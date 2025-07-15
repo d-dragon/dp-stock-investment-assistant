@@ -1,0 +1,38 @@
+# Configuration Example for DP Stock-Investment Assistant
+
+# OpenAI API Configuration
+openai:
+  api_key: "your-openai-api-key-here"
+  model: "gpt-4"
+  max_tokens: 2000
+  temperature: 0.7
+
+# Financial Data APIs
+financial_apis:
+  yahoo_finance:
+    enabled: true
+  alpha_vantage:
+    api_key: "your-alpha-vantage-api-key-here"
+    enabled: false
+
+# Application Settings
+app:
+  log_level: "INFO"
+  cache_enabled: true
+  max_history: 100
+
+# Analysis Settings
+analysis:
+  default_period: "1y"
+  default_interval: "1d"
+  sectors_to_track:
+    - "Technology"
+    - "Healthcare"
+    - "Financial"
+    - "Energy"
+
+# Export Settings
+export:
+  default_format: "pdf"
+  output_directory: "reports"
+  include_charts: true
