@@ -31,7 +31,60 @@ pip install -r requirements.txt
 
 ### Configuration
 
-Copy `config/config_example.yaml` to `config/config.yaml` and fill in your API keys and AI model parameters.
+There are two ways to configure the application:
+
+#### Method 1: Using YAML Configuration File
+
+1. Copy `config/config_example.yaml` to `config/config.yaml`
+2. Fill in your API keys and customize settings in the YAML file
+
+#### Method 2: Using Environment Variables (Recommended)
+
+1. Copy `.env.example` to `.env`
+2. Fill in your environment variables in the `.env` file
+
+```bash
+# Copy the example files
+copy config\config_example.yaml config\config.yaml  # Windows
+copy .env.example .env                               # Windows
+
+# OR on Unix/macOS:
+# cp config/config_example.yaml config/config.yaml
+# cp .env.example .env
+```
+
+The application supports environment variable overrides, which means:
+
+- Values in `.env` will override corresponding values in `config.yaml`
+- System environment variables will override `.env` values
+- This provides flexibility for different deployment environments
+
+#### Required Environment Variables
+
+```bash
+OPENAI_API_KEY=your-openai-api-key-here
+```
+
+#### Optional Environment Variables
+
+```bash
+# OpenAI Configuration
+OPENAI_MODEL=gpt-4
+OPENAI_MAX_TOKENS=2000
+OPENAI_TEMPERATURE=0.7
+
+# Financial APIs
+ALPHA_VANTAGE_API_KEY=your-alpha-vantage-key
+ALPHA_VANTAGE_ENABLED=false
+YAHOO_FINANCE_ENABLED=true
+
+# Application Settings
+APP_LOG_LEVEL=INFO
+APP_CACHE_ENABLED=true
+APP_MAX_HISTORY=100
+```
+
+See `.env.example` for a complete list of available environment variables.
 
 ### Usage
 
