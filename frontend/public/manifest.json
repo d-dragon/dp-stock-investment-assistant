@@ -1,0 +1,8 @@
+{
+  "short_name": "Stock Assistant",
+  "name": "Stock Investment Assistant",
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#667eea",
+  "background_color": "#764ba2"
+}

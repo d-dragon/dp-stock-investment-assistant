@@ -119,6 +119,14 @@ reports/*.csv
 reports/*.html
 *.log
 
+# Frontend
+frontend/node_modules/
+frontend/build/
+frontend/.env.local
+frontend/.env.development.local
+frontend/.env.test.local
+frontend/.env.production.local
+
 # OS
 .DS_Store
 Thumbs.db
