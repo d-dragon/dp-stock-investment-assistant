@@ -1,5 +1,7 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import './App.css';
+import { debounce, measurePerformance } from './utils/performance';
+import { FormattedMessage } from './components/MessageFormatter';
 
 function App() {
   const [messages, setMessages] = useState([]);
@@ -8,20 +10,29 @@ function App() {
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef(null);
 
-  const scrollToBottom = () => {
+  // Optimize scroll function with useCallback
+  const scrollToBottom = useCallback(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
-
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
-
-  useEffect(() => {
-    // Check if backend is available
-    checkConnection();
   }, []);
 
-  const checkConnection = async () => {
+  // Debounced scroll to prevent excessive calls
+  const debouncedScrollToBottom = useMemo(
+    () => debounce(scrollToBottom, 100),
+    [scrollToBottom]
+  );
+
+  useEffect(() => {
+    debouncedScrollToBottom();
+  }, [messages, debouncedScrollToBottom]);
+
+  useEffect(() => {
+    // Check if backend is available with performance monitoring
+    measurePerformance('Initial connection check', () => {
+      checkConnection();
+    });
+  }, []);
+
+  const checkConnection = useCallback(async () => {
     try {
       const response = await fetch('http://localhost:5000/api/health');
       setIsConnected(response.ok);
@@ -29,7 +40,7 @@ function App() {
       console.error('Connection failed:', error);
       setIsConnected(false);
     }
-  };
+  }, []);
 
   const sendMessage = async () => {
     if (!inputValue.trim() || isLoading) return;
@@ -41,6 +52,7 @@ function App() {
 
     try {
       const response = await fetch('http://localhost:5000/api/chat', {
+
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -85,7 +97,13 @@ function App() {
       </header>
 
       <main className="chat-container">
-        <div className="messages">
+        <div className="chat-header">
+          <div className="connection-status">
+            <div className={`status-indicator ${isConnected ? 'connected' : 'disconnected'}`}></div>
+          </div>
+        </div>
+
+        <div className="messages-container">
           {messages.length === 0 && (
             <div className="welcome-message">
               <h2>Welcome to your Stock Investment Assistant!</h2>
@@ -94,21 +112,21 @@ function App() {
           )}
           
           {messages.map((message, index) => (
-            <div key={index} className={`message ${message.role}`}>
-              <div className="message-content">
-                {message.content}
-              </div>
-            </div>
+            <FormattedMessage 
+              key={index} 
+              content={message.content} 
+              role={message.role} 
+            />
           ))}
           
           {isLoading && (
             <div className="message assistant">
-              <div className="message-content loading">
-                <span>Thinking...</span>
+              <div className="avatar assistant-avatar">🤖</div>
+              <div className="message-content">
                 <div className="loading-dots">
-                  <span>.</span>
-                  <span>.</span>
-                  <span>.</span>
+                  <span></span>
+                  <span></span>
+                  <span></span>
                 </div>
               </div>
             </div>
@@ -117,23 +135,26 @@ function App() {
           <div ref={messagesEndRef} />
         </div>
 
-        <div className="input-container">
-          <textarea
-            value={inputValue}
-            onChange={(e) => setInputValue(e.target.value)}
-            onKeyPress={handleKeyPress}
-            placeholder="Ask about stocks, investments, or market analysis..."
-            disabled={isLoading}
-            rows="3"
-          />
-          <button 
-            onClick={sendMessage} 
-            disabled={!inputValue.trim() || isLoading}
-            className="send-button"
-          >
-            Send
-          </button>
-        </div>
+        <form onSubmit={(e) => { e.preventDefault(); sendMessage(); }} className="input-form">
+          <div className="input-container">
+            <textarea
+              value={inputValue}
+              onChange={(e) => setInputValue(e.target.value)}
+              onKeyPress={handleKeyPress}
+              placeholder="Ask about stock investments..."
+              className="message-input"
+              rows="1"
+              disabled={!isConnected || isLoading}
+            />
+            <button 
+              type="submit" 
+              className="send-button"
+              disabled={!isConnected || isLoading || !inputValue.trim()}
+            >
+              ↗
+            </button>
+          </div>
+        </form>
       </main>
     </div>
   );

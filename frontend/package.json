@@ -8,11 +8,25 @@
     "react-dom": "^18.3.1",
     "react-scripts": "^5.0.1"
   },
+  "devDependencies": {
+    "cross-env": "^7.0.3",
+    "rimraf": "^5.0.10"
+  },
   "scripts": {
     "start": "react-scripts start",
+    "start:fast": "cross-env GENERATE_SOURCEMAP=false FAST_REFRESH=true react-scripts start",
+    "start:dev": "cross-env NODE_ENV=development react-scripts start",
+    "start:optimized": "cross-env NODE_OPTIONS=--max_old_space_size=4096 GENERATE_SOURCEMAP=false npm start",
     "build": "react-scripts build",
+    "build:analyze": "npm run build && npx bundle-analyzer build/static/js/*.js",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "test:ci": "react-scripts test --coverage --ci --silent --maxWorkers=2",
+    "eject": "react-scripts eject",
+    "clean": "rimraf build node_modules/.cache",
+    "clean:cache": "rimraf node_modules/.cache",
+    "prestart": "npm run clean:cache",
+    "benchmark": "node scripts/benchmark.js",
+    "perf": "node scripts/performance-monitor.js"
   },
   "eslintConfig": {
     "extends": [
