@@ -62,11 +62,55 @@ class StockAgent:
         try:
             # For now, pass the query directly to AI
             # TODO: Add data analysis, stock lookups, etc.
-            response = self.ai_client.generate_response(query)
+            response = self.ai_client.web_search_response(query)
             return response
         except Exception as e:
             self.logger.error(f"Error generating response: {e}")
             return f"Sorry, I encountered an error: {e}"
+
+    def _process_query_non_streaming(self, query: str) -> str:
+        """Process user query and return AI response without streaming.
+        
+        Args:
+            query: User's question or command
+            
+        Returns:
+            AI-generated response
+        """
+        try:
+            # Process query without streaming for API responses
+            response = self.ai_client.web_search_response(query)
+            return response
+        except Exception as e:
+            self.logger.error(f"Error generating response: {e}")
+            return f"Sorry, I encountered an error: {e}"
+
+    def process_query_streaming(self, query: str):
+        """Process user query and yield streaming response chunks.
+        
+        Args:
+            query: User's question or command
+            
+        Yields:
+            Response chunks as they are generated
+        """
+        try:
+            # Get the full response first, then stream it in chunks
+            response = self.ai_client.web_search_response(query)
+            if response:
+                # Split response into chunks for streaming simulation
+                words = response.split()
+                chunk_size = 3  # 3 words per chunk
+                for i in range(0, len(words), chunk_size):
+                    chunk = ' '.join(words[i:i + chunk_size])
+                    if i + chunk_size < len(words):
+                        chunk += ' '
+                    yield chunk
+            else:
+                yield "No response generated"
+        except Exception as e:
+            self.logger.error(f"Error generating streaming response: {e}")
+            yield f"Sorry, I encountered an error: {e}"
     
     def _show_help(self):
         """Show available commands."""

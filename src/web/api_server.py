@@ -5,11 +5,12 @@ Provides REST API endpoints for the React frontend.
 
 import logging
 import json
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, Response, stream_with_context
 from flask_cors import CORS
 from flask_socketio import SocketIO, emit
 import sys
 import os
+import time
 
 # Add the src directory to Python path
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
@@ -70,13 +71,27 @@ class APIServer:
                 if not user_message:
                     return jsonify({'error': 'Message cannot be empty'}), 400
                 
-                # Process the query using the agent
-                response = self.agent._process_query(user_message)
+                # Check if streaming is requested
+                stream = data.get('stream', False)
                 
-                return jsonify({
-                    'response': response,
-                    'timestamp': self._get_timestamp()
-                })
+                if stream:
+                    return Response(
+                        stream_with_context(self._stream_chat_response(user_message)),
+                        mimetype='text/event-stream',
+                        headers={
+                            'Cache-Control': 'no-cache',
+                            'Connection': 'keep-alive',
+                            'Access-Control-Allow-Origin': '*'
+                        }
+                    )
+                else:
+                    # Process the query using the agent (non-streaming)
+                    response = self.agent._process_query_non_streaming(user_message)
+                    
+                    return jsonify({
+                        'response': response,
+                        'timestamp': self._get_timestamp()
+                    })
                 
             except Exception as e:
                 self.logger.error(f"Error in chat endpoint: {e}")
@@ -157,6 +172,28 @@ class APIServer:
             except Exception as e:
                 self.logger.error(f"Error in chat_message handler: {e}")
                 emit('error', {'message': f'Error processing message: {str(e)}'})
+    
+    def _stream_chat_response(self, user_message):
+        """Stream chat response in real-time."""
+        try:
+            self.logger.info(f"Starting streaming response for: {user_message}")
+            # Stream response chunks in SSE format
+            chunk_count = 0
+            for chunk in self.agent.process_query_streaming(user_message):
+                if chunk.strip():  # Only send non-empty chunks
+                    chunk_count += 1
+                    # Format as JSON for the frontend
+                    chunk_data = json.dumps({'chunk': chunk})
+                    yield f"data: {chunk_data}\n\n"
+            
+            # Send completion signal
+            self.logger.info(f"Streaming complete. Sent {chunk_count} chunks.")
+            yield f"data: [DONE]\n\n"
+                
+        except Exception as e:
+            self.logger.error(f"Error in streaming response: {e}")
+            error_data = json.dumps({'error': str(e)})
+            yield f"data: {error_data}\n\n"
     
     def _get_timestamp(self):
         """Get current timestamp."""

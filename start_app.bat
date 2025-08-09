@@ -3,14 +3,14 @@ echo Starting DP Stock Investment Assistant with UI...
 
 echo.
 echo Step 1: Starting Backend API Server...
-start "API Server" cmd /k "cd /d %cd% && python src/web/api_server.py"
+start "API Server" cmd /k "cd /d %cd% && python src/main.py --mode web"
 
 echo Waiting for backend to start...
 timeout /t 3 /nobreak >nul
 
 echo.
 echo Step 2: Starting React Frontend...
-start "React Frontend" cmd /k "cd /d %cd%/frontend && npm start"
+start "React Frontend" cmd /k "cd /d %cd%/frontend && npm run start:fast"
 
 echo.
 echo ============================================
