@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import './App.css';
 import WebSocketTest from './components/WebSocketTest';
+import { restApiClient } from './services/restApiClient';
 
 // Interface definitions
 interface Message {
@@ -124,133 +125,74 @@ const App: React.FC = () => {
     setError(null);
 
     // Create placeholder message for streaming response
-    const assistantMessageId = Date.now().toString();
-    const assistantMessage: Message = {
-      id: assistantMessageId,
-      type: 'assistant',
-      content: '',
-      timestamp: new Date().toISOString(),
-      isStreaming: true
+    const assistantMessageId = crypto.randomUUID();
+    setMessages((prev: Message[]) => [
+      ...prev,
+      {
+        id: assistantMessageId,
+        type: 'assistant',              // FIX: use type, not role
+        content: '',
+        timestamp: new Date().toISOString(), // FIX: add required timestamp
+        isStreaming: true
+      }
+    ]);
+
+    // helper to append chunk to the last assistant message
+    const appendToAssistant = (text: string) => {
+      setMessages((prev: Message[]) =>
+        prev.map((m: Message) =>
+          m.id === assistantMessageId ? { ...m, content: (m.content || '') + text } : m
+        )
+      );
     };
-    setMessages((prev: Message[]) => [...prev, assistantMessage]);
 
     try {
-      // Try streaming first
-      console.log('🚀 Starting streaming request for:', userMessage);
-      const response = await fetch(`${API_BASE_URL}/api/chat`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ message: userMessage, stream: true }),
+      // streaming first
+      const full = await restApiClient.streamChat(userMessage, (chunk: string) => { // FIX: type chunk
+        appendToAssistant(chunk);
       });
 
-      console.log('📡 Response status:', response.status, response.statusText);
-      console.log('📡 Response headers:', Object.fromEntries(response.headers.entries()));
+      // mark streaming complete
+      setMessages((prev: Message[]) =>
+        prev.map((m: Message) =>
+          m.id === assistantMessageId ? { ...m, isStreaming: false } : m
+        )
+      );
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+      // ensure final content is set (already appended progressively)
+      if (!full) {
+        // fallback to non-streaming if nothing streamed
+        const resp = await restApiClient.sendChat(userMessage);
+        const content = typeof resp === 'string' ? resp : resp?.response || '';
+        setMessages((prev: Message[]) =>
+          prev.map((m: Message) =>
+            m.id === assistantMessageId ? { ...m, content, isStreaming: false } : m
+          )
+        );
       }
-
-      const reader = response.body?.getReader();
-      if (!reader) {
-        throw new Error('Streaming not supported');
-      }
-
-      const decoder = new TextDecoder();
-      let fullResponse = '';
-      let chunkCount = 0;
-
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) {
-          console.log('🏁 Streaming completed. Total chunks processed:', chunkCount);
-          break;
-        }
-
-        const chunk = decoder.decode(value);
-        console.log('📦 Raw chunk received:', chunk);
-        const lines = chunk.split('\n');
-
-        for (const line of lines) {
-          if (line.startsWith('data: ')) {
-            const data = line.slice(6);
-            console.log('📋 Processing data line:', data);
-            if (data === '[DONE]') {
-              console.log('✅ Received completion signal');
-              // Mark streaming as complete
-              setMessages((prev: Message[]) => prev.map((msg: Message) => 
-                msg.id === assistantMessageId 
-                  ? { ...msg, isStreaming: false }
-                  : msg
-              ));
-              return;
-            }
-            try {
-              const parsed = JSON.parse(data);
-              console.log('🔍 Parsed chunk data:', parsed);
-              if (parsed.chunk) {
-                chunkCount++;
-                fullResponse += parsed.chunk;
-                console.log('💬 Updated response length:', fullResponse.length);
-                // Update the assistant message with new content
-                setMessages((prev: Message[]) => prev.map((msg: Message) => 
-                  msg.id === assistantMessageId 
-                    ? { ...msg, content: fullResponse }
-                    : msg
-                ));
-              }
-            } catch (e) {
-              console.warn('⚠️ Failed to parse chunk:', data, e);
-              // Ignore parsing errors for malformed chunks
-            }
-          }
-        }
-      }
-
-      // Mark streaming as complete if loop exits normally
-      setMessages((prev: Message[]) => prev.map((msg: Message) => 
-        msg.id === assistantMessageId 
-          ? { ...msg, isStreaming: false }
-          : msg
-      ));
-
-    } catch (error) {
-      console.error('❌ Streaming error:', error);
-      
-      // Fallback to non-streaming
-      console.log('🔄 Falling back to non-streaming mode');
+    } catch (error: any) {
+      // fallback to non-streaming on error
       try {
-        const response = await fetch(`${API_BASE_URL}/api/chat`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ message: userMessage, stream: false }),
-        });
-
-        console.log('📡 Fallback response status:', response.status);
-
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        const data = await response.json();
-        console.log('📄 Fallback response data:', data);
-        
-        // Update the assistant message with full response
-        setMessages((prev: Message[]) => prev.map((msg: Message) => 
-          msg.id === assistantMessageId 
-            ? { ...msg, content: data.response || data.message || 'No response received', timestamp: data.timestamp, isStreaming: false }
-            : msg
-        ));
-        
-      } catch (fallbackError) {
-        console.error('❌ Fallback error:', fallbackError);
-        setError('Failed to connect to backend server. Make sure it\'s running on http://localhost:5000');
-        
-        // Remove the placeholder message on error
-        setMessages((prev: Message[]) => prev.filter((msg: Message) => msg.id !== assistantMessageId));
+        const resp = await restApiClient.sendChat(userMessage);
+        const content = typeof resp === 'string' ? resp : resp?.response || 'No response';
+        setMessages((prev: Message[]) =>
+          prev.map((m: Message) =>
+            m.id === assistantMessageId ? { ...m, content, isStreaming: false } : m
+          )
+        );
+      } catch (e: any) {
+        setMessages((prev: Message[]) =>
+          prev.map((m: Message) =>
+            m.id === assistantMessageId
+              ? {
+                  ...m,
+                  content:
+                    'Sorry, I encountered an error. Please ensure the backend is running at http://localhost:5000',
+                  isStreaming: false
+                }
+              : m
+          )
+        );
       }
     } finally {
       setIsLoading(false);
