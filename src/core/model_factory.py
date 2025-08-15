@@ -35,3 +35,12 @@ class ModelClientFactory:
         logger.info(f"Created model client provider={client.provider} model={client.model_name}")
         ModelClientFactory._CACHE[key] = client
         return client
+
+    @staticmethod
+    def get_fallback_sequence(config: Dict[str, Any]) -> list[str]:
+        model_cfg = config.get("model", {})
+        seq = model_cfg.get("fallback_order")
+        if isinstance(seq, list) and seq:
+            return seq
+        # default generic fallback preference
+        return ["openai", "grok"]

@@ -5,6 +5,7 @@ Refactored to support multi-model architecture via ModelClientFactory & LangChai
 
 import logging
 import re
+import time
 from typing import Dict, Any, Optional, Generator, List
 
 from .model_factory import ModelClientFactory
@@ -55,36 +56,77 @@ class StockAgent:
     def _process_query(self, query: str, *, provider: Optional[str] = None) -> str:
         try:
             tickers = self._extract_tickers(query)
-            prompt = build_prompt(query, {}, tickers)
-            client = self._select_client(provider)
-
-            # Fast path: if simple price/info request & tickers
+            quick_ctx = {}
             if tickers and self._looks_like_price_request(query):
-                enriched = self._build_quick_price_context(tickers)
-                prompt = build_prompt(query, enriched, tickers)
+                quick_ctx = self._build_quick_price_context(tickers)
 
-            # Prefer web search if provider supports & query seems news-related
-            if client.supports_web_search() and self._looks_like_news_query(query):
-                return client.generate_with_search(prompt)
+            prompt = build_prompt(query, quick_ctx, tickers)
+            if self.config.get("model", {}).get("debug_prompt"):
+                self.logger.debug(f"[PROMPT]\n{prompt}")
 
-            return client.generate(prompt)
+            client = self._select_client(provider)
+            return self._generate_with_fallback(
+                client=client,
+                prompt=prompt,
+                query=query,
+                news=self._looks_like_news_query(query),
+            )
         except Exception as e:
             self.logger.error(f"Error generating response: {e}")
             return f"Sorry, I encountered an error: {e}"
-
-    def _process_query_non_streaming(self, query: str) -> str:
-        return self._process_query(query)
 
     def process_query_streaming(self, query: str, *, provider: Optional[str] = None) -> Generator[str, None, None]:
         try:
             tickers = self._extract_tickers(query)
             prompt = build_prompt(query, {}, tickers)
+            if self.config.get("model", {}).get("debug_prompt"):
+                yield "[DEBUG PROMPT START]\n" + prompt + "\n[DEBUG PROMPT END]\n"
             client = self._select_client(provider)
-            for chunk in client.generate_stream(prompt):
-                yield chunk
+            # Streaming only on primary; if fail, emit fallback note and retry non-stream
+            try:
+                for chunk in client.generate_stream(prompt):
+                    yield chunk
+            except Exception as e:
+                self.logger.warning(f"Primary streaming failed ({client.provider}): {e}")
+                yield f"\n[notice] primary provider '{client.provider}' failed, attempting fallback...\n"
+                text = self._generate_with_fallback(client, prompt, query, news=False)
+                yield text
         except Exception as e:
             self.logger.error(f"Streaming error: {e}")
             yield f"Sorry, I encountered an error: {e}"
+
+    # -------- Fallback orchestration --------
+    def _generate_with_fallback(self, client, prompt: str, query: str, *, news: bool) -> str:
+        allow = self.config.get("model", {}).get("allow_fallback", True)
+        sequence = [client.provider]
+        if allow:
+            # append remaining fallback providers excluding current
+            fb = ModelClientFactory.get_fallback_sequence(self.config)
+            sequence += [p for p in fb if p not in sequence]
+
+        last_error = None
+        for provider in sequence:
+            try:
+                start = time.time()
+                active_client = (
+                    client if provider == client.provider else ModelClientFactory.get_client(self.config, provider=provider)
+                )
+                if news and active_client.supports_web_search():
+                    result = active_client.generate_with_search(prompt)
+                else:
+                    result = active_client.generate(prompt)
+                elapsed = (time.time() - start) * 1000
+                self.logger.info(
+                    f"gen_success provider={active_client.provider} model={active_client.model_name} ms={elapsed:.1f}"
+                )
+                if provider != client.provider:
+                    result = f"[fallback:{provider}] {result}"
+                return result
+            except Exception as e:
+                last_error = e
+                self.logger.warning(f"provider_fail provider={provider} error={e}")
+                continue
+        return f"All providers failed. Last error: {last_error}"
 
     # -------- Helper methods --------
     def _select_client(self, provider: Optional[str]):

@@ -1,0 +1,9 @@
+{{ system_prompt }}
+Perform a structured analysis for: {{ query }}
+{% if tickers %}Focus tickers: {{ tickers|join(", ") }}{% endif %}
+Return:
+1. Key recent performance metrics
+2. Valuation snapshot
+3. Notable news catalysts
+4. Risks
+5. Neutral disclaimer

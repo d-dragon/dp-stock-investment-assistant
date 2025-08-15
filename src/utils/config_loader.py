@@ -92,6 +92,9 @@ class ConfigLoader:
             'MODEL_NAME': ('model', 'name'),
             'MODEL_TEMPERATURE': ('model', 'temperature'),
             'MODEL_MAX_TOKENS': ('model', 'max_tokens'),
+            'MODEL_ALLOW_FALLBACK': ('model', 'allow_fallback'),
+            'MODEL_FALLBACK_ORDER': ('model', 'fallback_order'),  # comma-separated
+            'MODEL_DEBUG_PROMPT': ('model', 'debug_prompt'),
             # Grok specific (placeholder)
             'GROK_API_KEY': ('model', 'grok', 'api_key'),
             'GROK_MODEL': ('model', 'grok', 'model'),
@@ -164,6 +167,11 @@ class ConfigLoader:
         except ValueError:
             pass
         
+        # handle list (fallback order)
+        if "," in value:
+            parts = [p.strip() for p in value.split(",")]
+            if all(parts):
+                return parts
         # Return as string if no conversion possible
         return value
     
@@ -186,6 +194,9 @@ class ConfigLoader:
                 'name': 'gpt-4',
                 'temperature': 0.7,
                 'max_tokens': 2000,
+                'allow_fallback': True,
+                'fallback_order': ['openai', 'grok'],
+                'debug_prompt': False,
                 'grok': {
                     'api_key': '',
                     'model': 'grok-beta'
