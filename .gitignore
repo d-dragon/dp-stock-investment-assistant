@@ -130,3 +130,7 @@ frontend/.env.production.local
 # OS
 .DS_Store
 Thumbs.db
+
+# VS workspace settings
+.vscode/
+*.code-workspace

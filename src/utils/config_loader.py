@@ -87,6 +87,14 @@ class ConfigLoader:
             'OPENAI_MODEL': ('openai', 'model'),
             'OPENAI_MAX_TOKENS': ('openai', 'max_tokens'),
             'OPENAI_TEMPERATURE': ('openai', 'temperature'),
+            # Unified model section (new)
+            'MODEL_PROVIDER': ('model', 'provider'),
+            'MODEL_NAME': ('model', 'name'),
+            'MODEL_TEMPERATURE': ('model', 'temperature'),
+            'MODEL_MAX_TOKENS': ('model', 'max_tokens'),
+            # Grok specific (placeholder)
+            'GROK_API_KEY': ('model', 'grok', 'api_key'),
+            'GROK_MODEL': ('model', 'grok', 'model'),
             
             # Financial APIs
             'ALPHA_VANTAGE_API_KEY': ('financial_apis', 'alpha_vantage', 'api_key'),
@@ -172,6 +180,16 @@ class ConfigLoader:
                 'model': 'gpt-4',
                 'max_tokens': 2000,
                 'temperature': 0.7
+            },
+            'model': {  # new unified model config
+                'provider': 'openai',
+                'name': 'gpt-4',
+                'temperature': 0.7,
+                'max_tokens': 2000,
+                'grok': {
+                    'api_key': '',
+                    'model': 'grok-beta'
+                }
             },
             'financial_apis': {
                 'yahoo_finance': {
