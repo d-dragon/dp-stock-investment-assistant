@@ -1,0 +1,4 @@
+{{ system_prompt }}
+User query: {{ query }}
+{% if tickers %}Tickers referenced: {{ tickers|join(", ") }}{% endif %}
+Provide a factual answer with a brief disclaimer.

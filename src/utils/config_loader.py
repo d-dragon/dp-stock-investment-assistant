@@ -87,6 +87,17 @@ class ConfigLoader:
             'OPENAI_MODEL': ('openai', 'model'),
             'OPENAI_MAX_TOKENS': ('openai', 'max_tokens'),
             'OPENAI_TEMPERATURE': ('openai', 'temperature'),
+            # Unified model section (new)
+            'MODEL_PROVIDER': ('model', 'provider'),
+            'MODEL_NAME': ('model', 'name'),
+            'MODEL_TEMPERATURE': ('model', 'temperature'),
+            'MODEL_MAX_TOKENS': ('model', 'max_tokens'),
+            'MODEL_ALLOW_FALLBACK': ('model', 'allow_fallback'),
+            'MODEL_FALLBACK_ORDER': ('model', 'fallback_order'),  # comma-separated
+            'MODEL_DEBUG_PROMPT': ('model', 'debug_prompt'),
+            # Grok specific (placeholder)
+            'GROK_API_KEY': ('model', 'grok', 'api_key'),
+            'GROK_MODEL': ('model', 'grok', 'model'),
             
             # Financial APIs
             'ALPHA_VANTAGE_API_KEY': ('financial_apis', 'alpha_vantage', 'api_key'),
@@ -156,6 +167,11 @@ class ConfigLoader:
         except ValueError:
             pass
         
+        # handle list (fallback order)
+        if "," in value:
+            parts = [p.strip() for p in value.split(",")]
+            if all(parts):
+                return parts
         # Return as string if no conversion possible
         return value
     
@@ -172,6 +188,19 @@ class ConfigLoader:
                 'model': 'gpt-4',
                 'max_tokens': 2000,
                 'temperature': 0.7
+            },
+            'model': {  # new unified model config
+                'provider': 'openai',
+                'name': 'gpt-4',
+                'temperature': 0.7,
+                'max_tokens': 2000,
+                'allow_fallback': True,
+                'fallback_order': ['openai', 'grok'],
+                'debug_prompt': False,
+                'grok': {
+                    'api_key': '',
+                    'model': 'grok-beta'
+                }
             },
             'financial_apis': {
                 'yahoo_finance': {

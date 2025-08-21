@@ -11,12 +11,14 @@ from flask_socketio import SocketIO, emit
 import sys
 import os
 import time
+from datetime import datetime
 
 # Add the src directory to Python path
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
 from core.agent import StockAgent
 from core.data_manager import DataManager
+from core.model_factory import ModelClientFactory  # new import
 from utils.config_loader import ConfigLoader
 
 
@@ -62,21 +64,20 @@ class APIServer:
             """Chat endpoint for stock investment queries."""
             try:
                 data = request.get_json()
-                
                 if not data or 'message' not in data:
                     return jsonify({'error': 'Message is required'}), 400
-                
+
                 user_message = data['message'].strip()
-                
                 if not user_message:
                     return jsonify({'error': 'Message cannot be empty'}), 400
-                
-                # Check if streaming is requested
+
+                # Optional provider override (JSON > query param)
+                provider_override = data.get('provider') or request.args.get('provider')
                 stream = data.get('stream', False)
-                
+
                 if stream:
                     return Response(
-                        stream_with_context(self._stream_chat_response(user_message)),
+                        stream_with_context(self._stream_chat_response(user_message, provider_override)),
                         mimetype='text/event-stream',
                         headers={
                             'Cache-Control': 'no-cache',
@@ -85,50 +86,32 @@ class APIServer:
                         }
                     )
                 else:
-                    # Process the query using the agent (non-streaming)
-                    response = self.agent._process_query_non_streaming(user_message)
-                    
+                    raw_response = self.agent._process_query(user_message, provider=provider_override)
+                    provider_used, model_used, fallback_flag = self._extract_meta(raw_response)
+                    response_clean = self._strip_fallback_prefix(raw_response)
+
                     return jsonify({
-                        'response': response,
+                        'response': response_clean,
+                        'provider': provider_used,
+                        'model': model_used,
+                        'fallback': fallback_flag,
                         'timestamp': self._get_timestamp()
                     })
-                
+
             except Exception as e:
                 self.logger.error(f"Error in chat endpoint: {e}")
                 return jsonify({'error': f'Internal server error: {str(e)}'}), 500
-        
-        @self.app.route('/api/commands', methods=['GET'])
-        def get_commands():
-            """Get available commands."""
-            commands = [
-                {
-                    'command': 'help',
-                    'description': 'Show available commands'
-                },
-                {
-                    'command': 'stock analysis',
-                    'description': 'Ask questions about specific stocks',
-                    'example': 'What is the current price of AAPL?'
-                },
-                {
-                    'command': 'market trends',
-                    'description': 'Get insights about market trends',
-                    'example': 'How is the tech sector performing?'
-                },
-                {
-                    'command': 'investment advice',
-                    'description': 'Get investment guidance',
-                    'example': 'Should I invest in renewable energy stocks?'
-                }
-            ]
-            
-            return jsonify({'commands': commands})
-        
+
         @self.app.route('/api/config', methods=['GET'])
         def get_config():
             """Get safe configuration info (no sensitive data)."""
+            model_cfg = self.config.get('model', {})
+            legacy = self.config.get('openai', {})
             safe_config = {
-                'model': self.config.get('openai', {}).get('model', 'gpt-4'),
+                'model': {
+                    'provider': model_cfg.get('provider') or 'openai',
+                    'name': model_cfg.get('name') or legacy.get('model') or 'gpt-4'
+                },
                 'features': {
                     'yahoo_finance': self.config.get('financial_apis', {}).get('yahoo_finance', {}).get('enabled', False),
                     'alpha_vantage': self.config.get('financial_apis', {}).get('alpha_vantage', {}).get('enabled', False)
@@ -155,50 +138,94 @@ class APIServer:
             """Handle real-time chat messages."""
             try:
                 message = data.get('message', '').strip()
-                
+                provider_override = data.get('provider')
                 if not message:
                     emit('error', {'message': 'Message cannot be empty'})
                     return
-                
-                # Process the query
-                response = self.agent._process_query(message)
-                
-                # Send response back to client
+
+                raw_response = self.agent._process_query(message, provider=provider_override)
+                provider_used, model_used, fallback_flag = self._extract_meta(raw_response)
+                response_clean = self._strip_fallback_prefix(raw_response)
+
                 emit('chat_response', {
-                    'response': response,
+                    'response': response_clean,
+                    'provider': provider_used,
+                    'model': model_used,
+                    'fallback': fallback_flag,
                     'timestamp': self._get_timestamp()
                 })
-                
             except Exception as e:
                 self.logger.error(f"Error in chat_message handler: {e}")
                 emit('error', {'message': f'Error processing message: {str(e)}'})
-    
-    def _stream_chat_response(self, user_message):
-        """Stream chat response in real-time."""
+
+    def _stream_chat_response(self, user_message, provider_override=None):
+        """Stream chat response in real-time (SSE)."""
         try:
             self.logger.info(f"Starting streaming response for: {user_message}")
-            # Stream response chunks in SSE format
+            # Send an initial metadata event
+            client = ModelClientFactory.get_client(self.config, provider=provider_override) if provider_override else self.agent._select_client(None)
+            meta = {
+                'event': 'meta',
+                'provider': client.provider,
+                'model': client.model_name
+            }
+            yield f"data: {json.dumps(meta)}\n\n"
+
             chunk_count = 0
-            for chunk in self.agent.process_query_streaming(user_message):
-                if chunk.strip():  # Only send non-empty chunks
+            full_text_parts = []
+            for chunk in self.agent.process_query_streaming(user_message, provider=provider_override):
+                if chunk:
                     chunk_count += 1
-                    # Format as JSON for the frontend
-                    chunk_data = json.dumps({'chunk': chunk})
-                    yield f"data: {chunk_data}\n\n"
-            
-            # Send completion signal
-            self.logger.info(f"Streaming complete. Sent {chunk_count} chunks.")
-            yield f"data: [DONE]\n\n"
-                
+                    full_text_parts.append(chunk)
+                    yield f"data: {json.dumps({'chunk': chunk})}\n\n"
+
+            # After streaming, analyze fallback prefix (non-stream fallback could have occurred)
+            full_text = "".join(full_text_parts)
+            provider_used, model_used, fallback_flag = self._extract_meta(full_text)
+            completion_payload = {
+                'event': 'done',
+                'fallback': fallback_flag,
+                'provider': provider_used,
+                'model': model_used
+            }
+            yield f"data: {json.dumps(completion_payload)}\n\n"
+            yield "data: [DONE]\n\n"
+            self.logger.info(f"Streaming complete chunks={chunk_count}")
         except Exception as e:
             self.logger.error(f"Error in streaming response: {e}")
             error_data = json.dumps({'error': str(e)})
             yield f"data: {error_data}\n\n"
-    
-    def _get_timestamp(self):
-        """Get current timestamp."""
-        from datetime import datetime
-        return datetime.now().isoformat()
+
+    # -------- Helper metadata parsing --------
+    def _extract_meta(self, raw: str):
+        """
+        Inspect response for fallback prefix pattern: [fallback:provider]
+        Returns (provider, model, fallback_flag)
+        """
+        fallback_flag = False
+        provider = self.config.get('model', {}).get('provider', 'openai')
+        model = self.config.get('model', {}).get('name') or self.config.get('openai', {}).get('model', 'gpt-4')
+
+        if raw.startswith("[fallback:"):
+            fallback_flag = True
+            try:
+                closing = raw.find("]")
+                tag = raw[1:closing]  # fallback:provider
+                provider = tag.split(":", 1)[1]
+            except Exception:
+                pass
+        return provider, model, fallback_flag
+
+    def _strip_fallback_prefix(self, raw: str) -> str:
+        if raw.startswith("[fallback:"):
+            closing = raw.find("]")
+            if closing != -1:
+                return raw[closing + 1:].lstrip()
+        return raw
+
+    def _get_timestamp(self) -> str:
+        """Return current UTC timestamp as ISO 8601 string (Z suffix)."""
+        return datetime.now(timezone.utc).isoformat(timespec="seconds").replace("+00:00", "Z")
     
     def run(self, host='localhost', port=5000, debug=True):
         """Run the Flask application."""

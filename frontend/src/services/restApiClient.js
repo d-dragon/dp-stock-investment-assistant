@@ -2,159 +2,117 @@
 class RestApiClient {
   constructor(baseUrl = 'http://localhost:5000') {
     this.baseUrl = baseUrl;
-    this.defaultHeaders = {
-      'Content-Type': 'application/json',
-    };
+    this.defaultHeaders = { 'Content-Type': 'application/json' };
   }
 
-  // Generic request method
   async request(endpoint, options = {}) {
     const url = `${this.baseUrl}${endpoint}`;
-    const config = {
-      headers: { ...this.defaultHeaders, ...options.headers },
-      ...options,
-    };
-
-    try {
-      const response = await fetch(url, config);
-      
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const contentType = response.headers.get('content-type');
-      if (contentType && contentType.includes('application/json')) {
-        return await response.json();
-      } else {
-        return await response.text();
-      }
-    } catch (error) {
-      console.error(`API request failed for ${endpoint}:`, error);
-      throw error;
-    }
+    const config = { headers: { ...this.defaultHeaders, ...options.headers }, ...options };
+    const res = await fetch(url, config);
+    if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+    const ct = res.headers.get('content-type');
+    return ct && ct.includes('application/json') ? res.json() : res.text();
   }
 
-  // Health check
-  async checkHealth() {
-    try {
-      const response = await this.request('/api/health');
-      return { success: true, data: response };
-    } catch (error) {
-      return { success: false, error: error.message };
-    }
+  async sendChat(message, { provider } = {}) {
+    const body = { message, stream: false };
+    if (provider) body.provider = provider;
+    return this.request('/api/chat', {
+      method: 'POST',
+      body: JSON.stringify(body),
+    });
   }
 
-  // Send chat message (with optional streaming)
-  async sendChatMessage(message, streaming = false) {
-    try {
-      const response = await this.request('/api/chat', {
-        method: 'POST',
-        body: JSON.stringify({ message, stream: streaming }),
-      });
-      return { success: true, data: response };
-    } catch (error) {
-      return { success: false, error: error.message };
+  /**
+   * Stream chat response.
+   * onChunk callback receives either:
+   *  - string (content chunk)
+   *  - object { event: 'meta', provider, model }
+   *  - object { event: 'done', provider, model, fallback }
+   */
+  async streamChat(message, onChunk, { provider, signal } = {}) {
+    const body = { message, stream: true };
+    if (provider) body.provider = provider;
+
+    const controller = new AbortController();
+    if (signal) {
+      // bridge external abort
+      signal.addEventListener('abort', () => controller.abort(), { once: true });
     }
-  }
 
-  // Get available commands
-  async getCommands() {
+    const res = await fetch(`${this.baseUrl}/api/chat`, {
+      method: 'POST',
+      headers: this.defaultHeaders,
+      body: JSON.stringify(body),
+      signal: controller.signal,
+    });
+    if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+    const reader = res.body?.getReader();
+    if (!reader) throw new Error('Streaming not supported');
+
+    const decoder = new TextDecoder();
+    let full = '';
+    let buffer = '';
     try {
-      const response = await this.request('/api/commands');
-      return { success: true, data: response };
-    } catch (error) {
-      return { success: false, error: error.message };
-    }
-  }
-
-  // Get configuration
-  async getConfig() {
-    try {
-      const response = await this.request('/api/config');
-      return { success: true, data: response };
-    } catch (error) {
-      return { success: false, error: error.message };
-    }
-  }
-
-  // Send message with streaming support
-  async sendMessageWithStreaming(message, onChunk) {
-    try {
-      const response = await fetch(`${this.baseUrl}/api/chat`, {
-        method: 'POST',
-        headers: this.defaultHeaders,
-        body: JSON.stringify({ message, stream: true }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const reader = response.body.getReader();
-      const decoder = new TextDecoder();
-      let fullResponse = '';
-
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
-
-        const chunk = decoder.decode(value);
-        const lines = chunk.split('\n');
-
-        for (const line of lines) {
-          if (line.startsWith('data: ')) {
-            const data = line.slice(6);
-            if (data === '[DONE]') {
-              return { success: true, data: { response: fullResponse } };
-            }
-            try {
-              const parsed = JSON.parse(data);
-              if (parsed.chunk) {
-                fullResponse += parsed.chunk;
-                if (onChunk) onChunk(parsed.chunk);
-              }
-            } catch (e) {
-              // Ignore parsing errors for malformed chunks
-            }
+        buffer += decoder.decode(value, { stream: true });
+        let lineBreakIndex;
+        while ((lineBreakIndex = buffer.indexOf('\n')) !== -1) {
+          const rawLine = buffer.slice(0, lineBreakIndex);
+          buffer = buffer.slice(lineBreakIndex + 1);
+          const line = rawLine.trim();
+          if (!line || !line.startsWith('data:')) continue;
+          const data = line.slice(5).trim();
+          if (!data) continue;
+          if (data === '[DONE]') return full;
+          let parsed;
+          try {
+            parsed = JSON.parse(data);
+          } catch (e) {
+            // Not JSON: might be plain text chunk
+            continue;
+          }
+          if (parsed.event === 'meta') {
+            onChunk?.(parsed); // structured meta event
+            continue;
+          }
+          if (parsed.event === 'done') {
+            onChunk?.(parsed); // final metadata
+            continue; // don't append to full
+          }
+          if (parsed.error) {
+            onChunk?.({ event: 'error', error: parsed.error });
+            continue;
+          }
+          // Standard content chunk
+          const piece = typeof parsed.chunk === 'string' ? parsed.chunk : '';
+            if (piece) {
+            full += piece;
+            onChunk?.(piece);
           }
         }
       }
-
-      return { success: true, data: { response: fullResponse } };
-    } catch (error) {
-      return { success: false, error: error.message };
-    }
-  }
-
-  // Stock-specific endpoints
-  async getStockPrice(symbol) {
-    try {
-      const response = await this.request(`/api/stock/${symbol}/price`);
-      return { success: true, data: response };
-    } catch (error) {
-      return { success: false, error: error.message };
-    }
-  }
-
-  async getStockAnalysis(symbol) {
-    try {
-      const response = await this.request(`/api/stock/${symbol}/analysis`);
-      return { success: true, data: response };
-    } catch (error) {
-      return { success: false, error: error.message };
-    }
-  }
-
-  async getMarketNews() {
-    try {
-      const response = await this.request('/api/market/news');
-      return { success: true, data: response };
-    } catch (error) {
-      return { success: false, error: error.message };
+      // flush last buffer line (if any)
+      const finalLine = buffer.trim();
+      if (finalLine.startsWith('data:')) {
+        const data = finalLine.slice(5).trim();
+        if (data && data !== '[DONE]') {
+          try {
+            const parsed = JSON.parse(data);
+            if (parsed.event === 'done') onChunk?.(parsed);
+          } catch {
+            // ignore
+          }
+        }
+      }
+      return full;
+    } finally {
+      try { reader.releaseLock(); } catch (_) { /* ignore */ }
     }
   }
 }
 
-// Create and export a singleton instance
 export const restApiClient = new RestApiClient();
 export default RestApiClient;
