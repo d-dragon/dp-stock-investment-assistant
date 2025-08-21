@@ -1,0 +1,35 @@
+image:
+  registry: ""
+  api:
+    repository: dp-stock/api
+    tag: dev
+    pullPolicy: IfNotPresent
+  agent:
+    repository: dp-stock/agent
+    tag: dev
+    pullPolicy: IfNotPresent
+  frontend:
+    repository: dp-stock/frontend
+    tag: dev
+    pullPolicy: IfNotPresent
+
+replicaCount:
+  api: 1
+  agent: 1
+  frontend: 1
+
+service:
+  api:
+    type: ClusterIP
+    port: 5000
+  frontend:
+    type: ClusterIP
+    port: 80
+
+ingress:
+  enabled: false
+  className: nginx
+  host: dp-stock.local
+  tls: false
+
+resources: {}

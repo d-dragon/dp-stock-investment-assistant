@@ -51,7 +51,7 @@ def main():
             if args.mode == 'both':
                 # Start server in a separate thread for both modes
                 import threading
-                server_thread = threading.Thread(target=lambda: server.run(host=args.host, port=args.port, debug=False))
+                server_thread = threading.Thread(target=lambda: server.run(host=args.host, port=args.port, debug=False, allow_unsafe_werkzeug=True))
                 server_thread.daemon = True
                 server_thread.start()
                 
@@ -62,7 +62,7 @@ def main():
                 agent.run_interactive()
             else:
                 # Run only web server
-                server.run(host=args.host, port=args.port, debug=True)
+                server.run(host=args.host, port=args.port, debug=True, allow_unsafe_werkzeug=True)
                 
         elif args.mode == 'cli':
             # Run only CLI mode
