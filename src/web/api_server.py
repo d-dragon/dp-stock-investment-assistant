@@ -225,7 +225,7 @@ class APIServer:
 
     def _get_timestamp(self) -> str:
         """Return current UTC timestamp as ISO 8601 string (Z suffix)."""
-        return datetime.utcnow().isoformat(timespec="seconds") + "Z"
+        return datetime.now(timezone.utc).isoformat(timespec="seconds").replace("+00:00", "Z")
     
     def run(self, host='localhost', port=5000, debug=True):
         """Run the Flask application."""
