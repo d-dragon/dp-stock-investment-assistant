@@ -54,7 +54,7 @@ const App: React.FC = () => {
 
   const addMessage = (type: 'user' | 'assistant' | 'system', content: string, timestamp?: string, extra?: Partial<Message>) => {
     const newMessage: Message = {
-      id: crypto.randomUUID(),
+      id: getUUID(),
       type,
       content,
       timestamp: timestamp || new Date().toISOString(),
