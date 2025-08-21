@@ -1,0 +1,16 @@
+# Lightweight agent (future: background tasks / model warm)
+FROM python:3.11-slim
+ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 PIP_NO_CACHE_DIR=1 APP_HOME=/app
+WORKDIR $APP_HOME
+RUN apt-get update && apt-get install -y --no-install-recommends curl && rm -rf /var/lib/apt/lists/*
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+COPY src ./src
+ENV PYTHONPATH=/app/src
+RUN useradd -u 1002 -m agentuser
+USER agentuser
+EXPOSE 7000
+# Simple HTTP health (placeholder) so K8S can probe; extend later
+COPY scripts/agent_health_server.py ./agent_health_server.py
+HEALTHCHECK --interval=30s --timeout=3s --retries=3 CMD curl -f http://localhost:7000/health || exit 1
+ENTRYPOINT ["python", "agent_health_server.py"]

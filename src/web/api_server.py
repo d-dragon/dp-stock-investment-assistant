@@ -11,7 +11,7 @@ from flask_socketio import SocketIO, emit
 import sys
 import os
 import time
-from datetime import datetime
+from datetime import datetime, timezone
 
 # Add the src directory to Python path
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
@@ -25,7 +25,7 @@ from utils.config_loader import ConfigLoader
 class APIServer:
     """Flask API server for the Stock Investment Assistant."""
     
-    def __init__(self):
+    def __init__(self, app=None, *args, **kwargs):
         """Initialize the API server."""
         self.app = Flask(__name__)
         self.app.config['SECRET_KEY'] = 'your-secret-key-here'
@@ -227,10 +227,16 @@ class APIServer:
         """Return current UTC timestamp as ISO 8601 string (Z suffix)."""
         return datetime.now(timezone.utc).isoformat(timespec="seconds").replace("+00:00", "Z")
     
-    def run(self, host='localhost', port=5000, debug=True):
-        """Run the Flask application."""
+    def run(self, host: str = "0.0.0.0", port: int = 5000, debug: bool = False, **kwargs):
+        """
+        Run the underlying Flask app.
+
+        Accept arbitrary kwargs (for example: allow_unsafe_werkzeug=True)
+        and forward them to Flask.run so callers can opt-out of Werkzeug's production guard.
+        """
         self.logger.info(f"Starting API server on {host}:{port}")
-        self.socketio.run(self.app, host=host, port=port, debug=debug)
+        # forward any extra kwargs to Flask.run
+        self.app.run(host=host, port=port, debug=debug, **kwargs)
 
 
 def main():
