@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import './App.css';
 import WebSocketTest from './components/WebSocketTest';
 import { restApiClient } from './services/restApiClient';
@@ -39,9 +39,9 @@ const App: React.FC = () => {
   useEffect(() => {
     // Add welcome message
     addMessage('system', 'Welcome to DP Stock Investment Assistant! Please start the backend server first.');
-    loadCommands();
     loadConfig();
     checkConnection();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -64,7 +64,7 @@ const App: React.FC = () => {
     setMessages(prev => [...prev, newMessage]);
   };
 
-  const checkConnection = async () => {
+  const checkConnection = useCallback(async () => {
     try {
       const response = await fetch(`${API_BASE_URL}/api/health`);
       if (response.ok) {
@@ -75,36 +75,7 @@ const App: React.FC = () => {
       setIsConnected(false);
       addMessage('system', '❌ Backend server not available. Please start it first.');
     }
-  };
-
-  const loadCommands = async () => {
-    try {
-      const response = await fetch(`${API_BASE_URL}/api/commands`);
-      if (response.ok) {
-        const data = await response.json();
-        setCommands(data.commands);
-      }
-    } catch (error) {
-      console.error('Failed to load commands:', error);
-      // Set default commands if server is not available
-      setCommands([
-        {
-          command: 'help',
-          description: 'Show available commands'
-        },
-        {
-          command: 'stock analysis',
-          description: 'Ask questions about specific stocks',
-          example: 'What is the current price of AAPL?'
-        },
-        {
-          command: 'market trends',
-          description: 'Get insights about market trends',
-          example: 'How is the tech sector performing?'
-        }
-      ]);
-    }
-  };
+  }, []);
 
   const loadConfig = async () => {
     try {
@@ -117,7 +88,6 @@ const App: React.FC = () => {
       }
     } catch (error) {
       console.error('Failed to load backend config:', error);
-      // Config loading is optional, so we don't show user errors
     }
   };
 
@@ -208,14 +178,6 @@ const App: React.FC = () => {
     }
   };
 
-  const insertExampleQuery = (example: string) => {
-    setInputValue(example);
-  };
-
-  const formatTimestamp = (timestamp: string) => {
-    return new Date(timestamp).toLocaleTimeString();
-  };
-
   const getMessageStyle = (type: string, fallback?: boolean) => {
     const base: React.CSSProperties = {
       padding: '8px 12px',
@@ -251,7 +213,7 @@ const App: React.FC = () => {
         <strong>DP Stock Investment Assistant</strong>
         <select
           value={selectedProvider || ''}
-            onChange={e => setSelectedProvider(e.target.value || undefined)}
+          onChange={e => setSelectedProvider(e.target.value || undefined)}
           style={{ padding: '4px 8px' }}
           title="Select model provider"
         >
@@ -301,12 +263,7 @@ const App: React.FC = () => {
         <textarea
           value={inputValue}
           onChange={e => setInputValue(e.target.value)}
-          onKeyDown={e => {
-            if (e.key === 'Enter' && !e.shiftKey) {
-              e.preventDefault();
-              sendMessage();
-            }
-          }}
+          onKeyDown={handleKeyPress}
           placeholder="Ask about stocks, e.g. 'Latest news on AAPL and MSFT'"
           style={{ width: '100%', height: 70, resize: 'vertical', padding: 8, fontFamily: 'inherit' }}
         />
