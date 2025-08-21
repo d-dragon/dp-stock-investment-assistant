@@ -100,7 +100,7 @@ const App: React.FC = () => {
     setError(null);
 
     // Create streaming placeholder
-    const assistantId = crypto.randomUUID();
+    const assistantId = getUUID();
     setMessages(prev => [
       ...prev,
       {
