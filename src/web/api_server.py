@@ -229,14 +229,12 @@ class APIServer:
     
     def run(self, host: str = "0.0.0.0", port: int = 5000, debug: bool = False, **kwargs):
         """
-        Run the underlying Flask app.
-
-        Accept arbitrary kwargs (for example: allow_unsafe_werkzeug=True)
-        and forward them to Flask.run so callers can opt-out of Werkzeug's production guard.
+        Run the underlying server. Use SocketIO's runner so WebSocket support works locally.
         """
         self.logger.info(f"Starting API server on {host}:{port}")
-        # forward any extra kwargs to Flask.run
-        self.app.run(host=host, port=port, debug=debug, **kwargs)
+        # Do NOT forward unknown kwargs to werkzeug.run_simple (causes TypeError).
+        # Use socketio.run so local `python src/main.py` serves both HTTP and SocketIO.
+        self.socketio.run(self.app, host=host, port=port, debug=debug)
 
 
 def main():
