@@ -26,7 +26,7 @@ def main():
         parser = argparse.ArgumentParser(description='DP Stock Investment Assistant')
         parser.add_argument('--mode', choices=['cli', 'web', 'both'], default='web',
                           help='Run mode: cli (interactive CLI), web (API server), or both')
-        parser.add_argument('--host', default='localhost', help='API server host')
+        parser.add_argument('--host', default='0.0.0.0', help='API server host')
         parser.add_argument('--port', type=int, default=5000, help='API server port')
         args = parser.parse_args()
         
@@ -51,7 +51,7 @@ def main():
             if args.mode == 'both':
                 # Start server in a separate thread for both modes
                 import threading
-                server_thread = threading.Thread(target=lambda: server.run(host=args.host, port=args.port, debug=False, allow_unsafe_werkzeug=True))
+                server_thread = threading.Thread(target=lambda: server.run(host=args.host, port=args.port, debug=False))
                 server_thread.daemon = True
                 server_thread.start()
                 
@@ -62,7 +62,7 @@ def main():
                 agent.run_interactive()
             else:
                 # Run only web server
-                server.run(host=args.host, port=args.port, debug=True, allow_unsafe_werkzeug=True)
+                server.run(host=args.host, port=args.port, debug=True)
                 
         elif args.mode == 'cli':
             # Run only CLI mode
