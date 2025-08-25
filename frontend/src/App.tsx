@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import './App.css';
 import WebSocketTest from './components/WebSocketTest';
 import { restApiClient } from './services/restApiClient';
+import { getUUID } from './utils/uuid';
 
 // Interface definitions
 interface Message {
