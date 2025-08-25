@@ -180,3 +180,79 @@ Notes (quick)
 - Use managed identities and OIDC where possible for secure auth flows.
 - Validate locally before promoting images to registries and deploying to AKS.
 - Do not bake secrets into images; use env vars or Key Vault for production secrets.
+
+## Local Deployment
+
+Prerequisites
+- Docker Desktop with Kubernetes enabled, kubectl, and Helm installed.
+
+Build local images
+```powershell
+docker build -t dpstock-api:local -f IaC/Dockerfile.api .
+docker build -t dpstock-agent:local -f IaC/Dockerfile.agent .
+docker build -t dpstock-frontend:local -f frontend/Dockerfile frontend
+```
+
+Local Helm values override (IaC/helm/dp-stock/values.local.yaml)
+```yaml
+api:
+  image: { repository: dpstock-api, tag: local, pullPolicy: IfNotPresent }
+  replicaCount: 1
+agent:
+  image: { repository: dpstock-agent, tag: local, pullPolicy: IfNotPresent }
+  replicaCount: 1
+frontend:
+  image: { repository: dpstock-frontend, tag: local, pullPolicy: IfNotPresent }
+  replicaCount: 1
+ingress:
+  enabled: false
+```
+
+Install to local cluster
+```powershell
+kubectl create namespace dp-stock --dry-run=client -o yaml | kubectl apply -f -
+helm upgrade -i dp-stock IaC/helm/dp-stock -n dp-stock -f IaC/helm/dp-stock/values.local.yaml
+kubectl get pods,svc -n dp-stock
+```
+
+Access services (port-forward)
+```powershell
+kubectl -n dp-stock port-forward svc/dp-stock-frontend 3000:80
+kubectl -n dp-stock port-forward svc/dp-stock-api 5000:5000
+```
+
+Smoke tests
+```powershell
+curl http://localhost:5000/api/health
+curl http://localhost:3000/healthz
+```
+
+Optional: enable Ingress locally (requires controller)
+```powershell
+helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
+helm repo update
+helm upgrade -i ingress-nginx ingress-nginx/ingress-nginx -n ingress-nginx --create-namespace
+```
+Enable in values.local.yaml:
+```yaml
+ingress:
+  enabled: true
+  className: nginx
+  host: localtest.me
+  tls: false
+```
+Browse:
+- http://localtest.me/
+- http://localtest.me/api/health
+
+Validate and render chart
+```powershell
+helm lint IaC/helm/dp-stock
+helm template dp-stock IaC/helm/dp-stock -n dp-stock -f IaC/helm/dp-stock/values.local.yaml | Out-File rendered.yaml -Encoding utf8
+```
+
+Cleanup
+```powershell
+helm uninstall dp-stock -n dp-stock
+kubectl delete ns dp-stock
+```

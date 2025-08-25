@@ -4,48 +4,38 @@ kind: Ingress
 metadata:
   name: {{ include "dp-stock.fullname" . }}
   annotations:
-    kubernetes.io/ingress.class: {{ .Values.ingress.className }}
-{{- if .Values.ingress.tls }}
-    cert-manager.io/cluster-issuer: letsencrypt
-{{- end }}
+    {{- if .Values.ingress.className }}
+    kubernetes.io/ingress.class: {{ .Values.ingress.className | quote }}
+    {{- end }}
+    {{- if .Values.ingress.tls }}
+    cert-manager.io/cluster-issuer: "letsencrypt"
+    {{- end }}
 spec:
+  {{- if .Values.ingress.className }}
+  ingressClassName: {{ .Values.ingress.className | quote }}
+  {{- end }}
   rules:
-    - host: {{ .Values.ingress.host }}
+    - host: {{ .Values.ingress.host | quote }}
       http:
         paths:
           - path: /
             pathType: Prefix
             backend:
               service:
-                name: {{ include "dp-stock.fullname" . }}-frontend
-                port: { number: {{ .Values.service.frontend.port | default 80 }} }
+                name: {{ include "dp-stock.frontendServiceName" . }}
+                port:
+                  number: {{ .Values.service.frontend.port | default 80 }}
           - path: /api
             pathType: Prefix
             backend:
               service:
-                name: {{ include "dp-stock.fullname" . }}-api
-                port: { number: {{ .Values.service.api.port }} }
-{{- if .Values.ingress.tls }}
+                name: {{ include "dp-stock.apiServiceName" . }}
+                port:
+                  number: {{ .Values.service.api.port | default 80 }}
+  {{- if .Values.ingress.tls }}
   tls:
-    - hosts: [ {{ .Values.ingress.host }} ]
+    - hosts:
+        - {{ .Values.ingress.host | quote }}
       secretName: dp-stock-tls
+  {{- end }}
 {{- end }}
-{{- end }}
-```
-
-````yaml
-// filepath: g:\00_Work\Projects\dp-stock-investment-assistant\helm\dp-stock\templates\_helpers.tpl
-{{- define "dp-stock.fullname" -}}
-{{- default .Chart.Name .Values.fullnameOverride | trunc 63 | trimSuffix "-" -}}
-{{- end -}}
-{{- define "dp-stock.serviceName" -}}
-{{- printf "%s-%s" (include "dp-stock.fullname" .) .Values.tier -}}
-{{- end -}}
-
-{{- define "dp-stock.apiServiceName" -}}
-{{- include "dp-stock.serviceName" (dict "Values" .Values "tier" "api") -}}
-{{- end -}}
-
-{{- define "dp-stock.frontendServiceName" -}}
-{{- include "dp-stock.serviceName" (dict "Values" .Values "tier" "frontend") -}}
-{{- end -}}

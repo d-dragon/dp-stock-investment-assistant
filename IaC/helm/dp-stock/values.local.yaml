@@ -1,0 +1,24 @@
+# Use locally built images; let k8s reuse them (no registry)
+api:
+  image:
+    repository: dpstock-api
+    tag: local
+    pullPolicy: IfNotPresent
+  replicaCount: 1
+
+agent:
+  image:
+    repository: dpstock-agent
+    tag: local
+    pullPolicy: IfNotPresent
+  replicaCount: 1
+
+frontend:
+  image:
+    repository: dpstock-frontend
+    tag: local
+    pullPolicy: IfNotPresent
+  replicaCount: 1
+
+ingress:
+  enabled: false
