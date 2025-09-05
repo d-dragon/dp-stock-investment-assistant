@@ -196,13 +196,13 @@ docker build -t dpstock-frontend:local -f frontend/Dockerfile frontend
 Local Helm values override (IaC/helm/dp-stock/values.local.yaml)
 ```yaml
 api:
-  image: { repository: dpstock-api, tag: local, pullPolicy: IfNotPresent }
+  image: { repository: dpstock-api, tag: local, pullPolicy: Never }
   replicaCount: 1
 agent:
-  image: { repository: dpstock-agent, tag: local, pullPolicy: IfNotPresent }
+  image: { repository: dpstock-agent, tag: local, pullPolicy: Never }
   replicaCount: 1
 frontend:
-  image: { repository: dpstock-frontend, tag: local, pullPolicy: IfNotPresent }
+  image: { repository: dpstock-frontend, tag: local, pullPolicy: Never }
   replicaCount: 1
 ingress:
   enabled: false
@@ -256,3 +256,59 @@ Cleanup
 helm uninstall dp-stock -n dp-stock
 kubectl delete ns dp-stock
 ```
+
+## Troubleshooting cmds
+
+This section collects and summarizes key troubleshooting commands for kubectl, kind, and docker, focused on local Kubernetes deployments. Use these to diagnose and fix common issues like ErrImagePull, CrashLoopBackOff, and network problems. Validate locally before deploying to Azure AKS to avoid production issues.
+
+### 1. Cluster and Context Setup
+- Switch to Docker Desktop context: `kubectl config use-context docker-desktop`
+- Check cluster info: `kubectl cluster-info`
+- List nodes: `kubectl get nodes`
+- Create Kind cluster: `kind create cluster --name dp-stock-local`
+- Switch to Kind context: `kubectl config use-context kind-dp-stock-local`
+
+### 2. Building and Managing Images with Docker
+- Build images:
+  - `docker build -f IaC\Dockerfile.api -t dp-stock/api:dev .`
+  - `docker build -f IaC\Dockerfile.agent -t dp-stock/agent:dev .`
+  - `docker build -f frontend\Dockerfile -t dp-stock/frontend:dev .`
+- List images: `docker images | findstr dp-stock`
+- Save/load images for K8s sync:
+  - `docker save dp-stock/api:dev -o api.tar`
+  - `docker load -i api.tar`
+  - Remove tar: `Remove-Item api.tar`
+- Load into Kind: `kind load docker-image dp-stock/api:dev --name dp-stock-local`
+
+### 3. Deploying and Managing with Helm/kubectl
+- Install/update Helm release: `helm upgrade --install dp-stock .\IaC\helm\dp-stock -n dp-stock -f .\IaC\helm\dp-stock\values.local.yaml`
+- Check deployments, pods, services: `kubectl -n dp-stock get deploy,po,svc`
+- Check rollout status: `kubectl -n dp-stock rollout status deploy/dp-stock-api --timeout=180s`
+- Delete specific pod to force redeploy: `kubectl -n dp-stock delete pod <pod-name>`
+- Scale deployment: `kubectl -n dp-stock scale deploy dp-stock-frontend --replicas=0` then `--replicas=1`
+
+### 4. Inspecting Pods and Logs
+- Get pod details: `kubectl -n dp-stock get pods -o wide`
+- Describe pod: `kubectl -n dp-stock describe pod <pod-name>`
+- View logs: `kubectl -n dp-stock logs deploy/dp-stock-api --tail=200`
+- View previous crash logs: `kubectl -n dp-stock logs pod/<pod-name> --previous`
+- Test pod creation: `kubectl run temp-pod --image=dp-stock/api:dev --restart=Never -- sh -c "echo 'Image loaded successfully'"`
+
+### 5. Network and Service Inspection
+- Check endpoints: `kubectl -n dp-stock get endpoints dp-stock-frontend`
+- Describe service: `kubectl -n dp-stock describe svc dp-stock-frontend`
+- Port-forward: `kubectl -n dp-stock port-forward svc/dp-stock-frontend 3000:80`
+- Test connectivity inside cluster: `kubectl -n dp-stock run test-pod --image=busybox --rm -it -- sh` (then `wget http://dp-stock-frontend:80/healthz`)
+
+### 6. Cleanup
+- Uninstall Helm release: `helm uninstall dp-stock -n dp-stock`
+- Delete namespace: `kubectl delete ns dp-stock`
+- Delete Kind cluster: `kind delete cluster --name dp-stock-local`
+
+### Quick Tips
+- Always rebuild images after config changes (e.g., nginx.conf).
+- Use `pullPolicy: Never` for local images to avoid registry pulls.
+- For ErrImagePull, load images into the K8s node.
+- For CrashLoopBackOff, check logs and rebuild if config is outdated.
+- Validate with `docker-compose` before K8s deployment.
+- For Azure production, ensure these local validations prevent AKS deployment failures (e.g., image pull issues or misconfigured probes)
