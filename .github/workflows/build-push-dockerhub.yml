@@ -1,0 +1,49 @@
+name: Build and Push to Docker Hub
+
+on:
+  push:
+    branches: [ main ]  # Or 'pull_request' for PRs
+  workflow_dispatch:  # Manual trigger
+
+jobs:
+  build-push:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push API image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: IaC/Dockerfile.api
+          push: true
+          tags: dustinphan/dp-ai-stock-assistant:api-${{ github.sha }}, dustinphan/dp-ai-stock-assistant:api-latest
+
+      - name: Build and push Agent image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: IaC/Dockerfile.agent
+          push: true
+          tags: dustinphan/dp-ai-stock-assistant:agent-${{ github.sha }}, dustinphan/dp-ai-stock-assistant:agent-latest
+
+      - name: Build and push Frontend image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: frontend/Dockerfile
+          push: true
+          tags: dustinphan/dp-ai-stock-assistant:frontend-${{ github.sha }}, dustinphan/dp-ai-stock-assistant:frontend-latest
+
+      - name: Output image tags
+        run: |
+          echo "API: dustinphan/dp-ai-stock-assistant:api-${{ github.sha }}"
+          echo "Agent: dustinphan/dp-ai-stock-assistant:agent-${{ github.sha }}"
+          echo "Frontend: dustinphan/dp-ai-stock-assistant:frontend-${{ github.sha }}"
