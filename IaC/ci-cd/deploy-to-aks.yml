@@ -1,0 +1,49 @@
+name: Deploy to AKS
+on:
+  workflow_dispatch:
+    inputs:
+      imageTag:
+        description: "Image tag (default=latest SHA)"
+        required: true
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    env:
+      AKS_RG: ${{ secrets.AKS_RG }}
+      AKS_NAME: ${{ secrets.AKS_NAME }}
+      ACR_NAME: ${{ secrets.ACR_NAME }}
+      IMAGE_TAG: ${{ github.event.inputs.imageTag }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Azure login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Get ACR login server
+        id: acr
+        run: echo "LOGIN_SERVER=$(az acr show -n $ACR_NAME --query loginServer -o tsv)" >> $GITHUB_OUTPUT
+
+      - name: Set AKS context
+        uses: azure/aks-set-context@v4
+        with:
+          resource-group: ${{ env.AKS_RG }}
+          cluster-name: ${{ env.AKS_NAME }}
+
+      - name: Helm upgrade/install
+        env:
+          LOGIN_SERVER: ${{ steps.acr.outputs.LOGIN_SERVER }}
+        run: |
+          helm upgrade --install dp-stock IaC/helm/dp-stock \
+            --set image.api.repository=$LOGIN_SERVER/dp-stock-api \
+            --set image.api.tag=$IMAGE_TAG \
+            --set image.agent.repository=$LOGIN_SERVER/dp-stock-agent \
+            --set image.agent.tag=$IMAGE_TAG \
+            --set image.frontend.repository=$LOGIN_SERVER/dp-stock-frontend \
+            --set image.frontend.tag=$IMAGE_TAG
