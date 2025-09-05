@@ -1,22 +1,22 @@
-# IaC repository — concise documentation
+# 🚀 IaC Repository — Concise Documentation
 
-## Purpose
+## 📋 Purpose
 - Deploy a 3-container application (api, agent, frontend) for:
     - Local development: `docker-compose`
     - Production: AKS + Helm
 - Terraform provisions cloud infra (Resource Group, ACR, AKS) and grants AKS pull access to ACR.
 
-## Architecture summary
-- Containers
+## 🏗️ Architecture Summary
+- **Containers**
     - **api**: Python Flask + Socket.IO. Production runs under a WSGI server with a WebSocket-capable worker.
     - **agent**: Background worker (model warmup / async tasks) with a health endpoint.
     - **frontend**: React build served by Nginx.
-- Orchestration: Helm chart (`dp-stock`) deploys Deployments, Services, and optional Ingress routing `/` → frontend and `/api` → API.
-- Cloud: Terraform creates RG, ACR (admin disabled), AKS (managed identity + OIDC + Azure CNI) and assigns `AcrPull` to the AKS identity. Outputs include ACR login server, AKS name, and resource group.
+- **Orchestration**: Helm chart (`dp-stock`) deploys Deployments, Services, and optional Ingress routing `/` → frontend and `/api` → API.
+- **Cloud**: Terraform creates RG, ACR (admin disabled), AKS (managed identity + OIDC + Azure CNI) and assigns `AcrPull` to the AKS identity. Outputs include ACR login server, AKS name, and resource group.
 
-### Diagrams
+### 📊 Diagrams
 
-Architecture (runtime)
+**Architecture (runtime)**
 
 ```mermaid
 flowchart TD
@@ -37,7 +37,7 @@ flowchart TD
     style AKS_Cluster stroke:#2b6cb0,stroke-width:2px
 ```
 
-IaC provisioning flow (Terraform → Azure)
+**IaC Provisioning Flow (Terraform → Azure)**
 ```mermaid
 sequenceDiagram
     participant Dev as Developer/CI
@@ -52,7 +52,7 @@ sequenceDiagram
     TF-->>Dev: outputs consumed by Helm/CI
 ```
 
-CI/CD pipeline (build → push → deploy)
+**CI/CD Pipeline (build → push → deploy)**
 ```mermaid
 graph LR
     A[Source repo] --> B[CI Builds]
@@ -69,7 +69,7 @@ graph LR
 
 <!-- Ensure your markdown renderer supports Mermaid (GitHub/GitLab/VS Code with Mermaid extension) for these diagrams to render. -->
 
-Notes (quick)
+## 📝 Notes (Quick)
 - Ensure CI authenticates to ACR (service principal / managed identity / OIDC flow) — do not enable ACR admin user.
 - Terraform outputs (ACR login server, AKS kube config / name, resource group) should be consumed by the CI pipeline to perform Helm deploys and image pushes.
 - Keep probe paths and ports aligned across Dockerfiles, docker-compose, Helm values, and health checks in CI smoke tests.
@@ -79,7 +79,7 @@ Notes (quick)
 
 ---
 
-## Repository / IaC layout (high level)
+## 📁 Repository / IaC Layout (High Level)
 - `Dockerfile.api` — builds API image. Production: run with gunicorn + eventlet/gevent using `src.wsgi:app`.
 - `Dockerfile.agent` — builds agent image; exposes and probes a dedicated health endpoint.
 - `helm/dp-stock` — Helm chart:
@@ -91,8 +91,8 @@ Notes (quick)
 
 ---
 
-## Dockerfiles / Container notes
-- Dockerfile.api
+## 🐳 Dockerfiles / Container Notes
+- **Dockerfile.api**
     - Builds Flask/Socket.IO API container.
     - Expose: `5000`
     - Health endpoint: `/api/health`
@@ -101,18 +101,18 @@ Notes (quick)
         gunicorn -k eventlet -w 1 -b 0.0.0.0:5000 "src.wsgi:app"
         ```
     - Ensure `gunicorn` and a WebSocket-capable worker (`eventlet` or `gevent`) are in `requirements.txt`.
-- Dockerfile.agent
+- **Dockerfile.agent**
     - Builds agent/background worker (LangChain/model warmup, etc.).
     - Expose: `7000`
     - Health endpoint: `/health`
-- Frontend
+- **Frontend**
     - Nginx serves the React build.
     - Expose: `80`
     - Health endpoint: `/healthz`
 
 ---
 
-## Helm chart (helm/dp-stock)
+## ⚓ Helm Chart (helm/dp-stock)
 - `Chart.yaml`: metadata
 - `values.yaml`: image.repo, image.tag, replica counts, service ports, ingress config
 - `templates/`
@@ -126,7 +126,7 @@ Notes (quick)
 
 ---
 
-## Terraform infra (infra/terraform)
+## ☁️ Terraform Infra (infra/terraform)
 - `providers.tf`: pins `azurerm` provider, enables features
 - `variables.tf`: project/location/node size/count
 - `main.tf` provisions:
@@ -138,7 +138,7 @@ Notes (quick)
 
 ---
 
-## Root docker-compose.yml
+## 🔗 Root docker-compose.yml
 - Builds:
     - API: `IaC/Dockerfile.api`
     - Agent: `IaC/Dockerfile.agent`
@@ -150,7 +150,7 @@ Notes (quick)
 
 ---
 
-## Ports & health endpoints
+## 🔌 Ports & Health Endpoints
 - API: containerPort `5000`, probe `GET /api/health`
 - Agent: containerPort `7000`, probe `GET /health`
 - Frontend: containerPort `80`, probe `GET /healthz`
@@ -158,42 +158,42 @@ Notes (quick)
 
 ---
 
-## Run guidance & best practices
-- Local dev
+## 🏃 Run Guidance & Best Practices
+- **Local Dev**
     - Use the Python entry (`main.py`) for Socket.IO dev server. Avoid unsafe Werkzeug flags.
     - Validate builds and behavior with `docker-compose` before deploying to Kubernetes.
-- Production container
+- **Production Container**
     - Start API with gunicorn using `src.wsgi:app` and an eventlet/gevent worker (example above).
     - Ensure runtime requirements include `gunicorn` and a WebSocket-capable worker library.
-- Configuration
+- **Configuration**
     - Make CORS origins configurable via environment variables (default may include `http://localhost:3000` for local dev).
     - Do not bake secrets into images — use environment variables or a secrets store (e.g., Key Vault) in production.
-- Helm
+- **Helm**
     - Override `image.repository` and `image.tag` per environment.
     - Ensure probe paths/ports in `values.yaml` match container endpoints.
 
 ---
 
-## Notes / pitfalls to avoid
+## ⚠️ Notes / Pitfalls to Avoid
 - Keep probe endpoints and ports consistent across `docker-compose`, Dockerfiles, and Helm templates.
 - Ensure AKS has pull access to ACR (`AcrPull` role assignment to kubelet identity).
 - Use managed identities and OIDC where possible for secure auth flows.
 - Validate locally before promoting images to registries and deploying to AKS.
 - Do not bake secrets into images; use env vars or Key Vault for production secrets.
 
-## Local Deployment
+## 🏠 Local Deployment
 
-Prerequisites
+**Prerequisites**
 - Docker Desktop with Kubernetes enabled, kubectl, and Helm installed.
 
-Build local images
+**Build Local Images**
 ```powershell
 docker build -t dpstock-api:local -f IaC/Dockerfile.api .
 docker build -t dpstock-agent:local -f IaC/Dockerfile.agent .
 docker build -t dpstock-frontend:local -f frontend/Dockerfile frontend
 ```
 
-Local Helm values override (IaC/helm/dp-stock/values.local.yaml)
+**Local Helm Values Override (IaC/helm/dp-stock/values.local.yaml)**
 ```yaml
 api:
   image: { repository: dpstock-api, tag: local, pullPolicy: Never }
@@ -208,26 +208,26 @@ ingress:
   enabled: false
 ```
 
-Install to local cluster
+**Install to Local Cluster**
 ```powershell
 kubectl create namespace dp-stock --dry-run=client -o yaml | kubectl apply -f -
 helm upgrade -i dp-stock IaC/helm/dp-stock -n dp-stock -f IaC/helm/dp-stock/values.local.yaml
 kubectl get pods,svc -n dp-stock
 ```
 
-Access services (port-forward)
+**Access Services (Port-Forward)**
 ```powershell
 kubectl -n dp-stock port-forward svc/dp-stock-frontend 3000:80
 kubectl -n dp-stock port-forward svc/dp-stock-api 5000:5000
 ```
 
-Smoke tests
+**Smoke Tests**
 ```powershell
 curl http://localhost:5000/api/health
 curl http://localhost:3000/healthz
 ```
 
-Optional: enable Ingress locally (requires controller)
+**Optional: Enable Ingress Locally (Requires Controller)**
 ```powershell
 helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
 helm repo update
@@ -245,19 +245,19 @@ Browse:
 - http://localtest.me/
 - http://localtest.me/api/health
 
-Validate and render chart
+**Validate and Render Chart**
 ```powershell
 helm lint IaC/helm/dp-stock
 helm template dp-stock IaC/helm/dp-stock -n dp-stock -f IaC/helm/dp-stock/values.local.yaml | Out-File rendered.yaml -Encoding utf8
 ```
 
-Cleanup
+**Cleanup**
 ```powershell
 helm uninstall dp-stock -n dp-stock
 kubectl delete ns dp-stock
 ```
 
-## Troubleshooting cmds
+## 🔧 Troubleshooting Cmds
 
 This section collects and summarizes key troubleshooting commands for kubectl, kind, and docker, focused on local Kubernetes deployments. Use these to diagnose and fix common issues like ErrImagePull, CrashLoopBackOff, and network problems. Validate locally before deploying to Azure AKS to avoid production issues.
 
