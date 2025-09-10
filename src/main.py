@@ -2,10 +2,10 @@
 Main entry point for the DP Stock-Investment Assistant.
 """
 
-from core.agent import StockAgent
-from core.data_manager import DataManager
-from utils.config_loader import ConfigLoader
-from web.api_server import APIServer
+from src.core.agent import StockAgent
+from src.core.data_manager import DataManager
+from src.utils.config_loader import ConfigLoader
+from src.web.api_server import APIServer
 import logging
 import sys
 import argparse

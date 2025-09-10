@@ -1,5 +1,5 @@
-from core.data_manager import DataManager
-from utils.config_loader import ConfigLoader
+from src.core.data_manager import DataManager
+from src.utils.config_loader import ConfigLoader
 
 cfg = ConfigLoader.load_config(load_env=True)
 dm = DataManager(cfg)
