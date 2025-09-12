@@ -9,3 +9,5 @@ flask-socketio>=5.3.0
 python-socketio>=5.8.0
 langchain>=0.2.17,<1.0.0
 eventlet>=0.39.1
+redis>=6.1.1
+pymongo[srv]

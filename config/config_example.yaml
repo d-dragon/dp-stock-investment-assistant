@@ -36,3 +36,9 @@ export:
   default_format: "pdf"
   output_directory: "reports"
   include_charts: true
+
+database:
+  mongodb:
+    enabled: true
+    connection_string: "mongodb://username:password@hostname:port/stock_assistant?retryWrites=true&w=majority"
+    database_name: "stock_assistant"

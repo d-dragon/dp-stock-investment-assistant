@@ -117,6 +117,12 @@ class ConfigLoader:
             'EXPORT_DEFAULT_FORMAT': ('export', 'default_format'),
             'EXPORT_OUTPUT_DIRECTORY': ('export', 'output_directory'),
             'EXPORT_INCLUDE_CHARTS': ('export', 'include_charts'),
+            
+            # Database settings
+            'MONGODB_URI': ('database', 'mongodb', 'connection_string'),
+            'MONGODB_DB_NAME': ('database', 'mongodb', 'database_name'),
+            'MONGODB_USERNAME': ('database', 'mongodb', 'username'),
+            'MONGODB_PASSWORD': ('database', 'mongodb', 'password'),
         }
         
         for env_var, config_path in env_mappings.items():
