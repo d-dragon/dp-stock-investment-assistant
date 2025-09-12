@@ -1,9 +1,12 @@
 # src/data/repositories/factory.py
 from typing import Optional, Dict, Any
+import os
+from urllib.parse import urlparse
 
 from .mongodb_repository import MongoDBStockDataRepository
 from .redis_cache_repository import RedisCacheRepository
 from ..services.stock_data_service import StockDataService
+import logging
 
 class RepositoryFactory:
     """Factory for creating repository instances"""
@@ -17,15 +20,26 @@ class RepositoryFactory:
         Looks under `database.mongodb` (primary) and falls back to legacy
         top-level `mongodb` keys if present.
         """
+        logger = logging.getLogger(__name__)
         db_root = config.get('database', {}) if isinstance(config, dict) else {}
         mongo_config = db_root.get('mongodb', {}) or config.get('mongodb', {})
 
-        connection_string = mongo_config.get('connection_string', 'mongodb://localhost:27017/')
-        database_name = mongo_config.get('database_name', 'stock_assistant')
+        connection_string = os.environ.get('MONGO_URI') or mongo_config.get('connection_string')
+        if not connection_string:
+            raise RuntimeError("MongoDB connection string not configured")
+            
 
-        # Check if connection string has embedded credentials
-        from urllib.parse import urlparse
+            # Add debugging logs
+        logger.debug(f"MongoDB connection string: {connection_string}")
+
+
         parsed = urlparse(connection_string)
+        if parsed.scheme not in ('mongodb', 'mongodb+srv'):
+            raise ValueError("Invalid MongoDB URI scheme")
+
+        database_name = mongo_config.get('database_name', 'stock_assistant')
+        logger.debug(f"Database name: {database_name}")
+        # Check if connection string has embedded credentials
         has_embedded_creds = parsed.username is not None and parsed.password is not None
 
         if has_embedded_creds:

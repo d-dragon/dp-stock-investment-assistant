@@ -1,3 +1,5 @@
+[[TOC]]
+
 # DP Stock-Investment Assistant
 
 An AI-powered assistant for stock investment analysts, leveraging OpenAI's GPT API to provide market insights, answer financial queries, and analyze stock data.
@@ -178,7 +180,139 @@ Notes
 - If you want, we can add more tests or CI workflow files (GitHub Actions) next.
 
 ---
+## DB setup and migration
 
+Checklist
+ - Add or verify MongoDB and Redis services are available
+ - Configure connection strings and credentials in `.env` or `config/config.yaml`
+ - Run the migration script to create collections, indexes, and validation
+
+This section documents how to set up MongoDB and Redis for local development or Docker, and how to run the project's migration that creates the necessary collections, indexes, and validation rules.
+
+Prerequisites
+ - Python 3.8+
+ - Docker & Docker Compose (recommended)
+ - MongoDB 5.0+ (local or container)
+ - Redis 6.0+ (local or container)
+
+Option 1 — Docker Compose (recommended)
+
+1. Start MongoDB and Redis using Docker Compose:
+
+```powershell
+docker-compose up -d mongodb redis
+```
+
+2. Verify containers are running:
+
+```powershell
+docker-compose ps
+```
+
+3. Inspect container logs if needed:
+
+```powershell
+docker-compose logs mongodb
+docker-compose logs redis
+```
+
+Option 2 — Local installations
+
+1. Install MongoDB from https://www.mongodb.com/try/download/community and start the service.
+2. Install Redis from https://redis.io/download and start the server.
+
+Configuration
+
+You can configure the services either via `config/config.yaml` or environment variables in a `.env` file (env overrides take precedence).
+
+Add the following (example) to your `.env` file:
+
+```powershell
+# MongoDB
+MONGODB_URI=mongodb://stockadmin:stockpassword@localhost:27017/stock_assistant?authSource=stock_assistant
+MONGODB_DB_NAME=stock_assistant
+MONGODB_USERNAME=stockadmin
+MONGODB_PASSWORD=stockpassword
+
+# Redis
+REDIS_HOST=localhost
+REDIS_PORT=6379
+REDIS_DB=0
+REDIS_PASSWORD=redispassword
+REDIS_SSL=false
+```
+
+Data migration / initial DB setup
+
+1. Run the migration script which creates collections, adds indexes and applies validation:
+
+```powershell
+python src/data/migration/db_setup.py
+```
+
+2. Verify collections in MongoDB:
+
+```powershell
+mongosh "${env:MONGODB_URI}"
+# inside mongosh
+show collections
+db.symbols.getIndexes()
+```
+
+Collections created by migrations include:
+ - `market_data` (time-series)
+ - `symbols`
+ - `fundamental_analysis`
+ - `investment_reports`
+ - `news_events`
+ - `user_preferences`
+
+Troubleshooting
+
+ - Authentication errors: verify `.env` values match the DB user credentials and `authSource` is correct.
+ - Container issues: check `docker-compose logs mongodb` or `docker-compose ps`.
+ - Migration errors: ensure the DB user has permissions to create collections and indexes.
+
+Backup and restore
+
+MongoDB backup:
+
+```powershell
+docker-compose exec mongodb mongodump --db stock_assistant --out /backup
+```
+
+MongoDB restore:
+
+```powershell
+docker-compose exec mongodb mongorestore --db stock_assistant /backup/stock_assistant
+```
+
+Redis backup (save snapshot):
+
+```powershell
+docker-compose exec redis redis-cli -a redispassword SAVE
+```
+
+Redis restore (copy snapshot):
+
+```powershell
+# Copy dump.rdb into redis container data directory
+docker cp dump.rdb <redis_container_name>:/data/dump.rdb
+```
+
+Next steps
+
+1. Start the application:
+
+```powershell
+python src/main.py
+```
+
+2. Add test data via the application or API and confirm it persists after restart.
+
+3. Optionally use MongoDB Compass or Redis monitoring tools for inspection and performance checks.
+
+This completes the DB setup and migration documentation for local development and Docker-based environments.
 ## License
 
 MIT

@@ -7,8 +7,8 @@ from typing import Dict, Any, List, Optional
 import pandas as pd
 import yfinance as yf
 
-from src.data.repositories.factory import RepositoryFactory
-from src.data.services.stock_data_service import StockDataService
+from data.repositories.factory import RepositoryFactory
+from data.services.stock_data_service import StockDataService
 
 
 class DataManager:
