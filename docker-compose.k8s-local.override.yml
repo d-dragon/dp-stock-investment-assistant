@@ -1,0 +1,9 @@
+services:
+  api:
+    environment:
+      APP_ENV: k8s-local
+    ports:
+      - "5500:5000"   # avoid clashing with local host on 5000
+  frontend:
+    ports:
+      - "3001:80"     # avoid clashing with local host on 3000

@@ -1,0 +1,13 @@
+app:
+  log_level: "DEBUG"
+model:
+  debug_prompt: true
+database:
+  mongodb:
+    enabled: true
+    connection_string: "mongodb://stockadmin:stockpassword@localhost:27017/stock_assistant?authSource=stock_assistant&retryWrites=true&w=majority"
+    database_name: "stock_assistant"
+  redis:
+    enabled: true
+    host: "localhost"
+    port: 6379

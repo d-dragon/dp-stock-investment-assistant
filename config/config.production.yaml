@@ -1,0 +1,8 @@
+# filepath: g:\00_Work\Projects\dp-stock-investment-assistant\config\config.production.yaml
+app:
+  log_level: "WARNING"
+model:
+  provider: "openai"
+  allow_fallback: true
+  fallback_order: ["openai","grok"]
+  debug_prompt: false

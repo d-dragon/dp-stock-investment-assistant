@@ -1,14 +1,31 @@
-.git
-.gitignore
-__pycache__
-*.pyc
+# Never copy secrets into images
 .env
 .env.*
-node_modules
-frontend/node_modules
-frontend/build
-dist
-.cache
-.idea
+!.env.example
+
+# VCS/IDE
+.git
+.gitignore
 .vscode
-tests
+.idea
+
+# Python artifacts
+__pycache__/
+*.py[cod]
+*.pytest_cache/
+.venv/
+venv/
+build/
+dist/
+.eggs/
+
+# Node artifacts
+node_modules/
+frontend/node_modules/
+frontend/.next/
+frontend/build/
+frontend/dist/
+
+# Local data (not needed in API image)
+data/
+!data/migration/
