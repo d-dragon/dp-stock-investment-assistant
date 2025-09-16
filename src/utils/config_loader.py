@@ -371,11 +371,19 @@ class ConfigLoader:
         return result
 
     @staticmethod
+    def _parse_bool_env(varname: str, default: bool = False) -> bool:
+        """Parse an environment variable as a boolean value."""
+        val = os.getenv(varname)
+        if val is None:
+            return default
+        return val.strip().lower() in ("1", "true", "yes", "on")
+
+    @staticmethod
     def _apply_cloud_secret_overrides(config: Dict[str, Any]) -> Dict[str, Any]:
         """Optionally pull secrets from a cloud provider (Azure Key Vault if configured)."""
         # Activate if explicit or in staging/production
         env_name = ConfigLoader._normalize_env_name(os.getenv("APP_ENV") or "local")
-        use_kv = os.getenv("USE_AZURE_KEYVAULT", "false").lower() in ("1", "true", "yes", "on") \
+        use_kv = ConfigLoader._parse_bool_env("USE_AZURE_KEYVAULT", default=False) \
                  or env_name in ("staging", "production")
         if not use_kv:
             return config
