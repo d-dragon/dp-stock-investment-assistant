@@ -18,12 +18,12 @@ class TestBasicImports(unittest.TestCase):
     def test_import_main_modules(self):
         """Test importing main modules."""
         try:
-            from src.utils.config_loader import ConfigLoader
-            from src.core.agent import StockAgent
-            from src.core.ai_client import AIClient
-            from src.core.data_manager import DataManager
-            
-            # Test that classes can be instantiated with mock config
+            from utils.config_loader import ConfigLoader
+            from core.agent import StockAgent
+            from core.ai_client import AIClient
+            from core.data_manager import DataManager
+          
+          # Test that classes can be instantiated with mock config
             mock_config = {
                 'openai': {'api_key': 'test'},
                 'financial_apis': {'yahoo_finance': {'enabled': True}}
