@@ -41,13 +41,35 @@ class ConfigLoader:
                 config = ConfigLoader._get_default_config()
             else:
                 with open(config_path, 'r', encoding='utf-8') as file:
-                    config = yaml.safe_load(file)
+                    config = yaml.safe_load(file) or {}   # ensure dict even if YAML is empty
                 logger.info(f"Configuration loaded from {config_path}")
             
+            # Apply environment overlay (config.{env}.yaml)
+            env_name = ConfigLoader._normalize_env_name(
+                os.getenv("APP_ENV") or os.getenv("ENV") or os.getenv("STAGE") or "local"
+            )
+            try:
+                env_overlay_path = Path(config_path).with_name(f"config.{env_name}.yaml")
+                if env_overlay_path.exists():
+                    with open(env_overlay_path, 'r', encoding='utf-8') as f:
+                        env_overlay = yaml.safe_load(f) or {}
+                    config = ConfigLoader._deep_merge(config, env_overlay)
+                    logger.info(f"Applied environment overlay: {env_overlay_path.name}")
+                else:
+                    logger.debug(f"No environment overlay found for APP_ENV={env_name}")
+            except Exception as ex:
+                logger.warning(f"Failed to apply environment overlay for {env_name}: {ex}")
+
             # Apply environment variable overrides
             if load_env:
                 config = ConfigLoader._apply_env_overrides(config)
                 logger.info("Environment variable overrides applied")
+
+            # Apply cloud secret provider overrides (e.g., Azure Key Vault) if configured
+            try:
+                config = ConfigLoader._apply_cloud_secret_overrides(config)
+            except Exception as ex:
+                logger.warning(f"Cloud secret overrides skipped due to error: {ex}")
             
             return config
             
@@ -57,6 +79,10 @@ class ConfigLoader:
             config = ConfigLoader._get_default_config()
             if load_env:
                 config = ConfigLoader._apply_env_overrides(config)
+            try:
+                config = ConfigLoader._apply_cloud_secret_overrides(config)
+            except Exception:
+                pass
             return config
     
     @staticmethod
@@ -74,62 +100,77 @@ class ConfigLoader:
     @staticmethod
     def _apply_env_overrides(config: Dict[str, Any]) -> Dict[str, Any]:
         """Apply environment variable overrides to configuration.
-        
-        Args:
-            config: Base configuration dictionary
-            
-        Returns:
-            Configuration with environment variable overrides applied
+
+        Modes via CONFIG_ENV_OVERRIDE_MODE:
+            - all (default for APP_ENV=local): apply all mappings
+            - secrets-only (default for APP_ENV in k8s-local/staging/production): only API keys/passwords
+            - none: skip env overrides entirely
         """
-        env_mappings = {
+        env_name = ConfigLoader._normalize_env_name(os.getenv("APP_ENV") or "local")
+        default_mode = "secrets-only" if env_name in ("k8s-local", "staging", "production") else "all"
+        mode = (os.getenv("CONFIG_ENV_OVERRIDE_MODE") or default_mode).strip().lower()
+
+        env_mappings_all = {
             # OpenAI settings
             'OPENAI_API_KEY': ('openai', 'api_key'),
             'OPENAI_MODEL': ('openai', 'model'),
             'OPENAI_MAX_TOKENS': ('openai', 'max_tokens'),
             'OPENAI_TEMPERATURE': ('openai', 'temperature'),
-            # Unified model section (new)
+            # Unified model
             'MODEL_PROVIDER': ('model', 'provider'),
             'MODEL_NAME': ('model', 'name'),
             'MODEL_TEMPERATURE': ('model', 'temperature'),
             'MODEL_MAX_TOKENS': ('model', 'max_tokens'),
             'MODEL_ALLOW_FALLBACK': ('model', 'allow_fallback'),
-            'MODEL_FALLBACK_ORDER': ('model', 'fallback_order'),  # comma-separated
+            'MODEL_FALLBACK_ORDER': ('model', 'fallback_order'),
             'MODEL_DEBUG_PROMPT': ('model', 'debug_prompt'),
-            # Grok specific (placeholder)
+            # Grok specific
             'GROK_API_KEY': ('model', 'grok', 'api_key'),
             'GROK_MODEL': ('model', 'grok', 'model'),
-            
             # Financial APIs
             'ALPHA_VANTAGE_API_KEY': ('financial_apis', 'alpha_vantage', 'api_key'),
             'ALPHA_VANTAGE_ENABLED': ('financial_apis', 'alpha_vantage', 'enabled'),
             'YAHOO_FINANCE_ENABLED': ('financial_apis', 'yahoo_finance', 'enabled'),
-            
             # App settings
             'APP_LOG_LEVEL': ('app', 'log_level'),
             'APP_CACHE_ENABLED': ('app', 'cache_enabled'),
             'APP_MAX_HISTORY': ('app', 'max_history'),
-            
-            # Analysis settings
+            # Analysis
             'ANALYSIS_DEFAULT_PERIOD': ('analysis', 'default_period'),
             'ANALYSIS_DEFAULT_INTERVAL': ('analysis', 'default_interval'),
-            
-            # Export settings
+            # Export
             'EXPORT_DEFAULT_FORMAT': ('export', 'default_format'),
             'EXPORT_OUTPUT_DIRECTORY': ('export', 'output_directory'),
             'EXPORT_INCLUDE_CHARTS': ('export', 'include_charts'),
-            
-            # Database settings
+            # Database: MongoDB
+            'MONGODB_ENABLED': ('database', 'mongodb', 'enabled'),
             'MONGODB_URI': ('database', 'mongodb', 'connection_string'),
+            'MONGO_URI': ('database', 'mongodb', 'connection_string'),  # alias safety
             'MONGODB_DB_NAME': ('database', 'mongodb', 'database_name'),
             'MONGODB_USERNAME': ('database', 'mongodb', 'username'),
             'MONGODB_PASSWORD': ('database', 'mongodb', 'password'),
+            # Database: Redis
+            'REDIS_ENABLED': ('database', 'redis', 'enabled'),
+            'REDIS_HOST': ('database', 'redis', 'host'),
+            'REDIS_PORT': ('database', 'redis', 'port'),
+            'REDIS_DB': ('database', 'redis', 'db'),
+            'REDIS_PASSWORD': ('database', 'redis', 'password'),
+            'REDIS_SSL': ('database', 'redis', 'ssl'),
         }
-        
+        if mode == "none":
+            return config
+
+        # Restrict to secret-like variables for stricter modes
+        secret_like_keys = {
+            'OPENAI_API_KEY', 'GROK_API_KEY', 'ALPHA_VANTAGE_API_KEY',
+            'MONGODB_PASSWORD', 'REDIS_PASSWORD'
+        }
+        env_mappings = env_mappings_all if mode == "all" else {k: v for k, v in env_mappings_all.items() if k in secret_like_keys}
+
         for env_var, config_path in env_mappings.items():
             env_value = os.getenv(env_var)
             if env_value is not None:
                 ConfigLoader._set_nested_value(config, config_path, ConfigLoader._convert_env_value(env_value))
-        
         return config
     
     @staticmethod
@@ -217,6 +258,30 @@ class ConfigLoader:
                     'enabled': False
                 }
             },
+            'database': {
+                'mongodb': {
+                    'enabled': False,
+                    'connection_string': '',
+                    'database_name': '',
+                    'username': '',
+                    'password': ''
+                },
+                'redis': {
+                    'enabled': False,
+                    'host': 'localhost',
+                    'port': 6379,
+                    'db': 0,
+                    'password': '',
+                    'ssl': False,
+                    'ttl': {
+                        'price_data': 60,
+                        'historical_data': 3600,
+                        'fundamental_data': 86400,
+                        'technical_data': 900,
+                        'reports': 43200
+                    }
+                }
+            },
             'app': {
                 'log_level': 'INFO',
                 'cache_enabled': True,
@@ -263,25 +328,107 @@ class ConfigLoader:
     
     @staticmethod
     def validate_config(config: Dict[str, Any]) -> bool:
-        """Validate that required configuration values are present.
-        
-        Args:
-            config: Configuration dictionary to validate
-            
-        Returns:
-            True if configuration is valid, False otherwise
-        """
+        """Validate required configuration values (provider-aware)."""
         logger = logging.getLogger(__name__)
-        required_paths = [
-            'openai.api_key',
-            'openai.model'
-        ]
-        
+        provider = (config.get('model') or {}).get('provider', 'openai')
+        required_paths = []
+        if provider == 'openai':
+            required_paths = ['openai.api_key', 'openai.model']
+        elif provider == 'grok':
+            # keep light; avoid failing non-OpenAI local tests
+            required_paths = ['model.grok.api_key', 'model.grok.model']
+
         is_valid = True
         for path in required_paths:
             value = ConfigLoader.get_config_value(config, path)
             if not value or (isinstance(value, str) and value.strip() == ''):
                 logger.warning(f"Required configuration missing or empty: {path}")
                 is_valid = False
-        
         return is_valid
+
+    @staticmethod
+    def _normalize_env_name(env: str) -> str:
+        e = (env or '').strip().lower()
+        if e in ('dev', 'development', 'local'):
+            return 'local'
+        if e in ('k8s', 'k8s-local', 'local-k8s'):
+            return 'k8s-local'
+        if e in ('stage', 'stg', 'staging'):
+            return 'staging'
+        if e in ('prod', 'production'):
+            return 'production'
+        return e or 'local'
+
+    @staticmethod
+    def _deep_merge(base: Dict[str, Any], override: Dict[str, Any]) -> Dict[str, Any]:
+        """Deep merge override into base without mutating inputs."""
+        result = dict(base) if isinstance(base, dict) else {}
+        for k, v in (override or {}).items():
+            if k in result and isinstance(result[k], dict) and isinstance(v, dict):
+                result[k] = ConfigLoader._deep_merge(result[k], v)
+            else:
+                result[k] = v
+        return result
+
+    @staticmethod
+    def _parse_bool_env(varname: str, default: bool = False) -> bool:
+        """Parse an environment variable as a boolean value."""
+        val = os.getenv(varname)
+        if val is None:
+            return default
+        return val.strip().lower() in ("1", "true", "yes", "on")
+
+    @staticmethod
+    def _apply_cloud_secret_overrides(config: Dict[str, Any]) -> Dict[str, Any]:
+        """Optionally pull secrets from a cloud provider (Azure Key Vault if configured)."""
+        # Activate if explicit or in staging/production
+        env_name = ConfigLoader._normalize_env_name(os.getenv("APP_ENV") or "local")
+        use_kv = ConfigLoader._parse_bool_env("USE_AZURE_KEYVAULT", default=False) \
+                 or env_name in ("staging", "production")
+        if not use_kv:
+            return config
+
+        kv_uri = os.getenv("AZURE_KEYVAULT_URI")
+        kv_name = os.getenv("KEYVAULT_NAME")
+        if not kv_uri and kv_name:
+            kv_uri = f"https://{kv_name}.vault.azure.net/"
+
+        if not kv_uri:
+            # Not configured
+            return config
+
+        try:
+            from azure.identity import DefaultAzureCredential
+            from azure.keyvault.secrets import SecretClient
+        except Exception:
+            logging.getLogger(__name__).info("Azure Key Vault SDK not available; skipping secret fetch")
+            return config
+
+        logger = logging.getLogger(__name__)
+        try:
+            credential = DefaultAzureCredential()
+            client = SecretClient(vault_url=kv_uri, credential=credential)
+
+            # Known secret mappings (extend as needed)
+            mappings = {
+                'OPENAI_API_KEY': ('openai', 'api_key'),
+                'GROK_API_KEY': ('model', 'grok', 'api_key'),
+                'ALPHA_VANTAGE_API_KEY': ('financial_apis', 'alpha_vantage', 'api_key'),
+                'REDIS_PASSWORD': ('database', 'redis', 'password'),
+                # If you store MongoDB password separately (when not embedding in URI)
+                'MONGODB_PASSWORD': ('database', 'mongodb', 'password'),
+            }
+
+            for secret_name, path in mappings.items():
+                try:
+                    secret = client.get_secret(secret_name)
+                    if secret and secret.value:
+                        ConfigLoader._set_nested_value(config, path, secret.value)
+                        logger.info(f"Applied secret from Key Vault: {secret_name}")
+                except Exception as ex:
+                    logger.debug(f"Secret {secret_name} not applied: {ex}")
+
+        except Exception as ex:
+            logger.warning(f"Failed to apply Azure Key Vault secrets: {ex}")
+
+        return config

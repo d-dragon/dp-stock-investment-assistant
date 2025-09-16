@@ -5,6 +5,9 @@ services:
       dockerfile: IaC\Dockerfile.api
     image: dp-stock/api:dev
     env_file: .env
+    environment:
+      APP_ENV: ${APP_ENV:-local}
+      USE_AZURE_KEYVAULT: ${USE_AZURE_KEYVAULT:-false}
     ports:
       - "5000:5000"
     depends_on:
@@ -18,6 +21,8 @@ services:
       context: .
       dockerfile: IaC\Dockerfile.agent
     image: dp-stock/agent:dev
+    environment:
+      APP_ENV: ${APP_ENV:-local}
     networks: [ appnet ]
 
   frontend:

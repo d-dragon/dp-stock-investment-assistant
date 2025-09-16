@@ -1,0 +1,13 @@
+app:
+  log_level: "DEBUG"
+database:
+  mongodb:
+    enabled: true
+    # service DNS names in Docker Desktop/K8S
+    connection_string: "mongodb://stockadmin:stockpassword@mongodb:27017/stock_assistant?authSource=stock_assistant&retryWrites=true&w=majority"
+    database_name: "stock_assistant"
+  redis:
+    enabled: true
+    host: "redis"
+    port: 6379
+

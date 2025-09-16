@@ -24,7 +24,7 @@ class RepositoryFactory:
         db_root = config.get('database', {}) if isinstance(config, dict) else {}
         mongo_config = db_root.get('mongodb', {}) or config.get('mongodb', {})
 
-        connection_string = os.environ.get('MONGO_URI') or mongo_config.get('connection_string')
+        connection_string = mongo_config.get('connection_string')
         if not connection_string:
             raise RuntimeError("MongoDB connection string not configured")
             

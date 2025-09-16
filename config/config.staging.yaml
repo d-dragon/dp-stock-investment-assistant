@@ -1,0 +1,8 @@
+app:
+  log_level: "INFO"
+model:
+  provider: "openai"
+  debug_prompt: false
+financial_apis:
+  alpha_vantage:
+    enabled: true
