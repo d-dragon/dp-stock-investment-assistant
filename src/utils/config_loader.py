@@ -99,8 +99,18 @@ class ConfigLoader:
     
     @staticmethod
     def _apply_env_overrides(config: Dict[str, Any]) -> Dict[str, Any]:
-        """Apply environment variable overrides to configuration."""
-        env_mappings = {
+        """Apply environment variable overrides to configuration.
+
+        Modes via CONFIG_ENV_OVERRIDE_MODE:
+            - all (default for APP_ENV=local): apply all mappings
+            - secrets-only (default for APP_ENV in k8s-local/staging/production): only API keys/passwords
+            - none: skip env overrides entirely
+        """
+        env_name = ConfigLoader._normalize_env_name(os.getenv("APP_ENV") or "local")
+        default_mode = "secrets-only" if env_name in ("k8s-local", "staging", "production") else "all"
+        mode = (os.getenv("CONFIG_ENV_OVERRIDE_MODE") or default_mode).strip().lower()
+
+        env_mappings_all = {
             # OpenAI settings
             'OPENAI_API_KEY': ('openai', 'api_key'),
             'OPENAI_MODEL': ('openai', 'model'),
@@ -135,6 +145,7 @@ class ConfigLoader:
             # Database: MongoDB
             'MONGODB_ENABLED': ('database', 'mongodb', 'enabled'),
             'MONGODB_URI': ('database', 'mongodb', 'connection_string'),
+            'MONGO_URI': ('database', 'mongodb', 'connection_string'),  # alias safety
             'MONGODB_DB_NAME': ('database', 'mongodb', 'database_name'),
             'MONGODB_USERNAME': ('database', 'mongodb', 'username'),
             'MONGODB_PASSWORD': ('database', 'mongodb', 'password'),
@@ -146,6 +157,16 @@ class ConfigLoader:
             'REDIS_PASSWORD': ('database', 'redis', 'password'),
             'REDIS_SSL': ('database', 'redis', 'ssl'),
         }
+        if mode == "none":
+            return config
+
+        # Restrict to secret-like variables for stricter modes
+        secret_like_keys = {
+            'OPENAI_API_KEY', 'GROK_API_KEY', 'ALPHA_VANTAGE_API_KEY',
+            'MONGODB_PASSWORD', 'REDIS_PASSWORD'
+        }
+        env_mappings = env_mappings_all if mode == "all" else {k: v for k, v in env_mappings_all.items() if k in secret_like_keys}
+
         for env_var, config_path in env_mappings.items():
             env_value = os.getenv(env_var)
             if env_value is not None:

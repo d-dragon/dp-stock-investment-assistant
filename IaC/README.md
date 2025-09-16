@@ -159,15 +159,23 @@ graph LR
 ---
 
 ## 🏃 Run Guidance & Best Practices
-- **Local Dev**
+- ### **Local Dev**
     - Use the Python entry (`main.py`) for Socket.IO dev server. Avoid unsafe Werkzeug flags.
     - Validate builds and behavior with `docker-compose` before deploying to Kubernetes.
-- **Production Container**
+    - **Configuration Overrides**:
+        - Use environment-specific configuration files (e.g., `config.k8s-local.yaml`) to manage settings for different environments.
+        - Ensure that the application loads the correct configuration based on the `APP_ENV` variable.
+        - For local development, set `APP_ENV=local` to use local configurations.
+        - For Kubernetes deployments, set `APP_ENV=k8s-local` to utilize the k8s-specific configurations.
+        - Avoid hardcoding sensitive information in the configuration files; use environment variables or Azure Key Vault for production secrets.
+
+- ### **Production Container**
     - Start API with gunicorn using `src.wsgi:app` and an eventlet/gevent worker (example above).
     - Ensure runtime requirements include `gunicorn` and a WebSocket-capable worker library.
-- **Configuration**
+- ### **Configuration**
     - Make CORS origins configurable via environment variables (default may include `http://localhost:3000` for local dev).
     - Do not bake secrets into images — use environment variables or a secrets store (e.g., Key Vault) in production.
+    - 
 - **Helm**
     - Override `image.repository` and `image.tag` per environment.
     - Ensure probe paths/ports in `values.yaml` match container endpoints.

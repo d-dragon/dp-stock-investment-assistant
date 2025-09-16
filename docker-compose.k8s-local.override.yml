@@ -1,7 +1,8 @@
 services:
   api:
     environment:
-      APP_ENV: k8s-local
+      APP_ENV: "k8s-local"
+      CONFIG_ENV_OVERRIDE_MODE: "secrets-only"
     ports:
       - "5500:5000"   # avoid clashing with local host on 5000
   frontend:
