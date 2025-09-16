@@ -43,7 +43,7 @@ class StockAgent:
                 elif user_input.lower() == "help":
                     self._show_help()
                 elif user_input:
-                    response = self._process_query(user_input)
+                    response = self.process_query(user_input)
                     print(f"\nAssistant: {response}\n")
             except KeyboardInterrupt:
                 print("\nGoodbye!")
@@ -53,7 +53,7 @@ class StockAgent:
                 print(f"Error: {e}")
 
     # -------- Core processing --------
-    def _process_query(self, query: str, *, provider: Optional[str] = None) -> str:
+    def process_query(self, query: str, *, provider: Optional[str] = None) -> str:
         try:
             tickers = self._extract_tickers(query)
             quick_ctx = {}

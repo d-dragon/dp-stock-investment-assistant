@@ -14,8 +14,8 @@ The Stock Investment Assistant now supports real-time streaming responses for a 
 
 #### 2. Agent (`src/core/agent.py`)
 - **New Method**: `process_query_streaming()` - Handles streaming queries for API endpoints
-- **New Method**: `_process_query_non_streaming()` - Handles non-streaming queries
-- **Enhanced Method**: `_process_query()` - Still supports interactive mode with streaming
+- **New Method**: `process_query_non_streaming()` - Handles non-streaming queries
+- **Enhanced Method**: `process_query()` - Still supports interactive mode with streaming
 
 #### 3. API Server (`src/web/api_server.py`)
 - **Enhanced Endpoint**: `/api/chat` - Now supports `stream` parameter

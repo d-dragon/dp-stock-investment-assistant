@@ -161,6 +161,12 @@ pytest -q
 pytest -q tests/test_agent_fallback.py::test_agent_fallback
 pytest -q tests/test_langchain_adapter.py
 ```
+- Run all tests (under folder tests/)
+```powershell
+pytest tests
+or
+python -m pytest tests
+```
 
 Debugging & CI tips
 - Enable logging to inspect prompts and fallback:

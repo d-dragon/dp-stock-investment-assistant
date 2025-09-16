@@ -169,7 +169,7 @@ npm install react react-dom react-scripts
 
 ### To enhance the agent:
 - Modify `src/core/agent.py`
-- The `_process_query()` method handles all user input
+- The `process_query()` method handles all user input
 - Add data analysis, stock lookups, or other features
 
 ## 📁 Project Structure

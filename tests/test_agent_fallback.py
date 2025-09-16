@@ -37,5 +37,5 @@ def test_agent_fallback(monkeypatch):
     # minimal data manager stub
     class DM: pass
     agent = StockAgent(cfg, DM())
-    res = agent._process_query("What's the price of AAPL?")
-    assert "ok-response" in res or res.startswith("[fallback")
+    res = agent.process_query("What's the price of AAPL?")
+    assert res == "ok-response" or res.startswith("[fallback:openai]")
