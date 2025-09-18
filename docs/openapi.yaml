@@ -1,0 +1,420 @@
+openapi: 3.1.0
+info:
+  title: Stock Investment Assistant API
+  version: "1.1.0"
+  description: >
+    REST API for the Stock Investment Assistant backend. Provides chat, configuration, and model catalog endpoints.
+servers:
+  - url: http://localhost:5000
+    description: Local development
+tags:
+  - name: Health
+  - name: Chat
+  - name: Config
+  - name: Models
+paths:
+  /api/health:
+    get:
+      tags: [Health]
+      summary: Health check
+      operationId: getHealth
+      responses:
+        "200":
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+              examples:
+                healthy:
+                  value:
+                    status: healthy
+                    message: Stock Investment Assistant API is running
+
+  /api/chat:
+    post:
+      tags: [Chat]
+      summary: Send a chat message for investment analysis
+      description: >
+        Sends a user message to the assistant. If `stream` is true in the request body, the
+        server responds with Server-Sent Events (SSE) using `text/event-stream`. Otherwise it
+        returns a JSON response.
+      operationId: postChat
+      parameters:
+        - $ref: '#/components/parameters/ProviderQuery'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChatRequest'
+            examples:
+              nonStreaming:
+                value:
+                  message: "Analyze AAPL's outlook for the next quarter."
+                  provider: "openai"
+                  stream: false
+              streaming:
+                value:
+                  message: "Provide a brief market summary."
+                  stream: true
+      responses:
+        "200":
+          description: Chat response (JSON) or streaming response (SSE)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChatResponse'
+              examples:
+                example:
+                  value:
+                    response: "AAPL shows strong fundamentals with steady revenue growth..."
+                    provider: "openai"
+                    model: "gpt-4"
+                    fallback: false
+                    timestamp: "2025-09-16T12:34:56Z"
+            text/event-stream:
+              schema:
+                type: string
+                description: "Server-Sent Events stream. Each event is prefixed by 'data: ' and separated by a blank line."
+              examples:
+                stream:
+                  value: |-
+                    data: {"event":"meta","provider":"openai","model":"gpt-4"}
+
+                    data: {"chunk":"AAPL "}
+
+                    data: {"chunk":"continues to show "}
+
+                    data: {"chunk":"strong performance."}
+
+                    data: {"event":"done","fallback":false,"provider":"openai","model":"gpt-4"}
+
+                    data: [DONE]
+
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                missingMessage:
+                  value:
+                    error: "Message is required"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                serverError:
+                  value:
+                    error: "Internal server error"
+
+  /api/config:
+    get:
+      tags: [Config]
+      summary: Get safe configuration
+      description: Returns non-sensitive configuration details (model info and enabled features).
+      operationId: getConfig
+      responses:
+        "200":
+          description: Safe configuration
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConfigResponse'
+              examples:
+                example:
+                  value:
+                    model:
+                      provider: "openai"
+                      name: "gpt-4"
+                    features:
+                      yahoo_finance: true
+                      alpha_vantage: false
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/models/openai:
+    get:
+      tags: [Models]
+      summary: List OpenAI models (cached)
+      description: Returns cached list by default. Use refresh=true to refetch from OpenAI and update the cache.
+      operationId: listOpenAIModels
+      parameters:
+        - in: query
+          name: refresh
+          required: false
+          description: If true, refetch from OpenAI and update the cache.
+          schema:
+            type: boolean
+            default: false
+      responses:
+        "200":
+          description: List of models
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OpenAIModelListResponse'
+              examples:
+                cached:
+                  value:
+                    models:
+                      - id: "gpt-4o-mini"
+                        created: 1714000000
+                        owned_by: "openai"
+                        object: "model"
+                    fetched_at: "2025-09-18T12:00:00Z"
+                    source: "cache"
+                    cached: true
+        "502":
+          description: Upstream OpenAI error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        "500":
+          description: Server error (e.g., missing API key)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/models/openai/refresh:
+    post:
+      tags: [Models]
+      summary: Refresh OpenAI models cache
+      operationId: refreshOpenAIModels
+      responses:
+        "200":
+          description: Fresh list of models
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OpenAIModelListResponse'
+              examples:
+                fresh:
+                  value:
+                    models:
+                      - id: "gpt-4o-mini"
+                        created: 1714000000
+                        owned_by: "openai"
+                        object: "model"
+                    fetched_at: "2025-09-18T12:00:10Z"
+                    source: "openai"
+                    cached: false
+        "502":
+          description: Upstream OpenAI error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/models/openai/selected:
+    get:
+      tags: [Models]
+      summary: Get the currently selected model
+      operationId: getSelectedModel
+      responses:
+        "200":
+          description: Currently active provider/model
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ModelSelectionResponse'
+              examples:
+                current:
+                  value:
+                    provider: "openai"
+                    name: "gpt-4o-mini"
+
+  /api/models/openai/select:
+    post:
+      tags: [Models]
+      summary: Select the model to be used for OpenAI requests
+      operationId: selectModel
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SelectModelRequest'
+            examples:
+              choose:
+                value:
+                  provider: "openai"
+                  name: "gpt-4o-mini"
+      responses:
+        "200":
+          description: Selection applied
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ModelSelectionResponse'
+        "400":
+          description: Missing or invalid request data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  parameters:
+    ProviderQuery:
+      name: provider
+      in: query
+      required: false
+      description: Optional provider override; if also provided in body, body takes precedence.
+      schema:
+        type: string
+
+  schemas:
+    HealthResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: healthy
+        message:
+          type: string
+      required: [status, message]
+
+    ChatRequest:
+      type: object
+      properties:
+        message:
+          type: string
+          description: User prompt for the assistant.
+        provider:
+          type: string
+          description: Optional provider override for this request.
+        stream:
+          type: boolean
+          description: If true, the response will be streamed via Server-Sent Events.
+          default: false
+      required: [message]
+
+    ChatResponse:
+      type: object
+      properties:
+        response:
+          type: string
+          description: Model response text (non-streaming).
+        provider:
+          type: string
+          description: Provider used to generate the response.
+        model:
+          type: string
+          description: Model name used.
+        fallback:
+          type: boolean
+          description: Indicates the response came from a fallback provider.
+        timestamp:
+          type: string
+          format: date-time
+          description: ISO 8601 timestamp (UTC, Z-suffix).
+      required: [response, provider, model, fallback, timestamp]
+
+    ConfigResponse:
+      type: object
+      properties:
+        model:
+          type: object
+          properties:
+            provider:
+              type: string
+            name:
+              type: string
+          required: [provider, name]
+        features:
+          type: object
+          properties:
+            yahoo_finance:
+              type: boolean
+            alpha_vantage:
+              type: boolean
+          required: [yahoo_finance, alpha_vantage]
+      required: [model, features]
+
+    OpenAIModel:
+      type: object
+      properties:
+        id:
+          type: string
+        created:
+          type: integer
+          format: int64
+          nullable: true
+        owned_by:
+          type: string
+          nullable: true
+        object:
+          type: string
+          nullable: true
+      required: [id]
+
+    OpenAIModelListResponse:
+      type: object
+      properties:
+        models:
+          type: array
+          items:
+            $ref: '#/components/schemas/OpenAIModel'
+        fetched_at:
+          type: string
+          format: date-time
+        source:
+          type: string
+          description: "Source of data: 'cache' or 'openai'."
+        cached:
+          type: boolean
+      required: [models, fetched_at, source, cached]
+
+    SelectModelRequest:
+      type: object
+      properties:
+        provider:
+          type: string
+          default: openai
+        name:
+          type: string
+          description: The OpenAI model id to use (e.g., gpt-4o-mini).
+      required: [name]
+
+    ModelSelectionResponse:
+      type: object
+      properties:
+        provider:
+          type: string
+        name:
+          type: string
+      required: [provider, name]
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+      required: [error]
+security: []
+
+

@@ -44,3 +44,14 @@ class ModelClientFactory:
             return seq
         # default generic fallback preference
         return ["openai", "grok"]
+
+    @staticmethod
+    def clear_cache(provider: Optional[str] = None) -> None:
+        """Invalidate cached model clients."""
+        if provider is None:
+            ModelClientFactory._CACHE.clear()
+            return
+        prefix = f"{provider}:"
+        keys_to_remove = [key for key in list(ModelClientFactory._CACHE.keys()) if key.startswith(prefix)]
+        for key in keys_to_remove:
+            ModelClientFactory._CACHE.pop(key, None)

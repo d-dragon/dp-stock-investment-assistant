@@ -240,6 +240,10 @@ MONGODB_DB_NAME=stock_assistant
 MONGODB_USERNAME=stockadmin
 MONGODB_PASSWORD=stockpassword
 
+# If your host blocks port 27017 (common on some Windows setups), use an alternate host port
+# outside the Windows excluded port ranges (example below uses `27034`). Update the URI accordingly:
+# MONGODB_URI=mongodb://stockadmin:stockpassword@localhost:27034/stock_assistant?authSource=stock_assistant
+
 # Redis
 REDIS_HOST=localhost
 REDIS_PORT=6379

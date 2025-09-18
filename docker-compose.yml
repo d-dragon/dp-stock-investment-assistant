@@ -39,6 +39,10 @@ services:
   mongodb:
     image: mongo:5.0
     restart: always
+    # On some Windows systems certain port ranges are reserved by the OS (WSL/Hyper-V)
+    # which can prevent Docker from binding to 0.0.0.0:27017. If you see "ports are not
+    # available" or "bind: An attempt was made to access a socket in a way forbidden",
+    # use an alternate host port like 27018 below.
     ports:
       - "27017:27017"
     environment:

@@ -22,9 +22,12 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from core.agent import StockAgent
 from core.data_manager import DataManager
 from core.model_factory import ModelClientFactory
+from core.model_registry import OpenAIModelRegistry
+from data.repositories.factory import RepositoryFactory
 from utils.config_loader import ConfigLoader
 from web.routes.api_routes import APIRouteContext, create_api_blueprint
 from web.sockets.chat_events import SocketIOContext, register_chat_events
+from web.routes.models_routes import create_models_blueprint
 
 if TYPE_CHECKING:
     from flask import Blueprint
@@ -32,7 +35,7 @@ if TYPE_CHECKING:
 RouteFactory = Callable[[APIRouteContext], "Blueprint"]
 SocketRegistrar = Callable[[SocketIOContext], None]
 
-DEFAULT_HTTP_ROUTE_FACTORIES: Tuple[RouteFactory, ...] = (create_api_blueprint,)
+DEFAULT_HTTP_ROUTE_FACTORIES: Tuple[RouteFactory, ...] = (create_api_blueprint, create_models_blueprint)
 DEFAULT_SOCKETIO_REGISTRARS: Tuple[SocketRegistrar, ...] = (register_chat_events,)
 
 
@@ -71,6 +74,8 @@ class APIServer:
         self.config = config or ConfigLoader.load_config()
         self.data_manager = data_manager or DataManager(self.config)
         self.agent = agent or StockAgent(self.config, self.data_manager)
+        self.cache_repository = RepositoryFactory.create_cache_repository(self.config)
+        self.model_registry = OpenAIModelRegistry(self.config, self.cache_repository)
 
         self.logger = logging.getLogger(__name__)
 
@@ -84,6 +89,16 @@ class APIServer:
         self._register_routes()
         self._register_socketio_events()
 
+    def _set_active_model(self, provider: str, model_name: str) -> dict:
+        """Update the server's default model client."""
+        result = self.agent.set_default_model(provider, model_name)
+        if provider == "openai" and getattr(self, "model_registry", None):
+            try:
+                self.model_registry.record_active_model(model_name)
+            except Exception as exc:  # pragma: no cover - defensive logging
+                self.logger.warning(f"Failed to record active model selection: {exc}")
+        return result
+
     def _register_routes(self) -> None:
         """Register API blueprints."""
         context = APIRouteContext(
@@ -95,6 +110,8 @@ class APIServer:
             extract_meta=self._extract_meta,
             strip_fallback_prefix=self._strip_fallback_prefix,
             get_timestamp=self._get_timestamp,
+            model_registry=self.model_registry,
+            set_active_model=self._set_active_model,
         )
 
         for factory in self.http_route_factories:
@@ -207,4 +224,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-

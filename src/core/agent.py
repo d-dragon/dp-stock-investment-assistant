@@ -162,6 +162,32 @@ class StockAgent:
                 )
         return ctx
 
+    def set_default_model(self, provider: str, model_name: str) -> Dict[str, Any]:
+        """Update the default client used for responses."""
+        self.config.setdefault("model", {})
+        self.config["model"]["provider"] = provider
+        self.config["model"]["name"] = model_name
+        ModelClientFactory.clear_cache(provider=provider)
+        self._client = ModelClientFactory.get_client(self.config, provider=provider, model_name=model_name)
+        return {
+            "provider": provider,
+            "model": self._client.model_name
+        }
+
+    def set_active_model(self, *, provider: Optional[str], name: Optional[str]) -> None:
+        """
+        Update the active provider/model for subsequent requests.
+        """
+        model_cfg = self.config.setdefault("model", {})
+        if provider:
+            model_cfg["provider"] = provider
+        if name:
+            model_cfg["name"] = name
+        effective_provider = model_cfg.get("provider")
+        # Recreate underlying client with updated config
+        self._client = ModelClientFactory.get_client(self.config, provider=effective_provider)
+        self.logger.info(f"active_model provider={model_cfg.get('provider')} name={model_cfg.get('name')}")
+
     def _show_help(self):
         help_text = """
 Available commands:
@@ -175,3 +201,4 @@ Examples:
 - "Should I invest in renewable energy stocks?"
         """
         print(help_text)
+
