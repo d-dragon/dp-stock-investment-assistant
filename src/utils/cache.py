@@ -35,11 +35,32 @@ class CacheBackend:
 
     @classmethod
     def from_config(cls, config: Dict[str, Any], *, logger=None) -> "CacheBackend":
+        """
+        Build redis_url from (precedence):
+        1. ENV REDIS_URL
+        2. config.cache.redis_url
+        3. ENV host/port/password/db
+        4. config.database.redis.{host,port,password,db} if enabled
+        """
+        # 1 / 2 direct URL
         url = (
             os.getenv("REDIS_URL")
             or (config.get("cache", {}) or {}).get("redis_url")
-            or None
         )
+        if not url:
+            # 3 & 4 component assembly
+            db_cfg = (config.get("database", {}).get("redis", {}) or {})
+            enabled = str(os.getenv("REDIS_ENABLED") or db_cfg.get("enabled") or "").lower() in ("1", "true", "yes")
+            if enabled:
+                host = os.getenv("REDIS_HOST") or db_cfg.get("host") or "localhost"
+                port = os.getenv("REDIS_PORT") or db_cfg.get("port") or 6379
+                password = os.getenv("REDIS_PASSWORD") or db_cfg.get("password") or ""
+                db_index = os.getenv("REDIS_DB") or db_cfg.get("db") or 0
+                scheme = os.getenv("REDIS_SCHEME") or "redis"
+                auth = f":{password}@" if password else ""
+                url = f"{scheme}://{auth}{host}:{port}/{db_index}"
+                if logger:
+                    logger.debug(f"Constructed Redis URL: {url}")
         return cls(url, logger=logger)
 
     def is_available(self) -> bool:
@@ -67,35 +88,27 @@ class CacheBackend:
         if not val:
             return None
         data, exp = val
-        if exp is not None and time.time() > exp:
-            self._memory.pop(key, None)
-            return None
-        return data
-
-    def set(self, key: str, value: str, *, ttl_seconds: Optional[int] = None) -> None:
-        if self._redis:
+        if self._redis and time.time() > exp:
             try:
-                if ttl_seconds is not None:
-                    self._redis.setex(key, ttl_seconds, value)
-                else:
-                    self._redis.set(key, value)
-                return
-            except Exception as exc:
-                if self._logger:
-                    self._logger.debug(f"Redis set failed key={key} reason={exc}")
-        # memory
-        exp = (time.time() + ttl_seconds) if ttl_seconds else None
-        self._memory[key] = (value, exp)
-
-    def delete(self, key: str) -> None:
-        if self._redis:
-            try:
+                self._memory.pop(key, None)
                 self._redis.delete(key)
                 return
             except Exception as exc:
                 if self._logger:
                     self._logger.debug(f"Redis delete failed key={key} reason={exc}")
         self._memory.pop(key, None)
+        return data
+
+    def set(self, key: str, value: str, *, ttl_seconds: Optional[int] = None) -> None:
+        if self._redis:
+            try:
+                self._redis.set(key, value)
+            except Exception as exc:
+                if self._logger:
+                    self._logger.debug(f"Redis set failed key={key} reason={exc}")
+        # memory
+        exp = time.time() + (ttl_seconds if ttl_seconds else 0)
+        self._memory[key] = (value, exp)
 
     # ----- JSON helpers -----
     def get_json(self, key: str) -> Optional[Dict[str, Any]]:

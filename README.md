@@ -28,6 +28,8 @@ An AI-powered assistant for stock investment analysts, leveraging OpenAI's GPT A
 ```bash
 git clone https://github.com/d-dragon/dp-stock-investment-assistant.git
 cd dp-stock-investment-assistant
+python -m venv venv
+venv\Scripts\Activate.ps1
 pip install -r requirements.txt
 ```
 

@@ -152,7 +152,7 @@ def create_models_blueprint(context: APIRouteContext) -> Blueprint:
             if not name:
                 return jsonify({"error": "Field 'name' is required"}), 400
 
-            # Optional: validate exists in cache (advisory)
+            # Optional validation against cached list
             cached = cache.get_json(CACHE_KEY)
             if cached and cached.get("models"):
                 ids = {m.get("id") for m in cached["models"] if isinstance(m, dict)}
@@ -161,27 +161,28 @@ def create_models_blueprint(context: APIRouteContext) -> Blueprint:
 
             # Apply selection
             if set_active_model:
-                result = set_active_model(provider, name)
+                set_active_model(provider, name)
                 logger.info("models.select applied via context", extra={"provider": provider, "model_name": name})
             elif hasattr(agent, "set_active_model"):
                 agent.set_active_model(provider=provider, name=name)
                 logger.info("models.select applied via agent", extra={"provider": provider, "model_name": name})
             else:
-                # Fallback: mutate config, best-effort to refresh underlying client
                 cfg_model = config.setdefault("model", {})
                 cfg_model["provider"] = provider
                 cfg_model["name"] = name
                 logger.info("models.select applied to config", extra={"provider": provider, "model_name": name})
                 try:
                     from core.model_factory import ModelClientFactory
-                    agent._client = ModelClientFactory.get_client(config, provider=provider)
+                    ModelClientFactory.clear_cache(provider=provider)
+                    agent._client = ModelClientFactory.get_client(config, provider=provider, model_name=name)
                 except Exception as e:
                     logger.error("Failed to update agent client after select", extra={"error": str(e)})
 
-            # Persist in config
+            # Persist & cache
             cfg_model = config.setdefault("model", {})
             cfg_model["provider"] = provider
             cfg_model["name"] = name
+            cache.set("openai_config:model_name", name, ttl_seconds=3600)
 
             return jsonify({"provider": provider, "name": name})
         except Exception as exc:
