@@ -83,32 +83,47 @@ class CacheBackend:
             except Exception as exc:
                 if self._logger:
                     self._logger.debug(f"Redis get failed key={key} reason={exc}")
-        # memory
+        
+        # memory fallback
         val = self._memory.get(key)
         if not val:
             return None
+        
         data, exp = val
-        if self._redis and time.time() > exp:
+        # Check if expired
+        if exp is not None and time.time() > exp:
             try:
                 self._memory.pop(key, None)
-                self._redis.delete(key)
-                return
+                if self._redis:
+                    self._redis.delete(key)
             except Exception as exc:
                 if self._logger:
-                    self._logger.debug(f"Redis delete failed key={key} reason={exc}")
-        self._memory.pop(key, None)
+                    self._logger.debug(f"Cache delete failed key={key} reason={exc}")
+            return None
+        
         return data
 
     def set(self, key: str, value: str, *, ttl_seconds: Optional[int] = None) -> None:
         if self._redis:
             try:
-                self._redis.set(key, value)
+                self._redis.set(key, value, ex=ttl_seconds)
             except Exception as exc:
                 if self._logger:
                     self._logger.debug(f"Redis set failed key={key} reason={exc}")
         # memory
-        exp = time.time() + (ttl_seconds if ttl_seconds else 0)
+        exp = time.time() + (ttl_seconds if ttl_seconds else 3600)  # default 1 hour if no TTL
         self._memory[key] = (value, exp)
+
+    def delete(self, key: str) -> None:
+        """Delete a key from both Redis and memory cache."""
+        if self._redis:
+            try:
+                self._redis.delete(key)
+            except Exception as exc:
+                if self._logger:
+                    self._logger.debug(f"Redis delete failed key={key} reason={exc}")
+        # memory
+        self._memory.pop(key, None)
 
     # ----- JSON helpers -----
     def get_json(self, key: str) -> Optional[Dict[str, Any]]:

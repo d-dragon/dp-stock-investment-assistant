@@ -197,7 +197,7 @@ def test_set_openai_default_model_rejects_unsupported_model():
     assert response.status_code == 400
 
 def test_refresh_openai_models_endpoint_forces_refresh():
-    app, _, _, registry, _ = _make_test_app()
+    app, _, _, registry, active_calls = _make_test_app()
     client = app.test_client()
 
     response = client.post("/api/models/openai/refresh")

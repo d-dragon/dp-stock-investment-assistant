@@ -84,7 +84,7 @@ def create_api_blueprint(context: APIRouteContext) -> Blueprint:
                     headers=SSE_HEADERS
                 )
 
-            raw_response = agent._process_query(user_message, provider=provider_override)
+            raw_response = agent.process_query(user_message, provider=provider_override)
             provider_used, model_used, fallback_flag = extract_meta(raw_response)
             response_clean = strip_fallback_prefix(raw_response)
 
