@@ -1,9 +1,22 @@
 openapi: 3.1.0
 info:
   title: Stock Investment Assistant API
-  version: "1.1.0"
+  version: "1.2.0"
   description: >
     REST API for the Stock Investment Assistant backend. Provides chat, configuration, and model catalog endpoints.
+    
+    
+    **Architecture**: Built with Flask blueprints for modular organization:
+    - Core API endpoints (health, chat, config) 
+    - Model management endpoints (OpenAI model operations)
+    - Socket.IO integration for real-time communication
+    
+    
+    **Recent Changes (v1.2.0)**:
+    - Added PUT /api/models/openai/default endpoint for setting default models
+    - Consolidated model management in dedicated blueprint
+    - Enhanced error handling and validation
+    - Improved dependency injection with immutable dataclasses
 servers:
   - url: http://localhost:5000
     description: Local development
@@ -277,6 +290,69 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
+  /api/models/openai/default:
+    put:
+      tags: [Models]
+      summary: Set the default OpenAI model used by the assistant
+      description: Updates the active model used by the assistant and records it in the model registry
+      operationId: setDefaultModel
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SetDefaultModelRequest'
+            examples:
+              setDefault:
+                value:
+                  model: "gpt-4o"
+      responses:
+        "200":
+          description: Default model set successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SetDefaultModelResponse'
+              examples:
+                success:
+                  value:
+                    model: "gpt-4o"
+                    provider: "openai"
+                    active_model: "gpt-4o"
+        "400":
+          description: Invalid model or missing required fields
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                missingModel:
+                  value:
+                    error: "model is required"
+                unsupportedModel:
+                  value:
+                    error: "Model 'invalid-model' is not supported"
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                serverError:
+                  value:
+                    error: "Failed to set active model: Internal error"
+        "503":
+          description: Model management service unavailable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                unavailable:
+                  value:
+                    error: "OpenAI model management unavailable"
+
 components:
   parameters:
     ProviderQuery:
@@ -408,6 +484,28 @@ components:
         name:
           type: string
       required: [provider, name]
+
+    SetDefaultModelRequest:
+      type: object
+      properties:
+        model:
+          type: string
+          description: The OpenAI model ID to set as default (e.g., gpt-4o, gpt-4o-mini).
+      required: [model]
+
+    SetDefaultModelResponse:
+      type: object
+      properties:
+        model:
+          type: string
+          description: The model that was set as default.
+        provider:
+          type: string
+          description: The provider (always "openai").
+        active_model:
+          type: string
+          description: The currently active model after the update.
+      required: [model, provider, active_model]
 
     ErrorResponse:
       type: object

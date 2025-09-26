@@ -98,6 +98,40 @@ Run the main agent:
 python src/main.py
 ```
 
+## API Architecture
+
+The application implements a **modular blueprint-based Flask architecture** for clean separation of concerns and maintainable code organization.
+
+### Blueprint Structure
+- **Core API Endpoints** (`src/web/routes/api_routes.py`):
+  - `GET /api/health` - Service health check
+  - `POST /api/chat` - Chat with the AI assistant (supports streaming)
+  - `GET /api/config` - Get safe configuration details
+
+- **Model Management Endpoints** (`src/web/routes/models_routes.py`):
+  - `GET /api/models/openai` - List available OpenAI models (cached)
+  - `POST /api/models/openai/refresh` - Refresh models cache from OpenAI API
+  - `GET /api/models/openai/selected` - Get currently selected model
+  - `POST /api/models/openai/select` - Select a model for use
+  - `PUT /api/models/openai/default` - Set the default model used by the assistant
+
+- **Socket.IO Integration** (`src/web/sockets/`):
+  - Real-time WebSocket communication for chat streaming
+  - Events: `connect`, `disconnect`, `chat_message`
+
+### Dependency Injection
+The architecture uses **immutable dataclasses** for dependency injection:
+- `APIRouteContext` - Provides access to Flask app, agent, config, and utility functions
+- `SocketIOContext` - Provides Socket.IO-specific dependencies and handlers
+
+### Key Benefits
+- **Modular Organization**: Clear separation between core API and model management
+- **Clean Dependencies**: Immutable context objects prevent side effects
+- **Testable Architecture**: Each blueprint can be tested in isolation
+- **Scalable Design**: Easy to add new endpoint groups as separate blueprints
+
+See `docs/openapi.yaml` for complete API specification with request/response schemas.
+
 ## Roadmap
 
 - [ ] Basic GPT-powered Q&A
@@ -113,20 +147,26 @@ python src/main.py
 
 Follow these concise steps to run the project tests locally (Windows PowerShell examples included).
 
-Prerequisites
+### Prerequisites
 - Python 3.8+
-- Install project dependencies (or at least pytest for tests):
+- Install project dependencies:
 ```powershell
 python -m pip install -r requirements.txt
-# or minimal
-python -m pip install pytest
 ```
 - Create a local env file from the example:
 ```powershell
 copy .env.example .env
 ```
 
-Quick manual checks
+### Test Structure
+The project uses **pytest** as the testing framework with the following test organization:
+- **API Endpoint Tests**: Located in `tests/api/` directory
+  - `api_endpoints.py` - Tests core API endpoints (health, chat, config) - 8 tests
+  - `test_models_routes.py` - Tests model management endpoints - 9 tests  
+- **Unit Tests**: Located in `tests/` directory for core functionality
+- **Test Coverage**: 17 API endpoint tests providing full coverage of REST API functionality
+
+### Quick Manual Checks
 - Run the interactive agent:
 ```powershell
 python src\main.py
@@ -144,48 +184,66 @@ for chunk in agent.process_query_streaming("Latest news on AAPL"):
     print(chunk, end="", flush=True)
 ```
 
-Unit tests (guidance)
-- Tests use pytest and lightweight stubs/mocks to avoid real API calls.
-- Key test types:
-  - Model factory selection & caching
-  - Agent fallback behavior (primary fails -> fallback used)
-  - Streaming generator behavior and fallback notice
-  - Prompt builder contains referenced tickers and data
+### Running Tests
+Tests use pytest and lightweight stubs/mocks to avoid real API calls.
 
-Run tests (PowerShell)
-- Ensure src is on PYTHONPATH for imports, then run pytest:
+**Run all tests:**
+```powershell
+python -m pytest
+```
+
+**Run specific test categories:**
+```powershell
+# API endpoint tests only
+python -m pytest tests/api/ -v
+
+# Core functionality tests
+python -m pytest tests/test_agent.py tests/test_model_factory.py -v
+
+# Single test file
+python -m pytest tests/api/api_endpoints.py -v
+```
+
+**Run with verbose output:**
+```powershell
+python -m pytest -v
+```
+
+### Key Test Types
+- **Model factory selection & caching**: Validates model client creation and caching behavior
+- **Agent fallback behavior**: Tests primary model failure scenarios and fallback mechanisms  
+- **API endpoint validation**: Comprehensive testing of all REST API endpoints
+- **Blueprint architecture**: Tests the modular blueprint-based route organization
+- **Streaming generator behavior**: Validates real-time chat response streaming
+- **Configuration management**: Tests model selection and configuration updates
+
+### Test Environment Setup
+Ensure `src` is on PYTHONPATH for imports (VS Code handles this automatically):
 ```powershell
 $env:PYTHONPATH = "$PWD\src"
-pytest -q
-```
-- Run a single test or file:
-```powershell
-pytest -q tests/test_agent_fallback.py::test_agent_fallback
-pytest -q tests/test_langchain_adapter.py
-```
-- Run all tests (under folder tests/)
-```powershell
-pytest tests
-or
-python -m pytest tests
+pytest -v
 ```
 
-Debugging & CI tips
-- Enable logging to inspect prompts and fallback:
+### Debugging & CI Tips
+- Enable logging to inspect prompts and fallback behavior:
 ```python
 import logging
 logging.basicConfig(level=logging.DEBUG)
 ```
-- Use MODEL_DEBUG_PROMPT=true in .env to print prompts (do not enable in production).
-- In CI, run pytest and linting; mock external services (OpenAI, data APIs) or use recorded HTTP playback (vcrpy).
+- Use `MODEL_DEBUG_PROMPT=true` in `.env` to print prompts (do not enable in production)
+- In CI, run pytest and linting; mock external services (OpenAI, data APIs) or use recorded HTTP playback (vcrpy)
 
-VS Code
-- Set the interpreter, and add PYTHONPATH pointing to `${workspaceFolder}/src` so tests and imports resolve.
-- Use the Test Explorer to run/debug tests.
+### VS Code Integration
+- Set the Python interpreter to use the project's virtual environment
+- Add `PYTHONPATH` pointing to `${workspaceFolder}/src` in VS Code settings
+- Use the Test Explorer to run/debug individual tests
+- Tests are automatically discovered in the `tests/` directory
 
-Notes
-- No real API keys are required for the added unit tests because they use stub clients.
-- If you want, we can add more tests or CI workflow files (GitHub Actions) next.
+### Test Architecture Notes
+- **No real API keys required** - All tests use mock clients and stub implementations
+- **Blueprint testing** - Tests validate the modular Flask blueprint architecture
+- **Dataclass compatibility** - Tests use `dataclasses.replace()` for immutable context updates
+- **Isolated Flask apps** - Each test group uses isolated Flask application instances to prevent conflicts
 
 ---
 ## DB setup and migration
