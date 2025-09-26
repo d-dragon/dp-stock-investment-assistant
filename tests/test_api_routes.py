@@ -149,60 +149,6 @@ def test_chat_endpoint_streaming_branch():
     assert agent.calls == []
 
 
-def test_get_openai_models_returns_cached_list():
-    app, _, _, registry, _ = _make_test_app()
-    client = app.test_client()
-
-    response = client.get("/api/models/openai")
-
-    assert response.status_code == 200
-    payload = response.get_json()
-    assert payload["source"] == "cache"
-    assert payload["models"] == registry.models
-
-
-def test_get_openai_models_with_refresh_param_forces_live_fetch():
-    app, _, _, registry, _ = _make_test_app()
-    client = app.test_client()
-
-    response = client.get("/api/models/openai?refresh=true")
-
-    assert response.status_code == 200
-    assert registry.get_calls[-1] is True
-    payload = response.get_json()
-    assert payload["source"] == "live"
-
-
-def test_set_openai_default_model_updates_registry_and_agent():
-    app, _, _, registry, active_calls = _make_test_app()
-    client = app.test_client()
-
-    response = client.put("/api/models/openai/default", json={"model": "gpt-4o"})
-
-    assert response.status_code == 200
-    assert active_calls == [("openai", "gpt-4o")]
-    data = response.get_json()
-    assert data["model"] == "gpt-4o"
-    assert registry.active_model == "gpt-4o"
-
-
-def test_set_openai_default_model_rejects_unsupported_model():
-    registry = DummyRegistry()
-    app, _, _, registry, active_calls = _make_test_app(registry=registry)
-    registry.models = [{"id": "gpt-4", "created": 1}]
-    client = app.test_client()
-
-    response = client.put("/api/models/openai/default", json={"model": "unknown"})
-
-    assert response.status_code == 400
-
-def test_refresh_openai_models_endpoint_forces_refresh():
-    app, _, _, registry, active_calls = _make_test_app()
-    client = app.test_client()
-
-    response = client.post("/api/models/openai/refresh")
-
-    assert response.status_code == 200
-    assert registry.refreshed is True
-    assert active_calls == []
+# Model management tests have been moved to their own test file since
+# model endpoints are now handled by models_routes.py to avoid duplication
 

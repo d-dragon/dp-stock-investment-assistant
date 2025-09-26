@@ -53,11 +53,14 @@ def _fetch_openai_models(api_key: str, *, timeout: float = 15.0) -> Dict[str, An
 
 def create_models_blueprint(context: APIRouteContext) -> Blueprint:
     """
+    Create blueprint for model management endpoints.
+    
     Endpoints:
-    - GET /api/models/openai?refresh=true|false
-    - POST /api/models/openai/refresh
-    - GET /api/models/openai/selected
-    - POST /api/models/openai/select
+    - GET /api/models/openai?refresh=true|false - List available OpenAI models
+    - POST /api/models/openai/refresh - Force refresh of OpenAI model catalog
+    - GET /api/models/openai/selected - Get currently selected model
+    - POST /api/models/openai/select - Select a model for chat
+    - PUT /api/models/openai/default - Set default OpenAI model (legacy compatibility)
     """
     blueprint = Blueprint("models", __name__)
     config = context.config
@@ -188,5 +191,42 @@ def create_models_blueprint(context: APIRouteContext) -> Blueprint:
         except Exception as exc:
             logger.error("Error selecting model", extra={"error": str(exc), "provider": provider, "model_name": name, "traceback": True}, exc_info=True)
             return jsonify({"error": str(exc)}), 500
+
+    @blueprint.route('/models/openai/default', methods=['PUT'])
+    def set_default_openai_model():
+        """Set the default OpenAI model used by the assistant."""
+        # Access model registry from context
+        model_registry = context.model_registry
+        
+        if not model_registry or not set_active_model:
+            return jsonify({'error': 'OpenAI model management unavailable'}), 503
+
+        payload = request.get_json(silent=True) or {}
+        model_name = payload.get('model') if isinstance(payload, dict) else None
+        if not isinstance(model_name, str) or not model_name.strip():
+            return jsonify({'error': 'model is required'}), 400
+        model_name = model_name.strip()
+
+        try:
+            supported = model_registry.is_supported_model(model_name)
+        except RuntimeError as exc:
+            logger.error(f"OpenAI model validation unavailable: {exc}")
+            return jsonify({'error': str(exc)}), 503
+        except Exception as exc:
+            logger.error(f"Failed to validate OpenAI model '{model_name}': {exc}")
+            return jsonify({'error': f"Failed to validate model '{model_name}': {exc}"}), 500
+
+        if not supported:
+            return jsonify({'error': f"Model '{model_name}' is not supported"}), 400
+
+        try:
+            result = set_active_model('openai', model_name)
+        except Exception as exc:
+            logger.error(f"Failed to set active model '{model_name}': {exc}")
+            return jsonify({'error': f"Failed to set active model: {exc}"}), 500
+
+        model_registry.record_active_model(model_name)
+        result['active_model'] = model_registry.get_active_model()
+        return jsonify(result)
 
     return blueprint

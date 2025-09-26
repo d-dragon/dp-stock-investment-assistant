@@ -1,5 +1,6 @@
 import json
 import os
+from dataclasses import replace
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -36,6 +37,8 @@ def context():
         extract_meta=lambda s: ("openai", "gpt-4", False),
         strip_fallback_prefix=lambda s: s,
         get_timestamp=lambda: "2025-09-18T00:00:00Z",
+        model_registry=None,  # Will be mocked in individual tests as needed
+        set_active_model=None,  # Will be mocked in individual tests as needed
     )
 
 
@@ -101,7 +104,8 @@ def test_get_selected_model(client, context):
 def test_select_model_missing_name(client):
     r = client.post("/api/models/openai/select", json={})
     assert r.status_code == 400
-    assert json.loads(r.data)["error"]
+    data = json.loads(r.data)
+    assert data["error"] == "Field 'name' is required"
 
 
 def test_select_model_success_updates_agent(client, context):
@@ -122,3 +126,59 @@ def test_models_missing_api_key_returns_500(mock_get, client, monkeypatch):
     assert r.status_code == 500
     data = json.loads(r.data)
     assert "Missing OpenAI API key" in data["error"]
+
+
+def test_set_default_model_missing_registry(context):
+    """Test PUT /models/openai/default without model_registry in context."""
+    # Remove model_registry from context and create new app
+    context = replace(context, model_registry=None, app=Flask(__name__))
+    app = context.app
+    app.register_blueprint(create_models_blueprint(context), url_prefix="/api")
+    client = app.test_client()
+    
+    r = client.put("/api/models/openai/default", json={"model": "gpt-4o"})
+    assert r.status_code == 503
+    data = json.loads(r.data)
+    assert data["error"] == "OpenAI model management unavailable"
+
+
+def test_set_default_model_missing_model_name(context):
+    """Test PUT /models/openai/default with missing model parameter."""
+    # Add model_registry and set_active_model to context with new app
+    mock_registry = MagicMock()
+    mock_set_active = MagicMock()
+    context = replace(context, model_registry=mock_registry, set_active_model=mock_set_active, app=Flask(__name__))
+    
+    app = context.app
+    app.register_blueprint(create_models_blueprint(context), url_prefix="/api")
+    client = app.test_client()
+    
+    r = client.put("/api/models/openai/default", json={})
+    assert r.status_code == 400
+    data = json.loads(r.data)
+    assert data["error"] == "model is required"
+
+
+def test_set_default_model_success(context):
+    """Test PUT /models/openai/default with successful model setting."""
+    # Mock the registry and set_active_model with new app
+    mock_registry = MagicMock()
+    mock_registry.is_supported_model.return_value = True
+    mock_registry.get_active_model.return_value = "gpt-4o"
+    mock_set_active = MagicMock(return_value={"model": "gpt-4o", "provider": "openai"})
+    
+    context = replace(context, model_registry=mock_registry, set_active_model=mock_set_active, app=Flask(__name__))
+    app = context.app
+    app.register_blueprint(create_models_blueprint(context), url_prefix="/api")
+    client = app.test_client()
+    
+    r = client.put("/api/models/openai/default", json={"model": "gpt-4o"})
+    assert r.status_code == 200
+    data = json.loads(r.data)
+    assert data["model"] == "gpt-4o"
+    assert data["active_model"] == "gpt-4o"
+    
+    # Verify calls
+    mock_registry.is_supported_model.assert_called_once_with("gpt-4o")
+    mock_set_active.assert_called_once_with("openai", "gpt-4o")
+    mock_registry.record_active_model.assert_called_once_with("gpt-4o")

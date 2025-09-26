@@ -30,7 +30,9 @@ def mock_context():
         stream_chat_response=stream_chat_response,
         extract_meta=extract_meta,
         strip_fallback_prefix=strip_fallback_prefix,
-        get_timestamp=get_timestamp
+        get_timestamp=get_timestamp,
+        model_registry=None,  # Not needed for core API route tests
+        set_active_model=None,  # Not needed for core API route tests
     )
 
 @pytest.fixture
@@ -99,7 +101,8 @@ def test_chat_internal_error(client, mock_context):
     response = client.post('/api/chat', json=payload)
     assert response.status_code == 500
     data = json.loads(response.data)
-    assert data == {'error': 'Internal server error'}
+    assert 'Internal server error' in data['error']
+    assert 'Test error' in data['error']
 
 def test_get_config(client, mock_context):
     """Test GET /api/config."""
