@@ -13,7 +13,7 @@ dm = DataManager(cfg)
 agent = StockAgent(cfg, dm)
 
 print("=== Non-stream response ===")
-print(agent._process_query("What is the current price of AAPL?"))
+print(agent.process_query("What is the current price of AAPL?"))
 
 print("\n=== Streaming response ===")
 for chunk in agent.process_query_streaming("Summarize recent news about AAPL"):

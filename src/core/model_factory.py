@@ -15,15 +15,23 @@ class ModelClientFactory:
     def get_client(config: Dict[str, Any], *, provider: Optional[str] = None, model_name: Optional[str] = None) -> BaseModelClient:
         logger = logging.getLogger(__name__)
 
-        # Determine provider
+        # Resolve provider
         provider_cfg = provider or config.get("model", {}).get("provider")
         if not provider_cfg:
-            # Fallback: if legacy openai config present, assume openai
             provider_cfg = "openai" if "openai" in config else "openai"
 
-        key = f"{provider_cfg}:{model_name or ''}"
-        if key in ModelClientFactory._CACHE:
-            return ModelClientFactory._CACHE[key]
+        # Resolve model name (for cache key uniqueness)
+        model_cfg = config.get("model", {}) or {}
+        resolved_model_name = (
+            model_name
+            or model_cfg.get("name")
+            or (config.get("openai", {}) or {}).get("model")
+        )
+
+        key = f"{provider_cfg}:{resolved_model_name or ''}"
+        cached = ModelClientFactory._CACHE.get(key)
+        if cached:
+            return cached
 
         if provider_cfg == "openai":
             client = OpenAIModelClient(config)
@@ -42,5 +50,14 @@ class ModelClientFactory:
         seq = model_cfg.get("fallback_order")
         if isinstance(seq, list) and seq:
             return seq
-        # default generic fallback preference
         return ["openai", "grok"]
+
+    @staticmethod
+    def clear_cache(provider: Optional[str] = None) -> None:
+        if provider is None:
+            ModelClientFactory._CACHE.clear()
+            return
+        prefix = f"{provider}:"
+        for key in list(ModelClientFactory._CACHE.keys()):
+            if key.startswith(prefix):
+                ModelClientFactory._CACHE.pop(key, None)

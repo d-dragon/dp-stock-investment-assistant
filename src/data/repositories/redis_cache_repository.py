@@ -46,6 +46,28 @@ class RedisCacheRepository:
         except RedisError:
             return False
     
+    # Generic helpers
+    def set_json(self, key: str, value: Any, expire_seconds: Optional[int] = None) -> bool:
+        """Store a JSON-serializable value under the provided key."""
+        try:
+            payload = json.dumps(value)
+            self.client.set(key, payload, ex=expire_seconds if expire_seconds and expire_seconds > 0 else None)
+            return True
+        except (RedisError, TypeError) as e:
+            self.logger.error(f"Failed to set JSON key '{key}': {e}")
+            return False
+
+    def get_json(self, key: str) -> Optional[Any]:
+        """Retrieve a JSON value by key."""
+        try:
+            data = self.client.get(key)
+            if not data:
+                return None
+            return json.loads(data)
+        except (RedisError, json.JSONDecodeError) as e:
+            self.logger.error(f"Failed to get JSON key '{key}': {e}")
+            return None
+    
     # Stock price caching methods
     def cache_latest_price(self, symbol: str, price_data: Dict[str, Any], 
                            expire_seconds: int = 60) -> bool:
@@ -190,3 +212,27 @@ class RedisCacheRepository:
         except (RedisError, json.JSONDecodeError) as e:
             self.logger.error(f"Failed to get cached report: {str(e)}")
             return None
+
+    # Model caching helpers
+    def cache_supported_models(self, provider: str, models_payload: Dict[str, Any], expire_seconds: Optional[int] = None) -> bool:
+        key = f"model:supported:{provider}"
+        return self.set_json(key, models_payload, expire_seconds=expire_seconds)
+
+    def get_cached_supported_models(self, provider: str) -> Optional[Dict[str, Any]]:
+        key = f"model:supported:{provider}"
+        return self.get_json(key)
+
+    def cache_active_model(self, provider: str, model_name: str) -> bool:
+        key = f"model:active:{provider}"
+        payload = {
+            "model": model_name,
+            "updated_at": datetime.utcnow().isoformat(timespec="seconds") + "Z"
+        }
+        return self.set_json(key, payload)
+
+    def get_cached_active_model(self, provider: str) -> Optional[str]:
+        key = f"model:active:{provider}"
+        data = self.get_json(key)
+        if isinstance(data, dict):
+            return data.get("model")
+        return None

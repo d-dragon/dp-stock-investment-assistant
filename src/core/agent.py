@@ -24,8 +24,18 @@ class StockAgent:
         self.data_manager = data_manager
         self.logger = logging.getLogger(__name__)
 
+        # Initialize shared cache backend (same as used in clients)
+        from utils.cache import CacheBackend
+        self.cache = CacheBackend.from_config(config, logger=self.logger)
+
+        # Retrieve cached model name (new key) or legacy key
+        cached_model_name = self.cache.get("openai_config:model_name") or self.cache.get("openai_config:model")
+        self.logger.info(f"Retrieved cached model name: {cached_model_name}")
+        if cached_model_name:
+            self.config.setdefault("model", {})["name"] = cached_model_name
+
         # Preload default client (lazy if needed)
-        self._client = ModelClientFactory.get_client(config)
+        self._client = ModelClientFactory.get_client(self.config)
 
     # -------- Public interactive loop (unchanged UX) --------
     def run_interactive(self):
@@ -43,7 +53,7 @@ class StockAgent:
                 elif user_input.lower() == "help":
                     self._show_help()
                 elif user_input:
-                    response = self._process_query(user_input)
+                    response = self.process_query(user_input)
                     print(f"\nAssistant: {response}\n")
             except KeyboardInterrupt:
                 print("\nGoodbye!")
@@ -53,7 +63,7 @@ class StockAgent:
                 print(f"Error: {e}")
 
     # -------- Core processing --------
-    def _process_query(self, query: str, *, provider: Optional[str] = None) -> str:
+    def process_query(self, query: str, *, provider: Optional[str] = None) -> str:
         try:
             tickers = self._extract_tickers(query)
             quick_ctx = {}
@@ -162,6 +172,33 @@ class StockAgent:
                 )
         return ctx
 
+    def set_default_model(self, provider: str, model_name: str) -> Dict[str, Any]:
+        """Update the default client used for responses."""
+        self.config.setdefault("model", {})
+        self.config["model"]["provider"] = provider
+        self.config["model"]["name"] = model_name
+        ModelClientFactory.clear_cache(provider=provider)
+        self._client = ModelClientFactory.get_client(self.config, provider=provider, model_name=model_name)
+        return {
+            "provider": provider,
+            "model": self._client.model_name
+        }
+
+    def set_active_model(self, *, provider: Optional[str], name: Optional[str]) -> None:
+        model_cfg = self.config.setdefault("model", {})
+        if provider:
+            model_cfg["provider"] = provider
+        if name:
+            model_cfg["name"] = name
+            self.cache.set("openai_config:model_name", name, ttl_seconds=3600)
+            self.logger.debug(f"Updated cache for model name: {name}")
+        # Invalidate old client(s) for this provider so new model is loaded
+        from .model_factory import ModelClientFactory
+        ModelClientFactory.clear_cache(provider=model_cfg.get("provider") or "openai")
+        effective_provider = model_cfg.get("provider")
+        self._client = ModelClientFactory.get_client(self.config, provider=effective_provider, model_name=model_cfg.get("name"))
+        self.logger.info(f"active_model provider={model_cfg.get('provider')} name={model_cfg.get('name')}")
+
     def _show_help(self):
         help_text = """
 Available commands:
@@ -175,3 +212,4 @@ Examples:
 - "Should I invest in renewable energy stocks?"
         """
         print(help_text)
+

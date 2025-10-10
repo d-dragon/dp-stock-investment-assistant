@@ -5,28 +5,95 @@ import logging
 from typing import Dict, Any, Optional, Generator
 from openai import OpenAI
 from .base_model_client import BaseModelClient
+from utils.cache import CacheBackend
 
 
 class OpenAIModelClient(BaseModelClient):
     def __init__(self, config: Dict[str, Any]):
         super().__init__(config)
         self.logger = logging.getLogger(__name__)
+        
+        # Initialize cache backend
+        self.cache = CacheBackend.from_config(config, logger=self.logger)
 
         # Backward compatibility: accept either config['model'] or legacy config['openai']
         openai_cfg = config.get("openai", {})
         model_cfg = config.get("model", {})
 
-        # Precedence: explicit model.* overrides legacy openai.*
-        self._api_key = model_cfg.get("openai", {}).get("api_key") or openai_cfg.get("api_key")
+        # Get configuration with cache-first approach
+        self._api_key = self._get_config_value("api_key", model_cfg, openai_cfg)
         if not self._api_key:
             raise ValueError("OpenAI API key missing (expected in openai.api_key or model.openai.api_key)")
 
-        self._model = model_cfg.get("name") or openai_cfg.get("model") or "gpt-4"
-        self._temperature = model_cfg.get("temperature", openai_cfg.get("temperature", 0.7))
-        self._max_tokens = model_cfg.get("max_tokens", openai_cfg.get("max_tokens", 2000))
+        self._model = self._get_config_value("model", model_cfg, openai_cfg, default=None)  # No hardcoded default; rely on config
+        if not self._model:
+            raise ValueError("OpenAI model name missing (expected in model.name or openai.model)")
+        self._temperature = self._get_config_value("temperature", model_cfg, openai_cfg, default=0.7)
+        self._max_tokens = self._get_config_value("max_tokens", model_cfg, openai_cfg, default=2000)
 
         self.client = OpenAI(api_key=self._api_key)
         self.logger.info(f"OpenAIModelClient initialized model={self._model}")
+
+    def _get_config_value(self, key: str, model_cfg: Dict[str, Any], openai_cfg: Dict[str, Any], default: Any = None) -> Any:
+        """
+        Get configuration value with cache-first approach.
+        Priority: Redis cache -> model config -> openai config -> default
+        """
+        # Determine the actual cache key based on the configuration key
+        if key == "model":
+            cache_key = "openai_config:model_name"  # More descriptive since we're caching the model name
+        else:
+            cache_key = f"openai_config:{key}"
+            
+        # Try to get from cache first
+        cached_value = self.cache.get(cache_key)
+        if cached_value is not None:
+            self.logger.debug(f"Retrieved {key} from cache")
+            # Handle different data types
+            if key in ["temperature"]:
+                return float(cached_value)
+            elif key in ["max_tokens"]:
+                return int(cached_value)
+            return cached_value
+
+        # Fallback to config with precedence: explicit model.* overrides legacy openai.*
+        if key == "api_key":
+            value = model_cfg.get("openai", {}).get("api_key") or openai_cfg.get("api_key") or default
+        elif key == "model":
+            value = model_cfg.get("name") or openai_cfg.get("model") or default
+        else:
+            value = model_cfg.get(key, openai_cfg.get(key, default))
+
+        # Cache the value for future use (with 1 hour TTL)
+        if value is not None:
+            self.cache.set(cache_key, str(value), ttl_seconds=3600)
+            self.logger.debug(f"Cached {key} value")
+
+        return value
+
+    def update_config_in_cache(self, key: str, value: Any, *, ttl_seconds: int = 3600) -> None:
+        """
+        Update a configuration value in cache.
+        """
+        if key == "model":
+            cache_key = "openai_config:model_name"
+        else:
+            cache_key = f"openai_config:{key}"
+        self.cache.set(cache_key, str(value), ttl_seconds=ttl_seconds)
+        self.logger.info(f"Updated {key} in cache")
+
+    def clear_config_cache(self) -> None:
+        """
+        Clear all cached configuration values.
+        """
+        config_keys = ["api_key", "model", "temperature", "max_tokens"]
+        for key in config_keys:
+            if key == "model":
+                cache_key = "openai_config:model_name"
+            else:
+                cache_key = f"openai_config:{key}"
+            self.cache.delete(cache_key)
+        self.logger.info("Cleared OpenAI configuration cache")
 
     @property
     def provider(self) -> str:
