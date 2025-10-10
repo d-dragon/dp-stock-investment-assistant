@@ -142,7 +142,10 @@ def create_models_blueprint(context: APIRouteContext) -> Blueprint:
             "provider": model_cfg.get("provider") or "openai",
             "name": model_cfg.get("name") or (config.get("openai", {}) or {}).get("model") or "gpt-4",
         }
-        logger.debug("models.selected", extra=res)
+        logger.debug(
+            "models.selected",
+            extra={"provider": res["provider"], "model_name": res["name"]},
+        )
         return jsonify(res)
 
     @blueprint.route("/models/openai/select", methods=["POST"])
