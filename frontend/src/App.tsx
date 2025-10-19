@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import './App.css';
 import { restApiClient } from './services/restApiClient';
 import { getUUID } from './utils/uuid';
+import ModelSelector from './components/models/ModelSelector';
 
 // Interface definitions
 interface Message {
@@ -198,18 +199,24 @@ const App: React.FC = () => {
     return base;
   };
 
+  const handleModelChange = (provider: string, modelName: string) => {
+    console.log(`Model changed to: ${provider}/${modelName}`);
+    // The selection is already updated on the backend
+  };
+
   return (
     <div style={{ fontFamily: 'system-ui, Arial, sans-serif', height: '100vh', display: 'flex', flexDirection: 'column' }}>
       {/* Header / Controls */}
       <div style={{ padding: '8px 12px', borderBottom: '1px solid #ddd', display: 'flex', gap: 12, alignItems: 'center' }}>
         <strong>DP Stock Investment Assistant</strong>
+        <ModelSelector compact onModelChange={handleModelChange} disabled={isLoading} />
         <select
           value={selectedProvider || ''}
           onChange={e => setSelectedProvider(e.target.value || undefined)}
           style={{ padding: '4px 8px' }}
-          title="Select model provider"
+          title="Select model provider override"
         >
-          <option value="">Auto (config)</option>
+          <option value="">Auto (from selector)</option>
           <option value="openai">OpenAI</option>
           <option value="grok">Grok (stub)</option>
         </select>
