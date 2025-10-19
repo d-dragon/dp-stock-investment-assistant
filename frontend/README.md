@@ -19,9 +19,18 @@ This is the React frontend for the DP Stock Investment Assistant.
 ## Features
 
 - Real-time chat interface with the investment assistant
+- **OpenAI model selection and management** (NEW)
+  - View all available OpenAI models
+  - Switch models in real-time
+  - Refresh model catalog from OpenAI API
+  - See current model selection
+  - Cache status indicator
 - Connection status monitoring
+- Streaming chat responses
+- Provider selection (OpenAI, Grok stub)
+- Message history with metadata (provider, model, fallback status)
 - Responsive design
-- Modern UI with glassmorphism effects
+- Modern UI with TypeScript and strict type checking
 
 ## Backend Requirements
 
@@ -35,17 +44,35 @@ The frontend is a **React 18.3.1 single-page application (SPA)** built with Crea
 ### **Directory Structure**
 ```
 frontend/
-├── public/                    # Static assets served directly
-│   ├── index.html            # Main HTML template with React mount point
-│   └── manifest.json         # PWA configuration
-├── src/                      # Source code
-│   ├── App.js               # Main React component (chat interface)
-│   ├── App.css              # Component styling with gradient theme
-│   ├── index.js             # React application entry point
-│   └── index.css            # Global styles and base layout
-├── package.json             # Dependencies and build scripts
-├── .env                     # Environment configuration
-└── node_modules/            # NPM dependencies (git-ignored)
+├── public/                          # Static assets served directly
+│   ├── index.html                  # Main HTML template with React mount point
+│   └── manifest.json               # PWA configuration
+├── src/                            # Source code
+│   ├── components/                 # React components
+│   │   ├── models/                 # Model management components
+│   │   │   └── ModelSelector.tsx   # OpenAI model selector (NEW)
+│   │   ├── WebSocketTest.tsx       # WebSocket testing component
+│   │   └── ...                     # Other components
+│   ├── services/                   # API services
+│   │   ├── modelsApi.ts           # Model management API (NEW)
+│   │   ├── restApiClient.js       # REST API client with streaming
+│   │   ├── apiService.ts          # TypeScript API service
+│   │   └── webSocketService.ts    # Socket.IO service
+│   ├── types/                      # TypeScript type definitions
+│   │   └── models.ts              # Model-related types (NEW)
+│   ├── utils/                      # Utility functions
+│   │   └── uuid.ts                # UUID generation
+│   ├── App.tsx                    # Main React component (chat interface)
+│   ├── App.css                    # Component styling
+│   ├── index.tsx                  # React application entry point
+│   ├── index.css                  # Global styles and base layout
+│   └── config.ts                  # Configuration constants
+├── package.json                    # Dependencies and build scripts
+├── tsconfig.json                   # TypeScript configuration
+├── .env                           # Environment configuration
+├── FRONTEND_ANALYSIS.md           # Analysis and refinement plan (NEW)
+├── UI_IMPROVEMENTS.md             # Improvements documentation (NEW)
+└── node_modules/                   # NPM dependencies (git-ignored)
 ```
 
 ### **Application Purpose**
@@ -75,8 +102,10 @@ frontend/
 
 #### **Frontend Technologies**
 - **React 18.3.1**: Modern hooks-based component architecture
+- **TypeScript**: Full type safety with strict mode enabled
 - **React DOM 18.3.1**: Virtual DOM rendering with `createRoot`
 - **React Scripts 5.0.1**: Build tooling, development server, and bundling
+- **Socket.IO Client 4.8.1**: Real-time WebSocket communication
 - **CSS3**: Advanced styling with gradients, animations, and responsive design
 - **Fetch API**: HTTP client for backend communication
 
@@ -91,8 +120,15 @@ frontend/
 - **Flask API**: Python backend on `localhost:5000`
 - **RESTful Endpoints**:
   - `GET /api/health` - Connection health check
-  - `POST /api/chat` - Message processing and AI responses
+  - `POST /api/chat` - Message processing and AI responses (supports streaming)
+  - `GET /api/config` - Configuration retrieval
+  - `GET /api/models/openai` - List available OpenAI models (cached)
+  - `POST /api/models/openai/refresh` - Refresh model catalog
+  - `GET /api/models/openai/selected` - Get current model selection
+  - `POST /api/models/openai/select` - Select a model
+  - `PUT /api/models/openai/default` - Set default model
 - **JSON Communication**: Structured data exchange
+- **Server-Sent Events (SSE)**: Streaming chat responses
 
 ### **Key Components Analysis**
 
