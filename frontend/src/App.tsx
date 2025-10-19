@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import './App.css';
-import WebSocketTest from './components/WebSocketTest';
 import { restApiClient } from './services/restApiClient';
 import { getUUID } from './utils/uuid';
 
@@ -16,20 +15,12 @@ interface Message {
   fallback?: boolean;
 }
 
-interface Command {
-  command: string;
-  description: string;
-  example?: string;
-}
-
 const App: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isConnected, setIsConnected] = useState(false);
-  const [commands, setCommands] = useState<Command[]>([]);
   const [error, setError] = useState<string | null>(null);
-  const [currentTab, setCurrentTab] = useState<'chat' | 'websocket-test'>('chat');
   const [selectedProvider, setSelectedProvider] = useState<string | undefined>(undefined);
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
