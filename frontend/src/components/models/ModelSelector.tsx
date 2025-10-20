@@ -57,7 +57,7 @@ const ModelSelector: React.FC<ModelSelectorProps> = ({
       setError(null);
       const response = await modelsApi.refreshModels();
       setModels(response.models);
-      setCacheStatus('openai');
+      setCacheStatus(response.source);
     } catch (err: any) {
       setError(err.message || 'Failed to refresh models');
       console.error('Failed to refresh models:', err);
