@@ -22,35 +22,47 @@ const ModelSelector: React.FC<ModelSelectorProps> = ({
 
   // Load models and current selection on mount
   useEffect(() => {
+    let isMounted = true;
+
+    const loadModels = async (refresh: boolean = false) => {
+      try {
+        setIsLoading(true);
+        setError(null);
+        const response: ModelListResponse = await modelsApi.listModels(refresh);
+        if (!isMounted) return;
+        setModels(response.models);
+        setCacheStatus(response.source);
+      } catch (err: any) {
+        if (!isMounted) return;
+        setError(err.message || 'Failed to load models');
+        console.error('Failed to load models:', err);
+      } finally {
+        if (!isMounted) return;
+        setIsLoading(false);
+      }
+    };
+
+    const loadSelectedModel = async () => {
+      try {
+        const selection = await modelsApi.getSelectedModel();
+        if (!isMounted) return;
+        setSelectedModel(selection);
+      } catch (err: any) {
+        if (!isMounted) return;
+        console.error('Failed to load selected model:', err);
+        // Non-critical error, don't show to user
+      }
+    };
+
     loadModels();
     loadSelectedModel();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
-  const loadModels = async (refresh: boolean = false) => {
-    try {
-      setIsLoading(true);
-      setError(null);
-      const response: ModelListResponse = await modelsApi.listModels(refresh);
-      setModels(response.models);
-      setCacheStatus(response.source);
-    } catch (err: any) {
-      setError(err.message || 'Failed to load models');
-      console.error('Failed to load models:', err);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const loadSelectedModel = async () => {
-    try {
-      const selection = await modelsApi.getSelectedModel();
-      setSelectedModel(selection);
-    } catch (err: any) {
-      console.error('Failed to load selected model:', err);
-      // Non-critical error, don't show to user
-    }
-  };
-
+  // loadModels and loadSelectedModel are now defined inside useEffect with isMounted guard.
   const handleRefresh = async () => {
     try {
       setIsRefreshing(true);
