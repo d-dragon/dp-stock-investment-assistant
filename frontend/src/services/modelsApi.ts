@@ -19,10 +19,9 @@ class ModelsApiService {
 
   /**
    * List available OpenAI models (cached by default)
-   * @param refresh - Force refresh from OpenAI API if true
    */
-  async listModels(refresh: boolean = false): Promise<ModelListResponse> {
-    const url = `${this.baseUrl}/api/models/openai${refresh ? '?refresh=true' : ''}`;
+  async listModels(): Promise<ModelListResponse> {
+    const url = `${this.baseUrl}/api/models/openai`;
     const response = await fetch(url);
     
     if (!response.ok) {
