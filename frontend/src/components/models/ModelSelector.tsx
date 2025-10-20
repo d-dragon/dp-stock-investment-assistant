@@ -145,6 +145,8 @@ const ModelSelector: React.FC<ModelSelectorProps> = ({
             cursor: disabled || isRefreshing ? 'not-allowed' : 'pointer'
           }}
           title="Refresh model list from OpenAI"
+          aria-label="Refresh model list"
+          aria-busy={isRefreshing}
         >
           {isRefreshing ? '⟳' : '↻'}
         </button>
