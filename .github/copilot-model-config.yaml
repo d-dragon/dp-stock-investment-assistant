@@ -1,0 +1,403 @@
+# Multi-Model Routing Configuration
+# This configuration defines how different AI models should be used for various programming tasks
+# 
+# Note: This is a custom configuration for external model routing implementations.
+# GitHub Copilot's native chat modes do not currently support custom model selection.
+# Use this configuration with custom extensions or LangChain-based orchestration.
+
+version: '1.0'
+last_updated: '2025-11-13'
+
+# Primary model used as default for most tasks
+primary_model:
+  name: 'claude-sonnet-4.5'
+  provider: 'anthropic'
+  api_endpoint: 'https://api.anthropic.com/v1'
+  context_window: 200000
+  cost_per_1m_input_tokens: 3.00
+  cost_per_1m_output_tokens: 15.00
+  strengths:
+    - 'architectural design'
+    - 'system analysis'
+    - 'debugging'
+    - 'code understanding'
+    - 'refactoring'
+
+# Fallback models used when primary is unavailable or for validation
+fallback_models:
+  - name: 'gpt-5-codex'
+    provider: 'openai'
+    api_endpoint: 'https://api.openai.com/v1'
+    context_window: 128000
+    cost_per_1m_input_tokens: 10.00
+    cost_per_1m_output_tokens: 30.00
+    priority: 1
+    strengths:
+      - 'code generation'
+      - 'algorithm optimization'
+      - 'complex implementations'
+  
+  - name: 'grok-code-fast-1'
+    provider: 'xai'
+    api_endpoint: 'https://api.x.ai/v1'
+    context_window: 32000
+    cost_per_1m_input_tokens: 5.00
+    cost_per_1m_output_tokens: 15.00
+    priority: 2
+    strengths:
+      - 'fast responses'
+      - 'general coding'
+      - 'quick fixes'
+
+# Specialized models for specific task types
+specialized_models:
+  architecture:
+    name: 'claude-sonnet-4.5'
+    provider: 'anthropic'
+    use_cases:
+      - 'system design'
+      - 'architectural decisions'
+      - 'technical planning'
+      - 'design patterns'
+      - 'API design'
+    min_complexity: 'medium'
+    
+  code_generation:
+    name: 'gpt-5-codex'
+    provider: 'openai'
+    use_cases:
+      - 'writing new code'
+      - 'implementing features'
+      - 'scaffolding projects'
+      - 'algorithm implementation'
+      - 'performance optimization'
+    min_complexity: 'simple'
+    
+  debugging:
+    name: 'claude-sonnet-4.5'
+    provider: 'anthropic'
+    use_cases:
+      - 'bug analysis'
+      - 'root cause identification'
+      - 'performance issues'
+      - 'code quality review'
+      - 'security analysis'
+    min_complexity: 'medium'
+    
+  testing:
+    name: 'gemini-2.5-pro'
+    provider: 'google'
+    api_endpoint: 'https://generativelanguage.googleapis.com/v1'
+    context_window: 1000000
+    cost_per_1m_input_tokens: 1.25
+    cost_per_1m_output_tokens: 5.00
+    use_cases:
+      - 'test generation'
+      - 'test strategies'
+      - 'coverage analysis'
+      - 'edge case identification'
+      - 'property-based testing'
+    min_complexity: 'simple'
+    
+  documentation:
+    name: 'claude-haiku-4.5'
+    provider: 'anthropic'
+    api_endpoint: 'https://api.anthropic.com/v1'
+    context_window: 200000
+    cost_per_1m_input_tokens: 0.25
+    cost_per_1m_output_tokens: 1.25
+    use_cases:
+      - 'technical writing'
+      - 'README files'
+      - 'API documentation'
+      - 'code comments'
+      - 'user guides'
+    min_complexity: 'simple'
+
+# Task routing rules based on complexity and context
+routing_rules:
+  - name: 'simple_tasks'
+    description: 'Tasks with less than 50 lines of code'
+    conditions:
+      max_lines: 50
+      complexity: 'simple'
+    strategy: 'use_primary'
+    model: 'claude-sonnet-4.5'
+    
+  - name: 'medium_complexity'
+    description: 'Tasks requiring moderate analysis'
+    conditions:
+      max_lines: 200
+      complexity: 'medium'
+    strategy: 'primary_with_validation'
+    primary_model: 'claude-sonnet-4.5'
+    validation_model: 'gpt-5-codex'
+    
+  - name: 'complex_problems'
+    description: 'Multi-faceted problems requiring deep analysis'
+    conditions:
+      min_lines: 200
+      complexity: 'high'
+    strategy: 'multi_model_consultation'
+    models:
+      - 'claude-sonnet-4.5'  # Initial analysis
+      - 'gpt-5-codex'        # Implementation suggestions
+      - 'gemini-2.5-pro'     # Testing strategy
+    synthesis_model: 'claude-sonnet-4.5'
+    
+  - name: 'critical_decisions'
+    description: 'Architectural decisions requiring ensemble validation'
+    conditions:
+      is_architectural: true
+      impact: 'high'
+    strategy: 'ensemble'
+    models:
+      - 'claude-sonnet-4.5'
+      - 'gpt-5-codex'
+      - 'grok-code-fast-1'
+    consensus_threshold: 0.67  # 67% agreement required
+
+# Task type detection patterns
+task_detection:
+  architecture:
+    keywords:
+      - 'design'
+      - 'architecture'
+      - 'structure'
+      - 'pattern'
+      - 'system'
+      - 'component'
+      - 'module'
+    file_patterns:
+      - 'architecture/**'
+      - 'docs/design/**'
+      - '**/*.architecture.md'
+      
+  code_generation:
+    keywords:
+      - 'implement'
+      - 'create'
+      - 'generate'
+      - 'write'
+      - 'add feature'
+      - 'build'
+    file_patterns:
+      - 'src/**/*.py'
+      - 'src/**/*.ts'
+      - 'src/**/*.js'
+      
+  debugging:
+    keywords:
+      - 'bug'
+      - 'error'
+      - 'fix'
+      - 'debug'
+      - 'issue'
+      - 'problem'
+      - 'broken'
+    file_patterns:
+      - 'src/**'
+      
+  testing:
+    keywords:
+      - 'test'
+      - 'unittest'
+      - 'coverage'
+      - 'assertion'
+      - 'mock'
+    file_patterns:
+      - 'tests/**'
+      - '**/*_test.py'
+      - '**/*.test.ts'
+      - '**/*.spec.js'
+      
+  documentation:
+    keywords:
+      - 'document'
+      - 'readme'
+      - 'docs'
+      - 'explain'
+      - 'comment'
+    file_patterns:
+      - 'docs/**'
+      - '**/*.md'
+      - 'README.md'
+
+# Fallback strategy configuration
+fallback_strategy:
+  enabled: true
+  max_retries: 3
+  retry_delay_seconds: 2
+  cascade_on_failure: true
+  cascade_order:
+    - 'claude-sonnet-4.5'
+    - 'gpt-5-codex'
+    - 'grok-code-fast-1'
+  
+  # Error handling
+  error_conditions:
+    - type: 'rate_limit'
+      action: 'wait_and_retry'
+      wait_seconds: 60
+      
+    - type: 'timeout'
+      action: 'retry_with_fallback'
+      timeout_seconds: 30
+      
+    - type: 'api_error'
+      action: 'immediate_fallback'
+      
+    - type: 'model_unavailable'
+      action: 'skip_to_next_fallback'
+
+# Context management settings
+context_management:
+  max_context_tokens: 150000
+  context_compression:
+    enabled: true
+    strategy: 'summarize_old_messages'
+    compression_threshold: 100000
+    
+  context_sharing:
+    share_across_models: true
+    include_conversation_history: true
+    max_history_messages: 20
+    
+  context_preservation:
+    save_architecture_decisions: true
+    save_code_snippets: true
+    save_error_logs: true
+    save_user_preferences: true
+
+# Performance monitoring
+monitoring:
+  enabled: true
+  track_metrics:
+    - 'response_time'
+    - 'token_usage'
+    - 'cost_per_request'
+    - 'success_rate'
+    - 'user_satisfaction'
+  
+  logging:
+    log_level: 'info'
+    log_requests: true
+    log_responses: false  # Avoid logging sensitive data
+    log_errors: true
+    log_performance: true
+  
+  optimization:
+    enable_caching: true
+    cache_duration_minutes: 60
+    track_model_performance: true
+    auto_adjust_routing: true
+
+# Security and privacy
+security:
+  api_keys:
+    store_location: 'environment_variables'
+    required_keys:
+      - 'ANTHROPIC_API_KEY'
+      - 'OPENAI_API_KEY'
+      - 'GOOGLE_API_KEY'
+      - 'XAI_API_KEY'
+  
+  data_handling:
+    redact_sensitive_data: true
+    sensitive_patterns:
+      - 'api[_-]?key'
+      - 'password'
+      - 'secret'
+      - 'token'
+      - 'credential'
+    max_log_retention_days: 30
+    
+  rate_limiting:
+    enabled: true
+    requests_per_minute: 60
+    tokens_per_minute: 100000
+
+# Project-specific settings
+project_context:
+  name: 'dp-stock-investment-assistant'
+  tech_stack:
+    - 'Python 3.8+'
+    - 'FastAPI'
+    - 'React'
+    - 'MongoDB'
+    - 'Redis'
+    - 'Docker'
+  
+  coding_standards:
+    python:
+      style_guide: 'PEP 8'
+      use_type_hints: true
+      use_docstrings: true
+      max_line_length: 100
+      
+    javascript:
+      style_guide: 'ESLint'
+      use_prettier: true
+      component_style: 'functional'
+      
+    testing:
+      python_framework: 'pytest'
+      javascript_framework: 'jest'
+      min_coverage: 80
+  
+  deployment:
+    local: 'docker-compose'
+    production: 'azure'
+    ci_cd: 'github-actions'
+
+# Usage examples for integration
+integration_examples:
+  python_usage: |
+    ```python
+    import yaml
+    from model_router import ModelRouter
+    
+    # Load configuration
+    with open('.github/copilot-model-config.yaml', 'r') as f:
+        config = yaml.safe_load(f)
+    
+    # Initialize router
+    router = ModelRouter(config)
+    
+    # Route a task
+    result = router.route_task(
+        task_type='code_generation',
+        description='Create a new API endpoint',
+        complexity='medium',
+        context={'file_path': 'src/api/routes.py'}
+    )
+    
+    print(f"Selected model: {result.model}")
+    print(f"Response: {result.response}")
+    ```
+  
+  langchain_usage: |
+    ```python
+    from langchain.chat_models import ChatAnthropic, ChatOpenAI
+    from langchain.prompts import ChatPromptTemplate
+    import yaml
+    
+    # Load configuration
+    with open('.github/copilot-model-config.yaml', 'r') as f:
+        config = yaml.safe_load(f)
+    
+    # Initialize models
+    models = {
+        'claude-sonnet-4.5': ChatAnthropic(model='claude-sonnet-4-20250514'),
+        'gpt-5-codex': ChatOpenAI(model='gpt-4-turbo'),
+    }
+    
+    # Route based on task type
+    def get_model_for_task(task_type):
+        model_name = config['specialized_models'][task_type]['name']
+        return models[model_name]
+    
+    # Use the model
+    model = get_model_for_task('architecture')
+    result = model.invoke("Design a new microservice architecture")
+    ```
