@@ -26,6 +26,8 @@ from enum import Enum
 
 logger = logging.getLogger(__name__)
 
+DEFAULT_PRIMARY_MODEL_NAME = "claude-sonnet-4.5"
+
 
 class TaskType(Enum):
     """Enumeration of supported task types"""
@@ -168,10 +170,9 @@ class ModelRouter:
                 file_path = context['file_path']
                 file_patterns = patterns.get('file_patterns', [])
                 
+                import fnmatch
                 for pattern in file_patterns:
-                    # Convert glob pattern to regex
-                    regex_pattern = pattern.replace('**', '.*').replace('*', '[^/]*')
-                    if re.match(regex_pattern, file_path):
+                    if fnmatch.fnmatch(file_path, pattern):
                         try:
                             return TaskType(task_type)
                         except ValueError:
@@ -281,12 +282,9 @@ class ModelRouter:
             return RoutingResult(
                 model_name=model_name,
                 provider=model_config['provider'],
-                strategy=strategy,
-                fallback_models=fallback_models,
-                estimated_cost=0.0,  # TODO: Calculate based on expected tokens
+                estimated_cost=self._estimate_cost(model_config, description, context),
                 reasoning=reasoning
             )
-        
         # Fallback to primary model
         primary_model = self.config.get('primary_model', {})
         model_name = primary_model.get('name', 'claude-sonnet-4.5')
@@ -300,12 +298,14 @@ class ModelRouter:
             f"(no specialized model configured)"
         )
         
+        estimated_cost = self._estimate_cost(primary_model, description, context)
+        
         return RoutingResult(
             model_name=model_name,
             provider=primary_model.get('provider', 'anthropic'),
             strategy='use_primary',
             fallback_models=fallback_models,
-            estimated_cost=0.0,
+            estimated_cost=estimated_cost,
             reasoning=reasoning
         )
     
@@ -347,8 +347,31 @@ class ModelRouter:
         
         logger.info(f"Routing result: {result.reasoning}")
         
-        return result
-    
+    def _estimate_cost(self, model_config: Dict[str, Any], description: str, context: Optional[Dict[str, Any]]) -> float:
+        """
+        Estimate the cost for a given model and task based on expected token usage.
+        
+        Args:
+            model_config: Model configuration dictionary
+            description: Task description
+            context: Additional context
+        
+        Returns:
+            Estimated cost as a float
+        """
+        # Estimate input tokens (roughly 1 token per 4 characters)
+        input_tokens = max(1, len(description) // 4)
+        # Estimate output tokens (default to 256, can be overridden by context)
+        output_tokens = context.get('expected_output_tokens', 256) if context else 256
+
+        cost_per_1m_input = model_config.get('cost_per_1m_input_tokens', 0.0)
+        cost_per_1m_output = model_config.get('cost_per_1m_output_tokens', 0.0)
+
+        input_cost = (input_tokens / 1_000_000) * cost_per_1m_input
+        output_cost = (output_tokens / 1_000_000) * cost_per_1m_output
+
+        return round(input_cost + output_cost, 6)
+
     def get_fallback_chain(self) -> List[str]:
         """
         Get the configured fallback chain.
@@ -356,6 +379,8 @@ class ModelRouter:
         Returns:
             List of model names in fallback order
         """
+        strategy = self.config.get('fallback_strategy', {})
+        return strategy.get('cascade_order', [])
         strategy = self.config.get('fallback_strategy', {})
         return strategy.get('cascade_order', [])
     
