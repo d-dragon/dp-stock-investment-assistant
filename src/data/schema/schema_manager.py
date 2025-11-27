@@ -6,29 +6,69 @@ import logging
 from pymongo import MongoClient
 from pymongo.errors import PyMongoError
 
-from .market_data_schema import (
-    MARKET_DATA_SCHEMA, MARKET_DATA_INDEXES, 
-    MARKET_DATA_TIMESERIES_OPTIONS, get_market_data_validation
-)
-from .symbols_schema import (
-    SYMBOLS_SCHEMA, SYMBOLS_INDEXES, get_symbols_validation
-)
-from .fundamental_analysis_schema import (
-    FUNDAMENTAL_ANALYSIS_SCHEMA, FUNDAMENTAL_ANALYSIS_INDEXES,
-    get_fundamental_analysis_validation
+from .accounts_schema import ACCOUNTS_INDEXES, get_accounts_validation
+from .analyses_schema import ANALYSES_INDEXES, get_analyses_validation
+from .chats_schema import CHATS_INDEXES, get_chats_validation
+from .groups_schema import GROUPS_INDEXES, get_groups_validation
+from .investment_ideas_schema import (
+    INVESTMENT_IDEAS_INDEXES,
+    get_investment_ideas_validation
 )
 from .investment_reports_schema import (
     INVESTMENT_REPORTS_SCHEMA, INVESTMENT_REPORTS_INDEXES,
     get_investment_reports_validation
 )
+from .fundamental_analysis_schema import (
+    FUNDAMENTAL_ANALYSIS_SCHEMA, FUNDAMENTAL_ANALYSIS_INDEXES,
+    get_fundamental_analysis_validation
+)
+from .investment_styles_schema import (
+    INVESTMENT_STYLES_INDEXES,
+    get_investment_styles_validation
+)
+from .market_data_schema import (
+    MARKET_DATA_SCHEMA, MARKET_DATA_INDEXES, 
+    MARKET_DATA_TIMESERIES_OPTIONS, get_market_data_validation
+)
+from .market_snapshots_schema import (
+    MARKET_SNAPSHOTS_INDEXES,
+    get_market_snapshots_validation
+)
 from .news_events_schema import (
     NEWS_EVENTS_SCHEMA, NEWS_EVENTS_INDEXES,
     get_news_events_validation
 )
+from .notes_schema import NOTES_INDEXES, get_notes_validation
+from .notifications_schema import (
+    NOTIFICATIONS_INDEXES, get_notifications_validation
+)
+from .portfolios_schema import PORTFOLIOS_INDEXES, get_portfolios_validation
+from .positions_schema import POSITIONS_INDEXES, get_positions_validation
+from .reports_schema import REPORTS_INDEXES, get_reports_validation
+from .rules_policies_schema import (
+    RULES_POLICIES_INDEXES, get_rules_policies_validation
+)
+from .sessions_schema import SESSIONS_INDEXES, get_sessions_validation
+from .strategies_schema import STRATEGIES_INDEXES, get_strategies_validation
+from .symbols_schema import (
+    SYMBOLS_INDEXES, get_symbols_validation
+)
+from .tasks_schema import TASKS_INDEXES, get_tasks_validation
+from .technical_indicators_schema import (
+    TECHNICAL_INDICATORS_INDEXES,
+    get_technical_indicators_validation
+)
+from .trades_schema import TRADES_INDEXES, get_trades_validation
 from .user_preferences_schema import (
     USER_PREFERENCES_SCHEMA, USER_PREFERENCES_INDEXES,
     get_user_preferences_validation
 )
+from .user_profiles_schema import (
+    USER_PROFILES_INDEXES, get_user_profiles_validation
+)
+from .users_schema import USERS_INDEXES, get_users_validation
+from .watchlists_schema import WATCHLISTS_INDEXES, get_watchlists_validation
+from .workspaces_schema import WORKSPACES_INDEXES, get_workspaces_validation
 
 logger = logging.getLogger(__name__)
 
@@ -41,6 +81,9 @@ class SchemaManager:
         self.database_name = database_name
         self.client = None
         self.db = None
+        self._collection_cache = None
+        import threading
+        self._collection_cache_lock = threading.Lock()
         
     def connect(self):
         """Connect to MongoDB"""
@@ -52,14 +95,46 @@ class SchemaManager:
             logger.error(f"Failed to connect to MongoDB: {str(e)}")
             return False
     
-    def _get_collection_names(self):
-        """Get list of collection names using direct command to avoid authentication issues"""
+    def _get_collection_names(self, refresh=False):
+        """Get and cache list of collection names (thread-safe)."""
+        with self._collection_cache_lock:
+            if self._collection_cache is not None and not refresh:
+                return self._collection_cache
+            try:
+                result = self.db.command("listCollections")
+                self._collection_cache = [doc["name"] for doc in result["cursor"]["firstBatch"]]
+                return self._collection_cache
+            except Exception as e:
+                logger.warning(f"Could not list collections: {e}. Assuming collections exist.")
+                return self._collection_cache or []
+
+    def _setup_standard_collection(self, collection_name, validation_config, indexes):
+        """Create collection, apply validation, and build indexes."""
         try:
-            result = self.db.command("listCollections")
-            return [doc["name"] for doc in result["cursor"]["firstBatch"]]
-        except Exception as e:
-            logger.warning(f"Could not list collections: {e}. Assuming collections exist.")
-            return []  # Return empty list if we can't check
+            collection_names = self._get_collection_names()
+            if collection_name not in collection_names:
+                self.db.create_collection(collection_name)
+                logger.info(f"Created {collection_name} collection")
+                if self._collection_cache is not None:
+                    self._collection_cache.append(collection_name)
+
+            if validation_config:
+                try:
+                    self.db.command("collMod", collection_name, **validation_config)
+                    logger.info(f"Applied schema validation to {collection_name} collection")
+                except PyMongoError as e:
+                    logger.warning(f"Failed to apply validation to {collection_name}: {str(e)}")
+
+            if indexes:
+                for index in indexes:
+                    try:
+                        self.db[collection_name].create_index(index["keys"], **index.get("options", {}))
+                    except PyMongoError as e:
+                        logger.warning(f"Failed to create index {index.get('options', {}).get('name')} on {collection_name}: {str(e)}")
+            return True
+        except PyMongoError as e:
+            logger.error(f"Failed to setup {collection_name} collection: {str(e)}")
+            return False
             
     def setup_all_collections(self):
         """Setup all collections with schemas and indexes"""
@@ -67,6 +142,28 @@ class SchemaManager:
             return False
             
         success = True
+        success &= self.setup_groups_collection()
+        success &= self.setup_users_collection()
+        success &= self.setup_user_profiles_collection()
+        success &= self.setup_accounts_collection()
+        success &= self.setup_investment_styles_collection()
+        success &= self.setup_strategies_collection()
+        success &= self.setup_rules_policies_collection()
+        success &= self.setup_workspaces_collection()
+        success &= self.setup_sessions_collection()
+        success &= self.setup_watchlists_collection()
+        success &= self.setup_investment_ideas_collection()
+        success &= self.setup_notes_collection()
+        success &= self.setup_tasks_collection()
+        success &= self.setup_analyses_collection()
+        success &= self.setup_reports_collection()
+        success &= self.setup_chats_collection()
+        success &= self.setup_notifications_collection()
+        success &= self.setup_portfolios_collection()
+        success &= self.setup_positions_collection()
+        success &= self.setup_trades_collection()
+        success &= self.setup_technical_indicators_collection()
+        success &= self.setup_market_snapshots_collection()
         success &= self.setup_market_data_collection()
         success &= self.setup_symbols_collection()
         success &= self.setup_fundamental_analysis_collection()
@@ -110,42 +207,9 @@ class SchemaManager:
             return False
             
     def setup_symbols_collection(self):
-        """Create and configure the symbols collection"""
-        try:
-            # Create collection if it doesn't exist
-            if "symbols" not in self._get_collection_names():
-                self.db.create_collection("symbols")
-                logger.info("Created symbols collection")
-                
-            # Apply validation schema
-            try:
-                self.db.command(
-                    "collMod", 
-                    "symbols",
-                    **get_symbols_validation()
-                )
-                logger.info("Applied schema validation to symbols collection")
-            except PyMongoError as e:
-                logger.warning(f"Failed to apply validation to symbols: {str(e)}")
-                
-            # Create indexes with correct syntax
-            try:
-                # Unique index on symbol
-                self.db.symbols.create_index([("symbol", 1)], unique=True, name="idx_symbol_unique")
-                
-                # Regular indexes
-                self.db.symbols.create_index([("sector", 1)], name="idx_sector")
-                self.db.symbols.create_index([("industry", 1)], name="idx_industry")
-                self.db.symbols.create_index([("market_cap_category", 1)], name="idx_market_cap")
-                
-                logger.info("Created indexes on symbols collection")
-            except PyMongoError as e:
-                logger.warning(f"Failed to create indexes on symbols: {str(e)}")
-                
-            return True
-        except PyMongoError as e:
-            logger.error(f"Failed to setup symbols collection: {str(e)}")
-            return False
+        return self._setup_standard_collection(
+            "symbols", get_symbols_validation(), SYMBOLS_INDEXES
+        )
             
     def setup_fundamental_analysis_collection(self):
         """Create and configure the fundamental_analysis collection"""
@@ -282,3 +346,119 @@ class SchemaManager:
         except PyMongoError as e:
             logger.error(f"Failed to setup user_preferences collection: {str(e)}")
             return False
+
+    def setup_groups_collection(self):
+        return self._setup_standard_collection(
+            "groups", get_groups_validation(), GROUPS_INDEXES
+        )
+
+    def setup_users_collection(self):
+        return self._setup_standard_collection(
+            "users", get_users_validation(), USERS_INDEXES
+        )
+
+    def setup_user_profiles_collection(self):
+        return self._setup_standard_collection(
+            "user_profiles", get_user_profiles_validation(), USER_PROFILES_INDEXES
+        )
+
+    def setup_accounts_collection(self):
+        return self._setup_standard_collection(
+            "accounts", get_accounts_validation(), ACCOUNTS_INDEXES
+        )
+
+    def setup_investment_styles_collection(self):
+        return self._setup_standard_collection(
+            "investment_styles", get_investment_styles_validation(), INVESTMENT_STYLES_INDEXES
+        )
+
+    def setup_strategies_collection(self):
+        return self._setup_standard_collection(
+            "strategies", get_strategies_validation(), STRATEGIES_INDEXES
+        )
+
+    def setup_rules_policies_collection(self):
+        return self._setup_standard_collection(
+            "rules_policies", get_rules_policies_validation(), RULES_POLICIES_INDEXES
+        )
+
+    def setup_workspaces_collection(self):
+        return self._setup_standard_collection(
+            "workspaces", get_workspaces_validation(), WORKSPACES_INDEXES
+        )
+
+    def setup_sessions_collection(self):
+        return self._setup_standard_collection(
+            "sessions", get_sessions_validation(), SESSIONS_INDEXES
+        )
+
+    def setup_watchlists_collection(self):
+        return self._setup_standard_collection(
+            "watchlists", get_watchlists_validation(), WATCHLISTS_INDEXES
+        )
+
+    def setup_investment_ideas_collection(self):
+        return self._setup_standard_collection(
+            "investment_ideas",
+            get_investment_ideas_validation(),
+            INVESTMENT_IDEAS_INDEXES
+        )
+
+    def setup_notes_collection(self):
+        return self._setup_standard_collection(
+            "notes", get_notes_validation(), NOTES_INDEXES
+        )
+
+    def setup_tasks_collection(self):
+        return self._setup_standard_collection(
+            "tasks", get_tasks_validation(), TASKS_INDEXES
+        )
+
+    def setup_analyses_collection(self):
+        return self._setup_standard_collection(
+            "analyses", get_analyses_validation(), ANALYSES_INDEXES
+        )
+
+    def setup_chats_collection(self):
+        return self._setup_standard_collection(
+            "chats", get_chats_validation(), CHATS_INDEXES
+        )
+
+    def setup_notifications_collection(self):
+        return self._setup_standard_collection(
+            "notifications", get_notifications_validation(), NOTIFICATIONS_INDEXES
+        )
+
+    def setup_reports_collection(self):
+        return self._setup_standard_collection(
+            "reports", get_reports_validation(), REPORTS_INDEXES
+        )
+
+    def setup_portfolios_collection(self):
+        return self._setup_standard_collection(
+            "portfolios", get_portfolios_validation(), PORTFOLIOS_INDEXES
+        )
+
+    def setup_positions_collection(self):
+        return self._setup_standard_collection(
+            "positions", get_positions_validation(), POSITIONS_INDEXES
+        )
+
+    def setup_trades_collection(self):
+        return self._setup_standard_collection(
+            "trades", get_trades_validation(), TRADES_INDEXES
+        )
+
+    def setup_technical_indicators_collection(self):
+        return self._setup_standard_collection(
+            "technical_indicators",
+            get_technical_indicators_validation(),
+            TECHNICAL_INDICATORS_INDEXES
+        )
+
+    def setup_market_snapshots_collection(self):
+        return self._setup_standard_collection(
+            "market_snapshots",
+            get_market_snapshots_validation(),
+            MARKET_SNAPSHOTS_INDEXES
+        )

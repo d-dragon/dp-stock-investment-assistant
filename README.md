@@ -1,6 +1,6 @@
-[[TOC]]
-
 # DP Stock-Investment Assistant
+
+[TOC]
 
 An AI-powered assistant for stock investment analysts, leveraging OpenAI's GPT API to provide market insights, answer financial queries, and analyze stock data.
 
@@ -329,19 +329,20 @@ show collections
 db.symbols.getIndexes()
 ```
 
-Collections created by migrations include:
- - `market_data` (time-series)
- - `symbols`
- - `fundamental_analysis`
- - `investment_reports`
- - `news_events`
- - `user_preferences`
+Collections created by migrations now include:
+
+- Core market data: `market_data` (time-series), `symbols`, `fundamental_analysis`, `investment_reports`, `news_events`, `technical_indicators`, `market_snapshots`
+- User + org context: `groups`, `users`, `user_profiles`, `accounts`, `user_preferences`, `investment_styles`, `strategies`, `rules_policies`
+- Workspace artifacts: `workspaces`, `sessions`, `watchlists`, `investment_ideas`, `notes`, `tasks`, `analyses`, `reports`, `chats`, `notifications`
+- Portfolio data: `portfolios`, `positions`, `trades`
+
+See `docs/data_model_design.md` for a full breakdown of each collection, relationships, and implementation notes.
 
 Troubleshooting
 
- - Authentication errors: verify `.env` values match the DB user credentials and `authSource` is correct.
- - Container issues: check `docker-compose logs mongodb` or `docker-compose ps`.
- - Migration errors: ensure the DB user has permissions to create collections and indexes.
+- Authentication errors: verify `.env` values match the DB user credentials and `authSource` is correct.
+- Container issues: check `docker-compose logs mongodb` or `docker-compose ps`.
+- Migration errors: ensure the DB user has permissions to create collections and indexes.
 
 Backup and restore
 
@@ -374,15 +375,16 @@ Next steps
 
 1. Start the application:
 
-```powershell
-python src/main.py
-```
+  ```powershell
+  python src/main.py
+  ```
 
-2. Add test data via the application or API and confirm it persists after restart.
+1. Add test data via the application or API and confirm it persists after restart.
 
-3. Optionally use MongoDB Compass or Redis monitoring tools for inspection and performance checks.
+1. Optionally use MongoDB Compass or Redis monitoring tools for inspection and performance checks.
 
 This completes the DB setup and migration documentation for local development and Docker-based environments.
+
 ## License
 
 MIT
