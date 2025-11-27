@@ -33,7 +33,7 @@ def _load_prompt_file(name: str) -> str:
 class PromptBuilder:
     """Wrapper around LangChain PromptTemplate with fallback and external system prompt."""
 
-    def __init__(self, system_filename: str = "system_stock_assistant.txt"):
+    def __init__(self, system_filename: str = "system_stock_assistant-vn.txt"):
         self.logger = logging.getLogger(__name__)
         self.system_prompt = _load_prompt_file(system_filename)
         template_str = (
