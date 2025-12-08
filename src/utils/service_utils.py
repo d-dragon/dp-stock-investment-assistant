@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from datetime import datetime
 from typing import Any, Dict, Iterable, Iterator, List, Sequence, TypeVar
 
 try:  # optional dependency in tests
@@ -19,14 +20,29 @@ def stringify_identifier(value: Any) -> Any:
     return value
 
 
+def serialize_value(value: Any) -> Any:
+    """Convert MongoDB types to JSON-serializable values."""
+    if ObjectId is not None and isinstance(value, ObjectId):
+        return str(value)
+    if isinstance(value, datetime):
+        return value.isoformat()
+    if isinstance(value, dict):
+        return {k: serialize_value(v) for k, v in value.items()}
+    if isinstance(value, (list, tuple)):
+        return [serialize_value(item) for item in value]
+    return value
+
+
 def normalize_document(
     document: Dict[str, Any], *, id_fields: Sequence[str] = ("_id", "user_id", "workspace_id")
 ) -> Dict[str, Any]:
-    """Return a shallow copy with common identifier fields coerced to strings."""
-    normalized = dict(document or {})
-    for key in id_fields:
-        if key in normalized:
-            normalized[key] = stringify_identifier(normalized[key])
+    """Return a copy with common identifier fields and datetime objects coerced to JSON-safe types."""
+    normalized = {}
+    for key, value in (document or {}).items():
+        if key in id_fields:
+            normalized[key] = stringify_identifier(value)
+        else:
+            normalized[key] = serialize_value(value)
     return normalized
 
 
