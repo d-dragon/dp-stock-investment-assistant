@@ -12,6 +12,8 @@ if TYPE_CHECKING:
     from flask import Flask
     from core.agent import StockAgent
     from core.model_registry import OpenAIModelRegistry
+    from services.factory import ServiceFactory
+    from services.user_service import UserService
 
 SSE_HEADERS = {
     'Cache-Control': 'no-cache',
@@ -32,6 +34,8 @@ class APIRouteContext:
     get_timestamp: Callable[[], str]
     model_registry: Optional["OpenAIModelRegistry"] = None
     set_active_model: Optional[Callable[[str, str], Dict[str, Any]]] = None
+    service_factory: Optional["ServiceFactory"] = None
+    user_service: Optional["UserService"] = None
 
 
 def _parse_bool(value: Optional[str]) -> bool:

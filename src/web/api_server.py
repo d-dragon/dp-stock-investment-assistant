@@ -25,9 +25,11 @@ from core.model_factory import ModelClientFactory
 from core.model_registry import OpenAIModelRegistry
 from data.repositories.factory import RepositoryFactory
 from utils.config_loader import ConfigLoader
+from services.factory import ServiceFactory
 from web.routes.api_routes import APIRouteContext, create_api_blueprint
 from web.sockets.chat_events import SocketIOContext, register_chat_events
 from web.routes.models_routes import create_models_blueprint
+from web.routes.user_routes import create_user_blueprint
 
 if TYPE_CHECKING:
     from flask import Blueprint
@@ -35,7 +37,11 @@ if TYPE_CHECKING:
 RouteFactory = Callable[[APIRouteContext], "Blueprint"]
 SocketRegistrar = Callable[[SocketIOContext], None]
 
-DEFAULT_HTTP_ROUTE_FACTORIES: Tuple[RouteFactory, ...] = (create_api_blueprint, create_models_blueprint)
+DEFAULT_HTTP_ROUTE_FACTORIES: Tuple[RouteFactory, ...] = (
+    create_api_blueprint,
+    create_models_blueprint,
+    create_user_blueprint,
+)
 DEFAULT_SOCKETIO_REGISTRARS: Tuple[SocketRegistrar, ...] = (register_chat_events,)
 
 
@@ -71,13 +77,20 @@ class APIServer:
             socketio_config.update(socketio_kwargs)
         self.socketio = SocketIO(self.app, **socketio_config)
 
+        self.logger = logging.getLogger(__name__)
+
         self.config = config or ConfigLoader.load_config()
         self.data_manager = data_manager or DataManager(self.config)
         self.agent = agent or StockAgent(self.config, self.data_manager)
-        self.cache_repository = RepositoryFactory.create_cache_repository(self.config)
+        self.repository_factory = RepositoryFactory(self.config)
+        self.cache_repository = self.repository_factory.get_cache_repository() or RepositoryFactory.create_cache_repository(self.config)
         self.model_registry = OpenAIModelRegistry(self.config, self.cache_repository)
-
-        self.logger = logging.getLogger(__name__)
+        self.service_factory = ServiceFactory(
+            self.config,
+            repository_factory=self.repository_factory,
+            cache_backend=None,
+            logger=self.logger.getChild("services"),
+        )
 
         self.http_route_factories: Tuple[RouteFactory, ...] = tuple(
             http_route_factories or DEFAULT_HTTP_ROUTE_FACTORIES
@@ -112,6 +125,7 @@ class APIServer:
             get_timestamp=self._get_timestamp,
             model_registry=self.model_registry,
             set_active_model=self._set_active_model,
+            service_factory=self.service_factory,
         )
 
         for factory in self.http_route_factories:
