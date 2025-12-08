@@ -25,6 +25,7 @@ tags:
   - name: Chat
   - name: Config
   - name: Models
+  - name: Users
 paths:
   /api/health:
     get:
@@ -150,6 +151,224 @@ paths:
                       alpha_vantage: false
         "500":
           description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/users:
+    get:
+      tags: [Users]
+      summary: Get a user by id or email
+      description: Retrieve a user document using exactly one filter (`id` or `email`).
+      operationId: getUser
+      parameters:
+        - in: query
+          name: id
+          required: false
+          description: User identifier (MongoDB ObjectId string)
+          schema:
+            type: string
+        - in: query
+          name: email
+          required: false
+          description: Email address associated with the user profile
+          schema:
+            type: string
+            format: email
+      responses:
+        "200":
+          description: User found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserEnvelope'
+              examples:
+                byId:
+                  value:
+                    user:
+                      _id: "64f0c2a5f1c2b91234567890"
+                      email: "alex@example.com"
+                      name: "Alex Investor"
+        "400":
+          description: Invalid query parameters
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                missingFilter:
+                  value:
+                    error: "Query with exactly one of 'id' or 'email'"
+        "404":
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                missing:
+                  value:
+                    error: "User not found"
+        "503":
+          description: User service unavailable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        "500":
+          description: Server error while fetching user data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    post:
+      tags: [Users]
+      summary: Create or upsert a user
+      description: >
+        Creates a new user record or updates an existing one if the payload contains an `_id` or
+        a unique field (such as email) already stored in the system. The request body is flexible to
+        accommodate evolving profile metadata.
+      operationId: createUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserUpsertRequest'
+            examples:
+              basic:
+                value:
+                  email: "alex@example.com"
+                  profile:
+                    displayName: "Alex Investor"
+                    timezone: "America/New_York"
+                  preferences:
+                    riskTolerance: "balanced"
+      responses:
+        "201":
+          description: User created or updated
+          headers:
+            Location:
+              description: Canonical URL for the new or updated user resource
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserEnvelope'
+              examples:
+                created:
+                  value:
+                    user:
+                      _id: "64f0c2a5f1c2b91234567890"
+                      email: "alex@example.com"
+                      profile:
+                        displayName: "Alex Investor"
+                        timezone: "America/New_York"
+                      preferences:
+                        riskTolerance: "balanced"
+                        newsDigest: true
+        "400":
+          description: Invalid payload
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                invalidBody:
+                  value:
+                    error: "Request body must be a JSON object"
+        "503":
+          description: User service unavailable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                unavailable:
+                  value:
+                    error: "User service unavailable"
+        "500":
+          description: Server error while persisting user data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                failure:
+                  value:
+                    error: "Failed to create user"
+
+  /api/users/{userId}/profile:
+    patch:
+      tags: [Users]
+      summary: Update an existing user's profile
+      description: Applies partial updates to the `profile` sub-document for a specific user.
+      operationId: updateUserProfile
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          description: Unique identifier of the user (MongoDB ObjectId string)
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserProfileUpdateRequest'
+            examples:
+              preferences:
+                value:
+                  displayName: "Alex I."
+                  timezone: "UTC"
+                  newsDigest: false
+      responses:
+        "200":
+          description: Updated user document
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserEnvelope'
+              examples:
+                updated:
+                  value:
+                    user:
+                      _id: "64f0c2a5f1c2b91234567890"
+                      email: "alex@example.com"
+                      profile:
+                        displayName: "Alex I."
+                        timezone: "UTC"
+        "400":
+          description: Invalid profile payload
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                invalidBody:
+                  value:
+                    error: "Request body must be a JSON object"
+        "404":
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                missing:
+                  value:
+                    error: "User not found"
+        "503":
+          description: User service unavailable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        "500":
+          description: Server error while updating profile
           content:
             application/json:
               schema:
@@ -513,6 +732,86 @@ components:
         error:
           type: string
       required: [error]
+
+    UserProfile:
+      type: object
+      description: Flexible profile metadata describing preferences and personalization settings.
+      properties:
+        displayName:
+          type: string
+        timezone:
+          type: string
+        riskTolerance:
+          type: string
+        goals:
+          type: array
+          items:
+            type: string
+        newsDigest:
+          type: boolean
+        watchlist:
+          type: array
+          items:
+            type: string
+      additionalProperties: true
+
+    UserDocument:
+      type: object
+      description: Canonical representation of a stored user document.
+      properties:
+        _id:
+          type: string
+          description: Unique identifier generated by the database.
+        email:
+          type: string
+          format: email
+        profile:
+          $ref: '#/components/schemas/UserProfile'
+        preferences:
+          type: object
+          additionalProperties: true
+        metadata:
+          type: object
+          additionalProperties: true
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+      required: [email]
+      additionalProperties: true
+
+    UserUpsertRequest:
+      type: object
+      description: Payload accepted by the user creation endpoint. At minimum, an email is required.
+      properties:
+        email:
+          type: string
+          format: email
+        profile:
+          $ref: '#/components/schemas/UserProfile'
+        preferences:
+          type: object
+          additionalProperties: true
+        metadata:
+          type: object
+          additionalProperties: true
+      required: [email]
+      additionalProperties: true
+
+    UserProfileUpdateRequest:
+      type: object
+      description: Partial profile document used for PATCH updates. Any supplied fields overwrite existing values.
+      allOf:
+        - $ref: '#/components/schemas/UserProfile'
+
+    UserEnvelope:
+      type: object
+      properties:
+        user:
+          $ref: '#/components/schemas/UserDocument'
+      required: [user]
 security: []
 
 
