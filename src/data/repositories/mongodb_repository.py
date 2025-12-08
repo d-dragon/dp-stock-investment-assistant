@@ -64,7 +64,7 @@ class MongoDBRepository(BaseRepository):
             
     def health_check(self) -> bool:
         """Check if MongoDB connection is healthy"""
-        if not self.client:
+        if self.client is None:
             self.logger.warning("MongoDB client not initialized")
             return False
             
@@ -78,7 +78,7 @@ class MongoDBRepository(BaseRepository):
     
     def close(self):
         """Close MongoDB connection"""
-        if self.client:
+        if self.client is not None:
             try:
                 self.client.close()
                 self.logger.info("MongoDB connection closed")
@@ -111,7 +111,7 @@ class MongoGenericRepository(MongoDBRepository, Generic[T]):
             RuntimeError: If database connection not initialized
         """
         if self._collection is None:
-            if not self.client or not self.db:
+            if self.client is None or self.db is None:
                 raise RuntimeError(
                     f"Database connection not initialized. Call initialize() first."
                 )
