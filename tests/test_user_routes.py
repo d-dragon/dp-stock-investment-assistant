@@ -7,7 +7,7 @@ from typing import Iterable, Tuple
 
 from flask import Flask
 
-from web.routes.api_routes import APIRouteContext
+from web.routes.shared_context import APIRouteContext
 from web.routes.user_routes import create_user_blueprint
 
 

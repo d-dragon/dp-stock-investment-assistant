@@ -6,7 +6,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 from flask import Flask
 
-from web.routes.api_routes import APIRouteContext
+from web.routes.shared_context import APIRouteContext
 from web.routes.models_routes import create_models_blueprint
 
 

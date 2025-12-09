@@ -14,7 +14,7 @@ if TYPE_CHECKING:
     from flask import Flask
     from core.agent import StockAgent
 
-from .api_routes import APIRouteContext  # reuse shared context
+from .shared_context import APIRouteContext  # Shared context for all route blueprints
 from utils.cache import CacheBackend
 
 CACHE_KEY = "openai:models:list"

@@ -9,7 +9,7 @@ from flask import Blueprint, jsonify, request
 from services.factory import ServiceFactory
 from services.user_service import UserService
 
-from .api_routes import APIRouteContext
+from .shared_context import APIRouteContext
 
 
 def create_user_blueprint(context: APIRouteContext) -> Blueprint:

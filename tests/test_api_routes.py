@@ -1,9 +1,18 @@
-"""Unit tests for the HTTP API blueprint."""
+"""Unit tests for the HTTP API blueprint.
+
+DEPRECATED: This test file is deprecated as api_routes.py has been split into:
+- service_health_routes.py (tested in test_health_routes.py)
+- ai_chat_routes.py (tested in test_chat_routes.py)
+
+Keeping this file temporarily for reference, but tests now live in the new files.
+"""
 
 import logging
 from flask import Flask
 
-from web.routes.api_routes import APIRouteContext, create_api_blueprint
+from web.routes.shared_context import APIRouteContext
+from web.routes.service_health_routes import create_health_blueprint
+from web.routes.ai_chat_routes import create_chat_blueprint
 
 
 class DummyAgent:
@@ -12,7 +21,8 @@ class DummyAgent:
     def __init__(self):
         self.calls = []
 
-    def _process_query(self, message, provider=None):
+    def process_query(self, message, provider=None):
+        """Public method that matches actual agent interface."""
         self.calls.append((message, provider))
         return "RAW RESPONSE"
 
@@ -98,8 +108,11 @@ def _make_test_app(registry=None):
         model_registry=registry,
         set_active_model=set_active,
     )
-    blueprint = create_api_blueprint(context)
-    app.register_blueprint(blueprint, url_prefix="/api")
+    # Register new split blueprints
+    health_blueprint = create_health_blueprint(context)
+    chat_blueprint = create_chat_blueprint(context)
+    app.register_blueprint(health_blueprint, url_prefix="/api")
+    app.register_blueprint(chat_blueprint, url_prefix="/api")
     return app, agent, stream_calls, registry, active_calls
 
 

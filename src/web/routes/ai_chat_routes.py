@@ -1,19 +1,14 @@
-"""HTTP API routes for the Stock Investment Assistant."""
+"""AI chat and configuration endpoints."""
 
 from __future__ import annotations
 
-from dataclasses import dataclass
-from typing import Any, Callable, Iterable, Mapping, Optional, Tuple, TYPE_CHECKING, Dict
+from typing import TYPE_CHECKING, Optional
 
 from flask import Blueprint, Response, jsonify, request, stream_with_context
 
 if TYPE_CHECKING:
-    from logging import Logger
-    from flask import Flask
-    from core.agent import StockAgent
-    from core.model_registry import OpenAIModelRegistry
-    from services.factory import ServiceFactory
-    from services.user_service import UserService
+    from .shared_context import APIRouteContext
+
 
 SSE_HEADERS = {
     'Cache-Control': 'no-cache',
@@ -22,53 +17,43 @@ SSE_HEADERS = {
 }
 
 
-@dataclass(frozen=True)
-class APIRouteContext:
-    app: "Flask"
-    agent: "StockAgent"
-    config: Mapping[str, Any]
-    logger: "Logger"
-    stream_chat_response: Callable[[str, Optional[str]], Iterable[str]]
-    extract_meta: Callable[[str], Tuple[str, str, bool]]
-    strip_fallback_prefix: Callable[[str], str]
-    get_timestamp: Callable[[], str]
-    model_registry: Optional["OpenAIModelRegistry"] = None
-    set_active_model: Optional[Callable[[str, str], Dict[str, Any]]] = None
-    service_factory: Optional["ServiceFactory"] = None
-    user_service: Optional["UserService"] = None
+def create_chat_blueprint(context: "APIRouteContext") -> Blueprint:
+    """
+    Create and return the AI chat blueprint.
+    
+    Provides endpoints for:
+    - Chat interaction with AI agent (streaming and non-streaming)
+    - Configuration retrieval (safe, non-sensitive settings)
+    """
+    blueprint = Blueprint("chat", __name__)
 
-
-def _parse_bool(value: Optional[str]) -> bool:
-    if value is None:
-        return False
-    return value.strip().lower() in {"1", "true", "yes", "on"}
-
-
-def create_api_blueprint(context: APIRouteContext) -> Blueprint:
-    """Create and return the core REST API blueprint."""
-    blueprint = Blueprint("api", __name__)
-
+    # Unpack context dependencies
     agent = context.agent
     config = context.config
-    logger = context.logger
+    logger = context.logger.getChild("chat")
     stream_chat_response = context.stream_chat_response
     extract_meta = context.extract_meta
     strip_fallback_prefix = context.strip_fallback_prefix
     get_timestamp = context.get_timestamp
-    model_registry = context.model_registry
-    set_active_model = context.set_active_model
-
-    @blueprint.route('/health', methods=['GET'])
-    def health_check():
-        """Health check endpoint."""
-        return jsonify({
-            'status': 'healthy',
-            'message': 'Stock Investment Assistant API is running'
-        })
 
     @blueprint.route('/chat', methods=['POST'])
     def chat():
-        """Chat endpoint for stock investment queries."""
+        """
+        Chat endpoint for stock investment queries.
+        
+        Supports both streaming (SSE) and non-streaming responses.
+        
+        Request JSON:
+            {
+                "message": str (required),
+                "provider": str (optional),
+                "stream": bool (optional, default False)
+            }
+        
+        Returns:
+            - Streaming: SSE stream with incremental response chunks
+            - Non-streaming: JSON with complete response and metadata
+        """
         try:
             data = request.get_json()
             if not data or 'message' not in data:
@@ -82,12 +67,14 @@ def create_api_blueprint(context: APIRouteContext) -> Blueprint:
             stream = data.get('stream', False)
 
             if stream:
+                logger.info(f"Streaming chat request: {user_message[:50]}...")
                 return Response(
                     stream_with_context(stream_chat_response(user_message, provider_override)),
                     mimetype='text/event-stream',
                     headers=SSE_HEADERS
                 )
 
+            logger.info(f"Chat request: {user_message[:50]}...")
             raw_response = agent.process_query(user_message, provider=provider_override)
             provider_used, model_used, fallback_flag = extract_meta(raw_response)
             response_clean = strip_fallback_prefix(raw_response)
@@ -100,12 +87,21 @@ def create_api_blueprint(context: APIRouteContext) -> Blueprint:
                 'timestamp': get_timestamp()
             })
         except Exception as exc:
-            logger.error(f"Error in chat endpoint: {exc}")
+            logger.error(f"Error in chat endpoint: {exc}", exc_info=True)
             return jsonify({'error': f'Internal server error: {exc}'}), 500
 
     @blueprint.route('/config', methods=['GET'])
     def get_config():
-        """Get safe configuration info (no sensitive data)."""
+        """
+        Get safe configuration info (no sensitive data).
+        
+        Returns public configuration settings for frontend use.
+        Never exposes API keys, passwords, or other secrets.
+        
+        Returns:
+            JSON with model configuration and feature flags
+        """
+        logger.debug("Config request")
         model_cfg = config.get('model', {})
         legacy = config.get('openai', {})
         safe_config = {
@@ -119,7 +115,5 @@ def create_api_blueprint(context: APIRouteContext) -> Blueprint:
             }
         }
         return jsonify(safe_config)
-
-    # Model management endpoints are now handled by models_routes.py to avoid duplication
 
     return blueprint
