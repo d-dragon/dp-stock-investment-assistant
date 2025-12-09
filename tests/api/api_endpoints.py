@@ -2,7 +2,9 @@ import json
 import pytest
 from unittest.mock import MagicMock, patch
 from flask import Flask
-from web.routes.api_routes import create_api_blueprint, APIRouteContext
+from web.routes.shared_context import APIRouteContext
+from web.routes.service_health_routes import create_health_blueprint
+from web.routes.ai_chat_routes import create_chat_blueprint
 
 @pytest.fixture
 def mock_context():
@@ -37,10 +39,14 @@ def mock_context():
 
 @pytest.fixture
 def client(mock_context):
-    """Fixture to create a test client for the blueprint."""
-    blueprint = create_api_blueprint(mock_context)
+    """Fixture to create a test client for the blueprints."""
+    # Register both new blueprints
+    health_blueprint = create_health_blueprint(mock_context)
+    chat_blueprint = create_chat_blueprint(mock_context)
+    
     app = mock_context.app
-    app.register_blueprint(blueprint, url_prefix='/api')
+    app.register_blueprint(health_blueprint, url_prefix='/api')
+    app.register_blueprint(chat_blueprint, url_prefix='/api')
     return app.test_client()
 
 def test_health_check(client):

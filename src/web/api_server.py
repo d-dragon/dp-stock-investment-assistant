@@ -26,7 +26,9 @@ from core.model_registry import OpenAIModelRegistry
 from data.repositories.factory import RepositoryFactory
 from utils.config_loader import ConfigLoader
 from services.factory import ServiceFactory
-from web.routes.api_routes import APIRouteContext, create_api_blueprint
+from web.routes.shared_context import APIRouteContext
+from web.routes.service_health_routes import create_health_blueprint
+from web.routes.ai_chat_routes import create_chat_blueprint
 from web.sockets.chat_events import SocketIOContext, register_chat_events
 from web.routes.models_routes import create_models_blueprint
 from web.routes.user_routes import create_user_blueprint
@@ -38,7 +40,8 @@ RouteFactory = Callable[[APIRouteContext], "Blueprint"]
 SocketRegistrar = Callable[[SocketIOContext], None]
 
 DEFAULT_HTTP_ROUTE_FACTORIES: Tuple[RouteFactory, ...] = (
-    create_api_blueprint,
+    create_health_blueprint,
+    create_chat_blueprint,
     create_models_blueprint,
     create_user_blueprint,
 )
