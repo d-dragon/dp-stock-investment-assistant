@@ -4,7 +4,34 @@ applyTo: "frontend/**"
 ---
 
 # Frontend - React + TypeScript Conventions
+## Design Principles
+- **Single Responsibility**: Components render UI only; data fetching and state logic belong in custom hooks or services
+- **Interface Segregation**: Keep props and service interfaces narrow; split hooks/services rather than creating monolithic clients
+- **Open/Closed**: Extend functionality via new components/hooks/services; avoid modifying shared primitives or breaking existing contracts
+- **Dependency Inversion**: Components depend on typed interfaces from `services/`; inject configuration from `config.ts`; never hardcode endpoints
+- **Liskov Substitution**: Service implementations must maintain consistent return shapes, error semantics, and cancellation behavior (AbortController)
+- **Composition over Mutation**: Favor composing existing components/hooks over editing shared code; extend API/WebSocket clients without breaking contracts
 
+## Data Fetching and Streaming
+- **Streaming**: Use `ReadableStream` for SSE, `AbortController` for cancellation; clean up subscriptions in `useEffect` return
+- **Async Safety**: Guard state updates with `isMounted` refs to prevent updates after unmount
+- **Service Layer**: Centralize all API/WebSocket logic in `services/`; components consume via custom hooks
+
+## State and Caching
+- **Local State First**: Use `useState`/`useReducer` for component state; lift only when necessary
+- **Memoization**: Apply `useMemo`/`useCallback` when profiling shows benefit; avoid premature optimization
+- **No Global Mutable State**: Use context or custom hooks; avoid singletons that hold mutable state
+
+## Testing Strategy
+- **Framework**: Jest + React Testing Library
+- **Mock External Dependencies**: Mock API calls, WebSocket connections, SSE streams
+- **Test User Behavior**: Test what users see and do, not internal state or implementation details
+- **Deterministic Components**: Keep render logic pure; move side effects to hooks
+
+## Styling and UX
+- **Design Tokens**: Use theme constants from `config.ts`; no hardcoded colors or spacing
+- **Accessibility**: Add ARIA labels, manage focus for modals/dialogs, ensure keyboard navigation
+- **No Secrets in Code**: Never expose API keys or sensitive data in frontend code
 ## Tech Stack
 - **Framework**: React 18.3+ with TypeScript
 - **Build Tool**: Create React App (react-scripts 5.0+)
@@ -204,6 +231,16 @@ frontend/src/
     let isMounted = true;
     fetchData().then(data => { if (isMounted) setState(data); });
     return () => { isMounted = false; };
+  }, []);
+  ```
+- **WebSocket Cleanup**: Remove all listeners on unmount to prevent memory leaks
+  ```typescript
+  useEffect(() => {
+    socket.on('chat_response', handleResponse);
+    return () => {
+      socket.off('chat_response', handleResponse);
+      socket.removeAllListeners();
+    };
   }, []);
   ```
 - **Infinite Loops**: Missing dependency array or stale closure in `useEffect`

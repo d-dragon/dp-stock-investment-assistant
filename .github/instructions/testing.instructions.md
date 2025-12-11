@@ -5,6 +5,22 @@ applyTo: "tests/**"
 
 # Testing Strategy and Conventions
 
+## Quick Reference - Common Test Scenarios
+
+| Scenario | Location | Framework | Key Patterns |
+|----------|----------|-----------|--------------|
+| **Test a Python service** | `tests/test_*_service.py` | pytest, MagicMock | Mock repositories, test health_check(), use fixtures |
+| **Test a Flask API route** | `tests/api/test_*_routes.py` | pytest, Flask test client | Mock dependencies via context, validate status codes + JSON |
+| **Test a React component** | `frontend/src/components/*.test.tsx` | Jest + RTL | Use `getByRole/getByText`, mock services, test user interactions |
+| **Test a Socket.IO handler** | `tests/test_*_events.py` | pytest, mock SocketIO | Register handlers with mock context, test emit calls + cleanup |
+| **Test error scenarios** | Any test file | Framework-specific | Mock `side_effect=Exception`, verify emit('error') or status code |
+| **Test caching behavior** | `tests/test_*_service.py` | pytest, MagicMock | Verify `cache.set_json()` called with correct key/TTL |
+| **Test health checks** | `tests/test_*_service.py` | pytest | Test all required deps healthy, optional deps can fail |
+
+**For more details**, see the relevant section below: [Backend Testing](#backend-testing-python--pytest) | [Frontend Testing](#frontend-testing-jest--react-testing-library) | [WebSocket Testing](#websocket-testing-patterns-example-socketio) | [Health Check Testing](#health-check-testing)
+
+---
+
 ## Testing Philosophy
 
 ### Core Principles
@@ -239,6 +255,65 @@ def test_repository_inserts_and_retrieves_stock_data(test_db):
 
 ### Mocking Strategies
 
+#### Protocol-Based Mocking for Services
+```python
+# tests/test_user_service.py
+from unittest.mock import MagicMock
+import pytest
+
+@pytest.fixture
+def mock_workspace_provider():
+    """Mock implementing WorkspaceProvider protocol."""
+    provider = MagicMock()
+    provider.list_workspaces.return_value = [{"id": "ws1", "name": "Test"}]
+    return provider
+
+@pytest.fixture
+def mock_user_repo():
+    """Mock repository with health_check stubbed."""
+    repo = MagicMock()
+    repo.health_check.return_value = (True, {"component": "user_repository", "status": "ready"})
+    repo.find_one.return_value = {"_id": "user123", "email": "test@example.com"}
+    return repo
+
+def test_user_service_aggregates_data(mock_user_repo, mock_workspace_provider):
+    """Test UserService aggregates data from multiple providers."""
+    from services.user_service import UserService
+    
+    service = UserService(
+        user_repository=mock_user_repo,
+        workspace_provider=mock_workspace_provider,
+        cache=None
+    )
+    
+    dashboard = service.get_user_dashboard("user123")
+    assert len(dashboard["workspaces"]) > 0
+    mock_user_repo.find_one.assert_called_once()
+```
+
+#### Cache Testing Patterns
+```python
+def test_service_caches_with_correct_ttl(mock_repo):
+    """Test service caches data with correct TTL and key pattern."""
+    from unittest.mock import MagicMock
+    from services.workspace_service import WorkspaceService
+    
+    mock_cache = MagicMock()
+    service = WorkspaceService(repository=mock_repo, cache=mock_cache)
+    
+    service.get_workspace("ws123")
+    
+    # Verify cache was called
+    mock_cache.set_json.assert_called_once()
+    args = mock_cache.set_json.call_args
+    
+    # Verify key pattern
+    assert args[0][0] == "workspace:ws123"
+    
+    # Verify TTL constant
+    assert args[1]["ttl"] == 300  # WORKSPACE_CACHE_TTL
+```
+
 #### Mocking External APIs
 ```python
 def test_data_manager_fetches_yahoo_finance_data(mocker):
@@ -291,6 +366,132 @@ def test_cache_layer_uses_redis_for_price_data(mocker):
     mock_redis.get.assert_called_once_with('price:AAPL')
     mock_redis.setex.assert_called_once()
 ```
+
+### WebSocket Testing Patterns (Example: Socket.IO)
+
+Socket.IO testing uses a two-part pattern: unit tests with mock Socket.IO for handler logic, and integration tests with real Socket.IO test client for full event flow.
+
+#### Unit Test Pattern: Handler Logic with Mocks
+```python
+def test_chat_message_handler_validates_input(mock_socketio, mock_agent):
+    """Test handler rejects empty messages."""
+    from web.sockets.chat_events import register_chat_events
+    from web.routes.shared_context import SocketIOContext
+    import logging
+    
+    logger = logging.getLogger(__name__)
+    context = SocketIOContext(socketio=mock_socketio, agent=mock_agent, config={}, logger=logger)
+    register_chat_events(context)
+    
+    # Extract handler from mock
+    handler = mock_socketio.on.call_args_list[1][0][1]  # chat_message handler
+    
+    app = Flask(__name__)
+    with app.test_request_context():
+        handler({'message': ''})  # Empty message
+    
+    # Verify error emitted
+    mock_socketio.emit.assert_called_with('error', {'message': 'Message cannot be empty'})
+    mock_agent.process_query.assert_not_called()
+```
+
+#### Integration Test Pattern: Full Event Flow
+```python
+def test_chat_message_round_trip(socketio_test_client, mock_agent):
+    """Test complete chat message flow client → server → client."""
+    socketio_test_client.connect()
+    socketio_test_client.emit('chat_message', {'message': 'What is AAPL price?'})
+    
+    received = socketio_test_client.get_received()
+    responses = [r for r in received if r['name'] == 'chat_response']
+    
+    assert len(responses) >= 1
+    assert 'response' in responses[0]['args'][0]
+    assert mock_agent.process_query.called
+```
+
+#### Streaming Event Pattern
+```python
+def test_chat_stream_emits_multiple_chunks(socketio_test_client, mock_agent):
+    """Test streaming emits incremental chunks."""
+    mock_agent.process_query_streaming.return_value = iter(['chunk1', 'chunk2', 'chunk3'])
+    
+    socketio_test_client.connect()
+    socketio_test_client.emit('chat_stream_start', {'message': 'Test'})
+    
+    received = socketio_test_client.get_received()
+    chunks = [r for r in received if r['name'] == 'chat_chunk']
+    
+    assert len(chunks) == 3
+    assert chunks[0]['args'][0]['chunk'] == 'chunk1'
+    assert chunks[-1]['args'][0]['chunk'] == 'chunk3'
+    
+    # Verify stream completion
+    end_events = [r for r in received if r['name'] == 'chat_stream_end']
+    assert len(end_events) == 1
+```
+
+#### Error Handling Pattern
+```python
+def test_handler_catches_agent_exceptions(mock_socketio, mock_agent):
+    """Test handler emits error instead of crashing."""
+    mock_agent.process_query.side_effect = RuntimeError("Agent crashed")
+    
+    from web.sockets.chat_events import register_chat_events
+    from web.routes.shared_context import SocketIOContext
+    
+    context = SocketIOContext(
+        socketio=mock_socketio, 
+        agent=mock_agent, 
+        config={}, 
+        logger=logging.getLogger(__name__)
+    )
+    register_chat_events(context)
+    
+    handler = mock_socketio.on.call_args_list[0][0][1]
+    
+    app = Flask(__name__)
+    with app.test_request_context():
+        handler({'message': 'Test'})
+    
+    # Verify error emitted
+    assert mock_socketio.emit.called
+    call_args = mock_socketio.emit.call_args[0]
+    assert call_args[0] == 'error'
+```
+
+#### Socket.IO Test Fixtures
+```python
+@pytest.fixture
+def socketio_test_client(app):
+    """Real Socket.IO test client for integration tests."""
+    from flask_socketio import SocketIOTestClient
+    return SocketIOTestClient(app, socketio)
+
+@pytest.fixture
+def mock_socketio():
+    """Mock Socket.IO for unit tests."""
+    return MagicMock()
+
+@pytest.fixture
+def mock_agent():
+    """Mock agent for handler testing."""
+    agent = MagicMock()
+    agent.process_query.return_value = "Test response"
+    agent.process_query_streaming.return_value = iter(["chunk"])
+    return agent
+```
+
+#### Key WebSocket Testing Patterns
+- **Connection Lifecycle**: Test connect/disconnect events
+- **Event Registration**: Verify handlers registered correctly
+- **Message Validation**: Test required fields and data types
+- **Streaming**: Verify chunks emitted in order with completion event
+- **Error Handling**: Ensure errors emitted instead of crashes
+- **Cleanup**: Verify listeners removed on disconnect (no memory leaks)
+- **Mock Isolation**: Unit tests use mocks; integration tests use real Socket.IO client
+
+**📖 Reference**: See [`examples/testing/test_websocket_handlers.py`](../../examples/testing/test_websocket_handlers.py) for comprehensive patterns including connection, streaming, and cleanup testing.
 
 ### Running Backend Tests
 ```powershell
