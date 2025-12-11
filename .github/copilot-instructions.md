@@ -25,6 +25,14 @@
 - **Consistent style**: Follow language-specific style guides (PEP 8 for Python, Airbnb/Standard for TypeScript)
 - **DRY principle**: Eliminate duplication through abstraction, but avoid premature abstraction
 - **Dependency management**: Minimize external dependencies; prefer standard library or well-maintained, focused libraries
+### Design Principles (SOLID)
+- **Single Responsibility**: One concern per layer; routes handle HTTP, services handle business logic, repositories handle data access
+- **Open/Closed**: Extend via new modules (blueprints, services, providers) registered in factories; avoid editing unrelated modules
+- **Liskov Substitution**: Implementations must honor interface contracts (types, errors, invariants); no consumer-specific branches
+- **Interface Segregation**: Keep interfaces lean; split large surfaces; give consumers only what they need (read vs write, query vs command)
+- **Dependency Inversion**: Depend on protocols/interfaces (e.g., `WorkspaceProvider`, `UserProvider`); inject via factories/config
+- **Composition over Inheritance**: Favor composition except for established bases (`BaseService`, `MongoGenericRepository`, `CacheBackend`)
+- **Extension over Mutation**: Add new components as modules in dedicated files; register in factories rather than modifying existing code
 
 ### Testing Philosophy
 - **Test behavior, not implementation**: Focus on user-facing functionality and contracts
@@ -104,23 +112,42 @@
 
 ## Quick project map (what matters most)
 - Backend
-  - `src/main.py` – local entry; CLI runner.
+  - `src/main.py` – local entry; CLI runner with mode selection (cli/web/both).
   - `src/wsgi.py` – WSGI entry for production servers (gunicorn/eventlet or gevent).
-  - `src/web/` – Flask blueprints and Socket.IO.
-    - `routes/api_routes.py` – health, chat, config endpoints.
-    - `routes/models_routes.py` – model management endpoints.
-    - `sockets/` – Socket.IO server events.
-  - `src/core/` – agent, model factory/clients, data manager.
-  - `src/utils/config_loader.py` – config loader with .env, APP_ENV overlays, and optional Azure Key Vault.
-  - `src/data/` – repositories, schema, services, and migrations.
-    - `migration/db_setup.py` – creates collections, indexes, validation.
+  - `src/web/api_server.py` – Flask app factory with blueprint registration and SocketIO setup.
+  - `src/web/routes/` – Flask blueprints organized by domain:
+    - `service_health_routes.py` – health check endpoint.
+    - `ai_chat_routes.py` – chat endpoints (REST and streaming).
+    - `models_routes.py` – OpenAI model management and selection.
+    - `user_routes.py` – user, workspace, and dashboard endpoints.
+    - `shared_context.py` – immutable dataclass for dependency injection (APIRouteContext).
+  - `src/web/sockets/` – Socket.IO event handlers (chat_events.py).
+  - `src/core/` – agent, model factory/clients, data manager, model registry.
+    - `model_factory.py` – ModelClientFactory with caching and fallback support.
+  - `src/services/` – business logic layer above repositories.
+    - `factory.py` – ServiceFactory for dependency injection.
+    - `base.py` – BaseService with health_check() contract.
+    - Domain services: user_service.py, workspace_service.py, symbols_service.py.
+  - `src/data/repositories/` – data access layer with factory pattern.
+    - `factory.py` – RepositoryFactory centralizes repository creation.
+    - `mongodb_repository.py` – MongoGenericRepository base class.
+  - `src/utils/` – shared utilities.
+    - `config_loader.py` – hierarchical config with APP_ENV overlays and Azure Key Vault support.
+    - `cache.py` – CacheBackend abstraction (Redis or in-memory fallback).
+    - `service_utils.py` – normalize_document(), batched() for streaming.
+  - `src/data/migration/db_setup.py` – schema setup, indexes, validation.
 - Frontend
-  - `frontend/` – React app served by Nginx in production.
+  - `frontend/src/` – React TypeScript app.
+    - `config.ts` – API endpoints, WebSocket events, UI config.
+    - `components/` – React components.
+    - `services/` – API client wrappers.
 - Infra/IaC
-  - `docker-compose.yml` (+ `.override.yml` for local tweaks), `IaC/` (Dockerfiles, Helm chart, Terraform).
+  - `docker-compose.yml` (+ `.override.yml` for local tweaks) – local dev with MongoDB, Redis, API, Agent, Frontend.
+  - `IaC/` – Dockerfiles (Dockerfile.api, Dockerfile.agent), Helm chart, Terraform.
 - Docs
-  - `README.md` – setup, testing, DB migration.
-  - `.github/MODEL_ROUTING.md` – multi-model routing docs.
+  - `README.md` – setup, testing, DB migration, API architecture.
+  - `.github/MODEL_ROUTING.md` – multi-model routing and fallback strategy.
+  - `.github/instructions/*.instructions.md` – domain-specific detailed conventions.
   - `.github/chatmodes/*` – custom Copilot chat modes (docs; model routing not enforced by Copilot yet).
 
 ## Setup and run (Windows PowerShell examples)
@@ -143,19 +170,40 @@
   - If Windows blocks 27017 (reserved range), map a safe port via `docker-compose.override.yml` (e.g., host 27034 → container 27017) and update `MONGODB_URI` accordingly.
 - Migration
   - Run: `python src\data\migration\db_setup.py`
-  - Collections created: `market_data` (time-series), `symbols`, `fundamental_analysis`, `investment_reports`, `news_events`, `user_preferences`.
+  - Collections created include: `users`, `user_profiles`, `workspaces`, `watchlists`, `portfolios`, `positions`, `market_data` (time-series), `symbols`, `fundamental_analysis`, `investment_reports`, `news_events`, `chats`, `notes`, `tasks`, `notifications`, etc.
 - MongoDB pattern
   - Use `db.command("listCollections")` for existence checks. Catch Unauthorized and fall back gracefully.
-  - Don’t depend on `list_collection_names()` in authenticated contexts.
+  - Don't depend on `list_collection_names()` in authenticated contexts.
+  - Repository pattern: All DB access through `src/data/repositories/` extending `MongoGenericRepository`.
+  - Factory pattern: Use `RepositoryFactory.get_<repository_name>()` for singleton instances.
 - Redis
   - Configure via env (`REDIS_*`). Avoid real connections in tests; use stubs/mocks.
+  - CacheBackend (`src/utils/cache.py`) auto-falls back to in-memory if Redis unavailable.
+  - Create via `CacheBackend.from_config(config)` for environment-aware setup.
+
+## Service layer architecture
+- Pattern
+  - Business logic lives in `src/services/`, not in routes or repositories.
+  - All services extend `BaseService` (from `base.py`), which provides `health_check()` contract, logging, cache access, and time provider.
+  - Use `ServiceFactory` to wire repositories into services with dependency injection.
+- Building services
+  - Example: `service_factory.get_user_service()` returns singleton `UserService` with all dependencies wired.
+  - Services use protocols (from `protocols.py`) for cross-service dependencies to avoid circular imports.
+- Health checks
+  - Every service implements `health_check() -> Tuple[bool, Dict[str, Any]]`.
+  - Use `_dependencies_health_report(required={...}, optional={...})` helper for aggregating component health.
+- Cache integration
+  - Services receive `CacheBackend` via constructor; use `cache.get_json(key)` / `cache.set_json(key, value, ttl)`.
+  - TTL constants defined as class attributes (e.g., `WORKSPACE_CACHE_TTL = 300`).
 
 ## API guidelines
 - Blueprints
-  - Add new endpoints in a dedicated module under `src/web/routes/` and register via the app factory.
+  - Add new endpoints in a dedicated module under `src/web/routes/` and register via the app factory in `api_server.py`.
   - Keep responses JSON, typed, and validated where practical.
+  - Use immutable `APIRouteContext` dataclass for dependency injection into blueprints.
 - Streaming
-  - For chat streaming, use Flask `Response` + `stream_with_context` and SSE headers (see `api_routes.py`).
+  - For chat streaming, use Flask `Response` + `stream_with_context` and SSE headers.
+  - Use `batched()` from `service_utils.py` for chunked iteration (SSE/WebSocket).
 - Error handling
   - Return 4xx for client errors, 5xx with safe messages for server errors. Log exceptions with context.
 
@@ -163,9 +211,69 @@
 - `src/utils/config_loader.py` loads:
   - Base YAML (`config/config.yaml`) → APP_ENV overlay (e.g., `config.local.yaml`, `config.k8s-local.yaml`) → env vars → optional Azure Key Vault.
 - Env overrides
-  - SAFE defaults to “all” in `APP_ENV=local`, “secrets-only” for `k8s-local/staging/production`. Control via `CONFIG_ENV_OVERRIDE_MODE`.
+  - SAFE defaults to "all" in `APP_ENV=local`, "secrets-only" for `k8s-local/staging/production`. Control via `CONFIG_ENV_OVERRIDE_MODE`.
 - Azure Key Vault (optional)
   - Enable with `USE_AZURE_KEYVAULT=true` and `AZURE_KEYVAULT_URI`/`KEYVAULT_NAME`. Secrets like `OPENAI_API_KEY`, `GROK_API_KEY` are mapped in the loader.
+
+## Multi-model support and fallbacks
+- Model factory
+  - `ModelClientFactory.get_client(config, provider=None, model_name=None)` returns cached client instances.
+  - Supports OpenAI, Grok (xAI), with extensible provider registration.
+  - Clients keyed by `{provider}:{model_name}` for cache efficiency.
+- Model selection
+  - Primary: Set via `config["model"]["provider"]` or env var `MODEL_PROVIDER`.
+  - Override: Routes accept `provider` parameter for per-request model selection.
+  - Cached selection: Agent reads `openai_config:model_name` from cache for user preferences.
+- Fallback behavior
+  - Configure `model.allow_fallback` and `model.fallback_order` in config.
+  - Agent automatically retries with fallback models on primary failure.
+  - See `.github/MODEL_ROUTING.md` for detailed fallback strategy.
+
+## Testing Patterns
+
+See [testing.instructions.md](instructions/testing.instructions.md) for comprehensive testing guidance:
+- **Backend Testing (pytest)**: Protocol-based mocking, cache testing, fixture patterns
+- **Frontend Testing (Jest + RTL)**: Component testing, cleanup patterns, isMounted guards
+- **Integration Testing**: API routes, database repositories, service layer
+- **Mocking Strategies**: External APIs, MongoDB, Redis, WebSocket connections
+
+## Frontend Component Patterns
+
+See [frontend-react.instructions.md](instructions/frontend-react.instructions.md) for detailed patterns:
+- **API Service Pattern**: SSE streaming with ReadableStream, fetch with AbortController
+- **WebSocket Service**: Socket.IO client with reconnection logic and cleanup
+- **Component State Management**: AbortController for cancellation, useRef for persistent values
+- **Reusable Components**: Async loading with isMounted guards, cache integration
+- **Testing**: Jest + React Testing Library, component isolation, mock services
+
+## Deployment Workflows
+
+See [infrastructure-deployment.instructions.md](instructions/infrastructure-deployment.instructions.md) for complete workflows:
+- **Local Development**: Docker Compose with hot-reload, Windows port override patterns
+- **Local Kubernetes**: Docker Desktop with Helm, image build and deployment
+- **Production (AKS)**: Azure CLI, ACR builds, Helm deployments, health checks
+- **Troubleshooting**: Common issues, rollback procedures, monitoring setup
+
+## Common Tasks
+
+See domain-specific instruction files for step-by-step guides:
+
+**Backend Tasks** - See [backend-python.instructions.md](instructions/backend-python.instructions.md):
+- Add a New Service (7 steps with BaseService pattern)
+- Add a New Repository (6 steps with MongoGenericRepository)
+- Add an API Endpoint (7 steps with Flask blueprint)
+- Extend MongoDB Schema
+- Add Model Provider
+
+**Frontend Tasks** - See [frontend-react.instructions.md](instructions/frontend-react.instructions.md):
+- Add a Frontend Component (6 steps with TypeScript)
+- Add API Integration
+- Add WebSocket Event
+
+**Infrastructure Tasks** - See [infrastructure-deployment.instructions.md](instructions/infrastructure-deployment.instructions.md):
+- Deploy to Local Kubernetes
+- Deploy to AKS Production
+- Configure CI/CD Pipeline
 
 ## Domain-Specific Conventions Summary
 See linked instruction files for comprehensive guidelines:
@@ -196,6 +304,11 @@ See linked instruction files for comprehensive guidelines:
 - **Real API keys**: Tests should mock external services; if keys are needed, inject via fixtures or use test-only keys
 - **Network dependencies**: Tests must run offline; mock all HTTP calls, database connections, and external APIs
 - **Test data pollution**: Use transaction rollbacks, separate test databases, or cleanup fixtures to avoid state leakage
+
+### Model Factory Caching
+- **Cache key format**: Clients cached as `{provider}:{model_name}` (e.g., `openai:gpt-4`)
+- **Cache invalidation**: Changing model in config doesn't auto-invalidate; restart or clear ModelClientFactory._CACHE
+- **Shared cache backend**: Agent and model clients share same CacheBackend instance for consistency
 
 ## Quality Gates & Definition of Done
 
