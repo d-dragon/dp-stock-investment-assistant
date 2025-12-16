@@ -10,6 +10,64 @@
 > - [Frontend React](instructions/frontend-react.instructions.md)
 > - [Infrastructure & Deployment](instructions/infrastructure-deployment.instructions.md)
 > - [Testing](instructions/testing.instructions.md)
+
+> **Project Summary**: AI-powered stock investment assistant with Flask API, React UI, MongoDB/Redis persistence, and multi-model AI support (OpenAI + fallback providers via ModelClientFactory). Architecture uses service/repository factories for DI, health checks on all components, and layered separation (routes → services → repositories → DB).
+
+## Critical Developer Workflows (Commands)
+
+### Local Development
+```powershell
+# Setup (one-time)
+python -m venv venv
+venv\Scripts\Activate.ps1
+pip install -r requirements.txt
+python setup.py
+
+# Start services
+docker-compose up -d mongodb redis  # Windows: may need docker-compose.override.yml for port mapping
+python src\main.py --mode web      # API server on http://localhost:5000
+
+# Start frontend (separate terminal)
+cd frontend
+npm install
+npm start  # Runs on http://localhost:3000
+```
+
+### Testing
+```powershell
+# All tests (ensure PYTHONPATH includes src)
+$env:PYTHONPATH = "$PWD\src"
+pytest -v
+
+# Specific test file or pattern
+pytest tests/test_agent.py -v
+pytest -k "test_health" -v
+
+# With coverage
+pytest --cov=src --cov-report=html
+```
+
+### Database
+```powershell
+# Run migrations (creates schema, collections, indexes)
+python src\data\migration\db_setup.py
+
+# Connect to MongoDB
+mongo mongodb://localhost:27017/stock_assistant
+```
+
+### Docker/Compose
+```powershell
+# Windows-specific: Port 27017 may be blocked
+# Use docker-compose.override.yml to map 27034:27017
+docker-compose up --build api frontend
+
+# View logs
+docker-compose logs -f api
+
+# Stop everything
+docker-compose down
+```
 ## Universal Principles
 
 ### Security & Secrets Management

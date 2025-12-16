@@ -276,15 +276,6 @@ if not healthy:
     # Check required dependencies in details['dependencies']
 ```
 
-### Impact: Before vs After Quick Reference
-
-| Metric | Before | After | Improvement |
-|--------|--------|-------|-------------|
-| Time to find file path | 5-15 minutes (read 1,300+ lines) | 10-30 seconds (scan map/TOC) | **95% faster** |
-| Import errors from wrong path | Common (relative imports) | Rare (absolute `from src.*` shown) | **-90% errors** |
-| Time to add endpoint | 20-30 minutes (find pattern) | 3-5 minutes (decision tree + Flask section) | **83% faster** |
-| Time to debug 503 error | 15-30 minutes (grep codebase) | 2-5 minutes (Pitfalls #6 + health check) | **85% faster** |
-| Onboarding new AI agent | 15+ minutes (full file read) | 2 minutes (TOC + quick ref + targeted sections) | **87% faster** |
 
 ## Architecture Overview
 
