@@ -17,6 +17,21 @@ def setup_logging(level="INFO"):
         level=getattr(logging, level),
         format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
     )
+    
+    # Suppress verbose PyMongo heartbeat/connection logging in DEBUG mode
+    # PyMongo logs: pymongo.connection, pymongo.server, pymongo.heartbeat, pymongo.server_selector, etc.
+    pymongo_loggers = [
+        'pymongo.connection',
+        'pymongo.server',
+        'pymongo.heartbeat',
+        'pymongo.server_selector',
+        'pymongo.command',
+        'pymongo.pool',
+        'pymongo.topology',
+        'pymongo.monitoring',
+    ]
+    for logger_name in pymongo_loggers:
+        logging.getLogger(logger_name).setLevel(logging.WARNING)
 
 
 def main():
