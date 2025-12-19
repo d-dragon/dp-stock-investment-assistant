@@ -84,6 +84,13 @@ frontend/src/
 
 ## Backend Testing (Python + pytest)
 
+### Test runner rules
+- **Framework**: pytest 7.0+ with plugins (pytest-mock, pytest-asyncio as needed)
+- **Configuration**: `pytest.ini` or `pyproject.toml` for settings
+- **Test discovery**: Files named `test_*.py` or `*_test.py`; functions/classes prefixed with `test`
+- **Test run command**: & .\.venv\Scripts\python.exe -m pytest tests/test_*.py -v
+Note: Ensure enabled virtual environment before running tests.
+
 ### pytest Configuration
 - **Framework**: pytest 7.0+ with plugins (pytest-cov, pytest-mock)
 - **Configuration**: `pytest.ini` or `pyproject.toml` for settings

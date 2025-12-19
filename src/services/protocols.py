@@ -10,7 +10,54 @@ the required methods automatically satisfies the protocol.
 
 from __future__ import annotations
 
-from typing import Any, Dict, List, Optional, Protocol, runtime_checkable
+from typing import Any, Dict, Generator, List, Optional, Protocol, runtime_checkable
+
+
+@runtime_checkable
+class AgentProvider(Protocol):
+    """Minimal interface for AI agent query processing.
+    
+    This protocol defines the agent-related methods that ChatService needs.
+    By depending on the protocol instead of the concrete StockAgent,
+    we avoid tight coupling and improve testability.
+    
+    Any object implementing these methods can be used as an AgentProvider,
+    including the full StockAgent, test mocks, or alternative implementations.
+    """
+    
+    def process_query(
+        self,
+        query: str,
+        *,
+        provider: Optional[str] = None,
+    ) -> str:
+        """Process a query and return complete response.
+        
+        Args:
+            query: User query to process
+            provider: Optional provider override (e.g., 'openai', 'grok')
+            
+        Returns:
+            Complete response text
+        """
+        ...
+    
+    def process_query_streaming(
+        self,
+        query: str,
+        *,
+        provider: Optional[str] = None,
+    ) -> Generator[str, None, None]:
+        """Process a query and stream response chunks.
+        
+        Args:
+            query: User query to process
+            provider: Optional provider override (e.g., 'openai', 'grok')
+            
+        Yields:
+            Response text chunks
+        """
+        ...
 
 
 @runtime_checkable

@@ -12,6 +12,7 @@ if TYPE_CHECKING:
     from core.model_registry import OpenAIModelRegistry
     from services.factory import ServiceFactory
     from services.user_service import UserService
+    from services.chat_service import ChatService
 
 
 @dataclass(frozen=True)
@@ -27,10 +28,14 @@ class APIRouteContext:
     agent: "StockAgent"
     config: Mapping[str, Any]
     logger: "Logger"
-    stream_chat_response: Callable[[str, Optional[str]], Iterable[str]]
-    extract_meta: Callable[[str], Tuple[str, str, bool]]
-    strip_fallback_prefix: Callable[[str], str]
-    get_timestamp: Callable[[], str]
+    # Chat-related dependencies (prefer using chat_service instead of individual functions)
+    chat_service: Optional["ChatService"] = None
+    # Legacy function references (deprecated, use chat_service instead)
+    stream_chat_response: Optional[Callable[[str, Optional[str]], Iterable[str]]] = None
+    extract_meta: Optional[Callable[[str], Tuple[str, str, bool]]] = None
+    strip_fallback_prefix: Optional[Callable[[str], str]] = None
+    get_timestamp: Optional[Callable[[], str]] = None
+    # Other services
     model_registry: Optional["OpenAIModelRegistry"] = None
     set_active_model: Optional[Callable[[str, str], Dict[str, Any]]] = None
     service_factory: Optional["ServiceFactory"] = None
