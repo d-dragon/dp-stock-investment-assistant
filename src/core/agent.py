@@ -139,6 +139,21 @@ class StockAgent:
         return f"All providers failed. Last error: {last_error}"
 
     # -------- Helper methods --------
+    def get_current_model_info(self, provider: Optional[str] = None) -> Dict[str, str]:
+        """Get current model information without making API call.
+        
+        Args:
+            provider: Optional provider override (e.g., 'openai', 'grok')
+            
+        Returns:
+            Dict with 'provider' and 'model' keys
+        """
+        client = self._select_client(provider)
+        return {
+            "provider": client.provider,
+            "model": client.model_name
+        }
+    
     def _select_client(self, provider: Optional[str]):
         if provider:
             return ModelClientFactory.get_client(self.config, provider=provider)

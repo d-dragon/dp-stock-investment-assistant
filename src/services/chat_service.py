@@ -7,7 +7,6 @@ import logging
 from datetime import datetime, timezone
 from typing import Any, Callable, Dict, Generator, Mapping, Optional, Tuple
 
-from core.model_factory import ModelClientFactory
 from services.base import BaseService
 from services.protocols import AgentProvider
 from utils.cache import CacheBackend
@@ -83,16 +82,12 @@ class ChatService(BaseService):
         try:
             self.logger.info(f"Starting streaming response: {user_message[:50]}...")
             
-            # Emit model metadata first
-            client = (
-                ModelClientFactory.get_client(self._config, provider=provider_override)
-                if provider_override
-                else self._select_default_client()
-            )
+            # Emit model metadata first (delegate to agent)
+            model_info = self._agent.get_current_model_info(provider=provider_override)
             meta = {
                 "event": "meta",
-                "provider": client.provider,
-                "model": client.model_name,
+                "provider": model_info["provider"],
+                "model": model_info["model"],
             }
             yield f"data: {json.dumps(meta)}\n\n"
             
@@ -182,10 +177,49 @@ class ChatService(BaseService):
         """
         return self._utc_now()
     
-    def _select_default_client(self):
-        """Select default model client from config.
+    def process_chat_query(
+        self, user_message: str, provider_override: Optional[str] = None
+    ) -> Dict[str, Any]:
+        """Process chat query and return structured response (non-streaming).
         
+        This method provides a non-streaming alternative to stream_chat_response,
+        returning a complete response dict with metadata.
+        
+        Args:
+            user_message: User's query to process
+            provider_override: Optional provider override
+            
         Returns:
-            Model client instance
+            Dict with keys:
+                - response: str - The cleaned response text
+                - provider: str - Provider used
+                - model: str - Model used
+                - fallback: bool - Whether fallback was used
+                - timestamp: str - ISO 8601 timestamp
         """
-        return ModelClientFactory.get_client(self._config)
+        # Get response from agent
+        raw_response = self._agent.process_query(user_message, provider=provider_override)
+        
+        # Get model info from agent
+        model_info = self._agent.get_current_model_info(provider=provider_override)
+        
+        # Extract metadata from response
+        provider, model, fallback = self.extract_meta(raw_response)
+        
+        # Use model_info as fallback if extract_meta didn't find metadata
+        if model_info:
+            provider = provider or model_info.get("provider")
+            model = model or model_info.get("model")
+        
+        # Strip fallback prefix from response
+        cleaned_response = self.strip_fallback_prefix(raw_response)
+        
+        return {
+            "response": cleaned_response,
+            "provider": provider,
+            "model": model,
+            "fallback": fallback,
+            "timestamp": self.get_timestamp(),
+        }
+    
+

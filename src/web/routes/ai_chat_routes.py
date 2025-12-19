@@ -85,17 +85,9 @@ def create_chat_blueprint(context: "APIRouteContext") -> Blueprint:
                 )
 
             logger.info(f"Chat request: {user_message[:50]}...")
-            raw_response = agent.process_query(user_message, provider=provider_override)
-            provider_used, model_used, fallback_flag = extract_meta(raw_response)
-            response_clean = strip_fallback_prefix(raw_response)
+            result = chat_service.process_chat_query(user_message, provider_override=provider_override)
 
-            return jsonify({
-                'response': response_clean,
-                'provider': provider_used,
-                'model': model_used,
-                'fallback': fallback_flag,
-                'timestamp': get_timestamp()
-            })
+            return jsonify(result), 200
         except Exception as exc:
             logger.error(f"Error in chat endpoint: {exc}", exc_info=True)
             return jsonify({'error': f'Internal server error: {exc}'}), 500
