@@ -3,13 +3,17 @@
 from __future__ import annotations
 
 import logging
-from typing import Any, Callable, Dict, Optional, TypeVar, cast
+from typing import Any, Callable, Dict, Optional, TypeVar, cast, TYPE_CHECKING
 
 from data.repositories.factory import RepositoryFactory
+from services.chat_service import ChatService
 from services.symbols_service import SymbolsService
 from services.user_service import UserService
 from services.workspace_service import WorkspaceService
 from utils.cache import CacheBackend
+
+if TYPE_CHECKING:
+    from services.protocols import AgentProvider
 
 ServiceT = TypeVar("ServiceT")
 
@@ -21,11 +25,13 @@ class ServiceFactory:
         self,
         config: Dict[str, Any],
         *,
+        agent: Optional["AgentProvider"] = None,
         repository_factory: Optional[RepositoryFactory] = None,
         cache_backend: Optional[CacheBackend] = None,
         logger: Optional[logging.Logger] = None,
     ) -> None:
         self._config = config
+        self._agent = agent
         self._logger = logger or logging.getLogger(__name__)
         self._repository_factory = repository_factory or RepositoryFactory(config)
         self._cache = cache_backend or CacheBackend.from_config(config, logger=self._logger)
@@ -34,6 +40,9 @@ class ServiceFactory:
     # ------------------------------------------------------------------
     # Public builders
     # ------------------------------------------------------------------
+    def get_chat_service(self) -> ChatService:
+        return cast(ChatService, self._get_or_create("chat_service", self._build_chat_service))
+
     def get_workspace_service(self) -> WorkspaceService:
         return cast(WorkspaceService, self._get_or_create("workspace_service", self._build_workspace_service))
 
@@ -46,6 +55,20 @@ class ServiceFactory:
     # ------------------------------------------------------------------
     # Builders
     # ------------------------------------------------------------------
+    def _build_chat_service(self) -> ChatService:
+        if not self._agent:
+            raise RuntimeError(
+                "ChatService requires agent dependency. "
+                "Pass agent to ServiceFactory constructor."
+            )
+        
+        return ChatService(
+            agent_provider=self._agent,  # Satisfies AgentProvider protocol
+            config=self._config,
+            cache=self._cache,
+            logger=self._logger.getChild("chat"),
+        )
+
     def _build_workspace_service(self) -> WorkspaceService:
         workspace_repo = self._repository_factory.get_workspace_repository()
         if not workspace_repo:
