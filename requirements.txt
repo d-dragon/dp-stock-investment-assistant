@@ -31,3 +31,6 @@ pymongo[srv]
 
 # --- Utilities ---
 httpx>=0.27.0                     # Async HTTP client (for xAI/Grok)
+
+# --- Semantic Routing ---
+semantic-router>=0.1.0            # Query classification and routing
