@@ -10,7 +10,10 @@ the required methods automatically satisfies the protocol.
 
 from __future__ import annotations
 
-from typing import Any, Dict, Generator, List, Optional, Protocol, runtime_checkable
+from typing import TYPE_CHECKING, Any, Dict, Generator, List, Optional, Protocol, Union, runtime_checkable
+
+if TYPE_CHECKING:
+    from core.types import AgentResponse
 
 
 @runtime_checkable
@@ -23,6 +26,9 @@ class AgentProvider(Protocol):
     
     Any object implementing these methods can be used as an AgentProvider,
     including the full StockAgent, test mocks, or alternative implementations.
+    
+    The protocol supports both legacy string responses and new structured
+    AgentResponse objects for gradual migration.
     """
     
     def process_query(
@@ -56,6 +62,26 @@ class AgentProvider(Protocol):
             
         Yields:
             Response text chunks
+        """
+        ...
+    
+    def process_query_structured(
+        self,
+        query: str,
+        *,
+        provider: Optional[str] = None,
+    ) -> "AgentResponse":
+        """Process a query and return structured response.
+        
+        This method returns a full AgentResponse with metadata,
+        status, tool calls, and token usage information.
+        
+        Args:
+            query: User query to process
+            provider: Optional provider override (e.g., 'openai', 'grok')
+            
+        Returns:
+            AgentResponse with content and metadata
         """
         ...
 

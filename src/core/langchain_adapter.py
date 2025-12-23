@@ -6,9 +6,14 @@ import logging
 from pathlib import Path
 
 try:
-    from langchain.prompts import PromptTemplate
+    # LangChain 1.x: imports moved to langchain_core
+    from langchain_core.prompts import PromptTemplate
 except ImportError:
-    PromptTemplate = None  # graceful fallback
+    try:
+        # Fallback for older versions
+        from langchain.prompts import PromptTemplate
+    except ImportError:
+        PromptTemplate = None  # graceful fallback
 
 from .base_model_client import BaseModelClient
 
