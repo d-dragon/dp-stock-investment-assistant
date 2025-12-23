@@ -17,6 +17,17 @@ grok:
   temperature: 0.7
   timeout: 3600  # xAI recommends 3600s for reasoning models
 
+# Semantic Router Configuration
+# Uses semantic-router library for query classification
+semantic_router:
+  encoder:
+    primary: openai           # Primary encoder: openai or huggingface
+    fallback: huggingface     # Fallback if primary fails
+    openai_model: "text-embedding-3-small"
+    huggingface_model: "sentence-transformers/all-MiniLM-L6-v2"
+  threshold: 0.7              # Minimum confidence for route matching
+  cache_embeddings: true      # Cache embeddings for performance
+
 # Financial Data APIs
 financial_apis:
   yahoo_finance:
