@@ -7,6 +7,16 @@ openai:
   max_tokens: 2000
   temperature: 0.7
 
+# Grok (xAI) API Configuration
+# Reference: https://docs.x.ai/docs/guides/migration
+grok:
+  api_key: "your-xai-api-key-here"  # Also accepts XAI_API_KEY env var
+  base_url: "https://api.x.ai/v1"
+  model: "grok-4-1-fast-reasoning"  # Options: grok-4, grok-4-1-fast-reasoning, grok-3, grok-3-mini
+  max_tokens: 2000
+  temperature: 0.7
+  timeout: 3600  # xAI recommends 3600s for reasoning models
+
 # Financial Data APIs
 financial_apis:
   yahoo_finance:
