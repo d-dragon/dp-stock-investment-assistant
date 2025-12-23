@@ -127,6 +127,10 @@ class ConfigLoader:
             # Grok specific
             'GROK_API_KEY': ('model', 'grok', 'api_key'),
             'GROK_MODEL': ('model', 'grok', 'model'),
+            'GROK_BASE_URL': ('model', 'grok', 'base_url'),
+            'GROK_TIMEOUT': ('model', 'grok', 'timeout'),
+            'GROK_MAX_TOKENS': ('model', 'grok', 'max_tokens'),
+            'GROK_TEMPERATURE': ('model', 'grok', 'temperature'),
             # Financial APIs
             'ALPHA_VANTAGE_API_KEY': ('financial_apis', 'alpha_vantage', 'api_key'),
             'ALPHA_VANTAGE_ENABLED': ('financial_apis', 'alpha_vantage', 'enabled'),
