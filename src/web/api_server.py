@@ -19,7 +19,7 @@ from flask_socketio import SocketIO
 # Add the src directory to Python path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from core.agent import StockAgent
+from core.stock_assistant_agent import StockAssistantAgent
 from core.data_manager import DataManager
 from core.model_factory import ModelClientFactory
 from core.model_registry import OpenAIModelRegistry
@@ -59,7 +59,7 @@ class APIServer:
         socketio_kwargs: Optional[dict] = None,
         config: Optional[dict] = None,
         data_manager: Optional[DataManager] = None,
-        agent: Optional[StockAgent] = None,
+        agent: Optional[StockAssistantAgent] = None,
         http_route_factories: Optional[Sequence[RouteFactory]] = None,
         socketio_registrars: Optional[Sequence[SocketRegistrar]] = None,
     ):
@@ -84,7 +84,7 @@ class APIServer:
 
         self.config = config or ConfigLoader.load_config()
         self.data_manager = data_manager or DataManager(self.config)
-        self.agent = agent or StockAgent(self.config, self.data_manager)
+        self.agent = agent or StockAssistantAgent(self.config, self.data_manager)
         self.repository_factory = RepositoryFactory(self.config)
         self.cache_repository = self.repository_factory.get_cache_repository() or RepositoryFactory.create_cache_repository(self.config)
         self.model_registry = OpenAIModelRegistry(self.config, self.cache_repository)

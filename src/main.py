@@ -2,7 +2,7 @@
 Main entry point for the DP Stock-Investment Assistant.
 """
 
-from core.agent import StockAgent
+from core.stock_assistant_agent import StockAssistantAgent
 from core.data_manager import DataManager
 from utils.config_loader import ConfigLoader
 from web.api_server import APIServer
@@ -73,7 +73,7 @@ def main():
                 # Also run CLI mode
                 logger.info("Starting interactive CLI mode...")
                 data_manager = DataManager(config)
-                agent = StockAgent(config, data_manager)
+                agent = StockAssistantAgent(config, data_manager)
                 agent.run_interactive()
             else:
                 # Run only web server
@@ -83,7 +83,7 @@ def main():
             # Run only CLI mode
             logger.info("Starting interactive CLI mode...")
             data_manager = DataManager(config)
-            agent = StockAgent(config, data_manager)
+            agent = StockAssistantAgent(config, data_manager)
             agent.run_interactive()
         
     except Exception as e:

@@ -5,12 +5,12 @@ import sys
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from core.data_manager import DataManager
-from core.agent import StockAgent
+from core.stock_assistant_agent import StockAssistantAgent
 from utils.config_loader import ConfigLoader
 
 cfg = ConfigLoader.load_config(load_env=True)
 dm = DataManager(cfg)
-agent = StockAgent(cfg, dm)
+agent = StockAssistantAgent(cfg, dm)
 
 print("=== Non-stream response ===")
 print(agent.process_query("What is the current price of AAPL?"))

@@ -85,6 +85,20 @@ class AgentProvider(Protocol):
         """
         ...
 
+    def get_current_model_info(
+        self,
+        provider: Optional[str] = None,
+    ) -> Dict[str, str]:
+        """Get current model information.
+        
+        Args:
+            provider: Optional provider override
+            
+        Returns:
+            Dict with 'provider' and 'model' keys
+        """
+        ...
+
 
 @runtime_checkable
 class WorkspaceProvider(Protocol):
