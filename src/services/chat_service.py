@@ -7,6 +7,7 @@ import logging
 from datetime import datetime, timezone
 from typing import Any, Callable, Dict, Generator, Mapping, Optional, Tuple
 
+from core.types import AgentResponse, ResponseStatus
 from services.base import BaseService
 from services.protocols import AgentProvider
 from utils.cache import CacheBackend
@@ -221,5 +222,116 @@ class ChatService(BaseService):
             "fallback": fallback,
             "timestamp": self.get_timestamp(),
         }
+    
+    def process_chat_query_structured(
+        self, user_message: str, provider_override: Optional[str] = None
+    ) -> AgentResponse:
+        """Process chat query and return structured AgentResponse.
+        
+        This method uses the agent's structured response API to get
+        full metadata including tool calls and token usage.
+        
+        Args:
+            user_message: User's query to process
+            provider_override: Optional provider override
+            
+        Returns:
+            AgentResponse with content, provider, model, status, tool_calls, etc.
+        """
+        try:
+            # Use agent's structured response method
+            response = self._agent.process_query_structured(
+                user_message, provider=provider_override
+            )
+            
+            self.logger.info(
+                f"Structured query processed: status={response.status.value}, "
+                f"tools_used={len(response.tool_calls)}"
+            )
+            
+            return response
+            
+        except Exception as e:
+            self.logger.error(f"Structured query error: {e}")
+            return AgentResponse.error(
+                message=str(e),
+                provider="unknown",
+                model="unknown",
+            )
+    
+    def stream_chat_response_structured(
+        self, user_message: str, provider_override: Optional[str] = None
+    ) -> Generator[str, None, None]:
+        """Stream chat response with enhanced metadata (SSE format).
+        
+        Similar to stream_chat_response but uses AgentResponse for
+        richer completion metadata including tool calls and token usage.
+        
+        Emits SSE events in sequence:
+        1. Meta event with provider/model info
+        2. Content chunks as they arrive
+        3. Done event with full completion metadata
+        4. [DONE] terminator
+        
+        Args:
+            user_message: User's query to process
+            provider_override: Optional provider override
+            
+        Yields:
+            SSE-formatted strings (data: {...}\n\n)
+        """
+        try:
+            self.logger.info(f"Starting structured streaming: {user_message[:50]}...")
+            
+            # Emit model metadata first
+            model_info = self._agent.get_current_model_info(provider=provider_override)
+            meta = {
+                "event": "meta",
+                "provider": model_info["provider"],
+                "model": model_info["model"],
+            }
+            yield f"data: {json.dumps(meta)}\n\n"
+            
+            # Stream response chunks
+            chunk_count = 0
+            for chunk in self._agent.process_query_streaming(
+                user_message, provider=provider_override
+            ):
+                if chunk:
+                    chunk_count += 1
+                    yield f"data: {json.dumps({'chunk': chunk})}\n\n"
+            
+            # Get structured response for completion metadata
+            # (Note: This makes an additional call, so only use when rich metadata is needed)
+            response = self._agent.process_query_structured(
+                user_message, provider=provider_override
+            )
+            
+            completion = {
+                "event": "done",
+                "status": response.status.value,
+                "fallback": response.used_fallback,
+                "provider": response.provider,
+                "model": response.model,
+                "tools_used": len(response.tool_calls),
+                "tool_names": [tc.name for tc in response.tool_calls],
+                "token_usage": {
+                    "prompt_tokens": response.token_usage.prompt_tokens,
+                    "completion_tokens": response.token_usage.completion_tokens,
+                    "total_tokens": response.token_usage.total_tokens,
+                },
+            }
+            yield f"data: {json.dumps(completion)}\n\n"
+            yield "data: [DONE]\n\n"
+            
+            self.logger.info(
+                f"Structured streaming complete: chunks={chunk_count}, "
+                f"tools_used={len(response.tool_calls)}"
+            )
+        
+        except Exception as e:
+            self.logger.error(f"Structured streaming error: {e}")
+            error_data = json.dumps({"error": str(e)})
+            yield f"data: {error_data}\n\n"
     
 

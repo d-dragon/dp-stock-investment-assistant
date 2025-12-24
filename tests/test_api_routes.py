@@ -96,11 +96,27 @@ def _make_test_app(registry=None):
         active_calls.append((provider, model))
         return {"provider": provider, "model": model}
 
+    # Create mock chat_service for non-streaming tests
+    from unittest.mock import MagicMock
+    mock_chat_service = MagicMock()
+    mock_chat_service.process_chat_query.return_value = {
+        "response": "cleaned",
+        "provider": "provider",
+        "model": "model",
+        "fallback": False,
+        "timestamp": "2024-01-01T00:00:00Z"
+    }
+    mock_chat_service.stream_chat_response = stream_chat_response
+    mock_chat_service.extract_meta = extract_meta
+    mock_chat_service.strip_fallback_prefix = strip_fallback
+    mock_chat_service.get_timestamp = get_timestamp
+
     context = APIRouteContext(
         app=app,
         agent=agent,
         config={},
         logger=logging.getLogger("test-api-routes"),
+        chat_service=mock_chat_service,
         stream_chat_response=stream_chat_response,
         extract_meta=extract_meta,
         strip_fallback_prefix=strip_fallback,
@@ -113,11 +129,11 @@ def _make_test_app(registry=None):
     chat_blueprint = create_chat_blueprint(context)
     app.register_blueprint(health_blueprint, url_prefix="/api")
     app.register_blueprint(chat_blueprint, url_prefix="/api")
-    return app, agent, stream_calls, registry, active_calls
+    return app, agent, stream_calls, registry, active_calls, mock_chat_service
 
 
 def test_health_check_returns_healthy_status():
-    app, _, _, _, _ = _make_test_app()
+    app, _, _, _, _, _ = _make_test_app()
     client = app.test_client()
 
     response = client.get("/api/health")
@@ -128,7 +144,7 @@ def test_health_check_returns_healthy_status():
 
 
 def test_chat_endpoint_returns_processed_payload():
-    app, agent, stream_calls, _, _ = _make_test_app()
+    app, agent, stream_calls, _, _, mock_chat_service = _make_test_app()
     client = app.test_client()
 
     response = client.post("/api/chat", json={"message": "Hello world"})
@@ -140,12 +156,12 @@ def test_chat_endpoint_returns_processed_payload():
     assert payload["model"] == "model"
     assert payload["fallback"] is False
     assert payload["timestamp"] == "2024-01-01T00:00:00Z"
-    assert agent.calls == [("Hello world", None)]
+    mock_chat_service.process_chat_query.assert_called_once_with("Hello world", provider_override=None)
     assert stream_calls == []
 
 
 def test_chat_endpoint_streaming_branch():
-    app, agent, stream_calls, _, _ = _make_test_app()
+    app, agent, stream_calls, _, _, _ = _make_test_app()
     client = app.test_client()
 
     response = client.post("/api/chat", json={"message": "Stream this", "stream": True})

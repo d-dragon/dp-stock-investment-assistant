@@ -2,6 +2,7 @@
 
 import logging
 from flask import Flask
+from unittest.mock import MagicMock
 
 from web.routes.shared_context import APIRouteContext
 from web.routes.ai_chat_routes import create_chat_blueprint
@@ -41,11 +42,26 @@ def _make_test_app():
     def get_timestamp():
         return "2024-01-01T00:00:00Z"
 
+    # Create mock chat_service for non-streaming tests
+    mock_chat_service = MagicMock()
+    mock_chat_service.process_chat_query.return_value = {
+        "response": "cleaned",
+        "provider": "provider",
+        "model": "model",
+        "fallback": False,
+        "timestamp": "2024-01-01T00:00:00Z"
+    }
+    mock_chat_service.stream_chat_response = stream_chat_response
+    mock_chat_service.extract_meta = extract_meta
+    mock_chat_service.strip_fallback_prefix = strip_fallback
+    mock_chat_service.get_timestamp = get_timestamp
+
     context = APIRouteContext(
         app=app,
         agent=agent,
         config={"model_provider": "openai", "openai": {"model": "gpt-4"}},
         logger=logging.getLogger("test-chat-routes"),
+        chat_service=mock_chat_service,
         stream_chat_response=stream_chat_response,
         extract_meta=extract_meta,
         strip_fallback_prefix=strip_fallback,
@@ -55,12 +71,12 @@ def _make_test_app():
     blueprint = create_chat_blueprint(context)
     app.register_blueprint(blueprint, url_prefix="/api")
     
-    return app, agent, stream_calls
+    return app, agent, stream_calls, mock_chat_service
 
 
 def test_chat_endpoint_returns_200_for_valid_message():
     """Test chat endpoint returns 200 with valid payload."""
-    app, agent, _ = _make_test_app()
+    app, agent, _, _ = _make_test_app()
     client = app.test_client()
 
     response = client.post("/api/chat", json={"message": "Hello world"})
@@ -70,7 +86,7 @@ def test_chat_endpoint_returns_200_for_valid_message():
 
 def test_chat_endpoint_returns_processed_payload():
     """Test chat endpoint processes message and returns expected fields."""
-    app, agent, stream_calls = _make_test_app()
+    app, agent, stream_calls, mock_chat_service = _make_test_app()
     client = app.test_client()
 
     response = client.post("/api/chat", json={"message": "Hello world"})
@@ -81,24 +97,26 @@ def test_chat_endpoint_returns_processed_payload():
     assert payload["model"] == "model"
     assert payload["fallback"] is False
     assert payload["timestamp"] == "2024-01-01T00:00:00Z"
-    assert agent.calls == [("Hello world", None)]
+    # Now uses chat_service.process_chat_query instead of direct agent.process_query
+    mock_chat_service.process_chat_query.assert_called_once_with("Hello world", provider_override=None)
     assert stream_calls == []
 
 
 def test_chat_endpoint_passes_provider_override():
     """Test chat endpoint respects provider parameter."""
-    app, agent, _ = _make_test_app()
+    app, agent, _, mock_chat_service = _make_test_app()
     client = app.test_client()
 
     response = client.post("/api/chat", json={"message": "Test", "provider": "grok"})
 
     assert response.status_code == 200
-    assert agent.calls == [("Test", "grok")]
+    # Now uses chat_service.process_chat_query instead of direct agent.process_query
+    mock_chat_service.process_chat_query.assert_called_once_with("Test", provider_override="grok")
 
 
 def test_chat_endpoint_streaming_branch():
     """Test chat endpoint supports streaming responses via SSE."""
-    app, agent, stream_calls = _make_test_app()
+    app, agent, stream_calls, _ = _make_test_app()
     client = app.test_client()
 
     response = client.post("/api/chat", json={"message": "Stream this", "stream": True})
@@ -117,7 +135,7 @@ def test_chat_endpoint_streaming_branch():
 
 def test_chat_endpoint_returns_400_on_missing_message():
     """Test chat endpoint validates required message field."""
-    app, _, _ = _make_test_app()
+    app, _, _, _ = _make_test_app()
     client = app.test_client()
 
     response = client.post("/api/chat", json={})
@@ -129,7 +147,7 @@ def test_chat_endpoint_returns_400_on_missing_message():
 
 def test_config_endpoint_returns_safe_config():
     """Test config endpoint returns configuration without secrets."""
-    app, _, _ = _make_test_app()
+    app, _, _, _ = _make_test_app()
     client = app.test_client()
 
     response = client.get("/api/config")
@@ -142,7 +160,7 @@ def test_config_endpoint_returns_safe_config():
 
 def test_config_endpoint_returns_correct_defaults():
     """Test config endpoint extracts correct default values from config."""
-    app, _, _ = _make_test_app()
+    app, _, _, _ = _make_test_app()
     client = app.test_client()
 
     response = client.get("/api/config")
@@ -154,7 +172,7 @@ def test_config_endpoint_returns_correct_defaults():
 
 def test_config_endpoint_content_type_is_json():
     """Test config endpoint returns JSON content type."""
-    app, _, _ = _make_test_app()
+    app, _, _, _ = _make_test_app()
     client = app.test_client()
 
     response = client.get("/api/config")
