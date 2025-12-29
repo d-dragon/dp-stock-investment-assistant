@@ -19,8 +19,8 @@ from typing import Any, Dict, Optional, Type, Callable
 from langchain_core.tools import BaseTool
 from pydantic import Field
 
-from src.core.types import ToolCall
-from src.utils.cache import CacheBackend
+from ..types import ToolCall
+from utils.cache import CacheBackend
 
 
 class CachingTool(BaseTool):

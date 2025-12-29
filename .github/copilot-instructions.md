@@ -124,7 +124,7 @@ docker-compose down
 ## Project-Specific Guidelines
 
 ### Import & Module Organization
-- **Absolute imports**: Always use `from src.*` for application code; relative imports break tooling and tests
+- **Absolute imports**: Always use `from ` for application code; relative imports break tooling and tests
 - **Import order**: stdlib → third-party → local project modules, alphabetically sorted within groups
 - **Avoid circular dependencies**: Refactor to use dependency injection or interface abstraction
 
@@ -209,7 +209,7 @@ docker-compose down
   - `.github/chatmodes/*` – custom Copilot chat modes (docs; model routing not enforced by Copilot yet).
 
 ## Setup and run (Windows PowerShell examples)
-- Python env
+- Python en v
   - `python -m venv venv` → `venv\Scripts\Activate.ps1`
   - `python -m pip install -r requirements.txt`
 - Environment
@@ -354,7 +354,7 @@ See linked instruction files for comprehensive guidelines:
 - **Connection string format**: Ensure proper URL encoding for passwords with special characters
 
 ### Import & Dependency Issues
-- **Relative imports**: Break pytest discovery and packaging; always use absolute `from src.*` imports
+- **Relative imports**: Break pytest discovery and packaging; always use absolute `from .*` imports
 - **PYTHONPATH**: Ensure `src` is on PYTHONPATH for tests outside VS Code: `$env:PYTHONPATH = "$PWD\src"` (PowerShell)
 - **Circular dependencies**: Refactor using dependency injection or interface/protocol abstraction
 

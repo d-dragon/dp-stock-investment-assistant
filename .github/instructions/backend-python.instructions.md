@@ -518,7 +518,7 @@ Always emit errors to client; avoid silent failures. Validate inputs before proc
 - **Immutable Contexts**: Prefer `dataclasses` with `frozen=True` for dependency injection
 
 ## Import Conventions
-- **Absolute Imports**: Always use `from src.*` for application code
+- **Absolute Imports**: Always use `from .*` for application code
 - **Avoid Relative Imports**: They break tests and packaging; exceptions only for deeply nested internal modules
 - **Import Order**: stdlib → third-party → local, sorted alphabetically within groups
 
@@ -1410,7 +1410,7 @@ print(f"Fallback sequence: {sequence}")  # Should show: ["openai", "grok"]
 
 **MongoDB Unauthorized**: User may lack `listCollections` permission; always catch `Unauthorized` exception and fall back to known collection names (see Database Layer section)
 
-**Relative Imports**: Break pytest discovery and packaging; always use absolute `from src.*` imports
+**Relative Imports**: Break pytest discovery and packaging; always use absolute `from .*` imports
 
 **Real API Keys in Tests**: Mock all external services (OpenAI, financial APIs); never use production keys in tests
 

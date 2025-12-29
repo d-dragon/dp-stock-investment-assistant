@@ -96,23 +96,81 @@ If you don't have a tool for a specific request, provide helpful general guidanc
         from utils.cache import CacheBackend
         self.cache = CacheBackend.from_config(config, logger=self.logger)
         
-        # Load cached model name if available
-        cached_model_name = (
-            self.cache.get("openai_config:model_name") 
-            or self.cache.get("openai_config:model")
-        )
-        if cached_model_name:
-            self.logger.info(f"Retrieved cached model name: {cached_model_name}")
-            self.config.setdefault("model", {})["name"] = cached_model_name
+        # Don't override config with cached values - let OpenAIModelClient load fresh from .env
+        # The cache should only be used INSIDE OpenAIModelClient for runtime optimization, 
+        # not for initial config loading
         
         # Initialize tool registry
         self._tool_registry = tool_registry or get_tool_registry(logger=self.logger)
+        
+        # Initialize tools into the registry
+        self._initialize_tools()
         
         # Preload default client (for model info)
         self._client = ModelClientFactory.get_client(self.config)
         
         # Build the ReAct agent
         self._agent_executor = self._build_agent_executor()
+    
+    def _initialize_tools(self) -> None:
+        """Initialize and register tools into the ToolRegistry.
+        
+        Loads all available tool implementations and registers them
+        as enabled or disabled based on configuration.
+        """
+        try:
+            from .tools.stock_symbol import StockSymbolTool
+            from .tools.reporting import ReportingTool
+            # from .tools.tradingview import TradingViewTool  # Phase 2
+            
+            langchain_config = self.config.get('langchain', {})
+            tools_config = langchain_config.get('tools', {})
+            
+            # Check if tools are globally enabled
+            tools_enabled = tools_config.get('enabled', True)
+            
+            if not tools_enabled:
+                self.logger.info("Tools globally disabled in configuration")
+                return
+            
+            # Initialize and register StockSymbolTool
+            try:
+                stock_tool = StockSymbolTool(
+                    data_manager=self.data_manager,
+                    cache=self.cache,
+                    logger=self.logger.getChild("stock_symbol_tool")
+                )
+                self._tool_registry.register(stock_tool, enabled=True)
+            except Exception as e:
+                self.logger.warning(f"Failed to initialize StockSymbolTool: {e}")
+            
+            # Initialize and register ReportingTool
+            try:
+                reporting_tool = ReportingTool(
+                    data_manager=self.data_manager,
+                    cache=self.cache,
+                    logger=self.logger.getChild("reporting_tool")
+                )
+                self._tool_registry.register(reporting_tool, enabled=True)
+            except Exception as e:
+                self.logger.warning(f"Failed to initialize ReportingTool: {e}")
+            
+            # TradingViewTool - Phase 2
+            # try:
+            #     tradingview_tool = TradingViewTool(
+            #         data_manager=self.data_manager,
+            #         cache=self.cache,
+            #         logger=self.logger.getChild("tradingview_tool")
+            #     )
+            #     self._tool_registry.register(tradingview_tool, enabled=False)  # Disabled for Phase 2
+            # except Exception as e:
+            #     self.logger.warning(f"Failed to initialize TradingViewTool: {e}")
+            
+            enabled_count = len(self._tool_registry.get_enabled_tools())
+            self.logger.info(f"Tools initialized: {enabled_count} enabled, {len(self._tool_registry)} total")
+            
+        except Exception as e:
+            self.logger.error(f"Failed to initialize tools: {e}", exc_info=True)
     
     def _build_agent_executor(self):
         """Build LangGraph ReAct agent.
@@ -142,11 +200,11 @@ If you don't have a tool for a specific request, provide helpful general guidanc
             )
             
             # Create ReAct agent using LangChain's create_agent
-            # The system_prompt parameter accepts a SystemMessage or string
+            # This is the current official API (moved from langgraph.prebuilt.create_react_agent)
             agent = create_agent(
-                model=llm, 
+                model=llm,
                 tools=enabled_tools,
-                system_prompt=self.REACT_SYSTEM_PROMPT,
+                system_prompt=self.REACT_SYSTEM_PROMPT
             )
             
             self.logger.info("LangGraph ReAct agent built successfully")

@@ -11,7 +11,7 @@ from __future__ import annotations
 import logging
 from typing import Any, Dict, List, Optional, Type
 
-from src.core.tools.base import CachingTool
+from .base import CachingTool
 
 
 # Module-level singleton
