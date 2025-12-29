@@ -124,13 +124,13 @@ class ConfigLoader:
             'MODEL_ALLOW_FALLBACK': ('model', 'allow_fallback'),
             'MODEL_FALLBACK_ORDER': ('model', 'fallback_order'),
             'MODEL_DEBUG_PROMPT': ('model', 'debug_prompt'),
-            # Grok specific
-            'GROK_API_KEY': ('model', 'grok', 'api_key'),
-            'GROK_MODEL': ('model', 'grok', 'model'),
-            'GROK_BASE_URL': ('model', 'grok', 'base_url'),
-            'GROK_TIMEOUT': ('model', 'grok', 'timeout'),
-            'GROK_MAX_TOKENS': ('model', 'grok', 'max_tokens'),
-            'GROK_TEMPERATURE': ('model', 'grok', 'temperature'),
+            # Grok specific (top-level, not under 'model')
+            'GROK_API_KEY': ('grok', 'api_key'),
+            'GROK_MODEL': ('grok', 'model'),
+            'GROK_BASE_URL': ('grok', 'base_url'),
+            'GROK_TIMEOUT': ('grok', 'timeout'),
+            'GROK_MAX_TOKENS': ('grok', 'max_tokens'),
+            'GROK_TEMPERATURE': ('grok', 'temperature'),
             # Financial APIs
             'ALPHA_VANTAGE_API_KEY': ('financial_apis', 'alpha_vantage', 'api_key'),
             'ALPHA_VANTAGE_ENABLED': ('financial_apis', 'alpha_vantage', 'enabled'),

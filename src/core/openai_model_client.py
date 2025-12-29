@@ -36,26 +36,9 @@ class OpenAIModelClient(BaseModelClient):
 
     def _get_config_value(self, key: str, model_cfg: Dict[str, Any], openai_cfg: Dict[str, Any], default: Any = None) -> Any:
         """
-        Get configuration value with cache-first approach.
-        Priority: Redis cache -> model config -> openai config -> default
+        Get configuration value - check config first, THEN cache (development-friendly).
+        Priority: config -> Redis cache -> default
         """
-        # Determine the actual cache key based on the configuration key
-        if key == "model":
-            cache_key = "openai_config:model_name"  # More descriptive since we're caching the model name
-        else:
-            cache_key = f"openai_config:{key}"
-            
-        # Try to get from cache first
-        cached_value = self.cache.get(cache_key)
-        if cached_value is not None:
-            self.logger.debug(f"Retrieved {key} from cache")
-            # Handle different data types
-            if key in ["temperature"]:
-                return float(cached_value)
-            elif key in ["max_tokens"]:
-                return int(cached_value)
-            return cached_value
-
         # Fallback to config with precedence: explicit model.* overrides legacy openai.*
         if key == "api_key":
             value = model_cfg.get("openai", {}).get("api_key") or openai_cfg.get("api_key") or default
@@ -63,12 +46,19 @@ class OpenAIModelClient(BaseModelClient):
             value = model_cfg.get("name") or openai_cfg.get("model") or default
         else:
             value = model_cfg.get(key, openai_cfg.get(key, default))
-
-        # Cache the value for future use (with 1 hour TTL)
-        if value is not None:
-            self.cache.set(cache_key, str(value), ttl_seconds=3600)
-            self.logger.debug(f"Cached {key} value")
-
+        
+        # Only use cache if config value is missing
+        if value is None:
+            cache_key = f"openai_config:{key}" if key != "model" else "openai_config:model_name"
+            cached_value = self.cache.get(cache_key)
+            if cached_value is not None:
+                self.logger.debug(f"Retrieved {key} from cache (config missing)")
+                if key in ["temperature"]:
+                    return float(cached_value)
+                elif key in ["max_tokens"]:
+                    return int(cached_value)
+                return cached_value
+    
         return value
 
     def update_config_in_cache(self, key: str, value: Any, *, ttl_seconds: int = 3600) -> None:

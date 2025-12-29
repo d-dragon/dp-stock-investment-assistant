@@ -14,8 +14,8 @@ from typing import Any, Dict, Optional
 
 from pydantic import Field
 
-from src.core.tools.base import CachingTool
-from src.utils.cache import CacheBackend
+from .base import CachingTool
+from utils.cache import CacheBackend
 
 
 class ReportingTool(CachingTool):

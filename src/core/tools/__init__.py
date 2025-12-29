@@ -15,11 +15,11 @@ Registry:
 Reference: .github/instructions/backend-python.instructions.md § Model Factory
 """
 
-from src.core.tools.base import CachingTool
-from src.core.tools.registry import ToolRegistry, get_tool_registry, reset_tool_registry
-from src.core.tools.stock_symbol import StockSymbolTool
-from src.core.tools.reporting import ReportingTool
-from src.core.tools.tradingview import TradingViewTool
+from .base import CachingTool
+from .registry import ToolRegistry, get_tool_registry, reset_tool_registry
+from .stock_symbol import StockSymbolTool
+from .reporting import ReportingTool
+from .tradingview import TradingViewTool
 
 __all__ = [
     # Base
