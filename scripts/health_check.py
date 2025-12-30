@@ -36,11 +36,21 @@ try:
         "MongoDB URI": config.get('mongodb', {}).get('uri'),
         "Redis Host": config.get('redis', {}).get('host'),
     }
+
+    # Keys whose values are sensitive and must not be printed
+    sensitive_keys = {
+        "OpenAI API Key",
+        "Grok API Key",
+    }
     
     for key, value in checks.items():
         if value:
             status = "✅"
-            value_str = str(value)[:40] + "..." if len(str(value)) > 40 else str(value)
+            if key in sensitive_keys:
+                # Do not log the actual secret value
+                value_str = "[SET]"
+            else:
+                value_str = str(value)[:40] + "..." if len(str(value)) > 40 else str(value)
         else:
             status = "❌"
             value_str = "NOT SET"
