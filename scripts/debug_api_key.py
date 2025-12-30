@@ -4,6 +4,23 @@
 import os
 import sys
 
+
+def mask_secret(secret: str) -> str:
+    """
+    Return a safely masked representation of a secret value for logging.
+
+    Shows only a small portion of the secret plus its length to help with
+    debugging mismatches, while avoiding exposing the full value.
+    """
+    if not secret:
+        return "<empty>"
+    # If the secret is very short, avoid printing any of it.
+    if len(secret) <= 8:
+        return "<redacted>"
+    visible = 4
+    return f"{secret[:visible]}...{secret[-visible:]} (len={len(secret)})"
+
+
 print("=" * 80)
 print("DEBUG: API KEY SOURCE INVESTIGATION")
 print("=" * 80)
@@ -14,11 +31,10 @@ print("-" * 80)
 with open('.env', 'r') as f:
     for line in f:
         if 'OPENAI_API_KEY' in line:
-            # Show just the first and last 20 chars
             parts = line.split('=')
             if len(parts) == 2:
                 key_value = parts[1].strip()
-                print(f"FILE:  OPENAI_API_KEY={key_value[:20]}...{key_value[-20:]}")
+                print(f"FILE:  OPENAI_API_KEY={mask_secret(key_value)}")
 
 # Step 2: Load .env
 print("\n[Step 2] Loading .env with dotenv:")
@@ -27,7 +43,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 env_key_raw = os.getenv('OPENAI_API_KEY', '')
-print(f"MEMRY: OPENAI_API_KEY={env_key_raw[:20]}...{env_key_raw[-20:]}")
+print(f"MEMRY: OPENAI_API_KEY={mask_secret(env_key_raw)}")
 
 # Step 3: Load ConfigLoader
 print("\n[Step 3] Loading ConfigLoader:")
@@ -39,7 +55,7 @@ print("Calling ConfigLoader.load_config()...")
 config = ConfigLoader.load_config()
 
 config_key = config.get('openai', {}).get('api_key', '')
-print(f"CONFIG: openai.api_key={config_key[:20]}...{config_key[-20:]}")
+print(f"CONFIG: openai.api_key={mask_secret(config_key)}")
 
 # Step 4: Compare
 print("\n[Step 4] Comparison:")
@@ -53,8 +69,8 @@ elif config_key == "your-openai-api-key-here":
 else:
     print("❌ MISMATCH: .env and loaded config are DIFFERENT")
     print(f"\nDETAILS:")
-    print(f"  From .env:    {env_key_raw[:30]}...{env_key_raw[-20:]}")
-    print(f"  From config:  {config_key[:30]}...{config_key[-20:]}")
+    print(f"  From .env:    {mask_secret(env_key_raw)}")
+    print(f"  From config:  {mask_secret(config_key)}")
     
     # Try to identify the mystery key
     if 'usYTqinoFaZs' in config_key:
