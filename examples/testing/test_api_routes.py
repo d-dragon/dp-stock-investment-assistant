@@ -107,7 +107,8 @@ def create_test_app(mock_agent=None, mock_service=None) -> Flask:
             return jsonify(updated_user), 200
         
         except ValueError as e:
-            return jsonify({"error": str(e)}), 400
+            app.logger.error(f"Validation error updating user {user_id}: {e}")
+            return jsonify({"error": "Invalid user data"}), 400
         except Exception as e:
             app.logger.error(f"Update user error: {e}")
             return jsonify({"error": "Failed to update user"}), 500
