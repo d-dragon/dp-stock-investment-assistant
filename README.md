@@ -246,6 +246,44 @@ logging.basicConfig(level=logging.DEBUG)
 - **Isolated Flask apps** - Each test group uses isolated Flask application instances to prevent conflicts
 
 ---
+
+## LangSmith Studio Integration
+
+The project includes full integration with **LangSmith Studio** for visual debugging, testing, and monitoring of the AI agent's execution graph.
+
+### Quick Start
+
+```powershell
+# 1. Ensure LangGraph CLI is installed
+pip install "langgraph-cli[inmem]"
+
+# 2. Set your LangSmith API key
+$env:LANGSMITH_API_KEY = "lsv2_..."
+
+# 3. Start the development server
+langgraph dev
+```
+
+The agent will be available at:
+- **API**: http://127.0.0.1:2024
+- **Studio UI**: https://smith.langchain.com/studio/?baseUrl=http://127.0.0.1:2024
+
+### Key Features
+- **Visual Graph Inspection**: See the agent's decision flow in real-time
+- **Interactive Testing**: Send messages and observe tool invocations
+- **Trace Analysis**: Debug issues by examining execution history
+- **Prompt Engineering**: Test system prompts and tool configurations
+
+### Documentation
+
+📖 **[Complete LangSmith Studio Guide](docs/LANGSMITH_STUDIO_GUIDE.md)** - Comprehensive documentation covering:
+- Architecture and bootstrap approach explanation
+- Step-by-step setup instructions
+- Development workflows and use cases
+- Troubleshooting guide
+
+---
+
 ## DB setup and migration
 
 Checklist

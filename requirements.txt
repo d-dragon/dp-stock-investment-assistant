@@ -9,6 +9,8 @@ langchain>=1.0.0
 langchain-openai>=0.3.0           # OpenAI integration for LangChain
 langchain-community>=0.3.0        # Community tools and utilities
 langchain-core>=0.3.0             # Core abstractions (prompts, messages)
+langgraph-cli[inmem]>=0.2.0       # Studio local dev server
+langsmith>=0.2.0                 # LangSmith tracing SDK
 
 # --- Data Processing ---
 pandas>=2.0.0
