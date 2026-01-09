@@ -2,6 +2,9 @@ app:
   log_level: "DEBUG"
 model:
   debug_prompt: true
+langchain:
+  tracing:
+    enabled: true  # Enable Studio for local development
 database:
   mongodb:
     enabled: true

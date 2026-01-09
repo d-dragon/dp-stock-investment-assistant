@@ -1,5 +1,8 @@
 app:
   log_level: "DEBUG"
+langchain:
+  tracing:
+    enabled: true  # Enable Studio for local K8s development
 database:
   mongodb:
     enabled: true

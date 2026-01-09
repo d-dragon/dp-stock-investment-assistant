@@ -136,3 +136,6 @@ Thumbs.db
 *.code-workspace
 __azurite_db_blob__.json
 __azurite_db_blob_extent__.json
+
+# Langgraph api
+.langgraph_api

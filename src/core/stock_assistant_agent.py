@@ -119,9 +119,9 @@ If you don't have a tool for a specific request, provide helpful general guidanc
         as enabled or disabled based on configuration.
         """
         try:
-            from .tools.stock_symbol import StockSymbolTool
-            from .tools.reporting import ReportingTool
-            # from .tools.tradingview import TradingViewTool  # Phase 2
+            from src.core.tools.stock_symbol import StockSymbolTool
+            from src.core.tools.reporting import ReportingTool
+            # from src.core.tools.tradingview import TradingViewTool  # Phase 2
             
             langchain_config = self.config.get('langchain', {})
             tools_config = langchain_config.get('tools', {})
@@ -744,3 +744,55 @@ Always verify important financial decisions with a qualified advisor.
 
 # Alias for backward compatibility
 StockAgent = StockAssistantAgent
+
+
+# ============================================================================
+# LangSmith Studio Integration
+# ============================================================================
+
+def create_stock_assistant_agent(config: Optional[Dict] = None):
+    """
+    Factory function for LangSmith Studio (langgraph.json).
+    
+    Creates a StockAssistantAgent instance and returns the underlying
+    CompiledStateGraph for Studio visualization and debugging.
+    
+    Args:
+        config: Optional configuration dict. If None, loads from ConfigLoader.
+                Studio may pass runtime config overrides.
+    
+    Returns:
+        CompiledStateGraph: The agent executor compatible with Studio
+    
+    Usage:
+        # Studio imports via bootstrap: ./src/core/langgraph_bootstrap.py:agent
+        # The bootstrap sets up sys.path for project imports
+        
+        # Manual/programmatic usage
+        agent_graph = create_stock_assistant_agent()
+        response = agent_graph.invoke({"messages": [("user", "What is AAPL?")]})
+    """
+    from utils.config_loader import ConfigLoader
+    
+    # Load base config
+    if config is None:
+        cfg = ConfigLoader.load_config()
+    else:
+        # Merge Studio runtime config with local config
+        base_cfg = ConfigLoader.load_config()
+        cfg = {**base_cfg, **config}
+    
+    # Import DataManager here to avoid circular imports with agent.py
+    from core.data_manager import DataManager
+    dm = DataManager(cfg)
+    
+    # Create agent instance
+    agent_instance = StockAssistantAgent(cfg, dm)
+    
+    # Return the CompiledStateGraph (created by create_agent())
+    return agent_instance._agent_executor
+
+
+# Module-level export for direct usage (when src is in PYTHONPATH)
+# For Studio, use langgraph_bootstrap.py which sets up the path first
+agent = create_stock_assistant_agent()

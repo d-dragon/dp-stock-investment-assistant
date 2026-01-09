@@ -131,6 +131,11 @@ class ConfigLoader:
             'GROK_TIMEOUT': ('grok', 'timeout'),
             'GROK_MAX_TOKENS': ('grok', 'max_tokens'),
             'GROK_TEMPERATURE': ('grok', 'temperature'),
+            # LangSmith Tracing
+            'LANGSMITH_TRACING': ('langchain', 'tracing', 'enabled'),
+            'LANGSMITH_API_KEY': ('langchain', 'tracing', 'api_key'),
+            'LANGSMITH_PROJECT': ('langchain', 'tracing', 'project'),
+            'LANGSMITH_ENDPOINT': ('langchain', 'tracing', 'endpoint'),
             # Financial APIs
             'ALPHA_VANTAGE_API_KEY': ('financial_apis', 'alpha_vantage', 'api_key'),
             'ALPHA_VANTAGE_ENABLED': ('financial_apis', 'alpha_vantage', 'enabled'),
@@ -167,7 +172,7 @@ class ConfigLoader:
         # Restrict to secret-like variables for stricter modes
         secret_like_keys = {
             'OPENAI_API_KEY', 'GROK_API_KEY', 'ALPHA_VANTAGE_API_KEY',
-            'MONGODB_PASSWORD', 'REDIS_PASSWORD'
+            'LANGSMITH_API_KEY', 'MONGODB_PASSWORD', 'REDIS_PASSWORD'
         }
         env_mappings = env_mappings_all if mode == "all" else {k: v for k, v in env_mappings_all.items() if k in secret_like_keys}
 
