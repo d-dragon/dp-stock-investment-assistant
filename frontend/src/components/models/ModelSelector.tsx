@@ -28,7 +28,9 @@ const ModelSelector: React.FC<ModelSelectorProps> = ({
       try {
         setIsLoading(true);
         setError(null);
-        const response: ModelListResponse = await modelsApi.listModels(refresh);
+        const response: ModelListResponse = refresh 
+          ? await modelsApi.refreshModels() 
+          : await modelsApi.listModels();
         if (!isMounted) return;
         setModels(response.models);
         setCacheStatus(response.source);
