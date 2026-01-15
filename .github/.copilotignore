@@ -1,0 +1,84 @@
+﻿# GitHub Copilot Ignore File
+# Files and directories listed here will be excluded from Copilot's context
+# Format: Same as .gitignore (glob patterns)
+
+# ==============================================================================
+# EXAMPLES AND DEMONSTRATIONS (MAIN PROBLEM - REDUCES ~21 REFERENCES)
+# ==============================================================================
+# These are reference/documentation files - don't need in active context
+examples/
+examples/**
+
+# ==============================================================================
+# BUILD ARTIFACTS AND CACHES
+# ==============================================================================
+__pycache__/
+*.py[cod]
+*.class
+*.so
+build/
+dist/
+*.egg-info/
+.pytest_cache/
+.tox/
+htmlcov/
+.coverage
+coverage.xml
+
+# Node modules and frontend build
+frontend/node_modules/
+frontend/build/
+frontend/.next/
+
+# ==============================================================================
+# INFRASTRUCTURE AS CODE (REDUCE NOISE)
+# ==============================================================================
+# Keep these out unless explicitly working on infrastructure
+IaC/infra/terraform/.terraform/
+IaC/helm/dp-stock/charts/
+
+# ==============================================================================
+# DOCUMENTATION THAT'S RARELY EDITED
+# ==============================================================================
+# Keep high-level docs out of active context
+docs/High-level Design/*.drawio
+docs/High-level Design/*.xml
+*.drawio
+*.drawio.xml
+
+# ==============================================================================
+# TEST REPORTS AND LOGS
+# ==============================================================================
+reports/
+*.log
+*.log.*
+
+# ==============================================================================
+# TEMPORARY AND GENERATED FILES
+# ==============================================================================
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# ==============================================================================
+# SENSITIVE FILES (ALREADY IN .gitignore BUT EXTRA SAFETY)
+# ==============================================================================
+.env
+.env.local
+.env.*.local
+*.key
+*.pem
+*.crt
+secrets/
+
+# ==============================================================================
+# LEGACY OR ARCHIVED CODE
+# ==============================================================================
+# Uncomment if you have archived code that shouldn't be referenced
+# archive/
+# deprecated/
+# old/
