@@ -119,9 +119,9 @@ If you don't have a tool for a specific request, provide helpful general guidanc
         as enabled or disabled based on configuration.
         """
         try:
-            from src.core.tools.stock_symbol import StockSymbolTool
-            from src.core.tools.reporting import ReportingTool
-            # from src.core.tools.tradingview import TradingViewTool  # Phase 2
+            from core.tools.stock_symbol import StockSymbolTool
+            from core.tools.reporting import ReportingTool
+            # from core.tools.tradingview import TradingViewTool  # Phase 2
             
             langchain_config = self.config.get('langchain', {})
             tools_config = langchain_config.get('tools', {})
