@@ -7,7 +7,7 @@ to ensure Studio integration works correctly.
 Reference: .github/copilot-instructions.md § Testing with pytest
 """
 
-import os
+
 import sys
 from pathlib import Path
 from unittest.mock import patch, MagicMock
