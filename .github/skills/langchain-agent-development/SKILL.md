@@ -364,8 +364,8 @@ from src.core.base_model_client import BaseModelClient
 
 - **Testing Patterns**: See [backend-python.instructions.md](../../instructions/backend-python.instructions.md) § Testing with pytest
 - **Service Layer**: See [backend-python.instructions.md](../../instructions/backend-python.instructions.md) § Service Layer
-- **Architecture**: See [LANGCHAIN_AGENT_ARCHITECTURE.md](../../../docs/High-level%20Design/LANGCHAIN_AGENT_ARCHITECTURE.md)
-
+- **Architecture**: See [LANGCHAIN_AGENT_ARCHITECTURE.md](../../../docs/langchain-agent/LANGCHAIN_AGENT_ARCHITECTURE.md)
+- **Langchain agent HOW TO**: See [LANGCHAIN_AGENT_HOWTO.md](../../../docs/langchain-agent/LANGCHAIN_AGENT_HOWTO.md)
 ---
 
 ## Checklists
