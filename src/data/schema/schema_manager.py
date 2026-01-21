@@ -9,6 +9,7 @@ from pymongo.errors import PyMongoError
 from .accounts_schema import ACCOUNTS_INDEXES, get_accounts_validation
 from .analyses_schema import ANALYSES_INDEXES, get_analyses_validation
 from .chats_schema import CHATS_INDEXES, get_chats_validation
+from .conversations_schema import CONVERSATIONS_INDEXES, get_conversations_validation
 from .groups_schema import GROUPS_INDEXES, get_groups_validation
 from .investment_ideas_schema import (
     INVESTMENT_IDEAS_INDEXES,
@@ -158,6 +159,7 @@ class SchemaManager:
         success &= self.setup_analyses_collection()
         success &= self.setup_reports_collection()
         success &= self.setup_chats_collection()
+        success &= self.setup_conversations_collection()
         success &= self.setup_notifications_collection()
         success &= self.setup_portfolios_collection()
         success &= self.setup_positions_collection()
@@ -461,4 +463,12 @@ class SchemaManager:
             "market_snapshots",
             get_market_snapshots_validation(),
             MARKET_SNAPSHOTS_INDEXES
+        )
+
+    def setup_conversations_collection(self):
+        """Create and configure the conversations collection for agent memory tracking."""
+        return self._setup_standard_collection(
+            "conversations",
+            get_conversations_validation(),
+            CONVERSATIONS_INDEXES
         )
