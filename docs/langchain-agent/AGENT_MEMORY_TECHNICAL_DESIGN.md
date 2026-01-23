@@ -1,22 +1,24 @@
 # Agent Memory Technical Design
 
-> **Document Version**: 1.0  
-> **Last Updated**: January 21, 2026  
+> **Document Version**: 1.1  
+> **Last Updated**: January 22, 2026  
 > **Phase**: 2A.1 - Long-Term Conversation Memory  
-> **Status**: Technical Design Complete
+> **Status**: Technical Design Complete  
+> **Governing ADR**: [ADR-001 — Layered LLM Architecture](./AGENT_ARCHITECTURE_DECISION_RECORDS.md)
 
 ---
 
 ## Table of Contents
 
 1. [Executive Summary](#executive-summary)
-2. [Architectural Decisions](#architectural-decisions)
-3. [Data Model Design](#data-model-design)
-4. [Sequence Diagrams](#sequence-diagrams)
-5. [API Contract Changes](#api-contract-changes)
-6. [Configuration Requirements](#configuration-requirements)
-7. [Implementation Roadmap](#implementation-roadmap)
-8. [Testing Strategy](#testing-strategy)
+2. [Alignment with ADR-001](#alignment-with-adr-001)
+3. [Architectural Decisions](#architectural-decisions)
+4. [Data Model Design](#data-model-design)
+5. [Sequence Diagrams](#sequence-diagrams)
+6. [API Contract Changes](#api-contract-changes)
+7. [Configuration Requirements](#configuration-requirements)
+8. [Implementation Roadmap](#implementation-roadmap)
+9. [Testing Strategy](#testing-strategy)
 
 ---
 
@@ -30,10 +32,12 @@ Implement persistent conversation memory for the Stock Assistant LangChain agent
 
 | Principle | Description |
 |-----------|-------------|
-| **Dual Memory Strategy** | Short-term (checkpointer) + Long-term (vector store) |
+| **Dual Memory Strategy** | Short-term (checkpointer) + Long-term (vector store for personalization) |
+| **Memory Never Stores Facts** | Financial data stays in RAG/Tools layer per ADR-001 |
 | **Backward Compatibility** | Existing APIs continue to work without `session_id` |
 | **Separation of Concerns** | LangGraph handles agent state; ChatRepository handles UI queries |
 | **Native Integration** | Use LangGraph's built-in MongoDBSaver for checkpoints |
+| **Archive Over Delete** | Sessions archived for historical reference, not purged |
 
 ### Scope
 
@@ -42,11 +46,66 @@ Implement persistent conversation memory for the Stock Assistant LangChain agent
 - New MongoDB collections for agent memory
 - API changes to support `session_id` parameter
 - Memory summarization for long conversations
+- Conversation archival strategy
 
 **Out of Scope (Phase 2A.2+):**
 - Long-term vector store memory (semantic search over past conversations)
 - Cross-session memory retrieval
-- User preference learning
+- User preference learning (LTM personalization layer)
+
+---
+
+## Alignment with ADR-001
+
+This technical design implements the **Short-Term Memory (STM)** component defined in ADR-001. The following table maps ADR principles to implementation decisions:
+
+| ADR Principle | Implementation |
+|---|---|
+| **Memory never stores facts** | Conversation checkpoints and summaries store messages, preferences, and routing hints only; no prices, ratios, filings, or conclusions. |
+| **RAG never stores opinions** | RAG indices are sourced evidence only; interpretations remain in LLM output with citations. |
+| **Fine-tuning never stores knowledge** | Fine-tuning enforces structure and tone; training excludes invented data and forecasts. |
+| **Prompting controls behavior, not data** | Prompt compiler injects rules and schema; data is injected at runtime from STM/LTM/RAG/tools. |
+| **Tools compute numbers, LLM reasons about them** | Calculations are performed by tools; summaries reference tool calls without persisting outputs. |
+| **Investment data sources are external** | Market data and filings come from approved sources or internal databases via tools; memory only stores references. |
+| **Market manipulation safeguards are enforced** | Responses are informational and grounded in verifiable sources; no price influence or trade instructions. |
+
+| ADR Principle | Implementation |
+|---------------|----------------|
+| **Memory never stores facts** | Conversation checkpoints store messages only; no financial data, prices, or computed metrics |
+| **RAG never stores opinions** | Memory layer distinct from RAG indices (future `memory_vectors` for semantic recall only) |
+| **Prompting controls behavior** | Prompt compiler summarizes LTM/STM to ≤2 lines (future integration) |
+| **Tools compute numbers** | Memory does not persist tool outputs—only references to tools called |
+
+### Memory Layer Boundaries
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                      MEMORY BOUNDARIES (per ADR-001)                         │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│   ✅ STORED IN MEMORY                    ❌ NEVER IN MEMORY                  │
+│   ─────────────────────                  ──────────────────                  │
+│   • User query text                      • Stock prices (real-time/historical)│
+│   • Assistant response text              • Financial ratios/metrics          │
+│   • Tool call references (name, args)    • Valuation assessments             │
+│   • Session assumptions                  • Price targets/forecasts           │
+│   • Conversation summaries               • News content or filing text       │
+│   • Pinned intents                       • Analytical conclusions            │
+│   • Focused symbols (by name only)       • RAG-retrieved document content    │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+### STM Design per ADR-001 Section 6.2
+
+| ADR Specification | Technical Implementation |
+|-------------------|-------------------------|
+| Session-scoped conversations | `conversations` collection with `session_id` FK |
+| Archive option (not delete) | `status: archived` with read-only enforcement |
+| Workspace-bound isolation | `session.workspace_id` ensures context isolation |
+| Selective recall | `summarize_threshold` triggers condensation |
+| Query-specific retrieval | Future: RAG over `memory_vectors` collection |
+| Stores conversational state only | Checkpoint stores messages, not financial data |
 
 ---
 
@@ -54,36 +113,45 @@ Implement persistent conversation memory for the Stock Assistant LangChain agent
 
 ### Decision 1: Dual Memory Architecture
 
-**Decision**: Implement two types of memory with distinct purposes.
+**Decision**: Implement two types of memory with distinct purposes aligned with ADR-001.
 
 ```
-┌─────────────────────────────────────────────────────────────────────┐
-│                     MEMORY ARCHITECTURE                              │
-├─────────────────────────────────────────────────────────────────────┤
-│                                                                      │
-│  ┌─────────────────────────────┐    ┌─────────────────────────────┐ │
-│  │   SHORT-TERM MEMORY         │    │   LONG-TERM MEMORY          │ │
-│  │   (Conversation Buffer)     │    │   (Vector Store)            │ │
-│  ├─────────────────────────────┤    ├─────────────────────────────┤ │
-│  │ • Thread-scoped             │    │ • Cross-session             │ │
-│  │ • LangGraph Checkpointer    │    │ • Semantic search           │ │
-│  │ • Auto-summarization        │    │ • MongoDB Atlas Vector      │ │
-│  │ • Full message history      │    │ • Embedding-based retrieval │ │
-│  └─────────────────────────────┘    └─────────────────────────────┘ │
-│              │                                   │                   │
-│              ▼                                   ▼                   │
-│  ┌─────────────────────────────┐    ┌─────────────────────────────┐ │
-│  │  agent_checkpoints          │    │  memory_vectors             │ │
-│  │  (MongoDB Collection)       │    │  (MongoDB Collection)       │ │
-│  └─────────────────────────────┘    └─────────────────────────────┘ │
-│                                                                      │
-└─────────────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                     MEMORY ARCHITECTURE (ADR-001 Aligned)                    │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│  ┌─────────────────────────────┐    ┌─────────────────────────────────────┐ │
+│  │   SHORT-TERM MEMORY (STM)   │    │   LONG-TERM MEMORY (LTM)            │ │
+│  │   (Conversation Buffer)     │    │   (Personalization - FUTURE)        │ │
+│  ├─────────────────────────────┤    ├─────────────────────────────────────┤ │
+│  │ • Thread-scoped             │    │ • User preferences & risk profile  │ │
+│  │ • LangGraph Checkpointer    │    │ • Symbol tracking context          │ │
+│  │ • Auto-summarization        │    │ • Investment style preferences     │ │
+│  │ • Full message history      │    │ • NO financial facts (ADR rule)    │ │
+│  │ • Archive over delete       │    │ • Audit trail for changes          │ │
+│  └─────────────────────────────┘    └─────────────────────────────────────┘ │
+│              │                                   │                          │
+│              ▼                                   ▼                          │
+│  ┌─────────────────────────────┐    ┌─────────────────────────────────────┐ │
+│  │  agent_checkpoints          │    │  user_preferences (FUTURE)          │ │
+│  │  conversations              │    │  symbol_tracking (FUTURE)           │ │
+│  │  (MongoDB Collections)      │    │  (MongoDB Collections)              │ │
+│  └─────────────────────────────┘    └─────────────────────────────────────┘ │
+│                                                                              │
+│  ┌──────────────────────────────────────────────────────────────────────┐   │
+│  │   SEMANTIC MEMORY (Future - memory_vectors)                          │   │
+│  │   • Cross-session retrieval via embeddings                           │   │
+│  │   • Query-specific recall (RAG over past conversations)              │   │
+│  └──────────────────────────────────────────────────────────────────────┘   │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
 ```
 
 **Rationale:**
-- Short-term memory enables coherent multi-turn conversations
-- Long-term memory (future) enables learning from past interactions
-- Separation allows independent scaling and optimization
+- Short-term memory enables coherent multi-turn conversations within a session
+- Long-term memory (future) enables personalization without contaminating factual analysis
+- Semantic memory (future) enables cross-session retrieval via explicit user request
+- Clear separation prevents hallucination and maintains analytical integrity per ADR-001
 
 ---
 
@@ -142,14 +210,39 @@ Implement persistent conversation memory for the Stock Assistant LangChain agent
 
 ---
 
-### Decision 4: Conversation Collection Introduction
+### Decision 4: Conversation Collection with Archive Strategy
 
 **Decision**: Introduce new `conversations` collection with 1:1 mapping to `sessions`.
 
 **Purpose:**
 - Track conversation metadata (message count, token usage, summary)
 - Enable memory-specific operations without polluting session entity
-- Support future features like conversation archival
+- Support conversation archival per ADR-001 (archive over delete)
+- Maintain workspace isolation per ADR-001 Section 6.2
+
+**Archive Strategy (per ADR-001 Section 6.2):**
+
+| Status | Description | Behavior |
+|--------|-------------|----------|
+| `active` | Current working conversation | Full context available |
+| `summarized` | Long conversation compressed | Summary in active context |
+| `archived` | Session closed by user | Not in active context, query-retrievable |
+| ~~`deleted`~~ | **Never used** | ADR: Archive over delete |
+
+**Archive Lifecycle:**
+```
+┌──────────┐    auto-summarize    ┌─────────────┐    user closes    ┌──────────┐
+│  active  │ ──────────────────►  │ summarized  │ ────────────────► │ archived │
+└──────────┘    (token limit)     └─────────────┘     session       └──────────┘
+                                                                         │
+                                                                         │ explicit
+                                                                         │ request
+                                                                         ▼
+                                                               ┌──────────────────┐
+                                                               │ Query-retrievable │
+                                                               │ via RAG (future)  │
+                                                               └──────────────────┘
+```
 
 **Relationship:**
 
@@ -231,7 +324,13 @@ When total_tokens > summarize_threshold:
 
 #### 1. `conversations` Collection (NEW)
 
-**Purpose**: Track conversation metadata and memory state.
+**Purpose**: Track conversation metadata and memory state (per ADR-001 STM).
+
+**ADR-001 Compliance Notes:**
+- Stores conversation state only (assumptions, focused symbols, pinned intents)
+- **Never stores**: market data, computed ratios, analytical conclusions
+- Archive over delete: status transitions to "archived", never hard deleted
+- Workspace isolation enforced via session_id → workspace relationship
 
 ```javascript
 // conversations_schema.py equivalent
@@ -252,7 +351,7 @@ CONVERSATIONS_SCHEMA = {
         },
         "status": {
             "bsonType": "string",
-            "enum": ["active", "summarized", "archived"],
+            "enum": ["active", "summarized", "archived"],  // NO "deleted" per ADR
             "description": "Conversation memory status"
         },
         "message_count": {
@@ -275,6 +374,15 @@ CONVERSATIONS_SCHEMA = {
             "bsonType": "date",
             "description": "Timestamp of last message"
         },
+        "archived_at": {
+            "bsonType": "date",
+            "description": "Timestamp when archived (null if active/summarized)"
+        },
+        "archive_reason": {
+            "bsonType": "string",
+            "enum": ["user_closed", "inactivity", "workspace_archived"],
+            "description": "Why conversation was archived"
+        },
         "created_at": {
             "bsonType": "date",
             "description": "Creation timestamp"
@@ -286,6 +394,19 @@ CONVERSATIONS_SCHEMA = {
         "metadata": {
             "bsonType": "object",
             "description": "Additional metadata (model used, tool calls count, etc.)"
+        },
+        // Conversational state per ADR-001 (NOT facts)
+        "focused_symbols": {
+            "bsonType": "array",
+            "description": "Symbols currently in focus for this session"
+        },
+        "pinned_intents": {
+            "bsonType": "array",
+            "description": "User-pinned intents for context retention"
+        },
+        "session_assumptions": {
+            "bsonType": "object",
+            "description": "Assumptions made during this session"
         }
     }
 }
