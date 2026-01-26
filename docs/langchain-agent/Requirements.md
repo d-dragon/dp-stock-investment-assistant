@@ -1,10 +1,22 @@
-# LangChain Agent Requirements Specification
+# Stock Investment Assistant Agent — Software Requirements Specification
 
-> **Document Version**: 1.0  
+> **Document Version**: 2.0  
 > **Created**: January 22, 2026  
+> **Last Updated**: January 23, 2026  
 > **Status**: Active  
-> **Scope**: LangChain Agent Development for Stock Investment Assistant  
-> **Related**: [PHASE_2_AGENT_ENHANCEMENT_ROADMAP.md](./PHASE_2_AGENT_ENHANCEMENT_ROADMAP.md), [AGENT_MEMORY_TECHNICAL_DESIGN.md](./AGENT_MEMORY_TECHNICAL_DESIGN.md)
+> **Scope**: LangChain-based AI Agent for Stock Investment Assistant  
+## Related Documents
+
+This specification builds upon and references several architectural and design documents:
+
+| Document | Purpose | Reference |
+|----------|---------|-----------|
+| [AGENT_ARCHITECTURE_DECISION_RECORDS.md](./AGENT_ARCHITECTURE_DECISION_RECORDS.md) | Architectural decisions for LTM/STM, RAG, fine-tuning strategy, and memory separation | Design foundations for FR-3 (Memory System) |
+| [LANGCHAIN_AGENT_ARCHITECTURE_AND_DESIGN.md](./LANGCHAIN_AGENT_ARCHITECTURE_AND_DESIGN.md) | Comprehensive agent architecture overview, component deep dive, data flow, and Phase 2 improvements | Implementation guidance for FR-1, FR-2, FR-4 |
+| [LANGCHAIN_AGENT_HOWTO.md](./LANGCHAIN_AGENT_HOWTO.md) | Complete guide to ReAct pattern, semantic routing, tool system, and operations | Operational reference for agent deployment and usage |
+| [PHASE_2_AGENT_ENHANCEMENT_ROADMAP.md](./PHASE_2_AGENT_ENHANCEMENT_ROADMAP.md) | Future enhancement roadmap including multi-agent, advanced memory, and observability | Planning for P2 requirements beyond current release |
+| [AGENT_MEMORY_TECHNICAL_DESIGN.md](./AGENT_MEMORY_TECHNICAL_DESIGN.md) | Detailed technical design for conversation memory, checkpointing, and summarization | Implementation guidance supporting FR-3 (Memory System) |
+
 
 ---
 
@@ -14,7 +26,7 @@
 2. [Functional Requirements](#2-functional-requirements)
    - [FR-1: Agent Core](#fr-1-agent-core)
    - [FR-2: Tool System](#fr-2-tool-system)
-   - [FR-3: Memory System](#fr-3-memory-system)
+   - [FR-3: Conversation Memory](#fr-3-conversation-memory)
    - [FR-4: Semantic Routing](#fr-4-semantic-routing)
    - [FR-5: API Integration](#fr-5-api-integration)
    - [FR-6: Streaming](#fr-6-streaming)
@@ -25,11 +37,14 @@
    - [NFR-4: Security](#nfr-4-security)
    - [NFR-5: Observability](#nfr-5-observability)
    - [NFR-6: Maintainability](#nfr-6-maintainability)
-4. [Memory Requirements](#4-memory-requirements)
-5. [Constraints](#5-constraints)
-6. [Dependencies](#6-dependencies)
-7. [Acceptance Criteria](#7-acceptance-criteria)
-8. [Revision History](#8-revision-history)
+4. [Constraints](#4-constraints)
+5. [Acceptance Criteria](#5-acceptance-criteria)
+6. [Traceability Matrix](#6-traceability-matrix)
+7. [Interface Requirements](#7-interface-requirements)
+8. [Error Semantics](#8-error-semantics)
+9. [Data Handling & Privacy](#9-data-handling--privacy)
+10. [Assumptions & Open Issues](#10-assumptions--open-issues)
+11. [Revision History](#11-revision-history)
 
 ---
 
@@ -37,35 +52,46 @@
 
 ### 1.1 Purpose
 
-This document specifies the functional and non-functional requirements for the LangChain-based Stock Investment Assistant Agent. It serves as the authoritative source for agent behavior, capabilities, performance expectations, and quality attributes.
+This document specifies the functional and non-functional requirements for the Stock Investment Assistant Agent. It serves as the authoritative source for agent behavior, capabilities, performance expectations, and quality attributes.
+
+This specification follows **spec-driven development** principles, enabling AI-assisted development (vibe coding) where requirements are precise enough to guide implementation while remaining focused on **WHAT** the system does, not **HOW** it achieves it.
 
 ### 1.2 Scope
 
-This specification covers:
-- LangChain ReAct agent implementation (`StockAssistantAgent`)
-- Tool system architecture (`CachingTool`, `ToolRegistry`)
-- Conversation memory and persistence
-- Semantic query routing (`StockQueryRouter`)
-- API and WebSocket integration
-- Streaming response handling
+#### 1.2.1 In Scope
 
-Out of scope:
-- Frontend implementation details
-- Infrastructure provisioning
-- General backend services not directly related to the agent
+| Area | Description |
+|------|-------------|
+| **Agent Behavior** | Natural language query processing, response generation, and conversation management |
+| **Tool Capabilities** | What tools can accomplish (stock prices, news, analysis, reports) |
+| **Memory Behavior** | Conversation persistence, context recall, summarization |
+| **Query Understanding** | How the agent categorizes and routes user intents |
+| **API Contracts** | Request/response formats for REST and WebSocket interfaces |
+| **Response Delivery** | Streaming behavior and incremental content delivery |
+| **Quality Attributes** | Performance, reliability, security, and observability requirements |
+
+#### 1.2.2 Out of Scope
+
+| Area | Reason |
+|------|--------|
+| Implementation architecture | Belongs in [LANGCHAIN_AGENT_ARCHITECTURE_AND_DESIGN.md](./LANGCHAIN_AGENT_ARCHITECTURE_AND_DESIGN.md) |
+| Database schemas and indexes | Belongs in [AGENT_MEMORY_TECHNICAL_DESIGN.md](./AGENT_MEMORY_TECHNICAL_DESIGN.md) |
+| Library/package dependencies | Belongs in technical design documentation |
+| Infrastructure and deployment | Belongs in IaC documentation |
+| Frontend implementation | Belongs in frontend documentation |
+| Configuration schemas | Belongs in technical design documentation |
 
 ### 1.3 Definitions and Acronyms
 
 | Term | Definition |
 |------|------------|
-| **ReAct** | Reasoning + Acting pattern for LLM agents |
-| **LangGraph** | Framework for building stateful agent workflows |
-| **Checkpointer** | LangGraph component that persists agent state |
-| **Thread ID** | Unique identifier for conversation thread in LangGraph |
-| **CachingTool** | Abstract base class providing caching for tools |
-| **ToolRegistry** | Singleton managing tool registration and lifecycle |
-| **AgentResponse** | Frozen dataclass for structured agent outputs |
-| **TTL** | Time To Live (cache expiration duration) |
+| **Agent** | The AI-powered component that processes user queries and generates responses |
+| **Session** | A continuous conversation between user and agent with shared context |
+| **Thread** | A unique conversation identifier for tracking state |
+| **Tool** | A capability the agent can invoke to retrieve data or perform actions |
+| **Streaming** | Incremental delivery of response content as it's generated |
+| **Summarization** | Condensing conversation history to manage context size |
+| **TTL** | Time To Live (duration before data expires) |
 
 ### 1.4 Document Conventions
 
@@ -73,14 +99,14 @@ Out of scope:
 |--------|----------|
 | FR-X.Y | Functional Requirement |
 | NFR-X.Y | Non-Functional Requirement |
-| MEM-X.Y | Memory-Specific Requirement |
 | CON-X | Constraint |
-| DEP-X | Dependency |
+| AC-X.Y | Acceptance Criteria |
 
 Priority levels:
 - **P0**: Must have (blocking for release)
 - **P1**: Should have (important for usability)
 - **P2**: Nice to have (can defer)
+- **P3**: Future (planned for later phases)
 
 ---
 
@@ -88,206 +114,235 @@ Priority levels:
 
 ### FR-1: Agent Core
 
-#### FR-1.1 ReAct Agent Pattern
-**Priority**: P0
+> **Priority Levels**: P0 = Must have (MVP), P1 = Should have (production readiness), P2 = Nice to have
 
-| ID | Requirement |
-|----|-------------|
-| FR-1.1.1 | The agent SHALL implement the ReAct (Reasoning + Acting) pattern using LangGraph |
-| FR-1.1.2 | The agent SHALL use `create_react_agent` from LangChain for agent construction |
-| FR-1.1.3 | The agent SHALL bind all enabled tools from ToolRegistry to the agent executor |
-| FR-1.1.4 | The agent SHALL execute reasoning steps before invoking tools |
-| FR-1.1.5 | The agent SHALL support iterative tool invocation until a final answer is reached |
+#### FR-1.1 ReAct Agent Pattern
+
+| ID | Title | Description | Precondition | Expected Output | Priority |
+|----|-------|-------------|--------------|-----------------|----------|
+| FR-1.1.1 | **Reasoning Before Action** | Agent explains its reasoning before taking any action | User submits query | Response includes visible reasoning step before tool invocation | P0 |
+| FR-1.1.2 | **Tool-Augmented Responses** | Agent uses tools to gather information when needed | Query requires external data | Agent invokes appropriate tool(s) and incorporates results in response | P0 |
+| FR-1.1.3 | **Iterative Problem Solving** | Agent can invoke multiple tools in sequence to answer complex queries | Query requires multiple data points | Agent completes all necessary tool calls before final answer | P0 |
+| FR-1.1.4 | **Self-Correction** | Agent can recognize and recover from failed tool calls | Tool returns error | Agent attempts alternative approach or explains limitation | P0 |
+| FR-1.1.5 | **Answer Completeness** | Agent continues reasoning until a complete answer is formed | Query submitted | Response directly addresses user's question with supporting data | P0 |
 
 #### FR-1.2 Query Processing
-**Priority**: P0
 
-| ID | Requirement |
-|----|-------------|
-| FR-1.2.1 | The agent SHALL accept natural language queries as input |
-| FR-1.2.2 | The agent SHALL return structured `AgentResponse` objects containing content, provider, model, status, tool calls, token usage, and metadata |
-| FR-1.2.3 | The agent SHALL support synchronous query processing via `process_query()` |
-| FR-1.2.4 | The agent SHALL support streaming query processing via `process_query_streaming()` |
-| FR-1.2.5 | The agent SHALL support structured output via `process_query_structured()` |
+| ID | Title | Description | Precondition | Expected Output | Priority |
+|----|-------|-------------|--------------|-----------------|----------|
+| FR-1.2.1 | **Natural Language Input** | Agent accepts free-form text queries in natural language | — | Any grammatically reasonable query is processed without format errors | P0 |
+| FR-1.2.2 | **Structured Response** | Agent returns responses with consistent structure | Query processed | Response contains: content, model used, status, tools invoked, token count | P0 |
+| FR-1.2.3 | **Synchronous Processing** | Agent can process queries and return complete response | Non-streaming request | Complete response returned within timeout (see NFR-1.1) | P0 |
+| FR-1.2.4 | **Streaming Processing** | Agent can deliver response incrementally as it's generated | Streaming request | First token delivered within 2 seconds; continuous delivery until complete | P0 |
+| FR-1.2.5 | **Structured Output Mode** | Agent can return responses in a predefined schema | Schema specified in request | Response validates against provided schema (100% compliance) | P1 |
 
 #### FR-1.3 Model Selection
-**Priority**: P0
 
-| ID | Requirement |
-|----|-------------|
-| FR-1.3.1 | The agent SHALL use the primary model provider specified in configuration |
-| FR-1.3.2 | The agent SHALL support fallback to secondary providers when primary fails |
-| FR-1.3.3 | The agent SHALL set `ResponseStatus.FALLBACK` when using fallback model |
-| FR-1.3.4 | The agent SHALL support provider override via `provider` parameter |
-| FR-1.3.5 | The agent SHALL use `ModelClientFactory` for model instantiation |
+| ID | Title | Description | Precondition | Expected Output | Priority |
+|----|-------|-------------|--------------|-----------------|----------|
+| FR-1.3.1 | **Primary Model Usage** | Agent uses the configured primary AI model by default | Configuration specifies primary model | Response metadata shows primary model name | P0 |
+| FR-1.3.2 | **Automatic Failover** | Agent switches to backup model when primary is unavailable | Primary model returns error | Response generated using backup model; no user intervention required | P0 |
+| FR-1.3.3 | **Failover Transparency** | Agent indicates when backup model was used | Failover occurred | Response status clearly indicates fallback was used | P0 |
+| FR-1.3.4 | **Model Override** | User can request a specific model for a query | User specifies model preference | Requested model used if available; error if unavailable | P1 |
+| FR-1.3.5 | **Multi-Provider Support** | Agent supports multiple AI model providers | Provider configured | Agent can use any configured provider interchangeably | P0 |
 
 #### FR-1.4 System Prompt
-**Priority**: P1
 
-| ID | Requirement |
-|----|-------------|
-| FR-1.4.1 | The agent SHALL use a configurable system prompt defining assistant behavior |
-| FR-1.4.2 | The system prompt SHALL include available tool descriptions |
-| FR-1.4.3 | The system prompt SHALL include investment advice disclaimers |
-| FR-1.4.4 | The system prompt SHALL support memory context injection |
-| FR-1.4.5 | The agent SHOULD support externalized prompt files (future: Phase 2A.2) |
+| ID | Title | Description | Precondition | Expected Output | Priority |
+|----|-------|-------------|--------------|-----------------|----------|
+| FR-1.4.1 | **Behavioral Instructions** | Agent behavior is guided by configurable instructions | Configuration provided | Agent responses align with defined persona and guidelines | P0 |
+| FR-1.4.2 | **Tool Awareness** | Agent knows what tools are available and their purposes | Tools registered | Agent can describe available capabilities when asked | P1 |
+| FR-1.4.3 | **Disclaimer Inclusion** | Agent includes investment disclaimers in relevant responses | Response contains financial advice | Disclaimer present in response (verified by keyword match) | P0 |
+| FR-1.4.4 | **Memory Context Injection** | Agent receives prior conversation context as part of its instructions | Session has history | Agent demonstrates awareness of prior conversation | P1 |
+| FR-1.4.5 | **External Prompt Management** | System prompt can be modified without code deployment | — | Prompt changes take effect within 60 seconds without restart | P2 |
 
 ---
 
 ### FR-2: Tool System
 
-#### FR-2.1 CachingTool Base Class
-**Priority**: P0
+> **Priority Levels**: P0 = Must have (MVP), P1 = Should have (production readiness), P2 = Nice to have
 
-| ID | Requirement |
-|----|-------------|
-| FR-2.1.1 | All tools SHALL extend `CachingTool` base class |
-| FR-2.1.2 | `CachingTool` SHALL provide automatic result caching via `CacheBackend` |
-| FR-2.1.3 | `CachingTool` SHALL support configurable TTL per tool type |
-| FR-2.1.4 | `CachingTool` SHALL generate deterministic cache keys based on tool name and input |
-| FR-2.1.5 | `CachingTool` SHALL record `ToolCall` objects for analytics |
-| FR-2.1.6 | `CachingTool` SHALL support cache bypass via `enable_cache` flag |
-| FR-2.1.7 | Subclasses SHALL implement `_execute()` method with tool-specific logic |
+#### FR-2.1 Tool Result Caching
 
-#### FR-2.2 ToolRegistry
-**Priority**: P0
+| ID | Title | Description | Precondition | Expected Output | Priority |
+|----|-------|-------------|--------------|-----------------|----------|
+| FR-2.1.1 | **Automatic Result Caching** | Tool results are cached to avoid redundant external calls | Tool executed with cacheable input | Identical subsequent call returns cached result (cache hit rate ≥40%) | P0 |
+| FR-2.1.2 | **Configurable Cache Duration** | Each tool type has its own cache expiration time | Tool configured with TTL | Cached result expires after configured duration (±5 seconds) | P0 |
+| FR-2.1.3 | **Deterministic Cache Keys** | Same input always maps to same cached result | — | Two calls with identical input return same cached value | P0 |
+| FR-2.1.4 | **Cache Bypass Option** | Individual requests can skip cache when fresh data required | Bypass flag set | Tool fetches fresh data; response time matches uncached call | P1 |
+| FR-2.1.5 | **Tool Execution Logging** | Every tool invocation is recorded for analytics | Tool executed | Log contains: tool name, input, duration, cache hit/miss, timestamp | P1 |
+| FR-2.1.6 | **Cache Failure Tolerance** | Tools function normally when cache is unavailable | Cache service down | Tool executes successfully; result not cached; no error shown to user | P0 |
 
-| ID | Requirement |
-|----|-------------|
-| FR-2.2.1 | `ToolRegistry` SHALL be a singleton accessible via `get_tool_registry()` |
-| FR-2.2.2 | `ToolRegistry` SHALL support tool registration with `enabled` flag |
-| FR-2.2.3 | `ToolRegistry` SHALL return only enabled tools via `get_enabled_tools()` |
-| FR-2.2.4 | `ToolRegistry` SHALL support runtime tool enable/disable |
-| FR-2.2.5 | `ToolRegistry` SHALL provide tool lookup by name |
-| FR-2.2.6 | `ToolRegistry` SHALL prevent duplicate tool name registration |
+#### FR-2.2 Tool Registry
 
-#### FR-2.3 Required Tools
-**Priority**: P0/P1
+| ID | Title | Description | Precondition | Expected Output | Priority |
+|----|-------|-------------|--------------|-----------------|----------|
+| FR-2.2.1 | **Central Tool Management** | All tools are managed through a single registry | — | Tool list retrievable from one location | P0 |
+| FR-2.2.2 | **Tool Enablement Control** | Individual tools can be enabled or disabled | Tool registered | Disabled tools not available to agent; enabled tools available | P0 |
+| FR-2.2.3 | **Runtime Toggle** | Tools can be enabled/disabled without restart | System running | Tool availability changes within 5 seconds of toggle | P1 |
+| FR-2.2.4 | **Tool Discovery** | Agent can retrieve list of available tools by name | — | Tool lookup by name returns correct tool or null if not found | P0 |
+| FR-2.2.5 | **Unique Tool Names** | Each tool has a unique identifier | Tool registration attempted | Duplicate name registration rejected with error message | P0 |
+| FR-2.2.6 | **Tool Health Status** | System can report which tools are operational | — | Health check returns status for each registered tool | P1 |
 
-| ID | Requirement | Priority |
-|----|-------------|----------|
-| FR-2.3.1 | The system SHALL provide `StockSymbolTool` for stock price and symbol lookup | P0 |
-| FR-2.3.2 | The system SHALL provide `TradingViewTool` for technical analysis charts | P1 |
-| FR-2.3.3 | The system SHALL provide `ReportingTool` for investment report generation | P2 |
-| FR-2.3.4 | `StockSymbolTool` SHALL support actions: `get_price`, `search_symbol`, `get_info` | P0 |
-| FR-2.3.5 | `StockSymbolTool` SHALL use `DataManager` for data retrieval | P0 |
+#### FR-2.3 Stock Investment Tools
+
+| ID | Title | Description | Precondition | Expected Output | Priority |
+|----|-------|-------------|--------------|-----------------|----------|
+| FR-2.3.1 | **Stock Price Lookup** | User can request current price for any stock symbol | Valid stock symbol | Current price returned with timestamp (data ≤15 minutes old) | P0 |
+| FR-2.3.2 | **Symbol Search** | User can search for stock symbols by company name | Search query provided | Matching symbols returned with company names (≥1 result for valid queries) | P0 |
+| FR-2.3.3 | **Company Information** | User can retrieve company details for a symbol | Valid stock symbol | Company profile returned: name, sector, market cap, description | P0 |
+| FR-2.3.4 | **Technical Chart Generation** | User can request technical analysis charts | Valid symbol and timeframe | Chart URL or image returned showing price with indicators | P1 |
+| FR-2.3.5 | **Investment Report Generation** | User can generate formatted investment reports | Analysis data available | PDF/HTML report generated with executive summary and data | P2 |
 
 ---
 
-### FR-3: Memory System
+### FR-3: Conversation Memory
 
-> **Reference**: [AGENT_MEMORY_TECHNICAL_DESIGN.md](./AGENT_MEMORY_TECHNICAL_DESIGN.md) for detailed design
+> **Design Reference**: For implementation details, see [AGENT_MEMORY_TECHNICAL_DESIGN.md](./AGENT_MEMORY_TECHNICAL_DESIGN.md)  
+> **Architecture Context**: [ADR-001 — Layered LLM Architecture](./AGENT_ARCHITECTURE_DECISION_RECORDS.md)
+
+#### Priority Levels
+| Level | Meaning | Release Criteria |
+|-------|---------|------------------|
+| **P0** | MUST have | Blocking for MVP release |
+| **P1** | SHOULD have | Required for production readiness |
+| **P2** | NICE to have | Deferred to next release |
+| **P3** | FUTURE | Planned for later phases |
+
+---
 
 #### FR-3.1 Short-Term Memory (Conversation Buffer)
-**Priority**: P0
 
-| ID | Requirement |
-|----|-------------|
-| FR-3.1.1 | The agent SHALL maintain conversation history within a session |
-| FR-3.1.2 | The agent SHALL use LangGraph's `MongoDBSaver` checkpointer for state persistence |
-| FR-3.1.3 | The agent SHALL accept `session_id` parameter to identify conversation thread |
-| FR-3.1.4 | The agent SHALL pass `session_id` as `thread_id` in LangGraph config |
-| FR-3.1.5 | The agent SHALL recall previous exchanges when `session_id` is provided |
-| FR-3.1.6 | The agent SHALL operate statelessly when `session_id` is omitted (backward compatible) |
+| ID | Title | Description | Precondition | Expected Output | Priority |
+|----|-------|-------------|--------------|-----------------|----------|
+| FR-3.1.1 | **Session History Retention** | The agent remembers all messages exchanged within a single conversation session | User has an active session | Given 5 prior exchanges, the agent references any of them accurately when asked "What did I ask earlier?" | P0 |
+| FR-3.1.2 | **Session State Persistence** | Conversation state survives system restarts without data loss | Session was created and has ≥1 message | After restart, resuming session returns identical message history (100% match) | P0 |
+| FR-3.1.3 | **Session Identification** | Each conversation is uniquely identifiable by a session identifier | API request includes session_id | Requests with same session_id return consistent conversation context | P0 |
+| FR-3.1.4 | **Session Context Binding** | Agent responses incorporate prior context from the same session | Session has ≥2 prior messages | Response demonstrates awareness of earlier conversation (verified by human review or keyword match) | P0 |
+| FR-3.1.5 | **Session Recall on Reconnect** | User can resume a conversation after disconnection | Valid session_id provided | First response after reconnect includes acknowledgment of prior context | P1 |
+| FR-3.1.6 | **Stateless Fallback Mode** | Agent functions without session tracking when no session_id is provided | session_id is null or omitted | Agent responds normally; no conversation record is persisted | P0 |
+| FR-3.1.7 | **No Financial Data Persistence** | Memory stores conversation text only, never computed financial metrics | — | Inspection of stored data shows zero price values, ratios, or calculated figures | P0 |
+| FR-3.1.8 | **Conversational Content Only** | Memory contains user messages and agent responses, not raw tool outputs | Tools were invoked during session | Stored content includes "I found the price" but not the actual price data | P0 |
+
+---
 
 #### FR-3.2 Conversation Management
-**Priority**: P0
 
-| ID | Requirement |
-|----|-------------|
-| FR-3.2.1 | The system SHALL create a `conversations` record when a new session starts |
-| FR-3.2.2 | The system SHALL track message count per conversation |
-| FR-3.2.3 | The system SHALL track total token usage per conversation |
-| FR-3.2.4 | The system SHALL track last activity timestamp per conversation |
-| FR-3.2.5 | The system SHALL support conversation status: `active`, `summarized`, `archived` |
+| ID | Title | Description | Precondition | Expected Output | Priority |
+|----|-------|-------------|--------------|-----------------|----------|
+| FR-3.2.1 | **Conversation Initialization** | A new conversation record is created when a session begins | User initiates first message with new session_id | Conversation record exists with creation timestamp within 1 second of request | P0 |
+| FR-3.2.2 | **Message Count Tracking** | System maintains accurate count of messages in each conversation | Session has active messages | Message count equals actual number of user + assistant messages (±0 tolerance) | P1 |
+| FR-3.2.3 | **Token Usage Tracking** | System tracks cumulative token consumption per conversation | Session has processed queries | Total tokens recorded within ±5% of actual LLM token usage | P1 |
+| FR-3.2.4 | **Activity Timestamp** | System records when the conversation was last active | User sends a message | Updated timestamp reflects current time (±5 seconds) | P1 |
+| FR-3.2.5 | **Conversation Lifecycle Status** | Conversations transition through defined states: active → summarized → archived | — | Status field is always one of three valid values; transitions follow defined order only | P1 |
+| FR-3.2.6 | **Workspace Isolation** | Conversations belong to exactly one workspace and cannot be accessed from another | User in Workspace A tries to access Workspace B session | Access denied; conversation not found response returned | P0 |
+| FR-3.2.7 | **Conversation Archival** | Ended conversations are archived, never permanently deleted | User or system requests conversation closure | Conversation status = "archived"; record remains queryable for audit | P2 |
+| FR-3.2.8 | **Archive Immutability** | Archived conversations cannot be modified | Attempt to update archived conversation | Update rejected; error message indicates archive status | P2 |
+
+---
 
 #### FR-3.3 Memory Summarization
-**Priority**: P1
 
-| ID | Requirement |
-|----|-------------|
-| FR-3.3.1 | The system SHALL trigger summarization when `total_tokens` exceeds configured threshold |
-| FR-3.3.2 | The system SHALL keep the last K messages (configurable) when summarizing |
-| FR-3.3.3 | The system SHALL use LLM to generate conversation summary |
-| FR-3.3.4 | The system SHALL store summary in `conversations.summary` field |
-| FR-3.3.5 | The system SHALL track `summary_up_to_message` count |
-| FR-3.3.6 | The system SHALL prepend summary to context for new queries |
+| ID | Title | Description | Precondition | Expected Output | Priority |
+|----|-------|-------------|--------------|-----------------|----------|
+| FR-3.3.1 | **Automatic Summarization Trigger** | System generates summary when conversation exceeds size threshold | Conversation token count ≥ configured limit | Summary is generated; status transitions to "summarized" | P1 |
+| FR-3.3.2 | **Recent Message Preservation** | After summarization, most recent messages are retained for continuity | Summarization triggered | Last K messages remain accessible; earlier messages replaced by summary | P1 |
+| FR-3.3.3 | **AI-Generated Summary** | Summary is produced by language model, not rule-based extraction | Summarization triggered | Summary is coherent natural language, ≤3 sentences, captures conversation essence | P1 |
+| FR-3.3.4 | **Summary Storage** | Generated summary is persisted with the conversation record | Summary generated | Summary field is non-empty; retrievable on subsequent session access | P1 |
+| FR-3.3.5 | **Summary Boundary Tracking** | System knows which messages are covered by the summary | Summary exists | Summary boundary marker indicates message index where summary was created | P2 |
+| FR-3.3.6 | **Summary Context Injection** | Summary is included as context when conversation resumes | Session has existing summary | Agent's first response demonstrates awareness of summarized content | P1 |
+| FR-3.3.7 | **Intent Preservation in Summary** | Summary captures user's goals and focus areas, not conclusions or data | Summary generated | Summary contains intent phrases (e.g., "User is researching...") not facts (e.g., "AAPL price is $150") | P1 |
 
-#### FR-3.4 Long-Term Memory (Future)
-**Priority**: P2
+---
 
-| ID | Requirement |
-|----|-------------|
-| FR-3.4.1 | The system SHOULD support vector storage for semantic search (future Phase 2A.2+) |
-| FR-3.4.2 | The system SHOULD support cross-session memory retrieval (future) |
-| FR-3.4.3 | The system SHOULD store conversation embeddings in `memory_vectors` collection (future) |
+#### FR-3.4 Session Assumptions
+
+| ID | Title | Description | Precondition | Expected Output | Priority |
+|----|-------|-------------|--------------|-----------------|----------|
+| FR-3.4.1 | **Assumption Recording** | User-stated preferences and constraints are captured for the session | User declares assumption (e.g., "I'm focused on tech stocks") | Assumption stored; agent acknowledges and applies it in subsequent responses | P1 |
+| FR-3.4.2 | **Pinned Intent** | User can set a primary goal that persists throughout the conversation | User states intent (e.g., "Help me compare AAPL vs MSFT") | Intent stored; agent references it when providing responses | P1 |
+| FR-3.4.3 | **Symbol Focus List** | Session tracks which symbols the user is actively researching | User mentions multiple symbols | Focused symbols list updated; agent proactively references relevant symbols | P1 |
+| FR-3.4.4 | **Assumption Application** | Stored assumptions influence agent behavior and responses | Session has ≥1 assumption recorded | Agent responses align with stated assumptions without user repeating them | P1 |
+
+---
+
+#### FR-3.5 Long-Term Memory (Future)
+
+| ID | Title | Description | Precondition | Expected Output | Priority |
+|----|-------|-------------|--------------|-----------------|----------|
+| FR-3.5.1 | **Semantic Memory Search** | System SHALL find relevant past conversations based on meaning, not keywords | User asks about topic discussed in prior session | Relevant past exchanges surface with ≥70% relevance score | P3 |
+| FR-3.5.2 | **Cross-Session Recall** | Agent SHALL be able to reference information from previous sessions with same user | User has completed ≥2 sessions previously | Agent can retrieve context from any prior session when prompted | P3 |
+| FR-3.5.3 | **Conversation Indexing** | Past conversations SHALL be indexed for efficient retrieval | Session completed and archived | Conversation searchable within 60 seconds of archival | P3 |
+| FR-3.5.4 | **User Preference Learning** | System SHALL learn user's investment style and preferences over time | User has ≥5 completed sessions | Agent proactively applies learned preferences without explicit instruction | P3 |
+| FR-3.5.5 | **Symbol Interest Tracking** | System SHALL remember which symbols user has researched across sessions | User has researched symbols in past sessions | Agent can list user's historically researched symbols on request | P3 |
 
 ---
 
 ### FR-4: Semantic Routing
 
-#### FR-4.1 Query Classification
-**Priority**: P1
+> **Priority Levels**: P0 = Must have (MVP), P1 = Should have (production readiness), P2 = Nice to have
 
-| ID | Requirement |
-|----|-------------|
-| FR-4.1.1 | The system SHALL classify queries into predefined route categories |
-| FR-4.1.2 | Route categories SHALL include: `price_check`, `news_analysis`, `portfolio`, `technical_analysis`, `fundamentals`, `ideas`, `market_watch`, `general_chat` |
-| FR-4.1.3 | The router SHALL use semantic similarity for classification |
-| FR-4.1.4 | The router SHALL return confidence score with classification |
-| FR-4.1.5 | The router SHALL support configurable confidence threshold |
+#### FR-4.1 Query Classification
+
+| ID | Title | Description | Precondition | Expected Output | Priority |
+|----|-------|-------------|--------------|-----------------|----------|
+| FR-4.1.1 | **Automatic Query Categorization** | System determines the intent category of each user query | Query submitted | Query assigned to one of predefined categories | P1 |
+| FR-4.1.2 | **Investment Intent Categories** | System recognizes standard investment query types | — | Categories include: price inquiry, news, portfolio, technical analysis, fundamentals, ideas, market overview, general conversation | P1 |
+| FR-4.1.3 | **Meaning-Based Classification** | Classification based on query meaning, not just keywords | Query uses synonyms or indirect phrasing | Correct category assigned regardless of exact wording (≥85% accuracy) | P1 |
+| FR-4.1.4 | **Classification Confidence** | System indicates how confident it is in the classification | Query classified | Confidence score (0-100%) returned with category | P1 |
+| FR-4.1.5 | **Confidence Threshold** | Low-confidence classifications are handled differently | Confidence below threshold | System uses default handling or asks for clarification | P2 |
 
 #### FR-4.2 Route-Based Behavior
-**Priority**: P2
 
-| ID | Requirement |
-|----|-------------|
-| FR-4.2.1 | The agent SHOULD optimize tool selection based on route classification |
-| FR-4.2.2 | The agent SHOULD adjust system prompt based on route |
-| FR-4.2.3 | The agent SHOULD support route-specific response formatting |
+| ID | Title | Description | Precondition | Expected Output | Priority |
+|----|-------|-------------|--------------|-----------------|----------|
+| FR-4.2.1 | **Optimized Tool Selection** | Agent prioritizes relevant tools based on query category | Query classified | Most relevant tool invoked first (reduces unnecessary tool calls by ≥20%) | P2 |
+| FR-4.2.2 | **Context-Aware Instructions** | Agent receives category-specific guidance | Query classified | Response style matches category (e.g., technical analysis includes chart references) | P2 |
+| FR-4.2.3 | **Category-Specific Formatting** | Response format optimized for query type | Query classified | Price queries show structured data; narrative queries show prose | P2 |
 
 ---
 
 ### FR-5: API Integration
 
+> **Priority Levels**: P0 = Must have (MVP), P1 = Should have (production readiness), P2 = Nice to have
+
 #### FR-5.1 REST API
-**Priority**: P0
 
-| ID | Requirement |
-|----|-------------|
-| FR-5.1.1 | `POST /api/chat` SHALL accept `message` (required), `provider` (optional), `stream` (optional), `session_id` (optional) |
-| FR-5.1.2 | Response SHALL include `response`, `provider`, `model`, `status`, `tool_calls` |
-| FR-5.1.3 | Streaming endpoint SHALL return `text/event-stream` content type |
-| FR-5.1.4 | API SHALL maintain backward compatibility when `session_id` is omitted |
-| FR-5.1.5 | API SHALL return 400 for invalid `session_id` format |
-| FR-5.1.6 | API SHALL return 503 when agent service is unavailable |
+| ID | Title | Description | Precondition | Expected Output | Priority |
+|----|-------|-------------|--------------|-----------------|----------|
+| FR-5.1.1 | **Chat Endpoint** | Client can send messages to the agent via HTTP POST | — | POST request with message returns agent response | P0 |
+| FR-5.1.2 | **Request Parameters** | Chat endpoint accepts message, model preference, streaming flag, and session identifier | — | All parameters accepted; unrecognized parameters ignored | P0 |
+| FR-5.1.3 | **Response Structure** | API response contains all relevant metadata | Request processed | Response includes: content, model used, status, tools invoked | P0 |
+| FR-5.1.4 | **Streaming Response Format** | Streaming responses delivered as server-sent events | Streaming requested | Response content-type is text/event-stream; chunks delivered incrementally | P0 |
+| FR-5.1.5 | **Backward Compatibility** | API works without session identifier for stateless queries | session_id omitted | Request processes normally; no session persisted | P0 |
+| FR-5.1.6 | **Input Validation** | Invalid requests return appropriate error codes | Malformed request | 400 returned for invalid format; 503 for service unavailable | P0 |
 
-#### FR-5.2 WebSocket (Socket.IO)
-**Priority**: P0
+#### FR-5.2 WebSocket Interface
 
-| ID | Requirement |
-|----|-------------|
-| FR-5.2.1 | `chat_message` event SHALL accept `message` and optional `session_id` |
-| FR-5.2.2 | Server SHALL emit `chat_response` with complete response |
-| FR-5.2.3 | Server SHALL emit `chat_chunk` for streaming responses |
-| FR-5.2.4 | Server SHALL emit `chat_stream_end` when streaming completes |
-| FR-5.2.5 | Server SHALL emit `error` event on processing failures |
+| ID | Title | Description | Precondition | Expected Output | Priority |
+|----|-------|-------------|--------------|-----------------|----------|
+| FR-5.2.1 | **Real-Time Messaging** | Client can send messages via WebSocket connection | WebSocket connected | Message delivered to agent; response emitted back | P0 |
+| FR-5.2.2 | **Session Support** | WebSocket messages can include session identifier | — | Session context loaded when session_id provided | P0 |
+| FR-5.2.3 | **Complete Response Event** | Server emits event when full response is ready | Non-streaming request | Single response event contains complete answer | P0 |
+| FR-5.2.4 | **Streaming Chunk Events** | Server emits incremental events during streaming | Streaming requested | Multiple chunk events delivered; final event signals completion | P0 |
+| FR-5.2.5 | **Error Notification** | Server emits error event when processing fails | Error occurs | Error event contains error type and user-friendly message | P0 |
 
 ---
 
 ### FR-6: Streaming
 
-#### FR-6.1 Response Streaming
-**Priority**: P0
+> **Priority Levels**: P0 = Must have (MVP), P1 = Should have (production readiness), P2 = Nice to have
 
-| ID | Requirement |
-|----|-------------|
-| FR-6.1.1 | The agent SHALL support token-by-token streaming of responses |
-| FR-6.1.2 | Streaming SHALL use SSE (Server-Sent Events) format for REST |
-| FR-6.1.3 | Streaming SHALL use Socket.IO events for WebSocket |
-| FR-6.1.4 | Each chunk SHALL include incremental content |
-| FR-6.1.5 | Final message SHALL include complete metadata (tool calls, token usage) |
-| FR-6.1.6 | Streaming SHALL support cancellation via `AbortController` (client-side) |
+#### FR-6.1 Response Streaming
+
+| ID | Title | Description | Precondition | Expected Output | Priority |
+|----|-------|-------------|--------------|-----------------|----------|
+| FR-6.1.1 | **Incremental Delivery** | Response is delivered progressively as it's generated | Streaming requested | User sees response appearing word-by-word or phrase-by-phrase | P0 |
+| FR-6.1.2 | **Low Latency Start** | First content appears quickly after request | Streaming requested | First visible content within 2 seconds of request (P95) | P0 |
+| FR-6.1.3 | **HTTP Streaming Format** | REST streaming uses standard server-sent events | HTTP streaming request | Response conforms to SSE specification; parseable by EventSource | P0 |
+| FR-6.1.4 | **WebSocket Streaming Format** | WebSocket streaming uses sequential events | WebSocket streaming request | Chunks delivered as separate events; client can render incrementally | P0 |
+| FR-6.1.5 | **Metadata on Completion** | Final message includes summary metadata | Streaming completes | Last event contains: total tokens, tools invoked, processing time | P0 |
+| FR-6.1.6 | **Client Cancellation** | User can stop a streaming response mid-delivery | User initiates cancel | Streaming stops within 1 second; partial response preserved | P1 |
 
 ---
 
@@ -367,10 +422,10 @@ Priority levels:
 
 | ID | Requirement |
 |----|-------------|
-| NFR-3.1.1 | Agent service SHALL be stateless (state in MongoDB/Redis) |
-| NFR-3.1.2 | Multiple agent instances SHALL share the same checkpointer store |
+| NFR-3.1.1 | Agent service SHALL be stateless; durable state SHALL be externalized to shared backend services |
+| NFR-3.1.2 | Multiple agent instances SHALL share the same durable conversation state store |
 | NFR-3.1.3 | Tool registry SHALL be per-instance (no cross-instance state) |
-| NFR-3.1.4 | Cache SHALL be shared across instances (Redis) |
+| NFR-3.1.4 | Cache SHALL be shared across instances via a shared cache backend |
 
 #### NFR-3.2 Data Scaling
 **Priority**: P1
@@ -379,7 +434,7 @@ Priority levels:
 |----|-------------|
 | NFR-3.2.1 | Conversation history SHALL scale to 10,000+ messages per session |
 | NFR-3.2.2 | System SHALL support 1M+ total conversations |
-| NFR-3.2.3 | Checkpoint collection SHALL support automatic TTL-based cleanup |
+| NFR-3.2.3 | Conversation state store SHALL support automatic TTL-based cleanup |
 
 ---
 
@@ -400,9 +455,9 @@ Priority levels:
 
 | ID | Requirement |
 |----|-------------|
-| NFR-4.2.1 | Conversation content SHALL be stored encrypted at rest (MongoDB encryption) |
+| NFR-4.2.1 | Conversation content SHALL be stored encrypted at rest |
 | NFR-4.2.2 | API communication SHALL use HTTPS/WSS in production |
-| NFR-4.2.3 | Sensitive financial data SHALL NOT be logged in plain text |
+| NFR-4.2.3 | Sensitive user data (including financial information and PII) SHALL NOT be logged or emitted into traces |
 | NFR-4.2.4 | PII in conversations SHALL be handled per privacy policy |
 
 #### NFR-4.3 Input Validation
@@ -435,7 +490,7 @@ Priority levels:
 
 | ID | Requirement |
 |----|-------------|
-| NFR-5.2.1 | LangSmith tracing SHALL be supported for agent execution |
+| NFR-5.2.1 | Distributed tracing SHALL be supported for agent execution |
 | NFR-5.2.2 | Traces SHALL include message history, tool calls, and token usage |
 | NFR-5.2.3 | Trace data SHALL be exportable for analysis |
 | NFR-5.2.4 | Tracing SHALL be configurable (enable/disable per environment) |
@@ -482,195 +537,26 @@ Priority levels:
 
 | ID | Requirement |
 |----|-------------|
-| NFR-6.3.1 | All agent settings SHALL be configurable via `config.yaml` |
+| NFR-6.3.1 | All agent settings SHALL be configurable via environment-aware configuration |
 | NFR-6.3.2 | Sensitive values SHALL support environment variable override |
 | NFR-6.3.3 | Configuration changes SHALL NOT require code deployment |
 | NFR-6.3.4 | Configuration SHALL support environment-specific overlays |
 
 ---
 
-## 4. Memory Requirements
-
-> **Architectural Context**: This section details requirements for the conversation memory system as designed in [AGENT_MEMORY_TECHNICAL_DESIGN.md](./AGENT_MEMORY_TECHNICAL_DESIGN.md)
-
-### MEM-1: Data Model Requirements
-
-#### MEM-1.1 Conversations Collection
-**Priority**: P0
-
-| ID | Requirement | Data Type | Notes |
-|----|-------------|-----------|-------|
-| MEM-1.1.1 | Each conversation SHALL have unique `_id` | ObjectId | Primary key |
-| MEM-1.1.2 | Each conversation SHALL reference `session_id` | ObjectId | 1:1 with sessions |
-| MEM-1.1.3 | Each conversation SHALL have `thread_id` | String | LangGraph thread identifier |
-| MEM-1.1.4 | `session_id` and `thread_id` SHALL be unique indexes | - | Prevent duplicates |
-| MEM-1.1.5 | Each conversation SHALL track `status` | Enum | `active`, `summarized`, `archived` |
-| MEM-1.1.6 | Each conversation SHALL track `message_count` | Integer | Auto-incremented |
-| MEM-1.1.7 | Each conversation SHALL track `total_tokens` | Integer | Cumulative |
-| MEM-1.1.8 | Each conversation SHALL track `summary` | String | Optional, populated on summarization |
-| MEM-1.1.9 | Each conversation SHALL track `summary_up_to_message` | Integer | Last summarized message index |
-| MEM-1.1.10 | Each conversation SHALL track `last_activity_at` | DateTime | Updated on each message |
-| MEM-1.1.11 | Each conversation SHALL track `created_at` and `updated_at` | DateTime | Audit fields |
-
-#### MEM-1.2 Agent Checkpoints Collection
-**Priority**: P0
-
-| ID | Requirement | Notes |
-|----|-------------|-------|
-| MEM-1.2.1 | Collection SHALL be named `agent_checkpoints` | Configurable |
-| MEM-1.2.2 | Schema SHALL be managed by LangGraph `MongoDBSaver` | Not application-managed |
-| MEM-1.2.3 | Checkpoints SHALL be indexed by `thread_id` | Primary lookup |
-| MEM-1.2.4 | Checkpoints SHALL support TTL-based expiration | Default 30 days |
-| MEM-1.2.5 | Checkpoint data SHALL include full message history | LangGraph format |
-| MEM-1.2.6 | Checkpoint data SHALL include agent state metadata | Tool states, etc. |
-
-#### MEM-1.3 Memory Vectors Collection (Future)
-**Priority**: P2
-
-| ID | Requirement | Notes |
-|----|-------------|-------|
-| MEM-1.3.1 | Collection SHALL be named `memory_vectors` | For Phase 2A.2+ |
-| MEM-1.3.2 | Each vector SHALL include 1536-dimension embedding | text-embedding-3-small |
-| MEM-1.3.3 | Vectors SHALL be indexed for cosine similarity search | MongoDB Atlas Vector |
-| MEM-1.3.4 | Vectors SHALL reference `user_id`, `session_id`, `conversation_id` | Cross-reference |
-| MEM-1.3.5 | Vectors SHALL include content type classification | user_query, assistant_response, summary, insight, preference |
-
----
-
-### MEM-2: API Requirements
-
-#### MEM-2.1 Session-Aware Endpoints
-**Priority**: P0
-
-| ID | Requirement |
-|----|-------------|
-| MEM-2.1.1 | `POST /api/chat` SHALL accept optional `session_id` parameter |
-| MEM-2.1.2 | When `session_id` provided, agent SHALL load conversation history |
-| MEM-2.1.3 | When `session_id` omitted, agent SHALL operate statelessly |
-| MEM-2.1.4 | Invalid `session_id` SHALL return 400 Bad Request |
-| MEM-2.1.5 | Unauthorized `session_id` access SHALL return 403 Forbidden |
-
-#### MEM-2.2 WebSocket Memory Integration
-**Priority**: P0
-
-| ID | Requirement |
-|----|-------------|
-| MEM-2.2.1 | `chat_message` event SHALL accept optional `session_id` |
-| MEM-2.2.2 | Streaming responses SHALL maintain memory context |
-| MEM-2.2.3 | Memory state SHALL be persisted after each complete response |
-
----
-
-### MEM-3: Behavioral Requirements
-
-#### MEM-3.1 Context Loading
-**Priority**: P0
-
-| ID | Requirement |
-|----|-------------|
-| MEM-3.1.1 | Agent SHALL load conversation history before processing query |
-| MEM-3.1.2 | Agent SHALL include history in LLM context via LangGraph checkpointer |
-| MEM-3.1.3 | If summary exists, agent SHALL prepend summary to context |
-| MEM-3.1.4 | Agent SHALL handle missing/corrupted checkpoints gracefully |
-
-#### MEM-3.2 Context Persistence
-**Priority**: P0
-
-| ID | Requirement |
-|----|-------------|
-| MEM-3.2.1 | Agent SHALL persist state after each query completion |
-| MEM-3.2.2 | Persistence SHALL include user message, agent response, tool calls |
-| MEM-3.2.3 | Persistence SHALL be atomic (all-or-nothing) |
-| MEM-3.2.4 | Failed persistence SHALL NOT affect response delivery |
-| MEM-3.2.5 | `conversations` metadata SHALL be updated after each exchange |
-
-#### MEM-3.3 Summarization Trigger
-**Priority**: P1
-
-| ID | Requirement |
-|----|-------------|
-| MEM-3.3.1 | Summarization SHALL trigger when `total_tokens > summarize_threshold` |
-| MEM-3.3.2 | Default `summarize_threshold` SHALL be 4000 tokens |
-| MEM-3.3.3 | Summarization SHALL preserve last K messages (default K=10) |
-| MEM-3.3.4 | Summary generation SHALL use dedicated LLM call |
-| MEM-3.3.5 | Post-summarization, `conversations.status` SHALL be `summarized` |
-
-#### MEM-3.4 Memory Cleanup
-**Priority**: P1
-
-| ID | Requirement |
-|----|-------------|
-| MEM-3.4.1 | Inactive conversations MAY be archived after configurable period |
-| MEM-3.4.2 | Archived conversations SHALL be queryable but not active |
-| MEM-3.4.3 | Checkpoint TTL SHALL default to 30 days |
-| MEM-3.4.4 | Expired checkpoints SHALL be automatically purged |
-
----
-
-### MEM-4: Configuration Requirements
-
-#### MEM-4.1 Memory Configuration Schema
-**Priority**: P0
-
-```yaml
-# config.yaml memory section
-langchain:
-  memory:
-    enabled: true
-    checkpointer:
-      type: "mongodb"
-      collection: "agent_checkpoints"
-      ttl_days: 30
-    summarization:
-      enabled: true
-      threshold_tokens: 4000
-      keep_recent_messages: 10
-    conversation:
-      collection: "conversations"
-      max_messages: null  # null = unlimited
-```
-
-| ID | Requirement |
-|----|-------------|
-| MEM-4.1.1 | Memory feature SHALL be toggleable via `memory.enabled` |
-| MEM-4.1.2 | Checkpointer collection name SHALL be configurable |
-| MEM-4.1.3 | Checkpoint TTL SHALL be configurable (days) |
-| MEM-4.1.4 | Summarization threshold SHALL be configurable (tokens) |
-| MEM-4.1.5 | Recent message retention count SHALL be configurable |
-| MEM-4.1.6 | All memory settings SHALL have sensible defaults |
-
----
-
-## 5. Constraints
+## 4. Constraints
 
 | ID | Constraint | Rationale |
 |----|------------|-----------|
-| CON-1 | LangGraph version ≥ 0.2.0 required | MongoDBSaver checkpointer support |
-| CON-2 | MongoDB version ≥ 5.0 required | Time-series collections, Atlas Vector Search |
-| CON-3 | Python version ≥ 3.10 required | LangChain compatibility |
-| CON-4 | OpenAI API account required for embeddings | text-embedding-3-small model |
-| CON-5 | Redis required for tool caching | CacheBackend dependency |
-| CON-6 | LangSmith account required for tracing | Optional but recommended |
-| CON-7 | MongoDB Atlas required for vector search | Future MEM-1.3 requirements |
+| CON-1 | Supported runtime and framework versions SHALL be used | Ensures compatibility and supportability (see design docs) |
+| CON-2 | A primary LLM provider account SHALL be available | Required to generate responses |
+| CON-3 | A persistent conversation state store SHALL be available for stateful sessions | Required for FR-3 persistence behavior |
+| CON-4 | A caching backend SHALL be available for tool result caching | Required to meet FR-2.1 performance/cost goals |
+| CON-5 | A tracing/observability backend SHOULD be available | Enables NFR-5 observability targets |
 
 ---
 
-## 6. Dependencies
-
-| ID | Dependency | Version | Purpose |
-|----|------------|---------|---------|
-| DEP-1 | `langchain` | ≥1.0.0 | Core agent framework |
-| DEP-2 | `langchain-openai` | ≥0.2.0 | OpenAI model integration |
-| DEP-3 | `langgraph` | ≥0.2.0 | ReAct agent, state management |
-| DEP-4 | `langgraph-checkpoint-mongodb` | ≥0.1.0 | MongoDB checkpointer |
-| DEP-5 | `pymongo` | ≥4.10.0 | MongoDB driver |
-| DEP-6 | `redis` | ≥5.0.0 | Cache backend |
-| DEP-7 | `langsmith` | ≥0.1.0 | Tracing (optional) |
-| DEP-8 | `semantic-router` | ≥0.1.0 | Query classification |
-
----
-
-## 7. Acceptance Criteria
+## 5. Acceptance Criteria
 
 ### AC-1: Core Agent Functionality
 
@@ -709,12 +595,133 @@ langchain:
 
 ---
 
-## 8. Revision History
+## 6. Traceability Matrix
+
+This section maps acceptance criteria (AC-*) to the functional and non-functional requirements they verify. Mappings are many-to-many.
+
+| Acceptance Criteria | Verified Requirements |
+|--------------------|----------------------|
+| AC-1.1 | FR-1.2.1, FR-1.2.2, FR-5.1.3 |
+| AC-1.2 | FR-1.1.2, FR-2.2.1, FR-2.2.4 |
+| AC-1.3 | FR-1.3.2, FR-1.3.3, NFR-2.2.1 |
+| AC-1.4 | FR-1.2.4, FR-6.1.1, FR-6.1.2, NFR-1.1.1 |
+| AC-2.1 | FR-3.1.1, FR-3.1.4 |
+| AC-2.2 | FR-3.1.2, NFR-2.3.1 |
+| AC-2.3 | NFR-1.1.5 |
+| AC-2.4 | FR-3.3.1, FR-3.3.4 |
+| AC-2.5 | FR-3.1.6, FR-5.1.5 |
+| AC-3.1 | NFR-1.1.3 |
+| AC-3.2 | NFR-1.2.1 |
+| AC-3.3 | FR-2.1.1, NFR-1.3.2, NFR-5.3.4 |
+| AC-4.1 | NFR-4.1.1, NFR-4.2.3 |
+| AC-4.2 | NFR-4.1.3, NFR-4.1.4, FR-3.2.6 |
+| AC-4.3 | NFR-4.3.1, NFR-4.3.4 |
+
+---
+
+## 7. Interface Requirements
+
+### IR-1 REST API Contract
+
+| ID | Requirement |
+|----|-------------|
+| IR-1.1 | The REST API SHALL conform to the OpenAPI specification in [docs/openapi.yaml](../openapi.yaml) |
+| IR-1.2 | Request and response payloads SHALL validate against the schemas defined in [docs/openapi.yaml](../openapi.yaml) |
+| IR-1.3 | The API SHALL return `application/json` for non-streaming responses |
+| IR-1.4 | Streaming endpoints SHALL use SSE and SHALL return `text/event-stream` |
+
+### IR-2 WebSocket Contract
+
+| ID | Requirement |
+|----|-------------|
+| IR-2.1 | WebSocket event names used by the backend and frontend SHALL be consistent and centrally defined by the frontend configuration (see [frontend/src/config.ts](../../frontend/src/config.ts)) |
+| IR-2.2 | WebSocket message payloads SHALL be JSON objects |
+| IR-2.3 | WebSocket requests SHOULD support a `session_id` field for stateful conversation behavior |
+| IR-2.4 | WebSocket responses SHALL include a response payload and sufficient metadata to correlate to the initiating request |
+
+---
+
+## 8. Error Semantics
+
+### ERR-1 Standard Error Shape
+
+| ID | Requirement |
+|----|-------------|
+| ERR-1.1 | All non-streaming API error responses SHALL be JSON and SHALL include: `error.code`, `error.message`, and `error.correlation_id` |
+| ERR-1.2 | Error messages returned to clients SHALL be user-friendly and SHALL NOT expose internal stack traces or secrets |
+| ERR-1.3 | Errors SHALL use appropriate HTTP status codes (e.g., 400 validation error, 401/403 auth error, 404 not found, 429 rate limit, 500 internal error, 503 dependency unavailable) |
+
+### ERR-2 Streaming Errors and Cancellation
+
+| ID | Requirement |
+|----|-------------|
+| ERR-2.1 | If an error occurs during streaming, the system SHALL emit a terminal error event/message that is machine-detectable by the client |
+| ERR-2.2 | Client-initiated streaming cancellation SHALL stop the stream within 1 second and SHALL release any associated resources |
+| ERR-2.3 | Streaming partial output SHOULD be preserved and returned to the client if available |
+
+### ERR-3 Retry and Rate Limits
+
+| ID | Requirement |
+|----|-------------|
+| ERR-3.1 | The system SHALL implement safe retry behavior for transient upstream failures (e.g., model provider or tool provider) without duplicating side effects |
+| ERR-3.2 | When rate-limited, the system SHALL return a clear rate-limit error and SHOULD provide retry guidance (e.g., recommended wait time) |
+
+---
+
+## 9. Data Handling & Privacy
+
+### PRIV-1 Data Minimization and Classification
+
+| ID | Requirement |
+|----|-------------|
+| PRIV-1.1 | The system SHALL minimize stored conversation content to what is required to satisfy FR-3 behavior |
+| PRIV-1.2 | The system SHALL NOT persist raw tool outputs in conversation storage (see FR-3.1.8) |
+| PRIV-1.3 | The system SHALL NOT persist computed financial metrics in conversation storage (see FR-3.1.7) |
+
+### PRIV-2 Retention, Archival, and Deletion
+
+| ID | Requirement |
+|----|-------------|
+| PRIV-2.1 | The system SHALL support configurable retention windows for stored conversation records |
+| PRIV-2.2 | The system SHALL support archival of conversations as a distinct lifecycle state (see FR-3.2.7) |
+| PRIV-2.3 | The system SHALL support user-initiated deletion requests for conversation content, subject to audit and compliance requirements |
+
+### PRIV-3 PII Handling and Redaction
+
+| ID | Requirement |
+|----|-------------|
+| PRIV-3.1 | The system SHALL treat conversation content as potentially sensitive and SHALL apply redaction policies to logs and traces |
+| PRIV-3.2 | The system SHALL ensure that secrets (API keys, tokens, passwords) are never logged or traced |
+| PRIV-3.3 | The system SHALL provide an auditable record of access to conversation data (who/what accessed it and when) |
+
+---
+
+## 10. Assumptions & Open Issues
+
+### Assumptions
+
+- A user/session identity model exists to support ownership validation (see NFR-4.1.3).
+- A privacy policy exists to define what constitutes PII and how it must be handled (see NFR-4.2.4).
+- Clients consuming SSE and WebSocket streaming are capable of handling incremental updates and terminal error signaling.
+
+### Open Issues
+
+| ID | Issue | Impact |
+|----|-------|--------|
+| OI-1 | Define default retention windows per environment for PRIV-2.1 | Needed to make retention testable out-of-the-box |
+| OI-2 | Define the canonical error code taxonomy for ERR-1.1 | Required for consistent client handling and analytics |
+| OI-3 | Specify the exact WebSocket event payload schemas (beyond high-level contract) | Needed for strict schema validation and frontend/back alignment |
+
+---
+
+## 11. Revision History
 
 | Version | Date | Author | Changes |
 |---------|------|--------|---------|
 | 1.0 | 2026-01-22 | System | Initial requirements specification |
-
+| 1.1 | 2026-01-23 | System | Rewrote FR-3 Memory System with business-driven format: Added Title/Precondition/Expected Output columns, measurable acceptance criteria, declarative language. Removed technical implementation details. |
+| 1.2 | 2026-01-23 | System | Rewrote FR-1 (Agent Core), FR-2 (Tool System), FR-4 (Semantic Routing), FR-5 (API Integration), FR-6 (Streaming) with same business-driven format. All FRs now use consistent table structure with ID, Title, Description, Precondition, Expected Output, Priority columns. |
+| 2.0 | 2026-01-23 | System | Major restructure to standard SRS format. (1) Removed MEM-* section containing implementation details—memory behaviors already specified in FR-3. (2) Moved Dependencies to technical design document. (3) Enhanced Introduction with explicit In Scope/Out of Scope boundaries. (4) Cleaned Definitions section—removed implementation terms. (5) Restructured ToC from 8 to 6 sections. (6) Adopted spec-driven development approach for AI-assisted implementation. |
 ---
 
 *End of Requirements Document*
