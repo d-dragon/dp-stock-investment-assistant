@@ -334,13 +334,17 @@ The Short-Term Memory (STM) system provides conversation context management with
 
 | Parameter | Validation |
 |-----------|------------|
-| `summarize_threshold` | Must be > 0 and ≤ 100000 |
-| `max_messages` | Must be > 0 and ≤ 1000 |
-| `messages_to_keep` | Must be > 0 and ≤ max_messages |
-| `max_content_size` | Must be > 0 and ≤ 1048576 (1MB) |
-| `summary_max_length` | Must be > 0 and ≤ 2000 |
-| `context_load_timeout_ms` | Must be > 0 and ≤ 30000 |
-| `state_save_timeout_ms` | Must be > 0 and ≤ 5000 |
+| `summarize_threshold` | Must be ≥ 1000 and ≤ 10000 |
+| `max_messages` | Must be ≥ 10 and ≤ 200 |
+| `messages_to_keep` | Must be ≥ 5 and < max_messages |
+| `max_content_size` | Must be ≥ 1024 and ≤ 65536 |
+| `summary_max_length` | Must be ≥ 100 and ≤ 2000 |
+| `context_load_timeout_ms` | Must be ≥ 100 and ≤ 5000 |
+| `state_save_timeout_ms` | Must be ≥ 10 and ≤ 500 |
+| `checkpoint_collection` | Must be non-empty string |
+| `conversations_collection` | Must be non-empty string |
+
+> **Note**: Validation ranges are intentionally stricter than theoretical maximums to prevent misconfiguration. The `messages_to_keep` constraint uses strict inequality (`<`) to ensure at least one message slot remains for new messages after summarization.
 
 **Verification**:
 - Unit test: Invalid values raise ConfigurationError at startup
@@ -476,6 +480,14 @@ Runtime state for active sessions (not persisted).
 
 ---
 
+### SC-9: Memory Content Compliance
+
+**Metric**: Stored memory contains only allowed content types  
+**Target**: 100% compliance (zero violations)  
+**Measurement**: Automated scan of stored messages for prohibited patterns
+
+---
+
 ## Constitution Compliance Checklist
 
 | Article | Section | Requirement | Verification |
@@ -500,8 +512,13 @@ Runtime state for active sessions (not persisted).
 ## Open Questions
 
 1. **Archive Policy**: Who/what can archive a session, and is it manual-only (P0) or does it also support future automation?
-2. ~~**Summary Trigger**: At what token count should summarization occur?~~ **RESOLVED**: Configurable via `memory.summarize_threshold` (default: 4000 tokens) per FR-3.1.9.
-3. **Workspace Isolation**: Is cross-workspace session access ever permitted? (FR-3.2.6 suggests no)
+   - **Answer**: For P0, archival is **manual-only** via direct database operation or future admin API. Automated archival based on inactivity timeout is deferred to a future epic (see FR-3.2.x). Sessions transition to `archived` status only through explicit action; no TTL-based expiration.
+
+2. **Summary Trigger**: At what token count should summarization occur?
+   - **Answer**: Configurable via `memory.summarize_threshold` (default: 4000 tokens) per FR-3.1.9.
+
+3. **Workspace Isolation**: Is cross-workspace session access ever permitted?
+   - **Answer**: **NO**. Cross-workspace session access is explicitly prohibited per workspace isolation principle. A session belongs to exactly one workspace (see Session entity `workspace_id` foreign key constraint). API endpoints MUST validate that the requesting user has access to the session's parent workspace before returning session data. Unauthorized cross-workspace access attempts return HTTP 403 Forbidden.
 
 ---
 
