@@ -5,7 +5,7 @@
 > **Created**: 2026-01-27  
 > **Author**: AI Agent (Spec Kit)  
 > **Source**: [Requirements.md](../../../docs/langchain-agent/Requirements.md) § FR-3.1  
-> **Constitution Compliance**: Article III (Memory Boundaries)
+> **Constitution Compliance**: Article III (Memory Architecture Boundaries)
 
 ---
 
@@ -20,7 +20,9 @@ The Short-Term Memory (STM) system provides conversation context management with
 ### Session 2026-01-27
 
 - Q: For E2 “expired session” behavior, should sessions expire (TTL) or use lifecycle states? → A: No expiration; sessions use lifecycle states with manual archive.
+### Session 2026-01-28
 
+- Q: Should operational parameters (token thresholds, message limits, TTLs) be hardcoded or configurable? → A: All operational parameters MUST be configurable via configuration file or database.
 ---
 
 ## User Scenarios
@@ -284,6 +286,69 @@ The Short-Term Memory (STM) system provides conversation context management with
 
 ---
 
+### FR-3.1.9: Configurable Operational Parameters
+
+| Field | Value |
+|-------|-------|
+| **Priority** | P0 (Must Have) |
+| **Description** | All operational parameters MUST be configurable via configuration file (YAML) or database, never hardcoded in source code |
+| **Precondition** | — |
+| **Expected Output** | System behavior adjusts when configuration values change without code deployment |
+| **Constitution Link** | Article VII (Quality Gates - no magic numbers) |
+
+**Required Configurable Parameters:**
+
+| Parameter | Type | Default | Storage | Description |
+|-----------|------|---------|---------|-------------|
+| `memory.summarize_threshold` | integer | 4000 | Config | Token count triggering summarization |
+| `memory.max_messages` | integer | 50 | Config | Maximum messages before window buffer activates |
+| `memory.messages_to_keep` | integer | 10 | Config | Messages retained after summarization |
+| `memory.max_content_size` | integer | 32768 | Config | Maximum message content size in bytes |
+| `memory.summary_max_length` | integer | 500 | Config | Maximum summary length in characters |
+| `memory.context_load_timeout_ms` | integer | 500 | Config | Maximum time to load session context |
+| `memory.state_save_timeout_ms` | integer | 50 | Config | Maximum time to save agent state |
+| `memory.checkpoint_collection` | string | agent_checkpoints | Config | MongoDB collection for LangGraph checkpoints |
+| `memory.conversations_collection` | string | conversations | Config | MongoDB collection for conversation metadata |
+
+**Verification**:
+- Unit test: Change config value, verify system behavior changes
+- Integration test: Override defaults via environment variables
+- Validation test: Invalid config values produce clear error messages
+- No hardcoded values: Code review confirms no magic numbers
+
+**Design Rationale**:
+> Operational parameters vary between environments (dev, staging, production) and may need tuning based on usage patterns. Hardcoding prevents safe experimentation and requires code deployment for adjustments.
+
+---
+
+### FR-3.1.10: Configuration Validation
+
+| Field | Value |
+|-------|-------|
+| **Priority** | P1 (Should Have) |
+| **Description** | Configuration values are validated at startup with clear error messages for invalid values |
+| **Precondition** | Application startup |
+| **Expected Output** | Invalid configuration prevents startup with actionable error message |
+
+**Validation Rules:**
+
+| Parameter | Validation |
+|-----------|------------|
+| `summarize_threshold` | Must be > 0 and ≤ 100000 |
+| `max_messages` | Must be > 0 and ≤ 1000 |
+| `messages_to_keep` | Must be > 0 and ≤ max_messages |
+| `max_content_size` | Must be > 0 and ≤ 1048576 (1MB) |
+| `summary_max_length` | Must be > 0 and ≤ 2000 |
+| `context_load_timeout_ms` | Must be > 0 and ≤ 30000 |
+| `state_save_timeout_ms` | Must be > 0 and ≤ 5000 |
+
+**Verification**:
+- Unit test: Invalid values raise ConfigurationError at startup
+- Unit test: Error messages include parameter name and valid range
+- Integration test: Application fails fast on invalid config
+
+---
+
 ## Key Entities
 
 ### Session
@@ -316,13 +381,14 @@ An individual exchange within a session.
 | `message_id` | string | Unique identifier | UUID v4 format |
 | `session_id` | string | Parent session | Foreign key; required |
 | `role` | enum | Message author | `user`, `assistant`, `system` |
-| `content` | string | Message text | No financial data (FR-3.1.7); max 32KB |
+| `content` | string | Message text | No financial data (FR-3.1.7); max size per `memory.max_content_size` config |
 | `timestamp` | datetime | Creation time | UTC; immutable |
 | `sequence` | integer | Order in session | Auto-incremented; ≥1 |
 
 **Invariants**:
 - Content must not contain raw tool outputs (FR-3.1.8)
 - Content must not contain financial metrics (FR-3.1.7)
+- Content size enforced by configurable limit (FR-3.1.9)
 
 ---
 
@@ -397,8 +463,16 @@ Runtime state for active sessions (not persisted).
 ### SC-7: Response Time for Context Loading
 
 **Metric**: Session context loads within acceptable latency  
-**Target**: <500ms for sessions with ≤50 messages  
+**Target**: Within `memory.context_load_timeout_ms` (default: 500ms) for sessions with ≤`memory.max_messages` (default: 50) messages  
 **Measurement**: Performance test with instrumented timing
+
+---
+
+### SC-8: Configuration Compliance
+
+**Metric**: System behavior matches configuration values  
+**Target**: 100% of configurable parameters honored  
+**Measurement**: Unit tests verify each parameter affects system behavior
 
 ---
 
@@ -419,14 +493,14 @@ Runtime state for active sessions (not persisted).
 |------------|------|-------------|
 | MongoDB | Infrastructure | Persistence for Session and Message entities |
 | LangGraph Checkpointing | Library | State persistence mechanism |
-| Constitution v1.0.0 | Governance | Memory boundary rules |
+| Constitution v1.1.0 | Governance | Memory boundary rules |
 
 ---
 
 ## Open Questions
 
 1. **Archive Policy**: Who/what can archive a session, and is it manual-only (P0) or does it also support future automation?
-2. **Summary Trigger**: At what token count should summarization occur? (FR-3.3 dependency)
+2. ~~**Summary Trigger**: At what token count should summarization occur?~~ **RESOLVED**: Configurable via `memory.summarize_threshold` (default: 4000 tokens) per FR-3.1.9.
 3. **Workspace Isolation**: Is cross-workspace session access ever permitted? (FR-3.2.6 suggests no)
 
 ---
@@ -435,4 +509,5 @@ Runtime state for active sessions (not persisted).
 
 | Version | Date | Author | Changes |
 |---------|------|--------|---------|
+| 1.1.0 | 2026-01-28 | AI Agent | Added FR-3.1.9 (Configurable Parameters), FR-3.1.10 (Config Validation), SC-8; Updated Message entity, SC-7; Resolved Open Question #2 |
 | 1.0.0 | 2026-01-27 | AI Agent | Initial spec from FR-3.1.x transformation |

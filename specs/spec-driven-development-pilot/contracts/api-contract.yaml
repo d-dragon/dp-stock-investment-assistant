@@ -1,0 +1,483 @@
+# API Contract: FR-3.1 Short-Term Memory
+
+**Date**: 2025-01-27 | **Version**: 1.0.0 | **Plan**: [../plan.md](../plan.md)
+
+---
+
+## Base URL
+
+```
+/api
+```
+
+---
+
+## Endpoints Overview
+
+| Method | Path | Description | Auth |
+|--------|------|-------------|------|
+| `POST` | `/chat` | Send chat message (optionally with session_id) | Required |
+| `GET` | `/sessions/{session_id}/conversation` | Get conversation metadata | Required |
+| `GET` | `/sessions/{session_id}/messages` | Get message history | Required |
+| `POST` | `/sessions/{session_id}/conversation/archive` | Archive conversation | Required |
+
+---
+
+## 1. POST /chat
+
+Send a chat message to the AI agent. **Backward compatible** — works with or without `session_id`.
+
+### Request
+
+```yaml
+POST /api/chat
+Content-Type: application/json
+Authorization: Bearer {token}
+
+{
+    "message": "What is AAPL's P/E ratio?",
+    "session_id": "a1b2c3d4-e5f6-4789-a0b1-c2d3e4f56789",  # Optional
+    "provider": "openai"  # Optional, default from config
+}
+```
+
+#### Request Schema
+
+```yaml
+type: object
+required:
+  - message
+properties:
+  message:
+    type: string
+    minLength: 1
+    maxLength: 10000
+    description: User message text
+  session_id:
+    type: string
+    format: uuid
+    nullable: true
+    description: |
+      Session ID for conversation continuity.
+      - If provided: Load conversation context, persist state
+      - If omitted/null: Stateless single-turn, no persistence
+  provider:
+    type: string
+    enum: [openai, grok]
+    default: openai
+    description: AI model provider
+```
+
+### Response (200 OK)
+
+```yaml
+Content-Type: application/json
+
+{
+    "response": "Apple Inc. (AAPL) has a P/E ratio of approximately 28.5...",
+    "provider": "openai",
+    "model": "gpt-4",
+    "session_id": "a1b2c3d4-e5f6-4789-a0b1-c2d3e4f56789",
+    "conversation": {
+        "message_count": 3,
+        "status": "active",
+        "focused_symbols": ["AAPL"]
+    }
+}
+```
+
+#### Response Schema (with session_id)
+
+```yaml
+type: object
+required:
+  - response
+  - provider
+  - model
+properties:
+  response:
+    type: string
+    description: AI assistant response text
+  provider:
+    type: string
+    description: Model provider used
+  model:
+    type: string
+    description: Specific model name
+  session_id:
+    type: string
+    format: uuid
+    nullable: true
+    description: Echoed session_id (null if stateless)
+  conversation:
+    type: object
+    nullable: true
+    description: Conversation metadata (null if stateless)
+    properties:
+      message_count:
+        type: integer
+        minimum: 0
+      status:
+        type: string
+        enum: [active, summarized, archived]
+      focused_symbols:
+        type: array
+        items:
+          type: string
+          pattern: "^[A-Z]{1,5}$"
+```
+
+### Error Responses
+
+#### 400 Bad Request (Invalid Input)
+
+```yaml
+{
+    "error": "Validation error",
+    "details": {
+        "message": "Message is required",
+        "session_id": "Invalid UUID format"
+    }
+}
+```
+
+#### 403 Forbidden (Unauthorized Access)
+
+```yaml
+{
+    "error": "Access denied",
+    "message": "Session does not belong to authenticated user"
+}
+```
+
+#### 404 Not Found (Session Not Found)
+
+```yaml
+{
+    "error": "Not found",
+    "message": "Session 'a1b2c3d4-...' not found"
+}
+```
+
+#### 409 Conflict (Archived Conversation)
+
+```yaml
+{
+    "error": "Conflict",
+    "message": "Conversation is archived and read-only"
+}
+```
+
+#### 503 Service Unavailable
+
+```yaml
+{
+    "error": "Service unavailable",
+    "message": "AI agent service is not available"
+}
+```
+
+---
+
+## 2. GET /sessions/{session_id}/conversation
+
+Retrieve conversation metadata for a session.
+
+### Request
+
+```yaml
+GET /api/sessions/a1b2c3d4-e5f6-4789-a0b1-c2d3e4f56789/conversation
+Authorization: Bearer {token}
+```
+
+### Response (200 OK)
+
+```yaml
+Content-Type: application/json
+
+{
+    "session_id": "a1b2c3d4-e5f6-4789-a0b1-c2d3e4f56789",
+    "status": "active",
+    "message_count": 5,
+    "total_tokens": 1250,
+    "summary": null,
+    "focused_symbols": ["AAPL", "MSFT"],
+    "session_assumptions": "I prefer value stocks with dividends",
+    "pinned_intent": "Dividend growth investing",
+    "last_activity_at": "2025-01-27T10:30:00Z",
+    "created_at": "2025-01-27T10:00:00Z",
+    "updated_at": "2025-01-27T10:30:00Z",
+    "archived_at": null
+}
+```
+
+#### Response Schema
+
+```yaml
+type: object
+required:
+  - session_id
+  - status
+  - message_count
+  - created_at
+  - updated_at
+properties:
+  session_id:
+    type: string
+    format: uuid
+  status:
+    type: string
+    enum: [active, summarized, archived]
+  message_count:
+    type: integer
+    minimum: 0
+  total_tokens:
+    type: integer
+    minimum: 0
+  summary:
+    type: string
+    maxLength: 500
+    nullable: true
+  focused_symbols:
+    type: array
+    items:
+      type: string
+      pattern: "^[A-Z]{1,5}$"
+  session_assumptions:
+    type: string
+    nullable: true
+  pinned_intent:
+    type: string
+    nullable: true
+  last_activity_at:
+    type: string
+    format: date-time
+  created_at:
+    type: string
+    format: date-time
+  updated_at:
+    type: string
+    format: date-time
+  archived_at:
+    type: string
+    format: date-time
+    nullable: true
+```
+
+### Error Responses
+
+- `403 Forbidden` — User not authorized to access session
+- `404 Not Found` — Session or conversation not found
+
+---
+
+## 3. GET /sessions/{session_id}/messages
+
+Retrieve message history for a conversation.
+
+### Request
+
+```yaml
+GET /api/sessions/a1b2c3d4-e5f6-4789-a0b1-c2d3e4f56789/messages
+Authorization: Bearer {token}
+```
+
+#### Query Parameters
+
+```yaml
+limit:
+  type: integer
+  default: 50
+  maximum: 100
+  description: Maximum messages to return
+offset:
+  type: integer
+  default: 0
+  description: Pagination offset
+```
+
+### Response (200 OK)
+
+```yaml
+Content-Type: application/json
+
+{
+    "session_id": "a1b2c3d4-e5f6-4789-a0b1-c2d3e4f56789",
+    "messages": [
+        {
+            "role": "human",
+            "content": "Tell me about AAPL",
+            "timestamp": "2025-01-27T10:00:00Z"
+        },
+        {
+            "role": "ai",
+            "content": "Apple Inc. (AAPL) is a technology company...",
+            "timestamp": "2025-01-27T10:00:05Z"
+        },
+        {
+            "role": "human",
+            "content": "What is its P/E ratio?",
+            "timestamp": "2025-01-27T10:05:00Z"
+        },
+        {
+            "role": "ai",
+            "content": "AAPL's P/E ratio is approximately 28.5...",
+            "timestamp": "2025-01-27T10:05:03Z"
+        }
+    ],
+    "total_count": 4,
+    "has_summary": false,
+    "summary": null
+}
+```
+
+#### Response Schema
+
+```yaml
+type: object
+required:
+  - session_id
+  - messages
+  - total_count
+properties:
+  session_id:
+    type: string
+    format: uuid
+  messages:
+    type: array
+    items:
+      type: object
+      required:
+        - role
+        - content
+        - timestamp
+      properties:
+        role:
+          type: string
+          enum: [human, ai, system]
+        content:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+  total_count:
+    type: integer
+    minimum: 0
+  has_summary:
+    type: boolean
+  summary:
+    type: string
+    nullable: true
+    description: Summary of older messages if conversation was summarized
+```
+
+---
+
+## 4. POST /sessions/{session_id}/conversation/archive
+
+Manually archive a conversation (mark as read-only).
+
+### Request
+
+```yaml
+POST /api/sessions/a1b2c3d4-e5f6-4789-a0b1-c2d3e4f56789/conversation/archive
+Authorization: Bearer {token}
+```
+
+### Response (200 OK)
+
+```yaml
+Content-Type: application/json
+
+{
+    "session_id": "a1b2c3d4-e5f6-4789-a0b1-c2d3e4f56789",
+    "status": "archived",
+    "archived_at": "2025-01-27T12:00:00Z",
+    "message": "Conversation archived successfully"
+}
+```
+
+### Error Responses
+
+- `403 Forbidden` — User not authorized
+- `404 Not Found` — Session/conversation not found
+- `409 Conflict` — Already archived
+
+---
+
+## WebSocket Events
+
+### Event: `chat_message` (Client → Server)
+
+```yaml
+event: chat_message
+data:
+  message: "What is AAPL's P/E ratio?"
+  session_id: "a1b2c3d4-e5f6-4789-a0b1-c2d3e4f56789"  # Optional
+```
+
+### Event: `chat_response` (Server → Client)
+
+```yaml
+event: chat_response
+data:
+  response: "Apple Inc. (AAPL) has a P/E ratio..."
+  session_id: "a1b2c3d4-e5f6-4789-a0b1-c2d3e4f56789"
+  conversation:
+    message_count: 3
+    status: "active"
+```
+
+### Event: `chat_chunk` (Server → Client, Streaming)
+
+```yaml
+event: chat_chunk
+data:
+  chunk: "Apple Inc."
+  done: false
+  session_id: "a1b2c3d4-e5f6-4789-a0b1-c2d3e4f56789"
+```
+
+### Event: `chat_stream_end` (Server → Client)
+
+```yaml
+event: chat_stream_end
+data:
+  session_id: "a1b2c3d4-e5f6-4789-a0b1-c2d3e4f56789"
+  conversation:
+    message_count: 3
+    status: "active"
+    focused_symbols: ["AAPL"]
+```
+
+### Event: `error` (Server → Client)
+
+```yaml
+event: error
+data:
+  code: "CONVERSATION_ARCHIVED"
+  message: "Conversation is archived and read-only"
+```
+
+---
+
+## Error Codes
+
+| Code | HTTP Status | Description |
+|------|-------------|-------------|
+| `VALIDATION_ERROR` | 400 | Invalid request payload |
+| `INVALID_SESSION_ID` | 400 | Session ID not valid UUID |
+| `UNAUTHORIZED` | 401 | Missing/invalid authentication |
+| `FORBIDDEN` | 403 | User not authorized for resource |
+| `SESSION_NOT_FOUND` | 404 | Session does not exist |
+| `CONVERSATION_NOT_FOUND` | 404 | No conversation for session |
+| `CONVERSATION_ARCHIVED` | 409 | Conversation is read-only |
+| `SERVICE_UNAVAILABLE` | 503 | Agent/database unavailable |
+
+---
+
+## References
+
+- [AGENT_MEMORY_TECHNICAL_DESIGN.md](../../../docs/langchain-agent/AGENT_MEMORY_TECHNICAL_DESIGN.md) — MEM-2 API requirements
+- [backend-python.instructions.md](../../../.github/instructions/backend-python.instructions.md) — API patterns
+- [openapi.yaml](../../../docs/openapi.yaml) — Existing API spec
