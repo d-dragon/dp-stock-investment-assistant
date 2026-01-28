@@ -35,14 +35,23 @@ Usage in langgraph.json:
       }
     }
 
+STM Feature (FR-3.1):
+--------------------
+This module also provides the checkpointer factory for Short-Term Memory:
+    - create_checkpointer(config) - Creates MongoDBSaver if memory enabled
+    - Returns None if langchain.memory.enabled=false
+    - Uses MemoryConfig for fail-fast validation
+
 Reference: .github/instructions/backend-python.instructions.md
 """
 
 from __future__ import annotations
 
+import logging
 import os
 import sys
 from pathlib import Path
+from typing import Any, Dict, Optional
 
 
 def _setup_python_path() -> None:
@@ -75,6 +84,100 @@ _setup_python_path()
 
 # Now we can use project-standard imports
 from core.stock_assistant_agent import create_stock_assistant_agent
+from utils.memory_config import MemoryConfig
+
+# Module-level logger
+logger = logging.getLogger(__name__)
+
+
+def create_checkpointer(config: Dict[str, Any]) -> Optional[Any]:
+    """
+    Create MongoDBSaver checkpointer if memory is enabled.
+    
+    This factory function creates a LangGraph MongoDBSaver checkpointer
+    for Short-Term Memory (STM) persistence. It uses MemoryConfig for
+    fail-fast validation of all configuration parameters.
+    
+    Args:
+        config: Application configuration dict with 'langchain.memory' 
+                and 'mongodb' sections.
+    
+    Returns:
+        MongoDBSaver instance if memory enabled, None otherwise.
+        
+    Raises:
+        ValueError: If MemoryConfig validation fails (FR-3.1.10 fail-fast)
+        
+    Note:
+        Connection errors are logged but not raised, allowing the agent
+        to operate without memory if MongoDB is temporarily unavailable.
+        
+    Example:
+        >>> from utils.config_loader import ConfigLoader
+        >>> config = ConfigLoader.load_config()
+        >>> checkpointer = create_checkpointer(config)
+        >>> if checkpointer:
+        ...     print("Memory enabled")
+        
+    Reference:
+        - FR-3.1.1: Multi-turn conversation context
+        - FR-3.1.2: MongoDB-backed persistence
+        - plan.md § MongoDBSaver Initialization Pattern
+    """
+    # Check if memory is enabled (quick exit path)
+    memory_section = config.get("langchain", {}).get("memory", {})
+    
+    if not memory_section.get("enabled", False):
+        logger.info("Short-Term Memory disabled (langchain.memory.enabled=false)")
+        return None
+    
+    # Load and validate config with fail-fast semantics (FR-3.1.10)
+    # This will raise ValueError if any parameter is invalid
+    memory_config = MemoryConfig.from_config(config)
+    
+    # Get MongoDB connection details
+    mongodb_config = config.get("mongodb", {})
+    connection_string = mongodb_config.get("uri", "")
+    db_name = mongodb_config.get("database", "stock_assistant")
+    
+    if not connection_string:
+        logger.warning(
+            "MongoDB connection string not configured. "
+            "Short-Term Memory will be disabled."
+        )
+        return None
+    
+    try:
+        # Import MongoDBSaver here to avoid import errors when package not installed
+        from langgraph.checkpoint.mongodb import MongoDBSaver
+        
+        checkpointer = MongoDBSaver(
+            connection_string=connection_string,
+            db_name=db_name,
+            collection_name=memory_config.checkpoint_collection
+        )
+        
+        logger.info(
+            f"MongoDBSaver checkpointer initialized "
+            f"(collection={memory_config.checkpoint_collection})"
+        )
+        
+        return checkpointer
+        
+    except ImportError as e:
+        logger.error(
+            f"Failed to import MongoDBSaver: {e}. "
+            "Ensure langgraph-checkpoint-mongodb is installed."
+        )
+        return None
+        
+    except Exception as e:
+        # Log connection errors but don't raise - allow agent to work without memory
+        logger.error(
+            f"Failed to create MongoDBSaver checkpointer: {e}. "
+            "Short-Term Memory will be disabled for this session."
+        )
+        return None
 
 
 def get_agent():

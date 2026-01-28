@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 from typing import TYPE_CHECKING, Optional
 
 from flask import Blueprint, Response, jsonify, request, stream_with_context
@@ -9,6 +10,11 @@ from flask import Blueprint, Response, jsonify, request, stream_with_context
 if TYPE_CHECKING:
     from .shared_context import APIRouteContext
 
+
+# UUID v4 validation regex (8-4-4-4-12 format, version 4)
+UUID_V4_REGEX = re.compile(
+    r'^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$'
+)
 
 SSE_HEADERS = {
     'Cache-Control': 'no-cache',
@@ -57,12 +63,14 @@ def create_chat_blueprint(context: "APIRouteContext") -> Blueprint:
             {
                 "message": str (required),
                 "provider": str (optional),
-                "stream": bool (optional, default False)
+                "stream": bool (optional, default False),
+                "session_id": str (optional, UUID v4 for session-aware memory)
             }
         
         Returns:
             - Streaming: SSE stream with incremental response chunks
             - Non-streaming: JSON with complete response and metadata
+              If session_id provided, it's included in the response.
         """
         try:
             data = request.get_json()
@@ -75,17 +83,33 @@ def create_chat_blueprint(context: "APIRouteContext") -> Blueprint:
 
             provider_override = data.get('provider') or request.args.get('provider')
             stream = data.get('stream', False)
+            
+            # Extract and validate session_id (optional)
+            session_id = data.get('session_id')
+            if session_id is not None:
+                if not isinstance(session_id, str) or not UUID_V4_REGEX.match(session_id):
+                    return jsonify({'error': 'session_id must be a valid UUID v4'}), 400
 
             if stream:
-                logger.info(f"Streaming chat request: {user_message[:50]}...")
+                logger.info(f"Streaming chat request: {user_message[:50]}..." + 
+                           (f" session={session_id}" if session_id else ""))
                 return Response(
-                    stream_with_context(stream_chat_response(user_message, provider_override)),
+                    stream_with_context(stream_chat_response(
+                        user_message, provider_override, session_id=session_id
+                    )),
                     mimetype='text/event-stream',
                     headers=SSE_HEADERS
                 )
 
-            logger.info(f"Chat request: {user_message[:50]}...")
-            result = chat_service.process_chat_query(user_message, provider_override=provider_override)
+            logger.info(f"Chat request: {user_message[:50]}..." + 
+                       (f" session={session_id}" if session_id else ""))
+            result = chat_service.process_chat_query(
+                user_message, provider_override=provider_override, session_id=session_id
+            )
+            
+            # Include session_id in response if provided
+            if session_id:
+                result['session_id'] = session_id
 
             return jsonify(result), 200
         except Exception as exc:

@@ -63,7 +63,8 @@ class ChatService(BaseService):
         )
     
     def stream_chat_response(
-        self, user_message: str, provider_override: Optional[str] = None
+        self, user_message: str, provider_override: Optional[str] = None,
+        session_id: Optional[str] = None
     ) -> Generator[str, None, None]:
         """Stream chat response in real-time (SSE format).
         
@@ -76,6 +77,7 @@ class ChatService(BaseService):
         Args:
             user_message: User's query to process
             provider_override: Optional provider override
+            session_id: Optional session ID for session-aware memory
             
         Yields:
             SSE-formatted strings (data: {...}\n\n)
@@ -96,7 +98,7 @@ class ChatService(BaseService):
             chunk_count = 0
             full_text_parts = []
             for chunk in self._agent.process_query_streaming(
-                user_message, provider=provider_override
+                user_message, provider=provider_override, session_id=session_id
             ):
                 if chunk:
                     chunk_count += 1
@@ -179,7 +181,8 @@ class ChatService(BaseService):
         return self._utc_now()
     
     def process_chat_query(
-        self, user_message: str, provider_override: Optional[str] = None
+        self, user_message: str, provider_override: Optional[str] = None,
+        session_id: Optional[str] = None
     ) -> Dict[str, Any]:
         """Process chat query and return structured response (non-streaming).
         
@@ -189,6 +192,7 @@ class ChatService(BaseService):
         Args:
             user_message: User's query to process
             provider_override: Optional provider override
+            session_id: Optional session ID for session-aware memory
             
         Returns:
             Dict with keys:
@@ -199,7 +203,9 @@ class ChatService(BaseService):
                 - timestamp: str - ISO 8601 timestamp
         """
         # Get response from agent
-        raw_response = self._agent.process_query(user_message, provider=provider_override)
+        raw_response = self._agent.process_query(
+            user_message, provider=provider_override, session_id=session_id
+        )
         
         # Get model info from agent
         model_info = self._agent.get_current_model_info(provider=provider_override)

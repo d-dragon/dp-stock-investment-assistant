@@ -18,7 +18,7 @@ from typing import Any, Dict, Generator, List, Mapping, Optional
 
 from langchain_core.messages import HumanMessage, SystemMessage, AIMessage
 from langchain_openai import ChatOpenAI
-from langchain.agents import create_agent
+from langgraph.prebuilt import create_react_agent
 
 from .data_manager import DataManager
 from .langchain_adapter import build_prompt
@@ -78,6 +78,7 @@ If you don't have a tool for a specific request, provide helpful general guidanc
         data_manager: DataManager,
         *,
         tool_registry: Optional[ToolRegistry] = None,
+        checkpointer: Optional[Any] = None,
         logger: Optional[logging.Logger] = None,
     ) -> None:
         """Initialize StockAssistantAgent.
@@ -86,11 +87,13 @@ If you don't have a tool for a specific request, provide helpful general guidanc
             config: Application configuration dict
             data_manager: DataManager instance for stock data
             tool_registry: Optional ToolRegistry (defaults to singleton)
+            checkpointer: Optional LangGraph checkpointer for session memory (e.g., MongoDBSaver)
             logger: Optional logger instance
         """
         self.config = config
         self.data_manager = data_manager
         self.logger = logger or logging.getLogger(__name__)
+        self._checkpointer = checkpointer  # Store checkpointer for session-aware queries
         
         # Initialize cache backend
         from utils.cache import CacheBackend
@@ -176,7 +179,8 @@ If you don't have a tool for a specific request, provide helpful general guidanc
         """Build LangGraph ReAct agent.
         
         Returns:
-            CompiledStateGraph configured with enabled tools, or None if no tools
+            CompiledStateGraph configured with enabled tools and optional checkpointer,
+            or None if no tools are available.
         """
         # Get enabled tools from registry
         enabled_tools = self._tool_registry.get_enabled_tools()
@@ -199,15 +203,19 @@ If you don't have a tool for a specific request, provide helpful general guidanc
                 temperature=openai_config.get("temperature", 0.7),
             )
             
-            # Create ReAct agent using LangChain's create_agent
-            # This is the current official API (moved from langgraph.prebuilt.create_react_agent)
-            agent = create_agent(
+            # Create ReAct agent using langgraph.prebuilt.create_react_agent
+            # Pass checkpointer if available for session-aware memory
+            agent = create_react_agent(
                 model=llm,
                 tools=enabled_tools,
-                system_prompt=self.REACT_SYSTEM_PROMPT
+                prompt=self.REACT_SYSTEM_PROMPT,
+                checkpointer=self._checkpointer,  # None if not configured
             )
             
-            self.logger.info("LangGraph ReAct agent built successfully")
+            if self._checkpointer:
+                self.logger.info("LangGraph ReAct agent built with checkpointer (session memory enabled)")
+            else:
+                self.logger.info("LangGraph ReAct agent built successfully (stateless mode)")
             return agent
             
         except Exception as e:
@@ -246,6 +254,7 @@ If you don't have a tool for a specific request, provide helpful general guidanc
         query: str,
         *,
         provider: Optional[str] = None,
+        session_id: Optional[str] = None,
     ) -> str:
         """Process a query and return complete response.
         
@@ -254,6 +263,9 @@ If you don't have a tool for a specific request, provide helpful general guidanc
         Args:
             query: User query to process
             provider: Optional provider override
+            session_id: Optional session ID for conversation memory (UUID v4).
+                       When provided with a checkpointer, enables multi-turn
+                       conversations with context recall.
             
         Returns:
             Complete response text
@@ -261,7 +273,7 @@ If you don't have a tool for a specific request, provide helpful general guidanc
         try:
             # Try ReAct agent first
             if self._agent_executor:
-                return self._process_with_react(query, provider=provider)
+                return self._process_with_react(query, provider=provider, session_id=session_id)
             
             # Fallback to legacy processing
             return self._process_legacy(query, provider=provider)
@@ -275,6 +287,7 @@ If you don't have a tool for a specific request, provide helpful general guidanc
         query: str,
         *,
         provider: Optional[str] = None,
+        session_id: Optional[str] = None,
     ) -> Generator[str, None, None]:
         """Process a query and stream response chunks.
         
@@ -283,6 +296,9 @@ If you don't have a tool for a specific request, provide helpful general guidanc
         Args:
             query: User query to process
             provider: Optional provider override
+            session_id: Optional session ID for conversation memory (UUID v4).
+                       When provided with a checkpointer, enables multi-turn
+                       conversations with context recall.
             
         Yields:
             Response text chunks
@@ -293,7 +309,7 @@ If you don't have a tool for a specific request, provide helpful general guidanc
                 # Run async streaming in sync context
                 loop = asyncio.new_event_loop()
                 try:
-                    async_gen = self._stream_with_react_async(query, provider=provider)
+                    async_gen = self._stream_with_react_async(query, provider=provider, session_id=session_id)
                     while True:
                         try:
                             chunk = loop.run_until_complete(async_gen.__anext__())
@@ -394,21 +410,32 @@ If you don't have a tool for a specific request, provide helpful general guidanc
         query: str,
         *,
         provider: Optional[str] = None,
+        session_id: Optional[str] = None,
     ) -> str:
         """Process query using LangGraph ReAct agent.
         
         Args:
             query: User query
             provider: Optional provider override
+            session_id: Optional session ID for conversation memory.
+                       When provided with a checkpointer, enables multi-turn
+                       conversations where the agent recalls prior context.
             
         Returns:
             Response text from agent
         """
         try:
+            # Build invoke config with thread_id for session memory
+            invoke_config = None
+            if session_id and self._checkpointer:
+                invoke_config = {"configurable": {"thread_id": session_id}}
+                self.logger.debug(f"Session-aware query with thread_id: {session_id}")
+            
             # LangGraph agent uses messages format
-            result = self._agent_executor.invoke({
-                "messages": [HumanMessage(content=query)]
-            })
+            result = self._agent_executor.invoke(
+                {"messages": [HumanMessage(content=query)]},
+                config=invoke_config,
+            )
             
             # Extract final AI response from messages
             messages = result.get("messages", [])
@@ -435,20 +462,31 @@ If you don't have a tool for a specific request, provide helpful general guidanc
         query: str,
         *,
         provider: Optional[str] = None,
+        session_id: Optional[str] = None,
     ):
         """Async stream using astream_events for tool visibility.
         
         Args:
             query: User query
             provider: Optional provider override
+            session_id: Optional session ID for conversation memory.
+                       When provided with a checkpointer, enables multi-turn
+                       conversations where the agent recalls prior context.
             
         Yields:
             Response chunks with tool call notifications
         """
         try:
+            # Build stream config with thread_id for session memory
+            stream_config = None
+            if session_id and self._checkpointer:
+                stream_config = {"configurable": {"thread_id": session_id}}
+                self.logger.debug(f"Session-aware streaming with thread_id: {session_id}")
+            
             async for event in self._agent_executor.astream_events(
                 {"messages": [HumanMessage(content=query)]},
                 version="v2",
+                config=stream_config,
             ):
                 kind = event.get("event", "")
                 

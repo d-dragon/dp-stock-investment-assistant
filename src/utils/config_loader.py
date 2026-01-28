@@ -136,6 +136,17 @@ class ConfigLoader:
             'LANGSMITH_API_KEY': ('langchain', 'tracing', 'api_key'),
             'LANGSMITH_PROJECT': ('langchain', 'tracing', 'project'),
             'LANGSMITH_ENDPOINT': ('langchain', 'tracing', 'endpoint'),
+            # LangChain Memory (FR-3.1.9)
+            'LANGCHAIN_MEMORY_ENABLED': ('langchain', 'memory', 'enabled'),
+            'LANGCHAIN_MEMORY_SUMMARIZE_THRESHOLD': ('langchain', 'memory', 'summarize_threshold'),
+            'LANGCHAIN_MEMORY_MAX_MESSAGES': ('langchain', 'memory', 'max_messages'),
+            'LANGCHAIN_MEMORY_MESSAGES_TO_KEEP': ('langchain', 'memory', 'messages_to_keep'),
+            'LANGCHAIN_MEMORY_MAX_CONTENT_SIZE': ('langchain', 'memory', 'max_content_size'),
+            'LANGCHAIN_MEMORY_SUMMARY_MAX_LENGTH': ('langchain', 'memory', 'summary_max_length'),
+            'LANGCHAIN_MEMORY_CONTEXT_LOAD_TIMEOUT_MS': ('langchain', 'memory', 'context_load_timeout_ms'),
+            'LANGCHAIN_MEMORY_STATE_SAVE_TIMEOUT_MS': ('langchain', 'memory', 'state_save_timeout_ms'),
+            'LANGCHAIN_MEMORY_CHECKPOINT_COLLECTION': ('langchain', 'memory', 'checkpoint_collection'),
+            'LANGCHAIN_MEMORY_CONVERSATIONS_COLLECTION': ('langchain', 'memory', 'conversations_collection'),
             # Financial APIs
             'ALPHA_VANTAGE_API_KEY': ('financial_apis', 'alpha_vantage', 'api_key'),
             'ALPHA_VANTAGE_ENABLED': ('financial_apis', 'alpha_vantage', 'enabled'),
@@ -265,6 +276,26 @@ class ConfigLoader:
                 'alpha_vantage': {
                     'api_key': '',
                     'enabled': False
+                }
+            },
+            'langchain': {
+                'tracing': {
+                    'enabled': False,
+                    'api_key': '',
+                    'project': 'dp-stock-assistant',
+                    'endpoint': 'https://api.smith.langchain.com'
+                },
+                'memory': {
+                    'enabled': True,
+                    'summarize_threshold': 4000,
+                    'max_messages': 50,
+                    'messages_to_keep': 10,
+                    'max_content_size': 32768,
+                    'summary_max_length': 500,
+                    'context_load_timeout_ms': 500,
+                    'state_save_timeout_ms': 50,
+                    'checkpoint_collection': 'agent_checkpoints',
+                    'conversations_collection': 'conversations'
                 }
             },
             'database': {

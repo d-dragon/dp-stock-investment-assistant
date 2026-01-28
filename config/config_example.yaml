@@ -28,6 +28,45 @@ semantic_router:
   threshold: 0.7              # Minimum confidence for route matching
   cache_embeddings: true      # Cache embeddings for performance
 
+# LangChain Tools Configuration
+# Cache TTL values for tool result caching (in seconds)
+langchain:
+  tools:
+    enabled: true             # Master switch for tool functionality
+    cache_ttl:
+      stock_symbol: 60        # Stock info cache (1 minute)
+      reporting: 600          # Report cache (10 minutes)
+      tradingview: 300        # TradingView cache (5 minutes)
+      default: 120            # Default TTL for unlisted tools
+  
+  # Memory Configuration (FR-3.1: Short-Term Memory)
+  # Controls conversation persistence and session-aware memory for multi-turn interactions
+  memory:
+    enabled: true                           # Enable conversation memory (FR-3.1.1)
+    
+    # Summarization Settings (FR-3.1.6)
+    summarize_threshold: 4000               # Token count to trigger summarization (valid: 1000-10000)
+    max_messages: 50                        # Max messages per session before pruning (valid: 10-200)
+    messages_to_keep: 10                    # Messages to preserve when pruning (valid: 5-50, must be < max_messages)
+    max_content_size: 32768                 # Max bytes for single message content (valid: 1024-65536)
+    summary_max_length: 500                 # Max tokens for summary (valid: 100-2000)
+    
+    # Performance Settings (FR-3.1.9)
+    context_load_timeout_ms: 500            # Max time to load context (valid: 100-5000)
+    state_save_timeout_ms: 50               # Max time to persist state (valid: 10-500)
+    
+    # MongoDB Collections (FR-3.1.2)
+    checkpoint_collection: "agent_checkpoints"    # LangGraph-managed checkpoints
+    conversations_collection: "conversations"     # Application-managed metadata
+  
+  # LangSmith Tracing Configuration
+  # Enables trace visualization in LangSmith Studio
+  tracing:
+    enabled: false            # Enable for local Studio development
+    project: "dp-stock-assistant"  # Project name in LangSmith UI
+    api_key: ""               # Set via LANGSMITH_API_KEY env var
+    endpoint: "https://api.smith.langchain.com"  # LangSmith API endpoint
+
 # Financial Data APIs
 financial_apis:
   yahoo_finance:

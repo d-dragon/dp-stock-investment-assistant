@@ -22,6 +22,7 @@ from .technical_indicator_repository import TechnicalIndicatorRepository
 from .market_snapshot_repository import MarketSnapshotRepository
 from .investment_idea_repository import InvestmentIdeaRepository
 from .watchlist_repository import WatchlistRepository
+from .conversation_repository import ConversationRepository
 from ..services.stock_data_service import StockDataService
 import logging
 
@@ -405,6 +406,25 @@ class RepositoryFactory:
                 return repo
         except Exception as e:
             self.logger.error(f"Failed to create WatchlistRepository: {e}")
+        return None
+    
+    def get_conversation_repository(self) -> Optional[ConversationRepository]:
+        """Create ConversationRepository instance for STM conversation tracking."""
+        if not self._connection_string:
+            return None
+        
+        try:
+            repo = ConversationRepository(
+                self._connection_string,
+                self._database_name,
+                self._username,
+                self._password,
+                self._auth_source
+            )
+            if repo.initialize():
+                return repo
+        except Exception as e:
+            self.logger.error(f"Failed to create ConversationRepository: {e}")
         return None
     
     # --- Legacy Static Methods (Backward Compatibility) ---

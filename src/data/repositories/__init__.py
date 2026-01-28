@@ -28,6 +28,7 @@ from .technical_indicator_repository import TechnicalIndicatorRepository
 from .market_snapshot_repository import MarketSnapshotRepository
 from .investment_idea_repository import InvestmentIdeaRepository
 from .watchlist_repository import WatchlistRepository
+from .conversation_repository import ConversationRepository
 
 __all__ = [
     'BaseRepository',
@@ -54,4 +55,5 @@ __all__ = [
     'MarketSnapshotRepository',
     'InvestmentIdeaRepository',
     'WatchlistRepository',
+    'ConversationRepository',
 ]
