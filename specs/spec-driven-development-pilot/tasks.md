@@ -46,18 +46,18 @@ This task file implements FR-3.1 Short-Term Memory, enabling the StockAssistantA
 
 > **Goal**: Establish project structure and configuration skeleton for STM implementation.
 
-- [ ] T001 Create feature directory structure per plan.md project layout
+- [X] T001 Create feature directory structure per plan.md project layout
   - Create `src/data/schema/conversations_schema.py` (empty module with docstring)
   - Create `src/data/repositories/conversation_repository.py` (empty module)
   - Create `src/services/conversation_service.py` (empty module)
   - Create `src/utils/memory_config.py` (empty module)
 
-- [ ] T002 [P] Add memory configuration section skeleton to `config/config.yaml`
+- [X] T002 [P] Add memory configuration section skeleton to `config/config.yaml`
   - Add `langchain.memory` section with all 9 parameters (FR-3.1.9)
   - Parameters: `enabled`, `summarize_threshold`, `max_messages`, `messages_to_keep`, `max_content_size`, `summary_max_length`, `context_load_timeout_ms`, `state_save_timeout_ms`, `checkpoint_collection`, `conversations_collection`
   - Include comments with valid ranges per spec
 
-- [ ] T003 [P] Update `config/config_example.yaml` with memory configuration section
+- [X] T003 [P] Update `config/config_example.yaml` with memory configuration section
   - Mirror structure from T002 with example values
   - Document each parameter purpose
 
@@ -69,12 +69,12 @@ This task file implements FR-3.1 Short-Term Memory, enabling the StockAssistantA
 
 ### Schema & Migration
 
-- [ ] T004 Create conversations collection JSON schema in `src/data/schema/conversations_schema.py`
+- [X] T004 Create conversations collection JSON schema in `src/data/schema/conversations_schema.py`
   - Define `CONVERSATIONS_SCHEMA` with all 15 fields from data-model.md
   - Include schema validation rules (status enum, ISO dates, etc.)
   - Add `CONVERSATIONS_INDEXES` list (5 indexes including unique session_id)
 
-- [ ] T005 [P] Update `src/data/migration/db_setup.py` to create conversations collection
+- [X] T005 [P] Update `src/data/migration/db_setup.py` to create conversations collection
   - Add `setup_conversations_collection(db)` function
   - Create collection with JSON schema validation
   - Create all 5 indexes from schema file
@@ -82,7 +82,7 @@ This task file implements FR-3.1 Short-Term Memory, enabling the StockAssistantA
 
 ### Repository Layer
 
-- [ ] T006 Implement `ConversationRepository` in `src/data/repositories/conversation_repository.py`
+- [X] T006 Implement `ConversationRepository` in `src/data/repositories/conversation_repository.py`
   - Extend `MongoGenericRepository`
   - Implement `get_or_create(session_id, workspace_id, user_id)` method
   - Implement `update_stats(session_id, message_count, total_tokens)` method
@@ -90,26 +90,26 @@ This task file implements FR-3.1 Short-Term Memory, enabling the StockAssistantA
   - Implement `archive(session_id)` method (sets archived_at, status)
   - Implement `health_check()` returning (bool, dict)
 
-- [ ] T007 [P] Register `ConversationRepository` in `src/data/repositories/factory.py`
+- [X] T007 [P] Register `ConversationRepository` in `src/data/repositories/factory.py`
   - Add `get_conversation_repository()` method to `RepositoryFactory`
   - Follow singleton pattern consistent with other repositories
 
 ### Configuration Layer (FR-3.1.9, FR-3.1.10)
 
-- [ ] T008 Implement `MemoryConfig` frozen dataclass in `src/utils/memory_config.py`
+- [X] T008 Implement `MemoryConfig` frozen dataclass in `src/utils/memory_config.py`
   - Create `@dataclass(frozen=True)` with all 9 parameters
   - Implement `__post_init__` validation per FR-3.1.10 ranges
   - Add `_validate_range(field, min, max)` helper method
   - Implement `from_config(config_dict)` class method for YAML loading
   - Raise `ValueError` with actionable message on invalid config (fail-fast)
 
-- [ ] T009 [P] Update `src/utils/config_loader.py` to load memory configuration
+- [X] T009 [P] Update `src/utils/config_loader.py` to load memory configuration
   - Ensure `langchain.memory` section is loaded from YAML
   - Add environment variable override support for memory parameters
 
 ### Tests
 
-- [ ] T010 Create unit tests for `ConversationRepository` in `tests/test_conversation_repository.py`
+- [X] T010 Create unit tests for `ConversationRepository` in `tests/test_conversation_repository.py`
   - Test `get_or_create` creates new document when missing
   - Test `get_or_create` returns existing document
   - Test `update_stats` updates message_count and total_tokens
@@ -119,7 +119,7 @@ This task file implements FR-3.1 Short-Term Memory, enabling the StockAssistantA
   - Test `health_check` returns healthy status
   - Mock MongoDB collection; no real database needed
 
-- [ ] T011 [P] Create unit tests for `MemoryConfig` in `tests/test_memory_config.py`
+- [X] T011 [P] Create unit tests for `MemoryConfig` in `tests/test_memory_config.py`
   - Test default values load correctly
   - Test valid custom values accepted
   - Test invalid `summarize_threshold` < 1000 raises ValueError
@@ -128,7 +128,7 @@ This task file implements FR-3.1 Short-Term Memory, enabling the StockAssistantA
   - Test error message includes parameter name and valid range
   - Test `from_config()` loads from YAML dict structure
 
-- [ ] T011 [P] Create config validation unit tests in `tests/test_memory_config.py`
+- [X] T011 [P] Create config validation unit tests in `tests/test_memory_config.py`
   - Test: Invalid `summarize_threshold` (below 1000, above 10000) raises `ValueError`
   - Test: Invalid `max_messages` (below 10, above 200) raises `ValueError`
   - Test: Invalid `messages_to_keep` (below 5, above 50, or >= max_messages) raises `ValueError`
@@ -158,48 +158,48 @@ This task file implements FR-3.1 Short-Term Memory, enabling the StockAssistantA
 
 ### Agent Integration
 
-- [ ] T012 [US1] Initialize `MongoDBSaver` checkpointer in `src/core/langgraph_bootstrap.py`
+- [X] T012 [US1] Initialize `MongoDBSaver` checkpointer in `src/core/langgraph_bootstrap.py`
   - Add `create_checkpointer(config)` function using `MemoryConfig`
   - Return `None` if `langchain.memory.enabled=false`
   - Use collection name from `MemoryConfig.checkpoint_collection`
   - Handle connection errors gracefully with logging
 
-- [ ] T013 [US1] Modify `StockAssistantAgent.__init__` to accept checkpointer in `src/core/stock_assistant_agent.py`
+- [X] T013 [US1] Modify `StockAssistantAgent.__init__` to accept checkpointer in `src/core/stock_assistant_agent.py`
   - Add optional `checkpointer` parameter to constructor
   - Store as `self._checkpointer` instance attribute
   - Pass checkpointer to LangGraph graph builder if provided
 
-- [ ] T014 [US1] Add `session_id` parameter to `process_query()` in `src/core/stock_assistant_agent.py`
+- [X] T014 [US1] Add `session_id` parameter to `process_query()` in `src/core/stock_assistant_agent.py`
   - Add `session_id: Optional[str] = None` parameter
   - Build `config={"configurable": {"thread_id": session_id}}` when session_id provided
   - Pass config to `agent_executor.invoke()` call
 
-- [ ] T015 [P] [US1] Add `session_id` parameter to `process_query_streaming()` in `src/core/stock_assistant_agent.py`
+- [X] T015 [P] [US1] Add `session_id` parameter to `process_query_streaming()` in `src/core/stock_assistant_agent.py`
   - Mirror pattern from T014 for streaming method
   - Pass config to `agent_executor.stream()` call
 
 ### API Integration
 
-- [ ] T016 [US1] Modify `POST /api/chat` route in `src/web/routes/ai_chat_routes.py`
+- [X] T016 [US1] Modify `POST /api/chat` route in `src/web/routes/ai_chat_routes.py`
   - Extract `session_id` from request JSON (optional field)
   - Validate session_id format (UUID v4) if provided
   - Pass session_id to `agent.process_query(message, session_id=session_id)`
   - Include `session_id` in response JSON
 
-- [ ] T017 [P] [US1] Modify Socket.IO `chat_message` event in `src/web/sockets/chat_events.py`
+- [X] T017 [P] [US1] Modify Socket.IO `chat_message` event in `src/web/sockets/chat_events.py`
   - Extract `session_id` from event data (optional field)
   - Pass to agent processing method
   - Include in response emission
 
 ### Tests
 
-- [ ] T018 [US1] Create integration tests for agent memory in `tests/test_agent_memory.py`
+- [X] T018 [US1] Create integration tests for agent memory in `tests/test_agent_memory.py`
   - Test multi-turn conversation: ask question, follow up, verify context recall
   - Test session isolation: two different session_ids have separate contexts
   - Test agent references prior messages accurately (FR-3.1.1)
   - Use mock or test MongoDB instance
 
-- [ ] T019 [US1] Create API tests for session-aware chat in `tests/api/test_chat_routes_memory.py`
+- [X] T019 [US1] Create API tests for session-aware chat in `tests/api/test_chat_routes_memory.py`
   - Test `POST /api/chat` with valid session_id returns 200
   - Test response includes echoed session_id
   - Test multi-turn API conversation maintains context

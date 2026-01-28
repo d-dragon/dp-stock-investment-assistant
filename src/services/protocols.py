@@ -36,12 +36,14 @@ class AgentProvider(Protocol):
         query: str,
         *,
         provider: Optional[str] = None,
+        session_id: Optional[str] = None,
     ) -> str:
         """Process a query and return complete response.
         
         Args:
             query: User query to process
             provider: Optional provider override (e.g., 'openai', 'grok')
+            session_id: Optional session ID for session-aware memory
             
         Returns:
             Complete response text
@@ -53,12 +55,14 @@ class AgentProvider(Protocol):
         query: str,
         *,
         provider: Optional[str] = None,
+        session_id: Optional[str] = None,
     ) -> Generator[str, None, None]:
         """Process a query and stream response chunks.
         
         Args:
             query: User query to process
             provider: Optional provider override (e.g., 'openai', 'grok')
+            session_id: Optional session ID for session-aware memory
             
         Yields:
             Response text chunks
@@ -70,6 +74,7 @@ class AgentProvider(Protocol):
         query: str,
         *,
         provider: Optional[str] = None,
+        session_id: Optional[str] = None,
     ) -> "AgentResponse":
         """Process a query and return structured response.
         
@@ -79,6 +84,7 @@ class AgentProvider(Protocol):
         Args:
             query: User query to process
             provider: Optional provider override (e.g., 'openai', 'grok')
+            session_id: Optional session ID for session-aware memory
             
         Returns:
             AgentResponse with content and metadata

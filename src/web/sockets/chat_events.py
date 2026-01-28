@@ -2,10 +2,16 @@
 
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass
 from typing import Any, Callable, Mapping, Tuple, TYPE_CHECKING
 
 from flask_socketio import SocketIO, emit
+
+# UUID v4 regex pattern for session_id validation
+UUID_V4_REGEX = re.compile(
+    r'^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$'
+)
 
 if TYPE_CHECKING:
     from logging import Logger
@@ -45,26 +51,46 @@ def register_chat_events(context: SocketIOContext) -> None:
 
     @socketio.on('chat_message')
     def handle_chat_message(data):
-        """Handle real-time chat messages."""
+        """
+        Handle real-time chat messages.
+        
+        Accepts optional session_id (UUID v4) for conversation memory.
+        If session_id is provided, the agent will use it for session-aware memory.
+        """
         try:
             payload = data or {}
             message = payload.get('message', '').strip()
             provider_override = payload.get('provider')
+            session_id = payload.get('session_id')
+            
             if not message:
                 emit('error', {'message': 'Message cannot be empty'})
                 return
 
-            raw_response = agent.process_query(message, provider=provider_override)
+            # Validate session_id format if provided
+            if session_id is not None:
+                if not isinstance(session_id, str) or not UUID_V4_REGEX.match(session_id):
+                    emit('error', {'message': 'session_id must be a valid UUID v4'})
+                    return
+
+            logger.debug(f"Processing chat message with session_id={session_id}")
+            raw_response = agent.process_query(message, provider=provider_override, session_id=session_id)
             provider_used, model_used, fallback_flag = extract_meta(raw_response)
             response_clean = strip_fallback_prefix(raw_response)
 
-            emit('chat_response', {
+            response_data = {
                 'response': response_clean,
                 'provider': provider_used,
                 'model': model_used,
                 'fallback': fallback_flag,
                 'timestamp': get_timestamp()
-            })
+            }
+            
+            # Echo session_id back if provided
+            if session_id:
+                response_data['session_id'] = session_id
+
+            emit('chat_response', response_data)
         except Exception as exc:
             import traceback
             logger.error(f"Error in chat_message handler: {exc}\n{traceback.format_exc()}")
