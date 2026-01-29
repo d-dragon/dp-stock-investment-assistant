@@ -1,29 +1,36 @@
 """
 Memory Configuration Module for FR-3.1 Short-Term Memory (STM).
 
-This module provides the MemoryConfig frozen dataclass with fail-fast validation
-for all memory-related configuration parameters as specified in FR-3.1.9 and FR-3.1.10.
+This module provides:
+- MemoryConfig: Frozen dataclass with fail-fast validation for memory configuration
+- ContentValidator: Compliance validation for stored memory content (FR-3.1.7, FR-3.1.8)
 
 Key features:
 - Immutable configuration (frozen dataclass)
 - Fail-fast validation in __post_init__
 - Factory method from_config() for YAML loading
 - Range validation for all numeric parameters
+- Content compliance scanning for prohibited patterns
 
 Reference:
     - Spec: specs/spec-driven-development-pilot/plan.md § MemoryConfig Dataclass Pattern
+    - FR-3.1.7: Zero financial data (prices, ratios) in stored memory
+    - FR-3.1.8: Tool outputs stored as references only, not raw data
     - FR-3.1.9: All operational parameters must be externally configurable
     - FR-3.1.10: Invalid configuration must fail immediately with clear error messages
 
 Example:
-    >>> from utils.memory_config import MemoryConfig
+    >>> from utils.memory_config import MemoryConfig, ContentValidator
     >>> config = MemoryConfig.from_config(app_config)
     >>> print(config.summarize_threshold)
     4000
+    >>> violations = ContentValidator.scan_prohibited_patterns("Price is $150.00")
+    >>> print(violations)  # ['$150.00']
 """
 
 from dataclasses import dataclass
-from typing import Any, Dict, Optional
+import re
+from typing import Any, Dict, List, Optional
 
 
 # Validation ranges per FR-3.1.10
@@ -248,6 +255,137 @@ class MemoryConfig:
             "checkpoint_collection": self.checkpoint_collection,
             "conversations_collection": self.conversations_collection,
         }
+
+
+class ContentValidator:
+    """
+    Content compliance validator for FR-3.1.7 and FR-3.1.8.
+    
+    Validates that stored memory content does not contain prohibited
+    financial data patterns that should never be persisted.
+    
+    Prohibited patterns (FR-3.1.7):
+    - Dollar amounts: $150.00, $1,234.56
+    - Percentages: 15.5%, 100%
+    - P/E ratios: P/E 25.5, PE ratio 30
+    - Stock prices: price $150, trading at 150.00
+    
+    Reference:
+        - FR-3.1.7: Zero financial data (prices, ratios) in stored memory
+        - FR-3.1.8: Tool outputs stored as references only, not raw data
+    
+    Example:
+        >>> violations = ContentValidator.scan_prohibited_patterns("AAPL price is $150.00")
+        >>> print(violations)  # ['$150.00']
+        >>> violations = ContentValidator.scan_prohibited_patterns("User asked about AAPL")
+        >>> print(violations)  # []
+    """
+    
+    # Compiled regex patterns for performance
+    # Dollar amounts: $150, $1,234.56, $1000.00
+    _DOLLAR_PATTERN = re.compile(r'\$[\d,]+(?:\.\d{1,2})?')
+    
+    # Percentages: 15%, 15.5%, -3.2%
+    _PERCENTAGE_PATTERN = re.compile(r'-?\d+(?:\.\d+)?%')
+    
+    # P/E ratios: P/E 25, PE 25.5, P/E ratio 30, PE ratio: 25
+    _PE_RATIO_PATTERN = re.compile(r'P/?E\s*(?:ratio)?:?\s*\d+(?:\.\d+)?', re.IGNORECASE)
+    
+    # Generic price patterns: price $150, trading at 150.00, priced at $50
+    _PRICE_CONTEXT_PATTERN = re.compile(
+        r'(?:price[ds]?\s*(?:at\s*)?|trading\s*at\s*)'
+        r'(?:\$)?[\d,]+(?:\.\d{1,2})?',
+        re.IGNORECASE
+    )
+    
+    # Market cap patterns: market cap $1.5T, market cap: $500B
+    _MARKET_CAP_PATTERN = re.compile(
+        r'market\s*cap:?\s*\$?[\d,]+(?:\.\d+)?\s*[BMT]?',
+        re.IGNORECASE
+    )
+    
+    # EPS patterns: EPS $1.50, EPS: 2.30
+    _EPS_PATTERN = re.compile(r'EPS:?\s*\$?\d+(?:\.\d+)?', re.IGNORECASE)
+    
+    # Dividend yield patterns: dividend yield 2.5%, yield: 3%
+    _DIVIDEND_PATTERN = re.compile(
+        r'(?:dividend\s*)?yield:?\s*\d+(?:\.\d+)?%',
+        re.IGNORECASE
+    )
+    
+    @classmethod
+    def scan_prohibited_patterns(cls, content: str) -> List[str]:
+        """
+        Scan content for prohibited financial data patterns.
+        
+        This method checks content against all prohibited patterns defined
+        for FR-3.1.7 compliance. Any matches indicate content that should
+        NOT be stored in memory checkpoints.
+        
+        Args:
+            content: The text content to scan for violations
+            
+        Returns:
+            List of matched violation strings. Empty list means content
+            is compliant and safe to store.
+            
+        Example:
+            >>> ContentValidator.scan_prohibited_patterns("Stock is $150")
+            ['$150']
+            >>> ContentValidator.scan_prohibited_patterns("Asked about AAPL")
+            []
+        """
+        if not content:
+            return []
+        
+        violations: List[str] = []
+        
+        # Check all patterns
+        patterns = [
+            cls._DOLLAR_PATTERN,
+            cls._PERCENTAGE_PATTERN,
+            cls._PE_RATIO_PATTERN,
+            cls._PRICE_CONTEXT_PATTERN,
+            cls._MARKET_CAP_PATTERN,
+            cls._EPS_PATTERN,
+            cls._DIVIDEND_PATTERN,
+        ]
+        
+        for pattern in patterns:
+            matches = pattern.findall(content)
+            violations.extend(matches)
+        
+        # Remove duplicates while preserving order
+        seen = set()
+        unique_violations = []
+        for v in violations:
+            if v not in seen:
+                seen.add(v)
+                unique_violations.append(v)
+        
+        return unique_violations
+    
+    @classmethod
+    def is_compliant(cls, content: str) -> bool:
+        """
+        Check if content is compliant (contains no prohibited patterns).
+        
+        Convenience method that returns True if content passes compliance
+        check, False otherwise.
+        
+        Args:
+            content: The text content to validate
+            
+        Returns:
+            True if content is compliant (no violations), False otherwise
+            
+        Example:
+            >>> ContentValidator.is_compliant("User asked about AAPL trends")
+            True
+            >>> ContentValidator.is_compliant("AAPL price is $150.00")
+            False
+        """
+        return len(cls.scan_prohibited_patterns(content)) == 0
 
 
 # Convenience type alias

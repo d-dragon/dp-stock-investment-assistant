@@ -316,7 +316,7 @@ def test_stream_chat_response_calls_agent_with_query(mock_agent, mock_config):
     list(service.stream_chat_response("Test query"))
     
     mock_agent.process_query_streaming.assert_called_once_with(
-        "Test query", provider=None
+        "Test query", provider=None, session_id=None
     )
 
 
@@ -327,7 +327,7 @@ def test_stream_chat_response_passes_provider_override(mock_agent, mock_config):
     list(service.stream_chat_response("Test query", provider_override="grok"))
     
     mock_agent.process_query_streaming.assert_called_once_with(
-        "Test query", provider="grok"
+        "Test query", provider="grok", session_id=None
     )
 
 
@@ -459,7 +459,7 @@ def test_process_chat_query_calls_agent_with_provider_override(mock_agent, mock_
     
     # Verify agent called with correct provider
     mock_agent.get_current_model_info.assert_called_once_with(provider="grok")
-    mock_agent.process_query.assert_called_once_with("Test message", provider="grok")
+    mock_agent.process_query.assert_called_once_with("Test message", provider="grok", session_id=None)
     
     # Note: Without fallback prefix, extract_meta returns config defaults ("openai", "gpt-4")
     # The 'or' logic doesn't override since config values are non-None

@@ -9,7 +9,8 @@ from typing import Any, Callable, Dict, Generator, Mapping, Optional, Tuple
 
 from core.types import AgentResponse, ResponseStatus
 from services.base import BaseService
-from services.protocols import AgentProvider
+from services.exceptions import ArchivedSessionError
+from services.protocols import AgentProvider, ConversationProvider
 from utils.cache import CacheBackend
 
 
@@ -21,6 +22,7 @@ class ChatService(BaseService):
     - Extract provider/model metadata from agent responses
     - Detect and strip fallback prefixes from responses
     - Generate consistent timestamps for chat events
+    - Validate session status before processing (archived sessions → 409)
     
     This service encapsulates chat-specific logic that was previously
     in APIServer, improving separation of concerns and testability.
@@ -34,6 +36,7 @@ class ChatService(BaseService):
         agent_provider: AgentProvider,
         config: Mapping[str, Any],
         cache: Optional[CacheBackend] = None,
+        conversation_provider: Optional[ConversationProvider] = None,
         time_provider: Optional[Callable[[], str]] = None,
         logger: Optional[logging.Logger] = None,
     ) -> None:
@@ -43,24 +46,60 @@ class ChatService(BaseService):
             agent_provider: Agent implementing AgentProvider protocol
             config: Application configuration (for model defaults)
             cache: Optional cache backend
+            conversation_provider: Optional provider for session status checks
             time_provider: Optional time provider for testing
             logger: Optional logger instance
         """
         super().__init__(cache=cache, time_provider=time_provider, logger=logger)
         self._agent = agent_provider
         self._config = config
+        self._conversation_provider = conversation_provider
     
     def health_check(self) -> Tuple[bool, Dict[str, Any]]:
         """Check service health.
         
         Service is healthy if agent dependency is available.
+        Conversation provider is optional.
         
         Returns:
             Tuple of (healthy: bool, details: dict)
         """
         return self._dependencies_health_report(
             required={"agent": self._agent},
+            optional={"conversation_provider": self._conversation_provider},
         )
+    
+    def _validate_session_not_archived(self, session_id: Optional[str]) -> None:
+        """Validate that a session is not archived.
+        
+        Args:
+            session_id: Optional session ID to validate
+            
+        Raises:
+            ArchivedSessionError: If the session exists and is archived
+        """
+        if session_id is None:
+            return
+        
+        if self._conversation_provider is None:
+            # No conversation provider - skip validation
+            self.logger.debug(
+                "No conversation provider available for session validation"
+            )
+            return
+        
+        conversation = self._conversation_provider.get_conversation(session_id)
+        
+        if conversation is None:
+            # Session doesn't exist yet - that's fine, will be created
+            return
+        
+        status = conversation.get("status", "active")
+        if status == "archived":
+            self.logger.warning(
+                f"Rejected message to archived session: {session_id}"
+            )
+            raise ArchivedSessionError(session_id)
     
     def stream_chat_response(
         self, user_message: str, provider_override: Optional[str] = None,
@@ -81,7 +120,13 @@ class ChatService(BaseService):
             
         Yields:
             SSE-formatted strings (data: {...}\n\n)
+            
+        Raises:
+            ArchivedSessionError: If the session is archived
         """
+        # Validate session is not archived before processing
+        self._validate_session_not_archived(session_id)
+        
         try:
             self.logger.info(f"Starting streaming response: {user_message[:50]}...")
             
@@ -201,7 +246,13 @@ class ChatService(BaseService):
                 - model: str - Model used
                 - fallback: bool - Whether fallback was used
                 - timestamp: str - ISO 8601 timestamp
+                
+        Raises:
+            ArchivedSessionError: If the session is archived
         """
+        # Validate session is not archived before processing
+        self._validate_session_not_archived(session_id)
+        
         # Get response from agent
         raw_response = self._agent.process_query(
             user_message, provider=provider_override, session_id=session_id

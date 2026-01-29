@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: Stock Investment Assistant API
-  version: "1.2.0"
+  version: "1.3.0"
   description: >
     REST API for the Stock Investment Assistant backend. Provides chat, configuration, and model catalog endpoints.
     
@@ -10,9 +10,17 @@ info:
     - Core API endpoints (health, chat, config) 
     - Model management endpoints (OpenAI model operations)
     - Socket.IO integration for real-time communication
+    - Session-aware short-term memory for multi-turn conversations
     
     
-    **Recent Changes (v1.2.0)**:
+    **Recent Changes (v1.3.0)**:
+    - Added session-aware short-term memory (FR-3.1) with session_id parameter
+    - Sessions support up to 20 turns with automatic archival
+    - Added GET /api/sessions/{session_id}/conversation endpoint
+    - Enhanced error responses for session management (409 Conflict for archived sessions)
+    
+    
+    **Previous Changes (v1.2.0)**:
     - Added PUT /api/models/openai/default endpoint for setting default models
     - Consolidated model management in dedicated blueprint
     - Enhanced error handling and validation
@@ -23,6 +31,8 @@ servers:
 tags:
   - name: Health
   - name: Chat
+  - name: Sessions
+    description: Session management for multi-turn conversations (FR-3.1)
   - name: Config
   - name: Models
   - name: Users
@@ -53,6 +63,13 @@ paths:
         Sends a user message to the assistant. If `stream` is true in the request body, the
         server responds with Server-Sent Events (SSE) using `text/event-stream`. Otherwise it
         returns a JSON response.
+        
+        
+        **Session-Aware Memory (FR-3.1)**:
+        - Include `session_id` (UUID v4) to maintain conversation context across requests
+        - Sessions support up to 20 turns before automatic archival
+        - Archived sessions return 409 Conflict error
+        - Omit `session_id` for stateless single-turn interactions
       operationId: postChat
       parameters:
         - $ref: '#/components/parameters/ProviderQuery'
@@ -72,6 +89,13 @@ paths:
                 value:
                   message: "Provide a brief market summary."
                   stream: true
+              withSession:
+                summary: Multi-turn conversation with session tracking
+                value:
+                  message: "What about Tesla?"
+                  session_id: "550e8400-e29b-41d4-a716-446655440000"
+                  provider: "openai"
+                  stream: false
       responses:
         "200":
           description: Chat response (JSON) or streaming response (SSE)
@@ -87,6 +111,18 @@ paths:
                     model: "gpt-4"
                     fallback: false
                     timestamp: "2025-09-16T12:34:56Z"
+                withSession:
+                  summary: Response with session context
+                  value:
+                    response: "Based on our earlier discussion of AAPL, Tesla shows similar..."
+                    provider: "openai"
+                    model: "gpt-4"
+                    fallback: false
+                    timestamp: "2025-09-16T12:35:00Z"
+                    session_id: "550e8400-e29b-41d4-a716-446655440000"
+                    conversation:
+                      turn_count: 3
+                      status: "active"
             text/event-stream:
               schema:
                 type: string
@@ -107,7 +143,7 @@ paths:
                     data: [DONE]
 
         "400":
-          description: Bad request
+          description: Bad request (missing message or invalid session_id format)
           content:
             application/json:
               schema:
@@ -116,6 +152,121 @@ paths:
                 missingMessage:
                   value:
                     error: "Message is required"
+                invalidSessionId:
+                  summary: Invalid UUID format for session_id
+                  value:
+                    error: "Invalid session_id format. Must be a valid UUID v4."
+        "409":
+          description: Session archived (cannot add more messages to this session)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SessionArchivedError'
+              examples:
+                archivedSession:
+                  value:
+                    error: "SESSION_ARCHIVED"
+                    message: "This session has been archived after reaching the 20-turn limit."
+                    session_id: "550e8400-e29b-41d4-a716-446655440000"
+                    archived_at: "2025-09-16T12:30:00Z"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                serverError:
+                  value:
+                    error: "Internal server error"
+
+  /api/sessions/{session_id}/conversation:
+    get:
+      tags: [Sessions]
+      summary: Get conversation history for a session
+      description: >
+        Retrieves the full conversation history for a given session. Returns all messages
+        exchanged in the session along with metadata about the session status.
+        
+        
+        **Session States**:
+        - `active`: Session is accepting new messages (up to 20 turns)
+        - `archived`: Session has been archived and is read-only
+      operationId: getSessionConversation
+      parameters:
+        - name: session_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: The session identifier (UUID v4)
+          example: "550e8400-e29b-41d4-a716-446655440000"
+      responses:
+        "200":
+          description: Conversation history retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConversationHistory'
+              examples:
+                activeSession:
+                  summary: Active session with ongoing conversation
+                  value:
+                    session_id: "550e8400-e29b-41d4-a716-446655440000"
+                    status: "active"
+                    turn_count: 3
+                    messages:
+                      - role: "user"
+                        content: "What are the best tech stocks to buy?"
+                        timestamp: "2025-09-16T12:30:00Z"
+                      - role: "assistant"
+                        content: "Based on current market conditions, consider AAPL, MSFT, and NVDA..."
+                        timestamp: "2025-09-16T12:30:05Z"
+                      - role: "user"
+                        content: "Tell me more about NVDA"
+                        timestamp: "2025-09-16T12:31:00Z"
+                      - role: "assistant"
+                        content: "NVIDIA Corporation (NVDA) is a leader in AI and GPU technology..."
+                        timestamp: "2025-09-16T12:31:10Z"
+                    created_at: "2025-09-16T12:30:00Z"
+                    updated_at: "2025-09-16T12:31:10Z"
+                archivedSession:
+                  summary: Archived session (read-only)
+                  value:
+                    session_id: "660e8400-e29b-41d4-a716-446655440001"
+                    status: "archived"
+                    turn_count: 20
+                    messages:
+                      - role: "user"
+                        content: "First message..."
+                        timestamp: "2025-09-15T10:00:00Z"
+                      - role: "assistant"
+                        content: "Response to first message..."
+                        timestamp: "2025-09-15T10:00:05Z"
+                    created_at: "2025-09-15T10:00:00Z"
+                    updated_at: "2025-09-15T11:30:00Z"
+                    archived_at: "2025-09-15T11:30:00Z"
+        "400":
+          description: Invalid session_id format
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                invalidFormat:
+                  value:
+                    error: "Invalid session_id format. Must be a valid UUID v4."
+        "404":
+          description: Session not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                notFound:
+                  value:
+                    error: "Session not found"
         "500":
           description: Internal server error
           content:
@@ -606,6 +757,14 @@ components:
           type: boolean
           description: If true, the response will be streamed via Server-Sent Events.
           default: false
+        session_id:
+          type: string
+          format: uuid
+          description: >
+            Optional UUID v4 identifying the conversation session for multi-turn interactions.
+            Omit for stateless single-turn requests. Sessions support up to 20 turns
+            before automatic archival. Archived sessions return 409 Conflict.
+          example: "550e8400-e29b-41d4-a716-446655440000"
       required: [message]
 
     ChatResponse:
@@ -627,6 +786,12 @@ components:
           type: string
           format: date-time
           description: ISO 8601 timestamp (UTC, Z-suffix).
+        session_id:
+          type: string
+          format: uuid
+          description: Echoed session_id if provided in request. Confirms session context is active.
+        conversation:
+          $ref: '#/components/schemas/ConversationStatus'
       required: [response, provider, model, fallback, timestamp]
 
     ConfigResponse:
@@ -732,6 +897,97 @@ components:
         error:
           type: string
       required: [error]
+
+    SessionArchivedError:
+      type: object
+      description: Error response when attempting to add messages to an archived session.
+      properties:
+        error:
+          type: string
+          enum: ["SESSION_ARCHIVED"]
+          description: Error code indicating the session has been archived.
+        message:
+          type: string
+          description: Human-readable explanation of the error.
+        session_id:
+          type: string
+          format: uuid
+          description: The ID of the archived session.
+        archived_at:
+          type: string
+          format: date-time
+          description: ISO 8601 timestamp when the session was archived.
+      required: [error, message, session_id]
+
+    ConversationStatus:
+      type: object
+      description: Status information about the conversation session.
+      properties:
+        turn_count:
+          type: integer
+          minimum: 1
+          maximum: 20
+          description: Current number of turns in the conversation (max 20).
+        status:
+          type: string
+          enum: ["active", "archived"]
+          description: Whether the session is active or has been archived.
+        remaining_turns:
+          type: integer
+          minimum: 0
+          maximum: 19
+          description: Number of turns remaining before auto-archival.
+      required: [turn_count, status]
+
+    ConversationHistory:
+      type: object
+      description: Full conversation history for a session.
+      properties:
+        session_id:
+          type: string
+          format: uuid
+          description: The session identifier.
+        status:
+          type: string
+          enum: ["active", "archived"]
+          description: Current session status.
+        turn_count:
+          type: integer
+          description: Total number of turns in the conversation.
+        messages:
+          type: array
+          items:
+            $ref: '#/components/schemas/ConversationMessage'
+        created_at:
+          type: string
+          format: date-time
+          description: When the session was created.
+        updated_at:
+          type: string
+          format: date-time
+          description: When the session was last updated.
+        archived_at:
+          type: string
+          format: date-time
+          description: When the session was archived (if applicable).
+      required: [session_id, status, turn_count, messages]
+
+    ConversationMessage:
+      type: object
+      description: A single message in the conversation history.
+      properties:
+        role:
+          type: string
+          enum: ["user", "assistant"]
+          description: Who sent this message.
+        content:
+          type: string
+          description: The message content.
+        timestamp:
+          type: string
+          format: date-time
+          description: When this message was sent.
+      required: [role, content]
 
     UserProfile:
       type: object

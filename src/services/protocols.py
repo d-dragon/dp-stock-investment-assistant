@@ -166,3 +166,32 @@ class SymbolProvider(Protocol):
             Symbol metadata dictionary, or None if not found
         """
         ...
+
+
+@runtime_checkable
+class ConversationProvider(Protocol):
+    """Minimal interface for conversation/session status access.
+    
+    This protocol defines the conversation-related methods that other services
+    (like ChatService) need to check session status. By depending on the
+    protocol instead of the concrete ConversationService, we avoid circular
+    dependencies.
+    
+    Used by ChatService to verify a session is not archived before processing
+    new messages, enabling proper 409 Conflict responses for archived sessions.
+    """
+    
+    def get_conversation(
+        self,
+        session_id: str,
+    ) -> Optional[Dict[str, Any]]:
+        """Return conversation data for a session.
+        
+        Args:
+            session_id: The session/conversation identifier (UUID v4)
+            
+        Returns:
+            Conversation dict with at minimum 'status' field, or None if not found.
+            Status values include 'active' and 'archived'.
+        """
+        ...

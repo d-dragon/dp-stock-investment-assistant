@@ -4,14 +4,19 @@
 # ============================================================================
 
 # --- AI/LLM ---
+
 openai>=1.0.0
-langchain>=1.0.0
-langchain-openai>=0.3.0           # OpenAI integration for LangChain
-langchain-community>=0.3.0        # Community tools and utilities
-langchain-core>=0.3.0             # Core abstractions (prompts, messages)
-langgraph-cli[inmem]>=0.2.0       # Studio local dev server
-langgraph-checkpoint-mongodb>=2.0.0  # MongoDB checkpointer for STM (FR-3.1)
-langsmith>=0.2.0                 # LangSmith tracing SDK
+langchain>=1.0.0                  # Core LangChain framework
+langchain-openai>=0.3.5            # OpenAI integration for LangChain
+langchain-community>=0.3.14        # Community tools and utilities
+langchain-core>=0.3.28             # Core abstractions (prompts, messages, runnables)
+langgraph>=0.2.62                  # LangGraph core for agent workflows
+langgraph-cli>=0.1.62              # CLI for LangGraph Studio (replaces [inmem] extra)
+langgraph-checkpoint>=2.0.9        # Base checkpoint interfaces
+langgraph-checkpoint-mongodb>=2.0.5  # MongoDB checkpointer for STM (FR-3.1)
+langsmith>=0.2.6                   # LangSmith tracing SDK
+
+
 
 # --- Data Processing ---
 pandas>=2.0.0

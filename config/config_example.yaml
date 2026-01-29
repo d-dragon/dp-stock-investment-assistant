@@ -98,7 +98,23 @@ export:
   include_charts: true
 
 database:
+  # MongoDB Configuration
   mongodb:
     enabled: true
     connection_string: "mongodb://username:password@hostname:port/stock_assistant?retryWrites=true&w=majority"
     database_name: "stock_assistant"
+  
+  # Redis Configuration
+  redis:
+    enabled: true
+    host: "localhost"
+    port: 6379
+    db: 0
+    password: ""  # Optional
+    ssl: false
+    ttl:
+      price_data: 60
+      historical_data: 3600
+      fundamental_data: 86400
+      technical_data: 900
+      reports: 43200
