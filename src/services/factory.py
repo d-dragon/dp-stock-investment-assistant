@@ -7,6 +7,7 @@ from typing import Any, Callable, Dict, Optional, TypeVar, cast, TYPE_CHECKING
 
 from data.repositories.factory import RepositoryFactory
 from services.chat_service import ChatService
+from services.conversation_service import ConversationService
 from services.symbols_service import SymbolsService
 from services.user_service import UserService
 from services.workspace_service import WorkspaceService
@@ -43,6 +44,9 @@ class ServiceFactory:
     def get_chat_service(self) -> ChatService:
         return cast(ChatService, self._get_or_create("chat_service", self._build_chat_service))
 
+    def get_conversation_service(self) -> ConversationService:
+        return cast(ConversationService, self._get_or_create("conversation_service", self._build_conversation_service))
+
     def get_workspace_service(self) -> WorkspaceService:
         return cast(WorkspaceService, self._get_or_create("workspace_service", self._build_workspace_service))
 
@@ -67,6 +71,17 @@ class ServiceFactory:
             config=self._config,
             cache=self._cache,
             logger=self._logger.getChild("chat"),
+        )
+
+    def _build_conversation_service(self) -> ConversationService:
+        conversation_repo = self._repository_factory.get_conversation_repository()
+        if not conversation_repo:
+            raise RuntimeError("ConversationRepository could not be initialized")
+
+        return ConversationService(
+            conversation_repository=conversation_repo,
+            cache=self._cache,
+            logger=self._logger.getChild("conversation"),
         )
 
     def _build_workspace_service(self) -> WorkspaceService:

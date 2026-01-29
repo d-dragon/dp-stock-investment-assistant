@@ -29,8 +29,8 @@ def _make_test_app():
     agent = DummyAgent()
     stream_calls = []
 
-    def stream_chat_response(message, provider_override):
-        stream_calls.append((message, provider_override))
+    def stream_chat_response(message, provider_override=None, session_id=None):
+        stream_calls.append((message, provider_override, session_id))
         yield "data: test-chunk\n\n"
 
     def extract_meta(raw):
@@ -98,7 +98,7 @@ def test_chat_endpoint_returns_processed_payload():
     assert payload["fallback"] is False
     assert payload["timestamp"] == "2024-01-01T00:00:00Z"
     # Now uses chat_service.process_chat_query instead of direct agent.process_query
-    mock_chat_service.process_chat_query.assert_called_once_with("Hello world", provider_override=None)
+    mock_chat_service.process_chat_query.assert_called_once_with("Hello world", provider_override=None, session_id=None)
     assert stream_calls == []
 
 
@@ -111,7 +111,7 @@ def test_chat_endpoint_passes_provider_override():
 
     assert response.status_code == 200
     # Now uses chat_service.process_chat_query instead of direct agent.process_query
-    mock_chat_service.process_chat_query.assert_called_once_with("Test", provider_override="grok")
+    mock_chat_service.process_chat_query.assert_called_once_with("Test", provider_override="grok", session_id=None)
 
 
 def test_chat_endpoint_streaming_branch():
@@ -129,7 +129,8 @@ def test_chat_endpoint_streaming_branch():
     assert response.headers["Cache-Control"] == "no-cache"
     assert response.headers["Connection"] == "keep-alive"
     assert response.headers["Access-Control-Allow-Origin"] == "*"
-    assert stream_calls == [("Stream this", None)]
+    # stream_calls now includes session_id as 3rd element (None when not provided)
+    assert stream_calls == [("Stream this", None, None)]
     assert agent.calls == []
 
 
@@ -178,3 +179,108 @@ def test_config_endpoint_content_type_is_json():
     response = client.get("/api/config")
 
     assert response.content_type == "application/json"
+
+
+# =============================================================================
+# FR-3.1.6 Backward Compatibility Tests (T025)
+# Tests that API works correctly without session_id for stateless fallback
+# =============================================================================
+
+
+class TestChatBackwardCompatibility:
+    """Tests for backward compatibility when session_id is not provided.
+    
+    Verifies FR-3.1.6: Stateless fallback mode - API continues to work
+    without session management for backward compatibility.
+    """
+
+    def test_chat_without_session_id_returns_200(self):
+        """Test: POST /api/chat without session_id field returns 200.
+        
+        Backward compatibility: Existing clients that don't send session_id
+        should continue to work without any changes.
+        """
+        app, agent, _, mock_chat_service = _make_test_app()
+        client = app.test_client()
+
+        # Request without session_id - this is the backward-compatible case
+        response = client.post("/api/chat", json={"message": "Test message"})
+
+        assert response.status_code == 200
+        payload = response.get_json()
+        assert "response" in payload
+        assert payload["response"] == "cleaned"
+
+    def test_chat_without_session_id_omits_session_id_in_response(self):
+        """Test: Response omits session_id when not provided in request.
+        
+        When no session_id is provided, the response should not include
+        the session_id field at all (not even as null) for backward
+        compatibility with clients not expecting this field.
+        """
+        app, agent, _, mock_chat_service = _make_test_app()
+        client = app.test_client()
+
+        response = client.post("/api/chat", json={"message": "Test message"})
+
+        assert response.status_code == 200
+        payload = response.get_json()
+        # session_id should NOT be in the response when not provided
+        assert "session_id" not in payload
+
+    def test_chat_with_session_id_includes_it_in_response(self):
+        """Test: Response includes session_id when provided in request.
+        
+        When session_id IS provided, it should be echoed back in response.
+        """
+        app, agent, _, mock_chat_service = _make_test_app()
+        client = app.test_client()
+
+        test_session_id = "550e8400-e29b-41d4-a716-446655440000"
+        response = client.post("/api/chat", json={
+            "message": "Test message",
+            "session_id": test_session_id
+        })
+
+        assert response.status_code == 200
+        payload = response.get_json()
+        assert "session_id" in payload
+        assert payload["session_id"] == test_session_id
+
+    def test_chat_validates_session_id_format_when_provided(self):
+        """Test: Invalid session_id format returns 400 error.
+        
+        If session_id is provided but not a valid UUID v4, reject it.
+        """
+        app, agent, _, mock_chat_service = _make_test_app()
+        client = app.test_client()
+
+        # Invalid session_id (not a valid UUID)
+        response = client.post("/api/chat", json={
+            "message": "Test message",
+            "session_id": "invalid-session-id"
+        })
+
+        assert response.status_code == 400
+        payload = response.get_json()
+        assert "error" in payload
+
+    def test_chat_accepts_null_session_id_as_stateless(self):
+        """Test: Explicit null session_id is treated as stateless.
+        
+        Clients can explicitly send session_id: null to indicate
+        they want stateless behavior.
+        """
+        app, agent, _, mock_chat_service = _make_test_app()
+        client = app.test_client()
+
+        # Explicit null session_id
+        response = client.post("/api/chat", json={
+            "message": "Test message",
+            "session_id": None
+        })
+
+        assert response.status_code == 200
+        payload = response.get_json()
+        # session_id should NOT be in the response when null
+        assert "session_id" not in payload

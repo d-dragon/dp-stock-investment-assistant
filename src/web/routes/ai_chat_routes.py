@@ -7,6 +7,8 @@ from typing import TYPE_CHECKING, Optional
 
 from flask import Blueprint, Response, jsonify, request, stream_with_context
 
+from services.exceptions import ArchivedSessionError
+
 if TYPE_CHECKING:
     from .shared_context import APIRouteContext
 
@@ -112,6 +114,13 @@ def create_chat_blueprint(context: "APIRouteContext") -> Blueprint:
                 result['session_id'] = session_id
 
             return jsonify(result), 200
+        except ArchivedSessionError as exc:
+            logger.warning(f"Rejected message to archived session: {exc.session_id}")
+            return jsonify({
+                'error': 'Session is archived and cannot accept new messages',
+                'code': 'SESSION_ARCHIVED',
+                'session_id': exc.session_id
+            }), 409
         except Exception as exc:
             logger.error(f"Error in chat endpoint: {exc}", exc_info=True)
             return jsonify({'error': f'Internal server error: {exc}'}), 500

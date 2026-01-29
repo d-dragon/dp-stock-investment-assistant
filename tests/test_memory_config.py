@@ -1,8 +1,11 @@
 """
-Unit Tests for MemoryConfig (Task T011)
+Unit Tests for MemoryConfig and ContentValidator (Tasks T011, T027)
 
 Tests the MemoryConfig frozen dataclass with fail-fast validation
 per FR-3.1.9 (externally configurable) and FR-3.1.10 (fail-fast validation).
+
+Also tests ContentValidator for FR-3.1.7 (zero financial data) and
+FR-3.1.8 (tool outputs as references only) compliance.
 
 Test Strategy:
 - Test default values load correctly
@@ -14,6 +17,8 @@ Test Strategy:
 - Test disabled() factory method
 - Test to_dict() serialization
 - Verify error messages include parameter name and valid range
+- Test ContentValidator detects prohibited financial patterns
+- Test ContentValidator returns empty list for compliant content
 
 Reference:
     - Spec: specs/spec-driven-development-pilot/plan.md § MemoryConfig Dataclass Pattern
@@ -21,7 +26,7 @@ Reference:
 """
 
 import pytest
-from utils.memory_config import MemoryConfig, VALIDATION_RANGES
+from utils.memory_config import MemoryConfig, ContentValidator, VALIDATION_RANGES
 
 
 # ============================================================================
@@ -940,3 +945,219 @@ class TestCombinationConstraints:
         assert config.summarize_threshold == 10000
         assert config.max_messages == 200
         assert config.messages_to_keep == 50
+
+
+# ============================================================================
+# ContentValidator Tests (Task T027)
+# ============================================================================
+
+class TestContentValidatorDollarAmounts:
+    """Test ContentValidator detects dollar amount patterns."""
+    
+    def test_detects_simple_dollar_amount(self):
+        """Should detect $150."""
+        violations = ContentValidator.scan_prohibited_patterns("The stock is $150")
+        assert "$150" in violations
+    
+    def test_detects_dollar_with_decimals(self):
+        """Should detect $150.00."""
+        violations = ContentValidator.scan_prohibited_patterns("Price is $150.00")
+        assert "$150.00" in violations
+    
+    def test_detects_dollar_with_commas(self):
+        """Should detect $1,234.56."""
+        violations = ContentValidator.scan_prohibited_patterns("Market cap $1,234.56")
+        assert "$1,234.56" in violations
+    
+    def test_detects_large_dollar_amount(self):
+        """Should detect $1,234,567.89."""
+        violations = ContentValidator.scan_prohibited_patterns("Revenue: $1,234,567.89")
+        assert "$1,234,567.89" in violations
+    
+    def test_detects_multiple_dollar_amounts(self):
+        """Should detect multiple dollar amounts."""
+        content = "Stock went from $100 to $150"
+        violations = ContentValidator.scan_prohibited_patterns(content)
+        assert "$100" in violations
+        assert "$150" in violations
+
+
+class TestContentValidatorPercentages:
+    """Test ContentValidator detects percentage patterns."""
+    
+    def test_detects_simple_percentage(self):
+        """Should detect 15%."""
+        violations = ContentValidator.scan_prohibited_patterns("Yield is 15%")
+        assert "15%" in violations
+    
+    def test_detects_decimal_percentage(self):
+        """Should detect 15.5%."""
+        violations = ContentValidator.scan_prohibited_patterns("Growth rate 15.5%")
+        assert "15.5%" in violations
+    
+    def test_detects_negative_percentage(self):
+        """Should detect -3.2%."""
+        violations = ContentValidator.scan_prohibited_patterns("Stock fell -3.2%")
+        assert "-3.2%" in violations
+    
+    def test_detects_hundred_percent(self):
+        """Should detect 100%."""
+        violations = ContentValidator.scan_prohibited_patterns("Utilization at 100%")
+        assert "100%" in violations
+
+
+class TestContentValidatorPERatios:
+    """Test ContentValidator detects P/E ratio patterns."""
+    
+    def test_detects_pe_with_slash(self):
+        """Should detect P/E 25."""
+        violations = ContentValidator.scan_prohibited_patterns("The P/E 25 is high")
+        assert any("25" in v for v in violations)
+    
+    def test_detects_pe_without_slash(self):
+        """Should detect PE 25.5."""
+        violations = ContentValidator.scan_prohibited_patterns("PE 25.5 indicates")
+        assert any("25.5" in v for v in violations)
+    
+    def test_detects_pe_ratio_text(self):
+        """Should detect P/E ratio 30."""
+        violations = ContentValidator.scan_prohibited_patterns("P/E ratio 30 is average")
+        assert any("30" in v for v in violations)
+    
+    def test_detects_pe_ratio_with_colon(self):
+        """Should detect PE ratio: 25."""
+        violations = ContentValidator.scan_prohibited_patterns("PE ratio: 25")
+        assert any("25" in v for v in violations)
+
+
+class TestContentValidatorPriceContext:
+    """Test ContentValidator detects price context patterns."""
+    
+    def test_detects_price_at(self):
+        """Should detect 'price at' patterns."""
+        violations = ContentValidator.scan_prohibited_patterns("price at 150.00")
+        assert len(violations) > 0
+    
+    def test_detects_trading_at(self):
+        """Should detect 'trading at' patterns."""
+        violations = ContentValidator.scan_prohibited_patterns("AAPL trading at 175.50")
+        assert len(violations) > 0
+    
+    def test_detects_priced_at(self):
+        """Should detect 'priced at' patterns."""
+        violations = ContentValidator.scan_prohibited_patterns("stock priced at $50")
+        assert len(violations) > 0
+
+
+class TestContentValidatorMarketCap:
+    """Test ContentValidator detects market cap patterns."""
+    
+    def test_detects_market_cap_billions(self):
+        """Should detect market cap $500B."""
+        violations = ContentValidator.scan_prohibited_patterns("market cap $500B")
+        assert len(violations) > 0
+    
+    def test_detects_market_cap_trillions(self):
+        """Should detect market cap $1.5T."""
+        violations = ContentValidator.scan_prohibited_patterns("market cap: $1.5T")
+        assert len(violations) > 0
+
+
+class TestContentValidatorEPS:
+    """Test ContentValidator detects EPS patterns."""
+    
+    def test_detects_eps_dollar(self):
+        """Should detect EPS $1.50."""
+        violations = ContentValidator.scan_prohibited_patterns("EPS $1.50")
+        assert len(violations) > 0
+    
+    def test_detects_eps_with_colon(self):
+        """Should detect EPS: 2.30."""
+        violations = ContentValidator.scan_prohibited_patterns("EPS: 2.30")
+        assert len(violations) > 0
+
+
+class TestContentValidatorDividend:
+    """Test ContentValidator detects dividend yield patterns."""
+    
+    def test_detects_dividend_yield_percent(self):
+        """Should detect dividend yield 2.5%."""
+        violations = ContentValidator.scan_prohibited_patterns("dividend yield 2.5%")
+        assert len(violations) > 0
+    
+    def test_detects_yield_percent(self):
+        """Should detect yield: 3%."""
+        violations = ContentValidator.scan_prohibited_patterns("yield: 3%")
+        assert len(violations) > 0
+
+
+class TestContentValidatorCompliant:
+    """Test ContentValidator returns empty list for compliant content."""
+    
+    def test_empty_string_is_compliant(self):
+        """Empty string should return no violations."""
+        violations = ContentValidator.scan_prohibited_patterns("")
+        assert violations == []
+    
+    def test_none_like_empty_is_compliant(self):
+        """None converted to empty should be handled gracefully."""
+        # Empty string should not raise
+        violations = ContentValidator.scan_prohibited_patterns("")
+        assert violations == []
+    
+    def test_simple_question_is_compliant(self):
+        """Simple user question should be compliant."""
+        violations = ContentValidator.scan_prohibited_patterns("What is AAPL?")
+        assert violations == []
+    
+    def test_stock_symbol_only_is_compliant(self):
+        """Stock symbol mention should be compliant."""
+        violations = ContentValidator.scan_prohibited_patterns("User asked about AAPL trends")
+        assert violations == []
+    
+    def test_general_analysis_request_is_compliant(self):
+        """General analysis request should be compliant."""
+        content = "Can you analyze the technical indicators for MSFT?"
+        violations = ContentValidator.scan_prohibited_patterns(content)
+        assert violations == []
+    
+    def test_tool_reference_is_compliant(self):
+        """Tool reference without data should be compliant."""
+        content = "Called get_stock_price tool for AAPL"
+        violations = ContentValidator.scan_prohibited_patterns(content)
+        assert violations == []
+
+
+class TestContentValidatorIsCompliant:
+    """Test ContentValidator.is_compliant() convenience method."""
+    
+    def test_is_compliant_returns_true_for_clean_content(self):
+        """is_compliant() should return True for content without violations."""
+        assert ContentValidator.is_compliant("User asked about AAPL")
+    
+    def test_is_compliant_returns_false_for_violations(self):
+        """is_compliant() should return False for content with violations."""
+        assert not ContentValidator.is_compliant("AAPL price is $150")
+    
+    def test_is_compliant_returns_true_for_empty_string(self):
+        """is_compliant() should return True for empty string."""
+        assert ContentValidator.is_compliant("")
+
+
+class TestContentValidatorEdgeCases:
+    """Test ContentValidator edge cases and deduplication."""
+    
+    def test_removes_duplicate_violations(self):
+        """Should not return duplicate violations."""
+        content = "Price $150, again $150"
+        violations = ContentValidator.scan_prohibited_patterns(content)
+        # Count occurrences of $150
+        count = sum(1 for v in violations if v == "$150")
+        assert count == 1
+    
+    def test_multiple_different_patterns(self):
+        """Should detect multiple different violation types."""
+        content = "AAPL at $150 with P/E 25 and yield 2.5%"
+        violations = ContentValidator.scan_prohibited_patterns(content)
+        # Should have dollar, P/E, and percentage violations
+        assert len(violations) >= 3
