@@ -176,17 +176,18 @@ from data.schema.agent_checkpoints_schema import get_checkpointer_config
 
 # Get configuration
 config = get_checkpointer_config(
-    connection_string=app_config["mongodb"]["uri"],
-    database_name=app_config["mongodb"]["database"]
+    connection_string=app_config["database"]["mongodb"]["connection_string"],
+    database_name=app_config["database"]["mongodb"]["database_name"]
 )
 
 # Initialize checkpointer
 checkpointer = MongoDBSaver(**config)
 
-# Use with agent executor
-agent_executor = create_react_agent(
+# Use with agent executor (langchain.agents.create_agent)
+agent_executor = create_agent(
     model=model,
     tools=tools,
+    system_prompt=system_prompt,
     checkpointer=checkpointer
 )
 
