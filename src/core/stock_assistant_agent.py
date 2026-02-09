@@ -4,7 +4,10 @@ Stock Assistant Agent with LangGraph ReAct Pattern.
 Implements a ReAct (Reasoning + Acting) agent that uses LangGraph tools
 for stock-related queries. Replaces the legacy StockAgent with a modern
 tool-orchestrated architecture.
-
+Migration Note (v1.0):
+    Migrated from `langgraph.prebuilt.create_react_agent` (deprecated in
+    LangGraph v1.0) to `langchain.agents.create_agent`. Key API change:
+    `prompt=` parameter renamed to `system_prompt=`.
 Reference: .github/instructions/backend-python.instructions.md § Model Factory
 """
 
@@ -16,9 +19,9 @@ import re
 import time
 from typing import Any, Dict, Generator, List, Mapping, Optional
 
+from langchain.agents import create_agent
 from langchain_core.messages import HumanMessage, SystemMessage, AIMessage
 from langchain_openai import ChatOpenAI
-from langgraph.prebuilt import create_react_agent
 
 from .data_manager import DataManager
 from .langchain_adapter import build_prompt
@@ -203,13 +206,15 @@ If you don't have a tool for a specific request, provide helpful general guidanc
                 temperature=openai_config.get("temperature", 0.7),
             )
             
-            # Create ReAct agent using langgraph.prebuilt.create_react_agent
+            # Create ReAct agent using langchain.agents.create_agent
+            # Migrated from deprecated langgraph.prebuilt.create_react_agent (LangGraph v1.0)
             # Pass checkpointer if available for session-aware memory
-            agent = create_react_agent(
+            agent = create_agent(
                 model=llm,
                 tools=enabled_tools,
-                prompt=self.REACT_SYSTEM_PROMPT,
+                system_prompt=self.REACT_SYSTEM_PROMPT,
                 checkpointer=self._checkpointer,  # None if not configured
+                name="stock_assistant",
             )
             
             if self._checkpointer:

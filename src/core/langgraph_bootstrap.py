@@ -90,6 +90,15 @@ from utils.memory_config import MemoryConfig
 logger = logging.getLogger(__name__)
 
 
+def _mask_connection_string(connection_string: str) -> str:
+    """Mask password in MongoDB connection string for safe logging.
+    
+    Transforms 'mongodb://user:password@host' → 'mongodb://user:***@host'
+    """
+    import re
+    return re.sub(r"://([^:]+):([^@]+)@", r"://\1:***@", connection_string)
+
+
 def create_checkpointer(config: Dict[str, Any]) -> Optional[Any]:
     """
     Create MongoDBSaver checkpointer if memory is enabled.
@@ -136,25 +145,33 @@ def create_checkpointer(config: Dict[str, Any]) -> Optional[Any]:
     memory_config = MemoryConfig.from_config(config)
     
     # Get MongoDB connection details
-    mongodb_config = config.get("mongodb", {})
-    connection_string = mongodb_config.get("uri", "")
-    db_name = mongodb_config.get("database", "stock_assistant")
+    mongodb_config = config.get("database", {}).get("mongodb", {})
+    connection_string = mongodb_config.get("connection_string", "")
+    db_name = mongodb_config.get("database_name", "stock_assistant")
     
     if not connection_string:
         logger.warning(
-            "MongoDB connection string not configured. "
+            "MongoDB connection string not configured "
+            "(database.mongodb.connection_string is empty). "
             "Short-Term Memory will be disabled."
         )
         return None
     
+    # Log resolved params (mask password for security)
+    masked_conn = _mask_connection_string(connection_string)
+    logger.debug(f"MongoDBSaver config: connection={masked_conn}, db={db_name}")
+    
     try:
         # Import MongoDBSaver here to avoid import errors when package not installed
         from langgraph.checkpoint.mongodb import MongoDBSaver
+        from pymongo import MongoClient
         
+        # MongoDBSaver requires a MongoClient instance, not a connection string
+        client = MongoClient(connection_string)
         checkpointer = MongoDBSaver(
-            connection_string=connection_string,
+            client=client,
             db_name=db_name,
-            collection_name=memory_config.checkpoint_collection
+            checkpoint_collection_name=memory_config.checkpoint_collection,
         )
         
         logger.info(

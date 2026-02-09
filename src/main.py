@@ -4,6 +4,7 @@ Main entry point for the DP Stock-Investment Assistant.
 
 from core.stock_assistant_agent import StockAssistantAgent
 from core.data_manager import DataManager
+from core.langgraph_bootstrap import create_checkpointer
 from utils.config_loader import ConfigLoader
 from web.api_server import APIServer
 import logging
@@ -70,20 +71,22 @@ def main():
                 server_thread.daemon = True
                 server_thread.start()
                 
-                # Also run CLI mode
+                # Also run CLI mode with checkpointer for memory support
                 logger.info("Starting interactive CLI mode...")
                 data_manager = DataManager(config)
-                agent = StockAssistantAgent(config, data_manager)
+                checkpointer = create_checkpointer(config)
+                agent = StockAssistantAgent(config, data_manager, checkpointer=checkpointer)
                 agent.run_interactive()
             else:
                 # Run only web server
                 server.run(host=args.host, port=args.port, debug=True)
                 
         elif args.mode == 'cli':
-            # Run only CLI mode
+            # Run only CLI mode with checkpointer for memory support
             logger.info("Starting interactive CLI mode...")
             data_manager = DataManager(config)
-            agent = StockAssistantAgent(config, data_manager)
+            checkpointer = create_checkpointer(config)
+            agent = StockAssistantAgent(config, data_manager, checkpointer=checkpointer)
             agent.run_interactive()
         
     except Exception as e:

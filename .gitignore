@@ -141,3 +141,7 @@ __azurite_db_blob_extent__.json
 .langgraph_api
 docs/High-level Design/.$High-level design.drawio.bkp
 docs/High-level Design/.$High-level design.drawio.dtmp
+docs/.postman/config.json
+docs/postman/collections/Stock Investment Assistant API Copy.postman_collection.json
+docs/postman/globals/workspace.postman_globals.json
+docs/postman/specs/Stock Investment Assistant API/openapi.yaml

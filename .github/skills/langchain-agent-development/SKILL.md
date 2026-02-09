@@ -121,10 +121,10 @@ def test_tool_caches_result(mock_cache):
 The agent is built in `src/core/stock_assistant_agent.py`:
 
 ```python
-from langchain.agents import create_react_agent, AgentExecutor
+from langchain.agents import create_agent
 from langchain_openai import ChatOpenAI
 
-def _build_react_agent(self) -> AgentExecutor:
+def _build_agent_executor(self) -> CompiledGraph:
     # Get enabled tools from registry
     tools = ToolRegistry.get_instance().get_enabled_tools()
     
@@ -135,19 +135,16 @@ def _build_react_agent(self) -> AgentExecutor:
         api_key=self._api_key,
     )
     
-    # Create ReAct agent
-    agent = create_react_agent(
-        llm=llm,
+    # Create agent (migrated from deprecated create_react_agent in LangGraph v1.0)
+    agent = create_agent(
+        model=llm,
         tools=tools,
-        prompt=self._build_prompt(),
+        system_prompt=self._build_prompt(),
+        checkpointer=self._checkpointer,
+        name="stock_assistant",
     )
     
-    return AgentExecutor(
-        agent=agent,
-        tools=tools,
-        verbose=True,
-        handle_parsing_errors=True,
-    )
+    return agent  # Returns CompiledGraph directly, no AgentExecutor wrapper needed
 ```
 
 ### System Prompt Pattern

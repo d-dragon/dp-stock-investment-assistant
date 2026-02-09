@@ -21,6 +21,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from core.stock_assistant_agent import StockAssistantAgent
 from core.data_manager import DataManager
+from core.langgraph_bootstrap import create_checkpointer
 from core.model_factory import ModelClientFactory
 from core.model_registry import OpenAIModelRegistry
 from data.repositories.factory import RepositoryFactory
@@ -84,7 +85,18 @@ class APIServer:
 
         self.config = config or ConfigLoader.load_config()
         self.data_manager = data_manager or DataManager(self.config)
-        self.agent = agent or StockAssistantAgent(self.config, self.data_manager)
+        
+        # Initialize checkpointer for Short-Term Memory (FR-3.1)
+        # Only created when langchain.memory.enabled=true in config
+        checkpointer = create_checkpointer(self.config)
+        if checkpointer:
+            self.logger.info("Agent memory: enabled (MongoDBSaver checkpointer initialized)")
+        else:
+            self.logger.info("Agent memory: disabled")
+        
+        self.agent = agent or StockAssistantAgent(
+            self.config, self.data_manager, checkpointer=checkpointer
+        )
         self.repository_factory = RepositoryFactory(self.config)
         self.cache_repository = self.repository_factory.get_cache_repository() or RepositoryFactory.create_cache_repository(self.config)
         self.model_registry = OpenAIModelRegistry(self.config, self.cache_repository)

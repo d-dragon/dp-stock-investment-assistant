@@ -114,9 +114,11 @@ def mock_config():
                 "checkpoint_collection": "agent_checkpoints"
             }
         },
-        "mongodb": {
-            "uri": "mongodb://localhost:27017",
-            "database": "test_stock_assistant"
+        "database": {
+            "mongodb": {
+                "connection_string": "mongodb://localhost:27017",
+                "database_name": "test_stock_assistant"
+            }
         }
     }
 
@@ -1883,8 +1885,8 @@ class TestRealMongoDBPersistence:
         
         # Create checkpointer
         checkpointer = MongoDBSaver.from_conn_string(
-            mock_config["mongodb"]["uri"],
-            db_name=mock_config["mongodb"]["database"]
+            mock_config["database"]["mongodb"]["connection_string"],
+            db_name=mock_config["database"]["mongodb"]["database_name"]
         )
         
         # Store checkpoint
@@ -1901,8 +1903,8 @@ class TestRealMongoDBPersistence:
         
         # Simulate restart by creating new checkpointer instance
         new_checkpointer = MongoDBSaver.from_conn_string(
-            mock_config["mongodb"]["uri"],
-            db_name=mock_config["mongodb"]["database"]
+            mock_config["database"]["mongodb"]["connection_string"],
+            db_name=mock_config["database"]["mongodb"]["database_name"]
         )
         
         # Retrieve with new instance
