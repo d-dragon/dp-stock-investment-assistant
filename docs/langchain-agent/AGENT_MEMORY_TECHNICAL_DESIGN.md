@@ -1,9 +1,9 @@
 # Agent Memory Technical Design
 
-> **Document Version**: 1.1  
-> **Last Updated**: January 22, 2026  
-> **Phase**: 2A.1 - Long-Term Conversation Memory  
-> **Status**: Technical Design Complete  
+> **Document Version**: 1.2  
+> **Last Updated**: March 3, 2026  
+> **Phase**: 2A.1 - Short-Term Conversation Memory  
+> **Status**: Phase 1 (STM) Implemented  
 > **Governing ADR**: [ADR-001 — Layered LLM Architecture](./AGENT_ARCHITECTURE_DECISION_RECORDS.md)
 
 ---
@@ -27,6 +27,25 @@
 ### Objective
 
 Implement persistent conversation memory for the Stock Assistant LangChain agent, enabling multi-turn conversations where the agent recalls previous exchanges within a session.
+
+### Implementation Status
+
+| Component | Status | Location |
+|-----------|--------|----------|
+| `MemoryConfig` frozen dataclass | ✅ Done | `src/utils/memory_config.py` |
+| `ContentValidator` compliance scanner | ✅ Done | `src/utils/memory_config.py` (utility available; pipeline enforcement is incremental) |
+| `MongoDBSaver` checkpointer factory | ✅ Done | `src/core/langgraph_bootstrap.py::create_checkpointer()` |
+| Agent `session_id` parameter | ✅ Done | `src/core/stock_assistant_agent.py` (`process_query`, `process_query_streaming`) |
+| Agent checkpointer wiring | ✅ Done | `src/web/api_server.py::APIServer.__init__()` |
+| `ConversationRepository` | ✅ Done | `src/data/repositories/conversation_repository.py` |
+| `ConversationService` | ✅ Done | `src/services/conversation_service.py` |
+| REST API `session_id` support | ✅ Done | `src/web/routes/ai_chat_routes.py` |
+| Socket.IO `session_id` support | ✅ Done | `src/web/sockets/chat_events.py` |
+| YAML config `langchain.memory` section | ✅ Done | `config/config.yaml` |
+| `create_react_agent` → `create_agent` migration | ✅ Done | `src/core/stock_assistant_agent.py` |
+| `memory_vectors` collection (LTM) | ⏳ Future | Phase 2A.2+ |
+| Cross-session memory retrieval | ⏳ Future | Phase 2A.2+ |
+| User preference learning | ⏳ Future | Phase 2A.2+ |
 
 ### Key Design Principles
 
@@ -174,6 +193,13 @@ This technical design implements the **Short-Term Memory (STM)** component defin
 - Continue using `ChatRepository` for UI chat history display
 - Sync between collections is NOT required (different concerns)
 
+**Implementation Notes (post-implementation):**
+- Config path for connection string: `config["database"]["mongodb"]["connection_string"]`
+- Collection name configurable via `MemoryConfig.checkpoint_collection` (default: `agent_checkpoints`)
+- Checkpointer factory: `langgraph_bootstrap.py::create_checkpointer(config)`
+- Wired into agent via `APIServer.__init__()` → `StockAssistantAgent(checkpointer=checkpointer)`
+- Uses `MongoClient` instance (not raw connection string) as required by `MongoDBSaver` API
+
 ---
 
 ### Decision 3: Thread ID Mapping Strategy
@@ -189,10 +215,10 @@ This technical design implements the **Short-Term Memory (STM)** component defin
 │   ─────────────────           ───────────────                 │
 │                                                               │
 │   session_id ─────────────────► thread_id                     │
-│   (ObjectId string)             (configurable)                │
+│   (UUID v4 string)             (configurable)                 │
 │                                                               │
 │   Example:                                                    │
-│   "507f1f77bcf86cd799439011" ──► thread_id                   │
+│   "123e4567-e89b-42d3-a456-426614174000" ──► thread_id      │
 │                                                               │
 │   config = {                                                  │
 │       "configurable": {                                       │
@@ -342,12 +368,13 @@ CONVERSATIONS_SCHEMA = {
             "bsonType": "objectId"
         },
         "session_id": {
-            "bsonType": "objectId",
-            "description": "Reference to sessions collection (1:1 mapping)"
+            "bsonType": "string",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
+            "description": "UUID v4 session identifier (1:1 mapping to thread_id)"
         },
         "thread_id": {
             "bsonType": "string",
-            "description": "LangGraph thread identifier (equals string of session_id)"
+            "description": "LangGraph thread identifier (equals session_id)"
         },
         "status": {
             "bsonType": "string",
@@ -494,8 +521,8 @@ MEMORY_VECTORS_SCHEMA = {
             "bsonType": "objectId"
         },
         "session_id": {
-            "bsonType": "objectId",
-            "description": "Reference to source session"
+            "bsonType": "string",
+            "description": "Reference to source session (UUID v4)"
         },
         "user_id": {
             "bsonType": "objectId",
@@ -770,7 +797,7 @@ MEMORY_VECTORS_INDEXES = [
     "message": "string (required)",
     "provider": "string (optional, default: 'openai')",
     "stream": "boolean (optional, default: false)",
-    "session_id": "string (optional, ObjectId string)"
+    "session_id": "string (optional, UUID v4)"
 }
 ```
 
@@ -833,56 +860,70 @@ def process_query_streaming(
 # Structured - Before
 def process_query_structured(self, query: str, *, provider: Optional[str] = None) -> AgentResponse:
 
-# Structured - After
+# Current implementation (session_id not yet exposed on structured path)
 def process_query_structured(
-    self, 
-    query: str, 
-    *, 
+    self,
+    query: str,
+    *,
     provider: Optional[str] = None,
-    session_id: Optional[str] = None
 ) -> AgentResponse:
 ```
+
+> **Note**: Session-aware memory is implemented for `process_query()` and
+> `process_query_streaming()`. `process_query_structured()` remains provider-only
+> in the current implementation.
 
 ---
 
 ## Configuration Requirements
 
-### config.yaml Additions
+### config.yaml — Implemented Structure
+
+The memory configuration lives under `langchain.memory` in `config/config.yaml`.
+All parameters are loaded by the `MemoryConfig` frozen dataclass (`src/utils/memory_config.py`)
+with fail-fast validation on construction (FR-3.1.10).
 
 ```yaml
-# Add to existing langchain section
 langchain:
-  # ... existing tracing config ...
-  
+  # Memory Configuration (FR-3.1: Short-Term Memory)
   memory:
-    # Checkpointer configuration
-    checkpointer:
-      type: mongodb  # Options: mongodb, memory (for testing)
-      collection_name: agent_checkpoints
-    
-    # Memory scope settings
-    max_messages: null  # null = unlimited, or integer for window buffer
-    summarize_threshold: 4000  # Token count to trigger summarization
-    summarize_keep_recent: 10  # Messages to keep after summarization
-    
-    # TTL settings
-    checkpoint_ttl_days: 30  # Auto-expire old checkpoints
-    
-    # Feature flags
-    enabled: true
-    auto_summarize: true
+    enabled: true                           # Master switch (FR-3.1.1)
+
+    # Summarization Settings (FR-3.1.6)
+    summarize_threshold: 4000               # Token count to trigger summarization (valid: 1000-10000)
+    max_messages: 50                        # Max messages per session before pruning (valid: 10-200)
+    messages_to_keep: 10                    # Messages to preserve when pruning (valid: 5-50, < max_messages)
+    max_content_size: 32768                 # Max bytes for single message content (valid: 1024-65536)
+    summary_max_length: 500                 # Max tokens for summary (valid: 100-2000)
+
+    # Performance Settings (FR-3.1.9)
+    context_load_timeout_ms: 500            # Max time to load context (valid: 100-5000)
+    state_save_timeout_ms: 50               # Max time to persist state (valid: 10-500)
+
+    # MongoDB Collections (FR-3.1.2)
+    checkpoint_collection: "agent_checkpoints"    # LangGraph-managed checkpoints
+    conversations_collection: "conversations"     # Application-managed metadata
 ```
 
----
+### MemoryConfig Validation Rules
 
-### Environment Variables
+| Parameter | Type | Valid Range | Constraint |
+|-----------|------|-------------|------------|
+| `enabled` | bool | `true`/`false` | Master switch |
+| `summarize_threshold` | int | 1000–10000 | Token count trigger |
+| `max_messages` | int | 10–200 | Session limit |
+| `messages_to_keep` | int | 5–50 | Must be < `max_messages` |
+| `max_content_size` | int | 1024–65536 | Per-message bytes |
+| `summary_max_length` | int | 100–2000 | Summary token cap |
+| `context_load_timeout_ms` | int | 100–5000 | Performance SLA |
+| `state_save_timeout_ms` | int | 10–500 | Performance SLA |
+| `checkpoint_collection` | str | Non-empty | MongoDB collection name |
+| `conversations_collection` | str | Non-empty | MongoDB collection name |
 
-```bash
-# Optional overrides
-LANGCHAIN_MEMORY_ENABLED=true
-LANGCHAIN_MEMORY_CHECKPOINTER_TYPE=mongodb
-LANGCHAIN_MEMORY_SUMMARIZE_THRESHOLD=4000
-```
+### MongoDB Connection
+
+The checkpointer reads the connection string from `config["database"]["mongodb"]["connection_string"]`
+and database name from `config["database"]["mongodb"]["database_name"]` (default: `stock_assistant`).
 
 ---
 
@@ -890,27 +931,38 @@ LANGCHAIN_MEMORY_SUMMARIZE_THRESHOLD=4000
 
 ### Phase 2A.1 Implementation Tasks
 
-| # | Task | Effort | Dependencies |
-|---|------|--------|--------------|
-| 1 | Add `langgraph-checkpoint-mongodb` to requirements.txt | XS | None |
-| 2 | Create `conversations_schema.py` | S | None |
-| 3 | Register conversations collection in SchemaManager | S | Task 2 |
-| 4 | Create `ConversationRepository` | M | Task 2, 3 |
-| 5 | Create `ConversationService` | M | Task 4 |
-| 6 | Add memory config section to config.yaml | S | None |
-| 7 | Modify `StockAssistantAgent.__init__()` to init checkpointer | M | Task 1, 6 |
-| 8 | Modify `_build_agent_executor()` to pass checkpointer | M | Task 7 |
-| 9 | Update `process_query()` with session_id parameter | M | Task 8 |
-| 10 | Update `process_query_streaming()` with session_id | M | Task 8 |
-| 11 | Update `process_query_structured()` with session_id | S | Task 8 |
-| 12 | Update REST API routes for session_id | M | Task 9-11 |
-| 13 | Update Socket.IO handlers for session_id | M | Task 9-11 |
-| 14 | Implement memory summarization logic | L | Task 5, 8 |
-| 15 | Run database migration | S | Task 3 |
-| 16 | Unit tests for memory components | L | Tasks 4-11 |
-| 17 | Integration tests for multi-turn conversation | L | Task 16 |
+| # | Task | Effort | Status |
+|---|------|--------|--------|
+| 1 | Add `langgraph-checkpoint-mongodb` to requirements.txt | XS | ✅ Done |
+| 2 | Create `conversations_schema.py` | S | ✅ Done |
+| 3 | Register conversations collection in SchemaManager | S | ✅ Done |
+| 4 | Create `ConversationRepository` | M | ✅ Done |
+| 5 | Create `ConversationService` | M | ✅ Done |
+| 6 | Add memory config section to config.yaml | S | ✅ Done |
+| 7 | Create `MemoryConfig` dataclass with fail-fast validation | M | ✅ Done |
+| 8 | Create `create_checkpointer()` factory in langgraph_bootstrap | M | ✅ Done |
+| 9 | Update `StockAssistantAgent.__init__()` to accept checkpointer | M | ✅ Done |
+| 10 | Update `_build_agent_executor()` to pass checkpointer via `create_agent()` | M | ✅ Done |
+| 11 | Update `process_query()` with session_id parameter | M | ✅ Done |
+| 12 | Update `process_query_streaming()` with session_id | M | ✅ Done |
+| 13 | Update REST API routes for session_id (UUID v4 validation) | M | ✅ Done |
+| 14 | Update Socket.IO handlers for session_id | M | ✅ Done |
+| 15 | Wire checkpointer in `APIServer.__init__()` | S | ✅ Done |
+| 16 | Migrate `create_react_agent` → `create_agent` (LangGraph v1.0 deprecation) | M | ✅ Done |
+| 17 | Fix MongoDB config key (`database.mongodb.connection_string`) | S | ✅ Done |
+| 18 | Create `ContentValidator` for FR-3.1.7/FR-3.1.8 compliance | M | ✅ Done |
+| 19 | Unit tests for memory components | L | ✅ Done |
+| 20 | Integration tests for multi-turn conversation | L | ✅ Done |
 
-**Total Estimated Effort**: ~15-20 story points
+### Key Implementation Gaps Resolved
+
+During implementation, three critical wiring gaps were discovered and fixed:
+
+1. **`create_react_agent` deprecated**: The `langgraph.prebuilt.create_react_agent` API was deprecated in LangGraph v1.0. Migrated to `langchain.agents.create_agent` with `system_prompt=` and `name=` parameters.
+
+2. **Checkpointer not wired to agent**: The checkpointer was created in `create_checkpointer()` but never passed to `StockAssistantAgent` in `APIServer.__init__()`. Fixed by adding `checkpointer=checkpointer` to the constructor call.
+
+3. **MongoDB config key mismatch**: The original design assumed `config["mongodb"]["uri"]` but the actual config uses `config["database"]["mongodb"]["connection_string"]`. Fixed in `create_checkpointer()` factory.
 
 ---
 
@@ -918,20 +970,21 @@ LANGCHAIN_MEMORY_SUMMARIZE_THRESHOLD=4000
 
 ### Unit Tests
 
-| Component | Test Cases |
-|-----------|------------|
-| `ConversationRepository` | CRUD operations, thread_id lookup, status updates |
-| `ConversationService` | Init conversation, get/update, summarization trigger |
-| `StockAssistantAgent` | Checkpointer initialization, session_id flow |
+| Component | Test File | Test Cases |
+|-----------|-----------|------------|
+| `MemoryConfig` | `tests/test_memory_config.py` | Validation ranges, fail-fast, cross-field constraints, factory methods |
+| `ConversationRepository` | `tests/test_conversation_repository.py` | CRUD operations, find_by_session_id, archive, find_stale |
+| `ConversationService` | `tests/test_conversation_service.py` | track_message, get_conversation_stats, archive_conversation |
+| `StockAssistantAgent` | `tests/test_agent_memory.py` | Checkpointer initialization, session_id flow, stateless fallback |
+| `ContentValidator` | `tests/test_memory_config.py` | Prohibited pattern detection, compliance scanning |
 
 ### Integration Tests
 
-| Scenario | Description |
-|----------|-------------|
-| Multi-turn conversation | User asks follow-up, agent recalls previous |
-| Session restart | API restart, conversation resumes correctly |
-| Summarization trigger | Long conversation triggers summarization |
-| Backward compatibility | Request without session_id works |
+| Test File | Scenario |
+|-----------|----------|
+| `tests/integration/test_memory_persistence.py` | Full persistence flow, session restart |
+| `tests/integration/test_stm_runtime_wiring.py` | Runtime wiring verification (checkpointer → agent → API) |
+| `tests/api/test_chat_routes_memory.py` | REST API session_id handling, UUID validation |
 
 ### Performance Tests
 
@@ -949,22 +1002,28 @@ LANGCHAIN_MEMORY_SUMMARIZE_THRESHOLD=4000
 
 ```python
 from langgraph.checkpoint.mongodb import MongoDBSaver
+from pymongo import MongoClient
 
-# Initialization
+# Initialization (in langgraph_bootstrap.py::create_checkpointer)
+client = MongoClient(connection_string)
 checkpointer = MongoDBSaver(
-    connection_string="mongodb://...",
+    client=client,
     db_name="stock_assistant",
-    collection_name="agent_checkpoints"
+    checkpoint_collection_name="agent_checkpoints"  # via MemoryConfig
 )
 
-# Usage with agent
-agent_executor = create_react_agent(
+# Usage with agent (in stock_assistant_agent.py::_build_agent_executor)
+from langchain.agents import create_agent
+
+agent_executor = create_agent(
     model=model,
     tools=tools,
-    checkpointer=checkpointer
+    checkpointer=checkpointer,
+    system_prompt=system_prompt,
+    name="stock_assistant",
 )
 
-# Invoke with thread_id
+# Invoke with thread_id (in _process_with_react)
 result = agent_executor.invoke(
     {"messages": [HumanMessage(content="query")]},
     config={"configurable": {"thread_id": session_id}}
@@ -985,8 +1044,8 @@ result = agent_executor.invoke(
 
 ---
 
-> **Document Status**: Technical Design Complete  
-> **Next Step**: Implementation Phase  
+> **Document Status**: Phase 1 (STM) Implemented  
+> **Next Step**: Phase 2A.2 — Long-Term Memory (vector store, cross-session recall)  
 > **Review Required**: Architecture Team
 
 ### D. Memory technical requirements (backup)
@@ -1001,18 +1060,18 @@ result = agent_executor.invoke(
 | ID | Priority | Requirement | Data Type | Description |
 |----|----------|-------------|-----------|-------------|
 | MEM-1.1.1 | **P0** | Each conversation SHALL have unique `_id` | ObjectId | Primary key. Auto-generated by MongoDB. |
-| MEM-1.1.2 | **P0** | Each conversation SHALL reference `session_id` | ObjectId | FK to `sessions` collection. 1:1 relationship. |
-| MEM-1.1.3 | **P0** | Each conversation SHALL have `thread_id` | String | LangGraph thread identifier. Used by checkpointer for state lookup. |
-| MEM-1.1.4 | **P0** | `session_id` and `thread_id` SHALL be unique indexes | - | Create compound unique index `{session_id: 1, thread_id: 1}` to prevent duplicates. |
+| MEM-1.1.2 | **P0** | Each conversation SHALL reference `session_id` | String (UUID v4) | FK to `sessions.id`; primary lookup key and 1:1 mapping to thread context. |
+| MEM-1.1.3 | **P0** | `thread_id` SHALL map directly to `session_id` | Derived String | `thread_id` is passed in LangGraph invoke config as `thread_id=session_id`; no separate persisted field required. |
+| MEM-1.1.4 | **P0** | `session_id` SHALL be unique indexed | - | Unique index `{session_id: 1}` prevents duplicates. |
 | MEM-1.1.5 | **P0** | Each conversation SHALL track `status` | Enum | Values: `active`, `summarized`, `archived`. Use string enum in Pydantic model. |
 | MEM-1.1.6 | **P0** | Each conversation SHALL track `message_count` | Integer | Auto-incremented via `$inc`. Start at 0, increment on each user+assistant exchange. |
 | MEM-1.1.7 | **P0** | Each conversation SHALL track `total_tokens` | Integer | Cumulative prompt+completion tokens. Use LangChain callback handler to track. |
 | MEM-1.1.8 | **P1** | Each conversation SHALL track `summary` | String | Optional. Populated when summarization triggers. Max 500 chars. |
-| MEM-1.1.9 | **P1** | Each conversation SHALL track `summary_up_to_message` | Integer | Message index at which summary was generated. Used for incremental summarization. |
+| MEM-1.1.9 | **P1** | Each conversation MAY track summary progress metadata | Integer/Optional | Future enhancement for incremental summarization; not required in current schema. |
 | MEM-1.1.10 | **P0** | Each conversation SHALL track `last_activity_at` | DateTime | UTC timestamp. Updated on each message via `$set` with `datetime.utcnow()`. |
 | MEM-1.1.11 | **P0** | Each conversation SHALL track `created_at` and `updated_at` | DateTime | Audit fields. `created_at` set once; `updated_at` on every write. |
-| MEM-1.1.12 | **P0** | Each conversation SHALL reference `workspace_id` | ObjectId | **ADR Compliance**: Sessions are workspace-bound. Required field, not nullable. |
-| MEM-1.1.13 | **P0** | Each conversation SHALL reference `user_id` | ObjectId | FK to `users` collection. Required for authorization checks. |
+| MEM-1.1.12 | **P0** | Each conversation SHALL reference `workspace_id` | String/Null | **ADR Compliance**: Sessions are workspace-bound. Nullable in current schema for backward compatibility. |
+| MEM-1.1.13 | **P0** | Each conversation SHALL reference `user_id` | String/Null | FK-style reference for authorization checks; nullable in current schema for compatibility. |
 | MEM-1.1.14 | **P1** | Each conversation MAY store `assumptions[]` | Array[String] | Session-scoped assumptions. Example: `["Risk tolerance: moderate"]`. |
 | MEM-1.1.15 | **P1** | Each conversation MAY store `pinned_intent` | String | User's stated focus. Example: `"Compare AAPL vs MSFT"`. |
 | MEM-1.1.16 | **P1** | Each conversation MAY store `focused_symbols[]` | Array[String] | Symbol names only (NO prices). Example: `["AAPL", "MSFT"]`. |
@@ -1022,7 +1081,7 @@ result = agent_executor.invoke(
 
 | ID | Priority | Requirement | Description |
 |----|----------|-------------|-------------|
-| MEM-1.2.1 | **P0** | Collection SHALL be named `agent_checkpoints` | Configurable via `config.langchain.memory.checkpointer.collection`. |
+| MEM-1.2.1 | **P0** | Collection SHALL be named `agent_checkpoints` | Configurable via `config.langchain.memory.checkpoint_collection`. |
 | MEM-1.2.2 | **P0** | Schema SHALL be managed by LangGraph `MongoDBSaver` | Do NOT define custom schema—LangGraph owns this collection structure. |
 | MEM-1.2.3 | **P0** | Checkpoints SHALL be indexed by `thread_id` | Primary lookup key. Index created automatically by MongoDBSaver. |
 | MEM-1.2.4 | **P1** | Checkpoints SHALL support TTL-based expiration | Default 30 days. Configure via `ttl_days` in config. MongoDB TTL index on `created_at`. |
@@ -1048,9 +1107,9 @@ result = agent_executor.invoke(
 | ID | Priority | Requirement | Description |
 |----|----------|-------------|-------------|
 | MEM-2.1.1 | **P0** | `POST /api/chat` SHALL accept optional `session_id` parameter | Add to request body: `{"message": "...", "session_id": "..."}`. Type: `Optional[str]`. |
-| MEM-2.1.2 | **P0** | When `session_id` provided, agent SHALL load conversation history | Pass `session_id` to `StockAgentGraph.run()`. Checkpointer auto-loads state. |
-| MEM-2.1.3 | **P0** | When `session_id` omitted, agent SHALL operate statelessly | Generate ephemeral UUID for single-turn. Do NOT create `conversations` record. |
-| MEM-2.1.4 | **P0** | Invalid `session_id` format SHALL return 400 Bad Request | Validate UUID format before processing. Return `{"error": "Invalid session_id format"}`. |
+| MEM-2.1.2 | **P0** | When `session_id` provided, agent SHALL load conversation history | Pass `session_id` into agent query methods so LangGraph uses `thread_id=session_id` for checkpoint recall. |
+| MEM-2.1.3 | **P0** | When `session_id` omitted, agent SHALL operate statelessly | Process request without `thread_id` config. Do NOT create `conversations` record. |
+| MEM-2.1.4 | **P0** | Invalid `session_id` format SHALL return 400 Bad Request | Validate UUID v4 format before processing. Return `{"error": "session_id must be a valid UUID v4"}`. |
 | MEM-2.1.5 | **P0** | Unauthorized `session_id` access SHALL return 403 Forbidden | Check `conversation.user_id == request.user_id`. Return 403 if mismatch. |
 | MEM-2.1.6 | **P0** | Non-existent `session_id` SHALL return 404 Not Found | Query `conversations` collection first. Return 404 if not found. |
 
@@ -1060,7 +1119,7 @@ result = agent_executor.invoke(
 |----|----------|-------------|-------------|
 | MEM-2.2.1 | **P0** | `chat_message` event SHALL accept optional `session_id` | Add to event payload: `{message: "...", session_id: "..."}`. |
 | MEM-2.2.2 | **P0** | Streaming responses SHALL maintain memory context | Pass `session_id` through entire streaming pipeline. Context must persist across chunks. |
-| MEM-2.2.3 | **P0** | Memory state SHALL be persisted after each complete response | Call `checkpointer.put()` after stream completes, not during. Ensures atomic persistence. |
+| MEM-2.2.3 | **P0** | Memory state SHALL be persisted after each complete response | Persistence is handled by LangGraph checkpointer during `invoke()` / `astream_events()` execution with `thread_id`. |
 
 ---
 
@@ -1090,8 +1149,8 @@ result = agent_executor.invoke(
 | ID | Priority | Requirement | Description |
 |----|----------|-------------|-------------|
 | MEM-3.3.1 | **P1** | Summarization SHALL trigger when `total_tokens > summarize_threshold` | Check after each response. Default threshold: 4000 tokens. |
-| MEM-3.3.2 | **P1** | Default `summarize_threshold` SHALL be 4000 tokens | Configurable via `config.langchain.memory.summarization.threshold_tokens`. |
-| MEM-3.3.3 | **P1** | Summarization SHALL preserve last K messages (default K=10) | After summary, trim `state["messages"]` to last K. Configurable via `keep_recent_messages`. |
+| MEM-3.3.2 | **P1** | Default `summarize_threshold` SHALL be 4000 tokens | Configurable via `config.langchain.memory.summarize_threshold`. |
+| MEM-3.3.3 | **P1** | Summarization SHALL preserve last K messages (default K=10) | After summary, trim `state["messages"]` to last K. Configurable via `messages_to_keep`. |
 | MEM-3.3.4 | **P1** | Summary generation SHALL use dedicated LLM call | Call `llm.invoke(summarization_prompt)`. Use same model as agent or cheaper model. |
 | MEM-3.3.5 | **P1** | Post-summarization, `conversations.status` SHALL be `summarized` | Update via `ConversationRepository.set_status("summarized")`. |
 
@@ -1101,7 +1160,7 @@ result = agent_executor.invoke(
 |----|----------|-------------|-------------|
 | MEM-3.4.1 | **P1** | Inactive conversations SHALL be archived after configurable period | Default: 30 days inactive. Cron job or background task to check `last_activity_at`. |
 | MEM-3.4.2 | **P0** | Archived conversations SHALL be read-only | **ADR Compliance**: Reject updates with `ConversationArchivedError`. Only allow read queries. |
-| MEM-3.4.3 | **P1** | Checkpoint TTL SHALL default to 30 days | Configure via `config.langchain.memory.checkpointer.ttl_days`. |
+| MEM-3.4.3 | **P1** | Checkpoint TTL SHALL default to 30 days | Future enhancement; not currently implemented in `MemoryConfig`. |
 | MEM-3.4.4 | **P1** | Expired checkpoints SHALL be automatically purged by MongoDB TTL index | Create TTL index on `created_at` field. MongoDB handles expiration automatically. |
 | MEM-3.4.5 | **P0** | The system SHALL NOT hard-delete conversations | **ADR Compliance**: Implement `archive()` method only. No `delete()` method in repository. |
 
@@ -1111,33 +1170,34 @@ result = agent_executor.invoke(
 
 ##### MEM-4.1 Memory Configuration Schema
 
+> **Implementation Note**: The originally proposed nested structure (`checkpointer.type`, `summarization.threshold_tokens`)
+> was simplified during implementation to a flat structure managed by the `MemoryConfig` frozen dataclass
+> (`src/utils/memory_config.py`). All parameters are validated at startup with fail-fast semantics (FR-3.1.10).
+
+**Implemented config structure** (see [Configuration Requirements](#configuration-requirements) above):
 ```yaml
-# config.yaml memory section
 langchain:
   memory:
     enabled: true
-    checkpointer:
-      type: "mongodb"
-      collection: "agent_checkpoints"
-      ttl_days: 30
-    summarization:
-      enabled: true
-      threshold_tokens: 4000
-      keep_recent_messages: 10
-    conversation:
-      collection: "conversations"
-      max_messages: null  # null = unlimited
-      archive_after_days: 30  # auto-archive inactive conversations
+    summarize_threshold: 4000
+    max_messages: 50
+    messages_to_keep: 10
+    max_content_size: 32768
+    summary_max_length: 500
+    context_load_timeout_ms: 500
+    state_save_timeout_ms: 50
+    checkpoint_collection: "agent_checkpoints"
+    conversations_collection: "conversations"
 ```
 
 | ID | Priority | Requirement | Description |
 |----|----------|-------------|-------------|
 | MEM-4.1.1 | **P0** | Memory feature SHALL be toggleable via `memory.enabled` | When `false`, agent operates statelessly. No checkpointer initialized. |
-| MEM-4.1.2 | **P0** | Checkpointer collection name SHALL be configurable | Default: `agent_checkpoints`. Override via `checkpointer.collection`. |
-| MEM-4.1.3 | **P1** | Checkpoint TTL SHALL be configurable (days) | Default: 30 days. Set via `checkpointer.ttl_days`. |
-| MEM-4.1.4 | **P1** | Summarization threshold SHALL be configurable (tokens) | Default: 4000. Set via `summarization.threshold_tokens`. |
-| MEM-4.1.5 | **P1** | Recent message retention count SHALL be configurable | Default: 10. Set via `summarization.keep_recent_messages`. |
+| MEM-4.1.2 | **P0** | Checkpointer collection name SHALL be configurable | Default: `agent_checkpoints`. Set via `checkpoint_collection`. |
+| MEM-4.1.3 | **P1** | Checkpoint TTL SHALL be configurable (days) | Future enhancement; not currently in `MemoryConfig` schema. |
+| MEM-4.1.4 | **P1** | Summarization threshold SHALL be configurable (tokens) | Default: 4000. Set via `summarize_threshold`. |
+| MEM-4.1.5 | **P1** | Recent message retention count SHALL be configurable | Default: 10. Set via `messages_to_keep`. |
 | MEM-4.1.6 | **P0** | All memory settings SHALL have sensible defaults | Defaults must allow system to run without explicit config. |
-| MEM-4.1.7 | **P1** | Archive period SHALL be configurable | Default: 30 days. Set via `conversation.archive_after_days`. |
+| MEM-4.1.7 | **P1** | Archive period SHALL be configurable | Future enhancement; not currently in `MemoryConfig` schema. |
 
 ---

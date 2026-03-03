@@ -29,8 +29,8 @@ Implement **Short-Term Memory (STM)** for the StockAssistantAgent to enable mult
 
 ## Technical Context
 
-**Language/Version**: Python 3.8+ (per Constitution Article VIII)  
-**Primary Dependencies**: LangGraph >=0.2.0, LangChain >=1.0.0, Flask 2.x, PyMongo 4.x  
+**Language/Version**: Python 3.10+ (per `requirements.txt`)  
+**Primary Dependencies**: LangChain >=1.0.0, LangGraph >=0.2.62, langgraph-checkpoint >=2.0.9, langgraph-checkpoint-mongodb >=2.0.5, Flask >=2.3.0, PyMongo 4.x  
 **Storage**: MongoDB 5.0+ (collections: `sessions`, `conversations` [NEW], `agent_checkpoints` [NEW])  
 **Testing**: pytest with 80%+ coverage target (per Constitution Article VI)  
 **Target Platform**: Linux server (Docker/Kubernetes), local development on Windows  
@@ -250,9 +250,9 @@ tests/
 
 ### Phase 6: STM Runtime Integration & Agent Migration (CRITICAL — 5-6 SP) ✅ COMPLETED
 
-> **Goal**: Make STM actually functional at runtime. Phases 0-8 built all components correctly but left **three critical wiring gaps** that prevent STM from working when the app runs. This phase fixes the integration seams so `/api/chat` with `session_id` produces persistent multi-turn conversations in MongoDB.
+> **Goal**: Make STM actually functional at runtime. Phases 1-5 built all components correctly but left **three critical wiring gaps** that prevented STM from working when the app runs. This phase fixed the integration seams so `/api/chat` with `session_id` produces persistent multi-turn conversations in MongoDB.
 >
-> **Implementation Status**: All 5 tasks completed. 599 tests passing (4 pre-existing failures unchanged). Packages upgraded: langchain 1.2.9, langgraph 1.0.8, langgraph-checkpoint 4.0.0.
+> **Implementation Status**: All 5 tasks completed. Runtime wiring and validation tests were added for STM behavior.
 
 #### Problem Analysis
 
@@ -275,7 +275,7 @@ Migration is low-risk: parameter mapping is nearly 0:1. The key change is `promp
 
 ##### Gap 1: Checkpointer created but never passed to agent in `APIServer`
 
-**Current flow** (`api_server.py` line 86):
+**Pre-fix flow** (`api_server.py` line 86):
 ```python
 self.agent = agent or StockAssistantAgent(self.config, self.data_manager)
 #                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -295,7 +295,7 @@ This means even when `/api/chat` receives a valid `session_id`, the agent proces
 
 ##### Gap 2: MongoDB config key mismatch in `create_checkpointer()`
 
-**Current** (`langgraph_bootstrap.py` line 127-129):
+**Pre-fix** (`langgraph_bootstrap.py` line 127-129):
 ```python
 mongodb_config = config.get("mongodb", {})
 connection_string = mongodb_config.get("uri", "")
@@ -313,7 +313,7 @@ The code looks for `config["mongodb"]["uri"]` but the config has `config["databa
 
 #### Implementation Tasks
 
-##### 8.1 Migrate `create_react_agent` → `create_agent` (1.5 SP)
+##### 6.1 Migrate `create_react_agent` → `create_agent` (1.5 SP)
 
 **File**: `src/core/stock_assistant_agent.py`
 
@@ -328,7 +328,7 @@ The code looks for `config["mongodb"]["uri"]` but the config has `config["databa
 **Risk**: LOW — API is backward compatible; same `checkpointer`, `tools` params.  
 **Verification**: `pytest tests/test_agent.py tests/test_agent_memory.py -v`
 
-##### 8.2 Fix MongoDB config key mismatch in `create_checkpointer()` (0.5 SP)
+##### 6.2 Fix MongoDB config key mismatch in `create_checkpointer()` (0.5 SP)
 
 **File**: `src/core/langgraph_bootstrap.py`
 
@@ -342,7 +342,7 @@ The code looks for `config["mongodb"]["uri"]` but the config has `config["databa
 **Risk**: LOW — pure config key fix.  
 **Verification**: Manual test with MongoDB running; check logs for "MongoDBSaver checkpointer initialized".
 
-##### 8.3 Wire checkpointer into `APIServer` agent construction (1.5 SP)
+##### 6.3 Wire checkpointer into `APIServer` agent construction (1.5 SP)
 
 **File**: `src/web/api_server.py`
 
@@ -371,7 +371,7 @@ self.logger.info(f"Agent memory: {'enabled' if checkpointer else 'disabled'}")
 **Risk**: MEDIUM — touches the core server initialization path.  
 **Verification**: Start server → `GET /api/health` → check startup logs for "Agent memory: enabled".
 
-#### 8.4 End-to-end runtime verification test (1 SP)
+#### 6.4 End-to-end runtime verification test (1 SP)
 
 Create a manual test script or pytest integration test that:
 
@@ -386,7 +386,7 @@ Create a manual test script or pytest integration test that:
 
 **Risk**: LOW — read-only validation on running system.
 
-##### 8.5 Update existing tests for `create_agent` migration (0.5 SP)
+##### 6.5 Update existing tests for `create_agent` migration (0.5 SP)
 
 **Files**: `tests/test_agent.py`, `tests/test_agent_memory.py`, `tests/test_langsmith_integration.py`
 
@@ -399,16 +399,16 @@ Create a manual test script or pytest integration test that:
 #### Dependency Graph
 
 ```
-8.2 (config fix) ─┐
-                   ├─► 8.3 (wire into APIServer) ─► 9.4 (e2e verification)
-8.1 (migrate API) ─┘                                      │
-                                                           ▼
-                                                     8.5 (update tests)
+6.2 (config fix) ─┐
+             ├─► 6.3 (wire into APIServer) ─► 6.4 (e2e verification)
+6.1 (migrate API) ─┘                                      │
+                                         ▼
+                                     6.5 (update tests)
 ```
 
-Tasks 8.1 and 9.2 are independent and can be done in parallel [P].  
-Task 8.3 depends on both 9.1 and 9.2.  
-Tasks 8.4 and 9.5 depend on 9.3.
+Tasks 6.1 and 6.2 are independent and can be done in parallel [P].  
+Task 6.3 depends on both 6.1 and 6.2.  
+Tasks 6.4 and 6.5 depend on 6.3.
 
 #### Files Modified
 
@@ -421,7 +421,7 @@ Tasks 8.4 and 9.5 depend on 9.3.
 | `tests/test_agent.py` | MODIFY | Update mock patches for new import path |
 | `tests/test_agent_memory.py` | MODIFY | Update mock patches for new import path |
 | `tests/integration/test_memory_persistence.py` | MODIFY | Update mock config fixture to `database.mongodb.connection_string` |
-| `tests/integration/test_stm_runtime_wiring.py` | NEW | 19 runtime verification tests (7 classes) for Phase 9 wiring |
+| `tests/integration/test_stm_runtime_wiring.py` | NEW | Runtime verification tests for Phase 6 wiring |
 | `src/data/schema/agent_checkpoints_schema.py` | MODIFY | Update code example to use `create_agent` and correct config keys |
 | `.github/skills/langchain-agent-development/SKILL.md` | MODIFY | Update agent creation code sample to `create_agent` API |
 
@@ -499,6 +499,7 @@ class MemoryConfig:
 ```python
 # src/core/langgraph_bootstrap.py
 from langgraph.checkpoint.mongodb import MongoDBSaver
+from pymongo import MongoClient
 from utils.memory_config import MemoryConfig
 
 def create_checkpointer(config: Dict[str, Any]) -> Optional[MongoDBSaver]:
@@ -512,10 +513,11 @@ def create_checkpointer(config: Dict[str, Any]) -> Optional[MongoDBSaver]:
     mem_cfg = MemoryConfig.from_config(config)
     
     mongodb_config = config.get("database", {}).get("mongodb", {})
+    client = MongoClient(mongodb_config.get("connection_string", ""))
     return MongoDBSaver(
-        connection_string=mongodb_config.get("connection_string", ""),
+        client=client,
         db_name=mongodb_config.get("database_name", "stock_assistant"),
-        collection_name=mem_cfg.checkpoint_collection
+        checkpoint_collection_name=mem_cfg.checkpoint_collection
     )
 ```
 
@@ -598,4 +600,4 @@ def chat():
 | 1.0.0 | 2026-01-27 | Initial plan created from spec v1.0.0 |
 | 1.1.0 | 2026-01-28 | Added configuration tasks (FR-3.1.9, FR-3.1.10): Phase 1 tasks 1.5, 1.8; MemoryConfig pattern; SC-8 mapping |
 | 1.2.0 | 2026-02-06 | Added Phase 6: STM Runtime Integration — fixes 3 critical wiring gaps (deprecated API, checkpointer not wired, config key mismatch) |
-| 1.3.0 | 2026-02-10 | Phase 9 implemented: `create_react_agent` → `create_agent` migration (T038), MongoDB config keys fixed (T039), checkpointer wired into APIServer + main.py (T040), 19 runtime verification tests (T041), test mock/docs updated (T042). Packages upgraded: langchain 1.2.9, langgraph 1.0.8, langgraph-checkpoint 4.0.0. |
+| 1.3.0 | 2026-02-10 | Phase 6 implemented: `create_react_agent` → `create_agent` migration (T038), MongoDB config keys fixed (T039), checkpointer wired into APIServer + main.py (T040), runtime verification tests added (T041), test mock/docs updated (T042). |

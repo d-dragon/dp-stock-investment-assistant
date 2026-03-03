@@ -145,3 +145,6 @@ docs/.postman/config.json
 docs/postman/collections/Stock Investment Assistant API Copy.postman_collection.json
 docs/postman/globals/workspace.postman_globals.json
 docs/postman/specs/Stock Investment Assistant API/openapi.yaml
+docs/langchain-agent/LANGCHAIN_AGENT_ARCHITECTURE_AND_DESIGN.md
+
+nul
