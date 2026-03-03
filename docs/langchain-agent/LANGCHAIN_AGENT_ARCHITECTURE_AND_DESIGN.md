@@ -24,6 +24,7 @@ The **StockAssistantAgent** is a LangChain-based ReAct (Reasoning + Acting) agen
 | **AI Framework** | LangChain >=1.0.0 with `langchain_core` and `langchain_openai` |
 | **Model Providers** | OpenAI (GPT-5-nano), Grok (grok-4-1-fast-reasoning) with automatic fallback |
 | **Tool System** | Registry-based with caching support |
+| **Memory** | LangGraph `MongoDBSaver` checkpointer for session-scoped conversation persistence |
 | **Semantic Router** | `semantic-router` library with OpenAI/HuggingFace encoders |
 | **Response Types** | Structured (`AgentResponse`) with immutable dataclasses |
 
@@ -31,9 +32,10 @@ The **StockAssistantAgent** is a LangChain-based ReAct (Reasoning + Acting) agen
 
 ```
 src/core/
-├── stock_assistant_agent.py    # Main ReAct agent (689 lines)
-├── stock_query_router.py       # Semantic router for query classification (305 lines)
-├── routes.py                   # Route definitions and utterances (214 lines)
+├── stock_assistant_agent.py    # Main ReAct agent with session-aware memory
+├── langgraph_bootstrap.py      # LangGraph agent builder + MongoDBSaver checkpointer factory
+├── stock_query_router.py       # Semantic router for query classification
+├── routes.py                   # Route definitions and utterances
 ├── types.py                    # Core types: AgentResponse, ToolCall, TokenUsage
 ├── langchain_adapter.py        # Prompt building with external file support
 ├── model_factory.py            # Factory pattern for model clients
@@ -42,11 +44,20 @@ src/core/
 ├── grok_model_client.py        # Grok (xAI) implementation
 ├── data_manager.py             # Yahoo Finance data fetching
 └── tools/
-    ├── base.py                 # CachingTool base class (267 lines)
-    ├── registry.py             # ToolRegistry singleton (258 lines)
-    ├── stock_symbol.py         # Stock lookup tool (275 lines)
+    ├── base.py                 # CachingTool base class
+    ├── registry.py             # ToolRegistry singleton
+    ├── stock_symbol.py         # Stock lookup tool
     ├── tradingview.py          # TradingView placeholder (Phase 2)
-    └── reporting.py            # Report generation tool (273 lines)
+    └── reporting.py            # Report generation tool
+
+src/utils/
+└── memory_config.py            # MemoryConfig frozen dataclass with fail-fast validation
+
+src/data/repositories/
+└── conversation_repository.py  # ConversationRepository (conversations collection)
+
+src/services/
+└── conversation_service.py     # ConversationService (message tracking, archival)
 ```
 
 ---
@@ -56,6 +67,12 @@ src/core/
 ### 1. ReAct Pattern Selection
 
 **Decision**: Use LangChain's ReAct (Reasoning + Acting) pattern over raw LLM calls.
+
+**Implementation**: Uses `create_agent` from `langchain.agents` to build a `CompiledStateGraph`.
+
+> **Migration Note (v1.0)**: Migrated from deprecated `langgraph.prebuilt.create_react_agent` to
+> `langchain.agents.create_agent`. Key API change: `prompt=` parameter renamed to `system_prompt=`,
+> and `name="stock_assistant"` added for subgraph compatibility.
 
 **Rationale**:
 - **Autonomous tool selection**: The agent decides which tools to invoke based on query semantics
@@ -214,10 +231,10 @@ class AgentResponse:
 
 **Implementation**:
 ```python
-def process_query(self, query: str, *, provider: Optional[str] = None) -> str:
+def process_query(self, query: str, *, provider: Optional[str] = None, session_id: Optional[str] = None) -> str:
     try:
         if self._agent_executor:
-            return self._process_with_react(query, provider=provider)
+            return self._process_with_react(query, provider=provider, session_id=session_id)
         return self._process_legacy(query, provider=provider)
     except Exception as e:
         self.logger.error(f"Error generating response: {e}")
@@ -229,6 +246,39 @@ def process_query(self, query: str, *, provider: Optional[str] = None) -> str:
 - **Migration safety**: Allows gradual transition from old to new architecture
 - **Testing isolation**: Legacy path can be tested independently
 
+### 6. Short-Term Memory (STM) via LangGraph Checkpointer
+
+**Decision**: Use LangGraph's `MongoDBSaver` checkpointer for session-scoped conversation persistence.
+
+**Status**: Implemented (FR-3.1)
+
+**Key Design Choices**:
+
+| Aspect | Decision |
+|--------|----------|
+| **Checkpointer** | LangGraph `MongoDBSaver` — native integration with agent execution |
+| **Thread ID Mapping** | Direct 1:1: `session_id` → `thread_id` (no translation layer) |
+| **Dual Collections** | `agent_checkpoints` (LangGraph-owned) + `conversations` (app-managed metadata) |
+| **Backward Compatibility** | `session_id` is optional — omitting preserves stateless single-turn behavior |
+| **Memory Scope** | Stores conversation text ONLY; never stores prices, ratios, or tool outputs (per ADR-001) |
+| **Lifecycle** | `active` → `summarized` → `archived` (no hard delete per ADR-001) |
+| **Configuration** | `MemoryConfig` frozen dataclass with 9 configurable parameters and fail-fast validation |
+
+**Wiring Flow**:
+```
+APIServer.__init__()
+    │
+    ├─► create_checkpointer(config)  → MongoDBSaver | None
+    │
+    └─► StockAssistantAgent(config, data_manager, checkpointer=checkpointer)
+            │
+            └─► create_agent(..., checkpointer=checkpointer)
+                    │
+                    └─► invoke(messages, config={"thread_id": session_id})
+```
+
+> **Detailed Design**: See [AGENT_MEMORY_TECHNICAL_DESIGN.md](./AGENT_MEMORY_TECHNICAL_DESIGN.md) for data models, sequence diagrams, API contracts, and configuration reference.
+
 ---
 
 ## Design Patterns and Software Stacks
@@ -238,12 +288,15 @@ def process_query(self, query: str, *, provider: Optional[str] = None) -> str:
 | Pattern | Component | Purpose |
 |---------|-----------|---------|
 | **Factory** | `ModelClientFactory` | Create provider-specific clients |
+| **Factory** | `create_checkpointer()` | Create MongoDBSaver or None based on config |
 | **Singleton** | `ToolRegistry` | Centralized tool management |
 | **Template Method** | `CachingTool._execute()` | Define tool execution skeleton |
 | **Strategy** | `BaseModelClient` subclasses | Interchangeable model providers |
 | **Adapter** | `langchain_adapter.py` | Bridge external prompts to LangChain |
 | **Decorator** | `CachingTool._cached_run()` | Add caching to tool execution |
 | **Registry** | `ToolRegistry` | Dynamic component registration |
+| **Immutable Config** | `MemoryConfig` | Frozen dataclass with fail-fast validation |
+| **Repository** | `ConversationRepository` | Data access for conversations collection |
 
 ### Software Stack
 
@@ -252,8 +305,11 @@ def process_query(self, query: str, *, provider: Optional[str] = None) -> str:
 | Library | Version | Purpose |
 |---------|---------|---------|
 | `langchain` | >=1.0.0 | Agent framework, tool definitions |
-| `langchain_core` | >=0.3.0 | Base types (messages, prompts) |
-| `langchain_openai` | >=0.3.0 | OpenAI ChatModel integration |
+| `langchain_core` | >=0.3.28 | Base types (messages, prompts) |
+| `langchain_openai` | >=0.3.5 | OpenAI ChatModel integration |
+| `langgraph` | >=0.2.62 | LangGraph core for agent workflows |
+| `langgraph-checkpoint` | >=2.0.9 | Checkpoint base interfaces |
+| `langgraph-checkpoint-mongodb` | >=2.0.5 | MongoDB checkpointer for STM (FR-3.1) |
 | `semantic-router` | >=0.1.0 | Query classification with embeddings |
 | `pydantic` | 2.x | Data validation for tools |
 | `openai` | 1.x | Direct API access for OpenAI |
@@ -301,21 +357,27 @@ AgentResponse (frozen dataclass)
 **Location**: `src/core/stock_assistant_agent.py`
 
 **Responsibilities**:
-1. Initialize ReAct agent with enabled tools
+1. Initialize ReAct agent with enabled tools and optional checkpointer
 2. Process queries via LangGraph or legacy path
 3. Support streaming with `astream_events()`
 4. Handle provider fallback orchestration
 5. Expose model configuration APIs
+6. Manage session-aware memory via `session_id` parameter
 
 **Key Methods**:
 
 | Method | Description |
-|--------|-------------|
-| `process_query(query)` | Synchronous query processing |
-| `process_query_streaming(query)` | Generator-based streaming |
+|--------|------------|
+| `process_query(query, *, session_id)` | Synchronous query processing with optional session memory |
+| `process_query_streaming(query, *, session_id)` | Generator-based streaming with optional session memory |
 | `process_query_structured(query)` | Returns `AgentResponse` with metadata |
 | `set_default_model(provider, name)` | Update active model |
 | `run_interactive()` | CLI REPL mode |
+
+**Constructor** accepts an optional `checkpointer` parameter (injected by `APIServer`).
+When a checkpointer is present and `session_id` is provided, the agent includes
+`{"configurable": {"thread_id": session_id}}` in the invoke config, enabling
+LangGraph to automatically load/save conversation state.
 
 **System Prompt**:
 ```
@@ -552,61 +614,28 @@ src/templates/reports/
 └─────────────────────────────────────────────────────────────────┘
 ```
 
-#### 4.2 LangChain Middleware and Agent Memory
+#### 4.2 Short-Term Memory (STM) — Implemented
 
-**Current**: Stateless per-query processing with no conversation context
+**Status**: ✅ Implemented (FR-3.1, branch `spec-driven-development-pilot`)
 
-**Proposed**: Implement LangChain agent memory via middleware pattern
+**Implementation**: LangGraph `MongoDBSaver` checkpointer with session-scoped conversation persistence.
 
-> **Reference**: [LangChain Agent Memory Documentation](https://python.langchain.com/docs/how_to/agent_memory/)
+The agent now supports multi-turn conversations where it recalls previous exchanges within a session.
+Memory is controlled via the `session_id` parameter across `process_query()`, `process_query_streaming()`,
+REST API (`POST /api/chat`), and Socket.IO (`chat_message` event).
 
-**Memory Types to Consider**:
+**Key Components**:
+- `langgraph_bootstrap.py::create_checkpointer()` — Factory for MongoDBSaver
+- `utils/memory_config.py::MemoryConfig` — Immutable config with fail-fast validation
+- `data/repositories/conversation_repository.py` — CRUD for `conversations` collection
+- `services/conversation_service.py` — Message tracking, archival, summarization
 
-| Memory Type | Use Case | Retention |
-|-------------|----------|-----------|
-| `ConversationBufferWindowMemory` | Recent context | Last K exchanges |
-| `ConversationSummaryMemory` | Long sessions | Summarized history |
-| `ConversationEntityMemory` | Entity tracking | Named entities (stocks, users) |
+**Remaining Future Work (Phase 2A.2+)**:
+- Long-term vector store memory (semantic search over past conversations)
+- Cross-session memory retrieval
+- User preference learning (LTM personalization layer)
 
-**Proposed Implementation**:
-```python
-from langchain.memory import ConversationBufferWindowMemory
-from langchain_core.runnables import RunnablePassthrough
-
-class StockAssistantAgent:
-    def __init__(self, ...):
-        # Initialize memory for conversation context
-        self.memory = ConversationBufferWindowMemory(
-            k=10,  # Keep last 10 exchanges
-            return_messages=True,
-            memory_key="chat_history"
-        )
-        
-    def _build_react_agent(self) -> AgentExecutor:
-        # Middleware: Inject memory into agent chain
-        agent_with_memory = (
-            RunnablePassthrough.assign(
-                chat_history=lambda x: self.memory.load_memory_variables({})["chat_history"]
-            )
-            | self._agent
-        )
-        return AgentExecutor(agent=agent_with_memory, tools=self.tools)
-    
-    def process_query(self, query: str, ...) -> str:
-        response = self._agent_executor.invoke({"input": query})
-        # Save to memory after processing
-        self.memory.save_context(
-            {"input": query},
-            {"output": response["output"]}
-        )
-        return response["output"]
-```
-
-**Middleware Pattern Benefits**:
-- **Separation of concerns**: Memory logic decoupled from agent logic
-- **Composable chains**: Stack multiple middlewares (auth, rate limiting, memory)
-- **Session management**: Each user session gets isolated memory
-- **Context windowing**: Prevent token overflow with configurable K window
+> **Detailed Design**: [AGENT_MEMORY_TECHNICAL_DESIGN.md](./AGENT_MEMORY_TECHNICAL_DESIGN.md)
 
 #### 4.3 Structured Output Mode
 
@@ -776,6 +805,20 @@ tools:
   reporting:
     enabled: true
     cache_ttl_seconds: 600
+
+langchain:
+    # Memory Configuration (FR-3.1: Short-Term Memory)
+    memory:
+        enabled: true
+        summarize_threshold: 4000
+        max_messages: 50
+        messages_to_keep: 10
+        max_content_size: 32768
+        summary_max_length: 500
+        context_load_timeout_ms: 500
+        state_save_timeout_ms: 50
+        checkpoint_collection: "agent_checkpoints"
+        conversations_collection: "conversations"
 ```
 
 ### B. Type Definitions Quick Reference
@@ -808,6 +851,29 @@ stock_assistant_agent.py
     imports: model_factory.py (ModelClientFactory)
     imports: langchain_adapter.py (build_prompt)
     imports: tools/registry.py (ToolRegistry)
+    receives: checkpointer via constructor injection
+    
+langgraph_bootstrap.py
+    imports: langgraph.checkpoint.mongodb (MongoDBSaver)
+    imports: utils/memory_config.py (MemoryConfig)
+    reads: config["database"]["mongodb"]["connection_string"]
+    exports: create_checkpointer(), get_agent()
+
+api_server.py
+    imports: langgraph_bootstrap.py (create_checkpointer)
+    wires: checkpointer → StockAssistantAgent constructor
+
+conversation_repository.py
+    extends: mongodb_repository.py (MongoGenericRepository)
+    manages: conversations collection
+
+conversation_service.py
+    uses: ConversationRepository
+    implements: track_message, archive_conversation, get_conversation_stats
+
+utils/memory_config.py
+    defines: MemoryConfig (frozen dataclass, 9 parameters)
+    defines: ContentValidator (FR-3.1.7/FR-3.1.8 compliance scanning)
     
 stock_query_router.py
     imports: routes.py (ROUTE_UTTERANCES, RouteResult, StockQueryRoute)
@@ -835,12 +901,13 @@ tools/stock_symbol.py
 1. **TradingView Tool**: Replace placeholder with full implementation
 2. **Reporting Tool**: Integrate with Jinja2 template system
 3. **StockSymbol Tool**: Add multi-source data providers
-4. **Agent Memory**: Add conversation context management
+4. ~~**Agent Memory**: Add conversation context management~~ → **Done** (STM implemented via MongoDBSaver; see [AGENT_MEMORY_TECHNICAL_DESIGN.md](./AGENT_MEMORY_TECHNICAL_DESIGN.md))
 5. **Observability**: Integrate OpenTelemetry before production
+6. **Long-Term Memory (LTM)**: Vector store for cross-session semantic recall (Phase 2A.2+)
 
 ---
 
-**Document Version**: 1.0  
-**Last Updated**: 2024-12-25  
+**Document Version**: 2.0  
+**Last Updated**: 2026-03-03  
 **Author**: GitHub Copilot  
-**Branch**: `improve-openai-chat-response`
+**Branch**: `spec-driven-development-pilot`
