@@ -123,7 +123,7 @@ def create_chat_blueprint(context: "APIRouteContext") -> Blueprint:
             }), 409
         except Exception as exc:
             logger.error(f"Error in chat endpoint: {exc}", exc_info=True)
-            return jsonify({'error': f'Internal server error: {exc}'}), 500
+            return jsonify({'error': 'Internal server error'}), 500
 
     @blueprint.route('/config', methods=['GET'])
     def get_config():
