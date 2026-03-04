@@ -157,7 +157,7 @@ class ConversationService(BaseService):
         
         # Cache for future lookups
         if conversation and self.cache:
-            self.cache.set_json(cache_key, conversation, ttl=self.CONVERSATION_CACHE_TTL)
+            self.cache.set_json(cache_key, conversation, ttl_seconds=self.CONVERSATION_CACHE_TTL)
         
         return conversation
     
@@ -235,13 +235,14 @@ class ConversationService(BaseService):
         if not session_id:
             return False
         
-        result = self._repository.archive_by_session_id(session_id)
+        result = self._repository.archive(session_id)
         
         if result:
             self._invalidate_conversation_cache(session_id)
             self.logger.info(f"Archived conversation: {session_id}")
+            return True
         
-        return result
+        return False
     
     # ------------------------------------------------------------------
     # Private helpers

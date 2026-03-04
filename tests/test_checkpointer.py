@@ -1,22 +1,25 @@
 # Quick test script: test_checkpointer.py
-from langgraph.checkpoint.mongodb import MongoDBSaver
-from pymongo import MongoClient
+# Not a pytest test - requires a running MongoDB instance.
+# Run directly: python tests/test_checkpointer.py
 
-# Connect
-client = MongoClient("mongodb://localhost:27017")
-db = client["stock_assistant"]
+if __name__ == "__main__":
+    from langgraph.checkpoint.mongodb import MongoDBSaver
+    from pymongo import MongoClient
 
-# Create checkpointer
-checkpointer = MongoDBSaver(
-    client=client,
-    db_name="stock_assistant",
-    collection_name="agent_checkpoints"
-)
+    # Connect
+    client = MongoClient("mongodb://localhost:27017")
 
-# Test save/load cycle
-from langchain_core.messages import HumanMessage, AIMessage
+    # Create checkpointer
+    checkpointer = MongoDBSaver(
+        client=client,
+        db_name="stock_assistant",
+        checkpoint_collection_name="agent_checkpoints",
+    )
 
-config = {"configurable": {"thread_id": "test-session-123"}}
+    # Test save/load cycle
+    from langchain_core.messages import HumanMessage, AIMessage
 
-# This simulates what LangGraph does internally
-print("✓ Checkpointer connected successfully")
+    config = {"configurable": {"thread_id": "test-session-123"}}
+
+    # This simulates what LangGraph does internally
+    print("✓ Checkpointer connected successfully")

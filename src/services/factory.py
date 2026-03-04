@@ -70,6 +70,7 @@ class ServiceFactory:
             agent_provider=self._agent,  # Satisfies AgentProvider protocol
             config=self._config,
             cache=self._cache,
+            conversation_provider=self.get_conversation_service(),
             logger=self._logger.getChild("chat"),
         )
 
