@@ -12,7 +12,7 @@ Author: dp-stock-investment-assistant
 Updated: 2025-01-27 (FR-3.1 Implementation)
 """
 
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Optional
 
 # -----------------------------------------------------------------------------
 # Schema Definition (FR-3.1 Spec)
@@ -179,8 +179,8 @@ def get_conversations_indexes() -> List[Dict[str, Any]]:
 def get_default_conversation_document(
     session_id: str,
     *,
-    workspace_id: str | None = None,
-    user_id: str | None = None
+    workspace_id: Optional[str] = None,
+    user_id: Optional[str] = None
 ) -> Dict[str, Any]:
     """
     Return a default document template for new conversation.
