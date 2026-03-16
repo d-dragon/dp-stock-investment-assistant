@@ -1,0 +1,19 @@
+installed: []
+settings:
+  auto_execute_hooks: true
+hooks:
+  after_tasks:
+  - extension: understanding
+    command: speckit.understanding.validate
+    enabled: true
+    optional: true
+    prompt: Run requirements quality validation on the spec?
+    description: Validate spec quality after task breakdown
+    condition: null
+  - extension: fleet
+    command: speckit.fleet.review
+    enabled: true
+    optional: true
+    prompt: Run cross-model review to evaluate plan and tasks before implementation?
+    description: Pre-implementation review gate
+    condition: null
