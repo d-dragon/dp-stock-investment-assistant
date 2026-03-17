@@ -86,11 +86,13 @@ This specification follows **spec-driven development** principles, enabling AI-a
 | Term | Definition |
 |------|------------|
 | **Agent** | The AI-powered component that processes user queries and generates responses |
-| **Session** | A continuous conversation between user and agent with shared context |
-| **Thread** | A unique conversation identifier for tracking state |
+| **Workspace** | The top-level business container that owns sessions and enforces user and isolation boundaries |
+| **Session** | A business workflow container within a workspace that groups related conversations under a shared analytical context |
+| **Conversation** | A discrete agent interaction thread within a session that owns its own STM state and metadata |
+| **Thread** | The stateful memory identifier bound 1:1 to a conversation for checkpoint tracking |
 | **Tool** | A capability the agent can invoke to retrieve data or perform actions |
 | **Streaming** | Incremental delivery of response content as it's generated |
-| **Summarization** | Condensing conversation history to manage context size |
+| **Summarization** | Condensing a conversation thread's prior exchanges to manage context size while preserving recent continuity |
 | **TTL** | Time To Live (duration before data expires) |
 
 ### 1.4 Document Conventions
@@ -211,33 +213,35 @@ Priority levels:
 
 ---
 
-#### FR-3.1 Short-Term Memory (Conversation Buffer)
+#### FR-3.1 Short-Term Memory (Conversation Thread Buffer)
 
 | ID | Title | Description | Precondition | Expected Output | Priority |
 |----|-------|-------------|--------------|-----------------|----------|
-| FR-3.1.1 | **Session History Retention** | The agent remembers all messages exchanged within a single conversation session | User has an active session | Given 5 prior exchanges, the agent references any of them accurately when asked "What did I ask earlier?" | P0 |
-| FR-3.1.2 | **Session State Persistence** | Conversation state survives system restarts without data loss | Session was created and has ≥1 message | After restart, resuming session returns identical message history (100% match) | P0 |
-| FR-3.1.3 | **Session Identification** | Each conversation is uniquely identifiable by a session identifier | API request includes session_id | Requests with same session_id return consistent conversation context | P0 |
-| FR-3.1.4 | **Session Context Binding** | Agent responses incorporate prior context from the same session | Session has ≥2 prior messages | Response demonstrates awareness of earlier conversation (verified by human review or keyword match) | P0 |
-| FR-3.1.5 | **Session Recall on Reconnect** | User can resume a conversation after disconnection | Valid session_id provided | First response after reconnect includes acknowledgment of prior context | P1 |
-| FR-3.1.6 | **Stateless Fallback Mode** | Agent functions without session tracking when no session_id is provided | session_id is null or omitted | Agent responds normally; no conversation record is persisted | P0 |
+| FR-3.1.1 | **Conversation History Retention** | The agent remembers all messages exchanged within a single conversation thread | User has an active conversation | Given 5 prior exchanges in the same conversation, the agent references any of them accurately when asked "What did I ask earlier?" | P0 |
+| FR-3.1.2 | **Conversation State Persistence** | Conversation thread state survives system restarts without data loss | Conversation was created and has ≥1 message | After restart, resuming the same conversation returns identical message history (100% match) | P0 |
+| FR-3.1.3 | **Conversation Identification** | Each stateful conversation is uniquely identifiable by a conversation identifier that resolves to a single memory thread | API request includes `conversation_id` | Requests with the same `conversation_id` return consistent conversation context and resolve to the same `thread_id` | P0 |
+| FR-3.1.4 | **Conversation Context Binding** | Agent responses incorporate prior context from the same conversation thread | Conversation has ≥2 prior messages | Response demonstrates awareness of earlier exchanges from the same conversation and does not mix context from sibling conversations in the same session | P0 |
+| FR-3.1.5 | **Conversation Recall on Reconnect** | User can resume a conversation after disconnection by reconnecting to the same conversation resource | Valid `conversation_id` provided | First response after reconnect includes acknowledgment of prior context from that conversation | P1 |
+| FR-3.1.6 | **Stateless Fallback Mode** | Agent functions without conversation tracking when no `conversation_id` is provided | `conversation_id` is null or omitted | Agent responds normally; no stateful conversation thread is loaded or persisted | P0 |
 | FR-3.1.7 | **No Financial Data Persistence** | Memory stores conversation text only, never computed financial metrics | — | Inspection of stored data shows zero price values, ratios, or calculated figures | P0 |
 | FR-3.1.8 | **Conversational Content Only** | Memory contains user messages and agent responses, not raw tool outputs | Tools were invoked during session | Stored content includes "I found the price" but not the actual price data | P0 |
 
 ---
 
-#### FR-3.2 Conversation Management
+#### FR-3.2 Hierarchical Conversation Management
 
 | ID | Title | Description | Precondition | Expected Output | Priority |
 |----|-------|-------------|--------------|-----------------|----------|
-| FR-3.2.1 | **Conversation Initialization** | A new conversation record is created when a session begins | User initiates first message with new session_id | Conversation record exists with creation timestamp within 1 second of request | P0 |
-| FR-3.2.2 | **Message Count Tracking** | System maintains accurate count of messages in each conversation | Session has active messages | Message count equals actual number of user + assistant messages (±0 tolerance) | P1 |
-| FR-3.2.3 | **Token Usage Tracking** | System tracks cumulative token consumption per conversation | Session has processed queries | Total tokens recorded within ±5% of actual LLM token usage | P1 |
-| FR-3.2.4 | **Activity Timestamp** | System records when the conversation was last active | User sends a message | Updated timestamp reflects current time (±5 seconds) | P1 |
-| FR-3.2.5 | **Conversation Lifecycle Status** | Conversations transition through defined states: active → summarized → archived | — | Status field is always one of three valid values; transitions follow defined order only | P1 |
-| FR-3.2.6 | **Workspace Isolation** | Conversations belong to exactly one workspace and cannot be accessed from another | User in Workspace A tries to access Workspace B session | Access denied; conversation not found response returned | P0 |
-| FR-3.2.7 | **Conversation Archival** | Ended conversations are archived, never permanently deleted | User or system requests conversation closure | Conversation status = "archived"; record remains queryable for audit | P2 |
-| FR-3.2.8 | **Archive Immutability** | Archived conversations cannot be modified | Attempt to update archived conversation | Update rejected; error message indicates archive status | P2 |
+| FR-3.2.1 | **Session-Scoped Conversation Creation** | The system creates conversation records as children of an existing session, not as implicit aliases of the session itself | A valid workspace and session exist; user starts a new conversation | Conversation record exists with `conversation_id`, parent `session_id`, parent `workspace_id`, and creation timestamp within 1 second of request | P0 |
+| FR-3.2.2 | **Distinct Conversation Identity** | Each conversation is uniquely identifiable by a conversation identifier separate from the session identifier | A conversation is created | Requests referring to the same `conversation_id` resolve the same conversation resource; `conversation_id != session_id` for multi-conversation sessions | P0 |
+| FR-3.2.3 | **Conversation-to-Thread Binding** | Each conversation maps 1:1 to a single agent memory thread | Conversation exists and STM is enabled | Requests for the same `conversation_id` load the same `thread_id`; different conversations under the same session do not share thread state | P0 |
+| FR-3.2.4 | **Multiple Conversations Per Session** | A session can contain multiple independent conversations under the same business workflow | Session is active and already contains at least one conversation | Additional conversation can be created without mutating or overwriting existing conversation state | P0 |
+| FR-3.2.5 | **Conversation Parent Integrity** | Every conversation belongs to exactly one valid session and exactly one valid workspace | Conversation create, load, or update is requested | Operation succeeds only when referenced parent session and workspace exist and are consistent | P0 |
+| FR-3.2.6 | **Conversation Metadata Synchronization** | The system maintains conversation metadata independently of checkpointer state | Conversation has active exchanges | Message count, token count, status, and activity timestamp reflect the conversation's exchanges and remain retrievable via conversation APIs | P1 |
+| FR-3.2.7 | **Boundary Isolation** | Conversations cannot be accessed across workspace or session boundaries | User in Workspace A or Session A attempts to access Conversation B outside the boundary | Access denied; conversation not found or forbidden response returned | P0 |
+| FR-3.2.8 | **Conversation Lifecycle Status** | Conversations transition through defined states independent of session identity: active → summarized → archived | Conversation exists | Status field is always one of three valid values; transitions follow defined order only | P1 |
+| FR-3.2.9 | **Conversation Archival** | Ended conversations are archived, never permanently deleted, even when their parent session remains available for audit or review | User or system requests conversation closure | Conversation status = `archived`; record remains queryable for audit and historical navigation | P2 |
+| FR-3.2.10 | **Archive Immutability** | Archived conversations cannot accept new stateful writes or message updates | Attempt to send or persist updates to archived conversation | Update rejected; error message indicates archive status | P2 |
 
 ---
 
@@ -248,21 +252,25 @@ Priority levels:
 | FR-3.3.1 | **Automatic Summarization Trigger** | System generates summary when conversation exceeds size threshold | Conversation token count ≥ configured limit | Summary is generated; status transitions to "summarized" | P1 |
 | FR-3.3.2 | **Recent Message Preservation** | After summarization, most recent messages are retained for continuity | Summarization triggered | Last K messages remain accessible; earlier messages replaced by summary | P1 |
 | FR-3.3.3 | **AI-Generated Summary** | Summary is produced by language model, not rule-based extraction | Summarization triggered | Summary is coherent natural language, ≤3 sentences, captures conversation essence | P1 |
-| FR-3.3.4 | **Summary Storage** | Generated summary is persisted with the conversation record | Summary generated | Summary field is non-empty; retrievable on subsequent session access | P1 |
+| FR-3.3.4 | **Summary Storage** | Generated summary is persisted with the conversation record bound to the same `conversation_id` and thread | Summary generated | Summary field is non-empty; retrievable on subsequent conversation access | P1 |
 | FR-3.3.5 | **Summary Boundary Tracking** | System knows which messages are covered by the summary | Summary exists | Summary boundary marker indicates message index where summary was created | P2 |
-| FR-3.3.6 | **Summary Context Injection** | Summary is included as context when conversation resumes | Session has existing summary | Agent's first response demonstrates awareness of summarized content | P1 |
-| FR-3.3.7 | **Intent Preservation in Summary** | Summary captures user's goals and focus areas, not conclusions or data | Summary generated | Summary contains intent phrases (e.g., "User is researching...") not facts (e.g., "AAPL price is $150") | P1 |
+| FR-3.3.6 | **Summary Context Injection** | Summary is included as context when the same conversation resumes | Conversation has existing summary | Agent's first response demonstrates awareness of summarized content from that conversation thread | P1 |
+| FR-3.3.7 | **Intent Preservation in Summary** | Summary captures the conversation's goals, focus areas, and inherited session context without storing factual market data | Summary generated | Summary contains intent and context phrases (e.g., "User is evaluating dividend growth candidates") rather than computed or quoted facts (e.g., "AAPL price is $150") | P1 |
+| FR-3.3.8 | **Summary Isolation Across Conversations** | A summary generated for one conversation does not become active context for sibling conversations unless separately propagated through session context rules | Session contains multiple conversations and one conversation has been summarized | Only the summarized conversation automatically loads its own summary; sibling conversations remain isolated unless they independently store or inherit approved session context | P1 |
 
 ---
 
-#### FR-3.4 Session Assumptions
+#### FR-3.4 Session Context and Assumptions
 
 | ID | Title | Description | Precondition | Expected Output | Priority |
 |----|-------|-------------|--------------|-----------------|----------|
-| FR-3.4.1 | **Assumption Recording** | User-stated preferences and constraints are captured for the session | User declares assumption (e.g., "I'm focused on tech stocks") | Assumption stored; agent acknowledges and applies it in subsequent responses | P1 |
-| FR-3.4.2 | **Pinned Intent** | User can set a primary goal that persists throughout the conversation | User states intent (e.g., "Help me compare AAPL vs MSFT") | Intent stored; agent references it when providing responses | P1 |
-| FR-3.4.3 | **Symbol Focus List** | Session tracks which symbols the user is actively researching | User mentions multiple symbols | Focused symbols list updated; agent proactively references relevant symbols | P1 |
-| FR-3.4.4 | **Assumption Application** | Stored assumptions influence agent behavior and responses | Session has ≥1 assumption recorded | Agent responses align with stated assumptions without user repeating them | P1 |
+| FR-3.4.1 | **Session Context Recording** | User-stated preferences, constraints, and analytical goals are captured at the session level as reusable business context | User declares a reusable context statement (e.g., "Use a dividend-growth lens for this review") | Session context is stored and retrievable for subsequent conversations within the same session | P1 |
+| FR-3.4.2 | **Pinned Session Intent** | A session can maintain a primary intent that persists across multiple conversations in that session | User states a session goal (e.g., "Compare AAPL vs MSFT across several threads") | Session intent is stored once and remains available to new or resumed conversations in the same session | P1 |
+| FR-3.4.3 | **Session Symbol Focus Set** | The session tracks symbols and analytical targets that remain relevant across multiple conversations | User mentions one or more symbols during session workflow | Focused symbol set is updated at session scope and can be inherited by conversations in the same session | P1 |
+| FR-3.4.4 | **Context Propagation to Conversations** | New or resumed conversations under a session inherit the session's stored assumptions, intent, and focus context | Session has stored context and a conversation is created or resumed | Agent processing for that conversation receives the session context without the user restating it manually | P0 |
+| FR-3.4.5 | **Conversation-Level Refinement** | A conversation may refine the active session context for its own thread without breaking the parent session contract | Session context exists and user adds conversation-specific nuance | The conversation uses the refined context for its thread while the base session context remains intact and reusable | P1 |
+| FR-3.4.6 | **Context Isolation by Session Boundary** | Session context cannot leak to conversations belonging to other sessions or workspaces | User attempts to access or reuse context outside the owning session/workspace | Only conversations within the owning session can access the stored context; external access is rejected or omitted | P0 |
+| FR-3.4.7 | **Assumption Application Across Threads** | Stored session assumptions influence agent behavior across all conversations belonging to the same session | Session has one or more recorded assumptions and at least two conversations | Agent responses in each conversation align with the stated assumptions without requiring repeated user input | P1 |
 
 ---
 
@@ -311,21 +319,24 @@ Priority levels:
 | ID | Title | Description | Precondition | Expected Output | Priority |
 |----|-------|-------------|--------------|-----------------|----------|
 | FR-5.1.1 | **Chat Endpoint** | Client can send messages to the agent via HTTP POST | — | POST request with message returns agent response | P0 |
-| FR-5.1.2 | **Request Parameters** | Chat endpoint accepts message, model preference, streaming flag, and session identifier | — | All parameters accepted; unrecognized parameters ignored | P0 |
+| FR-5.1.2 | **Request Parameters** | Chat endpoint accepts message, model preference, streaming flag, and conversation identifier; it may also accept parent session context when needed for conversation creation or validation | — | All supported parameters are accepted; stateful requests resolve by `conversation_id`; unrecognized parameters ignored | P0 |
 | FR-5.1.3 | **Response Structure** | API response contains all relevant metadata | Request processed | Response includes: content, model used, status, tools invoked | P0 |
 | FR-5.1.4 | **Streaming Response Format** | Streaming responses delivered as server-sent events | Streaming requested | Response content-type is text/event-stream; chunks delivered incrementally | P0 |
-| FR-5.1.5 | **Backward Compatibility** | API works without session identifier for stateless queries | session_id omitted | Request processes normally; no session persisted | P0 |
+| FR-5.1.5 | **Backward Compatibility** | API works without conversation identifier for stateless queries | `conversation_id` omitted | Request processes normally; no stateful conversation thread is persisted | P0 |
 | FR-5.1.6 | **Input Validation** | Invalid requests return appropriate error codes | Malformed request | 400 returned for invalid format; 503 for service unavailable | P0 |
+| FR-5.1.7 | **Hierarchical Management Endpoints** | REST API provides interfaces for managing workspace, session, and conversation resources | Management feature enabled | CRUD-style endpoints exist for creating, listing, retrieving, and updating hierarchical resources according to policy | P1 |
+| FR-5.1.8 | **Boundary-Aware Resource Resolution** | Stateful and management endpoints validate workspace-session-conversation parent relationships before processing | Request includes hierarchical resource identifiers | Request succeeds only when identifiers describe a valid resource hierarchy; otherwise 404 or 403 returned | P0 |
 
 #### FR-5.2 WebSocket Interface
 
 | ID | Title | Description | Precondition | Expected Output | Priority |
 |----|-------|-------------|--------------|-----------------|----------|
 | FR-5.2.1 | **Real-Time Messaging** | Client can send messages via WebSocket connection | WebSocket connected | Message delivered to agent; response emitted back | P0 |
-| FR-5.2.2 | **Session Support** | WebSocket messages can include session identifier | — | Session context loaded when session_id provided | P0 |
+| FR-5.2.2 | **Conversation Support** | WebSocket messages can include conversation identifier for stateful message routing | — | Conversation context loaded when `conversation_id` is provided | P0 |
 | FR-5.2.3 | **Complete Response Event** | Server emits event when full response is ready | Non-streaming request | Single response event contains complete answer | P0 |
 | FR-5.2.4 | **Streaming Chunk Events** | Server emits incremental events during streaming | Streaming requested | Multiple chunk events delivered; final event signals completion | P0 |
 | FR-5.2.5 | **Error Notification** | Server emits error event when processing fails | Error occurs | Error event contains error type and user-friendly message | P0 |
+| FR-5.2.6 | **Hierarchy Context Support** | WebSocket workflows can supply or resolve parent session context separately from conversation identity when needed for conversation creation or validation | Stateful workflow requires parent session awareness | Conversation routing uses `conversation_id` for STM while preserving the correct parent session boundary | P1 |
 
 ---
 
@@ -432,7 +443,7 @@ Priority levels:
 
 | ID | Requirement |
 |----|-------------|
-| NFR-3.2.1 | Conversation history SHALL scale to 10,000+ messages per session |
+| NFR-3.2.1 | Conversation history SHALL scale to 10,000+ messages per conversation thread |
 | NFR-3.2.2 | System SHALL support 1M+ total conversations |
 | NFR-3.2.3 | Conversation state store SHALL support automatic TTL-based cleanup |
 
@@ -447,7 +458,7 @@ Priority levels:
 |----|-------------|
 | NFR-4.1.1 | API keys for LLM providers SHALL NOT be logged or exposed |
 | NFR-4.1.2 | API keys SHALL be loaded from environment variables or secure vault |
-| NFR-4.1.3 | Session access SHALL be validated against user ownership |
+| NFR-4.1.3 | Workspace, session, and conversation access SHALL be validated against user ownership and parent-boundary integrity |
 | NFR-4.1.4 | Cross-user conversation access SHALL be prevented |
 
 #### NFR-4.2 Data Protection
@@ -550,7 +561,7 @@ Priority levels:
 |----|------------|-----------|
 | CON-1 | Supported runtime and framework versions SHALL be used | Ensures compatibility and supportability (see design docs) |
 | CON-2 | A primary LLM provider account SHALL be available | Required to generate responses |
-| CON-3 | A persistent conversation state store SHALL be available for stateful sessions | Required for FR-3 persistence behavior |
+| CON-3 | A persistent conversation state store SHALL be available for stateful conversations and conversation-thread recovery | Required for FR-3 persistence behavior |
 | CON-4 | A caching backend SHALL be available for tool result caching | Required to meet FR-2.1 performance/cost goals |
 | CON-5 | A tracing/observability backend SHOULD be available | Enables NFR-5 observability targets |
 
@@ -571,11 +582,13 @@ Priority levels:
 
 | ID | Criterion | Verification |
 |----|-----------|--------------|
-| AC-2.1 | Agent recalls previous exchanges within same session | Integration test |
-| AC-2.2 | Conversation state persists across API restarts | System test |
+| AC-2.1 | Agent recalls previous exchanges within the same conversation thread | Integration test |
+| AC-2.2 | Conversation thread state persists across API restarts for the same `conversation_id` | System test |
 | AC-2.3 | Memory retrieval adds < 100ms latency | Performance test |
 | AC-2.4 | Summarization triggers at configured threshold | Unit test |
-| AC-2.5 | API remains backward compatible without session_id | Regression test |
+| AC-2.5 | API remains backward compatible without `conversation_id` | Regression test |
+| AC-2.6 | Two conversations under the same session do not share STM context | Integration test |
+| AC-2.7 | Session context is propagated into new or resumed conversations within the same session | Integration test |
 
 ### AC-3: Performance
 
@@ -590,7 +603,7 @@ Priority levels:
 | ID | Criterion | Verification |
 |----|-----------|--------------|
 | AC-4.1 | API keys never appear in logs | Log audit |
-| AC-4.2 | Cross-user session access is prevented | Security test |
+| AC-4.2 | Cross-user and cross-boundary conversation access is prevented | Security test |
 | AC-4.3 | Input validation rejects injection attempts | Penetration test |
 
 ---
@@ -606,15 +619,17 @@ This section maps acceptance criteria (AC-*) to the functional and non-functiona
 | AC-1.3 | FR-1.3.2, FR-1.3.3, NFR-2.2.1 |
 | AC-1.4 | FR-1.2.4, FR-6.1.1, FR-6.1.2, NFR-1.1.1 |
 | AC-2.1 | FR-3.1.1, FR-3.1.4 |
-| AC-2.2 | FR-3.1.2, NFR-2.3.1 |
+| AC-2.2 | FR-3.1.2, FR-3.1.5, NFR-2.3.1 |
 | AC-2.3 | NFR-1.1.5 |
 | AC-2.4 | FR-3.3.1, FR-3.3.4 |
 | AC-2.5 | FR-3.1.6, FR-5.1.5 |
+| AC-2.6 | FR-3.2.3, FR-3.2.4, FR-3.2.7 |
+| AC-2.7 | FR-3.4.1, FR-3.4.2, FR-3.4.4, FR-3.4.7 |
 | AC-3.1 | NFR-1.1.3 |
 | AC-3.2 | NFR-1.2.1 |
 | AC-3.3 | FR-2.1.1, NFR-1.3.2, NFR-5.3.4 |
 | AC-4.1 | NFR-4.1.1, NFR-4.2.3 |
-| AC-4.2 | NFR-4.1.3, NFR-4.1.4, FR-3.2.6 |
+| AC-4.2 | NFR-4.1.3, NFR-4.1.4, FR-3.2.7, FR-3.4.6 |
 | AC-4.3 | NFR-4.3.1, NFR-4.3.4 |
 
 ---
@@ -629,6 +644,9 @@ This section maps acceptance criteria (AC-*) to the functional and non-functiona
 | IR-1.2 | Request and response payloads SHALL validate against the schemas defined in [docs/openapi.yaml](../openapi.yaml) |
 | IR-1.3 | The API SHALL return `application/json` for non-streaming responses |
 | IR-1.4 | Streaming endpoints SHALL use SSE and SHALL return `text/event-stream` |
+| IR-1.5 | Stateful chat requests SHOULD support a `conversation_id` field to identify the conversation thread to load or resume |
+| IR-1.6 | Management APIs SHOULD expose hierarchical resource relationships for workspaces, sessions, and conversations |
+| IR-1.7 | Conversation management APIs SHOULD preserve parent references (`workspace_id`, `session_id`) in request or response payloads where required for navigation and validation |
 
 ### IR-2 WebSocket Contract
 
@@ -636,8 +654,9 @@ This section maps acceptance criteria (AC-*) to the functional and non-functiona
 |----|-------------|
 | IR-2.1 | WebSocket event names used by the backend and frontend SHALL be consistent and centrally defined by the frontend configuration (see [frontend/src/config.ts](../../frontend/src/config.ts)) |
 | IR-2.2 | WebSocket message payloads SHALL be JSON objects |
-| IR-2.3 | WebSocket requests SHOULD support a `session_id` field for stateful conversation behavior |
+| IR-2.3 | WebSocket requests SHOULD support a `conversation_id` field for stateful conversation behavior |
 | IR-2.4 | WebSocket responses SHALL include a response payload and sufficient metadata to correlate to the initiating request |
+| IR-2.5 | When session-scoped context is required for conversation creation or restoration, interfaces SHOULD support supplying or resolving the parent `session_id` separately from `conversation_id` |
 
 ---
 
@@ -700,9 +719,10 @@ This section maps acceptance criteria (AC-*) to the functional and non-functiona
 
 ### Assumptions
 
-- A user/session identity model exists to support ownership validation (see NFR-4.1.3).
+- A user-workspace-session-conversation identity model exists to support ownership validation and hierarchical boundary checks (see NFR-4.1.3).
 - A privacy policy exists to define what constitutes PII and how it must be handled (see NFR-4.2.4).
 - Clients consuming SSE and WebSocket streaming are capable of handling incremental updates and terminal error signaling.
+- Stateful clients can persist and resend `conversation_id` when resuming a conversation thread.
 
 ### Open Issues
 
@@ -711,6 +731,8 @@ This section maps acceptance criteria (AC-*) to the functional and non-functiona
 | OI-1 | Define default retention windows per environment for PRIV-2.1 | Needed to make retention testable out-of-the-box |
 | OI-2 | Define the canonical error code taxonomy for ERR-1.1 | Required for consistent client handling and analytics |
 | OI-3 | Specify the exact WebSocket event payload schemas (beyond high-level contract) | Needed for strict schema validation and frontend/back alignment |
+| OI-4 | Define the canonical REST and WebSocket payload contract for `conversation_id` and optional parent `session_id` usage | Required to avoid ambiguity between conversation-scoped STM and session-scoped business workflow |
+| OI-5 | Define the formal CRUD policy per resource, especially archive versus delete semantics for workspace and session resources | Required before finalizing management endpoint behavior |
 
 ---
 
@@ -722,6 +744,7 @@ This section maps acceptance criteria (AC-*) to the functional and non-functiona
 | 1.1 | 2026-01-23 | System | Rewrote FR-3 Memory System with business-driven format: Added Title/Precondition/Expected Output columns, measurable acceptance criteria, declarative language. Removed technical implementation details. |
 | 1.2 | 2026-01-23 | System | Rewrote FR-1 (Agent Core), FR-2 (Tool System), FR-4 (Semantic Routing), FR-5 (API Integration), FR-6 (Streaming) with same business-driven format. All FRs now use consistent table structure with ID, Title, Description, Precondition, Expected Output, Priority columns. |
 | 2.0 | 2026-01-23 | System | Major restructure to standard SRS format. (1) Removed MEM-* section containing implementation details—memory behaviors already specified in FR-3. (2) Moved Dependencies to technical design document. (3) Enhanced Introduction with explicit In Scope/Out of Scope boundaries. (4) Cleaned Definitions section—removed implementation terms. (5) Restructured ToC from 8 to 6 sections. (6) Adopted spec-driven development approach for AI-assisted implementation. |
+| 2.1 | 2026-03-17 | System | Realigned terminology and API/memory semantics to the conversation-scoped STM model: updated FR-3 and FR-5 language for `conversation_id -> thread_id`, clarified session-as-parent context behavior, and corrected NFR/constraint wording that previously implied session-scoped STM persistence. |
 ---
 
 *End of Requirements Document*

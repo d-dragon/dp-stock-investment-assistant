@@ -1,9 +1,9 @@
 # Agent Memory Technical Design
 
-> **Document Version**: 1.2  
-> **Last Updated**: March 3, 2026  
+> **Document Version**: 1.3  
+> **Last Updated**: March 17, 2026  
 > **Phase**: 2A.1 - Short-Term Conversation Memory  
-> **Status**: Phase 1 (STM) Implemented  
+> **Status**: STM baseline implemented; hierarchical conversation alignment defined  
 > **Governing ADR**: [ADR-001 — Layered LLM Architecture](./AGENT_ARCHITECTURE_DECISION_RECORDS.md)
 
 ---
@@ -26,7 +26,7 @@
 
 ### Objective
 
-Implement persistent conversation memory for the Stock Assistant LangChain agent, enabling multi-turn conversations where the agent recalls previous exchanges within a session.
+Implement persistent conversation memory for the Stock Assistant LangChain agent, enabling multi-turn conversations where the agent recalls previous exchanges within a conversation thread while allowing a single session to own multiple conversations.
 
 ### Implementation Status
 
@@ -35,12 +35,14 @@ Implement persistent conversation memory for the Stock Assistant LangChain agent
 | `MemoryConfig` frozen dataclass | ✅ Done | `src/utils/memory_config.py` |
 | `ContentValidator` compliance scanner | ✅ Done | `src/utils/memory_config.py` (utility available; pipeline enforcement is incremental) |
 | `MongoDBSaver` checkpointer factory | ✅ Done | `src/core/langgraph_bootstrap.py::create_checkpointer()` |
-| Agent `session_id` parameter | ✅ Done | `src/core/stock_assistant_agent.py` (`process_query`, `process_query_streaming`) |
+| Baseline STM parameter wiring (`session_id`) | ✅ Done | `src/core/stock_assistant_agent.py` (`process_query`, `process_query_streaming`) |
 | Agent checkpointer wiring | ✅ Done | `src/web/api_server.py::APIServer.__init__()` |
 | `ConversationRepository` | ✅ Done | `src/data/repositories/conversation_repository.py` |
 | `ConversationService` | ✅ Done | `src/services/conversation_service.py` |
-| REST API `session_id` support | ✅ Done | `src/web/routes/ai_chat_routes.py` |
-| Socket.IO `session_id` support | ✅ Done | `src/web/sockets/chat_events.py` |
+| REST API baseline `session_id` support | ✅ Done | `src/web/routes/ai_chat_routes.py` |
+| Socket.IO baseline `session_id` support | ✅ Done | `src/web/sockets/chat_events.py` |
+| Conversation-scoped `conversation_id -> thread_id` contract | ⏳ Planned alignment | API + service + repository migration |
+| Session-owned multi-conversation hierarchy | ⏳ Planned alignment | Schema, service, and API migration |
 | YAML config `langchain.memory` section | ✅ Done | `config/config.yaml` |
 | `create_react_agent` → `create_agent` migration | ✅ Done | `src/core/stock_assistant_agent.py` |
 | `memory_vectors` collection (LTM) | ⏳ Future | Phase 2A.2+ |
@@ -53,17 +55,20 @@ Implement persistent conversation memory for the Stock Assistant LangChain agent
 |-----------|-------------|
 | **Dual Memory Strategy** | Short-term (checkpointer) + Long-term (vector store for personalization) |
 | **Memory Never Stores Facts** | Financial data stays in RAG/Tools layer per ADR-001 |
-| **Backward Compatibility** | Existing APIs continue to work without `session_id` |
+| **Session Is Business Context** | Session stores reusable assumptions, intent, and symbol focus across conversations |
+| **Conversation Owns STM Thread** | Each conversation maps 1:1 to the LangGraph `thread_id` used for checkpoint recovery |
+| **Backward Compatibility** | APIs continue to support stateless operation when `conversation_id` is omitted |
 | **Separation of Concerns** | LangGraph handles agent state; ChatRepository handles UI queries |
 | **Native Integration** | Use LangGraph's built-in MongoDBSaver for checkpoints |
-| **Archive Over Delete** | Sessions archived for historical reference, not purged |
+| **Archive Over Delete** | Conversations are archived for historical reference, not purged |
 
 ### Scope
 
 **In Scope:**
 - Short-term conversation memory via LangGraph checkpointer
 - New MongoDB collections for agent memory
-- API changes to support `session_id` parameter
+- API changes to support `conversation_id` and optional parent `session_id`
+- Explicit session -> conversation -> thread hierarchy
 - Memory summarization for long conversations
 - Conversation archival strategy
 
@@ -119,7 +124,7 @@ This technical design implements the **Short-Term Memory (STM)** component defin
 
 | ADR Specification | Technical Implementation |
 |-------------------|-------------------------|
-| Session-scoped conversations | `conversations` collection with `session_id` FK |
+| Session-owned conversations | `conversations` collection with `session_id` FK plus distinct `conversation_id` and `thread_id` |
 | Archive option (not delete) | `status: archived` with read-only enforcement |
 | Workspace-bound isolation | `session.workspace_id` ensures context isolation |
 | Selective recall | `summarize_threshold` triggers condensation |
@@ -167,7 +172,8 @@ This technical design implements the **Short-Term Memory (STM)** component defin
 ```
 
 **Rationale:**
-- Short-term memory enables coherent multi-turn conversations within a session
+- Short-term memory enables coherent multi-turn conversations within a single conversation thread
+- Session-level context can be propagated across multiple sibling conversations without merging their STM buffers
 - Long-term memory (future) enables personalization without contaminating factual analysis
 - Semantic memory (future) enables cross-session retrieval via explicit user request
 - Clear separation prevents hallucination and maintains analytical integrity per ADR-001
@@ -204,7 +210,7 @@ This technical design implements the **Short-Term Memory (STM)** component defin
 
 ### Decision 3: Thread ID Mapping Strategy
 
-**Decision**: Map `session_id` directly to LangGraph's `thread_id`.
+**Decision**: Map `conversation_id` to LangGraph's `thread_id`, with session identity retained separately for hierarchy validation and reusable context.
 
 ```
 ┌──────────────────────────────────────────────────────────────┐
@@ -214,15 +220,15 @@ This technical design implements the **Short-Term Memory (STM)** component defin
 │   Application Layer           LangGraph Layer                 │
 │   ─────────────────           ───────────────                 │
 │                                                               │
-│   session_id ─────────────────► thread_id                     │
-│   (UUID v4 string)             (configurable)                 │
+│ conversation_id ──────────────► thread_id                     │
+│   (conversation key)           (configurable)                 │
 │                                                               │
 │   Example:                                                    │
-│   "123e4567-e89b-42d3-a456-426614174000" ──► thread_id      │
+│   "123e4567-e89b-42d3-a456-426614174000" ──► thread_id │
 │                                                               │
 │   config = {                                                  │
 │       "configurable": {                                       │
-│           "thread_id": session_id                             │
+│           "thread_id": conversation_id                        │
 │       }                                                       │
 │   }                                                           │
 │                                                               │
@@ -231,14 +237,15 @@ This technical design implements the **Short-Term Memory (STM)** component defin
 
 **Rationale:**
 - 1:1 mapping simplifies debugging and tracing
-- Session already represents a conversation unit in the domain model
-- No translation layer required
+- Session no longer doubles as the STM unit in the domain model
+- Conversation identity becomes the canonical checkpoint lookup key
+- Session context remains reusable across conversations without sharing thread state
 
 ---
 
 ### Decision 4: Conversation Collection with Archive Strategy
 
-**Decision**: Introduce new `conversations` collection with 1:1 mapping to `sessions`.
+**Decision**: Introduce a `conversations` collection with a 1:N relationship from `sessions`, while preserving a 1:1 relationship between `conversation_id` and `thread_id`.
 
 **Purpose:**
 - Track conversation metadata (message count, token usage, summary)
@@ -252,14 +259,14 @@ This technical design implements the **Short-Term Memory (STM)** component defin
 |--------|-------------|----------|
 | `active` | Current working conversation | Full context available |
 | `summarized` | Long conversation compressed | Summary in active context |
-| `archived` | Session closed by user | Not in active context, query-retrievable |
+| `archived` | Conversation closed by user or policy | Not in active context, query-retrievable |
 | ~~`deleted`~~ | **Never used** | ADR: Archive over delete |
 
 **Archive Lifecycle:**
 ```
 ┌──────────┐    auto-summarize    ┌─────────────┐    user closes    ┌──────────┐
 │  active  │ ──────────────────►  │ summarized  │ ────────────────► │ archived │
-└──────────┘    (token limit)     └─────────────┘     session       └──────────┘
+└──────────┘    (token limit)     └─────────────┘   conversation    └──────────┘
                                                                          │
                                                                          │ explicit
                                                                          │ request
@@ -273,15 +280,15 @@ This technical design implements the **Short-Term Memory (STM)** component defin
 **Relationship:**
 
 ```
-┌────────────┐     1:1      ┌────────────────┐
-│  sessions  │◄────────────►│ conversations  │
-└────────────┘              └────────────────┘
-      │                            │
-      │ 1:N                        │ 1:N (via thread_id)
-      ▼                            ▼
+┌────────────┐     1:N      ┌────────────────┐     1:1      ┌───────────────────┐
+│  sessions  │─────────────►│ conversations  │─────────────►│ agent_checkpoints │
+└────────────┘              └────────────────┘              │ (agent state)     │
+    │                            │                        └───────────────────┘
+    │ 1:N                        │
+    ▼                            ▼
 ┌────────────┐              ┌───────────────────┐
-│   chats    │              │ agent_checkpoints │
-│ (UI view)  │              │ (agent state)     │
+│   chats    │              │ conversation meta │
+│ (UI view)  │              │ + summaries       │
 └────────────┘              └───────────────────┘
 ```
 
@@ -327,16 +334,16 @@ When total_tokens > summarize_threshold:
     └──────┬───────┘                                                       
            │ 1:N                                                           
            ▼                                                               
-    ┌──────────────┐        1:1        ┌───────────────────┐               
-    │   sessions   │◄─────────────────►│  conversations    │               
-    └──────┬───────┘                   └─────────┬─────────┘               
-           │                                     │                         
-           │ 1:N                                 │ uses thread_id          
-           ▼                                     ▼                         
-    ┌──────────────┐               ┌─────────────────────────┐             
-    │    chats     │               │   agent_checkpoints     │             
-    │  (UI view)   │               │   (LangGraph state)     │             
-    └──────────────┘               └─────────────────────────┘             
+        ┌──────────────┐        1:N        ┌───────────────────┐               
+        │   sessions   │──────────────────►│  conversations    │               
+        └──────┬───────┘                   └─────────┬─────────┘               
+            │                                     │ 1:1                     
+            │ 1:N                                 ▼                         
+            ▼                           ┌─────────────────────────┐         
+        ┌──────────────┐                   │   agent_checkpoints     │         
+        │    chats     │                   │   (LangGraph state)     │         
+        │  (UI view)   │                   └─────────────────────────┘         
+        └──────────────┘                                                        
                                                                            
                                    ┌─────────────────────────┐             
                                    │   memory_vectors        │             
@@ -353,28 +360,37 @@ When total_tokens > summarize_threshold:
 **Purpose**: Track conversation metadata and memory state (per ADR-001 STM).
 
 **ADR-001 Compliance Notes:**
-- Stores conversation state only (assumptions, focused symbols, pinned intents)
+- Stores conversation state only (summary, message counters, conversation-level refinements)
 - **Never stores**: market data, computed ratios, analytical conclusions
 - Archive over delete: status transitions to "archived", never hard deleted
-- Workspace isolation enforced via session_id → workspace relationship
+- Workspace isolation enforced via explicit `workspace_id` and validated session relationship
 
 ```javascript
 // conversations_schema.py equivalent
 CONVERSATIONS_SCHEMA = {
     "bsonType": "object",
-    "required": ["session_id", "created_at"],
+    "required": ["conversation_id", "session_id", "workspace_id", "created_at"],
     "properties": {
         "_id": {
             "bsonType": "objectId"
         },
+        "conversation_id": {
+            "bsonType": "string",
+            "pattern": "^[A-Za-z0-9_-]{8,128}$",
+            "description": "Canonical conversation identifier exposed to clients and services"
+        },
         "session_id": {
             "bsonType": "string",
             "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
-            "description": "UUID v4 session identifier (1:1 mapping to thread_id)"
+            "description": "Parent session identifier that groups related conversations under shared business context"
+        },
+        "workspace_id": {
+            "bsonType": "string",
+            "description": "Parent workspace identifier for hierarchy validation and isolation"
         },
         "thread_id": {
             "bsonType": "string",
-            "description": "LangGraph thread identifier (equals session_id)"
+            "description": "LangGraph thread identifier (1:1 with conversation_id; may equal conversation_id)"
         },
         "status": {
             "bsonType": "string",
@@ -422,26 +438,34 @@ CONVERSATIONS_SCHEMA = {
             "bsonType": "object",
             "description": "Additional metadata (model used, tool calls count, etc.)"
         },
-        // Conversational state per ADR-001 (NOT facts)
+        // Conversation-specific refinements per ADR-001 (NOT facts)
         "focused_symbols": {
             "bsonType": "array",
-            "description": "Symbols currently in focus for this session"
+            "description": "Symbols currently in focus for this conversation thread"
         },
-        "pinned_intents": {
-            "bsonType": "array",
-            "description": "User-pinned intents for context retention"
+        "conversation_intent": {
+            "bsonType": "string",
+            "description": "Conversation-specific refinement of the parent session intent"
         },
-        "session_assumptions": {
+        "context_overrides": {
             "bsonType": "object",
-            "description": "Assumptions made during this session"
+            "description": "Conversation-level overrides applied on top of inherited session context"
         }
     }
 }
 
 CONVERSATIONS_INDEXES = [
     {
+        "keys": [("conversation_id", 1)],
+        "options": {"name": "idx_conversations_conversation_id", "unique": true}
+    },
+    {
         "keys": [("session_id", 1)],
-        "options": {"name": "idx_conversations_session", "unique": true}
+        "options": {"name": "idx_conversations_session"}
+    },
+    {
+        "keys": [("workspace_id", 1), ("session_id", 1), ("status", 1)],
+        "options": {"name": "idx_conversations_hierarchy_status"}
     },
     {
         "keys": [("thread_id", 1)],
@@ -588,17 +612,20 @@ MEMORY_VECTORS_INDEXES = [
 │  User   │  │   API   │  │  StockAssistantAgent │  │   MongoDBSaver    │  │  agent_checkpoints│
 └────┬────┘  └────┬────┘  └──────────┬───────────┘  └─────────┬─────────┘  └────────┬─────────┘
      │            │                  │                        │                     │
-     │ POST /api/chat               │                        │                     │
-     │ {message, session_id}        │                        │                     │
+    │ POST /api/chat               │                        │                     │
+    │ {message, conversation_id,   │                        │                     │
+    │  session_id?}                │                        │                     │
      │ ──────────────────────────►  │                        │                     │
      │            │                  │                        │                     │
      │            │  process_query(  │                        │                     │
      │            │    query,        │                        │                     │
-     │            │    session_id)   │                        │                     │
+    │            │    conversation_id,
+    │            │    session_id?)  │                        │                     │
      │            │ ────────────────►│                        │                     │
      │            │                  │                        │                     │
      │            │                  │  Load checkpoint       │                     │
-     │            │                  │  (thread_id=session_id)│                     │
+    │            │                  │  (thread_id resolved   │                     │
+    │            │                  │   from conversation)   │                     │
      │            │                  │ ──────────────────────►│                     │
      │            │                  │                        │  find_one           │
      │            │                  │                        │ (thread_id)         │
@@ -612,7 +639,7 @@ MEMORY_VECTORS_INDEXES = [
      │            │                  │  │ Agent Executor invoked with:          │   │
      │            │                  │  │  - Previous messages from checkpoint  │   │
      │            │                  │  │  - New HumanMessage(query)            │   │
-     │            │                  │  │  - config: {thread_id: session_id}    │   │
+    │            │                  │  │  - config: {thread_id: conversation_id}│   │
      │            │                  │  └─────────────────────┬─────────────────┘   │
      │            │                  │                        │                     │
      │            │                  │  [ReAct reasoning + tool execution]          │
@@ -634,7 +661,7 @@ MEMORY_VECTORS_INDEXES = [
 
 ---
 
-### Sequence 2: Session Creation with Conversation Init
+### Sequence 2: Session Creation and Explicit Conversation Creation
 
 ```
 ┌─────────┐  ┌─────────┐  ┌───────────────┐  ┌──────────────────┐  ┌───────────────┐
@@ -653,24 +680,29 @@ MEMORY_VECTORS_INDEXES = [
      │            │               │                   │                    │
      │            │               │◄────────────────  │   session_id       │
      │            │               │                   │                    │
-     │            │               │ init_conversation │                    │
-     │            │               │ (session_id)      │                    │
+    │ POST /api/sessions/{id}/conversations          │                    │
+    │ {title?, seed_context?}                        │                    │
+    │ ─────────────────────────►│                   │                    │
+    │            │               │ validate_session  │                    │
+    │            │               │ + workspace       │                    │
      │            │               │ ─────────────────►│                    │
      │            │               │                   │                    │
      │            │               │                   │  Insert conversation│
-     │            │               │                   │  {session_id,       │
-     │            │               │                   │   thread_id,        │
+    │            │               │                   │  {conversation_id,  │
+    │            │               │                   │   session_id,       │
+    │            │               │                   │   workspace_id,     │
+    │            │               │                   │   thread_id,        │
      │            │               │                   │   status: "active"} │
      │            │               │                   │ ──────────────────► │
      │            │               │                   │                    │
      │            │               │                   │◄─────conversation_id│
      │            │               │◄──────────────────│                    │
      │            │               │                   │                    │
-     │            │◄──────────────│                   │                    │
-     │            │  session_id   │                   │                    │
+    │            │◄──────────────│                   │                    │
+    │            │  conversation_id                  │                    │
      │            │               │                   │                    │
      │◄───────────│               │                   │                    │
-     │ {session_id, ...}          │                   │                    │
+    │ {session_id, conversation_id, ...}            │                    │
      │                            │                   │                    │
 ```
 
@@ -688,7 +720,7 @@ MEMORY_VECTORS_INDEXES = [
            │ ─────────────────────►│                     │                │
            │                       │                     │                │
            │                       │ get_conversation    │                │
-           │                       │ (session_id)        │                │
+           │                       │ (conversation_id)   │                │
            │                       │ ────────────────────────────────────►│
            │                       │                     │                │
            │                       │◄───────────────────────── {total_tokens, │
@@ -734,12 +766,14 @@ MEMORY_VECTORS_INDEXES = [
 │  Client │  │ Socket.IO    │  │  StockAssistantAgent │  │ MongoDBSaver  │
 └────┬────┘  └──────┬───────┘  └──────────┬───────────┘  └───────┬───────┘
      │              │                     │                      │
-     │ emit('chat_message',              │                      │
-     │  {message, session_id})           │                      │
+    │ emit('chat_message',              │                      │
+    │  {message, conversation_id,       │                      │
+    │   session_id?})                   │                      │
      │ ────────────────────────►         │                      │
      │              │                     │                      │
      │              │ process_query_streaming                    │
-     │              │ (query, session_id) │                      │
+    │              │ (query, conversation_id,
+    │              │  session_id?)       │                      │
      │              │ ───────────────────►│                      │
      │              │                     │                      │
      │              │                     │ Load checkpoint      │
@@ -797,13 +831,15 @@ MEMORY_VECTORS_INDEXES = [
     "message": "string (required)",
     "provider": "string (optional, default: 'openai')",
     "stream": "boolean (optional, default: false)",
-    "session_id": "string (optional, UUID v4)"
+    "conversation_id": "string (optional)",
+    "session_id": "string (optional, UUID v4; parent context for creation or validation)"
 }
 ```
 
 **Behavior:**
-- If `session_id` is provided: Load conversation history, maintain context
-- If `session_id` is omitted: Stateless single-turn (backward compatible)
+- If `conversation_id` is provided: Load the mapped conversation thread and maintain context
+- If `conversation_id` is omitted: Process as stateless single-turn unless the caller is creating a new conversation under a parent session
+- If `session_id` is provided alongside `conversation_id`: Validate the parent relationship before loading state
 
 ---
 
@@ -822,6 +858,7 @@ MEMORY_VECTORS_INDEXES = [
 ```json
 {
     "message": "string",
+    "conversation_id": "string (optional)",
     "session_id": "string (optional)"
 }
 ```
@@ -833,45 +870,38 @@ MEMORY_VECTORS_INDEXES = [
 #### StockAssistantAgent
 
 ```python
-# Before
-def process_query(self, query: str, *, provider: Optional[str] = None) -> str:
-
-# After
+# Target state
 def process_query(
     self, 
     query: str, 
     *, 
     provider: Optional[str] = None,
+    conversation_id: Optional[str] = None,
     session_id: Optional[str] = None
 ) -> str:
 
-# Streaming - Before
-def process_query_streaming(self, query: str, *, provider: Optional[str] = None) -> Generator[str, None, None]:
-
-# Streaming - After
 def process_query_streaming(
     self, 
     query: str, 
     *, 
     provider: Optional[str] = None,
+    conversation_id: Optional[str] = None,
     session_id: Optional[str] = None
 ) -> Generator[str, None, None]:
 
-# Structured - Before
-def process_query_structured(self, query: str, *, provider: Optional[str] = None) -> AgentResponse:
-
-# Current implementation (session_id not yet exposed on structured path)
 def process_query_structured(
     self,
     query: str,
     *,
     provider: Optional[str] = None,
+    conversation_id: Optional[str] = None,
+    session_id: Optional[str] = None,
 ) -> AgentResponse:
 ```
 
-> **Note**: Session-aware memory is implemented for `process_query()` and
-> `process_query_streaming()`. `process_query_structured()` remains provider-only
-> in the current implementation.
+> **Migration Note**: The current codebase still exposes baseline `session_id`
+> plumbing in some paths. The target design moves stateful STM routing to
+> `conversation_id`, while `session_id` remains optional parent context.
 
 ---
 
@@ -891,7 +921,7 @@ langchain:
 
     # Summarization Settings (FR-3.1.6)
     summarize_threshold: 4000               # Token count to trigger summarization (valid: 1000-10000)
-    max_messages: 50                        # Max messages per session before pruning (valid: 10-200)
+    max_messages: 50                        # Max messages per conversation thread before pruning (valid: 10-200)
     messages_to_keep: 10                    # Messages to preserve when pruning (valid: 5-50, < max_messages)
     max_content_size: 32768                 # Max bytes for single message content (valid: 1024-65536)
     summary_max_length: 500                 # Max tokens for summary (valid: 100-2000)
@@ -943,16 +973,19 @@ and database name from `config["database"]["mongodb"]["database_name"]` (default
 | 8 | Create `create_checkpointer()` factory in langgraph_bootstrap | M | ✅ Done |
 | 9 | Update `StockAssistantAgent.__init__()` to accept checkpointer | M | ✅ Done |
 | 10 | Update `_build_agent_executor()` to pass checkpointer via `create_agent()` | M | ✅ Done |
-| 11 | Update `process_query()` with session_id parameter | M | ✅ Done |
-| 12 | Update `process_query_streaming()` with session_id | M | ✅ Done |
-| 13 | Update REST API routes for session_id (UUID v4 validation) | M | ✅ Done |
-| 14 | Update Socket.IO handlers for session_id | M | ✅ Done |
+| 11 | Add baseline stateful query plumbing to `process_query()` and `process_query_streaming()` | M | ✅ Done |
+| 12 | Expose `conversation_id` as canonical STM identifier in agent methods | M | ⏳ Planned alignment |
+| 13 | Update REST API routes for `conversation_id` with optional parent `session_id` validation | M | ⏳ Planned alignment |
+| 14 | Update Socket.IO handlers for `conversation_id` and hierarchical context validation | M | ⏳ Planned alignment |
 | 15 | Wire checkpointer in `APIServer.__init__()` | S | ✅ Done |
 | 16 | Migrate `create_react_agent` → `create_agent` (LangGraph v1.0 deprecation) | M | ✅ Done |
 | 17 | Fix MongoDB config key (`database.mongodb.connection_string`) | S | ✅ Done |
 | 18 | Create `ContentValidator` for FR-3.1.7/FR-3.1.8 compliance | M | ✅ Done |
 | 19 | Unit tests for memory components | L | ✅ Done |
 | 20 | Integration tests for multi-turn conversation | L | ✅ Done |
+| 21 | Enforce 1:N session-to-conversation relationships in repositories and schema indexes | M | ⏳ Planned alignment |
+| 22 | Resolve `conversation_id -> thread_id` before checkpointer access | M | ⏳ Planned alignment |
+| 23 | Propagate session context to conversation-level overrides without sharing checkpoints | M | ⏳ Planned alignment |
 
 ### Key Implementation Gaps Resolved
 
@@ -973,18 +1006,18 @@ During implementation, three critical wiring gaps were discovered and fixed:
 | Component | Test File | Test Cases |
 |-----------|-----------|------------|
 | `MemoryConfig` | `tests/test_memory_config.py` | Validation ranges, fail-fast, cross-field constraints, factory methods |
-| `ConversationRepository` | `tests/test_conversation_repository.py` | CRUD operations, find_by_session_id, archive, find_stale |
+| `ConversationRepository` | `tests/test_conversation_repository.py` | CRUD operations, find_by_conversation_id, list_by_session_id, archive, find_stale |
 | `ConversationService` | `tests/test_conversation_service.py` | track_message, get_conversation_stats, archive_conversation |
-| `StockAssistantAgent` | `tests/test_agent_memory.py` | Checkpointer initialization, session_id flow, stateless fallback |
+| `StockAssistantAgent` | `tests/test_agent_memory.py` | Checkpointer initialization, conversation_id flow, stateless fallback |
 | `ContentValidator` | `tests/test_memory_config.py` | Prohibited pattern detection, compliance scanning |
 
 ### Integration Tests
 
 | Test File | Scenario |
 |-----------|----------|
-| `tests/integration/test_memory_persistence.py` | Full persistence flow, session restart |
+| `tests/integration/test_memory_persistence.py` | Full persistence flow, conversation restart, parent session validation |
 | `tests/integration/test_stm_runtime_wiring.py` | Runtime wiring verification (checkpointer → agent → API) |
-| `tests/api/test_chat_routes_memory.py` | REST API session_id handling, UUID validation |
+| `tests/api/test_chat_routes_memory.py` | REST API conversation_id handling, optional session_id validation |
 
 ### Performance Tests
 
@@ -1026,7 +1059,7 @@ agent_executor = create_agent(
 # Invoke with thread_id (in _process_with_react)
 result = agent_executor.invoke(
     {"messages": [HumanMessage(content="query")]},
-    config={"configurable": {"thread_id": session_id}}
+    config={"configurable": {"thread_id": conversation_id}}
 )
 ```
 
@@ -1044,7 +1077,7 @@ result = agent_executor.invoke(
 
 ---
 
-> **Document Status**: Phase 1 (STM) Implemented  
+> **Document Status**: STM baseline implemented; hierarchical conversation alignment pending  
 > **Next Step**: Phase 2A.2 — Long-Term Memory (vector store, cross-session recall)  
 > **Review Required**: Architecture Team
 
@@ -1060,22 +1093,23 @@ result = agent_executor.invoke(
 | ID | Priority | Requirement | Data Type | Description |
 |----|----------|-------------|-----------|-------------|
 | MEM-1.1.1 | **P0** | Each conversation SHALL have unique `_id` | ObjectId | Primary key. Auto-generated by MongoDB. |
-| MEM-1.1.2 | **P0** | Each conversation SHALL reference `session_id` | String (UUID v4) | FK to `sessions.id`; primary lookup key and 1:1 mapping to thread context. |
-| MEM-1.1.3 | **P0** | `thread_id` SHALL map directly to `session_id` | Derived String | `thread_id` is passed in LangGraph invoke config as `thread_id=session_id`; no separate persisted field required. |
-| MEM-1.1.4 | **P0** | `session_id` SHALL be unique indexed | - | Unique index `{session_id: 1}` prevents duplicates. |
-| MEM-1.1.5 | **P0** | Each conversation SHALL track `status` | Enum | Values: `active`, `summarized`, `archived`. Use string enum in Pydantic model. |
-| MEM-1.1.6 | **P0** | Each conversation SHALL track `message_count` | Integer | Auto-incremented via `$inc`. Start at 0, increment on each user+assistant exchange. |
-| MEM-1.1.7 | **P0** | Each conversation SHALL track `total_tokens` | Integer | Cumulative prompt+completion tokens. Use LangChain callback handler to track. |
-| MEM-1.1.8 | **P1** | Each conversation SHALL track `summary` | String | Optional. Populated when summarization triggers. Max 500 chars. |
-| MEM-1.1.9 | **P1** | Each conversation MAY track summary progress metadata | Integer/Optional | Future enhancement for incremental summarization; not required in current schema. |
-| MEM-1.1.10 | **P0** | Each conversation SHALL track `last_activity_at` | DateTime | UTC timestamp. Updated on each message via `$set` with `datetime.utcnow()`. |
-| MEM-1.1.11 | **P0** | Each conversation SHALL track `created_at` and `updated_at` | DateTime | Audit fields. `created_at` set once; `updated_at` on every write. |
-| MEM-1.1.12 | **P0** | Each conversation SHALL reference `workspace_id` | String/Null | **ADR Compliance**: Sessions are workspace-bound. Nullable in current schema for backward compatibility. |
-| MEM-1.1.13 | **P0** | Each conversation SHALL reference `user_id` | String/Null | FK-style reference for authorization checks; nullable in current schema for compatibility. |
-| MEM-1.1.14 | **P1** | Each conversation MAY store `assumptions[]` | Array[String] | Session-scoped assumptions. Example: `["Risk tolerance: moderate"]`. |
-| MEM-1.1.15 | **P1** | Each conversation MAY store `pinned_intent` | String | User's stated focus. Example: `"Compare AAPL vs MSFT"`. |
-| MEM-1.1.16 | **P1** | Each conversation MAY store `focused_symbols[]` | Array[String] | Symbol names only (NO prices). Example: `["AAPL", "MSFT"]`. |
-| MEM-1.1.17 | **P1** | Archived conversations SHALL track `archived_at` | DateTime | Timestamp when archived. Null for active/summarized conversations. |
+| MEM-1.1.2 | **P0** | Each conversation SHALL expose a unique `conversation_id` | String | Canonical external identifier for lookup, routing, and authorization. |
+| MEM-1.1.3 | **P0** | Each conversation SHALL reference `session_id` | String (UUID v4) | FK to `sessions.id`; parent business context for grouping related conversations. |
+| MEM-1.1.4 | **P0** | `thread_id` SHALL map 1:1 to `conversation_id` | Derived String | `thread_id` is resolved from the conversation record and passed to LangGraph invoke config as `thread_id=conversation_id` or an equivalent derived value. |
+| MEM-1.1.5 | **P0** | `conversation_id` and `thread_id` SHALL be uniquely indexed | - | Unique indexes prevent duplicate STM resources and checkpoint aliasing. |
+| MEM-1.1.6 | **P0** | Each conversation SHALL track `status` | Enum | Values: `active`, `summarized`, `archived`. Use string enum in Pydantic model. |
+| MEM-1.1.7 | **P0** | Each conversation SHALL track `message_count` | Integer | Auto-incremented via `$inc`. Start at 0, increment on each user+assistant exchange. |
+| MEM-1.1.8 | **P0** | Each conversation SHALL track `total_tokens` | Integer | Cumulative prompt+completion tokens. Use LangChain callback handler to track. |
+| MEM-1.1.9 | **P1** | Each conversation SHALL track `summary` | String | Optional. Populated when summarization triggers. Max 500 chars. |
+| MEM-1.1.10 | **P1** | Each conversation MAY track summary progress metadata | Integer/Optional | Future enhancement for incremental summarization; not required in current schema. |
+| MEM-1.1.11 | **P0** | Each conversation SHALL track `last_activity_at` | DateTime | UTC timestamp. Updated on each message via `$set` with `datetime.utcnow()`. |
+| MEM-1.1.12 | **P0** | Each conversation SHALL track `created_at` and `updated_at` | DateTime | Audit fields. `created_at` set once; `updated_at` on every write. |
+| MEM-1.1.13 | **P0** | Each conversation SHALL reference `workspace_id` | String | Required for hierarchy validation and workspace isolation. |
+| MEM-1.1.14 | **P0** | Each conversation SHALL reference `user_id` | String/Null | FK-style reference for authorization checks; nullable only during backward-compatible migration windows. |
+| MEM-1.1.15 | **P1** | Each conversation MAY store `context_overrides` | Object | Conversation-scoped refinements layered over the parent session context. |
+| MEM-1.1.16 | **P1** | Each conversation MAY store `conversation_intent` | String | Conversation-specific focus. Example: `"Stress test the dividend thesis"`. |
+| MEM-1.1.17 | **P1** | Each conversation MAY store `focused_symbols[]` | Array[String] | Symbol names only (NO prices). Example: `["AAPL", "MSFT"]`. |
+| MEM-1.1.18 | **P1** | Archived conversations SHALL track `archived_at` | DateTime | Timestamp when archived. Null for active/summarized conversations. |
 
 ##### MEM-1.2 Agent Checkpoints Collection
 
@@ -1095,30 +1129,31 @@ result = agent_executor.invoke(
 | MEM-1.3.1 | **P2** | Collection SHALL be named `memory_vectors` | Future Phase 2A.2+. Define schema but do not implement yet. |
 | MEM-1.3.2 | **P2** | Each vector SHALL include 1536-dimension embedding | Use `text-embedding-3-small` model. Store as `embedding: Float[1536]`. |
 | MEM-1.3.3 | **P2** | Vectors SHALL be indexed for cosine similarity search | Requires MongoDB Atlas Vector Search. Create `vectorSearchIndex` on deployment. |
-| MEM-1.3.4 | **P2** | Vectors SHALL reference `user_id`, `session_id`, `conversation_id` | Enable cross-reference queries. All fields indexed. |
+| MEM-1.3.4 | **P2** | Vectors SHALL reference `user_id`, `workspace_id`, `session_id`, `conversation_id` | Enable cross-reference queries and hierarchical recall controls. Indexed according to retrieval patterns. |
 | MEM-1.3.5 | **P2** | Vectors SHALL include content type classification | Enum: `user_query`, `assistant_response`, `summary`, `insight`, `preference`. |
 
 ---
 
 #### MEM-2: API Requirements
 
-##### MEM-2.1 Session-Aware Endpoints
+##### MEM-2.1 Conversation-Aware Endpoints
 
 | ID | Priority | Requirement | Description |
 |----|----------|-------------|-------------|
-| MEM-2.1.1 | **P0** | `POST /api/chat` SHALL accept optional `session_id` parameter | Add to request body: `{"message": "...", "session_id": "..."}`. Type: `Optional[str]`. |
-| MEM-2.1.2 | **P0** | When `session_id` provided, agent SHALL load conversation history | Pass `session_id` into agent query methods so LangGraph uses `thread_id=session_id` for checkpoint recall. |
-| MEM-2.1.3 | **P0** | When `session_id` omitted, agent SHALL operate statelessly | Process request without `thread_id` config. Do NOT create `conversations` record. |
-| MEM-2.1.4 | **P0** | Invalid `session_id` format SHALL return 400 Bad Request | Validate UUID v4 format before processing. Return `{"error": "session_id must be a valid UUID v4"}`. |
-| MEM-2.1.5 | **P0** | Unauthorized `session_id` access SHALL return 403 Forbidden | Check `conversation.user_id == request.user_id`. Return 403 if mismatch. |
-| MEM-2.1.6 | **P0** | Non-existent `session_id` SHALL return 404 Not Found | Query `conversations` collection first. Return 404 if not found. |
+| MEM-2.1.1 | **P0** | `POST /api/chat` SHALL accept optional `conversation_id` parameter | Add to request body: `{"message": "...", "conversation_id": "..."}`. Type: `Optional[str]`. |
+| MEM-2.1.2 | **P0** | `POST /api/chat` MAY accept optional parent `session_id` | Used for conversation creation flows or parent-boundary validation. |
+| MEM-2.1.3 | **P0** | When `conversation_id` is provided, the agent SHALL load conversation history | Resolve the conversation record first, then invoke LangGraph with the mapped `thread_id`. |
+| MEM-2.1.4 | **P0** | When `conversation_id` is omitted, the agent SHALL operate statelessly unless a create-conversation workflow is invoked | Process request without `thread_id` config. Do NOT create `conversations` record on ordinary stateless chat requests. |
+| MEM-2.1.5 | **P0** | Invalid identifier formats SHALL return 400 Bad Request | Validate `conversation_id` and, when supplied, `session_id` before processing. |
+| MEM-2.1.6 | **P0** | Unauthorized conversation access SHALL return 403 Forbidden | Check ownership and parent-boundary integrity before loading state. |
+| MEM-2.1.7 | **P0** | Non-existent conversation resources SHALL return 404 Not Found | Query `conversations` collection by `conversation_id` before invoking the agent. |
 
 ##### MEM-2.2 WebSocket Memory Integration
 
 | ID | Priority | Requirement | Description |
 |----|----------|-------------|-------------|
-| MEM-2.2.1 | **P0** | `chat_message` event SHALL accept optional `session_id` | Add to event payload: `{message: "...", session_id: "..."}`. |
-| MEM-2.2.2 | **P0** | Streaming responses SHALL maintain memory context | Pass `session_id` through entire streaming pipeline. Context must persist across chunks. |
+| MEM-2.2.1 | **P0** | `chat_message` event SHALL accept optional `conversation_id` | Add to event payload: `{message: "...", conversation_id: "..."}`. |
+| MEM-2.2.2 | **P0** | Streaming responses SHALL maintain memory context | Pass `conversation_id` through the streaming pipeline and resolve `thread_id` before execution. Context must persist across chunks. |
 | MEM-2.2.3 | **P0** | Memory state SHALL be persisted after each complete response | Persistence is handled by LangGraph checkpointer during `invoke()` / `astream_events()` execution with `thread_id`. |
 
 ---

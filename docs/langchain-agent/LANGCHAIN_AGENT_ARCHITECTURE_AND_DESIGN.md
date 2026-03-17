@@ -24,7 +24,7 @@ The **StockAssistantAgent** is a LangChain-based ReAct (Reasoning + Acting) agen
 | **AI Framework** | LangChain >=1.0.0 with `langchain_core` and `langchain_openai` |
 | **Model Providers** | OpenAI (GPT-5-nano), Grok (grok-4-1-fast-reasoning) with automatic fallback |
 | **Tool System** | Registry-based with caching support |
-| **Memory** | LangGraph `MongoDBSaver` checkpointer for session-scoped conversation persistence |
+| **Memory** | LangGraph `MongoDBSaver` checkpointer for conversation-scoped STM, with sessions as reusable parent business context |
 | **Semantic Router** | `semantic-router` library with OpenAI/HuggingFace encoders |
 | **Response Types** | Structured (`AgentResponse`) with immutable dataclasses |
 
@@ -32,7 +32,7 @@ The **StockAssistantAgent** is a LangChain-based ReAct (Reasoning + Acting) agen
 
 ```
 src/core/
-├── stock_assistant_agent.py    # Main ReAct agent with session-aware memory
+├── stock_assistant_agent.py    # Main ReAct agent with conversation-aware STM routing
 ├── langgraph_bootstrap.py      # LangGraph agent builder + MongoDBSaver checkpointer factory
 ├── stock_query_router.py       # Semantic router for query classification
 ├── routes.py                   # Route definitions and utterances
@@ -231,10 +231,22 @@ class AgentResponse:
 
 **Implementation**:
 ```python
-def process_query(self, query: str, *, provider: Optional[str] = None, session_id: Optional[str] = None) -> str:
+def process_query(
+    self,
+    query: str,
+    *,
+    provider: Optional[str] = None,
+    conversation_id: Optional[str] = None,
+    session_id: Optional[str] = None,
+) -> str:
     try:
         if self._agent_executor:
-            return self._process_with_react(query, provider=provider, session_id=session_id)
+            return self._process_with_react(
+                query,
+                provider=provider,
+                conversation_id=conversation_id,
+                session_id=session_id,
+            )
         return self._process_legacy(query, provider=provider)
     except Exception as e:
         self.logger.error(f"Error generating response: {e}")
@@ -248,21 +260,24 @@ def process_query(self, query: str, *, provider: Optional[str] = None, session_i
 
 ### 6. Short-Term Memory (STM) via LangGraph Checkpointer
 
-**Decision**: Use LangGraph's `MongoDBSaver` checkpointer for session-scoped conversation persistence.
+**Decision**: Use LangGraph's `MongoDBSaver` checkpointer for conversation-scoped STM persistence, with `conversation_id -> thread_id` as the canonical memory mapping and sessions retained as parent workflow context.
 
-**Status**: Implemented (FR-3.1)
+**Status**: Baseline implemented; hierarchy alignment defined in the SRS and technical design (FR-3.1 to FR-3.4, FR-5)
 
 **Key Design Choices**:
 
 | Aspect | Decision |
 |--------|----------|
 | **Checkpointer** | LangGraph `MongoDBSaver` — native integration with agent execution |
-| **Thread ID Mapping** | Direct 1:1: `session_id` → `thread_id` (no translation layer) |
+| **Thread ID Mapping** | Direct 1:1: `conversation_id` → `thread_id` |
+| **Hierarchy Model** | `workspace -> session -> conversation`, where the session owns reusable business context and the conversation owns STM |
 | **Dual Collections** | `agent_checkpoints` (LangGraph-owned) + `conversations` (app-managed metadata) |
-| **Backward Compatibility** | `session_id` is optional — omitting preserves stateless single-turn behavior |
+| **Backward Compatibility** | `conversation_id` is optional — omitting preserves stateless single-turn behavior |
 | **Memory Scope** | Stores conversation text ONLY; never stores prices, ratios, or tool outputs (per ADR-001) |
 | **Lifecycle** | `active` → `summarized` → `archived` (no hard delete per ADR-001) |
 | **Configuration** | `MemoryConfig` frozen dataclass with 9 configurable parameters and fail-fast validation |
+
+**Architecture Note**: The current runtime still exposes baseline `session_id` plumbing in some paths. The target architecture recorded in [AGENT_MEMORY_TECHNICAL_DESIGN.md](./AGENT_MEMORY_TECHNICAL_DESIGN.md) and the SRS moves stateful STM routing to `conversation_id`, while `session_id` remains optional parent context for validation and conversation creation flows.
 
 **Wiring Flow**:
 ```
@@ -274,7 +289,7 @@ APIServer.__init__()
             │
             └─► create_agent(..., checkpointer=checkpointer)
                     │
-                    └─► invoke(messages, config={"thread_id": session_id})
+                └─► invoke(messages, config={"thread_id": conversation_id})
 ```
 
 > **Detailed Design**: See [AGENT_MEMORY_TECHNICAL_DESIGN.md](./AGENT_MEMORY_TECHNICAL_DESIGN.md) for data models, sequence diagrams, API contracts, and configuration reference.
@@ -362,22 +377,27 @@ AgentResponse (frozen dataclass)
 3. Support streaming with `astream_events()`
 4. Handle provider fallback orchestration
 5. Expose model configuration APIs
-6. Manage session-aware memory via `session_id` parameter
+6. Manage conversation-aware STM routing via `conversation_id`, with optional `session_id` for parent-boundary validation and session-context propagation
 
 **Key Methods**:
 
 | Method | Description |
 |--------|------------|
-| `process_query(query, *, session_id)` | Synchronous query processing with optional session memory |
-| `process_query_streaming(query, *, session_id)` | Generator-based streaming with optional session memory |
+| `process_query(query, *, conversation_id, session_id)` | Synchronous query processing with optional conversation-scoped memory and optional parent session context |
+| `process_query_streaming(query, *, conversation_id, session_id)` | Generator-based streaming with optional conversation-scoped memory and optional parent session context |
 | `process_query_structured(query)` | Returns `AgentResponse` with metadata |
 | `set_default_model(provider, name)` | Update active model |
 | `run_interactive()` | CLI REPL mode |
 
 **Constructor** accepts an optional `checkpointer` parameter (injected by `APIServer`).
-When a checkpointer is present and `session_id` is provided, the agent includes
-`{"configurable": {"thread_id": session_id}}` in the invoke config, enabling
+When a checkpointer is present and `conversation_id` is provided, the agent includes
+`{"configurable": {"thread_id": conversation_id}}` in the invoke config, enabling
 LangGraph to automatically load/save conversation state.
+
+**Hierarchy Behavior**:
+- Session context stores reusable assumptions, intent, and focused symbols shared across related conversations.
+- Conversation state stores thread-specific summaries, message counters, and refinements without leaking STM across sibling conversations.
+- Parent workspace/session relationships are validated before a stateful conversation is resumed.
 
 **System Prompt**:
 ```
@@ -616,12 +636,12 @@ src/templates/reports/
 
 #### 4.2 Short-Term Memory (STM) — Implemented
 
-**Status**: ✅ Implemented (FR-3.1, branch `spec-driven-development-pilot`)
+**Status**: ✅ STM baseline implemented; conversation-scoped hierarchy alignment specified in the current design docs
 
-**Implementation**: LangGraph `MongoDBSaver` checkpointer with session-scoped conversation persistence.
+**Implementation**: LangGraph `MongoDBSaver` checkpointer with conversation-scoped STM persistence and session-level business-context propagation.
 
-The agent now supports multi-turn conversations where it recalls previous exchanges within a session.
-Memory is controlled via the `session_id` parameter across `process_query()`, `process_query_streaming()`,
+The target architecture supports multi-turn conversations where each conversation owns its own checkpointer thread, while a session can contain multiple conversations under shared analytical context.
+Stateful memory is controlled by `conversation_id`, while `session_id` remains optional parent context across `process_query()`, `process_query_streaming()`,
 REST API (`POST /api/chat`), and Socket.IO (`chat_message` event).
 
 **Key Components**:
@@ -630,7 +650,14 @@ REST API (`POST /api/chat`), and Socket.IO (`chat_message` event).
 - `data/repositories/conversation_repository.py` — CRUD for `conversations` collection
 - `services/conversation_service.py` — Message tracking, archival, summarization
 
+**Hierarchy Rules**:
+- `conversation_id -> thread_id` is the canonical STM binding.
+- A session can own multiple conversations; sibling conversations do not share checkpoints.
+- Session context may be inherited into conversations, but conversation summaries and message history remain isolated per thread.
+
 **Remaining Future Work (Phase 2A.2+)**:
+- Complete runtime migration from baseline `session_id` plumbing to the canonical `conversation_id` contract
+- Add hierarchical CRUD and validation flows for workspace/session/conversation resources
 - Long-term vector store memory (semantic search over past conversations)
 - Cross-session memory retrieval
 - User preference learning (LTM personalization layer)
@@ -902,12 +929,13 @@ tools/stock_symbol.py
 2. **Reporting Tool**: Integrate with Jinja2 template system
 3. **StockSymbol Tool**: Add multi-source data providers
 4. ~~**Agent Memory**: Add conversation context management~~ → **Done** (STM implemented via MongoDBSaver; see [AGENT_MEMORY_TECHNICAL_DESIGN.md](./AGENT_MEMORY_TECHNICAL_DESIGN.md))
+4.1 **Hierarchy Alignment**: Complete runtime adoption of `conversation_id -> thread_id` and parent session validation across agent, API, and repository layers
 5. **Observability**: Integrate OpenTelemetry before production
 6. **Long-Term Memory (LTM)**: Vector store for cross-session semantic recall (Phase 2A.2+)
 
 ---
 
-**Document Version**: 2.0  
-**Last Updated**: 2026-03-03  
+**Document Version**: 2.1  
+**Last Updated**: 2026-03-17  
 **Author**: GitHub Copilot  
-**Branch**: `spec-driven-development-pilot`
+**Branch**: `agent-session-with-stm-wiring`
