@@ -1,0 +1,1240 @@
+name: Create Architecture Backlog Issues
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Manually-triggered workflow that creates GitHub Issues for every improvement
+# item identified in docs/architecture-review.md (Sections 10 & 11) and adds
+# each issue to the "DP-Stock-AI-Assistant project" board.
+#
+# HOW TO RUN
+#   GitHub → Actions tab → "Create Architecture Backlog Issues" → Run workflow
+#   (choose dry_run=true first to preview, then dry_run=false to create)
+#
+# REQUIRED SECRET
+#   Add a repository secret named ISSUES_TOKEN containing a Personal Access
+#   Token (classic PAT or fine-grained) with these scopes:
+#     - repo        (create issues)
+#     - project     (read/write GitHub Projects)
+#   Without this secret the job falls back to GITHUB_TOKEN, which typically
+#   lacks the 'project' write scope so issues will be created but NOT added
+#   to the project board.
+# ─────────────────────────────────────────────────────────────────────────────
+
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Dry run — print commands but do not create issues"
+        required: false
+        default: "false"
+        type: choice
+        options:
+          - "false"
+          - "true"
+
+permissions:
+  issues: write
+  contents: read
+
+jobs:
+  create-issues:
+    name: Create backlog issues
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ secrets.ISSUES_TOKEN || secrets.GITHUB_TOKEN }}
+      REPO: ${{ github.repository }}
+      PROJECT_NUMBER: "3"
+      PROJECT_OWNER: "d-dragon"
+      DRY_RUN: ${{ inputs.dry_run }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # ── Step 1: Create labels ─────────────────────────────────────────────
+      - name: Create phase and category labels
+        shell: bash
+        run: |
+          create_label() {
+            local name="$1" color="$2" desc="$3"
+            if [[ "$DRY_RUN" == "true" ]]; then
+              echo "[DRY-RUN] label: $name"
+              return
+            fi
+            gh label create "$name" --color "$color" --description "$desc" \
+              --force --repo "$REPO" 2>/dev/null && echo "  label: $name" || true
+          }
+
+          echo "Creating phase labels..."
+          create_label "phase: 1 - foundation"    "B60205" "Phase 1 — Foundation Hardening (Sprint 1-2)"
+          create_label "phase: 2 - frontend"      "0075CA" "Phase 2 — Frontend Modernization (Sprint 3-4)"
+          create_label "phase: 3 - api-agent"     "FBCA04" "Phase 3 — API & Agent Enhancement (Sprint 5-6)"
+          create_label "phase: 4 - infra"         "0E8A16" "Phase 4 — Infrastructure & Scale (Sprint 7-8)"
+
+          echo "Creating category labels..."
+          create_label "security"      "D93F0B" "Security hardening"
+          create_label "type-safety"   "1D76DB" "TypeScript / type safety"
+          create_label "code-quality"  "BFD4F2" "Code quality & refactoring"
+          create_label "frontend"      "C2E0C6" "Frontend changes"
+          create_label "testing"       "F9D0C4" "Testing & QA"
+          create_label "observability" "E4E669" "Metrics, tracing, logging"
+          create_label "agent"         "5319E7" "AI agent & LLM tooling"
+          create_label "deployment"    "006B75" "Deployment & CI/CD"
+          create_label "reliability"   "E99695" "Reliability & error handling"
+          create_label "progressive"   "C5DEF5" "PWA / progressive web"
+          create_label "scalability"   "84B6EB" "Kubernetes scaling"
+          create_label "supply-chain"  "0052CC" "Supply chain security"
+          create_label "backlog"       "EDEDED" "Architecture review backlog item"
+
+      # ── Step 2: Helper function (exported for sub-steps) ─────────────────
+      # Each phase runs in its own step so the log is readable.
+      # The create_issue function is re-defined in each step (bash doesn't
+      # export functions across steps in GitHub Actions).
+
+      # ── Step 3: Phase 1 issues ────────────────────────────────────────────
+      - name: "Phase 1 — Foundation Hardening (8 issues)"
+        shell: bash
+        run: |
+          create_issue() {
+            local title="$1" body="$2" labels="$3"
+            if [[ "$DRY_RUN" == "true" ]]; then
+              echo "[DRY-RUN] create: '$title' [$labels]"
+              return 0
+            fi
+            local url
+            url=$(gh issue create \
+              --repo "$REPO" \
+              --title "$title" \
+              --body "$body" \
+              --label "$labels" \
+              --project "DP-Stock-AI-Assistant project" 2>/dev/null \
+              || gh issue create \
+                   --repo "$REPO" \
+                   --title "$title" \
+                   --body "$body" \
+                   --label "$labels" 2>/dev/null)
+            if [[ -n "$url" ]]; then
+              echo "✓ Created: $url"
+              # Fallback: add to project explicitly if --project flag wasn't enough
+              gh project item-add "$PROJECT_NUMBER" \
+                --owner "$PROJECT_OWNER" \
+                --url "$url" 2>/dev/null \
+                || echo "  (Could not add to project — ensure ISSUES_TOKEN has 'project' scope)"
+            fi
+          }
+
+          # ────────────────────────────────────────────
+          create_issue \
+            "[Security] Fix hardcoded SECRET_KEY in Flask API" \
+            "## Summary
+          The Flask \`SECRET_KEY\` is currently hardcoded as a placeholder in \`src/web/api_server.py\`.
+          A weak or predictable secret key allows session forgery attacks.
+
+          ## Current Code (Insecure)
+          \`\`\`python
+          self.app.config.setdefault('SECRET_KEY', 'your-secret-key-here')
+          \`\`\`
+
+          ## Recommended Fix
+          \`\`\`python
+          import os
+          # Generate: python -c \"import secrets; print(secrets.token_hex(32))\"
+          secret_key = os.environ.get('SECRET_KEY')
+          if not secret_key or len(secret_key) < 32:
+              raise RuntimeError(
+                  'SECRET_KEY env var required (min 32 chars). '
+                  'Generate: python -c \"import secrets; print(secrets.token_hex(32))\"'
+              )
+          self.app.config['SECRET_KEY'] = secret_key
+          \`\`\`
+
+          ## Acceptance Criteria
+          - [ ] \`SECRET_KEY\` loaded from env var, not hardcoded
+          - [ ] Startup fails with clear message if missing or < 32 characters
+          - [ ] \`.env.example\` documents how to generate a secure key
+          - [ ] Tests verify startup fails without valid key
+
+          ## References
+          > docs/architecture-review.md — §8.1 Security Assessment, §10.3 Security Hardening" \
+            "phase: 1 - foundation,security,backlog"
+
+          # ────────────────────────────────────────────
+          create_issue \
+            "[Security] Fix hardcoded CORS origins in Flask API" \
+            "## Summary
+          CORS allowed origins are hardcoded to \`[\"http://localhost:3000\"]\` in \`src/web/api_server.py\`.
+          Production deployments silently use the wrong CORS policy.
+
+          ## Current Code (Hardcoded)
+          \`\`\`python
+          origins = [\"http://localhost:3000\"]
+          CORS(self.app, origins=origins)
+          \`\`\`
+
+          ## Recommended Fix
+          \`\`\`python
+          cors_origins_str = os.environ.get('CORS_ORIGINS', 'http://localhost:3000')
+          origins = [o.strip() for o in cors_origins_str.split(',')]
+          CORS(self.app, origins=origins)
+          \`\`\`
+
+          ## Acceptance Criteria
+          - [ ] CORS origins loaded from \`CORS_ORIGINS\` env var (comma-separated)
+          - [ ] Defaults to \`http://localhost:3000\` when not set
+          - [ ] \`.env.example\` documents the variable
+          - [ ] Tests verify CORS configured from env
+
+          ## References
+          > docs/architecture-review.md — §8.1 Security Assessment" \
+            "phase: 1 - foundation,security,backlog"
+
+          # ────────────────────────────────────────────
+          create_issue \
+            "[Deployment] Fix hardcoded localhost API URLs in frontend" \
+            "## Summary
+          \`frontend/src/App.tsx\` hardcodes \`http://localhost:5000\`, bypassing the centralized \`config.ts\`
+          which already reads \`REACT_APP_API_URL\`. \`webSocketService.ts\` also hardcodes the same URL.
+
+          ## Current Code (Wrong)
+          \`\`\`typescript
+          // App.tsx
+          const API_BASE_URL = 'http://localhost:5000';
+
+          // webSocketService.ts
+          this.socket = io('http://localhost:5000', ...);
+          \`\`\`
+
+          ## Recommended Fix
+          \`\`\`typescript
+          // Use the existing config.ts — it already reads REACT_APP_API_URL
+          import { API_CONFIG } from './config';
+          const API_BASE_URL = API_CONFIG.BASE_URL;
+          \`\`\`
+
+          ## Acceptance Criteria
+          - [ ] \`App.tsx\` uses \`API_CONFIG.BASE_URL\` from \`config.ts\`
+          - [ ] \`webSocketService.ts\` uses \`API_CONFIG.WEBSOCKET.URL\`
+          - [ ] No hardcoded \`localhost:5000\` URLs remain in frontend source
+          - [ ] \`.env.example\` documents \`REACT_APP_API_URL\` and \`REACT_APP_WS_URL\`
+
+          ## References
+          > docs/architecture-review.md — §3.6 Frontend Issues" \
+            "phase: 1 - foundation,deployment,frontend,backlog"
+
+          # ────────────────────────────────────────────
+          create_issue \
+            "[Security] Add flask-limiter rate limiting to API endpoints" \
+            "## Summary
+          The API has no rate limiting. Chat endpoints are vulnerable to abuse and unbounded LLM API cost amplification.
+
+          ## Recommended Implementation
+          \`\`\`python
+          from flask_limiter import Limiter
+          from flask_limiter.util import get_remote_address
+
+          # In APIServer.__init__ after app setup:
+          limiter = Limiter(
+              app=self.app,
+              key_func=get_remote_address,
+              storage_uri=f'redis://{redis_host}:{redis_port}',
+              default_limits=['200/hour', '50/minute']
+          )
+
+          # Stricter limit on the chat endpoint:
+          @limiter.limit('10/minute')
+          def chat(): ...
+          \`\`\`
+
+          ## Acceptance Criteria
+          - [ ] \`flask-limiter\` added to \`requirements.txt\`
+          - [ ] Default limits: 200/hour and 50/minute per IP
+          - [ ] Stricter limit on \`POST /api/chat\`: 10/minute per IP
+          - [ ] Redis storage backend (not in-memory — supports multi-instance)
+          - [ ] 429 responses include \`Retry-After\` header
+          - [ ] Tests verify 429 response when limit exceeded
+
+          ## References
+          > docs/architecture-review.md — §8.1 Security Assessment" \
+            "phase: 1 - foundation,security,backlog"
+
+          # ────────────────────────────────────────────
+          create_issue \
+            "[Security] Add flask-talisman HTTP security headers" \
+            "## Summary
+          The API does not set standard HTTP security headers (HSTS, X-Content-Type-Options,
+          X-Frame-Options, CSP). These protect against clickjacking, MIME sniffing, and XSS.
+
+          ## Recommended Implementation
+          \`\`\`python
+          from flask_talisman import Talisman
+
+          Talisman(
+              self.app,
+              content_security_policy={
+                  'default-src': \"'self'\",
+                  'connect-src': \"'self' ws://localhost:5000\"
+              },
+              force_https=os.environ.get('FORCE_HTTPS', 'false').lower() == 'true',
+              strict_transport_security=True
+          )
+          \`\`\`
+
+          ## Acceptance Criteria
+          - [ ] \`flask-talisman\` added to \`requirements.txt\`
+          - [ ] HSTS, X-Content-Type-Options, X-Frame-Options headers set
+          - [ ] CSP header configured for API responses
+          - [ ] HTTPS enforcement toggled via \`FORCE_HTTPS\` env var
+
+          ## References
+          > docs/architecture-review.md — §8.1 Security Assessment" \
+            "phase: 1 - foundation,security,backlog"
+
+          # ────────────────────────────────────────────
+          create_issue \
+            "[Code Quality] Consolidate three frontend API clients into one typed service" \
+            "## Summary
+          The frontend has three overlapping API client files with no clear ownership:
+          - \`restApiClient.js\` — plain JS, primary client used by \`App.tsx\`
+          - \`apiService.ts\` — TypeScript, defined but NOT used by \`App.tsx\`
+          - \`modelsApi.ts\` — TypeScript, used only by \`ModelSelector\`
+
+          This causes confusion, inconsistent error handling, and duplicated logic.
+
+          ## Recommended Action
+          1. Create a single \`src/services/apiClient.ts\` that consolidates all fetch logic
+          2. All components use the unified typed client
+          3. Delete \`restApiClient.js\` and \`apiService.ts\`
+
+          ## Acceptance Criteria
+          - [ ] Single \`src/services/apiClient.ts\` covers all API calls
+          - [ ] \`App.tsx\` and \`ModelSelector\` both use the unified client
+          - [ ] No duplicate \`fetch\` wrappers remain
+          - [ ] All request/response types are typed (no \`any\`)
+
+          ## References
+          > docs/architecture-review.md — §3.4 Communication Architecture" \
+            "phase: 1 - foundation,code-quality,frontend,type-safety,backlog"
+
+          # ────────────────────────────────────────────
+          create_issue \
+            "[Type Safety] Fix @types/socket.io-client version mismatch" \
+            "## Summary
+          \`package.json\` declares \`socket.io-client@^4.8.1\` but \`@types/socket.io-client@^1.4.36\`.
+          Version 1.x types describe the v2 API, which is incompatible with v4.
+          This suppresses real TypeScript errors in WebSocket code.
+
+          ## Fix
+          Socket.IO v4 ships its own TypeScript definitions. The separate \`@types\` package
+          should be removed entirely.
+
+          \`\`\`json
+          // Remove from devDependencies in package.json:
+          \"@types/socket.io-client\": \"^1.4.36\"
+          \`\`\`
+
+          ## Acceptance Criteria
+          - [ ] \`@types/socket.io-client\` removed from \`package.json\`
+          - [ ] \`webSocketService.ts\` compiles cleanly using built-in v4 types
+          - [ ] No \`@ts-ignore\` workarounds remain in WebSocket code
+
+          ## References
+          > docs/architecture-review.md — §3.1 Current Stack" \
+            "phase: 1 - foundation,type-safety,frontend,backlog"
+
+          # ────────────────────────────────────────────
+          create_issue \
+            "[Type Safety] Convert remaining JavaScript files to TypeScript" \
+            "## Summary
+          Several frontend files are plain JavaScript, losing the benefits of TypeScript strict mode:
+          - \`src/services/restApiClient.js\`
+          - \`src/components/MessageFormatter.js\`
+          - \`src/components/OptimizedApp.js\`
+          - \`src/utils/performance.js\`
+
+          ## Acceptance Criteria
+          - [ ] All \`frontend/src/\` files use \`.ts\` or \`.tsx\` extensions
+          - [ ] No \`any\` types introduced during conversion
+          - [ ] TypeScript strict mode (\`\"strict\": true\`) passes without errors
+          - [ ] Existing functionality is unchanged
+
+          ## References
+          > docs/architecture-review.md — §3.2 Component Structure" \
+            "phase: 1 - foundation,type-safety,frontend,backlog"
+
+      # ── Step 4: Phase 2 issues ────────────────────────────────────────────
+      - name: "Phase 2 — Frontend Modernization (8 issues)"
+        shell: bash
+        run: |
+          create_issue() {
+            local title="$1" body="$2" labels="$3"
+            if [[ "$DRY_RUN" == "true" ]]; then
+              echo "[DRY-RUN] create: '$title' [$labels]"
+              return 0
+            fi
+            local url
+            url=$(gh issue create \
+              --repo "$REPO" \
+              --title "$title" \
+              --body "$body" \
+              --label "$labels" \
+              --project "DP-Stock-AI-Assistant project" 2>/dev/null \
+              || gh issue create \
+                   --repo "$REPO" \
+                   --title "$title" \
+                   --body "$body" \
+                   --label "$labels" 2>/dev/null)
+            if [[ -n "$url" ]]; then
+              echo "✓ Created: $url"
+              gh project item-add "$PROJECT_NUMBER" \
+                --owner "$PROJECT_OWNER" \
+                --url "$url" 2>/dev/null \
+                || echo "  (Could not add to project — ensure ISSUES_TOKEN has 'project' scope)"
+            fi
+          }
+
+          # ────────────────────────────────────────────
+          create_issue \
+            "[Frontend] Migrate build tool from Create React App to Vite" \
+            "## Summary
+          Create React App (CRA) is **officially deprecated** and no longer maintained.
+          Migrating to **Vite** dramatically improves developer experience and build performance.
+
+          ## Motivation
+          | Metric | CRA | Vite |
+          |--------|-----|------|
+          | Dev server cold start | 15-60 s | < 1 s |
+          | HMR update | 2-5 s | < 100 ms |
+          | Build time | 60-120 s | 10-30 s |
+          | Maintenance | ❌ Deprecated | ✅ Active |
+
+          ## Migration Steps
+          1. \`npm install -D vite @vitejs/plugin-react\`
+          2. Create \`vite.config.ts\`
+          3. Move \`index.html\` to project root and update script tag
+          4. Update env var prefix: \`REACT_APP_\` → \`VITE_\`
+          5. Remove \`react-scripts\` dependency
+          6. Replace \`react-scripts test\` with \`vitest\`
+
+          ## Acceptance Criteria
+          - [ ] Vite is the build/dev tool (\`react-scripts\` removed)
+          - [ ] \`npm run dev\` starts in < 2 s cold start
+          - [ ] \`npm run build\` produces optimized production bundle
+          - [ ] All existing features work identically
+          - [ ] Env vars migrated (\`REACT_APP_\` → \`VITE_\`)
+
+          ## References
+          > docs/architecture-review.md — §10.2 Frontend Modernization" \
+            "phase: 2 - frontend,frontend,backlog"
+
+          # ────────────────────────────────────────────
+          create_issue \
+            "[Frontend] Add Tailwind CSS + shadcn/ui design system" \
+            "## Summary
+          The current UI uses raw inline styles scattered across components with no visual hierarchy,
+          color system, or accessible components. This makes UI changes slow and inconsistent.
+
+          ## Recommended Stack
+          - **Tailwind CSS** — utility-first, tree-shaken bundle
+          - **shadcn/ui** — accessible copy-paste component library (Button, Input, Card, Select, etc.)
+
+          ## Implementation Steps
+          1. Install Tailwind CSS with PostCSS
+          2. Run \`npx shadcn-ui@latest init\`
+          3. Replace inline styles in \`App.tsx\` with Tailwind classes
+          4. Use shadcn/ui primitives: \`<Button>\`, \`<Textarea>\`, \`<Select>\`, \`<Badge>\`
+          5. Extract theme tokens from \`UI_CONFIG.THEME\` into \`tailwind.config.ts\`
+
+          ## Acceptance Criteria
+          - [ ] Tailwind CSS installed and configured
+          - [ ] At least 5 shadcn/ui components integrated (Button, Input, Select, Card, Badge)
+          - [ ] No inline \`style={{}}\` objects remain in main components
+          - [ ] UI passes WCAG AA contrast check
+
+          ## References
+          > docs/architecture-review.md — §10.2 Adopt a Design System" \
+            "phase: 2 - frontend,frontend,backlog"
+
+          # ────────────────────────────────────────────
+          create_issue \
+            "[Frontend] Add React Router v6 for client-side routing" \
+            "## Summary
+          The app is a single-page app with no URL routing. As features grow (workspaces, analytics,
+          settings), URL-based navigation is essential for bookmarkability and deep linking.
+
+          ## Recommended Implementation
+          \`\`\`typescript
+          import { BrowserRouter, Routes, Route } from 'react-router-dom';
+
+          <BrowserRouter>
+            <Routes>
+              <Route path=\"/\" element={<ChatPage />} />
+              <Route path=\"/workspace/:id\" element={<WorkspacePage />} />
+              <Route path=\"/settings\" element={<SettingsPage />} />
+            </Routes>
+          </BrowserRouter>
+          \`\`\`
+
+          ## Acceptance Criteria
+          - [ ] \`react-router-dom\` v6 installed
+          - [ ] At minimum: \`/\` (chat) and \`/settings\` routes implemented
+          - [ ] Browser back/forward navigation works
+          - [ ] URL preserved on page refresh
+
+          ## References
+          > docs/architecture-review.md — §3.6 Frontend Issues" \
+            "phase: 2 - frontend,frontend,backlog"
+
+          # ────────────────────────────────────────────
+          create_issue \
+            "[Frontend] Add Zustand for global state management" \
+            "## Summary
+          All application state lives in a single monolithic \`App.tsx\` (messages, loading, connection status,
+          provider selection). This doesn't scale to multi-workspace or multi-conversation features.
+
+          ## Recommended Implementation
+          \`\`\`typescript
+          // src/store/chatStore.ts
+          import { create } from 'zustand';
+
+          export const useChatStore = create<ChatState>((set) => ({
+            conversations: {},
+            activeSessionId: null,
+            isStreaming: false,
+            addMessage: (sessionId, msg) =>
+              set((state) => ({
+                conversations: {
+                  ...state.conversations,
+                  [sessionId]: [...(state.conversations[sessionId] ?? []), msg]
+                }
+              })),
+          }));
+          \`\`\`
+
+          ## Acceptance Criteria
+          - [ ] \`zustand\` installed
+          - [ ] Chat messages and streaming state managed through store
+          - [ ] \`App.tsx\` reduced to layout/routing only
+          - [ ] State persists across component unmount/remount
+
+          ## References
+          > docs/architecture-review.md — §10.2 State Management Lift" \
+            "phase: 2 - frontend,frontend,backlog"
+
+          # ────────────────────────────────────────────
+          create_issue \
+            "[Frontend] Add TanStack Query for server state management" \
+            "## Summary
+          Server data (model lists, health status) is fetched manually with ad-hoc \`useEffect\` hooks
+          and local loading/error state. TanStack Query provides automatic caching, background
+          refetching, and deduplication.
+
+          ## Recommended Implementation
+          \`\`\`typescript
+          // Replace manual useEffect + fetch in ModelSelector.tsx
+          const { data: models, isLoading } = useQuery({
+            queryKey: ['models', 'openai'],
+            queryFn: () => modelsApi.listModels(),
+            staleTime: 3_600_000,  // 1 hour — matches Redis TTL
+          });
+
+          const selectModel = useMutation({
+            mutationFn: modelsApi.selectModel,
+            onSuccess: () => queryClient.invalidateQueries({ queryKey: ['models'] }),
+          });
+          \`\`\`
+
+          ## Acceptance Criteria
+          - [ ] \`@tanstack/react-query\` installed with \`QueryClientProvider\` wrapping app
+          - [ ] Model list uses \`useQuery\` with 1h stale time
+          - [ ] Health check uses \`useQuery\` with 30s refetch interval
+          - [ ] Model selection uses \`useMutation\`
+          - [ ] Loading/error states handled uniformly
+
+          ## References
+          > docs/architecture-review.md — §10.2 Frontend Modernization" \
+            "phase: 2 - frontend,frontend,backlog"
+
+          # ────────────────────────────────────────────
+          create_issue \
+            "[Testing] Add frontend unit and component tests with Vitest + RTL" \
+            "## Summary
+          The frontend has **zero test files**. This makes refactoring and UI changes high-risk.
+          Adding Vitest + React Testing Library provides a fast co-located test suite.
+
+          ## Minimum Test Coverage Targets
+          | Target | Tests |
+          |--------|-------|
+          | \`App.tsx\` | Send message, streaming render, cancel |
+          | \`ModelSelector.tsx\` | Load models, select model, refresh, error state |
+          | \`restApiClient.js\` → \`apiClient.ts\` | \`streamChat\` parses SSE chunks correctly |
+          | \`webSocketService.ts\` | Connect/disconnect lifecycle |
+          | \`config.ts\` | Reads env vars correctly |
+
+          ## Setup
+          \`\`\`bash
+          npm install -D vitest @vitest/ui @testing-library/react @testing-library/user-event jsdom
+          \`\`\`
+
+          ## Acceptance Criteria
+          - [ ] Vitest configured with jsdom environment
+          - [ ] \`npm run test\` runs all tests in watch mode
+          - [ ] At least 10 component tests covering key interactions
+          - [ ] At least 5 utility/service unit tests
+          - [ ] Tests run in CI pipeline
+
+          ## References
+          > docs/architecture-review.md — §8.3 Testing Coverage" \
+            "phase: 2 - frontend,testing,frontend,backlog"
+
+          # ────────────────────────────────────────────
+          create_issue \
+            "[Reliability] Add React Error Boundaries to prevent full-app crashes" \
+            "## Summary
+          Without error boundaries, any unhandled React error crashes the entire application.
+          Error boundaries provide graceful degradation with user-friendly fallback UI.
+
+          ## Implementation
+          \`\`\`typescript
+          // src/components/ErrorBoundary.tsx
+          import { Component, ReactNode } from 'react';
+
+          export class ErrorBoundary extends Component<
+            { children: ReactNode; fallback?: ReactNode },
+            { hasError: boolean }
+          > {
+            state = { hasError: false };
+
+            static getDerivedStateFromError() { return { hasError: true }; }
+            componentDidCatch(error: Error) { console.error('Component error:', error); }
+
+            render() {
+              if (this.state.hasError) {
+                return this.props.fallback ?? <p>Something went wrong. Please refresh.</p>;
+              }
+              return this.props.children;
+            }
+          }
+          \`\`\`
+
+          ## Acceptance Criteria
+          - [ ] \`ErrorBoundary\` component created
+          - [ ] Wraps: chat message list, model selector, and root app
+          - [ ] Displays user-friendly fallback on error (not raw stack trace)
+          - [ ] Error details logged to console
+
+          ## References
+          > docs/architecture-review.md — §3.6 Frontend Issues" \
+            "phase: 2 - frontend,reliability,frontend,backlog"
+
+          # ────────────────────────────────────────────
+          create_issue \
+            "[Progressive] Implement PWA support: web app manifest + service worker" \
+            "## Summary
+          Adding PWA support enables the app to be installed on mobile/desktop and provides offline
+          capability, improving user experience for traders who need quick access.
+
+          ## Implementation (after Vite migration)
+          \`\`\`typescript
+          // vite.config.ts
+          import { VitePWA } from 'vite-plugin-pwa';
+
+          VitePWA({
+            registerType: 'autoUpdate',
+            manifest: {
+              name: 'DP Stock Investment Assistant',
+              short_name: 'StockAI',
+              theme_color: '#1976d2',
+              icons: [{ src: '/icon-192.png', sizes: '192x192', type: 'image/png' }]
+            },
+          })
+          \`\`\`
+
+          ## Acceptance Criteria
+          - [ ] Web app manifest present and valid (Lighthouse PWA score ≥ 90)
+          - [ ] Service worker registered and caching static assets
+          - [ ] Install prompt appears in supported browsers
+          - [ ] Offline fallback page shown when backend unreachable
+          - [ ] **Depends on**: Vite migration
+
+          ## References
+          > docs/architecture-review.md — §11 Phase 2" \
+            "phase: 2 - frontend,progressive,frontend,backlog"
+
+      # ── Step 5: Phase 3 issues ────────────────────────────────────────────
+      - name: "Phase 3 — API & Agent Enhancement (7 issues)"
+        shell: bash
+        run: |
+          create_issue() {
+            local title="$1" body="$2" labels="$3"
+            if [[ "$DRY_RUN" == "true" ]]; then
+              echo "[DRY-RUN] create: '$title' [$labels]"
+              return 0
+            fi
+            local url
+            url=$(gh issue create \
+              --repo "$REPO" \
+              --title "$title" \
+              --body "$body" \
+              --label "$labels" \
+              --project "DP-Stock-AI-Assistant project" 2>/dev/null \
+              || gh issue create \
+                   --repo "$REPO" \
+                   --title "$title" \
+                   --body "$body" \
+                   --label "$labels" 2>/dev/null)
+            if [[ -n "$url" ]]; then
+              echo "✓ Created: $url"
+              gh project item-add "$PROJECT_NUMBER" \
+                --owner "$PROJECT_OWNER" \
+                --url "$url" 2>/dev/null \
+                || echo "  (Could not add to project — ensure ISSUES_TOKEN has 'project' scope)"
+            fi
+          }
+
+          # ────────────────────────────────────────────
+          create_issue \
+            "[Security] Add JWT authentication to all API routes" \
+            "## Summary
+          All API endpoints are currently unauthenticated. Any client that can reach the server
+          can issue LLM queries and access user data, incurring costs and exposing sensitive information.
+
+          ## Recommended Implementation
+          \`\`\`python
+          from functools import wraps
+          import jwt
+
+          def require_auth(f):
+              @wraps(f)
+              def decorated(*args, **kwargs):
+                  token = request.headers.get('Authorization', '').removeprefix('Bearer ')
+                  if not token:
+                      return jsonify({'error': 'Authentication required'}), 401
+                  try:
+                      payload = jwt.decode(
+                          token,
+                          current_app.config['JWT_SECRET'],
+                          algorithms=['HS256']
+                      )
+                      g.user_id = payload['sub']
+                  except jwt.ExpiredSignatureError:
+                      return jsonify({'error': 'Token expired'}), 401
+                  except jwt.InvalidTokenError:
+                      return jsonify({'error': 'Invalid token'}), 401
+                  return f(*args, **kwargs)
+              return decorated
+          \`\`\`
+
+          ## Acceptance Criteria
+          - [ ] JWT middleware applied to all non-health routes
+          - [ ] \`POST /api/auth/login\` endpoint issues signed tokens
+          - [ ] \`JWT_SECRET\` loaded from env var (min 32 chars)
+          - [ ] Token expiry configurable (default: 24h)
+          - [ ] 401 responses have consistent JSON format
+          - [ ] Tests cover authenticated and unauthenticated request scenarios
+
+          ## References
+          > docs/architecture-review.md — §8.1 Security Assessment, §11 Phase 3" \
+            "phase: 3 - api-agent,security,backlog"
+
+          # ────────────────────────────────────────────
+          create_issue \
+            "[API] Add /api/v1/ versioning prefix to all routes" \
+            "## Summary
+          All routes use \`/api/\` with no version. When breaking changes are needed, this prevents
+          backward compatibility without impacting all consumers.
+
+          ## Recommended Implementation
+          \`\`\`python
+          # Register blueprints with versioned prefix
+          app.register_blueprint(chat_bp, url_prefix='/api/v1')
+          app.register_blueprint(models_bp, url_prefix='/api/v1')
+
+          # Backward compat: redirect /api/ to /api/v1/ with deprecation header
+          @app.route('/api/chat', methods=['POST'])
+          def chat_compat():
+              response = make_response(redirect('/api/v1/chat', code=308))
+              response.headers['Deprecation'] = 'true'
+              return response
+          \`\`\`
+
+          ## Acceptance Criteria
+          - [ ] All routes accessible under \`/api/v1/\` prefix
+          - [ ] Old \`/api/\` paths return 308 redirect with \`Deprecation: true\` header
+          - [ ] \`docs/openapi.yaml\` updated with \`/api/v1/\` paths
+          - [ ] Frontend \`config.ts\` updated to use versioned endpoints
+
+          ## References
+          > docs/architecture-review.md — §4.6 Backend Issues" \
+            "phase: 3 - api-agent,backlog"
+
+          # ────────────────────────────────────────────
+          create_issue \
+            "[Observability] Add X-Request-ID header tracing across all API requests" \
+            "## Summary
+          Without request IDs, correlating logs across Flask, LangGraph, tools, and MongoDB for a
+          single user request is difficult. \`X-Request-ID\` makes distributed debugging significantly easier.
+
+          ## Implementation
+          \`\`\`python
+          import uuid
+          from flask import g, request
+
+          @app.before_request
+          def set_request_id():
+              g.request_id = request.headers.get('X-Request-ID') or str(uuid.uuid4())
+
+          @app.after_request
+          def add_request_id_header(response):
+              response.headers['X-Request-ID'] = g.get('request_id', '')
+              return response
+
+          # In logging:
+          logger.info('Processing chat', extra={'request_id': g.request_id, 'user_id': user_id})
+          \`\`\`
+
+          ## Acceptance Criteria
+          - [ ] Every request assigned a UUID request ID (client-provided or generated)
+          - [ ] All responses include \`X-Request-ID\` header
+          - [ ] All log lines include \`request_id\` field
+          - [ ] Agent and tool logs propagate the same ID
+
+          ## References
+          > docs/architecture-review.md — §4.6 Backend Issues" \
+            "phase: 3 - api-agent,observability,backlog"
+
+          # ────────────────────────────────────────────
+          create_issue \
+            "[Agent] Expand LangGraph agent toolset with News, Screener, and Portfolio tools" \
+            "## Summary
+          The agent currently has only 2 active tools (\`StockSymbolTool\`, \`ReportingTool\`).
+          A richer toolset enables comprehensive investment analysis.
+
+          ## Proposed New Tools
+          | Tool | Description | Cache TTL |
+          |------|-------------|-----------|
+          | \`NewsSearchTool\` | Recent news for a symbol | 5 min |
+          | \`ScreenerTool\` | Filter stocks by criteria (P/E, market cap) | 15 min |
+          | \`PortfolioAnalysisTool\` | Analyze holdings list | 10 min |
+          | \`EarningsCalendarTool\` | Upcoming earnings dates | 1 hour |
+          | \`SectorComparisonTool\` | Compare stock to sector peers | 15 min |
+
+          ## Implementation Pattern
+          \`\`\`python
+          # src/core/tools/news_search.py
+          class NewsSearchTool(CachingTool):
+              name = 'news_search'
+              description = 'Fetch recent news articles for a given stock symbol'
+              cache_ttl = 300
+
+              def _run(self, symbol: str) -> str:
+                  news = self.data_manager.fetch_news(symbol)
+                  return json.dumps(news[:5])
+          \`\`\`
+
+          ## Acceptance Criteria
+          - [ ] At least 3 new tools implemented and registered in \`ToolRegistry\`
+          - [ ] Each tool has TTL-based Redis caching
+          - [ ] Each tool has unit tests with mocked data sources
+          - [ ] Agent system prompt updated to describe new tools
+          - [ ] Integration test verifies agent selects new tools for relevant queries
+
+          ## References
+          > docs/architecture-review.md — §5.7 Agent Improvement Areas" \
+            "phase: 3 - api-agent,agent,backlog"
+
+          # ────────────────────────────────────────────
+          create_issue \
+            "[Observability] Add Prometheus metrics endpoint to Flask API" \
+            "## Summary
+          The API exposes no metrics. Adding Prometheus metrics enables SLA monitoring,
+          cost alerting, and capacity planning.
+
+          ## Implementation
+          \`\`\`python
+          from prometheus_flask_exporter import PrometheusMetrics
+          from prometheus_client import Counter, Histogram
+
+          metrics = PrometheusMetrics(app)
+
+          chat_requests = Counter('chat_requests_total', 'Total chat requests',
+                                  ['provider', 'fallback', 'status'])
+          llm_latency   = Histogram('llm_response_seconds', 'LLM response latency',
+                                    ['provider'], buckets=[0.5,1,2,5,10,30,60])
+          \`\`\`
+
+          ## Metrics Target
+          | Metric | Type | Labels |
+          |--------|------|--------|
+          | \`chat_requests_total\` | Counter | provider, fallback, status |
+          | \`llm_response_seconds\` | Histogram | provider |
+          | \`tool_cache_hits_total\` | Counter | tool_name |
+          | \`active_sessions_gauge\` | Gauge | — |
+
+          ## Acceptance Criteria
+          - [ ] \`prometheus-flask-exporter\` in \`requirements.txt\`
+          - [ ] \`GET /metrics\` endpoint exposed (protected in production)
+          - [ ] At least 4 custom metrics instrumented
+          - [ ] Helm chart includes \`ServiceMonitor\` CRD for Prometheus scraping
+
+          ## References
+          > docs/architecture-review.md — §8.2 Observability Stack" \
+            "phase: 3 - api-agent,observability,backlog"
+
+          # ────────────────────────────────────────────
+          create_issue \
+            "[Observability] Add OpenTelemetry distributed tracing" \
+            "## Summary
+          LangSmith captures LLM call traces but the broader request lifecycle
+          (HTTP → Flask → LangGraph → tools → MongoDB) is not traced.
+          OpenTelemetry provides end-to-end distributed tracing.
+
+          ## Implementation
+          \`\`\`python
+          from opentelemetry.instrumentation.flask import FlaskInstrumentor
+          from opentelemetry.instrumentation.pymongo import PymongoInstrumentor
+          from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
+          from opentelemetry.sdk.trace import TracerProvider
+          from opentelemetry.sdk.trace.export import BatchSpanProcessor
+
+          provider = TracerProvider()
+          provider.add_span_processor(BatchSpanProcessor(OTLPSpanExporter()))
+          trace.set_tracer_provider(provider)
+
+          FlaskInstrumentor().instrument_app(app)
+          PymongoInstrumentor().instrument()
+          \`\`\`
+
+          ## Acceptance Criteria
+          - [ ] \`opentelemetry-sdk\`, Flask + PyMongo instrumentors in \`requirements.txt\`
+          - [ ] Flask requests auto-traced (HTTP method, route, status code)
+          - [ ] MongoDB operations traced
+          - [ ] OTLP exporter endpoint configurable via \`OTEL_EXPORTER_OTLP_ENDPOINT\` env var
+          - [ ] Custom span added for each LLM call (provider, model, latency)
+
+          ## References
+          > docs/architecture-review.md — §8.2 Observability Stack" \
+            "phase: 3 - api-agent,observability,backlog"
+
+          # ────────────────────────────────────────────
+          create_issue \
+            "[Testing] Add E2E tests with Playwright for critical user flows" \
+            "## Summary
+          There are currently no end-to-end tests. Critical flows (send message, receive streaming
+          response, cancel streaming, model selection) are not regression-tested.
+
+          ## Test Scenarios
+          \`\`\`typescript
+          // tests/e2e/chat.spec.ts
+          test('user sends message and receives streaming response', async ({ page }) => {
+            await page.goto('http://localhost:3000');
+            await page.fill('textarea', 'What is the current price of AAPL?');
+            await page.keyboard.press('Enter');
+            await expect(page.locator('.assistant-message').last()).toBeVisible();
+            await expect(page.locator('.streaming-indicator')).not.toBeVisible({ timeout: 30000 });
+            await expect(page.locator('.assistant-message').last()).toContainText(/AAPL|Apple/i);
+          });
+          \`\`\`
+
+          ## Test Suite Target
+          - [ ] \`chat-basic.spec.ts\`: Send message + receive response
+          - [ ] \`chat-streaming.spec.ts\`: SSE renders incrementally
+          - [ ] \`chat-cancel.spec.ts\`: Cancel button stops stream
+          - [ ] \`model-selector.spec.ts\`: Model selection updates active model
+          - [ ] \`health.spec.ts\`: Health endpoint returns 200
+
+          ## Acceptance Criteria
+          - [ ] Playwright installed and configured
+          - [ ] 5+ E2E tests covering the scenarios above
+          - [ ] Tests run against local \`docker-compose\` stack
+          - [ ] GitHub Actions workflow step added for E2E tests
+
+          ## References
+          > docs/architecture-review.md — §8.3 Testing Coverage" \
+            "phase: 3 - api-agent,testing,backlog"
+
+      # ── Step 6: Phase 4 issues ────────────────────────────────────────────
+      - name: "Phase 4 — Infrastructure & Scale (6 issues)"
+        shell: bash
+        run: |
+          create_issue() {
+            local title="$1" body="$2" labels="$3"
+            if [[ "$DRY_RUN" == "true" ]]; then
+              echo "[DRY-RUN] create: '$title' [$labels]"
+              return 0
+            fi
+            local url
+            url=$(gh issue create \
+              --repo "$REPO" \
+              --title "$title" \
+              --body "$body" \
+              --label "$labels" \
+              --project "DP-Stock-AI-Assistant project" 2>/dev/null \
+              || gh issue create \
+                   --repo "$REPO" \
+                   --title "$title" \
+                   --body "$body" \
+                   --label "$labels" 2>/dev/null)
+            if [[ -n "$url" ]]; then
+              echo "✓ Created: $url"
+              gh project item-add "$PROJECT_NUMBER" \
+                --owner "$PROJECT_OWNER" \
+                --url "$url" 2>/dev/null \
+                || echo "  (Could not add to project — ensure ISSUES_TOKEN has 'project' scope)"
+            fi
+          }
+
+          # ────────────────────────────────────────────
+          create_issue \
+            "[Security] Enforce Azure Key Vault as mandatory secret store in production" \
+            "## Summary
+          Azure Key Vault integration exists in \`config_loader.py\` but is disabled by default.
+          In production, all secrets (API keys, DB passwords) must come from Key Vault,
+          not environment variables.
+
+          ## Recommended Changes
+          \`\`\`python
+          # config_loader.py — enforce Key Vault in production
+          if app_env == 'production' and not use_azure_keyvault:
+              raise RuntimeError(
+                  'APP_ENV=production requires USE_AZURE_KEYVAULT=true. '
+                  'Set AZURE_KEYVAULT_URI and ensure managed identity is assigned.'
+              )
+          \`\`\`
+
+          \`\`\`hcl
+          # IaC/infra/terraform/keyvault.tf
+          resource \"azurerm_key_vault\" \"main\" {
+            name                       = \"dp-stock-kv-prod\"
+            resource_group_name        = azurerm_resource_group.main.name
+            tenant_id                  = data.azurerm_client_config.current.tenant_id
+            sku_name                   = \"standard\"
+            soft_delete_retention_days = 7
+          }
+          \`\`\`
+
+          ## Acceptance Criteria
+          - [ ] Startup fails with clear message if \`APP_ENV=production\` and Key Vault disabled
+          - [ ] Terraform module creates Key Vault resource
+          - [ ] All production secrets provisioned in Key Vault
+          - [ ] AKS managed identity granted \`Key Vault Secrets User\` role via Terraform
+          - [ ] Docs updated with Key Vault setup procedure
+
+          ## References
+          > docs/architecture-review.md — §7.6 Infrastructure Improvements" \
+            "phase: 4 - infra,security,deployment,backlog"
+
+          # ────────────────────────────────────────────
+          create_issue \
+            "[Scalability] Add Kubernetes HorizontalPodAutoscaler for API pods" \
+            "## Summary
+          The API deployment has a fixed replica count. Under variable load (market hours, news events),
+          the API should auto-scale to handle traffic without manual intervention.
+
+          ## Implementation
+          \`\`\`yaml
+          # IaC/helm/dp-stock/templates/hpa-api.yaml
+          apiVersion: autoscaling/v2
+          kind: HorizontalPodAutoscaler
+          metadata:
+            name: {{ include \"dp-stock.fullname\" . }}-api
+          spec:
+            scaleTargetRef:
+              apiVersion: apps/v1
+              kind: Deployment
+              name: {{ include \"dp-stock.fullname\" . }}-api
+            minReplicas: {{ .Values.api.autoscaling.minReplicas | default 1 }}
+            maxReplicas: {{ .Values.api.autoscaling.maxReplicas | default 5 }}
+            metrics:
+              - type: Resource
+                resource:
+                  name: cpu
+                  target:
+                    type: Utilization
+                    averageUtilization: 70
+          \`\`\`
+
+          ## Acceptance Criteria
+          - [ ] HPA Helm template added for API deployment
+          - [ ] \`autoscaling.enabled\` flag (default: false in dev, true in production values)
+          - [ ] Min/max replicas configurable via \`values.production.yaml\`
+          - [ ] CPU and memory resource requests/limits set (required for HPA)
+
+          ## References
+          > docs/architecture-review.md — §7.6 Infrastructure Improvements" \
+            "phase: 4 - infra,scalability,backlog"
+
+          # ────────────────────────────────────────────
+          create_issue \
+            "[Security] Add Kubernetes Network Policies to restrict inter-pod traffic" \
+            "## Summary
+          Without Network Policies, any pod can communicate with any other pod.
+          Policies restrict traffic to only expected communication paths.
+
+          ## Policy Design
+          \`\`\`yaml
+          # Default deny-all ingress
+          apiVersion: networking.k8s.io/v1
+          kind: NetworkPolicy
+          metadata:
+            name: default-deny-ingress
+          spec:
+            podSelector: {}
+            policyTypes: [Ingress]
+          ---
+          # Allow only: API → MongoDB
+          apiVersion: networking.k8s.io/v1
+          kind: NetworkPolicy
+          metadata:
+            name: allow-api-to-mongodb
+          spec:
+            podSelector:
+              matchLabels: { app: mongodb }
+            ingress:
+              - from:
+                - podSelector:
+                    matchLabels: { app: dp-stock-api }
+                ports: [{ port: 27017 }]
+          \`\`\`
+
+          ## Acceptance Criteria
+          - [ ] Default-deny ingress policy for all namespaced pods
+          - [ ] Explicit allow policies: frontend→API, API→MongoDB, API→Redis, API→Agent
+          - [ ] Policies added as Helm templates with \`networkPolicy.enabled\` toggle
+          - [ ] Verified with \`kubectl exec\` connectivity tests
+
+          ## References
+          > docs/architecture-review.md — §7.6 Infrastructure Improvements" \
+            "phase: 4 - infra,security,backlog"
+
+          # ────────────────────────────────────────────
+          create_issue \
+            "[Observability] Add Grafana + Prometheus Helm chart dependencies" \
+            "## Summary
+          There is no monitoring dashboard for production. Adding kube-prometheus-stack
+          as a Helm dependency provides dashboards for API latency, LLM costs, error rates,
+          and pod health out of the box.
+
+          ## Implementation
+          \`\`\`yaml
+          # IaC/helm/dp-stock/Chart.yaml
+          dependencies:
+            - name: kube-prometheus-stack
+              version: \"~65.x\"
+              repository: https://prometheus-community.github.io/helm-charts
+              condition: monitoring.enabled
+          \`\`\`
+
+          ## Dashboard Panels (Target)
+          - API request rate + p50/p95 latency
+          - LLM call count and latency by provider
+          - Chat requests with/without fallback
+          - Pod CPU/memory usage
+          - MongoDB connection pool
+          - Redis cache hit rate
+
+          ## Acceptance Criteria
+          - [ ] \`kube-prometheus-stack\` added as optional Helm dependency
+          - [ ] \`ServiceMonitor\` for API scraping included
+          - [ ] Grafana dashboard JSON provisioned via ConfigMap
+          - [ ] \`monitoring.enabled: false\` toggle in \`values.yaml\`, true in production
+          - [ ] **Depends on**: Prometheus metrics issue
+
+          ## References
+          > docs/architecture-review.md — §7.6 Infrastructure Improvements" \
+            "phase: 4 - infra,observability,deployment,backlog"
+
+          # ────────────────────────────────────────────
+          create_issue \
+            "[Availability] Add Kubernetes PodDisruptionBudget for zero-downtime deployments" \
+            "## Summary
+          Without a PodDisruptionBudget, rolling updates or node drains could take all API pods
+          offline simultaneously. A PDB ensures at least one pod remains available at all times.
+
+          ## Implementation
+          \`\`\`yaml
+          # IaC/helm/dp-stock/templates/pdb-api.yaml
+          apiVersion: policy/v1
+          kind: PodDisruptionBudget
+          metadata:
+            name: {{ include \"dp-stock.fullname\" . }}-api
+          spec:
+            minAvailable: 1
+            selector:
+              matchLabels:
+                {{- include \"dp-stock.selectorLabels\" . | nindent 6 }}
+                app.kubernetes.io/component: api
+          \`\`\`
+
+          ## Acceptance Criteria
+          - [ ] PDB template added to Helm chart for API and Agent deployments
+          - [ ] \`minAvailable: 1\` configured (or 50% for multi-replica production)
+          - [ ] Verified: \`kubectl drain\` leaves ≥1 API pod running
+
+          ## References
+          > docs/architecture-review.md — §7.6 Infrastructure Improvements" \
+            "phase: 4 - infra,scalability,backlog"
+
+          # ────────────────────────────────────────────
+          create_issue \
+            "[Supply Chain] Add container image signing with Cosign" \
+            "## Summary
+          Container images are pushed to ACR without cryptographic signatures.
+          Cosign provides image provenance verification: only images signed by the CI pipeline
+          can be deployed, protecting against supply chain attacks.
+
+          ## Implementation
+          \`\`\`yaml
+          # In .github/workflows/build-push-images.yml
+          - name: Install Cosign
+            uses: sigstore/cosign-installer@v3
+
+          - name: Sign image (keyless via GitHub OIDC)
+            run: |
+              cosign sign --yes \\
+                \${{ env.REGISTRY }}/\${{ env.IMAGE_NAME }}@\${{ steps.build.outputs.digest }}
+            env:
+              COSIGN_EXPERIMENTAL: '1'
+
+          - name: Verify image before deploy
+            run: cosign verify \${{ env.REGISTRY }}/\${{ env.IMAGE_NAME }}@\${{ steps.build.outputs.digest }}
+          \`\`\`
+
+          ## Acceptance Criteria
+          - [ ] Cosign installed in CI build workflow
+          - [ ] All images signed after push (keyless, via GitHub OIDC)
+          - [ ] Verify step added before Helm deploy job
+          - [ ] Kyverno/OPA Gatekeeper policy enforces signed images in production namespace
+
+          ## References
+          > docs/architecture-review.md — §7.6 Infrastructure Improvements" \
+            "phase: 4 - infra,supply-chain,deployment,backlog"
+
+      # ── Step 7: Summary ───────────────────────────────────────────────────
+      - name: Print summary
+        if: always()
+        shell: bash
+        run: |
+          echo ""
+          echo "═══════════════════════════════════════════════════════════════"
+          echo "  Architecture Backlog — Issue Creation Summary"
+          echo "═══════════════════════════════════════════════════════════════"
+          echo ""
+          echo "  Phase 1 — Foundation Hardening  :  8 issues"
+          echo "  Phase 2 — Frontend Modernization:  8 issues"
+          echo "  Phase 3 — API & Agent Enhancement: 7 issues"
+          echo "  Phase 4 — Infrastructure & Scale:  6 issues"
+          echo "  ─────────────────────────────────────────────────────"
+          echo "  Total: 29 issues"
+          echo ""
+          if [[ "$DRY_RUN" == "true" ]]; then
+            echo "  ⚠️  DRY RUN — no issues were created."
+            echo "      Re-run with dry_run=false to create all issues."
+          else
+            echo "  ✅ Issues created and added to:"
+            echo "     https://github.com/users/$PROJECT_OWNER/projects/$PROJECT_NUMBER"
+            echo ""
+            echo "  📌 NOTE: If issues were not added to the project board,"
+            echo "     ensure ISSUES_TOKEN secret has the 'project' scope."
+            echo "     Create a PAT at: GitHub → Settings → Developer Settings →"
+            echo "     Personal Access Tokens → Tokens (classic)"
+            echo "     Required scopes: repo, project"
+          fi
+          echo "═══════════════════════════════════════════════════════════════"
