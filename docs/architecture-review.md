@@ -1325,4 +1325,38 @@ graph TB
 
 ---
 
+## Creating GitHub Issues from This Review
+
+All 29 improvement items from Sections 10 and 11 are encoded as a `workflow_dispatch` GitHub Actions workflow:
+
+**File:** `.github/workflows/create-backlog-issues.yml`
+
+### Prerequisites
+
+1. Create a **Personal Access Token (PAT)** with scopes: `repo` + `project`  
+   *(GitHub → Settings → Developer settings → Personal access tokens)*
+2. Add the token as a repository secret named **`ISSUES_TOKEN`**  
+   *(Repository → Settings → Secrets and variables → Actions)*
+
+### Running the Workflow
+
+1. Go to **Actions** tab in the repository
+2. Select **"Create Architecture Backlog Issues"**
+3. Click **"Run workflow"**
+4. Set `dry_run = true` first to preview, then `dry_run = false` to create all 29 issues
+5. Issues will be created in the repository **and** added to the [DP-Stock-AI-Assistant project](https://github.com/users/d-dragon/projects/3)
+
+### What the Workflow Creates
+
+| Phase | Issues | Labels |
+|-------|--------|--------|
+| Phase 1 — Foundation Hardening | 8 | `phase: 1 - foundation` |
+| Phase 2 — Frontend Modernization | 8 | `phase: 2 - frontend` |
+| Phase 3 — API & Agent Enhancement | 7 | `phase: 3 - api-agent` |
+| Phase 4 — Infrastructure & Scale | 6 | `phase: 4 - infra` |
+
+Each issue includes: summary, problem description, recommended code snippet, and acceptance criteria.
+
+---
+
 *This document was generated as part of the architecture review and enhancement planning for DP Stock Investment Assistant. For implementation guidance on any specific area, refer to the domain instruction files in `.github/instructions/`.*
