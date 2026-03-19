@@ -79,8 +79,8 @@ def _make_test_app(registry=None):
     registry = registry or DummyRegistry()
     active_calls = []
 
-    def stream_chat_response(message, provider_override, session_id=None):
-        stream_calls.append((message, provider_override, session_id))
+    def stream_chat_response(message, provider_override, conversation_id=None):
+        stream_calls.append((message, provider_override, conversation_id))
         yield "data: test-chunk\n\n"
 
     def extract_meta(raw):
@@ -156,7 +156,7 @@ def test_chat_endpoint_returns_processed_payload():
     assert payload["model"] == "model"
     assert payload["fallback"] is False
     assert payload["timestamp"] == "2024-01-01T00:00:00Z"
-    mock_chat_service.process_chat_query.assert_called_once_with("Hello world", provider_override=None, session_id=None)
+    mock_chat_service.process_chat_query.assert_called_once_with("Hello world", provider_override=None, conversation_id=None)
     assert stream_calls == []
 
 

@@ -30,8 +30,8 @@ def _make_test_app():
     
     stream_calls = []
 
-    def stream_chat_response(message, provider_override=None, session_id=None):
-        stream_calls.append((message, provider_override, session_id))
+    def stream_chat_response(message, provider_override=None, conversation_id=None):
+        stream_calls.append((message, provider_override, conversation_id))
         yield "data: test-chunk\n\n"
 
     def extract_meta(raw):
@@ -75,8 +75,8 @@ def _make_test_app():
     return app, mock_agent, stream_calls, mock_chat_service
 
 
-def generate_valid_session_id():
-    """Generate a valid UUID v4 session_id."""
+def generate_valid_conversation_id():
+    """Generate a valid UUID v4 conversation_id."""
     return str(uuid.uuid4())
 
 
@@ -84,58 +84,58 @@ def generate_valid_session_id():
 # TESTS: VALID SESSION_ID
 # ============================================================================
 
-def test_chat_with_valid_session_id_returns_200():
-    """Test POST /api/chat with valid session_id returns 200."""
+def test_chat_with_valid_conversation_id_returns_200():
+    """Test POST /api/chat with valid conversation_id returns 200."""
     app, agent, stream_calls, mock_chat_service = _make_test_app()
     client = app.test_client()
-    session_id = generate_valid_session_id()
+    conversation_id = generate_valid_conversation_id()
 
     response = client.post("/api/chat", json={
         "message": "Hello",
-        "session_id": session_id
+        "conversation_id": conversation_id
     })
 
     assert response.status_code == 200
 
 
-def test_chat_response_includes_echoed_session_id():
-    """Test response includes echoed session_id when provided."""
+def test_chat_response_includes_echoed_conversation_id():
+    """Test response includes echoed conversation_id when provided."""
     app, agent, stream_calls, mock_chat_service = _make_test_app()
     client = app.test_client()
-    session_id = generate_valid_session_id()
+    conversation_id = generate_valid_conversation_id()
 
     response = client.post("/api/chat", json={
         "message": "Hello",
-        "session_id": session_id
+        "conversation_id": conversation_id
     })
 
     payload = response.get_json()
-    assert "session_id" in payload
-    assert payload["session_id"] == session_id
+    assert "conversation_id" in payload
+    assert payload["conversation_id"] == conversation_id
 
 
-def test_chat_passes_session_id_to_chat_service():
-    """Test chat endpoint passes session_id to chat_service.process_chat_query."""
+def test_chat_passes_conversation_id_to_chat_service():
+    """Test chat endpoint passes conversation_id to chat_service.process_chat_query."""
     app, agent, stream_calls, mock_chat_service = _make_test_app()
     client = app.test_client()
-    session_id = generate_valid_session_id()
+    conversation_id = generate_valid_conversation_id()
 
     response = client.post("/api/chat", json={
         "message": "Test message",
-        "session_id": session_id
+        "conversation_id": conversation_id
     })
 
     assert response.status_code == 200
-    # Verify session_id passed to chat_service
+    # Verify conversation_id passed to chat_service
     mock_chat_service.process_chat_query.assert_called_once_with(
         "Test message",
         provider_override=None,
-        session_id=session_id
+        conversation_id=conversation_id
     )
 
 
-def test_chat_without_session_id_still_works():
-    """Test POST /api/chat works without session_id (backward compatibility)."""
+def test_chat_without_conversation_id_still_works():
+    """Test POST /api/chat works without conversation_id (backward compatibility)."""
     app, agent, stream_calls, mock_chat_service = _make_test_app()
     client = app.test_client()
 
@@ -145,12 +145,12 @@ def test_chat_without_session_id_still_works():
 
     assert response.status_code == 200
     payload = response.get_json()
-    # session_id should NOT be in response when not provided
-    assert "session_id" not in payload
+    # conversation_id should NOT be in response when not provided
+    assert "conversation_id" not in payload
 
 
-def test_chat_without_session_id_passes_none_to_service():
-    """Test chat passes None for session_id when not provided."""
+def test_chat_without_conversation_id_passes_none_to_service():
+    """Test chat passes None for conversation_id when not provided."""
     app, agent, stream_calls, mock_chat_service = _make_test_app()
     client = app.test_client()
 
@@ -162,7 +162,7 @@ def test_chat_without_session_id_passes_none_to_service():
     mock_chat_service.process_chat_query.assert_called_once_with(
         "Test",
         provider_override=None,
-        session_id=None
+        conversation_id=None
     )
 
 
@@ -170,20 +170,20 @@ def test_chat_without_session_id_passes_none_to_service():
 # TESTS: INVALID SESSION_ID FORMAT
 # ============================================================================
 
-def test_chat_with_invalid_session_id_returns_400():
-    """Test POST /api/chat with invalid session_id format returns 400."""
+def test_chat_with_invalid_conversation_id_returns_400():
+    """Test POST /api/chat with invalid conversation_id format returns 400."""
     app, agent, stream_calls, mock_chat_service = _make_test_app()
     client = app.test_client()
 
     response = client.post("/api/chat", json={
         "message": "Hello",
-        "session_id": "not-a-valid-uuid"
+        "conversation_id": "not-a-valid-uuid"
     })
 
     assert response.status_code == 400
     payload = response.get_json()
     assert "error" in payload
-    assert "session_id" in payload["error"].lower() or "uuid" in payload["error"].lower()
+    assert "conversation_id" in payload["error"].lower() or "uuid" in payload["error"].lower()
 
 
 def test_chat_with_uuid_v1_returns_400():
@@ -195,87 +195,87 @@ def test_chat_with_uuid_v1_returns_400():
 
     response = client.post("/api/chat", json={
         "message": "Hello",
-        "session_id": uuid_v1
+        "conversation_id": uuid_v1
     })
 
     # UUID v1 should be rejected because we only accept v4
     assert response.status_code == 400
 
 
-def test_chat_with_empty_session_id_returns_400():
-    """Test POST /api/chat with empty string session_id returns 400."""
+def test_chat_with_empty_conversation_id_returns_400():
+    """Test POST /api/chat with empty string conversation_id returns 400."""
     app, agent, stream_calls, mock_chat_service = _make_test_app()
     client = app.test_client()
 
     response = client.post("/api/chat", json={
         "message": "Hello",
-        "session_id": ""
+        "conversation_id": ""
     })
 
     assert response.status_code == 400
 
 
-def test_chat_with_numeric_session_id_returns_400():
-    """Test POST /api/chat with numeric session_id returns 400."""
+def test_chat_with_numeric_conversation_id_returns_400():
+    """Test POST /api/chat with numeric conversation_id returns 400."""
     app, agent, stream_calls, mock_chat_service = _make_test_app()
     client = app.test_client()
 
     response = client.post("/api/chat", json={
         "message": "Hello",
-        "session_id": 12345
+        "conversation_id": 12345
     })
 
     assert response.status_code == 400
 
 
-def test_chat_with_null_session_id_treated_as_not_provided():
-    """Test POST /api/chat with null session_id works (treated as None)."""
+def test_chat_with_null_conversation_id_treated_as_not_provided():
+    """Test POST /api/chat with null conversation_id works (treated as None)."""
     app, agent, stream_calls, mock_chat_service = _make_test_app()
     client = app.test_client()
 
     response = client.post("/api/chat", json={
         "message": "Hello",
-        "session_id": None
+        "conversation_id": None
     })
 
     # null is treated as not provided, should succeed
     assert response.status_code == 200
     payload = response.get_json()
-    # session_id should NOT be in response when None
-    assert "session_id" not in payload
+    # conversation_id should NOT be in response when None
+    assert "conversation_id" not in payload
 
 
 # ============================================================================
 # TESTS: SESSION_ID WITH STREAMING
 # ============================================================================
 
-def test_streaming_chat_accepts_session_id():
-    """Test streaming mode accepts session_id."""
+def test_streaming_chat_accepts_conversation_id():
+    """Test streaming mode accepts conversation_id."""
     app, agent, stream_calls, mock_chat_service = _make_test_app()
     client = app.test_client()
-    session_id = generate_valid_session_id()
+    conversation_id = generate_valid_conversation_id()
 
     # Use stream: true parameter to trigger streaming mode
     response = client.post("/api/chat", json={
         "message": "Hello",
-        "session_id": session_id,
+        "conversation_id": conversation_id,
         "stream": True
     })
 
     assert response.status_code == 200
-    # Verify session_id was passed to stream_chat_response
+    # Verify conversation_id was passed to stream_chat_response
     assert len(stream_calls) == 1
-    assert stream_calls[0][2] == session_id  # Third element is session_id
+    assert stream_calls[0][2] == conversation_id  # Third element is conversation_id
 
 
-def test_streaming_chat_with_invalid_session_id_returns_400():
-    """Test streaming mode rejects invalid session_id."""
+def test_streaming_chat_with_invalid_conversation_id_returns_400():
+    """Test streaming mode rejects invalid conversation_id."""
     app, agent, stream_calls, mock_chat_service = _make_test_app()
     client = app.test_client()
 
     response = client.post("/api/chat", json={
         "message": "Hello",
-        "session_id": "invalid-uuid",
+        "conversation_id": "invalid-uuid",
         "stream": True
     })
 
@@ -286,23 +286,23 @@ def test_streaming_chat_with_invalid_session_id_returns_400():
 # TESTS: SESSION_ID WITH PROVIDER OVERRIDE
 # ============================================================================
 
-def test_chat_with_session_id_and_provider_override():
-    """Test POST /api/chat with both session_id and provider works."""
+def test_chat_with_conversation_id_and_provider_override():
+    """Test POST /api/chat with both conversation_id and provider works."""
     app, agent, stream_calls, mock_chat_service = _make_test_app()
     client = app.test_client()
-    session_id = generate_valid_session_id()
+    conversation_id = generate_valid_conversation_id()
 
     response = client.post("/api/chat", json={
         "message": "Hello",
         "provider": "grok",
-        "session_id": session_id
+        "conversation_id": conversation_id
     })
 
     assert response.status_code == 200
     mock_chat_service.process_chat_query.assert_called_once_with(
         "Hello",
         provider_override="grok",
-        session_id=session_id
+        conversation_id=conversation_id
     )
 
 
@@ -310,50 +310,50 @@ def test_chat_with_session_id_and_provider_override():
 # TESTS: MULTI-TURN CONVERSATION (API LEVEL)
 # ============================================================================
 
-def test_multiple_requests_with_same_session_id():
-    """Test multiple API requests with same session_id use consistent config."""
+def test_multiple_requests_with_same_conversation_id():
+    """Test multiple API requests with same conversation_id use consistent config."""
     app, agent, stream_calls, mock_chat_service = _make_test_app()
     client = app.test_client()
-    session_id = generate_valid_session_id()
+    conversation_id = generate_valid_conversation_id()
 
     # First request
     response1 = client.post("/api/chat", json={
         "message": "My name is Alice",
-        "session_id": session_id
+        "conversation_id": conversation_id
     })
     assert response1.status_code == 200
 
-    # Second request with same session_id
+    # Second request with same conversation_id
     response2 = client.post("/api/chat", json={
         "message": "What is my name?",
-        "session_id": session_id
+        "conversation_id": conversation_id
     })
     assert response2.status_code == 200
 
-    # Both should have passed the same session_id
+    # Both should have passed the same conversation_id
     calls = mock_chat_service.process_chat_query.call_args_list
     assert len(calls) == 2
-    assert calls[0][1]['session_id'] == session_id
-    assert calls[1][1]['session_id'] == session_id
+    assert calls[0][1]['conversation_id'] == conversation_id
+    assert calls[1][1]['conversation_id'] == conversation_id
 
 
-def test_requests_with_different_session_ids():
-    """Test requests with different session_ids use different configs."""
+def test_requests_with_different_conversation_ids():
+    """Test requests with different conversation_ids use different configs."""
     app, agent, stream_calls, mock_chat_service = _make_test_app()
     client = app.test_client()
-    session_id_1 = generate_valid_session_id()
-    session_id_2 = generate_valid_session_id()
+    conversation_id_1 = generate_valid_conversation_id()
+    conversation_id_2 = generate_valid_conversation_id()
 
     # Request with session 1
     response1 = client.post("/api/chat", json={
         "message": "Hello from session 1",
-        "session_id": session_id_1
+        "conversation_id": conversation_id_1
     })
 
     # Request with session 2
     response2 = client.post("/api/chat", json={
         "message": "Hello from session 2",
-        "session_id": session_id_2
+        "conversation_id": conversation_id_2
     })
 
     assert response1.status_code == 200
@@ -361,9 +361,9 @@ def test_requests_with_different_session_ids():
 
     calls = mock_chat_service.process_chat_query.call_args_list
     assert len(calls) == 2
-    assert calls[0][1]['session_id'] == session_id_1
-    assert calls[1][1]['session_id'] == session_id_2
-    assert session_id_1 != session_id_2
+    assert calls[0][1]['conversation_id'] == conversation_id_1
+    assert calls[1][1]['conversation_id'] == conversation_id_2
+    assert conversation_id_1 != conversation_id_2
 
 
 # ============================================================================
@@ -371,14 +371,14 @@ def test_requests_with_different_session_ids():
 # ============================================================================
 
 # Import the actual exception class from services layer
-from services.exceptions import ArchivedSessionError
+from services.exceptions import ArchivedConversationError
 
 
 def _make_archived_session_test_app():
-    """Create Flask app with chat_service that rejects archived sessions.
+    """Create Flask app with chat_service that rejects archived conversations.
     
     This simulates the expected behavior for T032:
-    - Archived sessions return 409 Conflict when used with POST /api/chat
+    - Archived conversations return 409 Conflict when used with POST /api/chat
     """
     app = Flask("test_archived_sessions")
     
@@ -387,14 +387,14 @@ def _make_archived_session_test_app():
     
     mock_chat_service = MagicMock()
     
-    # Configure mock to raise error for archived sessions
-    archived_session_id = str(uuid.uuid4())  # We'll track this
+    # Configure mock to raise error for archived conversations
+    archived_conversation_id = str(uuid.uuid4())  # We'll track this
     
-    def process_chat_query_with_archive_check(message, provider_override=None, session_id=None):
-        # Simulate archived session detection
-        if session_id == archived_session_id:
+    def process_chat_query_with_archive_check(message, provider_override=None, conversation_id=None):
+        # Simulate archived conversation detection
+        if conversation_id == archived_conversation_id:
             # Use the real exception class that the route knows how to handle
-            raise ArchivedSessionError(session_id)
+            raise ArchivedConversationError(conversation_id)
         return {
             "response": "cleaned response",
             "provider": "openai",
@@ -424,11 +424,11 @@ def _make_archived_session_test_app():
     blueprint = create_chat_blueprint(context)
     app.register_blueprint(blueprint, url_prefix="/api")
     
-    return app, mock_chat_service, archived_session_id
+    return app, mock_chat_service, archived_conversation_id
 
 
 class TestArchivedSessionHandling:
-    """T032: Tests for archived session handling per FR-3.1.5.
+    """T032: Tests for archived conversation handling per FR-3.1.5.
     
     Archived sessions should:
     - Return 409 Conflict when attempting to POST new messages
@@ -440,43 +440,43 @@ class TestArchivedSessionHandling:
     """
     
     def test_post_to_archived_session_returns_409_conflict(self):
-        """Test: Attempt to resume archived session returns 409 Conflict.
+        """Test: Attempt to resume archived conversation returns 409 Conflict.
         
         T032 requirement: System returns 409 Conflict with clear message
-        when attempting to POST to an archived session.
+        when attempting to POST to an archived conversation.
         
         NOTE: This test requires route-level exception handling for
-        ArchivedSessionError (or similar) to be implemented.
+        ArchivedConversationError to be implemented.
         """
-        app, mock_chat_service, archived_session_id = _make_archived_session_test_app()
+        app, mock_chat_service, archived_conversation_id = _make_archived_session_test_app()
         client = app.test_client()
         
-        # Attempt to send message to archived session
+        # Attempt to send message to archived conversation
         response = client.post("/api/chat", json={
             "message": "Hello, can we continue?",
-            "session_id": archived_session_id
+            "conversation_id": archived_conversation_id
         })
         
         # Expected: 409 Conflict (not 500 Internal Server Error)
-        # If this fails with 500, the route needs exception handling for ArchivedSessionError
+        # If this fails with 500, the route needs exception handling for ArchivedConversationError
         assert response.status_code == 409, (
-            f"Expected 409 Conflict for archived session, got {response.status_code}. "
-            "Route needs to catch ArchivedSessionError and return 409."
+            f"Expected 409 Conflict for archived conversation, got {response.status_code}. "
+            "Route needs to catch ArchivedConversationError and return 409."
         )
     
     def test_archived_session_error_message_is_clear(self):
         """Test: 409 response includes clear error message.
         
         The error message should indicate:
-        - The session is archived
+        - The conversation is archived
         - New messages cannot be added
         """
-        app, mock_chat_service, archived_session_id = _make_archived_session_test_app()
+        app, mock_chat_service, archived_conversation_id = _make_archived_session_test_app()
         client = app.test_client()
         
         response = client.post("/api/chat", json={
             "message": "Hello",
-            "session_id": archived_session_id
+            "conversation_id": archived_conversation_id
         })
         
         # Skip detailed assertion if 409 not implemented yet
@@ -497,7 +497,7 @@ class TestArchivedSessionHandling:
         Regression test: Ensure archived session handling doesn't
         break normal session functionality.
         """
-        app, mock_chat_service, archived_session_id = _make_archived_session_test_app()
+        app, mock_chat_service, archived_conversation_id = _make_archived_session_test_app()
         client = app.test_client()
         
         # Use a different session ID (not the archived one)
@@ -505,7 +505,7 @@ class TestArchivedSessionHandling:
         
         response = client.post("/api/chat", json={
             "message": "Hello",
-            "session_id": active_session_id
+            "conversation_id": active_session_id
         })
         
         # Should succeed with 200
@@ -519,12 +519,12 @@ class TestArchivedSessionHandling:
         Security: Error responses should not leak implementation details
         like full stack traces or internal class names.
         """
-        app, mock_chat_service, archived_session_id = _make_archived_session_test_app()
+        app, mock_chat_service, archived_conversation_id = _make_archived_session_test_app()
         client = app.test_client()
         
         response = client.post("/api/chat", json={
             "message": "Hello",
-            "session_id": archived_session_id
+            "conversation_id": archived_conversation_id
         })
         
         # Skip if 409 not implemented
@@ -536,7 +536,7 @@ class TestArchivedSessionHandling:
         response_text = str(payload)
         
         # Should not contain internal exception class names
-        assert "ArchivedSessionError" not in response_text
+        assert "ArchivedConversationError" not in response_text
         assert "Traceback" not in response_text
         assert "File" not in response_text  # No file paths
 
@@ -565,13 +565,13 @@ def _make_socketio_reconnection_test_app():
     
     mock_agent = MagicMock()
     
-    def process_query_with_history(message, provider=None, session_id=None):
+    def process_query_with_history(message, provider=None, conversation_id=None):
         """Simulate agent that uses session history for context."""
-        if session_id:
+        if conversation_id:
             # Get existing history or start new
-            history = session_history.get(session_id, [])
+            history = session_history.get(conversation_id, [])
             history.append(message)
-            session_history[session_id] = history
+            session_history[conversation_id] = history
             
             # Generate response that references history length
             return f"Received message #{len(history)}: {message}"
@@ -619,14 +619,14 @@ class TestSocketIOReconnection:
         """Test: Disconnecting and reconnecting preserves session history.
         
         Scenario:
-        1. Client connects, sends message with session_id
+        1. Client connects, sends message with conversation_id
         2. Client disconnects
-        3. Client reconnects with same session_id
+        3. Client reconnects with same conversation_id
         4. New messages should reference existing history
         """
         app, socketio, session_history = _make_socketio_reconnection_test_app()
         
-        test_session_id = str(uuid.uuid4())
+        test_conversation_id = str(uuid.uuid4())
         
         # Use SocketIOTestClient for testing
         from flask_socketio import SocketIOTestClient
@@ -640,10 +640,10 @@ class TestSocketIOReconnection:
         status_events = [r for r in received if r['name'] == 'status']
         assert len(status_events) >= 1
         
-        # Send first message with session_id
+        # Send first message with conversation_id
         client1.emit('chat_message', {
             'message': 'Hello, first message',
-            'session_id': test_session_id
+            'conversation_id': test_conversation_id
         })
         
         received = client1.get_received()
@@ -656,17 +656,17 @@ class TestSocketIOReconnection:
         client1.disconnect()
         assert not client1.is_connected()
         
-        # Reconnect with new client, same session_id
+        # Reconnect with new client, same conversation_id
         client2 = socketio.test_client(app)
         assert client2.is_connected()
         
         # Clear connection events
         client2.get_received()
         
-        # Send second message with same session_id
+        # Send second message with same conversation_id
         client2.emit('chat_message', {
             'message': 'Hello, second message',
-            'session_id': test_session_id
+            'conversation_id': test_conversation_id
         })
         
         received = client2.get_received()
@@ -680,13 +680,13 @@ class TestSocketIOReconnection:
         )
         
         # Verify session history has both messages
-        assert test_session_id in session_history
-        assert len(session_history[test_session_id]) == 2
+        assert test_conversation_id in session_history
+        assert len(session_history[test_conversation_id]) == 2
         
         client2.disconnect()
     
-    def test_session_id_echoed_back_in_response(self):
-        """Test: Session ID is echoed back in Socket.IO response.
+    def test_conversation_id_echoed_back_in_response(self):
+        """Test: Conversation ID is echoed back in Socket.IO response.
         
         This helps clients confirm their session state is being tracked.
         """
@@ -694,14 +694,14 @@ class TestSocketIOReconnection:
         
         from flask_socketio import SocketIOTestClient
         
-        test_session_id = str(uuid.uuid4())
+        test_conversation_id = str(uuid.uuid4())
         
         client = socketio.test_client(app)
         client.get_received()  # Clear connection events
         
         client.emit('chat_message', {
             'message': 'Test message',
-            'session_id': test_session_id
+            'conversation_id': test_conversation_id
         })
         
         received = client.get_received()
@@ -710,14 +710,14 @@ class TestSocketIOReconnection:
         assert len(responses) >= 1
         response_data = responses[0]['args'][0]
         
-        # Session ID should be echoed back
-        assert 'session_id' in response_data
-        assert response_data['session_id'] == test_session_id
+        # Conversation ID should be echoed back
+        assert 'conversation_id' in response_data
+        assert response_data['conversation_id'] == test_conversation_id
         
         client.disconnect()
     
     def test_multiple_clients_same_session_share_history(self):
-        """Test: Multiple clients using same session_id share conversation history.
+        """Test: Multiple clients using same conversation_id share conversation history.
         
         This simulates a user with multiple browser tabs or reconnecting
         after a brief disconnection.
@@ -726,7 +726,7 @@ class TestSocketIOReconnection:
         
         from flask_socketio import SocketIOTestClient
         
-        shared_session_id = str(uuid.uuid4())
+        shared_conversation_id = str(uuid.uuid4())
         
         # Client 1 sends message
         client1 = socketio.test_client(app)
@@ -734,17 +734,17 @@ class TestSocketIOReconnection:
         
         client1.emit('chat_message', {
             'message': 'From client 1',
-            'session_id': shared_session_id
+            'conversation_id': shared_conversation_id
         })
         client1.get_received()
         
-        # Client 2 sends message with same session_id (without disconnecting client 1)
+        # Client 2 sends message with same conversation_id (without disconnecting client 1)
         client2 = socketio.test_client(app)
         client2.get_received()
         
         client2.emit('chat_message', {
             'message': 'From client 2',
-            'session_id': shared_session_id
+            'conversation_id': shared_conversation_id
         })
         
         received = client2.get_received()
@@ -759,13 +759,13 @@ class TestSocketIOReconnection:
         )
         
         # Verify session history has both messages
-        assert len(session_history[shared_session_id]) == 2
+        assert len(session_history[shared_conversation_id]) == 2
         
         client1.disconnect()
         client2.disconnect()
     
-    def test_stateless_operation_when_no_session_id(self):
-        """Test: Without session_id, each message is stateless.
+    def test_stateless_operation_when_no_conversation_id(self):
+        """Test: Without conversation_id, each message is stateless.
         
         Regression test: Ensure session-aware features don't break
         stateless operation for clients not using sessions.
@@ -777,7 +777,7 @@ class TestSocketIOReconnection:
         client = socketio.test_client(app)
         client.get_received()
         
-        # Send message WITHOUT session_id
+        # Send message WITHOUT conversation_id
         client.emit('chat_message', {
             'message': 'Stateless message'
         })
@@ -791,7 +791,7 @@ class TestSocketIOReconnection:
         # Should indicate stateless operation
         assert 'Stateless' in response_data['response']
         
-        # No session_id in response when not provided in request
+        # No conversation_id in response when not provided in request
         # (This is implementation-dependent, some may omit, some may include None)
         
         client.disconnect()

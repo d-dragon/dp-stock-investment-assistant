@@ -18,7 +18,7 @@ T037: Performance benchmark tests:
 - Log benchmark results for CI tracking
 
 User Story (US2): User has active session with ≥3 messages, system restarts,
-user reconnects with same session_id, agent demonstrates awareness of prior conversation.
+user reconnects with same conversation_id, agent demonstrates awareness of prior conversation.
 
 User Story (US4): Tools return stock prices, ratios, news; stored memory contains 
 zero financial data (T029 compliance integration tests).
@@ -47,7 +47,7 @@ from utils.memory_config import ContentValidator
 
 @pytest.fixture
 def valid_session_id() -> str:
-    """Generate a valid UUID v4 session ID."""
+    """Generate a valid UUID v4 identifier used as conversation_id / thread_id."""
     return str(uuid.uuid4())
 
 
@@ -188,10 +188,10 @@ class TestMemoryPersistenceAcrossRestart:
     Test suite for FR-3.1.2: Message history matches 100% after restart.
     
     Simulates the user story:
-    1. User initiates conversation with session_id
+    1. User initiates conversation with conversation_id
     2. User exchanges ≥3 messages with agent
     3. System "restarts" (agent instance destroyed and recreated)
-    4. User reconnects with same session_id
+    4. User reconnects with same conversation_id
     5. Agent demonstrates awareness of prior conversation
     """
     
@@ -205,9 +205,9 @@ class TestMemoryPersistenceAcrossRestart:
         Test: Create session, add 3+ messages, simulate restart, verify context restored.
         
         Verifies:
-        - Session can be created with session_id
+        - Session can be created with conversation_id (maps to thread_id)
         - Messages are stored in checkpoint
-        - After "restart", same session_id retrieves stored messages
+        - After "restart", same conversation_id retrieves stored messages
         """
         # ─────────────────────────────────────────────────────────────
         # Phase 1: Initial conversation (before restart)
@@ -419,7 +419,11 @@ class TestMemoryPersistenceAcrossRestart:
 
 class TestSessionIdentifierBinding:
     """
-    Test suite for FR-3.1.3: Session identifier correctly binds to stored state.
+    Test suite for FR-3.1.3: Conversation identifier correctly binds to stored state.
+    
+    Note: valid_session_id fixture generates UUIDs used as conversation_id/thread_id
+    for LangGraph checkpointing. The name reflects the original session concept;
+    in the refactored model, conversation_id is the primary identity.
     """
     
     def test_session_id_binds_to_correct_checkpoint(
@@ -484,9 +488,11 @@ class TestConversationMetadataPersistence:
         Uses mock repository to simulate persistence.
         """
         # Mock conversation document
+        conversation_id = str(uuid.uuid4())
         session_id = str(uuid.uuid4())
         conversation = {
             "_id": "mock_id",
+            "conversation_id": conversation_id,
             "session_id": session_id,
             "workspace_id": "ws-123",
             "user_id": "user-456",
@@ -498,14 +504,14 @@ class TestConversationMetadataPersistence:
             "updated_at": "2025-01-27T10:30:00Z"
         }
         
-        # Simulate storage
-        mock_storage = {session_id: conversation}
+        # Simulate storage keyed by conversation_id (primary identity)
+        mock_storage = {conversation_id: conversation}
         
         # Simulate restart - new repository instance
         # In real scenario, MongoDB persists data between instances
         
         # Retrieve after "restart"
-        retrieved = mock_storage.get(session_id)
+        retrieved = mock_storage.get(conversation_id)
         
         assert retrieved is not None, "Conversation should persist across restart"
         assert retrieved["message_count"] == 5
@@ -759,7 +765,7 @@ class TestSessionRecallOnDisconnection:
     Reference: specs/spec-driven-development-pilot/tasks.md - T031
     
     User Story (US5): User has active conversation, network drops, 
-    user reconnects with same session_id, agent resumes with context awareness.
+    user reconnects with same conversation_id, agent resumes with context awareness.
     
     Test Strategy:
     - Simulate disconnect by destroying agent instance

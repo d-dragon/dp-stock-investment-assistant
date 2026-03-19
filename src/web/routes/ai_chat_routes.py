@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING, Optional
 
 from flask import Blueprint, Response, jsonify, request, stream_with_context
 
-from services.exceptions import ArchivedSessionError
+from services.exceptions import ArchivedConversationError
 
 if TYPE_CHECKING:
     from .shared_context import APIRouteContext
@@ -66,13 +66,8 @@ def create_chat_blueprint(context: "APIRouteContext") -> Blueprint:
                 "message": str (required),
                 "provider": str (optional),
                 "stream": bool (optional, default False),
-                "session_id": str (optional, UUID v4 for session-aware memory)
+                "conversation_id": str (optional, UUID v4 for conversation-aware memory)
             }
-        
-        Returns:
-            - Streaming: SSE stream with incremental response chunks
-            - Non-streaming: JSON with complete response and metadata
-              If session_id provided, it's included in the response.
         """
         try:
             data = request.get_json()
@@ -86,40 +81,39 @@ def create_chat_blueprint(context: "APIRouteContext") -> Blueprint:
             provider_override = data.get('provider') or request.args.get('provider')
             stream = data.get('stream', False)
             
-            # Extract and validate session_id (optional)
-            session_id = data.get('session_id')
-            if session_id is not None:
-                if not isinstance(session_id, str) or not UUID_V4_REGEX.match(session_id):
-                    return jsonify({'error': 'session_id must be a valid UUID v4'}), 400
+            # Extract and validate conversation_id (optional)
+            conversation_id = data.get('conversation_id')
+            if conversation_id is not None:
+                if not isinstance(conversation_id, str) or not UUID_V4_REGEX.match(conversation_id):
+                    return jsonify({'error': 'conversation_id must be a valid UUID v4'}), 400
 
             if stream:
                 logger.info(f"Streaming chat request: {user_message[:50]}..." + 
-                           (f" session={session_id}" if session_id else ""))
+                           (f" conversation={conversation_id}" if conversation_id else ""))
                 return Response(
                     stream_with_context(stream_chat_response(
-                        user_message, provider_override, session_id=session_id
+                        user_message, provider_override, conversation_id=conversation_id
                     )),
                     mimetype='text/event-stream',
                     headers=SSE_HEADERS
                 )
 
             logger.info(f"Chat request: {user_message[:50]}..." + 
-                       (f" session={session_id}" if session_id else ""))
+                       (f" conversation={conversation_id}" if conversation_id else ""))
             result = chat_service.process_chat_query(
-                user_message, provider_override=provider_override, session_id=session_id
+                user_message, provider_override=provider_override, conversation_id=conversation_id
             )
             
-            # Include session_id in response if provided
-            if session_id:
-                result['session_id'] = session_id
+            if conversation_id:
+                result['conversation_id'] = conversation_id
 
             return jsonify(result), 200
-        except ArchivedSessionError as exc:
-            logger.warning(f"Rejected message to archived session: {exc.session_id}")
+        except ArchivedConversationError as exc:
+            logger.warning(f"Rejected message to archived conversation: {exc.conversation_id}")
             return jsonify({
-                'error': 'Session is archived and cannot accept new messages',
-                'code': 'SESSION_ARCHIVED',
-                'session_id': exc.session_id
+                'error': 'Conversation is archived and cannot accept new messages',
+                'code': 'CONVERSATION_ARCHIVED',
+                'conversation_id': exc.conversation_id
             }), 409
         except Exception as exc:
             logger.error(f"Error in chat endpoint: {exc}", exc_info=True)

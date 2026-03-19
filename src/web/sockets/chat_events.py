@@ -8,7 +8,7 @@ from typing import Any, Callable, Mapping, Tuple, TYPE_CHECKING
 
 from flask_socketio import SocketIO, emit
 
-# UUID v4 regex pattern for session_id validation
+# UUID v4 regex pattern for conversation_id validation
 UUID_V4_REGEX = re.compile(
     r'^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$'
 )
@@ -54,27 +54,26 @@ def register_chat_events(context: SocketIOContext) -> None:
         """
         Handle real-time chat messages.
         
-        Accepts optional session_id (UUID v4) for conversation memory.
-        If session_id is provided, the agent will use it for session-aware memory.
+        Accepts optional conversation_id (UUID v4) for conversation memory.
         """
         try:
             payload = data or {}
             message = payload.get('message', '').strip()
             provider_override = payload.get('provider')
-            session_id = payload.get('session_id')
+            conversation_id = payload.get('conversation_id')
             
             if not message:
                 emit('error', {'message': 'Message cannot be empty'})
                 return
 
-            # Validate session_id format if provided
-            if session_id is not None:
-                if not isinstance(session_id, str) or not UUID_V4_REGEX.match(session_id):
-                    emit('error', {'message': 'session_id must be a valid UUID v4'})
+            # Validate conversation_id format if provided
+            if conversation_id is not None:
+                if not isinstance(conversation_id, str) or not UUID_V4_REGEX.match(conversation_id):
+                    emit('error', {'message': 'conversation_id must be a valid UUID v4'})
                     return
 
-            logger.debug(f"Processing chat message with session_id={session_id}")
-            raw_response = agent.process_query(message, provider=provider_override, session_id=session_id)
+            logger.debug(f"Processing chat message with conversation_id={conversation_id}")
+            raw_response = agent.process_query(message, provider=provider_override, conversation_id=conversation_id)
             provider_used, model_used, fallback_flag = extract_meta(raw_response)
             response_clean = strip_fallback_prefix(raw_response)
 
@@ -86,9 +85,9 @@ def register_chat_events(context: SocketIOContext) -> None:
                 'timestamp': get_timestamp()
             }
             
-            # Echo session_id back if provided
-            if session_id:
-                response_data['session_id'] = session_id
+            # Echo conversation_id back if provided
+            if conversation_id:
+                response_data['conversation_id'] = conversation_id
 
             emit('chat_response', response_data)
         except Exception as exc:

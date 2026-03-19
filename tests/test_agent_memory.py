@@ -53,8 +53,8 @@ def mock_checkpointer():
 
 
 @pytest.fixture
-def generate_session_id():
-    """Generate a valid UUID v4 session_id."""
+def generate_conversation_id():
+    """Generate a valid UUID v4 conversation_id."""
     return str(uuid.uuid4())
 
 
@@ -65,8 +65,8 @@ def generate_session_id():
 class TestSessionIdParameter:
     """Tests for session_id parameter acceptance and threading."""
 
-    def test_process_query_accepts_session_id(self, mock_config, generate_session_id):
-        """Test process_query accepts session_id parameter."""
+    def test_process_query_accepts_conversation_id(self, mock_config, generate_conversation_id):
+        """Test process_query accepts conversation_id parameter."""
         from core.stock_assistant_agent import StockAssistantAgent
         
         # Create agent with mocked dependencies
@@ -80,17 +80,17 @@ class TestSessionIdParameter:
             agent._use_streaming = False
             agent.logger = MagicMock()
             
-            session_id = generate_session_id
+            conversation_id = generate_conversation_id
             
-            # Should not raise - session_id is a valid parameter
-            result = agent.process_query("Hello", session_id=session_id)
+            # Should not raise - conversation_id is a valid parameter
+            result = agent.process_query("Hello", conversation_id=conversation_id)
             
             # Verify invoke was called with config containing thread_id
             call_args = agent._agent_executor.invoke.call_args
             config_arg = call_args[1].get('config') if call_args[1] else None
             
             assert config_arg is not None
-            assert config_arg['configurable']['thread_id'] == session_id
+            assert config_arg['configurable']['thread_id'] == conversation_id
 
     def test_process_query_works_without_session_id(self, mock_config):
         """Test process_query works when session_id is None (backward compat)."""
@@ -118,8 +118,8 @@ class TestSessionIdParameter:
                 # If configurable exists, thread_id should not be present
                 assert 'thread_id' not in config_arg.get('configurable', {})
 
-    def test_process_query_streaming_accepts_session_id(self, mock_config, generate_session_id):
-        """Test process_query_streaming accepts session_id parameter."""
+    def test_process_query_streaming_accepts_conversation_id(self, mock_config, generate_conversation_id):
+        """Test process_query_streaming accepts conversation_id parameter."""
         from core.stock_assistant_agent import StockAssistantAgent
         
         with patch('core.stock_assistant_agent.StockAssistantAgent._build_agent_executor'):
@@ -137,10 +137,10 @@ class TestSessionIdParameter:
             
             agent._agent_executor.astream_events = mock_astream_events
             
-            session_id = generate_session_id
+            conversation_id = generate_conversation_id
             
             # Should not raise - consuming the generator
-            chunks = list(agent.process_query_streaming("Hello", session_id=session_id))
+            chunks = list(agent.process_query_streaming("Hello", conversation_id=conversation_id))
             
             # The generator should have been consumed without error
 
@@ -170,12 +170,12 @@ class TestSessionIsolation:
             session_2 = str(uuid.uuid4())
             
             # Call with first session
-            agent.process_query("Hello from session 1", session_id=session_1)
+            agent.process_query("Hello from session 1", conversation_id=session_1)
             call_1 = agent._agent_executor.invoke.call_args_list[-1]
             config_1 = call_1[1].get('config', {})
             
             # Call with second session
-            agent.process_query("Hello from session 2", session_id=session_2)
+            agent.process_query("Hello from session 2", conversation_id=session_2)
             call_2 = agent._agent_executor.invoke.call_args_list[-1]
             config_2 = call_2[1].get('config', {})
             
@@ -217,7 +217,7 @@ class TestCheckpointerIntegration:
                 assert agent._checkpointer is mock_checkpointer
 
     def test_agent_config_includes_thread_id_when_checkpointer_present(
-        self, mock_config, mock_checkpointer, generate_session_id
+        self, mock_config, mock_checkpointer, generate_conversation_id
     ):
         """Test that config includes thread_id when checkpointer is present."""
         from core.stock_assistant_agent import StockAssistantAgent
@@ -232,14 +232,14 @@ class TestCheckpointerIntegration:
             agent._use_streaming = False
             agent.logger = MagicMock()
             
-            session_id = generate_session_id
-            agent.process_query("Hello", session_id=session_id)
+            conversation_id = generate_conversation_id
+            agent.process_query("Hello", conversation_id=conversation_id)
             
             call_args = agent._agent_executor.invoke.call_args
             config = call_args[1].get('config', {})
             
             assert 'configurable' in config
-            assert config['configurable']['thread_id'] == session_id
+            assert config['configurable']['thread_id'] == conversation_id
 
 
 # ============================================================================
@@ -250,9 +250,9 @@ class TestMultiTurnConversation:
     """Tests for multi-turn conversation context recall (FR-3.1.1)."""
 
     def test_consecutive_calls_with_same_session_use_same_thread_id(
-        self, mock_config, generate_session_id
+        self, mock_config, generate_conversation_id
     ):
-        """Test that consecutive calls with same session_id use same thread_id."""
+        """Test that consecutive calls with same conversation_id use same thread_id."""
         from core.stock_assistant_agent import StockAssistantAgent
         
         with patch('core.stock_assistant_agent.StockAssistantAgent._build_agent_executor'):
@@ -265,19 +265,19 @@ class TestMultiTurnConversation:
             agent._use_streaming = False
             agent.logger = MagicMock()
             
-            session_id = generate_session_id
+            conversation_id = generate_conversation_id
             
             # First message
-            agent.process_query("My name is Alice", session_id=session_id)
+            agent.process_query("My name is Alice", conversation_id=conversation_id)
             first_call_config = agent._agent_executor.invoke.call_args_list[0][1].get('config', {})
             
             # Second message (follow-up)
-            agent.process_query("What is my name?", session_id=session_id)
+            agent.process_query("What is my name?", conversation_id=conversation_id)
             second_call_config = agent._agent_executor.invoke.call_args_list[1][1].get('config', {})
             
             # Both should use the same thread_id
-            assert first_call_config['configurable']['thread_id'] == session_id
-            assert second_call_config['configurable']['thread_id'] == session_id
+            assert first_call_config['configurable']['thread_id'] == conversation_id
+            assert second_call_config['configurable']['thread_id'] == conversation_id
             assert first_call_config['configurable']['thread_id'] == second_call_config['configurable']['thread_id']
 
 
@@ -418,8 +418,8 @@ class TestStatelessFallbackMode:
             agent._use_streaming = False
             agent.logger = MagicMock()
             
-            # Query WITHOUT session_id (None)
-            agent.process_query("Hello", session_id=None)
+            # Query WITHOUT conversation_id (None)
+            agent.process_query("Hello", conversation_id=None)
             
             call_args = agent._agent_executor.invoke.call_args
             config = call_args[1].get('config')
@@ -493,8 +493,8 @@ class TestStatelessFallbackMode:
             agent._use_streaming = False
             agent.logger = MagicMock()
             
-            # Explicitly pass session_id=None
-            result = agent.process_query("Test query", session_id=None)
+            # Explicitly pass conversation_id=None
+            result = agent.process_query("Test query", conversation_id=None)
             
             # Should return valid response
             assert result is not None

@@ -8,6 +8,7 @@ from typing import Any, Callable, Dict, Optional, TypeVar, cast, TYPE_CHECKING
 from data.repositories.factory import RepositoryFactory
 from services.chat_service import ChatService
 from services.conversation_service import ConversationService
+from services.session_service import SessionService
 from services.symbols_service import SymbolsService
 from services.user_service import UserService
 from services.workspace_service import WorkspaceService
@@ -56,6 +57,9 @@ class ServiceFactory:
     def get_user_service(self) -> UserService:
         return cast(UserService, self._get_or_create("user_service", self._build_user_service))
 
+    def get_session_service(self) -> SessionService:
+        return cast(SessionService, self._get_or_create("session_service", self._build_session_service))
+
     # ------------------------------------------------------------------
     # Builders
     # ------------------------------------------------------------------
@@ -67,10 +71,11 @@ class ServiceFactory:
             )
         
         return ChatService(
-            agent_provider=self._agent,  # Satisfies AgentProvider protocol
+            agent_provider=self._agent,
             config=self._config,
             cache=self._cache,
             conversation_provider=self.get_conversation_service(),
+            session_provider=self.get_session_service(),
             logger=self._logger.getChild("chat"),
         )
 
@@ -126,11 +131,27 @@ class ServiceFactory:
 
         return UserService(
             user_repository=user_repo,
-            workspace_provider=workspace_service,  # Satisfies WorkspaceProvider protocol
-            symbol_provider=symbols_service,       # Satisfies SymbolProvider protocol
+            workspace_provider=workspace_service,
+            symbol_provider=symbols_service,
             watchlist_repository=watchlist_repo,
             cache=self._cache,
             logger=self._logger.getChild("user"),
+        )
+
+    def _build_session_service(self) -> SessionService:
+        session_repo = self._repository_factory.get_session_repository()
+        if not session_repo:
+            raise RuntimeError("SessionRepository could not be initialized")
+
+        conversation_repo = self._repository_factory.get_conversation_repository()
+        workspace_repo = self._repository_factory.get_workspace_repository()
+
+        return SessionService(
+            session_repository=session_repo,
+            conversation_repository=conversation_repo,
+            workspace_repository=workspace_repo,
+            cache=self._cache,
+            logger=self._logger.getChild("session"),
         )
 
     # ------------------------------------------------------------------

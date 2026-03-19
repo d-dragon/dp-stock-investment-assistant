@@ -27,6 +27,7 @@ def repository_factory() -> MagicMock:
     factory = MagicMock()
     factory.get_workspace_repository.return_value = MagicMock(name="WorkspaceRepository")
     factory.get_session_repository.return_value = MagicMock(name="SessionRepository")
+    factory.get_conversation_repository.return_value = MagicMock(name="ConversationRepository")
     factory.get_watchlist_repository.return_value = MagicMock(name="WatchlistRepository")
     factory.get_symbol_repository.return_value = MagicMock(name="SymbolRepository")
     return factory
@@ -113,3 +114,31 @@ def test_symbols_service_requires_repository(config: dict, repository_factory: M
 
     with pytest.raises(RuntimeError):
         factory.get_symbols_service()
+
+
+def test_conversation_service_is_singleton(config: dict, repository_factory: MagicMock, cache_backend: MagicMock) -> None:
+    factory = ServiceFactory(
+        config,
+        repository_factory=repository_factory,
+        cache_backend=cache_backend,
+    )
+
+    service_a = factory.get_conversation_service()
+    service_b = factory.get_conversation_service()
+
+    assert service_a is service_b
+    repository_factory.get_conversation_repository.assert_called_once()
+
+
+def test_session_service_is_singleton(config: dict, repository_factory: MagicMock, cache_backend: MagicMock) -> None:
+    factory = ServiceFactory(
+        config,
+        repository_factory=repository_factory,
+        cache_backend=cache_backend,
+    )
+
+    service_a = factory.get_session_service()
+    service_b = factory.get_session_service()
+
+    assert service_a is service_b
+    repository_factory.get_session_repository.assert_called_once()

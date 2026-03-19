@@ -259,7 +259,7 @@ If you don't have a tool for a specific request, provide helpful general guidanc
         query: str,
         *,
         provider: Optional[str] = None,
-        session_id: Optional[str] = None,
+        conversation_id: Optional[str] = None,
     ) -> str:
         """Process a query and return complete response.
         
@@ -268,7 +268,7 @@ If you don't have a tool for a specific request, provide helpful general guidanc
         Args:
             query: User query to process
             provider: Optional provider override
-            session_id: Optional session ID for conversation memory (UUID v4).
+            conversation_id: Conversation ID for STM memory (UUID v4).
                        When provided with a checkpointer, enables multi-turn
                        conversations with context recall.
             
@@ -278,7 +278,7 @@ If you don't have a tool for a specific request, provide helpful general guidanc
         try:
             # Try ReAct agent first
             if self._agent_executor:
-                return self._process_with_react(query, provider=provider, session_id=session_id)
+                return self._process_with_react(query, provider=provider, conversation_id=conversation_id)
             
             # Fallback to legacy processing
             return self._process_legacy(query, provider=provider)
@@ -292,7 +292,7 @@ If you don't have a tool for a specific request, provide helpful general guidanc
         query: str,
         *,
         provider: Optional[str] = None,
-        session_id: Optional[str] = None,
+        conversation_id: Optional[str] = None,
     ) -> Generator[str, None, None]:
         """Process a query and stream response chunks.
         
@@ -301,7 +301,7 @@ If you don't have a tool for a specific request, provide helpful general guidanc
         Args:
             query: User query to process
             provider: Optional provider override
-            session_id: Optional session ID for conversation memory (UUID v4).
+            conversation_id: Conversation ID for STM memory (UUID v4).
                        When provided with a checkpointer, enables multi-turn
                        conversations with context recall.
             
@@ -314,7 +314,7 @@ If you don't have a tool for a specific request, provide helpful general guidanc
                 # Run async streaming in sync context
                 loop = asyncio.new_event_loop()
                 try:
-                    async_gen = self._stream_with_react_async(query, provider=provider, session_id=session_id)
+                    async_gen = self._stream_with_react_async(query, provider=provider, conversation_id=conversation_id)
                     while True:
                         try:
                             chunk = loop.run_until_complete(async_gen.__anext__())
@@ -336,6 +336,7 @@ If you don't have a tool for a specific request, provide helpful general guidanc
         query: str,
         *,
         provider: Optional[str] = None,
+        conversation_id: Optional[str] = None,
     ) -> AgentResponse:
         """Process a query and return structured AgentResponse.
         
@@ -344,6 +345,7 @@ If you don't have a tool for a specific request, provide helpful general guidanc
         Args:
             query: User query to process
             provider: Optional provider override
+            conversation_id: Conversation ID for STM memory (UUID v4).
             
         Returns:
             AgentResponse with content and metadata
@@ -353,10 +355,16 @@ If you don't have a tool for a specific request, provide helpful general guidanc
         
         try:
             if self._agent_executor:
+                # Build invoke config for conversation memory
+                invoke_config = None
+                if conversation_id and self._checkpointer:
+                    invoke_config = {"configurable": {"thread_id": conversation_id}}
+                
                 # Use LangGraph ReAct agent
-                result = self._agent_executor.invoke({
-                    "messages": [HumanMessage(content=query)]
-                })
+                result = self._agent_executor.invoke(
+                    {"messages": [HumanMessage(content=query)]},
+                    config=invoke_config,
+                )
                 
                 # Extract tool calls from messages
                 messages = result.get("messages", [])
@@ -415,26 +423,25 @@ If you don't have a tool for a specific request, provide helpful general guidanc
         query: str,
         *,
         provider: Optional[str] = None,
-        session_id: Optional[str] = None,
+        conversation_id: Optional[str] = None,
     ) -> str:
         """Process query using LangGraph ReAct agent.
         
         Args:
             query: User query
             provider: Optional provider override
-            session_id: Optional session ID for conversation memory.
-                       When provided with a checkpointer, enables multi-turn
-                       conversations where the agent recalls prior context.
+            conversation_id: Conversation ID for STM memory.
+                       Maps to LangGraph thread_id for checkpointing.
             
         Returns:
             Response text from agent
         """
         try:
-            # Build invoke config with thread_id for session memory
+            # Build invoke config — conversation_id IS the thread_id
             invoke_config = None
-            if session_id and self._checkpointer:
-                invoke_config = {"configurable": {"thread_id": session_id}}
-                self.logger.debug(f"Session-aware query with thread_id: {session_id}")
+            if conversation_id and self._checkpointer:
+                invoke_config = {"configurable": {"thread_id": conversation_id}}
+                self.logger.debug(f"Conversation-aware query with thread_id: {conversation_id}")
             
             # LangGraph agent uses messages format
             result = self._agent_executor.invoke(
@@ -467,26 +474,25 @@ If you don't have a tool for a specific request, provide helpful general guidanc
         query: str,
         *,
         provider: Optional[str] = None,
-        session_id: Optional[str] = None,
+        conversation_id: Optional[str] = None,
     ):
         """Async stream using astream_events for tool visibility.
         
         Args:
             query: User query
             provider: Optional provider override
-            session_id: Optional session ID for conversation memory.
-                       When provided with a checkpointer, enables multi-turn
-                       conversations where the agent recalls prior context.
+            conversation_id: Conversation ID for STM memory.
+                       Maps to LangGraph thread_id for checkpointing.
             
         Yields:
             Response chunks with tool call notifications
         """
         try:
-            # Build stream config with thread_id for session memory
+            # Build stream config — conversation_id IS the thread_id
             stream_config = None
-            if session_id and self._checkpointer:
-                stream_config = {"configurable": {"thread_id": session_id}}
-                self.logger.debug(f"Session-aware streaming with thread_id: {session_id}")
+            if conversation_id and self._checkpointer:
+                stream_config = {"configurable": {"thread_id": conversation_id}}
+                self.logger.debug(f"Conversation-aware streaming with thread_id: {conversation_id}")
             
             async for event in self._agent_executor.astream_events(
                 {"messages": [HumanMessage(content=query)]},
