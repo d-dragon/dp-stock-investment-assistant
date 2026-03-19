@@ -83,8 +83,8 @@ def memory_disabled_config(memory_enabled_config):
 
 
 @pytest.fixture
-def generate_session_id():
-    """Generate a valid UUID v4 session_id."""
+def generate_conversation_id():
+    """Generate a valid UUID v4 conversation_id."""
     return str(uuid.uuid4())
 
 
@@ -395,8 +395,8 @@ class TestMainCheckpointerWiring:
 class TestMultiTurnSessionFlow:
     """End-to-end flow: session creation → context recall → persistence."""
 
-    def test_multi_turn_with_session_id_uses_thread_id(self, memory_enabled_config, generate_session_id):
-        """Full flow: two queries with same session_id share thread_id."""
+    def test_multi_turn_with_conversation_id_uses_thread_id(self, memory_enabled_config, generate_conversation_id):
+        """Full flow: two queries with same conversation_id share thread_id."""
         from core.stock_assistant_agent import StockAssistantAgent
         from langchain_core.messages import AIMessage
 
@@ -421,30 +421,30 @@ class TestMultiTurnSessionFlow:
                     agent._tool_registry.get_enabled_tools.return_value = []
                     agent._agent_executor = mock_executor
 
-                    session_id = generate_session_id
+                    conversation_id = generate_conversation_id
 
                     # First message
-                    result1 = agent.process_query("Tell me about AAPL", session_id=session_id)
+                    result1 = agent.process_query("Tell me about AAPL", conversation_id=conversation_id)
                     assert result1 == "I can help with AAPL."
 
                     # Verify thread_id was passed
                     call1_config = mock_executor.invoke.call_args_list[0][1].get('config')
                     assert call1_config is not None
-                    assert call1_config['configurable']['thread_id'] == session_id
+                    assert call1_config['configurable']['thread_id'] == conversation_id
 
                     # Second message (follow-up)
                     mock_executor.invoke.return_value = {
                         "messages": [AIMessage(content="Based on our discussion about AAPL...")]
                     }
-                    result2 = agent.process_query("What's the outlook?", session_id=session_id)
+                    result2 = agent.process_query("What's the outlook?", conversation_id=conversation_id)
                     assert "AAPL" in result2
 
                     # Same thread_id
                     call2_config = mock_executor.invoke.call_args_list[1][1].get('config')
-                    assert call2_config['configurable']['thread_id'] == session_id
+                    assert call2_config['configurable']['thread_id'] == conversation_id
 
     def test_stateless_mode_no_thread_id(self, memory_enabled_config):
-        """Verify no thread_id when session_id is None."""
+        """Verify no thread_id when conversation_id is None."""
         from core.stock_assistant_agent import StockAssistantAgent
         from langchain_core.messages import AIMessage
 

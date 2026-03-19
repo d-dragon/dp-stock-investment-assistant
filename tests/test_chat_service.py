@@ -69,7 +69,9 @@ def build_chat_service(
     config,
     cache=None,
     time_provider=None,
-    logger=None
+    logger=None,
+    conversation_provider=None,
+    session_provider=None,
 ):
     """Build ChatService with dependencies."""
     return ChatService(
@@ -78,6 +80,8 @@ def build_chat_service(
         cache=cache,
         time_provider=time_provider,
         logger=logger,
+        conversation_provider=conversation_provider,
+        session_provider=session_provider,
     )
 
 
@@ -316,7 +320,7 @@ def test_stream_chat_response_calls_agent_with_query(mock_agent, mock_config):
     list(service.stream_chat_response("Test query"))
     
     mock_agent.process_query_streaming.assert_called_once_with(
-        "Test query", provider=None, session_id=None
+        "Test query", provider=None, conversation_id=None
     )
 
 
@@ -327,7 +331,7 @@ def test_stream_chat_response_passes_provider_override(mock_agent, mock_config):
     list(service.stream_chat_response("Test query", provider_override="grok"))
     
     mock_agent.process_query_streaming.assert_called_once_with(
-        "Test query", provider="grok", session_id=None
+        "Test query", provider="grok", conversation_id=None
     )
 
 
@@ -459,7 +463,7 @@ def test_process_chat_query_calls_agent_with_provider_override(mock_agent, mock_
     
     # Verify agent called with correct provider
     mock_agent.get_current_model_info.assert_called_once_with(provider="grok")
-    mock_agent.process_query.assert_called_once_with("Test message", provider="grok", session_id=None)
+    mock_agent.process_query.assert_called_once_with("Test message", provider="grok", conversation_id=None)
     
     # Note: Without fallback prefix, extract_meta returns config defaults ("openai", "gpt-4")
     # The 'or' logic doesn't override since config values are non-None
@@ -574,6 +578,234 @@ def test_strip_fallback_prefix_with_empty_string(mock_agent, mock_config):
     cleaned = service.strip_fallback_prefix("")
     
     assert cleaned == ""
+
+
+# ============================================================================
+# TESTS: _load_conversation_context (E4 — session context merging)
+# ============================================================================
+
+@pytest.fixture
+def mock_conversation_provider():
+    """Mock conversation provider."""
+    provider = MagicMock()
+    provider.get_conversation.return_value = None
+    provider.health_check.return_value = (True, {"component": "conversation_provider"})
+    return provider
+
+
+@pytest.fixture
+def mock_session_provider():
+    """Mock session provider."""
+    provider = MagicMock()
+    provider.get_session_context.return_value = None
+    provider.health_check.return_value = (True, {"component": "session_provider"})
+    return provider
+
+
+class TestLoadConversationContext:
+    """Tests for _load_conversation_context (E4 fix)."""
+
+    def test_returns_none_when_no_conversation_id(
+        self, mock_agent, mock_config, mock_conversation_provider, mock_session_provider
+    ):
+        service = build_chat_service(
+            mock_agent, mock_config,
+            conversation_provider=mock_conversation_provider,
+            session_provider=mock_session_provider,
+        )
+        assert service._load_conversation_context(None) is None
+
+    def test_returns_none_when_no_conversation_provider(
+        self, mock_agent, mock_config, mock_session_provider
+    ):
+        service = build_chat_service(
+            mock_agent, mock_config,
+            session_provider=mock_session_provider,
+        )
+        assert service._load_conversation_context("conv-1") is None
+
+    def test_returns_none_when_no_session_provider(
+        self, mock_agent, mock_config, mock_conversation_provider
+    ):
+        service = build_chat_service(
+            mock_agent, mock_config,
+            conversation_provider=mock_conversation_provider,
+        )
+        assert service._load_conversation_context("conv-1") is None
+
+    def test_returns_none_when_conversation_not_found(
+        self, mock_agent, mock_config, mock_conversation_provider, mock_session_provider
+    ):
+        mock_conversation_provider.get_conversation.return_value = None
+        service = build_chat_service(
+            mock_agent, mock_config,
+            conversation_provider=mock_conversation_provider,
+            session_provider=mock_session_provider,
+        )
+        assert service._load_conversation_context("conv-1") is None
+        mock_conversation_provider.get_conversation.assert_called_once_with("conv-1")
+
+    def test_returns_none_when_conversation_has_no_session_id(
+        self, mock_agent, mock_config, mock_conversation_provider, mock_session_provider
+    ):
+        mock_conversation_provider.get_conversation.return_value = {
+            "status": "active",
+        }
+        service = build_chat_service(
+            mock_agent, mock_config,
+            conversation_provider=mock_conversation_provider,
+            session_provider=mock_session_provider,
+        )
+        assert service._load_conversation_context("conv-1") is None
+        mock_session_provider.get_session_context.assert_not_called()
+
+    def test_returns_none_when_session_context_unavailable(
+        self, mock_agent, mock_config, mock_conversation_provider, mock_session_provider
+    ):
+        mock_conversation_provider.get_conversation.return_value = {
+            "session_id": "sess-1", "status": "active",
+        }
+        mock_session_provider.get_session_context.return_value = None
+        service = build_chat_service(
+            mock_agent, mock_config,
+            conversation_provider=mock_conversation_provider,
+            session_provider=mock_session_provider,
+        )
+        assert service._load_conversation_context("conv-1") is None
+        mock_session_provider.get_session_context.assert_called_once_with("sess-1")
+
+    def test_returns_session_context_when_no_overrides(
+        self, mock_agent, mock_config, mock_conversation_provider, mock_session_provider
+    ):
+        mock_conversation_provider.get_conversation.return_value = {
+            "session_id": "sess-1", "status": "active",
+        }
+        mock_session_provider.get_session_context.return_value = {
+            "assumptions": ["Bull market"], "focused_symbols": ["AAPL"],
+        }
+        service = build_chat_service(
+            mock_agent, mock_config,
+            conversation_provider=mock_conversation_provider,
+            session_provider=mock_session_provider,
+        )
+        result = service._load_conversation_context("conv-1")
+        assert result == {"assumptions": ["Bull market"], "focused_symbols": ["AAPL"]}
+
+    def test_merges_conversation_overrides_over_session_context(
+        self, mock_agent, mock_config, mock_conversation_provider, mock_session_provider
+    ):
+        mock_conversation_provider.get_conversation.return_value = {
+            "session_id": "sess-1",
+            "status": "active",
+            "context_overrides": {"focused_symbols": ["TSLA"], "extra_key": "value"},
+        }
+        mock_session_provider.get_session_context.return_value = {
+            "assumptions": ["Bull market"], "focused_symbols": ["AAPL"],
+        }
+        service = build_chat_service(
+            mock_agent, mock_config,
+            conversation_provider=mock_conversation_provider,
+            session_provider=mock_session_provider,
+        )
+        result = service._load_conversation_context("conv-1")
+        assert result == {
+            "assumptions": ["Bull market"],
+            "focused_symbols": ["TSLA"],  # overridden
+            "extra_key": "value",  # added
+        }
+
+    def test_empty_overrides_preserve_session_context(
+        self, mock_agent, mock_config, mock_conversation_provider, mock_session_provider
+    ):
+        mock_conversation_provider.get_conversation.return_value = {
+            "session_id": "sess-1",
+            "status": "active",
+            "context_overrides": {},
+        }
+        mock_session_provider.get_session_context.return_value = {
+            "assumptions": ["Bear market"],
+        }
+        service = build_chat_service(
+            mock_agent, mock_config,
+            conversation_provider=mock_conversation_provider,
+            session_provider=mock_session_provider,
+        )
+        result = service._load_conversation_context("conv-1")
+        assert result == {"assumptions": ["Bear market"]}
+
+    def test_none_overrides_treated_as_empty(
+        self, mock_agent, mock_config, mock_conversation_provider, mock_session_provider
+    ):
+        """context_overrides=None should not crash — behaves like empty dict."""
+        mock_conversation_provider.get_conversation.return_value = {
+            "session_id": "sess-1",
+            "status": "active",
+            "context_overrides": None,
+        }
+        mock_session_provider.get_session_context.return_value = {
+            "pinned_intent": "growth",
+        }
+        service = build_chat_service(
+            mock_agent, mock_config,
+            conversation_provider=mock_conversation_provider,
+            session_provider=mock_session_provider,
+        )
+        result = service._load_conversation_context("conv-1")
+        assert result == {"pinned_intent": "growth"}
+
+
+class TestContextLoadingInStreaming:
+    """Verify _load_conversation_context is invoked during streaming and non-streaming paths."""
+
+    def test_stream_chat_response_loads_context(
+        self, mock_agent, mock_config, mock_conversation_provider, mock_session_provider
+    ):
+        mock_conversation_provider.get_conversation.return_value = {
+            "session_id": "sess-1", "status": "active",
+        }
+        mock_session_provider.get_session_context.return_value = {"focused_symbols": ["AAPL"]}
+
+        service = build_chat_service(
+            mock_agent, mock_config,
+            conversation_provider=mock_conversation_provider,
+            session_provider=mock_session_provider,
+        )
+        list(service.stream_chat_response("hello", conversation_id="conv-1"))
+
+        mock_conversation_provider.get_conversation.assert_called_with("conv-1")
+        mock_session_provider.get_session_context.assert_called_once_with("sess-1")
+
+    def test_process_chat_query_loads_context(
+        self, mock_agent, mock_config, mock_conversation_provider, mock_session_provider
+    ):
+        mock_conversation_provider.get_conversation.return_value = {
+            "session_id": "sess-1", "status": "active",
+        }
+        mock_session_provider.get_session_context.return_value = {"focused_symbols": ["AAPL"]}
+
+        service = build_chat_service(
+            mock_agent, mock_config,
+            conversation_provider=mock_conversation_provider,
+            session_provider=mock_session_provider,
+        )
+        service.process_chat_query("hello", conversation_id="conv-1")
+
+        mock_conversation_provider.get_conversation.assert_called_with("conv-1")
+        mock_session_provider.get_session_context.assert_called_once_with("sess-1")
+
+    def test_stream_skips_context_when_no_conversation_id(
+        self, mock_agent, mock_config, mock_conversation_provider, mock_session_provider
+    ):
+        service = build_chat_service(
+            mock_agent, mock_config,
+            conversation_provider=mock_conversation_provider,
+            session_provider=mock_session_provider,
+        )
+        list(service.stream_chat_response("hello"))
+
+        # get_conversation called once by _validate_conversation_active(None) -> returns early
+        # _load_conversation_context(None) -> returns early
+        mock_session_provider.get_session_context.assert_not_called()
 
 
 if __name__ == "__main__":

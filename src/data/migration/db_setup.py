@@ -1,5 +1,8 @@
 """
 Database setup and migration script.
+
+§10.2 clean-slate migration: Use --clean-slate to drop and recreate
+sessions, conversations, and agent_checkpoints collections.
 """
 
 import os
@@ -21,8 +24,39 @@ logging.basicConfig(
 )
 logger = logging.getLogger("db_setup")
 
-def setup_database(config=None):
-    """Set up the database schema"""
+# Collections affected by the STM domain model refactor (§10.2)
+STM_COLLECTIONS = ["sessions", "conversations", "agent_checkpoints"]
+
+
+def drop_stm_collections(connection_string: str, database_name: str) -> bool:
+    """Drop STM-related collections for clean-slate migration (§10.2).
+
+    WARNING: This permanently deletes all data in sessions, conversations,
+    and agent_checkpoints collections.
+    """
+    from pymongo import MongoClient
+    try:
+        client = MongoClient(connection_string)
+        db = client[database_name]
+        for name in STM_COLLECTIONS:
+            if name in db.list_collection_names():
+                logger.warning(f"Dropping collection '{name}' (clean-slate migration)")
+                db.drop_collection(name)
+            else:
+                logger.info(f"Collection '{name}' does not exist, skipping drop")
+        client.close()
+        return True
+    except Exception as e:
+        logger.error(f"Error dropping STM collections: {e}")
+        return False
+
+def setup_database(config=None, clean_slate: bool = False):
+    """Set up the database schema.
+    
+    Args:
+        config: Application config dict. Loaded from environment if None.
+        clean_slate: If True, drop STM collections before recreation (§10.2).
+    """
     # Load configuration
     if config is None:
         # Load from environment variables
@@ -37,6 +71,14 @@ def setup_database(config=None):
     if not connection_string:
         logger.error("MongoDB connection string not provided")
         return False
+    
+    # Clean-slate migration: drop STM collections first (§10.2)
+    if clean_slate:
+        logger.warning("=== CLEAN-SLATE MIGRATION: Dropping STM collections ===")
+        if not drop_stm_collections(connection_string, database_name):
+            logger.error("Failed to drop STM collections — aborting")
+            return False
+        logger.info("STM collections dropped successfully")
         
     # Initialize schema manager
     logger.info(f"Setting up database schema for '{database_name}'")
@@ -65,6 +107,11 @@ def parse_args():
         help="MongoDB database name (overrides config)",
         default=None
     )
+    parser.add_argument(
+        "--clean-slate",
+        action="store_true",
+        help="Drop sessions, conversations, and agent_checkpoints before recreation (§10.2)"
+    )
     return parser.parse_args()
 
 if __name__ == "__main__":
@@ -85,5 +132,5 @@ if __name__ == "__main__":
             config['database']['mongodb']['database_name'] = args.db
     
     # Run setup
-    success = setup_database(config)
+    success = setup_database(config, clean_slate=args.clean_slate)
     sys.exit(0 if success else 1)

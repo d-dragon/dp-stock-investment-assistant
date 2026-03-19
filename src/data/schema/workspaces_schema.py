@@ -7,7 +7,7 @@ WORKSPACES_SCHEMA = {
     "required": ["user_id", "name"],
     "properties": {
         "user_id": {
-            "bsonType": "objectId",
+            "bsonType": "string",
             "description": "Owner user reference"
         },
         "name": {

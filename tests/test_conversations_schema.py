@@ -25,20 +25,26 @@ class TestConversationsSchema:
     """Test CONVERSATIONS_SCHEMA structure per FR-3.1 spec."""
     
     def test_schema_required_fields(self):
-        """Verify required fields match spec: session_id, status, created_at, updated_at."""
+        """Verify required fields match spec."""
         required = CONVERSATIONS_SCHEMA["required"]
         
+        assert "conversation_id" in required
+        assert "thread_id" in required
         assert "session_id" in required
+        assert "workspace_id" in required
+        assert "user_id" in required
         assert "status" in required
         assert "created_at" in required
         assert "updated_at" in required
-        assert len(required) == 4
+        assert len(required) == 8
     
-    def test_schema_has_15_properties(self):
-        """Verify schema has all 15 properties per data-model.md."""
+    def test_schema_has_17_properties(self):
+        """Verify schema has all 17 properties per updated data-model."""
         properties = CONVERSATIONS_SCHEMA["properties"]
         expected_fields = [
             "_id",
+            "conversation_id",
+            "thread_id",
             "session_id",
             "workspace_id",
             "user_id",
@@ -47,26 +53,34 @@ class TestConversationsSchema:
             "total_tokens",
             "summary",
             "focused_symbols",
-            "session_assumptions",
-            "pinned_intent",
+            "context_overrides",
+            "conversation_intent",
             "last_activity_at",
             "created_at",
             "updated_at",
             "archived_at",
+            "archive_reason",
         ]
         
         for field in expected_fields:
             assert field in properties, f"Missing field: {field}"
         
-        assert len(properties) == 15
+        assert len(properties) == 18  # 17 + _id
+    
+    def test_conversation_id_is_uuid_string_pattern(self):
+        """Verify conversation_id uses UUID v4 pattern."""
+        props = CONVERSATIONS_SCHEMA["properties"]["conversation_id"]
+        
+        assert props["bsonType"] == "string"
+        assert "pattern" in props
+        assert "4[0-9a-f]{3}" in props["pattern"]
     
     def test_session_id_is_uuid_string_pattern(self):
-        """Verify session_id uses UUID v4 pattern (not ObjectId)."""
+        """Verify session_id uses UUID v4 pattern (non-unique FK)."""
         props = CONVERSATIONS_SCHEMA["properties"]["session_id"]
         
         assert props["bsonType"] == "string"
         assert "pattern" in props
-        # Pattern should match UUID v4
         assert "4[0-9a-f]{3}" in props["pattern"]
     
     def test_status_enum_values(self):
@@ -77,13 +91,12 @@ class TestConversationsSchema:
         assert set(status_prop["enum"]) == {"active", "summarized", "archived"}
     
     def test_focused_symbols_array_type(self):
-        """Verify focused_symbols is array with pattern validation."""
+        """Verify focused_symbols is array."""
         prop = CONVERSATIONS_SCHEMA["properties"]["focused_symbols"]
         
         assert prop["bsonType"] == "array"
         assert "items" in prop
         assert prop["items"]["bsonType"] == "string"
-        assert "pattern" in prop["items"]
     
     def test_summary_nullable(self):
         """Verify summary allows null."""
@@ -109,21 +122,45 @@ class TestConversationsSchema:
 class TestConversationsIndexes:
     """Test CONVERSATIONS_INDEXES structure per FR-3.1 spec."""
     
-    def test_has_5_indexes(self):
-        """Verify there are exactly 5 indexes."""
-        assert len(CONVERSATIONS_INDEXES) == 5
+    def test_has_8_indexes(self):
+        """Verify there are exactly 8 indexes."""
+        assert len(CONVERSATIONS_INDEXES) == 8
     
-    def test_session_id_unique_index(self):
-        """Verify session_id has unique index."""
+    def test_conversation_id_unique_index(self):
+        """Verify conversation_id has unique index."""
         idx = next(
             (i for i in CONVERSATIONS_INDEXES 
-             if i["options"]["name"] == "idx_conversations_session_id_unique"),
+             if i["options"]["name"] == "idx_conversations_conversation_id"),
+            None
+        )
+        
+        assert idx is not None
+        assert idx["keys"] == [("conversation_id", 1)]
+        assert idx["options"]["unique"] is True
+    
+    def test_thread_id_unique_index(self):
+        """Verify thread_id has unique index."""
+        idx = next(
+            (i for i in CONVERSATIONS_INDEXES 
+             if i["options"]["name"] == "idx_conversations_thread_id"),
+            None
+        )
+        
+        assert idx is not None
+        assert idx["keys"] == [("thread_id", 1)]
+        assert idx["options"]["unique"] is True
+    
+    def test_session_id_non_unique_index(self):
+        """Verify session_id has non-unique index (FK, 1:N)."""
+        idx = next(
+            (i for i in CONVERSATIONS_INDEXES 
+             if i["options"]["name"] == "idx_conversations_session_id"),
             None
         )
         
         assert idx is not None
         assert idx["keys"] == [("session_id", 1)]
-        assert idx["options"]["unique"] is True
+        assert idx["options"].get("unique") is not True
     
     def test_user_status_index(self):
         """Verify compound index on user_id + status."""
@@ -220,34 +257,44 @@ class TestGetConversationsIndexes:
 class TestGetDefaultConversationDocument:
     """Test get_default_conversation_document() helper."""
     
-    def test_minimal_args_session_id_only(self):
-        """Verify document created with session_id only."""
-        session_id = "a1b2c3d4-e5f6-4789-a0b1-c2d3e4f56789"
+    def test_minimal_args(self):
+        """Verify document created with required args."""
+        conv_id = "a1b2c3d4-e5f6-4789-a0b1-c2d3e4f56789"
+        thread_id = conv_id
+        session_id = "b2c3d4e5-f6a7-4890-b1c2-d3e4f5a67890"
         
-        doc = get_default_conversation_document(session_id)
+        doc = get_default_conversation_document(
+            conv_id, thread_id, session_id,
+            workspace_id="ws-001", user_id="user-001"
+        )
         
+        assert doc["conversation_id"] == conv_id
+        assert doc["thread_id"] == thread_id
         assert doc["session_id"] == session_id
-        assert doc["workspace_id"] is None
-        assert doc["user_id"] is None
+        assert doc["workspace_id"] == "ws-001"
+        assert doc["user_id"] == "user-001"
     
     def test_includes_all_required_fields(self):
         """Verify document has all required fields set."""
-        session_id = "a1b2c3d4-e5f6-4789-a0b1-c2d3e4f56789"
+        conv_id = "a1b2c3d4-e5f6-4789-a0b1-c2d3e4f56789"
         
-        doc = get_default_conversation_document(session_id)
+        doc = get_default_conversation_document(
+            conv_id, conv_id, "b2c3d4e5-f6a7-4890-b1c2-d3e4f5a67890",
+            workspace_id="ws-001", user_id="user-001"
+        )
         
         assert doc["status"] == "active"
         assert "created_at" in doc
         assert "updated_at" in doc
     
-    def test_with_optional_workspace_and_user(self):
-        """Verify optional workspace_id and user_id are set."""
-        session_id = "a1b2c3d4-e5f6-4789-a0b1-c2d3e4f56789"
+    def test_workspace_and_user_are_required(self):
+        """Verify workspace_id and user_id are required keyword-only args."""
+        conv_id = "a1b2c3d4-e5f6-4789-a0b1-c2d3e4f56789"
         workspace_id = "ws-123"
         user_id = "user-456"
         
         doc = get_default_conversation_document(
-            session_id,
+            conv_id, conv_id, "b2c3d4e5-f6a7-4890-b1c2-d3e4f5a67890",
             workspace_id=workspace_id,
             user_id=user_id
         )
@@ -257,37 +304,50 @@ class TestGetDefaultConversationDocument:
     
     def test_default_numeric_values(self):
         """Verify message_count and total_tokens default to 0."""
-        session_id = "a1b2c3d4-e5f6-4789-a0b1-c2d3e4f56789"
+        conv_id = "a1b2c3d4-e5f6-4789-a0b1-c2d3e4f56789"
         
-        doc = get_default_conversation_document(session_id)
+        doc = get_default_conversation_document(
+            conv_id, conv_id, "b2c3d4e5-f6a7-4890-b1c2-d3e4f5a67890",
+            workspace_id="ws-001", user_id="user-001"
+        )
         
         assert doc["message_count"] == 0
         assert doc["total_tokens"] == 0
     
     def test_default_null_values(self):
-        """Verify summary, session_assumptions, pinned_intent, archived_at are None."""
-        session_id = "a1b2c3d4-e5f6-4789-a0b1-c2d3e4f56789"
+        """Verify summary, context_overrides, conversation_intent, archived_at, archive_reason are None."""
+        conv_id = "a1b2c3d4-e5f6-4789-a0b1-c2d3e4f56789"
         
-        doc = get_default_conversation_document(session_id)
+        doc = get_default_conversation_document(
+            conv_id, conv_id, "b2c3d4e5-f6a7-4890-b1c2-d3e4f5a67890",
+            workspace_id="ws-001", user_id="user-001"
+        )
         
         assert doc["summary"] is None
-        assert doc["session_assumptions"] is None
-        assert doc["pinned_intent"] is None
+        assert doc["context_overrides"] is None
+        assert doc["conversation_intent"] is None
         assert doc["archived_at"] is None
+        assert doc["archive_reason"] is None
     
     def test_focused_symbols_empty_array(self):
         """Verify focused_symbols defaults to empty array."""
-        session_id = "a1b2c3d4-e5f6-4789-a0b1-c2d3e4f56789"
+        conv_id = "a1b2c3d4-e5f6-4789-a0b1-c2d3e4f56789"
         
-        doc = get_default_conversation_document(session_id)
+        doc = get_default_conversation_document(
+            conv_id, conv_id, "b2c3d4e5-f6a7-4890-b1c2-d3e4f5a67890",
+            workspace_id="ws-001", user_id="user-001"
+        )
         
         assert doc["focused_symbols"] == []
     
     def test_timestamps_are_datetime(self):
         """Verify timestamp fields are datetime objects."""
-        session_id = "a1b2c3d4-e5f6-4789-a0b1-c2d3e4f56789"
+        conv_id = "a1b2c3d4-e5f6-4789-a0b1-c2d3e4f56789"
         
-        doc = get_default_conversation_document(session_id)
+        doc = get_default_conversation_document(
+            conv_id, conv_id, "b2c3d4e5-f6a7-4890-b1c2-d3e4f5a67890",
+            workspace_id="ws-001", user_id="user-001"
+        )
         
         assert isinstance(doc["created_at"], datetime)
         assert isinstance(doc["updated_at"], datetime)
@@ -295,25 +355,35 @@ class TestGetDefaultConversationDocument:
     
     def test_timestamps_are_utc(self):
         """Verify timestamps use UTC timezone."""
-        session_id = "a1b2c3d4-e5f6-4789-a0b1-c2d3e4f56789"
+        conv_id = "a1b2c3d4-e5f6-4789-a0b1-c2d3e4f56789"
         
-        doc = get_default_conversation_document(session_id)
+        doc = get_default_conversation_document(
+            conv_id, conv_id, "b2c3d4e5-f6a7-4890-b1c2-d3e4f5a67890",
+            workspace_id="ws-001", user_id="user-001"
+        )
         
         assert doc["created_at"].tzinfo == timezone.utc
         assert doc["updated_at"].tzinfo == timezone.utc
     
-    def test_no_thread_id_field(self):
-        """Verify thread_id is not a separate field (session_id = thread_id)."""
-        session_id = "a1b2c3d4-e5f6-4789-a0b1-c2d3e4f56789"
+    def test_has_thread_id_field(self):
+        """Verify thread_id is now a separate field."""
+        conv_id = "a1b2c3d4-e5f6-4789-a0b1-c2d3e4f56789"
         
-        doc = get_default_conversation_document(session_id)
+        doc = get_default_conversation_document(
+            conv_id, conv_id, "b2c3d4e5-f6a7-4890-b1c2-d3e4f5a67890",
+            workspace_id="ws-001", user_id="user-001"
+        )
         
-        assert "thread_id" not in doc
+        assert "thread_id" in doc
+        assert doc["thread_id"] == conv_id
     
     def test_no_metadata_object(self):
         """Verify metadata is flattened into direct fields."""
-        session_id = "a1b2c3d4-e5f6-4789-a0b1-c2d3e4f56789"
+        conv_id = "a1b2c3d4-e5f6-4789-a0b1-c2d3e4f56789"
         
-        doc = get_default_conversation_document(session_id)
+        doc = get_default_conversation_document(
+            conv_id, conv_id, "b2c3d4e5-f6a7-4890-b1c2-d3e4f5a67890",
+            workspace_id="ws-001", user_id="user-001"
+        )
         
         assert "metadata" not in doc

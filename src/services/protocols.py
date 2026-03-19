@@ -36,14 +36,14 @@ class AgentProvider(Protocol):
         query: str,
         *,
         provider: Optional[str] = None,
-        session_id: Optional[str] = None,
+        conversation_id: Optional[str] = None,
     ) -> str:
         """Process a query and return complete response.
         
         Args:
             query: User query to process
             provider: Optional provider override (e.g., 'openai', 'grok')
-            session_id: Optional session ID for session-aware memory
+            conversation_id: Optional conversation ID for STM memory
             
         Returns:
             Complete response text
@@ -55,14 +55,14 @@ class AgentProvider(Protocol):
         query: str,
         *,
         provider: Optional[str] = None,
-        session_id: Optional[str] = None,
+        conversation_id: Optional[str] = None,
     ) -> Generator[str, None, None]:
         """Process a query and stream response chunks.
         
         Args:
             query: User query to process
             provider: Optional provider override (e.g., 'openai', 'grok')
-            session_id: Optional session ID for session-aware memory
+            conversation_id: Optional conversation ID for STM memory
             
         Yields:
             Response text chunks
@@ -74,7 +74,7 @@ class AgentProvider(Protocol):
         query: str,
         *,
         provider: Optional[str] = None,
-        session_id: Optional[str] = None,
+        conversation_id: Optional[str] = None,
     ) -> "AgentResponse":
         """Process a query and return structured response.
         
@@ -84,7 +84,7 @@ class AgentProvider(Protocol):
         Args:
             query: User query to process
             provider: Optional provider override (e.g., 'openai', 'grok')
-            session_id: Optional session ID for session-aware memory
+            conversation_id: Optional conversation ID for STM memory
             
         Returns:
             AgentResponse with content and metadata
@@ -170,28 +170,60 @@ class SymbolProvider(Protocol):
 
 @runtime_checkable
 class ConversationProvider(Protocol):
-    """Minimal interface for conversation/session status access.
+    """Minimal interface for conversation status access.
     
-    This protocol defines the conversation-related methods that other services
-    (like ChatService) need to check session status. By depending on the
-    protocol instead of the concrete ConversationService, we avoid circular
-    dependencies.
-    
-    Used by ChatService to verify a session is not archived before processing
-    new messages, enabling proper 409 Conflict responses for archived sessions.
+    Used by ChatService to verify a conversation is not archived before
+    processing new messages, enabling proper 409 Conflict responses.
     """
     
     def get_conversation(
         self,
-        session_id: str,
+        conversation_id: str,
     ) -> Optional[Dict[str, Any]]:
-        """Return conversation data for a session.
+        """Return conversation data.
         
         Args:
-            session_id: The session/conversation identifier (UUID v4)
+            conversation_id: The conversation identifier (UUID v4)
             
         Returns:
             Conversation dict with at minimum 'status' field, or None if not found.
-            Status values include 'active' and 'archived'.
+            Status values include 'active', 'summarized', and 'archived'.
+        """
+        ...
+
+
+@runtime_checkable
+class SessionProvider(Protocol):
+    """Minimal interface for session lifecycle access.
+    
+    Used by ChatService and other services that need to look up
+    session context or validate session status.
+    """
+    
+    def get_session(
+        self,
+        session_id: str,
+    ) -> Optional[Dict[str, Any]]:
+        """Return session data.
+        
+        Args:
+            session_id: The session identifier (UUID v4)
+            
+        Returns:
+            Session dict with status, context fields, or None if not found.
+        """
+        ...
+    
+    def get_session_context(
+        self,
+        session_id: str,
+    ) -> Optional[Dict[str, Any]]:
+        """Return session's reusable context (assumptions, pinned_intent, focused_symbols).
+        
+        Args:
+            session_id: The session identifier (UUID v4)
+            
+        Returns:
+            Dict with context fields, or None if session not found.
         """
         ...

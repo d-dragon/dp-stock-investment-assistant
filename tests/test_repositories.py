@@ -193,7 +193,7 @@ class TestSessionRepository:
         repo = SessionRepository("mongodb://localhost:27017", "test_db")
         
         workspace_id = str(ObjectId())
-        expected_sessions = [{"_id": ObjectId(), "status": "open"}]
+        expected_sessions = [{"_id": ObjectId(), "status": "active"}]
         
         mock_cursor = MagicMock()
         mock_cursor.sort.return_value = mock_cursor
@@ -208,7 +208,7 @@ class TestSessionRepository:
         
         assert result == expected_sessions
         call_args = mock_collection.find.call_args[0][0]
-        assert call_args["status"] == "open"
+        assert call_args["status"] == "active"
 
 
 class TestPortfolioRepository:

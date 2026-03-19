@@ -9,26 +9,19 @@ from typing import Any, Callable, Dict, Generator, Mapping, Optional, Tuple
 
 from core.types import AgentResponse, ResponseStatus
 from services.base import BaseService
-from services.exceptions import ArchivedSessionError
-from services.protocols import AgentProvider, ConversationProvider
+from services.exceptions import ArchivedConversationError
+from services.protocols import AgentProvider, ConversationProvider, SessionProvider
 from utils.cache import CacheBackend
 
 
 class ChatService(BaseService):
     """Orchestrates chat streaming, fallback detection, and metadata extraction.
     
-    Responsibilities:
-    - Stream chat responses in SSE format with metadata events
-    - Extract provider/model metadata from agent responses
-    - Detect and strip fallback prefixes from responses
-    - Generate consistent timestamps for chat events
-    - Validate session status before processing (archived sessions → 409)
-    
-    This service encapsulates chat-specific logic that was previously
-    in APIServer, improving separation of concerns and testability.
+    Validates conversation status before processing. Uses conversation_id
+    as the primary identity for STM memory binding.
     """
     
-    MODEL_METADATA_CACHE_TTL = 60  # Cache model selection briefly
+    MODEL_METADATA_CACHE_TTL = 60
     
     def __init__(
         self,
@@ -37,100 +30,86 @@ class ChatService(BaseService):
         config: Mapping[str, Any],
         cache: Optional[CacheBackend] = None,
         conversation_provider: Optional[ConversationProvider] = None,
+        session_provider: Optional["SessionProvider"] = None,
         time_provider: Optional[Callable[[], str]] = None,
         logger: Optional[logging.Logger] = None,
     ) -> None:
-        """Initialize ChatService.
-        
-        Args:
-            agent_provider: Agent implementing AgentProvider protocol
-            config: Application configuration (for model defaults)
-            cache: Optional cache backend
-            conversation_provider: Optional provider for session status checks
-            time_provider: Optional time provider for testing
-            logger: Optional logger instance
-        """
         super().__init__(cache=cache, time_provider=time_provider, logger=logger)
         self._agent = agent_provider
         self._config = config
         self._conversation_provider = conversation_provider
+        self._session_provider = session_provider
     
     def health_check(self) -> Tuple[bool, Dict[str, Any]]:
-        """Check service health.
-        
-        Service is healthy if agent dependency is available.
-        Conversation provider is optional.
-        
-        Returns:
-            Tuple of (healthy: bool, details: dict)
-        """
         return self._dependencies_health_report(
             required={"agent": self._agent},
-            optional={"conversation_provider": self._conversation_provider},
+            optional={
+                "conversation_provider": self._conversation_provider,
+                "session_provider": self._session_provider,
+            },
         )
     
-    def _validate_session_not_archived(self, session_id: Optional[str]) -> None:
-        """Validate that a session is not archived.
+    def _validate_conversation_active(self, conversation_id: Optional[str]) -> None:
+        """Validate that a conversation is not archived.
         
-        Args:
-            session_id: Optional session ID to validate
-            
         Raises:
-            ArchivedSessionError: If the session exists and is archived
+            ArchivedConversationError: If the conversation exists and is archived
         """
-        if session_id is None:
+        if conversation_id is None:
             return
-        
         if self._conversation_provider is None:
-            # No conversation provider - skip validation
-            self.logger.debug(
-                "No conversation provider available for session validation"
-            )
+            self.logger.debug("No conversation provider for validation")
             return
-        
-        conversation = self._conversation_provider.get_conversation(session_id)
-        
+        conversation = self._conversation_provider.get_conversation(conversation_id)
         if conversation is None:
-            # Session doesn't exist yet - that's fine, will be created
-            return
-        
+            return  # will be created on first message
         status = conversation.get("status", "active")
         if status == "archived":
-            self.logger.warning(
-                f"Rejected message to archived session: {session_id}"
-            )
-            raise ArchivedSessionError(session_id)
+            self.logger.warning(f"Rejected message to archived conversation: {conversation_id}")
+            raise ArchivedConversationError(conversation_id)
+    
+    def _load_conversation_context(
+        self, conversation_id: Optional[str]
+    ) -> Optional[Dict[str, Any]]:
+        """Load session context and merge with conversation overrides.
+        
+        Returns merged context dict or None if unavailable.
+        """
+        if not conversation_id or not self._conversation_provider or not self._session_provider:
+            return None
+        conversation = self._conversation_provider.get_conversation(conversation_id)
+        if not conversation:
+            return None
+        session_id = conversation.get("session_id")
+        if not session_id:
+            return None
+        session_ctx = self._session_provider.get_session_context(session_id)
+        if not session_ctx:
+            return None
+        # Merge: conversation overrides shallow-replace session context keys
+        overrides = conversation.get("context_overrides") or {}
+        merged = {**session_ctx, **overrides}
+        return merged
     
     def stream_chat_response(
         self, user_message: str, provider_override: Optional[str] = None,
-        session_id: Optional[str] = None
+        conversation_id: Optional[str] = None
     ) -> Generator[str, None, None]:
-        """Stream chat response in real-time (SSE format).
+        """Stream chat response in SSE format.
         
-        Emits SSE events in sequence:
-        1. Meta event with provider/model info
-        2. Content chunks as they arrive
-        3. Done event with completion metadata
-        4. [DONE] terminator
-        
-        Args:
-            user_message: User's query to process
-            provider_override: Optional provider override
-            session_id: Optional session ID for session-aware memory
-            
-        Yields:
-            SSE-formatted strings (data: {...}\n\n)
-            
         Raises:
-            ArchivedSessionError: If the session is archived
+            ArchivedConversationError: If the conversation is archived
         """
-        # Validate session is not archived before processing
-        self._validate_session_not_archived(session_id)
+        self._validate_conversation_active(conversation_id)
         
         try:
             self.logger.info(f"Starting streaming response: {user_message[:50]}...")
             
-            # Emit model metadata first (delegate to agent)
+            # Load session context for this conversation (FR-012a)
+            context = self._load_conversation_context(conversation_id)
+            if context:
+                self.logger.debug(f"Loaded session context for conversation={conversation_id}")
+            
             model_info = self._agent.get_current_model_info(provider=provider_override)
             meta = {
                 "event": "meta",
@@ -139,18 +118,16 @@ class ChatService(BaseService):
             }
             yield f"data: {json.dumps(meta)}\n\n"
             
-            # Stream response chunks
             chunk_count = 0
             full_text_parts = []
             for chunk in self._agent.process_query_streaming(
-                user_message, provider=provider_override, session_id=session_id
+                user_message, provider=provider_override, conversation_id=conversation_id
             ):
                 if chunk:
                     chunk_count += 1
                     full_text_parts.append(chunk)
                     yield f"data: {json.dumps({'chunk': chunk})}\n\n"
             
-            # Emit completion metadata
             full_text = "".join(full_text_parts)
             provider_used, model_used, fallback_flag = self.extract_meta(full_text)
             completion = {
@@ -227,49 +204,29 @@ class ChatService(BaseService):
     
     def process_chat_query(
         self, user_message: str, provider_override: Optional[str] = None,
-        session_id: Optional[str] = None
+        conversation_id: Optional[str] = None
     ) -> Dict[str, Any]:
-        """Process chat query and return structured response (non-streaming).
+        """Process chat query (non-streaming).
         
-        This method provides a non-streaming alternative to stream_chat_response,
-        returning a complete response dict with metadata.
-        
-        Args:
-            user_message: User's query to process
-            provider_override: Optional provider override
-            session_id: Optional session ID for session-aware memory
-            
-        Returns:
-            Dict with keys:
-                - response: str - The cleaned response text
-                - provider: str - Provider used
-                - model: str - Model used
-                - fallback: bool - Whether fallback was used
-                - timestamp: str - ISO 8601 timestamp
-                
         Raises:
-            ArchivedSessionError: If the session is archived
+            ArchivedConversationError: If the conversation is archived
         """
-        # Validate session is not archived before processing
-        self._validate_session_not_archived(session_id)
+        self._validate_conversation_active(conversation_id)
         
-        # Get response from agent
+        # Load session context for this conversation (FR-012a)
+        self._load_conversation_context(conversation_id)
+        
         raw_response = self._agent.process_query(
-            user_message, provider=provider_override, session_id=session_id
+            user_message, provider=provider_override, conversation_id=conversation_id
         )
         
-        # Get model info from agent
         model_info = self._agent.get_current_model_info(provider=provider_override)
-        
-        # Extract metadata from response
         provider, model, fallback = self.extract_meta(raw_response)
         
-        # Use model_info as fallback if extract_meta didn't find metadata
         if model_info:
             provider = provider or model_info.get("provider")
             model = model or model_info.get("model")
         
-        # Strip fallback prefix from response
         cleaned_response = self.strip_fallback_prefix(raw_response)
         
         return {
@@ -281,24 +238,13 @@ class ChatService(BaseService):
         }
     
     def process_chat_query_structured(
-        self, user_message: str, provider_override: Optional[str] = None
+        self, user_message: str, provider_override: Optional[str] = None,
+        conversation_id: Optional[str] = None,
     ) -> AgentResponse:
-        """Process chat query and return structured AgentResponse.
-        
-        This method uses the agent's structured response API to get
-        full metadata including tool calls and token usage.
-        
-        Args:
-            user_message: User's query to process
-            provider_override: Optional provider override
-            
-        Returns:
-            AgentResponse with content, provider, model, status, tool_calls, etc.
-        """
+        """Process chat query and return structured AgentResponse."""
         try:
-            # Use agent's structured response method
             response = self._agent.process_query_structured(
-                user_message, provider=provider_override
+                user_message, provider=provider_override, conversation_id=conversation_id
             )
             
             self.logger.info(
@@ -317,30 +263,13 @@ class ChatService(BaseService):
             )
     
     def stream_chat_response_structured(
-        self, user_message: str, provider_override: Optional[str] = None
+        self, user_message: str, provider_override: Optional[str] = None,
+        conversation_id: Optional[str] = None,
     ) -> Generator[str, None, None]:
-        """Stream chat response with enhanced metadata (SSE format).
-        
-        Similar to stream_chat_response but uses AgentResponse for
-        richer completion metadata including tool calls and token usage.
-        
-        Emits SSE events in sequence:
-        1. Meta event with provider/model info
-        2. Content chunks as they arrive
-        3. Done event with full completion metadata
-        4. [DONE] terminator
-        
-        Args:
-            user_message: User's query to process
-            provider_override: Optional provider override
-            
-        Yields:
-            SSE-formatted strings (data: {...}\n\n)
-        """
+        """Stream chat response with structured completion metadata (SSE)."""
         try:
             self.logger.info(f"Starting structured streaming: {user_message[:50]}...")
             
-            # Emit model metadata first
             model_info = self._agent.get_current_model_info(provider=provider_override)
             meta = {
                 "event": "meta",
@@ -349,19 +278,16 @@ class ChatService(BaseService):
             }
             yield f"data: {json.dumps(meta)}\n\n"
             
-            # Stream response chunks
             chunk_count = 0
             for chunk in self._agent.process_query_streaming(
-                user_message, provider=provider_override
+                user_message, provider=provider_override, conversation_id=conversation_id
             ):
                 if chunk:
                     chunk_count += 1
                     yield f"data: {json.dumps({'chunk': chunk})}\n\n"
             
-            # Get structured response for completion metadata
-            # (Note: This makes an additional call, so only use when rich metadata is needed)
             response = self._agent.process_query_structured(
-                user_message, provider=provider_override
+                user_message, provider=provider_override, conversation_id=conversation_id
             )
             
             completion = {

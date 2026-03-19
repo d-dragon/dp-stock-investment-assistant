@@ -1,11 +1,13 @@
 """
 Conversation repository for managing conversation documents.
 
-Reference: specs/spec-driven-development-pilot/data-model.md
+Reference: specs/agent-session-with-stm-wiring/spec.md
 FR-3.1: Short-Term Memory (STM)
 
 Key Behaviors:
-- session_id is the primary lookup key (= thread_id, 1:1 mapping)
+- conversation_id is the primary lookup key (unique per conversation)
+- thread_id maps 1:1 with conversation_id for LangGraph checkpointing
+- session_id is a non-unique FK (one session → many conversations)
 - Conversations are NEVER deleted (per ADR-001)
 - Archived conversations are immutable
 """
@@ -23,7 +25,9 @@ class ConversationRepository(MongoGenericRepository):
     Repository for conversations collection.
     
     Manages conversation metadata separate from LangGraph checkpoints.
-    Uses session_id as primary key (1:1 with sessions.id and thread_id).
+    Uses conversation_id as the primary business key.
+    thread_id is the LangGraph checkpoint key (1:1 with conversation_id).
+    session_id links to the parent session (many conversations per session).
     
     Per ADR-001: Conversations are NEVER deleted - only archived.
     """
@@ -57,45 +61,72 @@ class ConversationRepository(MongoGenericRepository):
     # Core Lookup Methods
     # ─────────────────────────────────────────────────────────────────
     
-    def find_by_session_id(self, session_id: str) -> Optional[Dict[str, Any]]:
+    def find_by_conversation_id(self, conversation_id: str) -> Optional[Dict[str, Any]]:
         """
-        Find conversation by session_id (primary lookup).
+        Find conversation by its business identifier (conversation_id).
         
-        Args:
-            session_id: UUID string matching sessions.id
-            
-        Returns:
-            Conversation document if found, None otherwise
+        This is the primary lookup method.
         """
-        if not session_id:
+        if not conversation_id:
             return None
-            
         try:
-            return self.collection.find_one({"session_id": session_id})
+            return self.collection.find_one({"conversation_id": conversation_id})
         except PyMongoError as e:
-            self.logger.error(f"Error finding conversation by session_id {session_id}: {e}")
+            self.logger.error(f"Error finding conversation {conversation_id}: {e}")
             return None
     
-    def exists_by_session_id(self, session_id: str) -> bool:
+    def find_by_thread_id(self, thread_id: str) -> Optional[Dict[str, Any]]:
+        """Find conversation by its LangGraph thread_id."""
+        if not thread_id:
+            return None
+        try:
+            return self.collection.find_one({"thread_id": thread_id})
+        except PyMongoError as e:
+            self.logger.error(f"Error finding conversation by thread_id {thread_id}: {e}")
+            return None
+    
+    def find_by_session_id(self, session_id: str) -> List[Dict[str, Any]]:
         """
-        Check if conversation exists for session_id.
+        Find all conversations belonging to a session.
         
-        Args:
-            session_id: UUID string
-            
-        Returns:
-            True if conversation exists
+        One session can have many conversations (1:N).
+        Returns list sorted by last_activity_at descending.
         """
         if not session_id:
+            return []
+        try:
+            return self.get_all(
+                filter_query={"session_id": session_id},
+                sort=[("last_activity_at", -1)]
+            )
+        except PyMongoError as e:
+            self.logger.error(f"Error finding conversations for session {session_id}: {e}")
+            return []
+    
+    def exists_by_conversation_id(self, conversation_id: str) -> bool:
+        """Check if conversation exists by conversation_id."""
+        if not conversation_id:
             return False
-            
         try:
             return self.collection.find_one(
-                {"session_id": session_id}, 
+                {"conversation_id": conversation_id},
                 {"_id": 1}
             ) is not None
         except PyMongoError as e:
-            self.logger.error(f"Error checking conversation existence for {session_id}: {e}")
+            self.logger.error(f"Error checking existence for conversation {conversation_id}: {e}")
+            return False
+    
+    def exists_by_session_id(self, session_id: str) -> bool:
+        """Check if any conversations exist for a session_id."""
+        if not session_id:
+            return False
+        try:
+            return self.collection.find_one(
+                {"session_id": session_id},
+                {"_id": 1}
+            ) is not None
+        except PyMongoError as e:
+            self.logger.error(f"Error checking conversation existence for session {session_id}: {e}")
             return False
     
     # ─────────────────────────────────────────────────────────────────
@@ -107,19 +138,9 @@ class ConversationRepository(MongoGenericRepository):
         user_id: str, 
         limit: int = 20
     ) -> List[Dict[str, Any]]:
-        """
-        Find active conversations for a user.
-        
-        Args:
-            user_id: User ID string
-            limit: Maximum results (default 20)
-            
-        Returns:
-            List of active conversation documents, newest first
-        """
+        """Find active conversations for a user, newest first."""
         if not user_id:
             return []
-            
         try:
             query = {
                 "user_id": user_id,
@@ -140,25 +161,13 @@ class ConversationRepository(MongoGenericRepository):
         status: str = None,
         limit: int = 50
     ) -> List[Dict[str, Any]]:
-        """
-        Find conversations in a workspace.
-        
-        Args:
-            workspace_id: Workspace ID string
-            status: Optional status filter
-            limit: Maximum results (default 50)
-            
-        Returns:
-            List of conversation documents
-        """
+        """Find conversations in a workspace with optional status filter."""
         if not workspace_id:
             return []
-            
         try:
-            query = {"workspace_id": workspace_id}
+            query: Dict[str, Any] = {"workspace_id": workspace_id}
             if status and status in self.VALID_STATUSES:
                 query["status"] = status
-                
             return self.get_all(
                 filter_query=query,
                 limit=limit,
@@ -173,23 +182,11 @@ class ConversationRepository(MongoGenericRepository):
         symbols: List[str], 
         limit: int = 20
     ) -> List[Dict[str, Any]]:
-        """
-        Find conversations focused on specific symbols.
-        
-        Args:
-            symbols: List of stock symbols (e.g., ["AAPL", "MSFT"])
-            limit: Maximum results
-            
-        Returns:
-            List of conversation documents containing any of the symbols
-        """
+        """Find conversations focused on specific symbols."""
         if not symbols:
             return []
-            
         try:
-            # Normalize symbols to uppercase
             normalized = [s.upper().strip() for s in symbols if s]
-            
             query = {"focused_symbols": {"$in": normalized}}
             return self.get_all(
                 filter_query=query,
@@ -205,19 +202,9 @@ class ConversationRepository(MongoGenericRepository):
         days: int = 30, 
         limit: int = 100
     ) -> List[Dict[str, Any]]:
-        """
-        Find conversations inactive for N days (for archive job).
-        
-        Args:
-            days: Inactivity threshold in days (default 30)
-            limit: Maximum results
-            
-        Returns:
-            List of stale conversation documents
-        """
+        """Find conversations inactive for N days (for archive job)."""
         try:
             cutoff = datetime.now(timezone.utc) - timedelta(days=days)
-            
             query = {
                 "status": {"$in": [self.STATUS_ACTIVE, self.STATUS_SUMMARIZED]},
                 "last_activity_at": {"$lt": cutoff}
@@ -231,43 +218,61 @@ class ConversationRepository(MongoGenericRepository):
             self.logger.error(f"Error finding stale conversations: {e}")
             return []
     
+    def find_by_session_id_list(
+        self,
+        session_ids: List[str],
+        status: str = None,
+        limit: int = 200
+    ) -> List[Dict[str, Any]]:
+        """Batch-fetch conversations for multiple session_ids."""
+        if not session_ids:
+            return []
+        try:
+            query: Dict[str, Any] = {"session_id": {"$in": session_ids}}
+            if status and status in self.VALID_STATUSES:
+                query["status"] = status
+            return self.get_all(
+                filter_query=query,
+                limit=limit,
+                sort=[("last_activity_at", -1)]
+            )
+        except PyMongoError as e:
+            self.logger.error(f"Error batch-fetching conversations: {e}")
+            return []
+    
     # ─────────────────────────────────────────────────────────────────
-    # Create/Upsert Methods
+    # Create Methods
     # ─────────────────────────────────────────────────────────────────
     
-    def get_or_create(
+    def create_conversation(
         self,
+        conversation_id: str,
+        thread_id: str,
         session_id: str,
-        workspace_id: str = None,
-        user_id: str = None
+        workspace_id: str,
+        user_id: str,
     ) -> Optional[Dict[str, Any]]:
         """
-        Get existing conversation or create new one for session.
-        
-        This is the primary method for conversation initialization.
-        Uses session_id as the unique key (1:1 with session).
+        Create a new conversation document.
         
         Args:
-            session_id: UUID string (required)
-            workspace_id: Workspace context (optional)
-            user_id: Owner user ID (optional)
+            conversation_id: Unique business ID (UUID v4)
+            thread_id: LangGraph checkpoint thread ID (UUID v4)
+            session_id: Parent session FK
+            workspace_id: Workspace FK
+            user_id: Owner user ID
             
         Returns:
-            Conversation document (existing or newly created)
-            None if session_id is empty/invalid
+            Newly created document, or None on failure
         """
-        if not session_id:
+        if not all([conversation_id, thread_id, session_id, workspace_id, user_id]):
+            self.logger.error("create_conversation requires all identifiers")
             return None
-            
         try:
-            # Check for existing conversation
-            existing = self.find_by_session_id(session_id)
-            if existing:
-                return existing
-            
-            # Create new conversation document
             now = datetime.now(timezone.utc)
-            new_conversation = {
+            doc = {
+                "conversation_id": conversation_id,
+                "thread_id": thread_id,
                 "session_id": session_id,
                 "workspace_id": workspace_id,
                 "user_id": user_id,
@@ -275,117 +280,118 @@ class ConversationRepository(MongoGenericRepository):
                 "message_count": 0,
                 "total_tokens": 0,
                 "focused_symbols": [],
+                "context_overrides": None,
+                "conversation_intent": None,
                 "summary": None,
                 "summarized_at": None,
                 "archived_at": None,
+                "archive_reason": None,
                 "created_at": now,
                 "updated_at": now,
-                "last_activity_at": now
+                "last_activity_at": now,
             }
-            
-            result = self.collection.insert_one(new_conversation)
-            
+            result = self.collection.insert_one(doc)
             if result.inserted_id:
-                new_conversation["_id"] = result.inserted_id
-                return new_conversation
-            
+                doc["_id"] = result.inserted_id
+                return doc
             return None
-            
         except PyMongoError as e:
-            self.logger.error(f"Error in get_or_create for session {session_id}: {e}")
+            self.logger.error(f"Error creating conversation {conversation_id}: {e}")
+            return None
+    
+    def get_or_create(
+        self,
+        conversation_id: str,
+        thread_id: str,
+        session_id: str,
+        workspace_id: str,
+        user_id: str,
+    ) -> Optional[Dict[str, Any]]:
+        """
+        Get existing conversation or create a new one.
+        
+        Looks up by conversation_id first — if not found, creates a new document.
+        """
+        if not conversation_id:
+            return None
+        try:
+            existing = self.find_by_conversation_id(conversation_id)
+            if existing:
+                return existing
+            return self.create_conversation(
+                conversation_id=conversation_id,
+                thread_id=thread_id,
+                session_id=session_id,
+                workspace_id=workspace_id,
+                user_id=user_id,
+            )
+        except PyMongoError as e:
+            self.logger.error(f"Error in get_or_create for conversation {conversation_id}: {e}")
             return None
     
     # ─────────────────────────────────────────────────────────────────
     # Update Methods
     # ─────────────────────────────────────────────────────────────────
     
-    def update_by_session_id(
+    def update_by_conversation_id(
         self, 
-        session_id: str, 
+        conversation_id: str, 
         data: Dict[str, Any]
     ) -> bool:
         """
-        Update conversation by session_id.
+        Update conversation by conversation_id.
         
-        Args:
-            session_id: UUID string
-            data: Fields to update
-            
-        Returns:
-            True if document was modified
-            
-        Note:
-            Fails silently if conversation is archived (immutable).
+        Fails silently if conversation is archived (immutable).
         """
-        if not session_id:
+        if not conversation_id:
             return False
-            
         try:
-            # Check if archived (immutable)
             existing = self.collection.find_one(
-                {"session_id": session_id},
+                {"conversation_id": conversation_id},
                 {"status": 1}
             )
             if not existing:
-                self.logger.warning(f"Conversation not found for session_id: {session_id}")
+                self.logger.warning(f"Conversation not found: {conversation_id}")
                 return False
-                
             if existing.get("status") == self.STATUS_ARCHIVED:
-                self.logger.warning(f"Cannot update archived conversation: {session_id}")
+                self.logger.warning(f"Cannot update archived conversation: {conversation_id}")
                 return False
-            
-            # Add updated_at timestamp
             update_data = {**data, "updated_at": datetime.now(timezone.utc)}
-            
             result = self.collection.update_one(
-                {"session_id": session_id},
+                {"conversation_id": conversation_id},
                 {"$set": update_data}
             )
             return result.modified_count > 0
-            
         except PyMongoError as e:
-            self.logger.error(f"Error updating conversation {session_id}: {e}")
+            self.logger.error(f"Error updating conversation {conversation_id}: {e}")
             return False
     
     def update_activity(
         self, 
-        session_id: str, 
+        conversation_id: str, 
         message_count_delta: int = 1, 
         token_delta: int = 0
     ) -> Optional[Dict[str, Any]]:
         """
         Update activity metrics after message exchange.
         
-        Uses $inc for atomic updates to counters.
-        
-        Args:
-            session_id: UUID string
-            message_count_delta: Number of messages to add (default 1)
-            token_delta: Number of tokens to add (default 0)
-            
-        Returns:
-            Updated document if successful, None otherwise
+        Uses $inc for atomic counter updates.
         """
-        if not session_id:
+        if not conversation_id:
             return None
-            
         try:
-            # Check if archived first
             existing = self.collection.find_one(
-                {"session_id": session_id},
+                {"conversation_id": conversation_id},
                 {"status": 1}
             )
             if not existing:
                 return None
-                
             if existing.get("status") == self.STATUS_ARCHIVED:
-                self.logger.warning(f"Cannot update activity for archived conversation: {session_id}")
+                self.logger.warning(f"Cannot update activity for archived conversation: {conversation_id}")
                 return None
-            
             now = datetime.now(timezone.utc)
-            
             result = self.collection.find_one_and_update(
-                {"session_id": session_id},
+                {"conversation_id": conversation_id},
                 {
                     "$inc": {
                         "message_count": message_count_delta,
@@ -399,46 +405,31 @@ class ConversationRepository(MongoGenericRepository):
                 return_document=True
             )
             return result
-            
         except PyMongoError as e:
-            self.logger.error(f"Error updating activity for {session_id}: {e}")
+            self.logger.error(f"Error updating activity for {conversation_id}: {e}")
             return None
     
     def update_summary(
         self, 
-        session_id: str, 
+        conversation_id: str, 
         summary: str
     ) -> Optional[Dict[str, Any]]:
-        """
-        Update summary and set status to 'summarized'.
-        
-        Args:
-            session_id: UUID string
-            summary: Summary text
-            
-        Returns:
-            Updated document if successful, None otherwise
-        """
-        if not session_id or not summary:
+        """Update summary and set status to 'summarized'."""
+        if not conversation_id or not summary:
             return None
-            
         try:
-            # Validate not archived
             existing = self.collection.find_one(
-                {"session_id": session_id},
+                {"conversation_id": conversation_id},
                 {"status": 1}
             )
             if not existing:
                 return None
-                
             if existing.get("status") == self.STATUS_ARCHIVED:
-                self.logger.warning(f"Cannot update summary for archived conversation: {session_id}")
+                self.logger.warning(f"Cannot update summary for archived conversation: {conversation_id}")
                 return None
-            
             now = datetime.now(timezone.utc)
-            
             result = self.collection.find_one_and_update(
-                {"session_id": session_id},
+                {"conversation_id": conversation_id},
                 {
                     "$set": {
                         "summary": summary,
@@ -449,48 +440,32 @@ class ConversationRepository(MongoGenericRepository):
                 return_document=True
             )
             return result
-            
         except PyMongoError as e:
-            self.logger.error(f"Error updating summary for {session_id}: {e}")
+            self.logger.error(f"Error updating summary for {conversation_id}: {e}")
             return None
     
     def update_focused_symbols(
         self, 
-        session_id: str, 
+        conversation_id: str, 
         symbols: List[str]
     ) -> Optional[Dict[str, Any]]:
-        """
-        Update focused symbols for a conversation.
-        
-        Args:
-            session_id: UUID string
-            symbols: List of stock symbols (will be normalized to uppercase)
-            
-        Returns:
-            Updated document if successful, None otherwise
-        """
-        if not session_id:
+        """Update focused symbols for a conversation (normalized to uppercase)."""
+        if not conversation_id:
             return None
-            
         try:
-            # Normalize and deduplicate
             normalized = list(set(s.upper().strip() for s in symbols if s))
-            
             existing = self.collection.find_one(
-                {"session_id": session_id},
+                {"conversation_id": conversation_id},
                 {"status": 1}
             )
             if not existing:
                 return None
-                
             if existing.get("status") == self.STATUS_ARCHIVED:
-                self.logger.warning(f"Cannot update symbols for archived conversation: {session_id}")
+                self.logger.warning(f"Cannot update symbols for archived conversation: {conversation_id}")
                 return None
-            
             now = datetime.now(timezone.utc)
-            
             result = self.collection.find_one_and_update(
-                {"session_id": session_id},
+                {"conversation_id": conversation_id},
                 {
                     "$set": {
                         "focused_symbols": normalized,
@@ -500,61 +475,99 @@ class ConversationRepository(MongoGenericRepository):
                 return_document=True
             )
             return result
-            
         except PyMongoError as e:
-            self.logger.error(f"Error updating symbols for {session_id}: {e}")
+            self.logger.error(f"Error updating symbols for {conversation_id}: {e}")
             return None
+    
+    def update_context_overrides(
+        self,
+        conversation_id: str,
+        context_overrides: Optional[Dict[str, Any]]
+    ) -> bool:
+        """Set thread-local context overrides for a conversation."""
+        return self.update_by_conversation_id(conversation_id, {
+            "context_overrides": context_overrides
+        })
     
     # ─────────────────────────────────────────────────────────────────
     # Status Transition Methods
     # ─────────────────────────────────────────────────────────────────
     
-    def archive(self, session_id: str) -> Optional[Dict[str, Any]]:
+    def archive(
+        self,
+        conversation_id: str,
+        archive_reason: str = None
+    ) -> Optional[Dict[str, Any]]:
         """
         Archive conversation (terminal state).
         
         Once archived, conversation becomes immutable.
         
         Args:
-            session_id: UUID string
-            
-        Returns:
-            Updated document if successful, None otherwise
+            conversation_id: Conversation business ID
+            archive_reason: Optional reason (user_requested, session_closed, stale, admin)
         """
-        if not session_id:
+        if not conversation_id:
             return None
-            
         try:
-            # Check current status
             existing = self.collection.find_one(
-                {"session_id": session_id},
+                {"conversation_id": conversation_id},
                 {"status": 1}
             )
             if not existing:
                 return None
-                
             if existing.get("status") == self.STATUS_ARCHIVED:
-                # Already archived - return current document
-                return self.collection.find_one({"session_id": session_id})
-            
+                return self.collection.find_one({"conversation_id": conversation_id})
             now = datetime.now(timezone.utc)
-            
+            update_fields: Dict[str, Any] = {
+                "status": self.STATUS_ARCHIVED,
+                "archived_at": now,
+                "updated_at": now,
+            }
+            if archive_reason:
+                update_fields["archive_reason"] = archive_reason
             result = self.collection.find_one_and_update(
-                {"session_id": session_id},
+                {"conversation_id": conversation_id},
+                {"$set": update_fields},
+                return_document=True
+            )
+            return result
+        except PyMongoError as e:
+            self.logger.error(f"Error archiving conversation {conversation_id}: {e}")
+            return None
+    
+    def archive_by_session_id(
+        self,
+        session_id: str,
+        archive_reason: str = "session_closed"
+    ) -> int:
+        """
+        Archive all conversations for a session (cascade).
+        
+        Returns the number of conversations archived.
+        """
+        if not session_id:
+            return 0
+        try:
+            now = datetime.now(timezone.utc)
+            result = self.collection.update_many(
+                {
+                    "session_id": session_id,
+                    "status": {"$ne": self.STATUS_ARCHIVED}
+                },
                 {
                     "$set": {
                         "status": self.STATUS_ARCHIVED,
                         "archived_at": now,
-                        "updated_at": now
+                        "updated_at": now,
+                        "archive_reason": archive_reason,
                     }
-                },
-                return_document=True
+                }
             )
-            return result
-            
+            return result.modified_count
         except PyMongoError as e:
-            self.logger.error(f"Error archiving conversation {session_id}: {e}")
-            return None
+            self.logger.error(f"Error archiving conversations for session {session_id}: {e}")
+            return 0
     
     # ─────────────────────────────────────────────────────────────────
     # Override: Disable Delete (ADR-001)
@@ -565,12 +578,6 @@ class ConversationRepository(MongoGenericRepository):
         Delete is disabled for conversations (ADR-001: No-delete policy).
         
         Use archive() instead to mark conversations as read-only.
-        
-        Args:
-            id: Document ID
-            
-        Returns:
-            Always False
         """
         self.logger.warning(
             f"Delete attempted on conversation {id}. "
@@ -583,23 +590,15 @@ class ConversationRepository(MongoGenericRepository):
     # ─────────────────────────────────────────────────────────────────
     
     def health_check(self) -> Tuple[bool, Dict[str, Any]]:
-        """
-        Check repository health.
-        
-        Returns:
-            (healthy: bool, details: dict)
-        """
+        """Check repository health."""
         try:
-            # Try to count documents (tests read permission)
             count = self.count()
-            
             return True, {
                 "component": "conversation_repository",
                 "status": "ready",
                 "collection": self.collection_name,
                 "document_count": count
             }
-            
         except Exception as e:
             return False, {
                 "component": "conversation_repository",

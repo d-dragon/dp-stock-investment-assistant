@@ -65,6 +65,8 @@ def sample_conversation():
     """Sample conversation document."""
     return {
         "_id": "conv-12345",
+        "conversation_id": "conv-abc123",
+        "thread_id": "thread-abc123",
         "session_id": "sess-abc123",
         "workspace_id": "ws-001",
         "user_id": "user-001",
@@ -135,14 +137,18 @@ class TestTrackMessage:
         }
         
         result = conversation_service.track_message(
-            session_id="sess-abc123",
+            conversation_id="conv-abc123",
             role="user",
             content="Hello",
+            thread_id="thread-abc123",
+            session_id="sess-abc123",
             workspace_id="ws-001",
             user_id="user-001",
         )
         
         mock_repository.get_or_create.assert_called_once_with(
+            conversation_id="conv-abc123",
+            thread_id="thread-abc123",
             session_id="sess-abc123",
             workspace_id="ws-001",
             user_id="user-001",
@@ -162,7 +168,7 @@ class TestTrackMessage:
         }
         
         result = conversation_service.track_message(
-            session_id="sess-abc123",
+            conversation_id="conv-abc123",
             role="assistant",
             content="Hello! How can I help?",  # ~23 chars / 4 = ~5 tokens
         )
@@ -170,7 +176,7 @@ class TestTrackMessage:
         mock_repository.update_activity.assert_called_once()
         call_kwargs = mock_repository.update_activity.call_args
         
-        assert call_kwargs.kwargs["session_id"] == "sess-abc123"
+        assert call_kwargs.kwargs["conversation_id"] == "conv-abc123"
         assert call_kwargs.kwargs["message_count_delta"] == 1
         # Token count is estimated: len("Hello! How can I help?") // 4 = 5
         assert call_kwargs.kwargs["token_delta"] >= 1
@@ -183,19 +189,19 @@ class TestTrackMessage:
         mock_repository.update_activity.return_value = sample_conversation
         
         conversation_service.track_message(
-            session_id="sess-abc123",
+            conversation_id="conv-abc123",
             role="user",
             content="Test message",
         )
         
-        mock_cache.delete.assert_called_once_with("conversation:sess-abc123")
+        mock_cache.delete.assert_called_once_with("conversation:conv-abc123")
     
-    def test_track_message_returns_none_for_empty_session_id(
+    def test_track_message_returns_none_for_empty_conversation_id(
         self, conversation_service, mock_repository
     ):
-        """track_message should return None for empty session_id."""
+        """track_message should return None for empty conversation_id."""
         result = conversation_service.track_message(
-            session_id="",
+            conversation_id="",
             role="user",
             content="Hello",
         )
@@ -208,7 +214,7 @@ class TestTrackMessage:
     ):
         """track_message should return None for empty content."""
         result = conversation_service.track_message(
-            session_id="sess-abc123",
+            conversation_id="conv-abc123",
             role="user",
             content="",
         )
@@ -220,10 +226,10 @@ class TestTrackMessage:
         self, conversation_service, mock_repository
     ):
         """track_message should handle repository failures gracefully."""
-        mock_repository.get_or_create.return_value = None
+        mock_repository.update_activity.return_value = None
         
         result = conversation_service.track_message(
-            session_id="sess-abc123",
+            conversation_id="conv-abc123",
             role="user",
             content="Hello",
         )
@@ -244,29 +250,29 @@ class TestGetConversation:
         """get_conversation should return cached data if available."""
         mock_cache.get_json.return_value = sample_conversation
         
-        result = conversation_service.get_conversation("sess-abc123")
+        result = conversation_service.get_conversation("conv-abc123")
         
         assert result == sample_conversation
-        mock_cache.get_json.assert_called_once_with("conversation:sess-abc123")
-        mock_repository.find_by_session_id.assert_not_called()
+        mock_cache.get_json.assert_called_once_with("conversation:conv-abc123")
+        mock_repository.find_by_conversation_id.assert_not_called()
     
     def test_get_conversation_from_repository_on_cache_miss(
         self, conversation_service, mock_repository, mock_cache, sample_conversation
     ):
         """get_conversation should fetch from repository on cache miss."""
         mock_cache.get_json.return_value = None
-        mock_repository.find_by_session_id.return_value = sample_conversation
+        mock_repository.find_by_conversation_id.return_value = sample_conversation
         
-        result = conversation_service.get_conversation("sess-abc123")
+        result = conversation_service.get_conversation("conv-abc123")
         
         assert result == sample_conversation
-        mock_repository.find_by_session_id.assert_called_once_with("sess-abc123")
+        mock_repository.find_by_conversation_id.assert_called_once_with("conv-abc123")
         mock_cache.set_json.assert_called_once()
     
-    def test_get_conversation_returns_none_for_empty_session_id(
+    def test_get_conversation_returns_none_for_empty_conversation_id(
         self, conversation_service
     ):
-        """get_conversation should return None for empty session_id."""
+        """get_conversation should return None for empty conversation_id."""
         result = conversation_service.get_conversation("")
         
         assert result is None
@@ -285,10 +291,10 @@ class TestGetConversationStats:
         """get_conversation_stats should return formatted statistics."""
         mock_cache.get_json.return_value = sample_conversation
         
-        stats = conversation_service.get_conversation_stats("sess-abc123")
+        stats = conversation_service.get_conversation_stats("conv-abc123")
         
         assert stats is not None
-        assert stats["session_id"] == "sess-abc123"
+        assert stats["conversation_id"] == "conv-abc123"
         assert stats["message_count"] == 5
         assert stats["total_tokens"] == 150
         assert stats["status"] == "active"
@@ -298,6 +304,7 @@ class TestGetConversationStats:
     ):
         """get_conversation_stats should calculate session duration."""
         conv = {
+            "conversation_id": "conv-abc123",
             "session_id": "sess-abc123",
             "message_count": 10,
             "total_tokens": 500,
@@ -307,7 +314,7 @@ class TestGetConversationStats:
         }
         mock_cache.get_json.return_value = conv
         
-        stats = conversation_service.get_conversation_stats("sess-abc123")
+        stats = conversation_service.get_conversation_stats("conv-abc123")
         
         assert stats is not None
         # Duration should be 30 minutes = 1800 seconds
@@ -318,9 +325,9 @@ class TestGetConversationStats:
     ):
         """get_conversation_stats should return None for nonexistent conversation."""
         mock_cache.get_json.return_value = None
-        mock_repository.find_by_session_id.return_value = None
+        mock_repository.find_by_conversation_id.return_value = None
         
-        stats = conversation_service.get_conversation_stats("nonexistent-session")
+        stats = conversation_service.get_conversation_stats("nonexistent-conv")
         
         assert stats is None
 
@@ -366,31 +373,31 @@ class TestArchiveConversation:
         self, conversation_service, mock_repository, mock_cache
     ):
         """archive_conversation should delegate to repository."""
-        mock_repository.archive_by_session_id.return_value = True
+        mock_repository.archive.return_value = {"status": "archived"}
         
-        result = conversation_service.archive_conversation("sess-abc123")
+        result = conversation_service.archive_conversation("conv-abc123")
         
         assert result is True
-        mock_repository.archive_by_session_id.assert_called_once_with("sess-abc123")
+        mock_repository.archive.assert_called_once_with("conv-abc123", archive_reason=None)
     
     def test_archive_conversation_invalidates_cache(
         self, conversation_service, mock_repository, mock_cache
     ):
         """archive_conversation should invalidate cache on success."""
-        mock_repository.archive_by_session_id.return_value = True
+        mock_repository.archive.return_value = {"status": "archived"}
         
-        conversation_service.archive_conversation("sess-abc123")
+        conversation_service.archive_conversation("conv-abc123")
         
-        mock_cache.delete.assert_called_once_with("conversation:sess-abc123")
+        mock_cache.delete.assert_called_once_with("conversation:conv-abc123")
     
-    def test_archive_conversation_returns_false_for_empty_session_id(
+    def test_archive_conversation_returns_false_for_empty_conversation_id(
         self, conversation_service, mock_repository
     ):
-        """archive_conversation should return False for empty session_id."""
+        """archive_conversation should return False for empty conversation_id."""
         result = conversation_service.archive_conversation("")
         
         assert result is False
-        mock_repository.archive_by_session_id.assert_not_called()
+        mock_repository.archive.assert_not_called()
 
 
 # =============================================================================
