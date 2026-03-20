@@ -1,0 +1,319 @@
+version: 1
+generated_on: 2026-03-19
+
+reports:
+  spec_sync_status:
+    version: "1.0"
+    status: Active
+    revision_history:
+      - version: "1.0"
+        date: 2026-03-19
+        summary: Added embedded report metadata and anchor-aware evidence links for forward spec sync reporting.
+  srs_spec_traceability:
+    version: "1.3"
+    status: Active
+    revision_history:
+      - version: "1.0"
+        date: 2026-03-19
+        summary: Initial bidirectional reverse trace generation between SRS items and spec-kit artifacts.
+      - version: "1.1"
+        date: 2026-03-19
+        summary: Added line-specific SRS links, embedded document version tracking, and promoted exact pilot overlap to gate-enforced coverage.
+      - version: "1.2"
+        date: 2026-03-19
+        summary: Added a requirement-family index and per-family mapping summaries to improve reverse-trace navigation.
+      - version: "1.3"
+        date: 2026-03-19
+        summary: Reformatted the family index into a grouped markdown table for easier navigation by requirement type.
+
+srs:
+  path: docs/langchain-agent/SOFTWARE_REQUIREMENTS_SPECIFICATION.md
+  version: "2.2"
+  last_updated: 2026-03-19
+
+status_rules:
+  analyzed:
+    requires:
+      - analysis.md
+      - .analyze-done
+  planned:
+    requires:
+      - plan.md
+  implemented:
+    requires:
+      - tasks.md
+    rule: all checklist tasks in tasks.md are checked
+  verified:
+    requires:
+      - review.md
+      - .verify-done
+    rule: implementation status is implemented before verification can be true
+
+features:
+  - feature_id: agent-session-with-stm-wiring
+    feature_title: STM Domain Model Refactor and Service-Layer Restructuring
+    feature_path: specs/agent-session-with-stm-wiring
+    reference_document: specs/agent-session-with-stm-wiring/spec.md
+    reference_anchor: requirements-mandatory
+    mapping_status: mapped
+    feature_kind: implementation-feature
+    status_sync:
+      source_of_truth: derived
+      gate_enforced: true
+      synchronized_documents:
+        - specs/agent-session-with-stm-wiring/spec.md
+    srs_mapping:
+      baseline_version: "2.2"
+      coverage_status: partial
+      mapped_srs_items:
+        - FR-3.1.1
+        - FR-3.1.2
+        - FR-3.1.3
+        - FR-3.1.4
+        - FR-3.1.5
+        - FR-3.1.6
+        - FR-3.1.7
+        - FR-3.1.8
+        - FR-3.2.1
+        - FR-3.2.2
+        - FR-3.2.3
+        - FR-3.2.4
+        - FR-3.2.5
+        - FR-3.2.6
+        - FR-3.2.7
+        - FR-3.2.8
+        - FR-3.2.9
+        - FR-3.2.10
+        - FR-3.4.1
+        - FR-3.4.2
+        - FR-3.4.3
+        - FR-3.4.4
+        - FR-3.4.5
+        - FR-3.4.6
+        - FR-3.4.7
+        - FR-5.1.2
+        - FR-5.1.5
+        - FR-5.1.8
+        - FR-5.2.2
+        - FR-5.2.6
+        - FR-7.1.2
+        - FR-7.1.3
+        - NFR-2.3.1
+        - NFR-2.3.2
+        - NFR-4.1.3
+        - NFR-4.1.4
+        - AC-2.1
+        - AC-2.2
+        - AC-2.5
+        - AC-2.6
+        - AC-2.7
+        - AC-4.2
+        - AC-6.1
+        - AC-7.1
+        - AC-7.2
+        - AC-7.3
+        - IR-1.5
+        - IR-1.6
+        - IR-1.7
+      mapped_functional_groups:
+        - group: FR-3.1
+          coverage: full
+        - group: FR-3.2
+          coverage: full
+        - group: FR-3.4
+          coverage: full
+        - group: FR-5.1
+          coverage: partial
+          includes:
+            - FR-5.1.2
+            - FR-5.1.5
+            - FR-5.1.8
+        - group: FR-5.2
+          coverage: partial
+          includes:
+            - FR-5.2.2
+            - FR-5.2.6
+        - group: FR-7.1
+          coverage: partial
+          includes:
+            - FR-7.1.2
+            - FR-7.1.3
+      mapped_non_functional:
+        - NFR-2.3.1
+        - NFR-2.3.2
+        - NFR-4.1.3
+        - NFR-4.1.4
+      mapped_acceptance_criteria:
+        - AC-2.1
+        - AC-2.2
+        - AC-2.5
+        - AC-2.6
+        - AC-2.7
+        - AC-4.2
+        - AC-6.1
+        - AC-7.1
+        - AC-7.2
+        - AC-7.3
+      out_of_scope_srs_groups:
+        - FR-5.3
+        - FR-5.4
+        - FR-5.5
+        - FR-5.6
+        - FR-7.2
+        - FR-7.3
+      sync_notes:
+        - Feature scope covers Phase A and Phase B only.
+        - Management API and reconciliation requirements remain intentionally outside this feature boundary.
+        - Coverage was evaluated against SRS v2.2 on 2026-03-19.
+    speckit_mapping:
+      spec_requirements:
+        - FR-001
+        - FR-002
+        - FR-003
+        - FR-004
+        - FR-005
+        - FR-006
+        - FR-007
+        - FR-008
+        - FR-009
+        - FR-009a
+        - FR-009b
+        - FR-010
+        - FR-011
+        - FR-011a
+        - FR-011b
+        - FR-012
+        - FR-012a
+        - FR-012b
+        - FR-013
+        - FR-014
+        - FR-015
+        - FR-015a
+        - FR-016
+        - FR-017
+        - FR-018
+        - FR-019
+      success_criteria:
+        - SC-001
+        - SC-002
+        - SC-003
+        - SC-004
+        - SC-005
+        - SC-006
+        - SC-007
+        - SC-008
+        - SC-009
+        - SC-010
+      plan_steps:
+        - "1.1"
+        - "1.2"
+        - "1.3"
+        - "1.4"
+        - "1.5"
+        - "1.6"
+        - "2.1"
+        - "2.2"
+        - "2.3"
+        - "2.4"
+        - "2.5"
+        - "2.6"
+        - "2.7"
+      evidence_paths:
+        - path: specs/agent-session-with-stm-wiring/spec.md
+          label: Feature requirements
+          anchor: requirements-mandatory
+        - path: specs/agent-session-with-stm-wiring/spec.md
+          label: Phase B service refactor scope
+          anchor: phase-b-service-layer-refactor
+        - path: specs/agent-session-with-stm-wiring/tasks.md
+          label: User Story 1 delivery phase
+          anchor: phase-3-user-story-1-conversation-scoped-agent-memory-priority-p1--mvp
+        - path: specs/agent-session-with-stm-wiring/tasks.md
+          label: Service-layer chat flow phase
+          anchor: phase-5-user-story-4-service-layer-conversation-aware-chat-flow-priority-p4
+        - path: specs/agent-session-with-stm-wiring/analysis.md
+          label: Analysis report
+        - path: specs/agent-session-with-stm-wiring/plan.md
+          label: Delivery plan
+        - path: specs/agent-session-with-stm-wiring/tasks.md
+          label: Task checklist
+        - path: specs/agent-session-with-stm-wiring/review.md
+          label: Verification review
+        - path: specs/agent-session-with-stm-wiring/review.md
+          label: Post-implementation verdict
+          anchor: verdict
+        - path: specs/agent-session-with-stm-wiring/review.md
+          label: Final re-run verdict
+          anchor: final-re-run-verdict
+        - path: specs/agent-session-with-stm-wiring/.analyze-done
+          label: Analyze marker
+        - path: specs/agent-session-with-stm-wiring/.verify-done
+          label: Verify marker
+
+  - feature_id: 001-stm-domain-service-refactor
+    feature_title: Legacy STM domain service refactor planning artifact
+    feature_path: specs/001-stm-domain-service-refactor
+    mapping_status: unmapped
+    feature_kind: legacy-plan-only
+    sync_notes:
+      - Directory contains a plan artifact only.
+      - No spec.md or tasks.md pair exists to derive delivery status.
+
+  - feature_id: spec-driven-development-pilot
+    feature_title: Spec-driven development pilot
+    feature_path: specs/spec-driven-development-pilot
+    reference_document: specs/spec-driven-development-pilot/plan.md
+    reference_anchor: summary
+    mapping_status: mapped
+    feature_kind: pilot
+    status_sync:
+      source_of_truth: derived
+      gate_enforced: true
+    srs_mapping:
+      baseline_version: "2.2"
+      coverage_status: partial
+      mapped_srs_items:
+        - FR-3.1.1
+        - FR-3.1.2
+        - FR-3.1.4
+        - FR-3.1.6
+        - FR-3.1.7
+        - FR-3.1.8
+      mapped_functional_groups:
+        - group: FR-3.1
+          coverage: partial
+          includes:
+            - FR-3.1.1
+            - FR-3.1.2
+            - FR-3.1.4
+            - FR-3.1.6
+            - FR-3.1.7
+            - FR-3.1.8
+      sync_notes:
+        - Pilot artifacts are gate-enforced only for STM behaviors that remain semantically identical in SRS v2.2.
+        - Legacy session_id identity semantics are intentionally excluded from exact trace coverage.
+    speckit_mapping:
+      evidence_paths:
+        - path: specs/spec-driven-development-pilot/plan.md
+          label: STM implementation summary
+          anchor: summary
+        - path: specs/spec-driven-development-pilot/plan.md
+          label: Session-aware invocation pattern
+          anchor: 3-agent-session-aware-invocation-pattern
+        - path: specs/spec-driven-development-pilot/tasks.md
+          label: STM task checklist
+        - path: specs/spec-driven-development-pilot/tasks.md
+          label: Session-aware conversation phase
+          anchor: phase-3-us1--session-aware-conversation-p1--5-6-sp
+        - path: specs/spec-driven-development-pilot/tasks.md
+          label: Runtime integration phase
+          anchor: phase-9-stm-runtime-integration--agent-migration-critical--5-6-sp
+        - path: specs/spec-driven-development-pilot/quickstart.md
+          label: STM quickstart
+        - path: specs/spec-driven-development-pilot/data-model.md
+          label: STM data model
+        - path: specs/spec-driven-development-pilot/contracts/api-contract.yaml
+          label: API contract
+    sync_notes:
+      - Pilot artifact set now traces only the STM requirements that remain behaviorally identical to the current SRS.
+      - Identity-model differences remain out of scope for this exact mapping.

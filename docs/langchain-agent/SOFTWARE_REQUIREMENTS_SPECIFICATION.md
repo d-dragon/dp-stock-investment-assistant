@@ -1,8 +1,8 @@
 # Stock Investment Assistant Agent — Software Requirements Specification
 
-> **Document Version**: 2.0  
+> **Document Version**: 2.2  
 > **Created**: January 22, 2026  
-> **Last Updated**: January 23, 2026  
+> **Last Updated**: March 19, 2026  
 > **Status**: Active  
 > **Scope**: LangChain-based AI Agent for Stock Investment Assistant  
 ## Related Documents
@@ -16,6 +16,9 @@ This specification builds upon and references several architectural and design d
 | [LANGCHAIN_AGENT_HOWTO.md](./LANGCHAIN_AGENT_HOWTO.md) | Complete guide to ReAct pattern, semantic routing, tool system, and operations | Operational reference for agent deployment and usage |
 | [PHASE_2_AGENT_ENHANCEMENT_ROADMAP.md](./PHASE_2_AGENT_ENHANCEMENT_ROADMAP.md) | Future enhancement roadmap including multi-agent, advanced memory, and observability | Planning for P2 requirements beyond current release |
 | [AGENT_MEMORY_TECHNICAL_DESIGN.md](./AGENT_MEMORY_TECHNICAL_DESIGN.md) | Detailed technical design for conversation memory, checkpointing, and summarization | Implementation guidance supporting FR-3 (Memory System) |
+| [AGENTIC_APP_WITH_STM_INTEGRATION_ROADMAP.md](../High-level%20Design/AGENTIC_APP_WITH_STM_INTEGRATION_ROADMAP.md) | Technical roadmap for workspace-session-conversation hierarchy and STM integration | Roadmap for FR-5.3–5.5, FR-7 (management, consistency, migration) |
+| [SRS_SPEC_TRACEABILITY.md](./SRS_SPEC_TRACEABILITY.md) | Bidirectional trace between SRS items and spec-kit feature artifacts | Companion delivery trace for implementation coverage and sync status |
+
 
 
 ---
@@ -30,6 +33,7 @@ This specification builds upon and references several architectural and design d
    - [FR-4: Semantic Routing](#fr-4-semantic-routing)
    - [FR-5: API Integration](#fr-5-api-integration)
    - [FR-6: Streaming](#fr-6-streaming)
+   - [FR-7: Data Integrity and Operational Tooling](#fr-7-data-integrity-and-operational-tooling)
 3. [Non-Functional Requirements](#3-non-functional-requirements)
    - [NFR-1: Performance](#nfr-1-performance)
    - [NFR-2: Reliability](#nfr-2-reliability)
@@ -94,6 +98,11 @@ This specification follows **spec-driven development** principles, enabling AI-a
 | **Streaming** | Incremental delivery of response content as it's generated |
 | **Summarization** | Condensing a conversation thread's prior exchanges to manage context size while preserving recent continuity |
 | **TTL** | Time To Live (duration before data expires) |
+| **Management API** | REST endpoints for creating, listing, retrieving, updating, and archiving workspace, session, and conversation resources |
+| **Cascade Archive** | When a parent resource is archived, its child resources are also transitioned to archived status |
+| **Reconciliation** | The process of detecting and optionally repairing inconsistencies between related data stores (e.g., conversation metadata vs. checkpointer state) |
+| **Migration** | The controlled transformation of historical data from the legacy identity model (session_id as thread_id) to the canonical hierarchy (conversation_id as thread_id) |
+| **Orphan Record** | A child record whose required parent record is missing or invalid (e.g., a conversation without a valid parent session) |
 
 ### 1.4 Document Conventions
 
@@ -237,7 +246,7 @@ Priority levels:
 | FR-3.2.3 | **Conversation-to-Thread Binding** | Each conversation maps 1:1 to a single agent memory thread | Conversation exists and STM is enabled | Requests for the same `conversation_id` load the same `thread_id`; different conversations under the same session do not share thread state | P0 |
 | FR-3.2.4 | **Multiple Conversations Per Session** | A session can contain multiple independent conversations under the same business workflow | Session is active and already contains at least one conversation | Additional conversation can be created without mutating or overwriting existing conversation state | P0 |
 | FR-3.2.5 | **Conversation Parent Integrity** | Every conversation belongs to exactly one valid session and exactly one valid workspace | Conversation create, load, or update is requested | Operation succeeds only when referenced parent session and workspace exist and are consistent | P0 |
-| FR-3.2.6 | **Conversation Metadata Synchronization** | The system maintains conversation metadata independently of checkpointer state | Conversation has active exchanges | Message count, token count, status, and activity timestamp reflect the conversation's exchanges and remain retrievable via conversation APIs | P1 |
+| FR-3.2.6 | **Conversation Metadata Synchronization** | The system updates conversation metadata as part of the active chat processing flow — not as a background or deferred operation — so that message count, token count, status, and activity timestamp reflect the conversation's exchanges after each turn and remain retrievable via conversation APIs | Conversation has active exchanges | After each user and assistant turn, message_count and total_tokens are incremented and last_activity_at is updated within the same request cycle; metadata is query-consistent within 5 seconds | P0 |
 | FR-3.2.7 | **Boundary Isolation** | Conversations cannot be accessed across workspace or session boundaries | User in Workspace A or Session A attempts to access Conversation B outside the boundary | Access denied; conversation not found or forbidden response returned | P0 |
 | FR-3.2.8 | **Conversation Lifecycle Status** | Conversations transition through defined states independent of session identity: active → summarized → archived | Conversation exists | Status field is always one of three valid values; transitions follow defined order only | P1 |
 | FR-3.2.9 | **Conversation Archival** | Ended conversations are archived, never permanently deleted, even when their parent session remains available for audit or review | User or system requests conversation closure | Conversation status = `archived`; record remains queryable for audit and historical navigation | P2 |
@@ -324,7 +333,7 @@ Priority levels:
 | FR-5.1.4 | **Streaming Response Format** | Streaming responses delivered as server-sent events | Streaming requested | Response content-type is text/event-stream; chunks delivered incrementally | P0 |
 | FR-5.1.5 | **Backward Compatibility** | API works without conversation identifier for stateless queries | `conversation_id` omitted | Request processes normally; no stateful conversation thread is persisted | P0 |
 | FR-5.1.6 | **Input Validation** | Invalid requests return appropriate error codes | Malformed request | 400 returned for invalid format; 503 for service unavailable | P0 |
-| FR-5.1.7 | **Hierarchical Management Endpoints** | REST API provides interfaces for managing workspace, session, and conversation resources | Management feature enabled | CRUD-style endpoints exist for creating, listing, retrieving, and updating hierarchical resources according to policy | P1 |
+| FR-5.1.7 | **Hierarchical Management Endpoints** | REST API provides CRUD and lifecycle management interfaces for workspace, session, and conversation resources as specified in FR-5.3, FR-5.4, and FR-5.5 | Management feature enabled | Endpoints exist for creating, listing, retrieving, updating, and archiving hierarchical resources; responses include parent references for navigation | P0 |
 | FR-5.1.8 | **Boundary-Aware Resource Resolution** | Stateful and management endpoints validate workspace-session-conversation parent relationships before processing | Request includes hierarchical resource identifiers | Request succeeds only when identifiers describe a valid resource hierarchy; otherwise 404 or 403 returned | P0 |
 
 #### FR-5.2 WebSocket Interface
@@ -337,6 +346,70 @@ Priority levels:
 | FR-5.2.4 | **Streaming Chunk Events** | Server emits incremental events during streaming | Streaming requested | Multiple chunk events delivered; final event signals completion | P0 |
 | FR-5.2.5 | **Error Notification** | Server emits error event when processing fails | Error occurs | Error event contains error type and user-friendly message | P0 |
 | FR-5.2.6 | **Hierarchy Context Support** | WebSocket workflows can supply or resolve parent session context separately from conversation identity when needed for conversation creation or validation | Stateful workflow requires parent session awareness | Conversation routing uses `conversation_id` for STM while preserving the correct parent session boundary | P1 |
+
+---
+
+#### FR-5.3 Management API — Workspace
+
+> **Priority Levels**: P0 = Must have (MVP), P1 = Should have (production readiness), P2 = Nice to have  
+> **Roadmap Reference**: Phase C — Management API Delivery
+
+| ID | Title | Description | Precondition | Expected Output | Priority |
+|----|-------|-------------|--------------|-----------------|----------|
+| FR-5.3.1 | **List User Workspaces** | Client can retrieve all workspaces owned by the authenticated user | User is authenticated | List of workspaces returned with id, name, description, status, and session count; empty list if none exist | P1 |
+| FR-5.3.2 | **Create Workspace** | Client can create a new workspace with a name and optional description | User is authenticated | Workspace record created; response includes workspace_id and creation timestamp | P1 |
+| FR-5.3.3 | **Get Workspace Details** | Client can retrieve a single workspace by its identifier including aggregate statistics | Valid workspace_id provided; user owns workspace | Response includes workspace metadata plus session count and active conversation count | P1 |
+| FR-5.3.4 | **Update Workspace Metadata** | Client can update workspace name and description | Valid workspace_id; workspace is not archived | Updated workspace returned; only provided fields are changed | P2 |
+| FR-5.3.5 | **Archive Workspace** | Client can archive a workspace, cascading archive status to all child sessions and conversations | Valid workspace_id; workspace is active | Workspace status transitions to archived; all child sessions and conversations also transition to archived; no new sessions or conversations can be created under it | P2 |
+| FR-5.3.6 | **Workspace Ownership Enforcement** | All workspace operations validate that the requesting user owns the workspace | Any workspace request | Requests for workspaces not owned by the user return 403 or 404 | P0 |
+
+---
+
+#### FR-5.4 Management API — Session
+
+> **Priority Levels**: P0 = Must have (MVP), P1 = Should have (production readiness), P2 = Nice to have  
+> **Roadmap Reference**: Phase C — Management API Delivery
+
+| ID | Title | Description | Precondition | Expected Output | Priority |
+|----|-------|-------------|--------------|-----------------|----------|
+| FR-5.4.1 | **Create Session Under Workspace** | Client can create a new session with a title and optional seed context (assumptions, pinned_intent, focused_symbols) | Valid workspace_id; workspace is active; user owns workspace | Session record created with session_id, parent workspace_id, and creation timestamp; status is active | P0 |
+| FR-5.4.2 | **Get Session** | Client can retrieve a session by its identifier including context fields | Valid session_id; user has access | Response includes session metadata, status, assumptions, pinned_intent, focused_symbols, and conversation count | P0 |
+| FR-5.4.3 | **List Sessions in Workspace** | Client can list sessions belonging to a workspace with optional status filter | Valid workspace_id; user owns workspace | Paginated list of sessions with id, title, status, and conversation count; supports filtering by status (active, closed, archived) | P0 |
+| FR-5.4.4 | **Update Session Context** | Client can update session assumptions, pinned_intent, and focused_symbols | Valid session_id; session is active; user has access | Updated session returned; changes are available to subsequent conversation context loading | P1 |
+| FR-5.4.5 | **Close Session** | Client can transition a session from active to closed | Valid session_id; session is currently active | Session status transitions to closed; existing conversations remain in their current state; new conversation creation under this session is constrained by policy | P1 |
+| FR-5.4.6 | **Archive Session** | Client can archive a session, cascading archive status to all child conversations | Valid session_id; session is closed or active | Session status transitions to archived; all child conversations also transition to archived; no new messages accepted in any child conversation | P1 |
+| FR-5.4.7 | **Session Lifecycle Enforcement** | Session state transitions follow the defined order: active → closed → archived | Any session status change requested | Invalid transitions (e.g., archived → active) are rejected with a clear error message | P0 |
+| FR-5.4.8 | **Session Parent Validation** | All session operations validate that the session belongs to a workspace owned by the requesting user | Any session request | Requests for sessions outside the user's workspace boundary return 403 or 404 | P0 |
+
+---
+
+#### FR-5.5 Management API — Conversation
+
+> **Priority Levels**: P0 = Must have (MVP), P1 = Should have (production readiness), P2 = Nice to have  
+> **Roadmap Reference**: Phase C — Management API Delivery
+
+| ID | Title | Description | Precondition | Expected Output | Priority |
+|----|-------|-------------|--------------|-----------------|----------|
+| FR-5.5.1 | **Create Conversation Under Session** | Client can create a new conversation within a session, optionally providing a title and seed context | Valid session_id; session is active; user has access | Conversation record created with conversation_id, thread_id, parent session_id and workspace_id, status active; response includes the conversation_id that can be used for subsequent chat requests | P0 |
+| FR-5.5.2 | **Get Conversation** | Client can retrieve a conversation by its identifier including metadata and statistics | Valid conversation_id; user has access through hierarchy | Response includes conversation metadata, status, message_count, total_tokens, summary (if summarized), focused_symbols, and parent identifiers | P0 |
+| FR-5.5.3 | **List Conversations in Session** | Client can list conversations belonging to a session with optional status filter | Valid session_id; user has access | Paginated list of conversations with id, status, message_count, last_activity_at; supports filtering by status | P0 |
+| FR-5.5.4 | **Archive Conversation** | Client can archive an active or summarized conversation | Valid conversation_id; conversation is not already archived; user has access | Conversation status transitions to archived; archive_reason recorded; no further messages accepted | P1 |
+| FR-5.5.5 | **Get Conversation History Summary** | Client can retrieve a high-level summary of a conversation's exchanges | Valid conversation_id with ≥1 message | Response includes AI-generated summary (if available), message_count, total_tokens, focused_symbols, and time range | P2 |
+| FR-5.5.6 | **Conversation Parent Validation** | All conversation management operations validate the full ownership chain (user → workspace → session → conversation) | Any conversation management request | Requests for conversations outside the user's hierarchy return 403 or 404 | P0 |
+
+---
+
+#### FR-5.6 Management API — Cross-Cutting Behaviors
+
+> **Roadmap Reference**: Phase C — Management API Delivery
+
+| ID | Title | Description | Precondition | Expected Output | Priority |
+|----|-------|-------------|--------------|-----------------|----------|
+| FR-5.6.1 | **Pagination Support** | List endpoints support paginated results to handle large collections | List request issued | Response includes items array, total count, and pagination cursor or offset metadata | P1 |
+| FR-5.6.2 | **Archive Over Delete** | No management endpoint performs hard deletion of any hierarchical resource; all removal operations transition to archived status | Delete or removal action requested | Resource marked as archived; record remains queryable for audit; 410 Gone or equivalent not used | P0 |
+| FR-5.6.3 | **Cascade Archive** | Archiving a parent resource cascades the archive transition to all descendant resources | Parent archive requested | All descendants transitioned to archived; cascade is atomic per parent operation | P1 |
+| FR-5.6.4 | **Consistent Error Shape** | Management API errors follow the same JSON error shape as chat API errors (ERR-1.1) | Error occurs on management endpoint | Error response includes error.code, error.message, and error.correlation_id | P0 |
+| FR-5.6.5 | **Idempotent Resource Lookup** | GET operations are idempotent and safe; repeated identical requests return the same result | Any GET request | Response is identical across retries for unchanged resources | P0 |
 
 ---
 
@@ -354,6 +427,48 @@ Priority levels:
 | FR-6.1.4 | **WebSocket Streaming Format** | WebSocket streaming uses sequential events | WebSocket streaming request | Chunks delivered as separate events; client can render incrementally | P0 |
 | FR-6.1.5 | **Metadata on Completion** | Final message includes summary metadata | Streaming completes | Last event contains: total tokens, tools invoked, processing time | P0 |
 | FR-6.1.6 | **Client Cancellation** | User can stop a streaming response mid-delivery | User initiates cancel | Streaming stops within 1 second; partial response preserved | P1 |
+
+---
+
+### FR-7: Data Integrity and Operational Tooling
+
+> **Roadmap Reference**: Phase D — Runtime Consistency and Reconciliation  
+> **Priority Levels**: P0 = Must have (MVP), P1 = Should have (production readiness), P2 = Nice to have
+
+#### FR-7.1 Runtime Metadata Consistency
+
+| ID | Title | Description | Precondition | Expected Output | Priority |
+|----|-------|-------------|--------------|-----------------|----------|
+| FR-7.1.1 | **Conversation Record Assurance** | The system ensures a conversation metadata record exists before the agent processes a chat message for a given conversation_id | Chat request with conversation_id submitted | Conversation record exists in the conversations collection before agent invocation; auto-created if missing with correct parent references | P0 |
+| FR-7.1.2 | **User Turn Tracking** | Each user message processed by the chat flow increments the conversation's message_count and updates last_activity_at | User sends a chat message within a conversation | message_count incremented by 1; last_activity_at updated to current timestamp; visible via conversation GET endpoint within 5 seconds | P0 |
+| FR-7.1.3 | **Assistant Turn Tracking** | Each assistant response updates the conversation's message_count and total_tokens estimate | Agent produces a response | message_count incremented by 1; total_tokens updated with estimated token count; visible via conversation GET endpoint within 5 seconds | P0 |
+| FR-7.1.4 | **Focused Symbol Refresh** | When the agent detects new stock symbols during processing, the conversation-level focused_symbols field is updated | Agent processes a query mentioning a new symbol | focused_symbols array includes newly detected symbols without removing previously tracked ones | P1 |
+| FR-7.1.5 | **Dual Persistence Coordination** | Checkpoint state (managed by LangGraph) and conversation metadata (managed by application) are treated as two coordinated but distinct persistence layers; neither is authoritative over the other's domain | Chat flow executes with STM enabled | Checkpoint stores agent graph state; conversation record stores searchable application metadata; both updated in the same request cycle | P0 |
+
+---
+
+#### FR-7.2 Data Reconciliation
+
+| ID | Title | Description | Precondition | Expected Output | Priority |
+|----|-------|-------------|--------------|-----------------|----------|
+| FR-7.2.1 | **Orphan Conversation Detection** | The system can detect conversations whose parent session does not exist or is invalid | Reconciliation scan triggered | Report lists all conversation_ids referencing non-existent or invalid session_ids | P1 |
+| FR-7.2.2 | **Orphan Session Detection** | The system can detect sessions whose parent workspace does not exist or is invalid | Reconciliation scan triggered | Report lists all session_ids referencing non-existent or invalid workspace_ids | P1 |
+| FR-7.2.3 | **Checkpoint-Metadata Misalignment Detection** | The system can detect checkpoints without corresponding conversation records and conversation records without corresponding checkpoints (when STM should exist) | Reconciliation scan triggered | Report lists unmatched thread_ids in both directions | P1 |
+| FR-7.2.4 | **Reconciliation Report** | Reconciliation produces a machine-readable report of all detected anomalies | Reconciliation scan completes | JSON report includes anomaly type, affected resource identifiers, and suggested remediation | P1 |
+| FR-7.2.5 | **Non-Blocking Reconciliation** | Reconciliation scans execute without blocking production traffic or degrading chat performance | Reconciliation running alongside active chat sessions | Chat response latency is not materially affected (< 5% increase) during reconciliation | P1 |
+
+---
+
+#### FR-7.3 Data Migration
+
+| ID | Title | Description | Precondition | Expected Output | Priority |
+|----|-------|-------------|--------------|-----------------|----------|
+| FR-7.3.1 | **Legacy Thread Promotion** | The system can convert historical session_id-based checkpoint threads into conversation records with correctly assigned conversation_id and thread_id | Legacy data exists from pre-hierarchy implementation | Each legacy thread_id is promoted to a conversation record with preserved checkpoint accessibility | P1 |
+| FR-7.3.2 | **Migration Dry-Run** | The migration tool supports a preview mode that reports planned changes without writing to the database | Migration initiated in dry-run mode | Report shows number of records to create, update, or skip; no database writes occur | P1 |
+| FR-7.3.3 | **Migration Audit Trail** | All migration actions are recorded in an audit log for traceability | Migration executed | Audit log entries include timestamp, action type, source identifier, target identifier, and outcome | P1 |
+| FR-7.3.4 | **Incremental Migration** | Migration supports resumable execution; if interrupted, it can continue from the last successful point without re-processing completed records | Migration interrupted and restarted | Previously processed records are skipped; remaining records are processed; final state is identical to uninterrupted execution | P1 |
+| FR-7.3.5 | **Zero Data Loss** | Migration does not discard, overwrite, or orphan any existing checkpoint data | Migration completes | All pre-migration checkpoint threads remain accessible via their new conversation_id mapping | P0 |
+| FR-7.3.6 | **Backward-Compatible Operation During Migration** | The system continues to serve both legacy stateless requests and new hierarchy-aware requests during the migration window | Migration in progress | Stateless requests (no conversation_id) process normally; conversation-scoped requests resolve correctly for both migrated and not-yet-migrated records | P0 |
 
 ---
 
@@ -391,6 +506,16 @@ Priority levels:
 | NFR-1.3.2 | Cache hit rate SHALL be ≥ 40% for repeated queries | Minimum |
 | NFR-1.3.3 | Database connection pool utilization SHALL stay < 80% | Normal ops |
 
+#### NFR-1.4 Management API Latency
+**Priority**: P1
+
+| ID | Requirement | Target |
+|----|-------------|--------|
+| NFR-1.4.1 | Single-resource GET response time SHALL be < 200ms | P95 |
+| NFR-1.4.2 | List operations (with pagination) response time SHALL be < 500ms | P95 |
+| NFR-1.4.3 | Create/update/archive operations response time SHALL be < 500ms | P95 |
+| NFR-1.4.4 | Cascade archive operations response time SHALL be < 2 seconds | P95 |
+
 ---
 
 ### NFR-2: Reliability
@@ -423,6 +548,27 @@ Priority levels:
 | NFR-2.3.1 | Conversation checkpoints SHALL be atomically persisted |
 | NFR-2.3.2 | Conversation metadata SHALL be eventually consistent within 5 seconds |
 | NFR-2.3.3 | Token counts SHALL be accurate within 5% of actual usage |
+
+#### NFR-2.4 Data Migration Reliability
+**Priority**: P1
+
+| ID | Requirement |
+|----|-------------|
+| NFR-2.4.1 | Migration SHALL NOT cause data loss; all pre-existing checkpoints SHALL remain accessible after migration |
+| NFR-2.4.2 | Migration SHALL be resumable after interruption without re-processing completed records |
+| NFR-2.4.3 | Migration SHALL support dry-run mode that reports planned changes without database writes |
+| NFR-2.4.4 | Migration and reconciliation actions SHALL be logged with correlation ID and timestamps |
+| NFR-2.4.5 | Migration SHALL be executable during normal system operation without service downtime |
+
+#### NFR-2.5 Reconciliation Safety
+**Priority**: P1
+
+| ID | Requirement |
+|----|-------------|
+| NFR-2.5.1 | Reconciliation scans SHALL be non-blocking and SHALL NOT degrade production query latency by more than 5% |
+| NFR-2.5.2 | Reconciliation operations SHALL be idempotent; repeated runs produce the same report for unchanged data |
+| NFR-2.5.3 | Reconciliation SHALL NOT auto-repair data without explicit operator confirmation unless configured for auto-heal mode |
+| NFR-2.5.4 | Reconciliation and migration tools SHALL require elevated permissions; they SHALL NOT be accessible via public API endpoints |
 
 ---
 
@@ -606,6 +752,39 @@ Priority levels:
 | AC-4.2 | Cross-user and cross-boundary conversation access is prevented | Security test |
 | AC-4.3 | Input validation rejects injection attempts | Penetration test |
 
+### AC-5: Management API Functionality
+
+| ID | Criterion | Verification |
+|----|-----------|--------------|
+| AC-5.1 | Workspace CRUD: create, list, get, and archive workspaces via REST API | Integration test |
+| AC-5.2 | Session CRUD: create session under workspace, list sessions, get session details, update context, close, and archive | Integration test |
+| AC-5.3 | Conversation CRUD: create conversation under session, list conversations, get conversation details, and archive | Integration test |
+| AC-5.4 | Cascade archive: archiving a session archives all child conversations; archiving a workspace archives all child sessions and conversations | Integration test |
+| AC-5.5 | Management API response times within NFR-1.4 targets | Load test |
+| AC-5.6 | Management endpoints enforce user ownership at every hierarchy level | Security test |
+| AC-5.7 | List endpoints support pagination for collections with > 50 items | Integration test |
+
+### AC-6: Data Consistency and Reconciliation
+
+| ID | Criterion | Verification |
+|----|-----------|--------------|
+| AC-6.1 | After each chat turn, conversation metadata (message_count, total_tokens, last_activity_at) reflects the exchange within 5 seconds | Integration test |
+| AC-6.2 | Reconciliation scan detects orphan conversations (missing parent session) and orphan sessions (missing parent workspace) | System test |
+| AC-6.3 | Reconciliation scan detects checkpoint-metadata misalignment (checkpoints without conversation records and vice versa) | System test |
+| AC-6.4 | Migration promotes legacy session_id-based threads into conversation records without data loss | Migration test |
+| AC-6.5 | Migration dry-run reports planned changes without writing to the database | Unit test |
+| AC-6.6 | System operates normally during migration window (both legacy and new-model requests succeed) | System test |
+
+### AC-7: Lifecycle Enforcement
+
+| ID | Criterion | Verification |
+|----|-----------|--------------|
+| AC-7.1 | Archived conversation rejects new chat messages with appropriate error | Integration test |
+| AC-7.2 | Closed or archived session constrains new conversation creation according to policy | Integration test |
+| AC-7.3 | Session state transitions follow defined order (active → closed → archived); invalid transitions are rejected | Unit test |
+| AC-7.4 | Cross-workspace session access is rejected | Security test |
+| AC-7.5 | Cross-session conversation access (from outside the owning session's workspace) is rejected | Security test |
+
 ---
 
 ## 6. Traceability Matrix
@@ -631,6 +810,24 @@ This section maps acceptance criteria (AC-*) to the functional and non-functiona
 | AC-4.1 | NFR-4.1.1, NFR-4.2.3 |
 | AC-4.2 | NFR-4.1.3, NFR-4.1.4, FR-3.2.7, FR-3.4.6 |
 | AC-4.3 | NFR-4.3.1, NFR-4.3.4 |
+| AC-5.1 | FR-5.3.1, FR-5.3.2, FR-5.3.3, FR-5.3.5, FR-5.3.6 |
+| AC-5.2 | FR-5.4.1, FR-5.4.2, FR-5.4.3, FR-5.4.4, FR-5.4.5, FR-5.4.6, FR-5.4.7 |
+| AC-5.3 | FR-5.5.1, FR-5.5.2, FR-5.5.3, FR-5.5.4 |
+| AC-5.4 | FR-5.6.3, FR-5.4.6, FR-5.3.5 |
+| AC-5.5 | NFR-1.4.1, NFR-1.4.2, NFR-1.4.3, NFR-1.4.4 |
+| AC-5.6 | FR-5.3.6, FR-5.4.8, FR-5.5.6 |
+| AC-5.7 | FR-5.6.1 |
+| AC-6.1 | FR-7.1.2, FR-7.1.3, FR-3.2.6, NFR-2.3.2 |
+| AC-6.2 | FR-7.2.1, FR-7.2.2, FR-7.2.4 |
+| AC-6.3 | FR-7.2.3, FR-7.2.4 |
+| AC-6.4 | FR-7.3.1, FR-7.3.5 |
+| AC-6.5 | FR-7.3.2, NFR-2.4.3 |
+| AC-6.6 | FR-7.3.6, NFR-2.4.5 |
+| AC-7.1 | FR-3.2.10, FR-7.1.1 |
+| AC-7.2 | FR-5.4.5, FR-5.4.7 |
+| AC-7.3 | FR-5.4.7, FR-3.2.8 |
+| AC-7.4 | FR-5.4.8, FR-3.2.7 |
+| AC-7.5 | FR-5.5.6, FR-3.2.7, FR-3.4.6 |
 
 ---
 
@@ -647,6 +844,12 @@ This section maps acceptance criteria (AC-*) to the functional and non-functiona
 | IR-1.5 | Stateful chat requests SHOULD support a `conversation_id` field to identify the conversation thread to load or resume |
 | IR-1.6 | Management APIs SHOULD expose hierarchical resource relationships for workspaces, sessions, and conversations |
 | IR-1.7 | Conversation management APIs SHOULD preserve parent references (`workspace_id`, `session_id`) in request or response payloads where required for navigation and validation |
+| IR-1.8 | Workspace management endpoints SHALL be rooted at `/api/workspaces` with nested session navigation at `/api/workspaces/{workspace_id}/sessions` |
+| IR-1.9 | Session management endpoints SHALL support both nested access (`/api/workspaces/{workspace_id}/sessions`) and direct access (`/api/sessions/{session_id}`) with parent validation |
+| IR-1.10 | Conversation management endpoints SHALL support both nested access (`/api/sessions/{session_id}/conversations`) and direct access (`/api/conversations/{conversation_id}`) with hierarchy validation |
+| IR-1.11 | List responses SHALL include pagination metadata (total count, page/cursor info) and SHALL support query parameters for filtering by status |
+| IR-1.12 | Archive action endpoints SHALL use POST method (e.g., `POST /api/conversations/{id}/archive`) rather than DELETE, to distinguish archive-over-delete semantics |
+| IR-1.13 | Management API responses SHALL include `workspace_id`, `session_id`, and `conversation_id` in resource payloads to support client-side hierarchy navigation |
 
 ### IR-2 WebSocket Contract
 
@@ -732,7 +935,10 @@ This section maps acceptance criteria (AC-*) to the functional and non-functiona
 | OI-2 | Define the canonical error code taxonomy for ERR-1.1 | Required for consistent client handling and analytics |
 | OI-3 | Specify the exact WebSocket event payload schemas (beyond high-level contract) | Needed for strict schema validation and frontend/back alignment |
 | OI-4 | Define the canonical REST and WebSocket payload contract for `conversation_id` and optional parent `session_id` usage | Required to avoid ambiguity between conversation-scoped STM and session-scoped business workflow |
-| OI-5 | Define the formal CRUD policy per resource, especially archive versus delete semantics for workspace and session resources | Required before finalizing management endpoint behavior |
+| ~~OI-5~~ | ~~Define the formal CRUD policy per resource, especially archive versus delete semantics for workspace and session resources~~ | **Resolved in v2.2** — FR-5.3–5.6 define full CRUD policy; FR-5.6.2 mandates archive-over-delete semantics |
+| OI-6 | Define the migration execution window and rollback strategy for legacy thread promotion (FR-7.3) | Required before production migration; determines maintenance-window needs and data-safety guarantees |
+| OI-7 | Define reconciliation schedule and alerting thresholds for orphan/misalignment detection (FR-7.2) | Required to operationalize reconciliation — determines frequency, severity tiers, and notification targets |
+| OI-8 | Define pagination defaults (page size, max page size, sort order) for management API list endpoints (FR-5.6.1) | Required for consistent client behavior and to prevent unbound result sets |
 
 ---
 
@@ -745,6 +951,7 @@ This section maps acceptance criteria (AC-*) to the functional and non-functiona
 | 1.2 | 2026-01-23 | System | Rewrote FR-1 (Agent Core), FR-2 (Tool System), FR-4 (Semantic Routing), FR-5 (API Integration), FR-6 (Streaming) with same business-driven format. All FRs now use consistent table structure with ID, Title, Description, Precondition, Expected Output, Priority columns. |
 | 2.0 | 2026-01-23 | System | Major restructure to standard SRS format. (1) Removed MEM-* section containing implementation details—memory behaviors already specified in FR-3. (2) Moved Dependencies to technical design document. (3) Enhanced Introduction with explicit In Scope/Out of Scope boundaries. (4) Cleaned Definitions section—removed implementation terms. (5) Restructured ToC from 8 to 6 sections. (6) Adopted spec-driven development approach for AI-assisted implementation. |
 | 2.1 | 2026-03-17 | System | Realigned terminology and API/memory semantics to the conversation-scoped STM model: updated FR-3 and FR-5 language for `conversation_id -> thread_id`, clarified session-as-parent context behavior, and corrected NFR/constraint wording that previously implied session-scoped STM persistence. |
+| 2.2 | 2026-03-19 | System | Phase C–E requirement integration. Added FR-5.3–5.6 (Management API for workspace, session, conversation, cross-cutting behaviors), FR-7 (Data Integrity and Operational Tooling — runtime metadata consistency, reconciliation, migration). Added NFR-1.4 (Management API Latency), NFR-2.4 (Data Migration Reliability), NFR-2.5 (Reconciliation Safety). Added AC-5 (Management API Functionality), AC-6 (Data Consistency and Reconciliation), AC-7 (Lifecycle Enforcement). Added IR-1.8–IR-1.13 (management API interface contracts). Strengthened FR-3.2.6 to P0 runtime-wiring requirement and FR-5.1.7 to P0 with explicit cross-references. Resolved OI-5; added OI-6–OI-8. Governing analysis: PHASE_CDE_REQUIREMENT_ANALYSIS.md. |
 ---
 
 *End of Requirements Document*

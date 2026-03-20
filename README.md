@@ -282,6 +282,51 @@ The agent will be available at:
 - Development workflows and use cases
 - Troubleshooting guide
 
+## Spec-driven development process
+
+This repository uses a spec-driven workflow to keep the authoritative SRS aligned with implementation-oriented spec artifacts under `specs/`.
+
+### Sync Spec status
+
+Use the traceability manifest and sync generator whenever SRS scope, feature specs, plans, tasks, or verification status changes.
+
+Quick links:
+- [Forward feature-to-SRS sync report](specs/spec-sync-status.md)
+- [Reverse SRS-to-spec trace report](docs/langchain-agent/SRS_SPEC_TRACEABILITY.md)
+
+Core artifacts:
+- `specs/spec-traceability.yaml` - Source manifest for SRS-to-spec mappings, report metadata, anchors, and gate behavior
+- `specs/spec-sync-status.md` - Forward sync report from feature specs to SRS coverage/status
+- `docs/langchain-agent/SRS_SPEC_TRACEABILITY.md` - Reverse trace from SRS items to mapped feature specs
+- `scripts/sync_spec_status.py` - Generator and sync gate script
+
+Recommended workflow:
+1. Update the relevant SRS items or spec-kit artifacts first.
+2. If feature scope changed, update `specs/spec-traceability.yaml` with the new `mapped_srs_items`, evidence links, and gate settings.
+3. Regenerate the reports:
+
+```powershell
+python scripts/sync_spec_status.py
+```
+
+4. Run the post-iteration gate before closing the work:
+
+```powershell
+python scripts/sync_spec_status.py --gate
+```
+
+5. Review both generated reports to confirm:
+  - mapped features have the expected lifecycle state
+  - SRS items point to the right feature specs
+  - evidence links land on the most relevant sections
+  - the gate passes for all gate-enforced mappings
+
+Operational guidance:
+- Use gate-enforced mappings only when the linked feature behavior matches the current SRS exactly.
+- Use partial mappings when a feature implements only a subset of a requirement family.
+- Use evidence anchors in the manifest so report links jump directly to requirement, task, or review sections.
+- Re-run the sync script after each development iteration that changes requirements, plans, tasks, or verification state.
+
 ---
 
 ## DB setup and migration
