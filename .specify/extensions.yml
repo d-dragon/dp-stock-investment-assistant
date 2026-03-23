@@ -32,3 +32,19 @@ hooks:
     prompt: Run verify-tasks in a fresh session to check for phantom completions
     description: Post-implementation phantom completion detector
     condition: null
+  after_specify:
+  - extension: speckit-utils
+    command: speckit.speckit-utils.doctor
+    enabled: true
+    optional: true
+    prompt: Run project health check?
+    description: Validate project health after specification generation
+    condition: null
+  after_plan:
+  - extension: speckit-utils
+    command: speckit.speckit-utils.validate
+    enabled: true
+    optional: true
+    prompt: Validate spec-to-task traceability?
+    description: Verify requirements map to planned tasks after planning
+    condition: null

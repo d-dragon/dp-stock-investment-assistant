@@ -1,25 +1,17 @@
 <!--
 SYNC IMPACT REPORT
 ==================
-Version Change: 1.1.0 → 1.2.0 (MINOR)
-Bump Rationale: Restructured to align with latest constitution-template.md format.
-  Removed "Article N:" numbering from all section headers; consolidated 9 Article
-  sections into 4 template-aligned top-level sections (Core Principles, Development
-  Standards, Architecture & Quality, Governance). No principles added or removed.
+Version Change: 1.2.0 → 1.3.0 (MINOR)
+Bump Rationale: Added explicit governance requiring the project-scoped REST API
+  document (`docs/openapi.yaml`) to be included in spec-kit planning, task generation,
+  implementation, and review whenever REST API behavior changes.
 
 Modified Sections:
-- "Article I: Core Architectural Principles" → now nested under "## Core Principles"
-- "Article II: Golden Development Rules" → subsection of "## Development Standards"
-- "Article III: Memory Architecture Boundaries" → subsection of "## Development Standards"
-- "Article IV: Design Patterns & Architecture" → subsection of "## Architecture & Quality"
-- "Article V: SOLID Principles" → subsection of "## Architecture & Quality"
-- "Article VI: Testing Standards" → subsection of "## Architecture & Quality"
-- "Article VII: Quality Gates" → subsection of "## Architecture & Quality"
-- "Article VIII: Import & Code Style Standards" → subsection of "## Development Standards"
-- "Article IX: Governance" → "## Governance" (top-level, as per template)
+- Added Golden Development Rule 9 requiring public API contract synchronization.
+- Added a Spec-Kit REST API Gate under Quality Gates.
 
 Added Sections: None
-Removed Sections: None (all content preserved, restructured only)
+Removed Sections: None
 
 Template Consistency Check:
 - .specify/templates/plan-template.md: ✅ Constitution Check section is generic; no update needed
@@ -27,7 +19,8 @@ Template Consistency Check:
 - .specify/templates/tasks-template.md: ✅ Task types align with principle-driven standards
 - .specify/templates/constitution-template.md: ✅ Structure now aligned
 
-Follow-up TODOs: None
+Follow-up TODOs:
+- Spec-kit task generation should now treat `docs/openapi.yaml` as mandatory whenever REST API changes are in scope.
 -->
 
 # DP Stock Investment Assistant Constitution
@@ -80,7 +73,7 @@ only** and MUST be grounded in verifiable sources.
 
 ### Golden Development Rules
 
-These eight rules govern all development practices. Violations MUST be corrected before merge.
+These nine rules govern all development practices. Violations MUST be corrected before merge.
 
 #### 1. Security First
 No secrets in code, logs, or version control. API keys, passwords, and credentials MUST never
@@ -114,6 +107,14 @@ until they are needed. Complexity MUST be justified against simplicity.
 #### 8. Follow Domain Standards
 Adhere to language-specific guidelines: PEP 8 for Python, Airbnb/Standard for TypeScript.
 Reference domain instruction files in `.github/instructions/` for runtime development guidance.
+
+#### 9. Public API Contract Must Stay in Sync
+For any spec-kit feature that adds, removes, deprecates, or changes REST API behavior, the
+project-scoped REST API document at `docs/openapi.yaml` MUST be part of the workflow. Planning,
+task generation, implementation, and review MUST explicitly account for OpenAPI updates and
+verification against the actual registered public routes. A spec-kit phase involving REST API
+changes is not complete if `docs/openapi.yaml` is stale, feature-incomplete, or inconsistent with
+the implemented public API surface.
 
 ### Memory Architecture Boundaries
 
@@ -270,6 +271,11 @@ rather than modifying existing code.
 - [ ] Breaking changes explicitly noted with migration path
 - [ ] PR addresses one logical change (split large changes)
 
+#### Spec-Kit REST API Gate
+- Any spec-kit feature affecting REST endpoints MUST include `docs/openapi.yaml` in planning and task artifacts.
+- Task generation MUST include explicit OpenAPI update and verification work items.
+- Reviews MUST compare `docs/openapi.yaml` against the current registered public API surface, not only against the new feature endpoints.
+
 #### CI/CD Pipeline
 - **Build**: Clean compilation with no errors or warnings
 - **Lint**: PEP 8 for Python, ESLint for TypeScript—zero violations
@@ -302,4 +308,4 @@ principles take precedence.
 - **MINOR**: New articles, principles, or materially expanded guidance
 - **PATCH**: Clarifications, typo fixes, non-semantic refinements
 
-**Version**: 1.2.0 | **Ratified**: 2026-01-27 | **Last Amended**: 2026-03-12
+**Version**: 1.3.0 | **Ratified**: 2026-01-27 | **Last Amended**: 2026-03-23
