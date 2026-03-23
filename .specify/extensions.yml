@@ -25,3 +25,10 @@ hooks:
     prompt: Run verify to validate implementation against specification?
     description: Post-implementation verification gate
     condition: null
+  - extension: verify-tasks
+    command: speckit.verify-tasks.run
+    enabled: true
+    optional: true
+    prompt: Run verify-tasks in a fresh session to check for phantom completions
+    description: Post-implementation phantom completion detector
+    condition: null
