@@ -36,10 +36,27 @@ Spec-Kit enables a spec-first workflow, ensuring that features, APIs, and compon
 ## Prerequisites
 
 - Access to this repository and its documentation
-- Familiarity with markdown and the project's [spec format](../specs/spec-template.md)
+- Familiarity with markdown and the project's [spec format](.specify/templates/spec-template.md)
 - [Spec-Kit CLI](https://github.com/github/spec-kit#cli) installed (optional but recommended)
 
 ## Spec-Kit Workflow
+Applied fleet, speckit-utils, verify,etc. extensions to expand the official Spec-Kit SDD workflow, tailored for this project. The workflow consists of multiphases that guide the process from spec authoring to implementation and maintenance. Each phase is iterated with feedback loops to ensure alignment and quality.
+
+1. speckit.constitution
+2. speckit.specify 
+3. speckit.clarify
+4. speckit.plan + spec traceability update
+5. speckit.doctor
+6. speckit.checklist
+7. speckit.tasks
+8. speckit.validate
+9. speckit.analyze
+10. speckit.review
+11. speckit.implement
+12. speckit.verify-tasks
+13. speckit.verify + 
+14. speckit.tests + spec traceability update
+15. speckit.maintain
 
 ### Step 1: Author a Specification
 

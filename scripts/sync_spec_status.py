@@ -181,6 +181,9 @@ def derive_feature_status(feature: Dict[str, Any], manifest: Dict[str, Any]) -> 
     elif analyzed:
         derived_status = "analyzed"
         sync_status = "current"
+    elif normalize_status_value(spec_status or "") == "clarified":
+        derived_status = "clarified"
+        sync_status = "current"
     else:
         derived_status = "draft"
         sync_status = "stale"
@@ -340,7 +343,7 @@ def render_report(manifest: Dict[str, Any], results: List[FeatureSyncResult], ou
 
     lines.append("## Status Semantics")
     lines.append("")
-    lines.append("- `derived status` is computed from spec-kit artifacts, not from manual document headers.")
+    lines.append("- `derived status` is computed from spec-kit artifacts, with a pre-planning `clarified` stage recognized from a spec header of `Status: Clarified`.")
     lines.append("- `sync status` reports whether the feature-to-SRS mapping is current against the manifest SRS baseline.")
     lines.append("- `coverage status` shows whether the feature covers all, some, or none of the linked SRS scope.")
     lines.append("")
