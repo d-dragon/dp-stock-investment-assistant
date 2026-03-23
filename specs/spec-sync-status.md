@@ -1,7 +1,7 @@
 # Spec Sync Status
 
 > **Document Version**: 1.0  
-> **Generated**: 2026-03-19 04:55:29Z  
+> **Generated**: 2026-03-20 07:30:26Z  
 > **Status**: Active  
 > **Traceability Manifest Version**: 1  
 
@@ -16,6 +16,7 @@
 | Feature | Mapping | Coverage | Derived Status | Sync Status | Tasks |
 |---------|---------|----------|----------------|-------------|-------|
 | [agent-session-with-stm-wiring](agent-session-with-stm-wiring/spec.md#requirements-mandatory) | `mapped` | `partial` | `verified` | `current` | `32/32` |
+| [stm-phase-cde](stm-phase-cde/spec.md#requirements-mandatory) | `mapped` | `partial` | `clarified` | `current` | `n/a` |
 | [001-stm-domain-service-refactor](001-stm-domain-service-refactor/plan.md) | `unmapped` | `n/a` | `unmapped` | `unmapped` | `n/a` |
 | [spec-driven-development-pilot](spec-driven-development-pilot/plan.md#summary) | `mapped` | `partial` | `implemented` | `current` | `42/42` |
 
@@ -51,6 +52,20 @@
   - [Analyze marker](agent-session-with-stm-wiring/.analyze-done)
   - [Verify marker](agent-session-with-stm-wiring/.verify-done)
 
+## stm-phase-cde
+
+- Title: STM Phase C-E — Management API, Runtime Consistency, and Test Realignment
+- Path: [specs/stm-phase-cde](stm-phase-cde/spec.md#requirements-mandatory)
+- Mapping status: `mapped`
+- Coverage status: `partial`
+- Derived status: `clarified`
+- Sync status: `current`
+- Sync gate enforced: `yes`
+- spec.md status field: `Clarified`
+- Linked SRS items: `FR-3.1.3, FR-3.2.2, FR-3.2.3, FR-3.2.6, FR-3.2.7, FR-3.2.8, FR-3.2.10, FR-5.1.7, FR-5.1.8, FR-5.3.1, FR-5.3.2, FR-5.3.3, FR-5.3.4, FR-5.3.5, FR-5.3.6, FR-5.4.1, FR-5.4.2, FR-5.4.3, FR-5.4.4, FR-5.4.5, FR-5.4.6, FR-5.4.7, FR-5.4.8, FR-5.5.1, FR-5.5.2, FR-5.5.3, FR-5.5.4, FR-5.5.5, FR-5.5.6, FR-5.6.1, FR-5.6.2, FR-5.6.3, FR-5.6.4, FR-5.6.5, FR-7.1.1, FR-7.1.2, FR-7.1.3, FR-7.1.4, FR-7.1.5, FR-7.2.1, FR-7.2.2, FR-7.2.3, FR-7.2.4, FR-7.2.5, FR-7.3.1, FR-7.3.2, FR-7.3.3, FR-7.3.4, FR-7.3.5, FR-7.3.6, NFR-1.4.1, NFR-1.4.2, NFR-1.4.3, NFR-1.4.4, NFR-2.3.2, NFR-2.4.1, NFR-2.4.2, NFR-2.4.3, NFR-2.4.4, NFR-2.4.5, NFR-2.5.1, NFR-2.5.2, NFR-2.5.3, NFR-2.5.4, NFR-6.1.3, AC-2.2, AC-2.5, AC-2.6, AC-5.1, AC-5.2, AC-5.3, AC-5.4, AC-5.5, AC-5.6, AC-5.7, AC-6.1, AC-6.2, AC-6.3, AC-6.4, AC-6.5, AC-6.6, AC-7.1, AC-7.2, AC-7.3, AC-7.4, AC-7.5, IR-1.8, IR-1.9, IR-1.10, IR-1.11, IR-1.12, IR-1.13`
+- Evidence:
+  - [Feature requirements](stm-phase-cde/spec.md#requirements-mandatory)
+
 ## 001-stm-domain-service-refactor
 
 - Title: Legacy STM domain service refactor planning artifact
@@ -84,7 +99,7 @@
 
 ## Status Semantics
 
-- `derived status` is computed from spec-kit artifacts, not from manual document headers.
+- `derived status` is computed from spec-kit artifacts, with a pre-planning `clarified` stage recognized from a spec header of `Status: Clarified`.
 - `sync status` reports whether the feature-to-SRS mapping is current against the manifest SRS baseline.
 - `coverage status` shows whether the feature covers all, some, or none of the linked SRS scope.
 

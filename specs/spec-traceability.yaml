@@ -250,6 +250,244 @@ features:
         - path: specs/agent-session-with-stm-wiring/.verify-done
           label: Verify marker
 
+  - feature_id: stm-phase-cde
+    feature_title: STM Phase C-E — Management API, Runtime Consistency, and Test Realignment
+    feature_path: specs/stm-phase-cde
+    reference_document: specs/stm-phase-cde/spec.md
+    reference_anchor: requirements-mandatory
+    mapping_status: mapped
+    feature_kind: implementation-feature
+    status_sync:
+      source_of_truth: derived
+      gate_enforced: true
+      synchronized_documents:
+        - specs/stm-phase-cde/spec.md
+    srs_mapping:
+      baseline_version: "2.2"
+      coverage_status: partial
+      mapped_srs_items:
+        - FR-3.1.3
+        - FR-3.2.2
+        - FR-3.2.3
+        - FR-3.2.6
+        - FR-3.2.7
+        - FR-3.2.8
+        - FR-3.2.10
+        - FR-5.1.7
+        - FR-5.1.8
+        - FR-5.3.1
+        - FR-5.3.2
+        - FR-5.3.3
+        - FR-5.3.4
+        - FR-5.3.5
+        - FR-5.3.6
+        - FR-5.4.1
+        - FR-5.4.2
+        - FR-5.4.3
+        - FR-5.4.4
+        - FR-5.4.5
+        - FR-5.4.6
+        - FR-5.4.7
+        - FR-5.4.8
+        - FR-5.5.1
+        - FR-5.5.2
+        - FR-5.5.3
+        - FR-5.5.4
+        - FR-5.5.5
+        - FR-5.5.6
+        - FR-5.6.1
+        - FR-5.6.2
+        - FR-5.6.3
+        - FR-5.6.4
+        - FR-5.6.5
+        - FR-7.1.1
+        - FR-7.1.2
+        - FR-7.1.3
+        - FR-7.1.4
+        - FR-7.1.5
+        - FR-7.2.1
+        - FR-7.2.2
+        - FR-7.2.3
+        - FR-7.2.4
+        - FR-7.2.5
+        - FR-7.3.1
+        - FR-7.3.2
+        - FR-7.3.3
+        - FR-7.3.4
+        - FR-7.3.5
+        - FR-7.3.6
+        - NFR-1.4.1
+        - NFR-1.4.2
+        - NFR-1.4.3
+        - NFR-1.4.4
+        - NFR-2.3.2
+        - NFR-2.4.1
+        - NFR-2.4.2
+        - NFR-2.4.3
+        - NFR-2.4.4
+        - NFR-2.4.5
+        - NFR-2.5.1
+        - NFR-2.5.2
+        - NFR-2.5.3
+        - NFR-2.5.4
+        - NFR-6.1.3
+        - AC-2.2
+        - AC-2.5
+        - AC-2.6
+        - AC-5.1
+        - AC-5.2
+        - AC-5.3
+        - AC-5.4
+        - AC-5.5
+        - AC-5.6
+        - AC-5.7
+        - AC-6.1
+        - AC-6.2
+        - AC-6.3
+        - AC-6.4
+        - AC-6.5
+        - AC-6.6
+        - AC-7.1
+        - AC-7.2
+        - AC-7.3
+        - AC-7.4
+        - AC-7.5
+        - IR-1.8
+        - IR-1.9
+        - IR-1.10
+        - IR-1.11
+        - IR-1.12
+        - IR-1.13
+      mapped_functional_groups:
+        - group: FR-3.1
+          coverage: partial
+        - group: FR-3.2
+          coverage: partial
+        - group: FR-5.3
+          coverage: full
+        - group: FR-5.4
+          coverage: full
+        - group: FR-5.5
+          coverage: full
+        - group: FR-5.6
+          coverage: full
+        - group: FR-7.1
+          coverage: full
+        - group: FR-7.2
+          coverage: full
+        - group: FR-7.3
+          coverage: full
+        - group: NFR-1.4
+          coverage: full
+        - group: NFR-2.4
+          coverage: full
+        - group: NFR-2.5
+          coverage: full
+      mapped_non_functional:
+        - NFR-1.4.1
+        - NFR-1.4.2
+        - NFR-1.4.3
+        - NFR-1.4.4
+        - NFR-2.3.2
+        - NFR-2.4.1
+        - NFR-2.4.2
+        - NFR-2.4.3
+        - NFR-2.4.4
+        - NFR-2.4.5
+        - NFR-2.5.1
+        - NFR-2.5.2
+        - NFR-2.5.3
+        - NFR-2.5.4
+        - NFR-6.1.3
+      mapped_acceptance_criteria:
+        - AC-2.2
+        - AC-2.5
+        - AC-2.6
+        - AC-5.1
+        - AC-5.2
+        - AC-5.3
+        - AC-5.4
+        - AC-5.5
+        - AC-5.6
+        - AC-5.7
+        - AC-6.1
+        - AC-6.2
+        - AC-6.3
+        - AC-6.4
+        - AC-6.5
+        - AC-6.6
+        - AC-7.1
+        - AC-7.2
+        - AC-7.3
+        - AC-7.4
+        - AC-7.5
+      sync_notes:
+        - Feature scope covers Phase C, Phase D, and Phase E — continuation of Phase A-B.
+        - Full coverage of FR-5.3 through FR-5.6, FR-7.1 through FR-7.3, NFR-1.4, NFR-2.4, NFR-2.5, AC-5 through AC-7.
+        - Partial coverage of FR-3.1, FR-3.2 (Phase E test realignment references FR-3.1.3, FR-3.2.2, FR-3.2.3, FR-3.2.7, FR-3.2.8).
+        - Coverage evaluated against SRS v2.2 on 2026-03-20.
+        - Spec clarified on 2026-03-20 — two clarification rounds completed, SRS v2.2 cross-check gaps resolved.
+    speckit_mapping:
+      spec_requirements:
+        - FR-C01
+        - FR-C02
+        - FR-C03
+        - FR-C04
+        - FR-C05
+        - FR-C06
+        - FR-C07
+        - FR-C08
+        - FR-C09
+        - FR-C10
+        - FR-C11
+        - FR-C12
+        - FR-C13
+        - FR-C14
+        - FR-C15
+        - FR-C16
+        - FR-C17
+        - FR-D01
+        - FR-D02
+        - FR-D03
+        - FR-D04
+        - FR-D05
+        - FR-D06
+        - FR-D07
+        - FR-D08
+        - FR-D09
+        - FR-D10
+        - FR-D11
+        - FR-D12
+        - FR-D13
+        - FR-D14
+        - FR-D15
+        - FR-E01
+        - FR-E02
+        - FR-E03
+        - FR-E04
+        - FR-E05
+        - FR-E06
+      success_criteria:
+        - SC-001
+        - SC-002
+        - SC-003
+        - SC-004
+        - SC-005
+        - SC-006
+        - SC-007
+        - SC-008
+        - SC-009
+        - SC-010
+        - SC-011
+        - SC-012
+        - SC-013
+        - SC-014
+        - SC-015
+      evidence_paths:
+        - path: specs/stm-phase-cde/spec.md
+          label: Feature requirements
+          anchor: requirements-mandatory
+
   - feature_id: 001-stm-domain-service-refactor
     feature_title: Legacy STM domain service refactor planning artifact
     feature_path: specs/001-stm-domain-service-refactor
