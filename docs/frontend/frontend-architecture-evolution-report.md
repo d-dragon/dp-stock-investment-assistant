@@ -530,6 +530,68 @@ These guardrails mirror external guidance as well: micro-frontends.org recommend
 
 This section turns Option B from a directional recommendation into a concrete near-term architecture proposal for this repository.
 
+### 9.0 Research Summary: What Pattern Is This in Practice?
+
+Based on the current repository and the referenced architecture guidance, the recommended near-term pattern is not just "modularization" in the abstract. In practice, it is best described as:
+
+- a modular monolith frontend
+- implemented as a feature-modular React SPA
+- with bounded internal modules behind one application shell
+- and designed for possible future extraction, but not current independent deployment
+
+In other words, this is a monolith-first frontend strategy with strong internal modularity. That distinction matters.
+
+Research-backed interpretation:
+
+- Martin Fowler's monolith-first guidance argues that coarse-grained systems are often the safer starting point because boundaries are hard to get right early, and decomposition becomes realistic only when modular seams are intentionally preserved ([Monolith First](https://martinfowler.com/bliki/MonolithFirst.html)).
+- React's own scaling guidance recommends moving state and wiring into providers, contexts, reducers, and custom hooks as applications grow, which fits a modular-internal architecture more naturally than jumping to independently deployed frontends ([React: Scaling Up with Reducer and Context](https://react.dev/learn/scaling-up-with-reducer-and-context)).
+- Micro-frontend literature defines the stronger form of decomposition as independently deliverable frontend applications composed into a greater whole. That is explicitly beyond what this repository currently needs, but it is the natural future extension if team and release pressure increase enough ([Martin Fowler](https://martinfowler.com/articles/micro-frontends.html)).
+
+For this project's technical stack, the most accurate pattern label is:
+
+`bounded-context modular SPA with a shared shell and shared platform layer`
+
+That means:
+
+- React remains the single runtime.
+- Routing remains centralized.
+- Shared providers and platform services stay in one deployable application.
+- Business areas are separated by module boundaries rather than by deployment boundaries.
+
+```mermaid
+flowchart LR
+  A["Frontend monolith today"] --> B["Feature-modular SPA"]
+  B --> C["Bounded internal modules"]
+  C --> D["Optional future extraction"]
+
+  A --> A1["Fast start, weak boundaries"]
+  B --> B1["Shared shell, strong module APIs"]
+  C --> C1["Platform layer plus domain ownership"]
+  D --> D1["Only if deployment autonomy is needed"]
+```
+
+Caption: Research framing for Option B. This path aligns with monolith-first boundary discovery ([Monolith First](https://martinfowler.com/bliki/MonolithFirst.html)), React’s internal application scaling model ([React](https://react.dev/learn/scaling-up-with-reducer-and-context)), and the distinction between modularization and true micro-frontends ([Martin Fowler](https://martinfowler.com/articles/micro-frontends.html)).
+
+### 9.0.1 Pattern Classification for This Repository
+
+| Dimension | Recommended Form in This Project | Why |
+|----------|----------------------------------|-----|
+| Structural pattern | Modular monolith frontend | One deployable app, multiple internal feature modules |
+| Decomposition style | Package-by-feature / bounded context | Better fit than technical-layer-only folders |
+| Integration style | Route composition inside a shared shell | Matches current SPA shape and React Router model |
+| State model | Shared shell state plus module-local state | Fits current app size and streaming workflow needs |
+| Server-state handling | Shared async cache and typed API layer | Prevents ad hoc fetch logic duplication |
+| Evolution strategy | Monolith-first, extract later | Boundaries are not yet mature enough for micro-frontends |
+
+### 9.0.2 Why This Pattern Fits the Current Technical Stack
+
+The current stack makes this pattern practical without excessive disruption:
+
+- React 18 already supports composition through providers, hooks, and route-level assembly.
+- The frontend is still a single SPA, so introducing feature modules is structurally simpler than introducing multiple independently deployed applications.
+- SSE/streaming chat, shared session behavior, and model selection all benefit from a coherent shell and shared contracts.
+- Vite, React Router, and TanStack Query are complementary choices for a modular application because they map well to shell bootstrapping, route composition, and server-state orchestration respectively ([Vite](https://vite.dev/guide/), [React Router](https://reactrouter.com/start/declarative/installation), [TanStack Query](https://tanstack.com/query/latest/docs/framework/react/overview)).
+
 ### 9.1 Proposed Architecture
 
 The recommended architecture is a modular application with one deployable frontend shell and several strongly bounded feature modules.
@@ -665,6 +727,79 @@ flowchart LR
 
 Caption: Solution design view for Option B. The separation of providers, platform services, and feature modules follows the same modular scaling principles described in [React](https://react.dev/learn/scaling-up-with-reducer-and-context).
 
+### 9.3.1 Pros, Cons, and Strategy Tradeoffs
+
+Research synthesis for the modular application strategy in this repository:
+
+| Area | Advantages | Tradeoffs |
+|------|------------|-----------|
+| Delivery | Faster than distributed frontend decomposition; fewer operational moving parts | Teams still coordinate through one release unit |
+| Architecture | Stronger internal boundaries, better cohesion, easier refactoring inside one codebase | Requires discipline to stop shared layers from becoming dumping grounds |
+| UX | Easier consistency in navigation, tokens, accessibility, and interaction design | Risk of shell over-centralization if every feature depends on global state |
+| State | Easier to share session, streaming lifecycle, and notification behavior | Cross-module state can become tangled if contracts are weak |
+| Tooling | One runtime and one deployment artifact reduce platform overhead | Build times and bundle size still need governance as scope grows |
+| Future evolution | Extraction remains possible if seams are protected | Extraction becomes difficult if modules are only cosmetic folders |
+
+Pros emphasized by the research:
+
+- Monolith-first reduces the upfront complexity premium of distributed architectures, which Fowler highlights as a major reason to avoid premature decomposition ([Monolith First](https://martinfowler.com/bliki/MonolithFirst.html)).
+- Internal modularity creates space to learn where real business boundaries are before those boundaries become expensive to change across deployed systems ([Monolith First](https://martinfowler.com/bliki/MonolithFirst.html)).
+- React's provider and hook model supports this kind of structured internal scaling well, particularly when state wiring is moved out of root components and into dedicated providers and reusable hooks ([React](https://react.dev/learn/scaling-up-with-reducer-and-context)).
+- TanStack Query is especially helpful when the application has meaningful server-state concerns, because it separates remote data synchronization concerns from local UI state ([TanStack Query](https://tanstack.com/query/latest/docs/framework/react/overview)).
+
+Cons emphasized by the research:
+
+- A modular monolith does not automatically deliver team autonomy in the same way independent deployment does.
+- It is easy to claim modularity while still creating hidden coupling through shared state, shared domain models, or uncontrolled imports.
+- If boundaries are poorly enforced, the codebase remains a monolith in both structure and behavior, just with more folders.
+
+### 9.3.2 Regular Pitfalls of the Modular Application Pattern
+
+The most common failure modes for this strategy are not technical impossibilities. They are governance failures.
+
+Regular pitfalls:
+
+1. Folder modularity without behavioral modularity
+2. Shared platform layer turning into a dumping ground
+3. Cross-module imports bypassing public APIs
+4. Global state spreading into unrelated features
+5. Shared UI libraries absorbing domain logic too early
+6. No ownership rules for modules and contracts
+7. Route composition existing in name only, while root components still coordinate everything
+
+Why these pitfalls matter here:
+
+- Martin Fowler's micro-frontend guidance repeatedly stresses that architecture benefits come from explicit boundaries and contracts, not from high-level labels alone ([Martin Fowler](https://martinfowler.com/articles/micro-frontends.html)).
+- micro-frontends.org warns about "micro frontends anarchy"; the same warning applies one level earlier to modular monoliths if naming, ownership, and contracts are not enforced ([micro-frontends.org](https://micro-frontends.org/)).
+- Shared component or platform code becomes dangerous when it absorbs domain logic too early, another issue highlighted in Fowler's discussion of shared component libraries and harvested platform evolution ([Martin Fowler](https://martinfowler.com/articles/micro-frontends.html)).
+
+Recommended countermeasures:
+
+- Enforce public module entry points.
+- Define import direction rules.
+- Keep domain logic inside domain modules.
+- Keep shared UI primitives genuinely generic.
+- Use provider-scoped state for domain clusters, not one all-knowing global store.
+- Review module boundaries during every significant feature addition.
+
+```mermaid
+flowchart TD
+  P["Modular application strategy"] --> Good["Healthy outcome"]
+  P --> Bad["Failure mode"]
+
+  Good --> G1["Strong module APIs"]
+  Good --> G2["Controlled platform layer"]
+  Good --> G3["Shared shell, limited global state"]
+  Good --> G4["Future extraction remains possible"]
+
+  Bad --> B1["Shared dumping ground"]
+  Bad --> B2["Cross-module coupling"]
+  Bad --> B3["Pseudo-modules only"]
+  Bad --> B4["Root component still orchestrates everything"]
+```
+
+Caption: Practical success and failure patterns for modular applications. The good path reflects monolith-first discipline and explicit module boundaries; the bad path reflects the same coupling and governance problems warned about in [Martin Fowler](https://martinfowler.com/articles/micro-frontends.html), [Monolith First](https://martinfowler.com/bliki/MonolithFirst.html), and [micro-frontends.org](https://micro-frontends.org/).
+
 ### 9.4 How to Architecturally Shift to This Approach
 
 The shift should be evolutionary, not a rewrite.
@@ -719,6 +854,68 @@ The success condition is not "many modules exist". The success condition is:
 - shared platform code is controlled,
 - cross-module imports are disciplined,
 - and future extraction is possible without redesigning the frontend from scratch.
+
+### 9.6 ADR Companion Statement
+
+The standalone ADR is maintained in [adr-frontend-001-modular-application.md](./adr-frontend-001-modular-application.md).
+
+The following ADR-style statement formalizes the near-term architectural decision.
+
+**ADR-Frontend-001: Adopt a Modular Application Frontend Before Any Micro-Frontend Decomposition**
+
+Status:
+
+- Proposed
+
+Date:
+
+- 2026-03-24
+
+Context:
+
+- The current frontend is a single React SPA with growing feature scope.
+- The product domain requires high UX consistency, trusted interaction patterns, shared session behavior, and predictable streaming workflows.
+- The system does not yet have the team topology, release pressure, or domain stability that typically justify independently deployed frontend applications.
+- The current codebase would benefit more from explicit internal boundaries than from deployment-time decomposition.
+
+Decision:
+
+- Adopt a modular application architecture for the frontend.
+- Keep one deployable frontend shell.
+- Organize the codebase around bounded feature modules and a controlled platform layer.
+- Use route composition, shared providers, and typed platform services as the primary integration mechanism.
+- Defer micro-frontend extraction until explicit readiness triggers are met.
+
+Rationale:
+
+- This follows monolith-first reasoning: discover stable boundaries before making them expensive to move across deployment units ([Monolith First](https://martinfowler.com/bliki/MonolithFirst.html)).
+- It aligns with React guidance for scaling larger applications internally through providers, reducers, contexts, and custom hooks ([React](https://react.dev/learn/scaling-up-with-reducer-and-context)).
+- It preserves future optionality because the architecture is designed to expose stable seams for later extraction if organizational need appears.
+
+Consequences:
+
+- Positive:
+  - Lower near-term architectural risk
+  - Faster modernization path from the current SPA
+  - Better UX consistency and shared-state control
+  - Reduced platform overhead compared to micro-frontends
+- Negative:
+  - Independent frontend deployment is deferred
+  - Governance discipline is required to maintain true module boundaries
+  - Build and release remain centralized until readiness changes
+
+Decision triggers for reconsideration:
+
+- Three or more frontend teams require release autonomy.
+- Shared release cadence becomes a measurable delivery bottleneck.
+- Domain boundaries remain stable across multiple release cycles.
+- Module APIs and platform governance are mature enough to support extraction safely.
+
+Implementation note:
+
+- The target implementation pattern is a bounded-context modular SPA with shared shell, route composition, provider-based internal state scaling, and shared server-state orchestration.
+
+This ADR companion is supported by the same evidence used throughout this report: [Monolith First](https://martinfowler.com/bliki/MonolithFirst.html), [Martin Fowler: Micro Frontends](https://martinfowler.com/articles/micro-frontends.html), [React](https://react.dev/learn/scaling-up-with-reducer-and-context), [Vite](https://vite.dev/guide/), [React Router](https://reactrouter.com/start/declarative/installation), and [TanStack Query](https://tanstack.com/query/latest/docs/framework/react/overview).
 
 ## 10. Adoption Roadmap
 
