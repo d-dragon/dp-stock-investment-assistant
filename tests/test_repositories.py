@@ -143,7 +143,49 @@ class TestWorkspaceRepository:
         
         assert result == expected_workspaces
         call_args = mock_collection.find.call_args[0][0]
-        assert call_args["user_id"] == ObjectId(user_id)
+        assert "$in" in call_args["user_id"]
+        assert user_id in call_args["user_id"]["$in"]
+        assert ObjectId(user_id) in call_args["user_id"]["$in"]
+
+    def test_find_by_user_with_pagination_matches_string_and_objectid(self):
+        """Management pagination should query both string and ObjectId user_id forms."""
+        repo = WorkspaceRepository("mongodb://localhost:27017", "test_db")
+
+        user_id = str(ObjectId())
+        expected_workspaces = [{"workspace_id": "ws-1", "user_id": ObjectId(user_id)}]
+
+        mock_cursor = MagicMock()
+        mock_cursor.sort.return_value = mock_cursor
+        mock_cursor.skip.return_value = mock_cursor
+        mock_cursor.limit.return_value = mock_cursor
+        mock_cursor.__iter__.return_value = iter(expected_workspaces)
+
+        mock_collection = MagicMock()
+        mock_collection.find.return_value = mock_cursor
+        repo._collection = mock_collection
+
+        result = repo.find_by_user_with_pagination(user_id, limit=25, offset=0, status=None)
+
+        assert result == expected_workspaces
+        query = mock_collection.find.call_args[0][0]
+        assert "$in" in query["user_id"]
+        assert user_id in query["user_id"]["$in"]
+        assert ObjectId(user_id) in query["user_id"]["$in"]
+
+    def test_count_by_user_uses_exact_string_for_non_objectid(self):
+        """Non-ObjectId user IDs should not attempt ObjectId casting."""
+        repo = WorkspaceRepository("mongodb://localhost:27017", "test_db")
+
+        mock_collection = MagicMock()
+        mock_collection.count_documents.return_value = 3
+        repo._collection = mock_collection
+
+        total = repo.count_by_user("user-plain", status="active")
+
+        assert total == 3
+        query = mock_collection.count_documents.call_args[0][0]
+        assert query["user_id"] == "user-plain"
+        assert query["status"] == "active"
 
 
 class TestSymbolRepository:

@@ -18,8 +18,14 @@ from data.repositories.session_repository import SessionRepository
 from data.repositories.conversation_repository import ConversationRepository
 from data.repositories.workspace_repository import WorkspaceRepository
 from services.base import BaseService
-from services.exceptions import InvalidLifecycleTransitionError
+from services.exceptions import (
+    EntityNotFoundError,
+    InvalidLifecycleTransitionError,
+    OwnershipViolationError,
+    ParentNotFoundError,
+)
 from utils.cache import CacheBackend
+from utils.service_utils import normalize_document, stringify_identifier
 
 
 # Valid lifecycle transitions (sequential: active → closed → archived)
@@ -77,15 +83,25 @@ class SessionService(BaseService):
         *,
         title: str = None,
     ) -> Optional[Dict[str, Any]]:
-        """Create a new session document."""
+        """Create a new session document.
+
+        Raises:
+            ParentNotFoundError: If workspace does not exist.
+            OwnershipViolationError: If user does not own the workspace.
+        """
         if not all([session_id, workspace_id, user_id]):
             self.logger.warning("create_session: missing required identifiers")
             return None
         if self._workspace_repo:
-            workspace = self._workspace_repo.get_by_id(workspace_id)
+            workspace = self._workspace_repo.find_by_workspace_id(workspace_id)
             if not workspace:
-                self.logger.warning(f"create_session: workspace not found: {workspace_id}")
-                return None
+                raise ParentNotFoundError("workspace", workspace_id, "session")
+            actual_owner = stringify_identifier(workspace.get("user_id"))
+            expected_owner = stringify_identifier(user_id)
+            if actual_owner != expected_owner:
+                raise OwnershipViolationError(
+                    "workspace", workspace_id, expected_owner, actual_owner,
+                )
         now = datetime.now(timezone.utc)
         doc = {
             "session_id": session_id,
@@ -226,9 +242,235 @@ class SessionService(BaseService):
             return False
     
     # ------------------------------------------------------------------
+    # Management API (Phase C)
+    # ------------------------------------------------------------------
+
+    def get_session_detail(self, session_id: str, user_id: str) -> Dict[str, Any]:
+        """Fetch session with aggregate counts, verifying ownership.
+
+        Returns:
+            Session dict with ``conversation_count``.
+
+        Raises:
+            EntityNotFoundError: If session does not exist.
+            OwnershipViolationError: If requesting user does not own the parent workspace.
+            ParentNotFoundError: If the parent workspace does not exist.
+        """
+        session = self._session_repo.find_by_session_id(session_id)
+        if session is None:
+            raise EntityNotFoundError("session", session_id)
+
+        self._verify_session_ownership(session, user_id)
+
+        result = normalize_document(session)
+        result["conversation_count"] = self._count_conversations(session_id)
+        return result
+
+    def list_sessions_paginated(
+        self,
+        workspace_id: str,
+        user_id: str,
+        *,
+        limit: int = 25,
+        offset: int = 0,
+        status: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """Return paginated session list with total count, verifying workspace ownership.
+
+        Returns:
+            Dict with ``items``, ``total``, ``limit``, ``offset``.
+
+        Raises:
+            ParentNotFoundError: If workspace does not exist.
+            OwnershipViolationError: If requesting user does not own the workspace.
+        """
+        workspace = self._get_workspace(workspace_id)
+        if workspace is None:
+            raise ParentNotFoundError("workspace", workspace_id, "session")
+
+        actual_owner = stringify_identifier(workspace.get("user_id"))
+        expected_owner = stringify_identifier(user_id)
+        if actual_owner != expected_owner:
+            raise OwnershipViolationError(
+                "workspace", workspace_id, expected_owner, actual_owner,
+            )
+
+        items = self._session_repo.find_by_workspace_with_pagination(
+            workspace_id, limit=limit, offset=offset, status=status,
+        )
+        total = self._session_repo.count_by_workspace(workspace_id, status=status)
+        return {
+            "items": [normalize_document(doc) for doc in items],
+            "total": total,
+            "limit": limit,
+            "offset": offset,
+        }
+
+    def update_session(
+        self,
+        session_id: str,
+        user_id: str,
+        *,
+        title: Optional[str] = None,
+        description: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """Partial update of session title/description.
+
+        Returns:
+            Updated session dict with ``conversation_count``.
+
+        Raises:
+            EntityNotFoundError: If session does not exist.
+            OwnershipViolationError: If requesting user does not own the parent workspace.
+            ParentNotFoundError: If the parent workspace does not exist.
+        """
+        session = self._session_repo.find_by_session_id(session_id)
+        if session is None:
+            raise EntityNotFoundError("session", session_id)
+
+        self._verify_session_ownership(session, user_id)
+
+        updates: Dict[str, Any] = {}
+        if title is not None:
+            updates["title"] = title.strip()
+        if description is not None:
+            updates["description"] = description.strip()
+
+        if not updates:
+            result = normalize_document(session)
+            result["conversation_count"] = self._count_conversations(session_id)
+            return result
+
+        updated = self._session_repo.update_fields(session_id, updates)
+        if updated is None:
+            raise EntityNotFoundError("session", session_id)
+
+        result = normalize_document(updated)
+        result["conversation_count"] = self._count_conversations(session_id)
+        return result
+
+    def close_session_managed(self, session_id: str, user_id: str) -> Dict[str, Any]:
+        """Close a session, verifying ownership.
+
+        Blocks new conversation creation but leaves existing conversations
+        operational. Idempotent if already closed.
+
+        Returns:
+            Session detail dict after close.
+
+        Raises:
+            EntityNotFoundError: If session does not exist.
+            OwnershipViolationError: If requesting user does not own the parent workspace.
+            ParentNotFoundError: If the parent workspace does not exist.
+            InvalidLifecycleTransitionError: If transition is not allowed.
+        """
+        session = self._session_repo.find_by_session_id(session_id)
+        if session is None:
+            raise EntityNotFoundError("session", session_id)
+
+        self._verify_session_ownership(session, user_id)
+
+        if session.get("status") == "closed":
+            result = normalize_document(session)
+            result["conversation_count"] = self._count_conversations(session_id)
+            return result
+
+        closed = self.close_session(session_id)
+        if closed is None:
+            raise EntityNotFoundError("session", session_id)
+
+        result = normalize_document(closed)
+        result["conversation_count"] = self._count_conversations(session_id)
+        return result
+
+    def archive_session_managed(self, session_id: str, user_id: str) -> Dict[str, Any]:
+        """Archive a session (idempotent), verifying ownership.
+
+        Unlike the lifecycle ``archive_session`` method, this is idempotent
+        and includes ownership verification for the management API.
+
+        Returns:
+            Session detail dict after archive.
+
+        Raises:
+            EntityNotFoundError: If session does not exist.
+            OwnershipViolationError: If requesting user does not own the parent workspace.
+            ParentNotFoundError: If the parent workspace does not exist.
+        """
+        session = self._session_repo.find_by_session_id(session_id)
+        if session is None:
+            raise EntityNotFoundError("session", session_id)
+
+        self._verify_session_ownership(session, user_id)
+
+        if session.get("status") == "archived":
+            result = normalize_document(session)
+            result["conversation_count"] = self._count_conversations(session_id)
+            return result
+
+        # Cascade: archive all child conversations first
+        if self._conversation_repo:
+            count = self._conversation_repo.archive_by_session_id(
+                session_id, archive_reason="session_archived",
+            )
+            self.logger.info(
+                "archive_session_managed: archived %d child conversations for session %s",
+                count, session_id,
+            )
+
+        archived = self._session_repo.archive(session_id)
+        if archived is None:
+            raise EntityNotFoundError("session", session_id)
+
+        self._invalidate_session_cache(session_id)
+
+        result = normalize_document(archived)
+        result["conversation_count"] = self._count_conversations(session_id)
+        return result
+
+    # ------------------------------------------------------------------
     # Private helpers
     # ------------------------------------------------------------------
-    
+
+    def _verify_session_ownership(self, session: Dict[str, Any], user_id: str) -> None:
+        """Verify user owns the workspace containing this session."""
+        workspace = self._get_workspace(session.get("workspace_id"))
+        if not workspace:
+            raise ParentNotFoundError(
+                "workspace", session.get("workspace_id", ""), "session",
+            )
+        actual_owner = stringify_identifier(workspace.get("user_id"))
+        expected_owner = stringify_identifier(user_id)
+        if actual_owner != expected_owner:
+            raise OwnershipViolationError(
+                "session",
+                session.get("session_id", session.get("_id", "")),
+                expected_owner,
+                actual_owner,
+            )
+
+    def _get_workspace(self, workspace_id: Optional[str]) -> Optional[Dict[str, Any]]:
+        """Look up workspace via the workspace repository."""
+        if not workspace_id or not self._workspace_repo:
+            return None
+        try:
+            return self._workspace_repo.find_by_workspace_id(workspace_id)
+        except Exception:
+            self.logger.exception(
+                "Failed to fetch workspace", extra={"workspace_id": workspace_id},
+            )
+            return None
+
+    def _count_conversations(self, session_id: str) -> int:
+        """Count conversations belonging to this session."""
+        try:
+            return self._session_repo.count_conversations(session_id)
+        except Exception:
+            self.logger.exception(
+                "Failed to count conversations", extra={"session_id": session_id},
+            )
+            return 0
+
     def _session_cache_key(self, session_id: str) -> str:
         return f"session:{session_id}"
     

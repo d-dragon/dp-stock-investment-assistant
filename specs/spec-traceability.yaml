@@ -1,16 +1,19 @@
 version: 1
-generated_on: 2026-03-19
+generated_on: 2026-03-31
 
 reports:
   spec_sync_status:
-    version: "1.0"
+    version: "1.1"
     status: Active
     revision_history:
       - version: "1.0"
         date: 2026-03-19
         summary: Added embedded report metadata and anchor-aware evidence links for forward spec sync reporting.
+      - version: "1.1"
+        date: 2026-03-31
+        summary: Synchronized stm-phase-cde from clarified planning state to verified implementation state and expanded evidence links.
   srs_spec_traceability:
-    version: "1.3"
+    version: "1.4"
     status: Active
     revision_history:
       - version: "1.0"
@@ -25,6 +28,9 @@ reports:
       - version: "1.3"
         date: 2026-03-19
         summary: Reformatted the family index into a grouped markdown table for easier navigation by requirement type.
+      - version: "1.4"
+        date: 2026-03-31
+        summary: Updated stm-phase-cde reverse-trace statuses from clarified to verified after implementation and verification completion.
 
 srs:
   path: docs/langchain-agent/SOFTWARE_REQUIREMENTS_SPECIFICATION.md
@@ -262,6 +268,10 @@ features:
       gate_enforced: true
       synchronized_documents:
         - specs/stm-phase-cde/spec.md
+        - specs/stm-phase-cde/plan.md
+        - specs/stm-phase-cde/tasks.md
+        - specs/stm-phase-cde/quickstart.md
+        - specs/stm-phase-cde/review.md
     srs_mapping:
       baseline_version: "2.2"
       coverage_status: partial
@@ -427,6 +437,8 @@ features:
         - Partial coverage of FR-3.1, FR-3.2 (Phase E test realignment references FR-3.1.3, FR-3.2.2, FR-3.2.3, FR-3.2.7, FR-3.2.8).
         - Coverage evaluated against SRS v2.2 on 2026-03-20.
         - Spec clarified on 2026-03-20 — two clarification rounds completed, SRS v2.2 cross-check gaps resolved.
+        - Implementation and verification completed by 2026-03-24 with `review.md` and `.verify-done` present.
+        - Spec artifacts re-synchronized to the implemented route, tooling, and verification state on 2026-03-31.
     speckit_mapping:
       spec_requirements:
         - FR-C01
@@ -487,6 +499,21 @@ features:
         - path: specs/stm-phase-cde/spec.md
           label: Feature requirements
           anchor: requirements-mandatory
+        - path: specs/stm-phase-cde/plan.md
+          label: Delivery plan
+        - path: specs/stm-phase-cde/tasks.md
+          label: Task checklist
+        - path: specs/stm-phase-cde/quickstart.md
+          label: Validation runbook
+        - path: specs/stm-phase-cde/review.md
+          label: Verification review
+        - path: specs/stm-phase-cde/review.md
+          label: Implementation sync status
+          anchor: implementation-sync-status
+        - path: specs/stm-phase-cde/.analyze-done
+          label: Analyze marker
+        - path: specs/stm-phase-cde/.verify-done
+          label: Verify marker
 
   - feature_id: 001-stm-domain-service-refactor
     feature_title: Legacy STM domain service refactor planning artifact

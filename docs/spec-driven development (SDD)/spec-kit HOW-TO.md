@@ -12,7 +12,7 @@ This guide describes how to apply the Spec-Kit methodology for Spec-Driven Devel
   - [Table of Contents](#table-of-contents)
   - [Overview](#overview)
   - [Prerequisites](#prerequisites)
-  - [Spec-Kit Workflow](#spec-kit-workflow)
+  - [SDLC with Spec-Kit Workflow](#sdlc-with-spec-kit-workflow)
     - [Step 1: Author a Specification](#step-1-author-a-specification)
     - [Step 2: Review and Approve](#step-2-review-and-approve)
     - [Step 3: Implement to Spec](#step-3-implement-to-spec)
@@ -39,24 +39,26 @@ Spec-Kit enables a spec-first workflow, ensuring that features, APIs, and compon
 - Familiarity with markdown and the project's [spec format](.specify/templates/spec-template.md)
 - [Spec-Kit CLI](https://github.com/github/spec-kit#cli) installed (optional but recommended)
 
-## Spec-Kit Workflow
+## SDLC with Spec-Kit Workflow
 Applied fleet, speckit-utils, verify,etc. extensions to expand the official Spec-Kit SDD workflow, tailored for this project. The workflow consists of multiphases that guide the process from spec authoring to implementation and maintenance. Each phase is iterated with feedback loops to ensure alignment and quality.
-
-1. speckit.constitution
-2. speckit.specify 
-3. speckit.clarify
-4. speckit.plan + spec traceability update
-5. speckit.doctor
-6. speckit.checklist
-7. speckit.tasks
-8. speckit.validate
-9. speckit.analyze
-10. speckit.review
-11. speckit.implement
-12. speckit.verify-tasks
-13. speckit.verify + 
-14. speckit.tests + spec traceability update
-15. speckit.maintain
+0. Define the functional and non-functional requirements as standard SRS (FR/NFR), ensuring they are clear, testable, and traceable.
+1. Design architectural, technical, and operational specifications that satisfy the requirements and align with the project’s architectural principles.
+2. speckit.constitution
+3. speckit.specify (reference to SRS documentation and mapping)
+4. speckit.clarify
+5. speckit.plan (+ spec - SRS traceability update)
+6. speckit.doctor
+7. speckit.checklist
+8. speckit.tasks
+9. speckit.validate
+10. speckit.analyze
+11. speckit.review
+12. speckit.implement
+13. speckit.verify-tasks
+14. speckit.verify + 
+15. speckit.tests + spec traceability update
+16. speckit.maintain
+17. Implementation-Specs-TechnicalDocumentation Synchronization and ongoing maintenance.
 
 ### Step 1: Author a Specification
 

@@ -6,6 +6,10 @@ WORKSPACES_SCHEMA = {
     "bsonType": "object",
     "required": ["user_id", "name"],
     "properties": {
+        "workspace_id": {
+            "bsonType": "string",
+            "description": "Unique workspace identifier (UUID v4)"
+        },
         "user_id": {
             "bsonType": "string",
             "description": "Owner user reference"
@@ -17,6 +21,11 @@ WORKSPACES_SCHEMA = {
         "description": {
             "bsonType": "string",
             "description": "Optional description"
+        },
+        "status": {
+            "bsonType": "string",
+            "enum": ["active", "archived"],
+            "description": "Workspace lifecycle status"
         },
         "created_at": {
             "bsonType": "date",

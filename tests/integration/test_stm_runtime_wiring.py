@@ -9,9 +9,9 @@ Verifies that Phase 9 integration gaps are fixed:
 
 Success Criteria:
 - Agent starts with checkpointer when langchain.memory.enabled: true
-- /api/chat with session_id persists conversation to MongoDB
+- /api/chat with conversation_id persists conversation to MongoDB
 - Multi-turn context recall works across messages
-- Stateless mode (no session_id) still works
+- Stateless mode (no conversation_id) still works
 - All existing tests pass with no deprecation warnings
 """
 
@@ -548,3 +548,596 @@ class TestConfigStructureAlignment:
         }
         result = create_checkpointer(old_style_config)
         assert result is None, "Old-style mongodb.uri should not work anymore"
+
+
+# ============================================================================
+# TEST: RUNTIME METADATA CONSISTENCY (T032 / US5)
+# ============================================================================
+
+class TestRuntimeMetadataConsistency:
+    """Verify conversation metadata stays consistent with management API view.
+
+    After processing a query through the agent:
+    - message_count should increment
+    - last_activity_at should update
+    - total_tokens should accumulate
+    """
+
+    @pytest.fixture
+    def mock_conversation_repo(self):
+        """Mock ConversationRepository with in-memory state."""
+        repo = MagicMock()
+        # Mutable state simulating a live conversation document
+        state = {
+            "conversation_id": "conv-123",
+            "session_id": "sess-abc",
+            "workspace_id": "ws-xyz",
+            "user_id": "user-1",
+            "status": "active",
+            "message_count": 0,
+            "total_tokens": 0,
+            "last_activity_at": None,
+        }
+
+        def update_metadata_side_effect(conversation_id, **kwargs):
+            delta_msg = kwargs.get("message_count_delta", 0)
+            delta_tok = kwargs.get("token_delta", 0)
+            ts = kwargs.get("last_activity_at")
+            state["message_count"] += delta_msg
+            state["total_tokens"] += delta_tok
+            if ts:
+                state["last_activity_at"] = ts
+            return dict(state)
+
+        repo.update_metadata.side_effect = update_metadata_side_effect
+        repo.find_by_conversation_id.side_effect = lambda cid: dict(state) if cid == "conv-123" else None
+        repo.health_check.return_value = (True, {"component": "conversation_repository"})
+        repo._state = state  # expose for assertions
+        return repo
+
+    def test_message_count_increments_after_record(self, mock_conversation_repo):
+        """After recording metadata, message_count should be incremented."""
+        from services.conversation_service import ConversationService
+
+        svc = ConversationService(conversation_repository=mock_conversation_repo)
+        svc.record_message_metadata("conv-123", tokens_used=50)
+
+        assert mock_conversation_repo._state["message_count"] == 1
+
+    def test_total_tokens_accumulate_after_record(self, mock_conversation_repo):
+        """Tokens should accumulate across multiple record calls."""
+        from services.conversation_service import ConversationService
+
+        svc = ConversationService(conversation_repository=mock_conversation_repo)
+        svc.record_message_metadata("conv-123", tokens_used=50)
+        svc.record_message_metadata("conv-123", tokens_used=30)
+
+        assert mock_conversation_repo._state["total_tokens"] == 80
+
+    def test_last_activity_at_updates_after_record(self, mock_conversation_repo):
+        """last_activity_at should be set after recording metadata."""
+        from services.conversation_service import ConversationService
+
+        svc = ConversationService(conversation_repository=mock_conversation_repo)
+        svc.record_message_metadata("conv-123", tokens_used=10)
+
+        assert mock_conversation_repo._state["last_activity_at"] is not None
+
+    def test_management_api_view_matches_after_record(self, mock_conversation_repo):
+        """get_conversation should reflect the updated metadata."""
+        from services.conversation_service import ConversationService
+
+        svc = ConversationService(conversation_repository=mock_conversation_repo)
+        svc.record_message_metadata("conv-123", tokens_used=100)
+        svc.record_message_metadata("conv-123", tokens_used=200)
+
+        doc = svc.get_conversation("conv-123")
+        assert doc["message_count"] == 2
+        assert doc["total_tokens"] == 300
+
+
+# ============================================================================
+# TEST: RECONCILIATION ANOMALY DETECTION (T036)
+# ============================================================================
+
+class TestReconciliationAnomalyDetection:
+    """Verify reconciliation scan detects drift between checkpoint and management state."""
+
+    @pytest.fixture
+    def mock_conversation_repo(self):
+        """Conversation repository mock with configurable behaviour."""
+        repo = MagicMock()
+        repo.health_check.return_value = (True, {"component": "conversation_repo"})
+        # Defaults: nothing found
+        repo.find_by_thread_id.return_value = None
+        repo.get_all.return_value = []
+        repo.find_stale.return_value = []
+        return repo
+
+    @pytest.fixture
+    def mock_checkpointer(self):
+        """Checkpointer mock that supports list/get."""
+        cp = MagicMock()
+        cp.list.return_value = []
+        cp.get.return_value = None
+        return cp
+
+    @pytest.fixture
+    def reconciliation_service(self, mock_conversation_repo, mock_checkpointer):
+        from services.runtime_reconciliation_service import RuntimeReconciliationService
+
+        return RuntimeReconciliationService(
+            conversation_repo=mock_conversation_repo,
+            checkpointer=mock_checkpointer,
+        )
+
+    # ---- Orphaned threads ----
+
+    def test_detects_orphaned_thread(
+        self, reconciliation_service, mock_checkpointer, mock_conversation_repo
+    ):
+        """Thread in checkpointer with no matching conversation is flagged."""
+        mock_checkpointer.list.return_value = [{"thread_id": "orphan-123"}]
+        mock_conversation_repo.find_by_thread_id.return_value = None
+
+        report = reconciliation_service.scan()
+
+        assert report["anomaly_count"] >= 1
+        orphans = [a for a in report["anomalies"] if a["type"] == "orphaned_thread"]
+        assert len(orphans) == 1
+        assert orphans[0]["thread_id"] == "orphan-123"
+        assert orphans[0]["severity"] == "warning"
+
+    def test_no_orphan_when_conversation_exists(
+        self, reconciliation_service, mock_checkpointer, mock_conversation_repo
+    ):
+        """Thread with a matching conversation is NOT flagged as orphaned."""
+        mock_checkpointer.list.return_value = [{"thread_id": "known-456"}]
+        mock_conversation_repo.find_by_thread_id.return_value = {
+            "conversation_id": "conv-456",
+            "thread_id": "known-456",
+            "status": "active",
+        }
+
+        report = reconciliation_service.scan()
+
+        orphans = [a for a in report["anomalies"] if a["type"] == "orphaned_thread"]
+        assert len(orphans) == 0
+
+    # ---- Metadata drift ----
+
+    def test_detects_metadata_drift(
+        self, reconciliation_service, mock_checkpointer, mock_conversation_repo
+    ):
+        """Management message_count != checkpoint message count is flagged."""
+        mock_conversation_repo.get_all.return_value = [
+            {
+                "conversation_id": "conv-drift",
+                "thread_id": "thread-drift",
+                "status": "active",
+                "message_count": 5,
+            }
+        ]
+        # Checkpoint has 7 messages
+        mock_checkpointer.get.return_value = {
+            "channel_values": {
+                "messages": [f"msg-{i}" for i in range(7)]
+            }
+        }
+
+        report = reconciliation_service.scan()
+
+        drift = [a for a in report["anomalies"] if a["type"] == "metadata_drift"]
+        assert len(drift) == 1
+        assert drift[0]["expected"] == 5
+        assert drift[0]["actual"] == 7
+        assert drift[0]["field"] == "message_count"
+
+    def test_no_drift_when_counts_match(
+        self, reconciliation_service, mock_checkpointer, mock_conversation_repo
+    ):
+        """Matching message counts produce no drift anomaly."""
+        mock_conversation_repo.get_all.return_value = [
+            {
+                "conversation_id": "conv-ok",
+                "thread_id": "thread-ok",
+                "status": "active",
+                "message_count": 3,
+            }
+        ]
+        mock_checkpointer.get.return_value = {
+            "channel_values": {"messages": ["a", "b", "c"]}
+        }
+
+        report = reconciliation_service.scan()
+
+        drift = [a for a in report["anomalies"] if a["type"] == "metadata_drift"]
+        assert len(drift) == 0
+
+    # ---- Stale conversations ----
+
+    def test_detects_stale_conversation(
+        self, reconciliation_service, mock_conversation_repo
+    ):
+        """Active conversation with old last_activity_at is flagged."""
+        from datetime import datetime, timedelta, timezone
+
+        old_ts = datetime.now(timezone.utc) - timedelta(days=60)
+        mock_conversation_repo.find_stale.return_value = [
+            {
+                "conversation_id": "conv-stale",
+                "status": "active",
+                "last_activity_at": old_ts,
+            }
+        ]
+
+        report = reconciliation_service.scan()
+
+        stale = [a for a in report["anomalies"] if a["type"] == "stale_conversation"]
+        assert len(stale) == 1
+        assert stale[0]["conversation_id"] == "conv-stale"
+        assert stale[0]["severity"] == "info"
+
+    def test_no_stale_when_none_found(
+        self, reconciliation_service, mock_conversation_repo
+    ):
+        """No stale-conversation anomaly when repository returns empty."""
+        mock_conversation_repo.find_stale.return_value = []
+
+        report = reconciliation_service.scan()
+
+        stale = [a for a in report["anomalies"] if a["type"] == "stale_conversation"]
+        assert len(stale) == 0
+
+    # ---- Missing threads ----
+
+    def test_detects_missing_thread(
+        self, reconciliation_service, mock_checkpointer, mock_conversation_repo
+    ):
+        """Conversation with thread_id absent from checkpointer is flagged."""
+        mock_conversation_repo.get_all.return_value = [
+            {
+                "conversation_id": "conv-missing",
+                "thread_id": "thread-gone",
+                "status": "active",
+                "message_count": 2,
+            }
+        ]
+        mock_checkpointer.get.return_value = None  # thread doesn't exist
+
+        report = reconciliation_service.scan()
+
+        missing = [a for a in report["anomalies"] if a["type"] == "missing_thread"]
+        assert len(missing) == 1
+        assert missing[0]["thread_id"] == "thread-gone"
+        assert missing[0]["severity"] == "error"
+
+    def test_no_missing_thread_when_checkpoint_exists(
+        self, reconciliation_service, mock_checkpointer, mock_conversation_repo
+    ):
+        """Conversation whose thread exists in checkpointer is NOT flagged."""
+        mock_conversation_repo.get_all.return_value = [
+            {
+                "conversation_id": "conv-ok",
+                "thread_id": "thread-ok",
+                "status": "active",
+                "message_count": 3,
+            }
+        ]
+        mock_checkpointer.get.return_value = {
+            "channel_values": {"messages": ["a", "b", "c"]}
+        }
+
+        report = reconciliation_service.scan()
+
+        missing = [a for a in report["anomalies"] if a["type"] == "missing_thread"]
+        assert len(missing) == 0
+
+    # ---- Report structure ----
+
+    def test_scan_report_contains_required_fields(self, reconciliation_service):
+        """Report must contain correlation_id, timestamps, anomaly_count, anomalies."""
+        report = reconciliation_service.scan()
+
+        assert "correlation_id" in report
+        assert "started_at" in report
+        assert "completed_at" in report
+        assert "duration_ms" in report
+        assert "scope" in report
+        assert "anomaly_count" in report
+        assert "anomalies" in report
+        assert isinstance(report["anomalies"], list)
+
+    def test_scan_without_checkpointer_skips_checkpoint_checks(
+        self, mock_conversation_repo
+    ):
+        """When checkpointer is None, orphaned/drift/missing checks are skipped."""
+        from services.runtime_reconciliation_service import RuntimeReconciliationService
+
+        svc = RuntimeReconciliationService(
+            conversation_repo=mock_conversation_repo,
+            checkpointer=None,
+        )
+
+        report = svc.scan()
+
+        # Only stale-conversation detection should run (no checkpointer needed)
+        checkpoint_types = {"orphaned_thread", "metadata_drift", "missing_thread"}
+        for anomaly in report["anomalies"]:
+            assert anomaly["type"] not in checkpoint_types
+
+    # ---- Error resilience ----
+
+    def test_scan_continues_on_orphan_detection_error(
+        self, reconciliation_service, mock_checkpointer, mock_conversation_repo
+    ):
+        """If orphan detection raises, scan still returns a valid report."""
+        mock_checkpointer.list.side_effect = RuntimeError("connection lost")
+        mock_conversation_repo.find_stale.return_value = [
+            {"conversation_id": "conv-stale", "status": "active", "last_activity_at": "old"}
+        ]
+
+        report = reconciliation_service.scan()
+
+        # Stale detection should still produce results
+        assert report["anomaly_count"] >= 1
+        assert any(a["type"] == "stale_conversation" for a in report["anomalies"])
+
+
+# ============================================================================
+# TEST: RECONCILIATION STRUCTURED LOGGING (T037)
+# ============================================================================
+
+class TestReconciliationStructuredLogging:
+    """Verify scan emits structured log events: scan_started, anomaly_detected, scan_completed."""
+
+    @pytest.fixture
+    def mock_conversation_repo(self):
+        repo = MagicMock()
+        repo.health_check.return_value = (True, {})
+        repo.find_by_thread_id.return_value = None
+        repo.get_all.return_value = []
+        repo.find_stale.return_value = []
+        return repo
+
+    @pytest.fixture
+    def mock_checkpointer(self):
+        cp = MagicMock()
+        cp.list.return_value = []
+        cp.get.return_value = None
+        return cp
+
+    @pytest.fixture
+    def reconciliation_service(self, mock_conversation_repo, mock_checkpointer):
+        from services.runtime_reconciliation_service import RuntimeReconciliationService
+
+        return RuntimeReconciliationService(
+            conversation_repo=mock_conversation_repo,
+            checkpointer=mock_checkpointer,
+        )
+
+    def test_scan_started_log_with_correlation_id(self, reconciliation_service):
+        """scan() must emit a scan_started log with correlation_id."""
+        mock_logger = MagicMock()
+        reconciliation_service._logger = mock_logger
+        reconciliation_service.scan()
+
+        info_calls = mock_logger.info.call_args_list
+        started_calls = [
+            c for c in info_calls
+            if c.kwargs.get("extra", {}).get("action") == "scan_started"
+        ]
+        assert len(started_calls) == 1, "Expected exactly one scan_started log"
+        extra = started_calls[0].kwargs["extra"]
+        assert "correlation_id" in extra
+        assert len(extra["correlation_id"]) == 36  # UUID format
+
+    def test_scan_completed_log_with_duration(self, reconciliation_service):
+        """scan() must emit a scan_completed log with anomaly_count and duration_ms."""
+        mock_logger = MagicMock()
+        reconciliation_service._logger = mock_logger
+        reconciliation_service.scan()
+
+        info_calls = mock_logger.info.call_args_list
+        completed_calls = [
+            c for c in info_calls
+            if c.kwargs.get("extra", {}).get("action") == "scan_completed"
+        ]
+        assert len(completed_calls) == 1, "Expected exactly one scan_completed log"
+        extra = completed_calls[0].kwargs["extra"]
+        assert "anomaly_count" in extra
+        assert "duration_ms" in extra
+        assert isinstance(extra["duration_ms"], (int, float))
+
+    def test_anomaly_detected_log_with_type_and_severity(
+        self, reconciliation_service, mock_checkpointer, mock_conversation_repo
+    ):
+        """Each anomaly must emit an anomaly_detected warning with type and severity."""
+        # Inject an orphaned thread
+        mock_checkpointer.list.return_value = [{"thread_id": "orphan-log-test"}]
+        mock_conversation_repo.find_by_thread_id.return_value = None
+
+        mock_logger = MagicMock()
+        reconciliation_service._logger = mock_logger
+        reconciliation_service.scan()
+
+        warning_calls = mock_logger.warning.call_args_list
+        anomaly_calls = [
+            c for c in warning_calls
+            if c.kwargs.get("extra", {}).get("action") == "anomaly_detected"
+        ]
+        assert len(anomaly_calls) >= 1, "Expected at least one anomaly_detected log"
+        extra = anomaly_calls[0].kwargs["extra"]
+        assert "type" in extra
+        assert "severity" in extra
+        assert "correlation_id" in extra
+
+    def test_correlation_id_consistent_across_scan(
+        self, reconciliation_service, mock_checkpointer, mock_conversation_repo
+    ):
+        """All log events in a single scan share the same correlation_id."""
+        mock_checkpointer.list.return_value = [{"thread_id": "cid-check"}]
+        mock_conversation_repo.find_by_thread_id.return_value = None
+
+        mock_logger = MagicMock()
+        reconciliation_service._logger = mock_logger
+        reconciliation_service.scan()
+
+        all_extras = []
+        for call in mock_logger.info.call_args_list + mock_logger.warning.call_args_list:
+            extra = call.kwargs.get("extra", {})
+            if "correlation_id" in extra:
+                all_extras.append(extra["correlation_id"])
+
+        assert len(set(all_extras)) == 1, (
+            f"All logs must share one correlation_id, got: {set(all_extras)}"
+        )
+
+
+# ============================================================================
+# TEST: STM CONVERSATION ISOLATION (T046 / US8)
+# ============================================================================
+
+class TestSTMConversationIsolation:
+    """Verify conversation_id == thread_id STM isolation model.
+
+    Replaces legacy session_id == thread_id assumptions with explicit
+    coverage for the canonical conversation-scoped STM mapping.
+    """
+
+    def test_conversation_id_maps_to_thread_id(self, memory_enabled_config, generate_conversation_id):
+        """Canonical mapping: conversation_id passed to agent becomes thread_id."""
+        from core.stock_assistant_agent import StockAssistantAgent
+        from langchain_core.messages import AIMessage
+
+        with patch('core.stock_assistant_agent.StockAssistantAgent._build_agent_executor'):
+            agent = StockAssistantAgent.__new__(StockAssistantAgent)
+            agent._config = memory_enabled_config
+            agent._checkpointer = MagicMock()
+            agent._agent_executor = MagicMock()
+            agent._agent_executor.invoke.return_value = {
+                "messages": [AIMessage(content="Response")]
+            }
+            agent._use_react = True
+            agent._use_streaming = False
+            agent.logger = MagicMock()
+
+            cid = generate_conversation_id
+            agent.process_query("Test", conversation_id=cid)
+
+            config = agent._agent_executor.invoke.call_args[1].get('config', {})
+            assert config['configurable']['thread_id'] == cid
+
+    def test_same_conversation_restore_yields_same_checkpoint(
+        self, memory_enabled_config, generate_conversation_id
+    ):
+        """Same conversation_id across turns yields same thread_id → same checkpoint."""
+        from core.stock_assistant_agent import StockAssistantAgent
+        from langchain_core.messages import AIMessage
+
+        with patch('core.stock_assistant_agent.StockAssistantAgent._build_agent_executor'):
+            agent = StockAssistantAgent.__new__(StockAssistantAgent)
+            agent._config = memory_enabled_config
+            agent._checkpointer = MagicMock()
+            agent._agent_executor = MagicMock()
+            agent._agent_executor.invoke.return_value = {
+                "messages": [AIMessage(content="Answer")]
+            }
+            agent._use_react = True
+            agent._use_streaming = False
+            agent.logger = MagicMock()
+
+            cid = generate_conversation_id
+
+            # Turn 1
+            agent.process_query("First question", conversation_id=cid)
+            tid_1 = agent._agent_executor.invoke.call_args_list[0][1]['config']['configurable']['thread_id']
+
+            # Turn 2 (resumed conversation)
+            agent.process_query("Follow-up", conversation_id=cid)
+            tid_2 = agent._agent_executor.invoke.call_args_list[1][1]['config']['configurable']['thread_id']
+
+            assert tid_1 == tid_2 == cid
+
+    def test_cross_conversation_isolation(self, memory_enabled_config):
+        """Different conversation_ids yield different thread_ids → independent checkpoints."""
+        from core.stock_assistant_agent import StockAssistantAgent
+        from langchain_core.messages import AIMessage
+
+        with patch('core.stock_assistant_agent.StockAssistantAgent._build_agent_executor'):
+            agent = StockAssistantAgent.__new__(StockAssistantAgent)
+            agent._config = memory_enabled_config
+            agent._checkpointer = MagicMock()
+            agent._agent_executor = MagicMock()
+            agent._agent_executor.invoke.return_value = {
+                "messages": [AIMessage(content="Response")]
+            }
+            agent._use_react = True
+            agent._use_streaming = False
+            agent.logger = MagicMock()
+
+            cid_a = str(uuid.uuid4())
+            cid_b = str(uuid.uuid4())
+
+            agent.process_query("Question A", conversation_id=cid_a)
+            tid_a = agent._agent_executor.invoke.call_args_list[0][1]['config']['configurable']['thread_id']
+
+            agent.process_query("Question B", conversation_id=cid_b)
+            tid_b = agent._agent_executor.invoke.call_args_list[1][1]['config']['configurable']['thread_id']
+
+            assert tid_a == cid_a
+            assert tid_b == cid_b
+            assert tid_a != tid_b
+
+    def test_stateless_mode_no_checkpoint_binding(self, memory_enabled_config):
+        """No conversation_id means no checkpoint binding (stateless mode)."""
+        from core.stock_assistant_agent import StockAssistantAgent
+        from langchain_core.messages import AIMessage
+
+        with patch('core.stock_assistant_agent.StockAssistantAgent._build_agent_executor'):
+            agent = StockAssistantAgent.__new__(StockAssistantAgent)
+            agent._config = memory_enabled_config
+            agent._checkpointer = MagicMock()
+            agent._agent_executor = MagicMock()
+            agent._agent_executor.invoke.return_value = {
+                "messages": [AIMessage(content="Stateless response")]
+            }
+            agent._use_react = True
+            agent._use_streaming = False
+            agent.logger = MagicMock()
+
+            # No conversation_id → stateless
+            agent.process_query("Hello")
+
+            config = agent._agent_executor.invoke.call_args[1].get('config')
+            if config and 'configurable' in config:
+                assert config['configurable'].get('thread_id') is None
+
+    def test_resumed_checkpoint_retrieval_preserves_thread_id(
+        self, memory_enabled_config
+    ):
+        """Starting a new message in an existing conversation retrieves prior checkpoint thread_id."""
+        from core.stock_assistant_agent import StockAssistantAgent
+        from langchain_core.messages import AIMessage
+
+        cid = str(uuid.uuid4())
+
+        with patch('core.stock_assistant_agent.StockAssistantAgent._build_agent_executor'):
+            agent = StockAssistantAgent.__new__(StockAssistantAgent)
+            agent._config = memory_enabled_config
+            agent._checkpointer = MagicMock()
+            agent._agent_executor = MagicMock()
+            agent._agent_executor.invoke.return_value = {
+                "messages": [AIMessage(content="Resumed")]
+            }
+            agent._use_react = True
+            agent._use_streaming = False
+            agent.logger = MagicMock()
+
+            # Simulate resuming: first query in a "previously-active" conversation
+            agent.process_query("Continue from where we left off", conversation_id=cid)
+
+            config = agent._agent_executor.invoke.call_args[1].get('config', {})
+            # The thread_id MUST equal the conversation_id so the checkpointer
+            # retrieves the correct prior checkpoint
+            assert config['configurable']['thread_id'] == cid

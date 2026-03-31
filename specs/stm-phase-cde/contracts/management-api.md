@@ -77,7 +77,7 @@ Response extends base payload with:
 - `session_count`
 - `active_conversation_count`
 
-### `PATCH /api/workspaces/{workspace_id}`
+### `PUT /api/workspaces/{workspace_id}`
 
 - Accepts partial updates for `name` and `description` only while the workspace is active.
 - Response fields match the workspace detail payload:
@@ -174,7 +174,7 @@ Response fields:
 - `created_at`
 - `updated_at`
 
-### `PATCH /api/sessions/{session_id}`
+### `PUT /api/sessions/{session_id}`
 
 - Accepts partial updates for session context fields while `status=active`.
 - Rejects updates for `closed` and `archived` sessions.
@@ -295,6 +295,23 @@ Response fields:
 - `last_activity_at`
 - `created_at`
 - `updated_at`
+
+### `PUT /api/conversations/{conversation_id}`
+
+- Accepts partial updates for `title` while the conversation is active.
+- Rejects updates for `archived` conversations.
+- Response fields match the conversation detail payload:
+  - `conversation_id`
+  - `thread_id`
+  - `session_id`
+  - `workspace_id`
+  - `status`
+  - `message_count`
+  - `total_tokens`
+  - `focused_symbols`
+  - `last_activity_at`
+  - `created_at`
+  - `updated_at`
 
 ### `POST /api/conversations/{conversation_id}/archive`
 

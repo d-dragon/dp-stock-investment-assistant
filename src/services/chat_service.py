@@ -5,7 +5,7 @@ from __future__ import annotations
 import json
 import logging
 from datetime import datetime, timezone
-from typing import Any, Callable, Dict, Generator, Mapping, Optional, Tuple
+from typing import Any, Callable, Dict, Generator, List, Mapping, Optional, Tuple
 
 from core.types import AgentResponse, ResponseStatus
 from services.base import BaseService
@@ -19,6 +19,15 @@ class ChatService(BaseService):
     
     Validates conversation status before processing. Uses conversation_id
     as the primary identity for STM memory binding.
+    
+    Migration-window dual-path contract (FR-D15 / SC-012):
+        Both legacy stateless requests (conversation_id=None) and
+        hierarchy-aware requests (with conversation_id) are supported
+        simultaneously. Guard clauses in _validate_conversation_active,
+        _ensure_conversation_exists, _record_message_metadata, and
+        _load_conversation_context all return early when conversation_id
+        is None, preserving the stateless path without reintroducing the
+        deprecated session_id == thread_id caller model.
     """
     
     MODEL_METADATA_CACHE_TTL = 60
@@ -68,6 +77,48 @@ class ChatService(BaseService):
             self.logger.warning(f"Rejected message to archived conversation: {conversation_id}")
             raise ArchivedConversationError(conversation_id)
     
+    def _ensure_conversation_exists(self, conversation_id: Optional[str]) -> None:
+        """Auto-create conversation record if it doesn't exist (FR-D01).
+        
+        Non-blocking: logs warning on failure to avoid disrupting chat flow.
+        """
+        if not conversation_id or not self._conversation_provider:
+            return
+        try:
+            self._conversation_provider.ensure_conversation_exists(conversation_id)
+        except Exception as e:
+            self.logger.warning(
+                f"Auto-create conversation failed for {conversation_id}: {e}"
+            )
+    
+    def _record_message_metadata(
+        self,
+        conversation_id: Optional[str],
+        *,
+        tokens_used: int = 0,
+        symbols: Optional[List[str]] = None,
+    ) -> None:
+        """Record per-turn metadata after agent response (FR-D02/FR-D03).
+        
+        Non-blocking: logs warning on failure so the chat response is
+        never disrupted by a metadata-write error.
+        """
+        if not conversation_id or not self._conversation_provider:
+            return
+        try:
+            self._conversation_provider.record_message_metadata(
+                conversation_id, tokens_used=tokens_used, symbols=symbols,
+            )
+        except Exception as e:
+            self.logger.warning(
+                f"Metadata recording failed for {conversation_id}: {e}"
+            )
+    
+    @staticmethod
+    def _estimate_tokens(text: str) -> int:
+        """Rough token estimate (~4 chars per token)."""
+        return max(len(text) // 4, 1) if text else 0
+    
     def _load_conversation_context(
         self, conversation_id: Optional[str]
     ) -> Optional[Dict[str, Any]]:
@@ -101,6 +152,7 @@ class ChatService(BaseService):
             ArchivedConversationError: If the conversation is archived
         """
         self._validate_conversation_active(conversation_id)
+        self._ensure_conversation_exists(conversation_id)
         
         try:
             self.logger.info(f"Starting streaming response: {user_message[:50]}...")
@@ -140,6 +192,12 @@ class ChatService(BaseService):
             yield "data: [DONE]\n\n"
             
             self.logger.info(f"Streaming complete chunks={chunk_count}")
+            
+            # Non-blocking metadata recording (FR-D02/FR-D03)
+            self._record_message_metadata(
+                conversation_id,
+                tokens_used=self._estimate_tokens(full_text),
+            )
         
         except Exception as e:
             self.logger.error(f"Streaming error: {e}")
@@ -212,6 +270,7 @@ class ChatService(BaseService):
             ArchivedConversationError: If the conversation is archived
         """
         self._validate_conversation_active(conversation_id)
+        self._ensure_conversation_exists(conversation_id)
         
         # Load session context for this conversation (FR-012a)
         self._load_conversation_context(conversation_id)
@@ -228,6 +287,12 @@ class ChatService(BaseService):
             model = model or model_info.get("model")
         
         cleaned_response = self.strip_fallback_prefix(raw_response)
+        
+        # Non-blocking metadata recording (FR-D02/FR-D03)
+        self._record_message_metadata(
+            conversation_id,
+            tokens_used=self._estimate_tokens(raw_response),
+        )
         
         return {
             "response": cleaned_response,

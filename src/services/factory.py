@@ -16,6 +16,7 @@ from utils.cache import CacheBackend
 
 if TYPE_CHECKING:
     from services.protocols import AgentProvider
+    from services.runtime_reconciliation_service import RuntimeReconciliationService
 
 ServiceT = TypeVar("ServiceT")
 
@@ -30,6 +31,7 @@ class ServiceFactory:
         agent: Optional["AgentProvider"] = None,
         repository_factory: Optional[RepositoryFactory] = None,
         cache_backend: Optional[CacheBackend] = None,
+        checkpointer: Optional[Any] = None,
         logger: Optional[logging.Logger] = None,
     ) -> None:
         self._config = config
@@ -37,6 +39,7 @@ class ServiceFactory:
         self._logger = logger or logging.getLogger(__name__)
         self._repository_factory = repository_factory or RepositoryFactory(config)
         self._cache = cache_backend or CacheBackend.from_config(config, logger=self._logger)
+        self._checkpointer = checkpointer
         self._services: Dict[str, Any] = {}
 
     # ------------------------------------------------------------------
@@ -59,6 +62,12 @@ class ServiceFactory:
 
     def get_session_service(self) -> SessionService:
         return cast(SessionService, self._get_or_create("session_service", self._build_session_service))
+
+    def get_reconciliation_service(self) -> "RuntimeReconciliationService":
+        return cast(
+            "RuntimeReconciliationService",
+            self._get_or_create("reconciliation_service", self._build_reconciliation_service),
+        )
 
     # ------------------------------------------------------------------
     # Builders
@@ -84,8 +93,13 @@ class ServiceFactory:
         if not conversation_repo:
             raise RuntimeError("ConversationRepository could not be initialized")
 
+        session_repo = self._repository_factory.get_session_repository()
+        workspace_repo = self._repository_factory.get_workspace_repository()
+
         return ConversationService(
             conversation_repository=conversation_repo,
+            session_repository=session_repo,
+            workspace_repository=workspace_repo,
             cache=self._cache,
             logger=self._logger.getChild("conversation"),
         )
@@ -96,11 +110,13 @@ class ServiceFactory:
             raise RuntimeError("WorkspaceRepository could not be initialized")
 
         session_repo = self._repository_factory.get_session_repository()
+        conversation_repo = self._repository_factory.get_conversation_repository()
         watchlist_repo = self._repository_factory.get_watchlist_repository()
 
         return WorkspaceService(
             workspace_repository=workspace_repo,
             session_repository=session_repo,
+            conversation_repository=conversation_repo,
             watchlist_repository=watchlist_repo,
             cache=self._cache,
             logger=self._logger.getChild("workspace"),
@@ -152,6 +168,25 @@ class ServiceFactory:
             workspace_repository=workspace_repo,
             cache=self._cache,
             logger=self._logger.getChild("session"),
+        )
+
+    def _build_reconciliation_service(self) -> "RuntimeReconciliationService":
+        from services.runtime_reconciliation_service import RuntimeReconciliationService
+
+        conversation_repo = self._repository_factory.get_conversation_repository()
+        if not conversation_repo:
+            raise RuntimeError("ConversationRepository could not be initialized")
+
+        session_repo = self._repository_factory.get_session_repository()
+        workspace_repo = self._repository_factory.get_workspace_repository()
+
+        return RuntimeReconciliationService(
+            conversation_repo=conversation_repo,
+            session_repo=session_repo,
+            workspace_repo=workspace_repo,
+            checkpointer=self._checkpointer,
+            cache=self._cache,
+            logger=self._logger.getChild("reconciliation"),
         )
 
     # ------------------------------------------------------------------

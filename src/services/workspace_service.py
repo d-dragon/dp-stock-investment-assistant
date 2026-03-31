@@ -4,14 +4,17 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import uuid
 from typing import Any, Callable, Dict, Iterable, Iterator, List, Optional
 
 from bson import ObjectId
 
+from data.repositories.conversation_repository import ConversationRepository
 from data.repositories.session_repository import SessionRepository
 from data.repositories.watchlist_repository import WatchlistRepository
 from data.repositories.workspace_repository import WorkspaceRepository
 from services.base import BaseService, HealthReport
+from services.exceptions import EntityNotFoundError, OwnershipViolationError, StaleEntityError
 from utils.cache import CacheBackend
 from utils.service_utils import batched, normalize_document, stringify_identifier
 
@@ -28,6 +31,7 @@ class WorkspaceService(BaseService):
         *,
         workspace_repository: WorkspaceRepository,
         session_repository: Optional[SessionRepository] = None,
+        conversation_repository: Optional[ConversationRepository] = None,
         watchlist_repository: Optional[WatchlistRepository] = None,
         cache: Optional[CacheBackend] = None,
         time_provider: Optional[Callable[[], str]] = None,
@@ -36,6 +40,7 @@ class WorkspaceService(BaseService):
         super().__init__(cache=cache, time_provider=time_provider, logger=logger)
         self._workspace_repository = workspace_repository
         self._session_repository = session_repository
+        self._conversation_repository = conversation_repository
         self._watchlist_repository = watchlist_repository
 
     # ---------------------------------------------------------------------
@@ -119,9 +124,13 @@ class WorkspaceService(BaseService):
         if not normalized_name:
             raise ValueError("Workspace name is required")
 
+        workspace_id = str(uuid.uuid4())
+
         document: Dict[str, Any] = {
+            "workspace_id": workspace_id,
             "user_id": self._coerce_user_identifier(user_id),
             "name": normalized_name,
+            "status": WorkspaceRepository.STATUS_ACTIVE,
         }
 
         if description is not None:
@@ -129,7 +138,7 @@ class WorkspaceService(BaseService):
 
         if data:
             for key, value in data.items():
-                if key in {"_id", "user_id"}:
+                if key in {"_id", "user_id", "workspace_id", "status"}:
                     continue
                 document[key] = value
 
@@ -230,6 +239,202 @@ class WorkspaceService(BaseService):
             self.invalidate_user_cache(owner_id)
 
         return deleted
+
+    # ------------------------------------------------------------------
+    # Management API (Phase C)
+    # ------------------------------------------------------------------
+
+    def get_workspace_detail(self, workspace_id: str, user_id: str) -> Dict[str, Any]:
+        """Fetch workspace with aggregate counts, verifying ownership.
+
+        Returns:
+            Workspace dict with ``session_count`` and ``active_conversation_count``.
+
+        Raises:
+            EntityNotFoundError: If workspace does not exist.
+            OwnershipViolationError: If requesting user is not the owner.
+        """
+        workspace = self._workspace_repository.find_by_workspace_id(workspace_id)
+        if workspace is None:
+            raise EntityNotFoundError("workspace", workspace_id)
+
+        self._verify_ownership(workspace, user_id)
+
+        result = normalize_document(workspace)
+        result["session_count"] = self._count_sessions(workspace_id)
+        result["active_conversation_count"] = self._count_active_conversations(workspace_id)
+        return result
+
+    def list_workspaces_paginated(
+        self,
+        user_id: str,
+        *,
+        limit: int = 25,
+        offset: int = 0,
+        status: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """Return paginated workspace list with total count.
+
+        Returns:
+            Dict with ``items``, ``total``, ``limit``, ``offset``.
+        """
+        items = self._workspace_repository.find_by_user_with_pagination(
+            user_id, limit=limit, offset=offset, status=status,
+        )
+        total = self._workspace_repository.count_by_user(user_id, status=status)
+        return {
+            "items": [normalize_document(doc) for doc in items],
+            "total": total,
+            "limit": limit,
+            "offset": offset,
+        }
+
+    def update_workspace(
+        self,
+        workspace_id: str,
+        user_id: str,
+        *,
+        name: Optional[str] = None,
+        description: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """Partial update of workspace name/description.
+
+        Returns:
+            Updated workspace dict.
+
+        Raises:
+            EntityNotFoundError: If workspace does not exist.
+            OwnershipViolationError: If requesting user is not the owner.
+        """
+        workspace = self._workspace_repository.find_by_workspace_id(workspace_id)
+        if workspace is None:
+            raise EntityNotFoundError("workspace", workspace_id)
+
+        self._verify_ownership(workspace, user_id)
+
+        updates: Dict[str, Any] = {}
+        if name is not None:
+            updates["name"] = name.strip()
+        if description is not None:
+            updates["description"] = description.strip()
+
+        if not updates:
+            return normalize_document(workspace)
+
+        updated = self._workspace_repository.update_fields(workspace_id, updates)
+        if updated is None:
+            raise EntityNotFoundError("workspace", workspace_id)
+
+        result = normalize_document(updated)
+        result["session_count"] = self._count_sessions(workspace_id)
+        result["active_conversation_count"] = self._count_active_conversations(workspace_id)
+        return result
+
+    def archive_workspace(self, workspace_id: str, user_id: str) -> Dict[str, Any]:
+        """Archive a workspace (idempotent).
+
+        Per the management API contract, repeated archive requests are safe.
+
+        Returns:
+            Workspace detail dict after archive transition.
+
+        Raises:
+            EntityNotFoundError: If workspace does not exist.
+            OwnershipViolationError: If requesting user is not the owner.
+        """
+        workspace = self._workspace_repository.find_by_workspace_id(workspace_id)
+        if workspace is None:
+            raise EntityNotFoundError("workspace", workspace_id)
+
+        self._verify_ownership(workspace, user_id)
+
+        if workspace.get("status") == WorkspaceRepository.STATUS_ARCHIVED:
+            # Idempotent: return current state
+            result = normalize_document(workspace)
+            result["session_count"] = self._count_sessions(workspace_id)
+            result["active_conversation_count"] = self._count_active_conversations(workspace_id)
+            return result
+
+        # Cascade: archive all sessions and their conversations
+        self._cascade_archive_descendants(workspace_id)
+
+        archived = self._workspace_repository.archive(workspace_id)
+        if archived is None:
+            raise EntityNotFoundError("workspace", workspace_id)
+
+        result = normalize_document(archived)
+        result["session_count"] = self._count_sessions(workspace_id)
+        result["active_conversation_count"] = self._count_active_conversations(workspace_id)
+        return result
+
+    def _verify_ownership(self, workspace: Dict[str, Any], user_id: str) -> None:
+        """Verify the requesting user owns the workspace."""
+        actual_owner = stringify_identifier(workspace.get("user_id"))
+        expected_owner = stringify_identifier(user_id)
+        if actual_owner != expected_owner:
+            raise OwnershipViolationError(
+                "workspace",
+                workspace.get("workspace_id", workspace.get("_id", "")),
+                expected_owner,
+                actual_owner,
+            )
+
+    def _cascade_archive_descendants(self, workspace_id: str) -> None:
+        """Archive all sessions (and their conversations) in a workspace.
+
+        Iterates sessions and archives each session's conversations first,
+        then archives the session itself. Uses bulk repo operations where available.
+        """
+        if not self._session_repository:
+            return
+
+        sessions = self._session_repository.find_by_workspace(workspace_id)
+        conv_total = 0
+
+        for session in sessions:
+            sid = session.get("session_id")
+            if not sid or session.get("status") == "archived":
+                continue
+            # Archive child conversations for this session
+            if self._conversation_repository:
+                count = self._conversation_repository.archive_by_session_id(
+                    sid, archive_reason="workspace_archived",
+                )
+                conv_total += count
+            # Archive the session itself
+            self._session_repository.archive(sid)
+
+        self.logger.info(
+            "Cascade archive for workspace %s: archived %d sessions, %d conversations",
+            workspace_id, len(sessions), conv_total,
+        )
+
+    def _count_sessions(self, workspace_id: str) -> int:
+        """Count sessions belonging to a workspace."""
+        if self._session_repository is None:
+            return 0
+        try:
+            collection = self._session_repository.collection
+            return collection.count_documents({"workspace_id": workspace_id})
+        except Exception:
+            self.logger.exception("Failed to count sessions", extra={"workspace_id": workspace_id})
+            return 0
+
+    def _count_active_conversations(self, workspace_id: str) -> int:
+        """Count active conversations in a workspace's sessions."""
+        if self._session_repository is None:
+            return 0
+        try:
+            db = self._session_repository.collection.database
+            return db["conversations"].count_documents({
+                "workspace_id": workspace_id,
+                "status": {"$ne": "archived"},
+            })
+        except Exception:
+            self.logger.exception(
+                "Failed to count active conversations", extra={"workspace_id": workspace_id},
+            )
+            return 0
 
     # ------------------------------------------------------------------
     # Health + internals

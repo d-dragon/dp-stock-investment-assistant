@@ -33,6 +33,9 @@ from web.routes.ai_chat_routes import create_chat_blueprint
 from web.sockets.chat_events import SocketIOContext, register_chat_events
 from web.routes.models_routes import create_models_blueprint
 from web.routes.user_routes import create_user_blueprint
+from web.routes.workspace_routes import create_workspace_blueprint
+from web.routes.session_routes import create_session_blueprint
+from web.routes.conversation_routes import create_conversation_blueprint
 
 if TYPE_CHECKING:
     from flask import Blueprint
@@ -40,11 +43,18 @@ if TYPE_CHECKING:
 RouteFactory = Callable[[APIRouteContext], "Blueprint"]
 SocketRegistrar = Callable[[SocketIOContext], None]
 
+# OPERATOR BOUNDARY: Reconciliation and migration services are operator-only.
+# They are invoked via scripts/ (e.g. reconcile_stm_runtime.py), NOT through
+# Flask routes.  Do NOT add reconciliation or migration blueprints here.
+# See specs/stm-phase-cde/contracts/operator-tooling.md for the contract.
 DEFAULT_HTTP_ROUTE_FACTORIES: Tuple[RouteFactory, ...] = (
     create_health_blueprint,
     create_chat_blueprint,
     create_models_blueprint,
     create_user_blueprint,
+    create_workspace_blueprint,
+    create_session_blueprint,
+    create_conversation_blueprint,
 )
 DEFAULT_SOCKETIO_REGISTRARS: Tuple[SocketRegistrar, ...] = (register_chat_events,)
 

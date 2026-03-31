@@ -1,249 +1,233 @@
-# Quick Start Guide - Configuration & Tools Verification
+# Quick Start: Local Setup and API Verification
 
-## TL;DR - Everything is Working! ✅
+## Goal
 
-Your configuration is correct and all tools are properly initialized. Run this:
+Use this guide to start the backend locally, verify configuration loading, and smoke-test the current API surface with copy-paste-ready PowerShell commands.
+
+## 1. Prepare the environment
+
+```powershell
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install -r requirements.txt
+Copy-Item .env.example .env
+Copy-Item config\config_example.yaml config\config.yaml
+```
+
+Update `.env` and `config\config.yaml` with real local values before running the application.
+
+Current configuration sources load in this order:
+
+1. `config/config.yaml`
+2. `config/config.{APP_ENV}.yaml`
+3. Environment variables and `.env`
+
+Minimum local values to review in `.env`:
+
+```dotenv
+OPENAI_API_KEY=your-openai-api-key-here
+GROK_API_KEY=your-grok-api-key-here
+MONGODB_URI=mongodb://username:password@hostname:port/stock_assistant?retryWrites=true&w=majority
+REDIS_HOST=localhost
+REDIS_PORT=6379
+REDIS_PASSWORD=your_redis_password
+APP_ENV=local
+MODEL_PROVIDER=openai
+```
+
+## 2. Start local dependencies
+
+```powershell
+docker-compose up -d mongodb redis
+python src\data\migration\db_setup.py
+```
+
+If Docker is not already running, start it before the commands above.
+
+## 3. Verify configuration and core wiring
+
+### Configuration sanity check
+
+```powershell
+python examples\config_usage.py
+```
+
+Expected:
+
+- Configuration loads without throwing.
+- Sensitive values are masked in output.
+- Model and logging settings are shown from the merged config.
+
+### System health check
+
+```powershell
+python scripts\health_check.py
+```
+
+Expected:
+
+- The script completes with `ALL CHECKS PASSED`.
+- API server instantiation succeeds or reports a non-fatal warning with context.
+
+### Tool wiring test
+
+```powershell
+python -m pytest tests/test_tools.py -v
+```
+
+Expected:
+
+- Tool registry and tool implementations load through the test suite.
+
+### Optional agent script
+
 ```powershell
 python test_agent.py
 ```
 
----
+Use this only after model credentials and dependencies are configured. It exercises a direct agent query path rather than the HTTP API.
 
-## Quick Verification Commands
-
-### 1. Check Configuration Loading (30 seconds)
-```powershell
-python test_config.py
-```
-**Expected output:**
-```
-✅ OpenAI Configuration:
-   API Key: sk-proj-usYTqinoFaZsEBFgMgXqpJ...
-   Model: gpt-5
-✅ Grok Configuration:
-   API Key: xai-00TWu9nUn0FhPDavrRKtUDT0LJ...
-   Model: grok-4-1-fast-reasoning
-✅ All configuration loaded successfully!
-```
-
-### 2. Check Tool Initialization (60 seconds)
-```powershell
-python test_tools.py
-```
-**Expected output:**
-```
-✅ StockSymbolTool imported
-✅ ReportingTool imported
-✅ Enabled tools: 2
-   - stock_symbol: Retrieve stock symbol information...
-   - reporting: Generate investment reports...
-✅ Agent initialized successfully!
-```
-
-### 3. Test Agent with Queries (varies)
-```powershell
-python test_agent.py
-```
-**Expected behavior:**
-- Responds to "What is the current price of AAPL?"
-- Streams response for "Summarize recent news about AAPL"
-- Uses StockSymbolTool and ReportingTool internally
-
-### 4. Full System Health Check (2 minutes)
-```powershell
-python health_check.py
-```
-**Expected output:**
-```
-======================================================================
-✅ ALL CHECKS PASSED - System is healthy!
-======================================================================
-```
-
----
-
-## Start the API Server
+## 4. Start the API server
 
 ```powershell
-# Start API server (will listen on http://localhost:5000)
-python src\main.py --mode web
-
-# Or with explicit host/port:
 python src\main.py --mode web --host 0.0.0.0 --port 5000
 ```
 
-**Server ready when you see:**
-```
-🚀 Starting Stock Investment Assistant API Server...
-📡 API will be available at: http://0.0.0.0:5000
-💬 WebSocket endpoint: ws://localhost:5000
-```
+Server startup is complete when the console prints the API and WebSocket endpoints.
 
----
+## 5. Smoke-test public API routes
 
-## Test API Endpoints
+### Set base URL
 
-Once server is running, test these endpoints:
-
-### Health Check
 ```powershell
-curl http://localhost:5000/api/health
+$baseUrl = "http://localhost:5000"
 ```
-Expected: `{"status": "healthy"}`
 
-### Chat Endpoint
+### Health check
+
 ```powershell
-# Non-streaming response
-curl -X POST http://localhost:5000/api/chat `
-  -H "Content-Type: application/json" `
-  -d '{"message": "What is the price of AAPL?"}'
+Invoke-RestMethod -Method Get -Uri "$baseUrl/api/health"
 ```
 
-### Stream Endpoint
+Expected:
+
+- Response contains `status: healthy`.
+- Response also includes a human-readable `message`.
+
+### Non-streaming chat
+
 ```powershell
-# Streaming response
-curl -X POST http://localhost:5000/api/chat/stream `
-  -H "Content-Type: application/json" `
-  -d '{"message": "Summarize news about AAPL"}'
+Invoke-RestMethod -Method Post -Uri "$baseUrl/api/chat" -ContentType application/json -Body '{"message":"What is the current price of AAPL?"}'
 ```
 
----
+Expected:
 
-## Configuration Files Hierarchy
+- HTTP 200 response.
+- JSON payload with the assistant reply.
 
-Configuration is loaded in this order (later overrides earlier):
+### Streaming chat
 
-1. **Base** → `config/config.yaml`
-2. **Environment overlay** → `config/config.local.yaml` (for APP_ENV=local)
-3. **Environment variables** → `.env` file
-   - `OPENAI_API_KEY` ✅ Set
-   - `GROK_API_KEY` ✅ Set
-   - `MONGODB_URI` ✅ Set
-   - `REDIS_PASSWORD` ✅ Set
+The current implementation uses the same `/api/chat` route for streaming. Set `stream` to `true` and use `curl.exe` to keep the SSE response open.
 
-### Verify What's Loaded
 ```powershell
-# Python REPL
-python
-```
-```python
-from utils.config_loader import ConfigLoader
-config = ConfigLoader.load_config()
-print(config.get('openai', {}).get('api_key')[:20] + "...")
-print(config.get('model', {}))
+curl.exe -N -X POST "$baseUrl/api/chat" -H "Content-Type: application/json" -d '{"message":"Summarize recent news about AAPL","stream":true}'
 ```
 
----
+Expected:
 
-## Tools Available to Agent
+- Server responds as `text/event-stream`.
+- Chunks arrive incrementally until completion.
 
-The agent has access to:
+## 6. Smoke-test management API routes
 
-### 1. StockSymbolTool
-- **What**: Retrieve stock symbol information and prices
-- **Uses**: Data Manager, Cache
-- **Query example**: "What is the current price of AAPL?"
+Management workspace, session, and conversation routes require `X-User-ID`. Workspace creation currently validates this header as a Mongo ObjectId-style string.
 
-### 2. ReportingTool
-- **What**: Generate investment reports in markdown format
-- **Uses**: Stock data, analysis
-- **Query example**: "Generate a report on Microsoft"
+### Set required auth header
 
-### 3. (Future) TradingViewTool
-- **Status**: Phase 2, currently commented out
-- **When enabled**: Advanced charting and technical analysis
-
----
-
-## Troubleshooting
-
-### Issue: "No enabled tools found" message
-**Status**: Normal during startup, tools ARE enabled
-**Action**: None needed, this is just a logging artifact
-
-### Issue: Wrong API key in logs
-**Status**: Actually correct, being loaded from `.env`
-**Verify with**:
 ```powershell
-python test_config.py
+$headers = @{
+    "X-User-ID" = "693688b61af03340512889ea"
+}
 ```
 
-### Issue: MongoDB connection error
-**Check**:
+### Create a workspace and capture `workspace_id`
+
 ```powershell
-# Verify MongoDB is running
-docker ps | findstr mongodb
-
-# Or start it:
-docker-compose up -d mongodb
+$workspace = Invoke-RestMethod -Method Post -Uri "$baseUrl/api/workspaces" -Headers $headers -ContentType application/json -Body '{"name":"Growth watchlist","description":"Quick start smoke test"}'
+$workspaceId = $workspace.workspace_id
+$workspace
 ```
 
-### Issue: Redis connection error  
-**Check**:
+Expected:
+
+- Response contains `workspace_id`, `status`, and timestamps.
+
+### List workspaces
+
 ```powershell
-# Verify Redis is running
-docker ps | findstr redis
-
-# Or start it:
-docker-compose up -d redis
+Invoke-RestMethod -Method Get -Uri "$baseUrl/api/workspaces?limit=25&offset=0" -Headers $headers
 ```
 
----
+Expected:
 
-## What Each Test Script Does
+- Response contains `items`, `total`, `limit`, and `offset`.
 
-| Script | Purpose | Duration | Details |
-|--------|---------|----------|---------|
-| `test_config.py` | Verify config loads from env | <30s | Checks all API keys and settings |
-| `test_tools.py` | Verify tools initialize | ~60s | Creates agent, checks tool registry |
-| `test_agent.py` | Test agent queries | Varies | Runs actual queries with streaming |
-| `health_check.py` | Full system check | ~2min | All 8 system components |
+### Create a session and capture `session_id`
 
----
-
-## Environment Variables Verification
-
-Check that these are set in `.env`:
-
-```bash
-# Required
-OPENAI_API_KEY=sk-proj-...
-GROK_API_KEY=xai-...
-MONGODB_URI=mongodb://...
-REDIS_PASSWORD=...
-
-# Optional but recommended
-APP_ENV=local
-MODEL_PROVIDER=openai
-LOG_LEVEL=INFO
+```powershell
+$session = Invoke-RestMethod -Method Post -Uri "$baseUrl/api/workspaces/$workspaceId/sessions" -Headers $headers -ContentType application/json -Body '{"title":"Q2 review"}'
+$sessionId = $session.session_id
+$session
 ```
 
-**Current status**:
-- OPENAI_API_KEY: ✅ Set to `sk-proj-usYTqinoFaZsEBFgMgXqpJ...`
-- GROK_API_KEY: ✅ Set to `xai-00TWu9nUn0FhPDavrRKtUDT0LJ...`
-- MONGODB_URI: ✅ Configured
-- REDIS_PASSWORD: ✅ Configured
+### Create a conversation and capture `conversation_id`
 
----
+```powershell
+$conversation = Invoke-RestMethod -Method Post -Uri "$baseUrl/api/sessions/$sessionId/conversations" -Headers $headers -ContentType application/json -Body '{}'
+$conversationId = $conversation.conversation_id
+$conversation
+```
 
-## Next Steps
+### Retrieve conversation summary
 
-1. ✅ **Verify config** → `python test_config.py`
-2. ✅ **Check tools** → `python test_tools.py`
-3. ✅ **Test agent** → `python test_agent.py`
-4. 🚀 **Start API server** → `python src\main.py --mode web`
-5. 🌐 **Connect React frontend** → Points to `http://localhost:5000`
+```powershell
+Invoke-RestMethod -Method Get -Uri "$baseUrl/api/conversations/$conversationId/summary" -Headers $headers
+```
 
----
+Expected:
 
-## Production Deployment
+- Response contains `message_count`, `total_tokens`, `duration_seconds`, `status`, `created_at`, and `last_activity_at`.
 
-When ready to deploy:
-1. Copy `.env` to production with real API keys
-2. Set `APP_ENV=production` in `.env`
-3. Use `config/config.production.yaml` for production settings
-4. Run via gunicorn: `gunicorn -k eventlet -w 1 -b 0.0.0.0:5000 src.wsgi:app`
+## 7. Run focused automated checks
 
----
+### Core management and chat tests
 
-**Questions?** Check `DIAGNOSTIC_REPORT.md` and `ISSUE_RESOLUTION.md` for more details.
+```powershell
+python -m pytest tests/test_workspace_service.py tests/test_session_service.py tests/test_conversation_service.py tests/test_chat_service.py -v
+python -m pytest tests/integration/test_management_api_contracts.py -v
+```
+
+### Performance-marked tests
+
+```powershell
+python -m pytest tests/performance/test_management_api_latency.py tests/performance/test_reconciliation_impact.py -m performance -q
+```
+
+### Coverage snapshot
+
+```powershell
+python -m pytest tests/ --cov=src --cov-fail-under=56 -q
+```
+
+## 8. Common corrections from older docs
+
+- Use `python scripts\health_check.py`, not `python health_check.py`.
+- Use `python -m pytest tests/test_tools.py -v`, not `python test_tools.py`.
+- There is no separate `/api/chat/stream` route. Streaming uses `POST /api/chat` with `"stream": true`.
+- Do not paste live API keys or partial secrets into documentation or logs.
+
+## 9. Next steps
+
+1. Start the frontend from [frontend/README.md](/g:/00_Work/Projects/dp-stock-investment-assistant/frontend/README.md) after the backend is healthy.
+2. Use the STM validation runbook in [specs/stm-phase-cde/quickstart.md](/g:/00_Work/Projects/dp-stock-investment-assistant/specs/stm-phase-cde/quickstart.md) for deeper lifecycle, reconciliation, and migration checks.
+3. Review the API surface in [docs/openapi.yaml](/g:/00_Work/Projects/dp-stock-investment-assistant/docs/openapi.yaml) if you need request and response details.

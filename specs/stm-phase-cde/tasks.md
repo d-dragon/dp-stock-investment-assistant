@@ -18,9 +18,9 @@
 **Purpose**: Establish the implementation baseline, route inventory, and coverage guardrails before shared backend work begins.
 
 <!-- sequential -->
-- [ ] T001 Review and reconcile feature traceability across `specs/stm-phase-cde/spec.md`, `specs/stm-phase-cde/plan.md`, and `specs/stm-phase-cde/checklists/readiness.md` so the implementation backlog preserves the clarified scope.
-- [ ] T002 Audit the currently registered public route surface in `src/web/api_server.py` against the legacy contract in `docs/openapi.yaml`, including the existing `/api/sessions/{session_id}/conversation` documentation drift.
-- [ ] T003 Capture the pre-change agent-core coverage baseline and add the verification command set to `specs/stm-phase-cde/quickstart.md` for NFR-6.1.3 non-regression tracking.
+- [x] T001 Review and reconcile feature traceability across `specs/stm-phase-cde/spec.md`, `specs/stm-phase-cde/plan.md`, and `specs/stm-phase-cde/checklists/readiness.md` so the implementation backlog preserves the clarified scope.
+- [x] T002 Audit the currently registered public route surface in `src/web/api_server.py` against the legacy contract in `docs/openapi.yaml`, including the existing `/api/sessions/{session_id}/conversation` documentation drift.
+- [x] T003 Capture the pre-change agent-core coverage baseline and add the verification command set to `specs/stm-phase-cde/quickstart.md` for NFR-6.1.3 non-regression tracking.
 
 ---
 
@@ -31,13 +31,13 @@
 **⚠️ CRITICAL**: No user-story work should begin until these tasks are complete.
 
 <!-- parallel-group: 1 -->
-- [ ] T004 [P] Define shared `limit`/`offset`/`status` parsing helpers for management routes in `src/utils/service_utils.py`.
-- [ ] T005 [P] Verify research decisions remain aligned with `specs/stm-phase-cde/research.md`, `specs/stm-phase-cde/data-model.md`, `specs/stm-phase-cde/contracts/management-api.md`, and `specs/stm-phase-cde/contracts/operator-tooling.md` before implementation branches diverge.
-- [ ] T006 [P] Add management lifecycle and validation error types aligned to the chat error envelope in `src/services/exceptions.py`.
+- [x] T004 [P] Define shared `limit`/`offset`/`status` parsing helpers for management routes in `src/utils/service_utils.py`.
+- [x] T005 [P] Verify research decisions remain aligned with `specs/stm-phase-cde/research.md`, `specs/stm-phase-cde/data-model.md`, `specs/stm-phase-cde/contracts/management-api.md`, and `specs/stm-phase-cde/contracts/operator-tooling.md` before implementation branches diverge.
+- [x] T006 [P] Add management lifecycle and validation error types aligned to the chat error envelope in `src/services/exceptions.py`.
 
 <!-- sequential -->
-- [ ] T007 Wire the management blueprints and any new operator services through `src/services/factory.py` and `src/web/api_server.py`.
-- [ ] T008 Reconcile the baseline public API documentation in `docs/openapi.yaml` for existing routes, `conversation_id` chat semantics, constitution-gated OpenAPI sync, and the explicit disposition of legacy `/api/sessions/{session_id}/conversation` documentation.
+- [x] T007 Wire the management blueprints and any new operator services through `src/services/factory.py` and `src/web/api_server.py`.
+- [x] T008 Reconcile the baseline public API documentation in `docs/openapi.yaml` for existing routes, `conversation_id` chat semantics, constitution-gated OpenAPI sync, and the explicit disposition of legacy `/api/sessions/{session_id}/conversation` documentation.
 
 **Checkpoint**: Shared routing, contract, and OpenAPI gates are defined; user stories can now proceed in priority order.
 
@@ -50,14 +50,14 @@
 **Independent Test**: Create, list, retrieve, update, and archive a workspace over REST; verify cross-user access is rejected and archive cascades are observable in workspace detail payloads.
 
 <!-- parallel-group: 2 -->
-- [ ] T009 [P] [US1] Add workspace service and route coverage in `tests/test_workspace_service.py` and `tests/test_api_routes.py`.
-- [ ] T010 [P] [US1] Add workspace contract and ownership integration coverage in `tests/integration/test_management_api_contracts.py`.
-- [ ] T011 [P] [US1] Extend aggregate-count and archive helpers in `src/data/repositories/workspace_repository.py`.
+- [x] T009 [P] [US1] Add workspace service and route coverage in `tests/test_workspace_service.py` and `tests/test_api_routes.py`.
+- [x] T010 [P] [US1] Add workspace contract and ownership integration coverage in `tests/integration/test_management_api_contracts.py`.
+- [x] T011 [P] [US1] Extend aggregate-count and archive helpers in `src/data/repositories/workspace_repository.py`.
 
 <!-- sequential -->
-- [ ] T012 [US1] Extend workspace CRUD, detail aggregation, and archive orchestration in `src/services/workspace_service.py`.
-- [ ] T013 [US1] Implement workspace management routes in `src/web/routes/workspace_routes.py` and register them in `src/web/api_server.py`.
-- [ ] T014 [US1] Publish workspace management paths, payloads, and archive action schemas in `docs/openapi.yaml`.
+- [x] T012 [US1] Extend workspace CRUD, detail aggregation, and archive orchestration in `src/services/workspace_service.py`.
+- [x] T013 [US1] Implement workspace management routes in `src/web/routes/workspace_routes.py` and register them in `src/web/api_server.py`.
+- [x] T014 [US1] Publish workspace management paths, payloads, and archive action schemas in `docs/openapi.yaml`.
 
 **Checkpoint**: Workspace management is independently testable and documented.
 
@@ -70,14 +70,14 @@
 **Independent Test**: Create sessions under a workspace, list and retrieve them, update active-session context, close and archive sessions, and verify parent mismatch and closed-session constraints are enforced.
 
 <!-- parallel-group: 3 -->
-- [ ] T015 [P] [US2] Add session lifecycle and ownership tests in `tests/test_session_service.py` and `tests/test_api_routes.py`.
-- [ ] T016 [P] [US2] Add nested-parent mismatch, closed-session, and archived-workspace integration tests in `tests/integration/test_management_api_contracts.py`.
-- [ ] T017 [P] [US2] Extend filter, count, and cascade queries in `src/data/repositories/session_repository.py`.
+- [x] T015 [P] [US2] Add session lifecycle and ownership tests in `tests/test_session_service.py` and `tests/test_api_routes.py`.
+- [x] T016 [P] [US2] Add nested-parent mismatch, closed-session, and archived-workspace integration tests in `tests/integration/test_management_api_contracts.py`.
+- [x] T017 [P] [US2] Extend filter, count, and cascade queries in `src/data/repositories/session_repository.py`.
 
 <!-- sequential -->
-- [ ] T018 [US2] Extend session lifecycle and context-mutation validation in `src/services/session_service.py`.
-- [ ] T019 [US2] Implement nested and direct session routes in `src/web/routes/session_routes.py` and register them in `src/web/api_server.py`.
-- [ ] T020 [US2] Update `docs/openapi.yaml` for session CRUD, close/archive actions, nested parent validation, and the final disposition of legacy `/api/sessions/{session_id}/conversation` documentation.
+- [x] T018 [US2] Extend session lifecycle and context-mutation validation in `src/services/session_service.py`.
+- [x] T019 [US2] Implement nested and direct session routes in `src/web/routes/session_routes.py` and register them in `src/web/api_server.py`.
+- [x] T020 [US2] Update `docs/openapi.yaml` for session CRUD, close/archive actions, nested parent validation, and the final disposition of legacy `/api/sessions/{session_id}/conversation` documentation.
 
 **Checkpoint**: Session management and lifecycle rules are independently testable.
 
@@ -90,14 +90,14 @@
 **Independent Test**: Create conversations under a session, list and retrieve them, request summary data, archive them, and verify full hierarchy validation for direct and nested access.
 
 <!-- parallel-group: 4 -->
-- [ ] T021 [P] [US3] Add conversation CRUD, archive, and summary tests in `tests/test_conversation_service.py` and `tests/test_api_routes.py`.
-- [ ] T022 [P] [US3] Add hierarchy-chain and zero-result pagination integration coverage in `tests/integration/test_management_api_contracts.py`.
-- [ ] T023 [P] [US3] Extend conversation list, detail, summary, and archive helpers in `src/data/repositories/conversation_repository.py`.
+- [x] T021 [P] [US3] Add conversation CRUD, archive, and summary tests in `tests/test_conversation_service.py` and `tests/test_api_routes.py`.
+- [x] T022 [P] [US3] Add hierarchy-chain and zero-result pagination integration coverage in `tests/integration/test_management_api_contracts.py`.
+- [x] T023 [P] [US3] Extend conversation list, detail, summary, and archive helpers in `src/data/repositories/conversation_repository.py`.
 
 <!-- sequential -->
-- [ ] T024 [US3] Extend conversation hierarchy validation, summary retrieval, and archive-reason behavior in `src/services/conversation_service.py`.
-- [ ] T025 [US3] Implement nested and direct conversation routes in `src/web/routes/conversation_routes.py` and register them in `src/web/api_server.py`.
-- [ ] T026 [US3] Update `docs/openapi.yaml` for conversation CRUD, history-summary responses, and required hierarchy identifiers.
+- [x] T024 [US3] Extend conversation hierarchy validation, summary retrieval, and archive-reason behavior in `src/services/conversation_service.py`.
+- [x] T025 [US3] Implement nested and direct conversation routes in `src/web/routes/conversation_routes.py` and register them in `src/web/api_server.py`.
+- [x] T026 [US3] Update `docs/openapi.yaml` for conversation CRUD, history-summary responses, and required hierarchy identifiers.
 
 **Checkpoint**: Conversation management is independently testable and tied to the public contract.
 
@@ -110,13 +110,13 @@
 **Independent Test**: Validate list pagination, repeated GET stability, error shape parity with chat, and parent archive cascades across the management API surface.
 
 <!-- parallel-group: 5 -->
-- [ ] T027 [P] [US4] Add pagination, error-envelope parity, idempotent GET, and atomic archive-cascade integration coverage in `tests/integration/test_management_api_contracts.py`.
-- [ ] T028 [P] [US4] Implement shared management pagination and error-response helpers in `src/utils/service_utils.py` and `src/services/exceptions.py`.
+- [x] T027 [P] [US4] Add pagination, error-envelope parity, idempotent GET, and atomic archive-cascade integration coverage in `tests/integration/test_management_api_contracts.py`.
+- [x] T028 [P] [US4] Implement shared management pagination and error-response helpers in `src/utils/service_utils.py` and `src/services/exceptions.py`.
 
 <!-- sequential -->
-- [ ] T029 [US4] Align archive-over-delete, secure parent-match rejection, and atomic parent-to-descendant archive execution across `src/web/routes/workspace_routes.py`, `src/web/routes/session_routes.py`, `src/web/routes/conversation_routes.py`, `src/services/workspace_service.py`, and `src/services/session_service.py`.
-- [ ] T030 [US4] Reconcile `docs/openapi.yaml` against the registered public API surface in `src/web/api_server.py`, including new Phase C paths plus `/api/chat`, `/api/health`, `/api/config`, `/api/models/openai*`, and `/api/users*`.
-- [ ] T030A [US4] Add management API latency-budget verification for GET, list, create/update/archive, and cascade archive behavior in `tests/performance/test_management_api_latency.py` and `specs/stm-phase-cde/quickstart.md`.
+- [x] T029 [US4] Align archive-over-delete, secure parent-match rejection, and atomic parent-to-descendant archive execution across `src/web/routes/workspace_routes.py`, `src/web/routes/session_routes.py`, `src/web/routes/conversation_routes.py`, `src/services/workspace_service.py`, and `src/services/session_service.py`.
+- [x] T030 [US4] Reconcile `docs/openapi.yaml` against the registered public API surface in `src/web/api_server.py`, including new Phase C paths plus `/api/chat`, `/api/health`, `/api/config`, `/api/models/openai*`, and `/api/users*`.
+- [x] T030A [US4] Add management API latency-budget verification for GET, list, create/update/archive, and cascade archive behavior in `tests/performance/test_management_api_latency.py` and `specs/stm-phase-cde/quickstart.md`.
 
 **Checkpoint**: The public management API behaves consistently and the canonical OpenAPI document is no longer feature-partial.
 
@@ -129,13 +129,13 @@
 **Independent Test**: Send chat messages with `conversation_id`, verify metadata updates become visible within 5 seconds, confirm archived conversations reject new messages, and explicitly cover concurrent archive-versus-message races plus chat-response success when metadata writes fail and drift is surfaced later.
 
 <!-- parallel-group: 6 -->
-- [ ] T031 [P] [US5] Add runtime metadata synchronization, archived-conversation rejection, and concurrent archive-versus-message race tests in `tests/test_chat_service.py` and `tests/test_chat_routes.py`.
-- [ ] T032 [P] [US5] Add metadata-checkpoint alignment and chat-response-success with metadata-write-failure drift-surfacing regression coverage in `tests/integration/test_stm_runtime_wiring.py` and `tests/integration/test_memory_persistence.py`.
-- [ ] T033 [P] [US5] Extend conversation metadata update helpers for counts, tokens, timestamps, and focused symbols in `src/services/conversation_service.py` and `src/data/repositories/conversation_repository.py`.
+- [x] T031 [P] [US5] Add runtime metadata synchronization, archived-conversation rejection, and concurrent archive-versus-message race tests in `tests/test_chat_service.py` and `tests/test_chat_routes.py`.
+- [x] T032 [P] [US5] Add metadata-checkpoint alignment and chat-response-success with metadata-write-failure drift-surfacing regression coverage in `tests/integration/test_stm_runtime_wiring.py` and `tests/integration/test_memory_persistence.py`.
+- [x] T033 [P] [US5] Extend conversation metadata update helpers for counts, tokens, timestamps, and focused symbols in `src/services/conversation_service.py` and `src/data/repositories/conversation_repository.py`.
 
 <!-- sequential -->
-- [ ] T034 [US5] Extend chat flow auto-create, archive gating, mixed-write handling, and reconciliation-visible drift emission for metadata write failures in `src/services/chat_service.py` and `src/web/routes/ai_chat_routes.py`.
-- [ ] T035 [US5] Update `docs/openapi.yaml` and `specs/stm-phase-cde/quickstart.md` for `conversation_id` chat requests, archived-conversation conflicts, and metadata-visibility verification.
+- [x] T034 [US5] Extend chat flow auto-create, archive gating, mixed-write handling, and reconciliation-visible drift emission for metadata write failures in `src/services/chat_service.py` and `src/web/routes/ai_chat_routes.py`.
+- [x] T035 [US5] Update `docs/openapi.yaml` and `specs/stm-phase-cde/quickstart.md` for `conversation_id` chat requests, archived-conversation conflicts, and metadata-visibility verification.
 
 **Checkpoint**: Runtime metadata consistency is independently testable and reflected in the published chat contract.
 
@@ -148,13 +148,13 @@
 **Independent Test**: Seed orphaned and mismatched records, run reconciliation, validate the JSON report, and verify the tooling stays outside public route registration.
 
 <!-- parallel-group: 7 -->
-- [ ] T036 [P] [US6] Add reconciliation anomaly-detection coverage in `tests/integration/test_stm_runtime_wiring.py` and `tests/integration/test_memory_persistence.py`.
-- [ ] T038 [P] [US6] Implement reconciliation scan, machine-readable report assembly, and structured scan-action logging with `correlation_id` and timestamps in `src/services/runtime_reconciliation_service.py` and `src/services/factory.py`.
+- [x] T036 [P] [US6] Add reconciliation anomaly-detection coverage in `tests/integration/test_stm_runtime_wiring.py` and `tests/integration/test_memory_persistence.py`.
+- [x] T038 [P] [US6] Implement reconciliation scan, machine-readable report assembly, and structured scan-action logging with `correlation_id` and timestamps in `src/services/runtime_reconciliation_service.py` and `src/services/factory.py`.
 
 <!-- sequential -->
-- [ ] T037 [US6] Add reconciliation latency-impact, scan-action logging, and operator-boundary coverage in `tests/performance/test_reconciliation_impact.py`, `tests/integration/test_stm_runtime_wiring.py`, and `tests/security/test_operator_tooling_boundaries.py`.
-- [ ] T039 [US6] Implement the operator-only reconciliation entrypoint in `scripts/reconcile_stm_runtime.py`, including distinct scan log emission for `scan_started`, `anomaly_detected`, and `scan_completed` actions.
-- [ ] T040 [US6] Align the operator-only boundary across `specs/stm-phase-cde/contracts/operator-tooling.md`, `tests/security/test_operator_tooling_boundaries.py`, and `src/web/api_server.py`.
+- [x] T037 [US6] Add reconciliation latency-impact, scan-action logging, and operator-boundary coverage in `tests/performance/test_reconciliation_impact.py`, `tests/integration/test_stm_runtime_wiring.py`, and `tests/security/test_operator_tooling_boundaries.py`.
+- [x] T039 [US6] Implement the operator-only reconciliation entrypoint in `scripts/reconcile_stm_runtime.py`, including distinct scan log emission for `scan_started`, `anomaly_detected`, and `scan_completed` actions.
+- [x] T040 [US6] Align the operator-only boundary across `specs/stm-phase-cde/contracts/operator-tooling.md`, `tests/security/test_operator_tooling_boundaries.py`, and `src/web/api_server.py`.
 
 **Checkpoint**: Reconciliation is independently testable, operator-only, and absent from the public REST surface.
 
@@ -167,13 +167,13 @@
 **Independent Test**: Run dry-run and resume-capable migration against seeded legacy data, confirm zero destructive writes in dry-run mode, and verify uninterrupted and resumed runs converge.
 
 <!-- parallel-group: 8 -->
-- [ ] T041 [P] [US7] Add migration dry-run, resume, and mixed-traffic regression tests in `tests/integration/test_memory_persistence.py` and `tests/security/test_operator_tooling_boundaries.py`.
-- [ ] T042 [P] [US7] Implement additive legacy checkpoint promotion in `src/data/migration/legacy_checkpoint_migration.py`.
-- [ ] T043 [P] [US7] Implement the operator migration CLI and audit output in `scripts/migrate_legacy_threads.py`.
+- [x] T041 [P] [US7] Add migration dry-run, resume, and mixed-traffic regression tests in `tests/integration/test_memory_persistence.py` and `tests/security/test_operator_tooling_boundaries.py`.
+- [x] T042 [P] [US7] Implement additive legacy checkpoint promotion in `src/data/migration/legacy_checkpoint_migration.py`.
+- [x] T043 [P] [US7] Implement the operator migration CLI and audit output in `scripts/migrate_legacy_threads.py`.
 
 <!-- sequential -->
-- [ ] T044 [US7] Extend legacy stateless and conversation-aware chat compatibility in `src/services/chat_service.py` and `src/web/routes/ai_chat_routes.py`.
-- [ ] T045 [US7] Align migration runbook details in `specs/stm-phase-cde/contracts/operator-tooling.md` and `specs/stm-phase-cde/quickstart.md`.
+- [x] T044 [US7] Extend legacy stateless and conversation-aware chat compatibility in `src/services/chat_service.py` and `src/web/routes/ai_chat_routes.py`.
+- [x] T045 [US7] Align migration runbook details in `specs/stm-phase-cde/contracts/operator-tooling.md` and `specs/stm-phase-cde/quickstart.md`.
 
 **Checkpoint**: Migration tooling is independently testable, resumable, and aligned with the mixed-traffic contract.
 
@@ -186,12 +186,12 @@
 **Independent Test**: Run the revised suite, confirm legacy `session_id == thread_id` assumptions are removed, and verify the coverage baseline does not regress.
 
 <!-- parallel-group: 9 -->
-- [ ] T046 [P] [US8] Replace legacy `session_id == thread_id` assertions with explicit STM-isolation coverage for same-conversation restore, cross-conversation isolation, resumed checkpoint retrieval, stateless mode, and `conversation_id == thread_id` behavior in `tests/test_agent_memory.py`, `tests/integration/test_stm_runtime_wiring.py`, and `tests/test_chat_routes.py`.
-- [ ] T047 [P] [US8] Add hierarchy and lifecycle regression coverage in `tests/integration/test_management_api_contracts.py` and `tests/test_api_routes.py`.
-- [ ] T048 [P] [US8] Add public-surface and operator-boundary regression coverage in `tests/security/test_operator_tooling_boundaries.py` and `src/web/api_server.py`.
+- [x] T046 [P] [US8] Replace legacy `session_id == thread_id` assertions with explicit STM-isolation coverage for same-conversation restore, cross-conversation isolation, resumed checkpoint retrieval, stateless mode, and `conversation_id == thread_id` behavior in `tests/test_agent_memory.py`, `tests/integration/test_stm_runtime_wiring.py`, and `tests/test_chat_routes.py`.
+- [x] T047 [P] [US8] Add hierarchy and lifecycle regression coverage in `tests/integration/test_management_api_contracts.py` and `tests/test_api_routes.py`.
+- [x] T048 [P] [US8] Add public-surface and operator-boundary regression coverage in `tests/security/test_operator_tooling_boundaries.py` and `src/web/api_server.py`.
 
 <!-- sequential -->
-- [ ] T049 [US8] Capture and enforce the NFR-6.1.3 coverage-baseline non-regression workflow in `specs/stm-phase-cde/quickstart.md` and `tests/conftest.py`.
+- [x] T049 [US8] Capture and enforce the NFR-6.1.3 coverage-baseline non-regression workflow in `specs/stm-phase-cde/quickstart.md` and `tests/conftest.py`.
 
 **Checkpoint**: Regression coverage now enforces the hierarchy-aware model and the feature’s soft coverage gate.
 
@@ -202,9 +202,18 @@
 **Purpose**: Finish the review gates that prove the implementation, contracts, quickstart, and verification commands stay aligned.
 
 <!-- sequential -->
-- [ ] T050 Validate that `specs/stm-phase-cde/quickstart.md`, `specs/stm-phase-cde/contracts/management-api.md`, and `docs/openapi.yaml` remain mutually consistent as the executable validation guide, route contract, and published REST document.
-- [ ] T051 Run the feature regression and coverage command set from `specs/stm-phase-cde/quickstart.md` across `tests/test_workspace_service.py`, `tests/test_session_service.py`, `tests/test_conversation_service.py`, `tests/test_chat_service.py`, `tests/integration/test_management_api_contracts.py`, `tests/integration/test_stm_runtime_wiring.py`, `tests/security/test_operator_tooling_boundaries.py`, `tests/performance/test_reconciliation_impact.py`, and `tests/performance/test_management_api_latency.py`, including the concurrent archive-versus-message and metadata-write-failure drift scenarios.
-- [ ] T052 Re-audit `specs/stm-phase-cde/spec.md`, `specs/stm-phase-cde/plan.md`, `specs/stm-phase-cde/research.md`, `specs/stm-phase-cde/data-model.md`, and `specs/stm-phase-cde/checklists/readiness.md` for final spec-plan-contract alignment before implementation sign-off.
+- [x] T050 Validate that `specs/stm-phase-cde/quickstart.md`, `specs/stm-phase-cde/contracts/management-api.md`, and `docs/openapi.yaml` remain mutually consistent as the executable validation guide, route contract, and published REST document.
+- [x] T051 Run the feature regression and coverage command set from `specs/stm-phase-cde/quickstart.md` across `tests/test_workspace_service.py`, `tests/test_session_service.py`, `tests/test_conversation_service.py`, `tests/test_chat_service.py`, `tests/integration/test_management_api_contracts.py`, `tests/integration/test_stm_runtime_wiring.py`, `tests/security/test_operator_tooling_boundaries.py`, `tests/performance/test_reconciliation_impact.py`, and `tests/performance/test_management_api_latency.py`, including the concurrent archive-versus-message and metadata-write-failure drift scenarios.
+- [x] T052 Re-audit `specs/stm-phase-cde/spec.md`, `specs/stm-phase-cde/plan.md`, `specs/stm-phase-cde/research.md`, `specs/stm-phase-cde/data-model.md`, and `specs/stm-phase-cde/checklists/readiness.md` for final spec-plan-contract alignment before implementation sign-off.
+
+## Post-Audit Fixes
+
+**Purpose**: Address the 4 minor gaps identified by the T052 audit.
+
+- [x] T053 Wire `POST /api/sessions/{session_id}/close` route in `session_routes.py` backed by new `close_session_managed` service method (audit finding 3c).
+- [x] T054 Implement `GET /api/conversations/{conversation_id}/summary` route in `conversation_routes.py` backed by new `get_conversation_summary` managed service method (audit finding 3d).
+- [x] T055 Add `workspace_id` and `status` properties to `src/data/schema/workspaces_schema.py` JSON schema validation (audit finding 3a).
+- [x] T056 Check off all 36 readiness checklist items in `specs/stm-phase-cde/checklists/readiness.md` (audit finding 4a).
 
 ---
 

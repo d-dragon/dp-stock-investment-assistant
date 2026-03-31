@@ -1,7 +1,7 @@
-# SRS To Spec Traceability
+﻿# SRS To Spec Traceability
 
-> **Document Version**: 1.3  
-> **Generated**: 2026-03-20 07:30:26Z  
+> **Document Version**: 1.4  
+> **Generated**: 2026-03-31 00:00:00Z  
 > **Status**: Active  
 > **Traceability Manifest Version**: 1  
 
@@ -24,6 +24,7 @@
 | `1.1` | `2026-03-19` | Added line-specific SRS links, embedded document version tracking, and promoted exact pilot overlap to gate-enforced coverage. |
 | `1.2` | `2026-03-19` | Added a requirement-family index and per-family mapping summaries to improve reverse-trace navigation. |
 | `1.3` | `2026-03-19` | Reformatted the family index into a grouped markdown table for easier navigation by requirement type. |
+| `1.4` | `2026-03-31` | Updated stm-phase-cde reverse-trace status labels from clarified to verified after implementation and verification sign-off. |
 
 ## Family Index
 
@@ -101,7 +102,7 @@ Mapped: `25/38`. Unmapped: `13`.
 | [FR-3.1.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L230) | [agent-session-with-stm-wiring](../../specs/agent-session-with-stm-wiring/spec.md#requirements-mandatory) | `verified` | `current` |
 |  | [spec-driven-development-pilot](../../specs/spec-driven-development-pilot/plan.md#summary) | `implemented` | `current` |
 | [FR-3.1.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L231) | [agent-session-with-stm-wiring](../../specs/agent-session-with-stm-wiring/spec.md#requirements-mandatory) | `verified` | `current` |
-|  | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `clarified` | `current` |
+|  | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
 | [FR-3.1.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L232) | [agent-session-with-stm-wiring](../../specs/agent-session-with-stm-wiring/spec.md#requirements-mandatory) | `verified` | `current` |
 |  | [spec-driven-development-pilot](../../specs/spec-driven-development-pilot/plan.md#summary) | `implemented` | `current` |
 | [FR-3.1.5](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L233) | [agent-session-with-stm-wiring](../../specs/agent-session-with-stm-wiring/spec.md#requirements-mandatory) | `verified` | `current` |
@@ -113,20 +114,20 @@ Mapped: `25/38`. Unmapped: `13`.
 |  | [spec-driven-development-pilot](../../specs/spec-driven-development-pilot/plan.md#summary) | `implemented` | `current` |
 | [FR-3.2.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L244) | [agent-session-with-stm-wiring](../../specs/agent-session-with-stm-wiring/spec.md#requirements-mandatory) | `verified` | `current` |
 | [FR-3.2.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L245) | [agent-session-with-stm-wiring](../../specs/agent-session-with-stm-wiring/spec.md#requirements-mandatory) | `verified` | `current` |
-|  | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `clarified` | `current` |
+|  | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
 | [FR-3.2.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L246) | [agent-session-with-stm-wiring](../../specs/agent-session-with-stm-wiring/spec.md#requirements-mandatory) | `verified` | `current` |
-|  | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `clarified` | `current` |
+|  | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
 | [FR-3.2.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L247) | [agent-session-with-stm-wiring](../../specs/agent-session-with-stm-wiring/spec.md#requirements-mandatory) | `verified` | `current` |
 | [FR-3.2.5](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L248) | [agent-session-with-stm-wiring](../../specs/agent-session-with-stm-wiring/spec.md#requirements-mandatory) | `verified` | `current` |
 | [FR-3.2.6](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L249) | [agent-session-with-stm-wiring](../../specs/agent-session-with-stm-wiring/spec.md#requirements-mandatory) | `verified` | `current` |
-|  | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `clarified` | `current` |
+|  | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
 | [FR-3.2.7](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L250) | [agent-session-with-stm-wiring](../../specs/agent-session-with-stm-wiring/spec.md#requirements-mandatory) | `verified` | `current` |
-|  | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `clarified` | `current` |
+|  | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
 | [FR-3.2.8](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L251) | [agent-session-with-stm-wiring](../../specs/agent-session-with-stm-wiring/spec.md#requirements-mandatory) | `verified` | `current` |
-|  | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `clarified` | `current` |
+|  | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
 | [FR-3.2.9](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L252) | [agent-session-with-stm-wiring](../../specs/agent-session-with-stm-wiring/spec.md#requirements-mandatory) | `verified` | `current` |
 | [FR-3.2.10](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L253) | [agent-session-with-stm-wiring](../../specs/agent-session-with-stm-wiring/spec.md#requirements-mandatory) | `verified` | `current` |
-|  | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `clarified` | `current` |
+|  | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
 | [FR-3.3.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L261) | `-` | `unmapped` | `unmapped` |
 | [FR-3.3.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L262) | `-` | `unmapped` | `unmapped` |
 | [FR-3.3.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L263) | `-` | `unmapped` | `unmapped` |
@@ -175,40 +176,40 @@ Mapped: `31/39`. Unmapped: `8`.
 | [FR-5.1.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L333) | `-` | `unmapped` | `unmapped` |
 | [FR-5.1.5](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L334) | [agent-session-with-stm-wiring](../../specs/agent-session-with-stm-wiring/spec.md#requirements-mandatory) | `verified` | `current` |
 | [FR-5.1.6](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L335) | `-` | `unmapped` | `unmapped` |
-| [FR-5.1.7](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L336) | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `clarified` | `current` |
+| [FR-5.1.7](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L336) | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
 | [FR-5.1.8](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L337) | [agent-session-with-stm-wiring](../../specs/agent-session-with-stm-wiring/spec.md#requirements-mandatory) | `verified` | `current` |
-|  | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `clarified` | `current` |
+|  | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
 | [FR-5.2.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L343) | `-` | `unmapped` | `unmapped` |
 | [FR-5.2.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L344) | [agent-session-with-stm-wiring](../../specs/agent-session-with-stm-wiring/spec.md#requirements-mandatory) | `verified` | `current` |
 | [FR-5.2.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L345) | `-` | `unmapped` | `unmapped` |
 | [FR-5.2.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L346) | `-` | `unmapped` | `unmapped` |
 | [FR-5.2.5](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L347) | `-` | `unmapped` | `unmapped` |
 | [FR-5.2.6](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L348) | [agent-session-with-stm-wiring](../../specs/agent-session-with-stm-wiring/spec.md#requirements-mandatory) | `verified` | `current` |
-| [FR-5.3.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L359) | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `clarified` | `current` |
-| [FR-5.3.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L360) | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `clarified` | `current` |
-| [FR-5.3.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L361) | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `clarified` | `current` |
-| [FR-5.3.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L362) | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `clarified` | `current` |
-| [FR-5.3.5](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L363) | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `clarified` | `current` |
-| [FR-5.3.6](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L364) | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `clarified` | `current` |
-| [FR-5.4.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L375) | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `clarified` | `current` |
-| [FR-5.4.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L376) | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `clarified` | `current` |
-| [FR-5.4.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L377) | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `clarified` | `current` |
-| [FR-5.4.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L378) | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `clarified` | `current` |
-| [FR-5.4.5](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L379) | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `clarified` | `current` |
-| [FR-5.4.6](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L380) | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `clarified` | `current` |
-| [FR-5.4.7](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L381) | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `clarified` | `current` |
-| [FR-5.4.8](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L382) | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `clarified` | `current` |
-| [FR-5.5.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L393) | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `clarified` | `current` |
-| [FR-5.5.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L394) | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `clarified` | `current` |
-| [FR-5.5.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L395) | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `clarified` | `current` |
-| [FR-5.5.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L396) | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `clarified` | `current` |
-| [FR-5.5.5](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L397) | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `clarified` | `current` |
-| [FR-5.5.6](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L398) | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `clarified` | `current` |
-| [FR-5.6.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L408) | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `clarified` | `current` |
-| [FR-5.6.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L409) | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `clarified` | `current` |
-| [FR-5.6.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L410) | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `clarified` | `current` |
-| [FR-5.6.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L411) | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `clarified` | `current` |
-| [FR-5.6.5](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L412) | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `clarified` | `current` |
+| [FR-5.3.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L359) | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
+| [FR-5.3.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L360) | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
+| [FR-5.3.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L361) | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
+| [FR-5.3.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L362) | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
+| [FR-5.3.5](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L363) | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
+| [FR-5.3.6](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L364) | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
+| [FR-5.4.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L375) | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
+| [FR-5.4.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L376) | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
+| [FR-5.4.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L377) | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
+| [FR-5.4.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L378) | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
+| [FR-5.4.5](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L379) | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
+| [FR-5.4.6](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L380) | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
+| [FR-5.4.7](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L381) | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
+| [FR-5.4.8](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L382) | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
+| [FR-5.5.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L393) | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
+| [FR-5.5.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L394) | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
+| [FR-5.5.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L395) | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
+| [FR-5.5.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L396) | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
+| [FR-5.5.5](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L397) | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
+| [FR-5.5.6](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L398) | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
+| [FR-5.6.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L408) | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
+| [FR-5.6.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L409) | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
+| [FR-5.6.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L410) | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
+| [FR-5.6.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L411) | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
+| [FR-5.6.5](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L412) | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
 
 ### FR-6
 
@@ -229,24 +230,24 @@ Mapped: `16/16`. Unmapped: `0`.
 
 | SRS Item | Linked Spec | Current Status | Sync Status |
 |----------|-------------|----------------|-------------|
-| [FR-7.1.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L442) | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `clarified` | `current` |
+| [FR-7.1.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L442) | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
 | [FR-7.1.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L443) | [agent-session-with-stm-wiring](../../specs/agent-session-with-stm-wiring/spec.md#requirements-mandatory) | `verified` | `current` |
-|  | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `clarified` | `current` |
+|  | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
 | [FR-7.1.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L444) | [agent-session-with-stm-wiring](../../specs/agent-session-with-stm-wiring/spec.md#requirements-mandatory) | `verified` | `current` |
-|  | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `clarified` | `current` |
-| [FR-7.1.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L445) | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `clarified` | `current` |
-| [FR-7.1.5](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L446) | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `clarified` | `current` |
-| [FR-7.2.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L454) | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `clarified` | `current` |
-| [FR-7.2.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L455) | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `clarified` | `current` |
-| [FR-7.2.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L456) | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `clarified` | `current` |
-| [FR-7.2.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L457) | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `clarified` | `current` |
-| [FR-7.2.5](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L458) | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `clarified` | `current` |
-| [FR-7.3.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L466) | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `clarified` | `current` |
-| [FR-7.3.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L467) | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `clarified` | `current` |
-| [FR-7.3.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L468) | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `clarified` | `current` |
-| [FR-7.3.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L469) | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `clarified` | `current` |
-| [FR-7.3.5](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L470) | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `clarified` | `current` |
-| [FR-7.3.6](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L471) | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `clarified` | `current` |
+|  | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
+| [FR-7.1.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L445) | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
+| [FR-7.1.5](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L446) | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
+| [FR-7.2.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L454) | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
+| [FR-7.2.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L455) | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
+| [FR-7.2.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L456) | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
+| [FR-7.2.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L457) | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
+| [FR-7.2.5](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L458) | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
+| [FR-7.3.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L466) | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
+| [FR-7.3.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L467) | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
+| [FR-7.3.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L468) | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
+| [FR-7.3.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L469) | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
+| [FR-7.3.5](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L470) | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
+| [FR-7.3.6](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L471) | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
 
 ### NFR-1
 
@@ -266,10 +267,10 @@ Mapped: `4/16`. Unmapped: `12`.
 | [NFR-1.3.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L505) | `-` | `unmapped` | `unmapped` |
 | [NFR-1.3.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L506) | `-` | `unmapped` | `unmapped` |
 | [NFR-1.3.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L507) | `-` | `unmapped` | `unmapped` |
-| [NFR-1.4.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L514) | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `clarified` | `current` |
-| [NFR-1.4.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L515) | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `clarified` | `current` |
-| [NFR-1.4.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L516) | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `clarified` | `current` |
-| [NFR-1.4.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L517) | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `clarified` | `current` |
+| [NFR-1.4.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L514) | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
+| [NFR-1.4.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L515) | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
+| [NFR-1.4.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L516) | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
+| [NFR-1.4.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L517) | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
 
 ### NFR-2
 
@@ -287,17 +288,17 @@ Mapped: `11/20`. Unmapped: `9`.
 | [NFR-2.2.5](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L541) | `-` | `unmapped` | `unmapped` |
 | [NFR-2.3.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L548) | [agent-session-with-stm-wiring](../../specs/agent-session-with-stm-wiring/spec.md#requirements-mandatory) | `verified` | `current` |
 | [NFR-2.3.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L549) | [agent-session-with-stm-wiring](../../specs/agent-session-with-stm-wiring/spec.md#requirements-mandatory) | `verified` | `current` |
-|  | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `clarified` | `current` |
+|  | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
 | [NFR-2.3.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L550) | `-` | `unmapped` | `unmapped` |
-| [NFR-2.4.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L557) | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `clarified` | `current` |
-| [NFR-2.4.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L558) | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `clarified` | `current` |
-| [NFR-2.4.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L559) | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `clarified` | `current` |
-| [NFR-2.4.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L560) | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `clarified` | `current` |
-| [NFR-2.4.5](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L561) | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `clarified` | `current` |
-| [NFR-2.5.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L568) | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `clarified` | `current` |
-| [NFR-2.5.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L569) | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `clarified` | `current` |
-| [NFR-2.5.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L570) | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `clarified` | `current` |
-| [NFR-2.5.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L571) | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `clarified` | `current` |
+| [NFR-2.4.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L557) | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
+| [NFR-2.4.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L558) | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
+| [NFR-2.4.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L559) | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
+| [NFR-2.4.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L560) | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
+| [NFR-2.4.5](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L561) | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
+| [NFR-2.5.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L568) | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
+| [NFR-2.5.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L569) | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
+| [NFR-2.5.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L570) | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
+| [NFR-2.5.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L571) | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
 
 ### NFR-3
 
@@ -362,7 +363,7 @@ Mapped: `1/13`. Unmapped: `12`.
 |----------|-------------|----------------|-------------|
 | [NFR-6.1.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L676) | `-` | `unmapped` | `unmapped` |
 | [NFR-6.1.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L677) | `-` | `unmapped` | `unmapped` |
-| [NFR-6.1.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L678) | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `clarified` | `current` |
+| [NFR-6.1.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L678) | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
 | [NFR-6.1.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L679) | `-` | `unmapped` | `unmapped` |
 | [NFR-6.1.5](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L680) | `-` | `unmapped` | `unmapped` |
 | [NFR-6.2.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L687) | `-` | `unmapped` | `unmapped` |
@@ -405,13 +406,13 @@ Mapped: `5/7`. Unmapped: `2`.
 |----------|-------------|----------------|-------------|
 | [AC-2.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L731) | [agent-session-with-stm-wiring](../../specs/agent-session-with-stm-wiring/spec.md#requirements-mandatory) | `verified` | `current` |
 | [AC-2.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L732) | [agent-session-with-stm-wiring](../../specs/agent-session-with-stm-wiring/spec.md#requirements-mandatory) | `verified` | `current` |
-|  | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `clarified` | `current` |
+|  | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
 | [AC-2.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L733) | `-` | `unmapped` | `unmapped` |
 | [AC-2.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L734) | `-` | `unmapped` | `unmapped` |
 | [AC-2.5](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L735) | [agent-session-with-stm-wiring](../../specs/agent-session-with-stm-wiring/spec.md#requirements-mandatory) | `verified` | `current` |
-|  | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `clarified` | `current` |
+|  | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
 | [AC-2.6](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L736) | [agent-session-with-stm-wiring](../../specs/agent-session-with-stm-wiring/spec.md#requirements-mandatory) | `verified` | `current` |
-|  | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `clarified` | `current` |
+|  | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
 | [AC-2.7](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L737) | [agent-session-with-stm-wiring](../../specs/agent-session-with-stm-wiring/spec.md#requirements-mandatory) | `verified` | `current` |
 
 ### AC-3
@@ -440,13 +441,13 @@ Mapped: `7/7`. Unmapped: `0`.
 
 | SRS Item | Linked Spec | Current Status | Sync Status |
 |----------|-------------|----------------|-------------|
-| [AC-5.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L759) | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `clarified` | `current` |
-| [AC-5.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L760) | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `clarified` | `current` |
-| [AC-5.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L761) | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `clarified` | `current` |
-| [AC-5.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L762) | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `clarified` | `current` |
-| [AC-5.5](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L763) | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `clarified` | `current` |
-| [AC-5.6](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L764) | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `clarified` | `current` |
-| [AC-5.7](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L765) | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `clarified` | `current` |
+| [AC-5.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L759) | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
+| [AC-5.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L760) | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
+| [AC-5.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L761) | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
+| [AC-5.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L762) | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
+| [AC-5.5](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L763) | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
+| [AC-5.6](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L764) | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
+| [AC-5.7](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L765) | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
 
 ### AC-6
 
@@ -455,12 +456,12 @@ Mapped: `6/6`. Unmapped: `0`.
 | SRS Item | Linked Spec | Current Status | Sync Status |
 |----------|-------------|----------------|-------------|
 | [AC-6.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L771) | [agent-session-with-stm-wiring](../../specs/agent-session-with-stm-wiring/spec.md#requirements-mandatory) | `verified` | `current` |
-|  | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `clarified` | `current` |
-| [AC-6.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L772) | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `clarified` | `current` |
-| [AC-6.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L773) | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `clarified` | `current` |
-| [AC-6.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L774) | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `clarified` | `current` |
-| [AC-6.5](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L775) | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `clarified` | `current` |
-| [AC-6.6](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L776) | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `clarified` | `current` |
+|  | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
+| [AC-6.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L772) | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
+| [AC-6.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L773) | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
+| [AC-6.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L774) | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
+| [AC-6.5](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L775) | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
+| [AC-6.6](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L776) | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
 
 ### AC-7
 
@@ -469,13 +470,13 @@ Mapped: `5/5`. Unmapped: `0`.
 | SRS Item | Linked Spec | Current Status | Sync Status |
 |----------|-------------|----------------|-------------|
 | [AC-7.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L782) | [agent-session-with-stm-wiring](../../specs/agent-session-with-stm-wiring/spec.md#requirements-mandatory) | `verified` | `current` |
-|  | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `clarified` | `current` |
+|  | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
 | [AC-7.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L783) | [agent-session-with-stm-wiring](../../specs/agent-session-with-stm-wiring/spec.md#requirements-mandatory) | `verified` | `current` |
-|  | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `clarified` | `current` |
+|  | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
 | [AC-7.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L784) | [agent-session-with-stm-wiring](../../specs/agent-session-with-stm-wiring/spec.md#requirements-mandatory) | `verified` | `current` |
-|  | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `clarified` | `current` |
-| [AC-7.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L785) | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `clarified` | `current` |
-| [AC-7.5](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L786) | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `clarified` | `current` |
+|  | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
+| [AC-7.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L785) | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
+| [AC-7.5](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L786) | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
 
 ### IR-1
 
@@ -490,12 +491,12 @@ Mapped: `9/13`. Unmapped: `4`.
 | [IR-1.5](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L844) | [agent-session-with-stm-wiring](../../specs/agent-session-with-stm-wiring/spec.md#requirements-mandatory) | `verified` | `current` |
 | [IR-1.6](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L845) | [agent-session-with-stm-wiring](../../specs/agent-session-with-stm-wiring/spec.md#requirements-mandatory) | `verified` | `current` |
 | [IR-1.7](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L846) | [agent-session-with-stm-wiring](../../specs/agent-session-with-stm-wiring/spec.md#requirements-mandatory) | `verified` | `current` |
-| [IR-1.8](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L847) | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `clarified` | `current` |
-| [IR-1.9](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L848) | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `clarified` | `current` |
-| [IR-1.10](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L849) | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `clarified` | `current` |
-| [IR-1.11](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L850) | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `clarified` | `current` |
-| [IR-1.12](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L851) | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `clarified` | `current` |
-| [IR-1.13](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L852) | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `clarified` | `current` |
+| [IR-1.8](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L847) | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
+| [IR-1.9](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L848) | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
+| [IR-1.10](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L849) | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
+| [IR-1.11](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L850) | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
+| [IR-1.12](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L851) | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
+| [IR-1.13](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L852) | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
 
 ### IR-2
 
@@ -545,4 +546,5 @@ Mapped: `0/9`. Unmapped: `9`.
 - A mapped feature is in sync only when its derived status and its feature `spec.md` status agree, and its SRS baseline version matches the manifest baseline.
 - Informational mappings remain visible in the reverse trace but are excluded from gate enforcement.
 - Use `python scripts/sync_spec_status.py --gate` after each development iteration.
+
 

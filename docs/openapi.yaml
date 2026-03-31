@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: Stock Investment Assistant API
-  version: "1.3.0"
+  version: "1.4.0"
   description: >
     REST API for the Stock Investment Assistant backend. Provides chat, configuration, and model catalog endpoints.
     
@@ -10,13 +10,31 @@ info:
     - Core API endpoints (health, chat, config) 
     - Model management endpoints (OpenAI model operations)
     - Socket.IO integration for real-time communication
-    - Session-aware short-term memory for multi-turn conversations
+    - Conversation-aware short-term memory for multi-turn conversations
     
     
-    **Recent Changes (v1.3.0)**:
+    **Changes (v1.4.0)**:
+    - Full API surface reconciliation (T030): openapi.yaml now documents all 26 registered endpoints
+    - Migrated chat identity field from `session_id` to `conversation_id` to align with runtime code
+    - Removed `session_id` field from ChatRequest/ChatResponse schemas (not implemented in code)
+    - Removed ghost endpoint GET /api/sessions/{session_id}/conversation (never implemented)
+    - Removed orphaned schemas: ConversationHistory, ConversationMessage, SessionArchivedError
+    - Fixed 409 Conflict error schema to match actual code behavior (`CONVERSATION_ARCHIVED` code)
+    - Added Phase C management API endpoints: workspaces (5), sessions (5), conversations (5)
+    - Added missing session close endpoint (POST /api/sessions/{session_id}/close)
+    - Added conversation summary endpoint (GET /api/conversations/{conversation_id}/summary)
+    - Added session context fields (assumptions, pinned_intent, focused_symbols) to session schemas
+    - Added context_overrides to conversation create request schema
+    - Added summary and focused_symbols to conversation detail schema
+    - Added metadata fields (message_count, total_tokens, focused_symbols, last_activity_at) to conversation list items
+    - Added missing 400/409 error responses to archive endpoints matching actual error handling
+    - Added 503 service-unavailable documentation to management API tag descriptions
+    
+    
+    **Previous Changes (v1.3.0)**:
     - Added session-aware short-term memory (FR-3.1) with session_id parameter
     - Sessions support up to 20 turns with automatic archival
-    - Added GET /api/sessions/{session_id}/conversation endpoint
+    - Added GET /api/sessions/{session_id}/conversation endpoint (documentation only; never implemented)
     - Enhanced error responses for session management (409 Conflict for archived sessions)
     
     
@@ -31,11 +49,27 @@ servers:
 tags:
   - name: Health
   - name: Chat
-  - name: Sessions
-    description: Session management for multi-turn conversations (FR-3.1)
   - name: Config
   - name: Models
   - name: Users
+  - name: workspace-management
+    description: >
+      Phase C management API for workspace lifecycle operations.
+      Workspaces are the top-level container for sessions and conversations.
+      All workspace endpoints require an `X-User-ID` header for ownership scoping.
+      All endpoints may return `503 Service Unavailable` if the workspace service is not initialized.
+  - name: session-management
+    description: >
+      Phase C management API for session lifecycle operations.
+      Sessions belong to a workspace and contain conversations.
+      All session endpoints require an `X-User-ID` header for ownership scoping.
+      All endpoints may return `503 Service Unavailable` if the session service is not initialized.
+  - name: conversation-management
+    description: >
+      Phase C management API for conversation lifecycle operations.
+      Conversations belong to a session and contain chat messages.
+      All conversation endpoints require an `X-User-ID` header for ownership scoping.
+      All endpoints may return `503 Service Unavailable` if the conversation service is not initialized.
 paths:
   /api/health:
     get:
@@ -65,11 +99,18 @@ paths:
         returns a JSON response.
         
         
-        **Session-Aware Memory (FR-3.1)**:
-        - Include `session_id` (UUID v4) to maintain conversation context across requests
-        - Sessions support up to 20 turns before automatic archival
-        - Archived sessions return 409 Conflict error
-        - Omit `session_id` for stateless single-turn interactions
+        **Conversation-Aware Memory (FR-3.1)**:
+        - Include `conversation_id` (UUID v4) to maintain conversation context across requests
+        - If the given `conversation_id` does not yet exist, the server auto-creates the conversation record before processing the message
+        - Each accepted message updates conversation metadata: `message_count`, `total_tokens`, `last_activity_at`, and `focused_symbols` are kept in sync with the checkpoint state
+        - Conversations support up to 20 turns before automatic archival
+        - Archived conversations return 409 Conflict error
+        - Omit `conversation_id` for stateless single-turn interactions
+        
+        
+        **Migration Note (v1.4.0-alpha)**:
+        The request field was renamed from `session_id` to `conversation_id` to match the runtime code.
+        `session_id` is accepted as a deprecated alias and will be removed in v2.0.
       operationId: postChat
       parameters:
         - $ref: '#/components/parameters/ProviderQuery'
@@ -89,11 +130,11 @@ paths:
                 value:
                   message: "Provide a brief market summary."
                   stream: true
-              withSession:
-                summary: Multi-turn conversation with session tracking
+              withConversation:
+                summary: Multi-turn conversation with conversation tracking
                 value:
                   message: "What about Tesla?"
-                  session_id: "550e8400-e29b-41d4-a716-446655440000"
+                  conversation_id: "550e8400-e29b-41d4-a716-446655440000"
                   provider: "openai"
                   stream: false
       responses:
@@ -111,15 +152,15 @@ paths:
                     model: "gpt-4"
                     fallback: false
                     timestamp: "2025-09-16T12:34:56Z"
-                withSession:
-                  summary: Response with session context
+                withConversation:
+                  summary: Response with conversation context
                   value:
                     response: "Based on our earlier discussion of AAPL, Tesla shows similar..."
                     provider: "openai"
                     model: "gpt-4"
                     fallback: false
                     timestamp: "2025-09-16T12:35:00Z"
-                    session_id: "550e8400-e29b-41d4-a716-446655440000"
+                    conversation_id: "550e8400-e29b-41d4-a716-446655440000"
                     conversation:
                       turn_count: 3
                       status: "active"
@@ -143,7 +184,7 @@ paths:
                     data: [DONE]
 
         "400":
-          description: Bad request (missing message or invalid session_id format)
+          description: Bad request (missing message or invalid conversation_id format)
           content:
             application/json:
               schema:
@@ -152,23 +193,22 @@ paths:
                 missingMessage:
                   value:
                     error: "Message is required"
-                invalidSessionId:
-                  summary: Invalid UUID format for session_id
+                invalidConversationId:
+                  summary: Invalid UUID format for conversation_id
                   value:
-                    error: "Invalid session_id format. Must be a valid UUID v4."
+                    error: "conversation_id must be a valid UUID v4"
         "409":
-          description: Session archived (cannot add more messages to this session)
+          description: Conversation archived (cannot add more messages to this conversation)
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SessionArchivedError'
+                $ref: '#/components/schemas/ConversationArchivedError'
               examples:
-                archivedSession:
+                archivedConversation:
                   value:
-                    error: "SESSION_ARCHIVED"
-                    message: "This session has been archived after reaching the 20-turn limit."
-                    session_id: "550e8400-e29b-41d4-a716-446655440000"
-                    archived_at: "2025-09-16T12:30:00Z"
+                    error: "Conversation 550e8400-e29b-41d4-a716-446655440000 is archived and cannot accept new messages"
+                    code: "CONVERSATION_ARCHIVED"
+                    conversation_id: "550e8400-e29b-41d4-a716-446655440000"
         "500":
           description: Internal server error
           content:
@@ -180,103 +220,1501 @@ paths:
                   value:
                     error: "Internal server error"
 
-  /api/sessions/{session_id}/conversation:
-    get:
-      tags: [Sessions]
-      summary: Get conversation history for a session
+  /api/workspaces:
+    post:
+      tags: [workspace-management]
+      summary: Create a new workspace
       description: >
-        Retrieves the full conversation history for a given session. Returns all messages
-        exchanged in the session along with metadata about the session status.
-        
-        
-        **Session States**:
-        - `active`: Session is accepting new messages (up to 20 turns)
-        - `archived`: Session has been archived and is read-only
-      operationId: getSessionConversation
+        Creates a workspace owned by the authenticated user. The workspace starts in `active` status.
+      operationId: createWorkspace
       parameters:
-        - name: session_id
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-          description: The session identifier (UUID v4)
-          example: "550e8400-e29b-41d4-a716-446655440000"
+        - $ref: '#/components/parameters/XUserIdHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WorkspaceCreateRequest'
+            examples:
+              basic:
+                value:
+                  name: "Semiconductor swing trades"
+                  description: "Tracking cyclical names and catalysts"
+              nameOnly:
+                value:
+                  name: "Q4 earnings watch"
       responses:
-        "200":
-          description: Conversation history retrieved successfully
+        "201":
+          description: Workspace created
+          headers:
+            Location:
+              description: Canonical URL for the created workspace
+              schema:
+                type: string
+                example: "/api/workspaces/abc123"
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ConversationHistory'
+                $ref: '#/components/schemas/Workspace'
               examples:
-                activeSession:
-                  summary: Active session with ongoing conversation
+                created:
                   value:
-                    session_id: "550e8400-e29b-41d4-a716-446655440000"
+                    workspace_id: "abc123"
+                    name: "Semiconductor swing trades"
+                    description: "Tracking cyclical names and catalysts"
                     status: "active"
-                    turn_count: 3
-                    messages:
-                      - role: "user"
-                        content: "What are the best tech stocks to buy?"
-                        timestamp: "2025-09-16T12:30:00Z"
-                      - role: "assistant"
-                        content: "Based on current market conditions, consider AAPL, MSFT, and NVDA..."
-                        timestamp: "2025-09-16T12:30:05Z"
-                      - role: "user"
-                        content: "Tell me more about NVDA"
-                        timestamp: "2025-09-16T12:31:00Z"
-                      - role: "assistant"
-                        content: "NVIDIA Corporation (NVDA) is a leader in AI and GPU technology..."
-                        timestamp: "2025-09-16T12:31:10Z"
-                    created_at: "2025-09-16T12:30:00Z"
-                    updated_at: "2025-09-16T12:31:10Z"
-                archivedSession:
-                  summary: Archived session (read-only)
-                  value:
-                    session_id: "660e8400-e29b-41d4-a716-446655440001"
-                    status: "archived"
-                    turn_count: 20
-                    messages:
-                      - role: "user"
-                        content: "First message..."
-                        timestamp: "2025-09-15T10:00:00Z"
-                      - role: "assistant"
-                        content: "Response to first message..."
-                        timestamp: "2025-09-15T10:00:05Z"
-                    created_at: "2025-09-15T10:00:00Z"
-                    updated_at: "2025-09-15T11:30:00Z"
-                    archived_at: "2025-09-15T11:30:00Z"
+                    created_at: "2026-03-23T10:00:00Z"
+                    updated_at: "2026-03-23T10:00:00Z"
         "400":
-          description: Invalid session_id format
+          description: Validation error (missing or invalid name)
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/components/schemas/ManagementError'
               examples:
-                invalidFormat:
+                missingName:
                   value:
-                    error: "Invalid session_id format. Must be a valid UUID v4."
-        "404":
-          description: Session not found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-              examples:
-                notFound:
+                    error:
+                      message: "Field 'name' is required and must be a non-empty string"
+                      code: "VALIDATION_ERROR"
+                invalidBody:
                   value:
-                    error: "Session not found"
+                    error:
+                      message: "Request body must be a JSON object"
+                      code: "VALIDATION_ERROR"
         "500":
           description: Internal server error
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/components/schemas/ManagementError'
+        "503":
+          description: Service unavailable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManagementError'
               examples:
                 serverError:
                   value:
-                    error: "Internal server error"
+                    error:
+                      message: "Internal server error"
+                      code: "INTERNAL_ERROR"
+    get:
+      tags: [workspace-management]
+      summary: List workspaces owned by the current user
+      description: >
+        Returns a paginated list of workspaces owned by the authenticated user,
+        sorted by `updated_at` descending.
+      operationId: listWorkspaces
+      parameters:
+        - $ref: '#/components/parameters/XUserIdHeader'
+        - name: limit
+          in: query
+          required: false
+          description: Maximum number of items to return (1–100).
+          schema:
+            type: integer
+            default: 25
+            minimum: 1
+            maximum: 100
+        - name: offset
+          in: query
+          required: false
+          description: Number of items to skip for pagination.
+          schema:
+            type: integer
+            default: 0
+            minimum: 0
+        - name: status
+          in: query
+          required: false
+          description: Filter workspaces by status.
+          schema:
+            type: string
+            enum: [active, archived]
+      responses:
+        "200":
+          description: Paginated list of workspaces
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkspaceList'
+              examples:
+                twoWorkspaces:
+                  value:
+                    items:
+                      - workspace_id: "abc123"
+                        name: "Semiconductor swing trades"
+                        description: "Tracking cyclical names"
+                        status: "active"
+                        session_count: 3
+                        created_at: "2026-03-20T09:00:00Z"
+                        updated_at: "2026-03-23T10:00:00Z"
+                      - workspace_id: "def456"
+                        name: "Q4 earnings watch"
+                        description: null
+                        status: "active"
+                        session_count: 1
+                        created_at: "2026-03-21T14:00:00Z"
+                        updated_at: "2026-03-22T08:30:00Z"
+                    total: 2
+                    limit: 25
+                    offset: 0
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManagementError'
+        "503":
+          description: Service unavailable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManagementError'
+
+  /api/workspaces/{workspace_id}:
+    get:
+      tags: [workspace-management]
+      summary: Get workspace detail
+      description: >
+        Returns the workspace with aggregate counts (session_count, active_conversation_count).
+        Only the workspace owner can access it.
+      operationId: getWorkspace
+      parameters:
+        - $ref: '#/components/parameters/WorkspaceId'
+        - $ref: '#/components/parameters/XUserIdHeader'
+      responses:
+        "200":
+          description: Workspace detail with aggregate counts
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkspaceDetail'
+              examples:
+                detail:
+                  value:
+                    workspace_id: "abc123"
+                    name: "Semiconductor swing trades"
+                    description: "Tracking cyclical names and catalysts"
+                    status: "active"
+                    session_count: 3
+                    active_conversation_count: 5
+                    created_at: "2026-03-20T09:00:00Z"
+                    updated_at: "2026-03-23T10:00:00Z"
+        "403":
+          description: Ownership violation — workspace belongs to another user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManagementError'
+              examples:
+                forbidden:
+                  value:
+                    error:
+                      message: "Access denied"
+                      code: "FORBIDDEN"
+        "404":
+          description: Workspace not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManagementError'
+              examples:
+                notFound:
+                  value:
+                    error:
+                      message: "Workspace not found"
+                      code: "NOT_FOUND"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManagementError'
+        "503":
+          description: Service unavailable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManagementError'
+    put:
+      tags: [workspace-management]
+      summary: Update a workspace
+      description: >
+        Updates workspace `name` and/or `description`. Only the workspace owner
+        can perform this operation. The workspace must be active.
+      operationId: updateWorkspace
+      parameters:
+        - $ref: '#/components/parameters/WorkspaceId'
+        - $ref: '#/components/parameters/XUserIdHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WorkspaceUpdateRequest'
+            examples:
+              updateName:
+                value:
+                  name: "Semiconductor cyclical trades"
+              updateBoth:
+                value:
+                  name: "Semiconductor cyclical trades"
+                  description: "Updated tracking for cyclical names"
+      responses:
+        "200":
+          description: Updated workspace
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkspaceDetail'
+              examples:
+                updated:
+                  value:
+                    workspace_id: "abc123"
+                    name: "Semiconductor cyclical trades"
+                    description: "Updated tracking for cyclical names"
+                    status: "active"
+                    session_count: 3
+                    active_conversation_count: 5
+                    created_at: "2026-03-20T09:00:00Z"
+                    updated_at: "2026-03-23T11:00:00Z"
+        "400":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManagementError'
+              examples:
+                invalidBody:
+                  value:
+                    error:
+                      message: "Request body must be a JSON object"
+                      code: "VALIDATION_ERROR"
+        "403":
+          description: Ownership violation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManagementError'
+              examples:
+                forbidden:
+                  value:
+                    error:
+                      message: "Access denied"
+                      code: "FORBIDDEN"
+        "404":
+          description: Workspace not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManagementError'
+              examples:
+                notFound:
+                  value:
+                    error:
+                      message: "Workspace not found"
+                      code: "NOT_FOUND"
+        "409":
+          description: Conflict — stale entity (concurrent update detected)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManagementError'
+              examples:
+                conflict:
+                  value:
+                    error:
+                      message: "Workspace was modified by another request"
+                      code: "CONFLICT"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManagementError'
+        "503":
+          description: Service unavailable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManagementError'
+
+  /api/workspaces/{workspace_id}/archive:
+    post:
+      tags: [workspace-management]
+      summary: Archive a workspace
+      description: >
+        Archives the workspace and all descendant sessions and conversations atomically.
+        Repeated archive requests are idempotent and leave already-archived descendants unchanged.
+        Only the workspace owner can archive it.
+      operationId: archiveWorkspace
+      parameters:
+        - $ref: '#/components/parameters/WorkspaceId'
+        - $ref: '#/components/parameters/XUserIdHeader'
+      responses:
+        "200":
+          description: Workspace archived successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkspaceDetail'
+              examples:
+                archived:
+                  value:
+                    workspace_id: "abc123"
+                    name: "Semiconductor swing trades"
+                    description: "Tracking cyclical names and catalysts"
+                    status: "archived"
+                    session_count: 3
+                    active_conversation_count: 0
+                    created_at: "2026-03-20T09:00:00Z"
+                    updated_at: "2026-03-23T12:00:00Z"
+        "403":
+          description: Ownership violation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManagementError'
+              examples:
+                forbidden:
+                  value:
+                    error:
+                      message: "Access denied"
+                      code: "FORBIDDEN"
+        "404":
+          description: Workspace not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManagementError'
+              examples:
+                notFound:
+                  value:
+                    error:
+                      message: "Workspace not found"
+                      code: "NOT_FOUND"
+        "400":
+          description: Validation error (e.g., invalid lifecycle transition)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManagementError'
+              examples:
+                validationError:
+                  value:
+                    error:
+                      message: "Invalid state transition"
+                      code: "VALIDATION_ERROR"
+        "409":
+          description: Conflict — stale entity or concurrent modification
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManagementError'
+              examples:
+                conflict:
+                  value:
+                    error:
+                      message: "Workspace was modified by another request"
+                      code: "CONFLICT"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManagementError'
+        "503":
+          description: Service unavailable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManagementError'
+
+  /api/workspaces/{workspace_id}/sessions:
+    post:
+      tags: [session-management]
+      summary: Create a new session in a workspace
+      description: >
+        Creates a session within the specified workspace. The session starts in `active` status.
+        The parent workspace must exist and be owned by the authenticated user.
+      operationId: createSession
+      parameters:
+        - $ref: '#/components/parameters/WorkspaceId'
+        - $ref: '#/components/parameters/XUserIdHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SessionCreateRequest'
+            examples:
+              withTitle:
+                value:
+                  title: "NVDA earnings prep"
+                  description: "Assess post-earnings risk/reward"
+              minimal:
+                value:
+                  title: ""
+      responses:
+        "201":
+          description: Session created
+          headers:
+            Location:
+              description: Canonical URL for the created session
+              schema:
+                type: string
+                example: "/api/sessions/550e8400-e29b-41d4-a716-446655440000"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SessionDetail'
+              examples:
+                created:
+                  value:
+                    session_id: "550e8400-e29b-41d4-a716-446655440000"
+                    workspace_id: "abc123"
+                    title: "NVDA earnings prep"
+                    description: "Assess post-earnings risk/reward"
+                    status: "active"
+                    conversation_count: 0
+                    created_at: "2026-03-23T10:00:00Z"
+                    updated_at: "2026-03-23T10:00:00Z"
+        "400":
+          description: Validation error (invalid request body)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManagementError'
+              examples:
+                invalidBody:
+                  value:
+                    error:
+                      message: "Request body must be a JSON object"
+                      code: "VALIDATION_ERROR"
+        "403":
+          description: Ownership violation — workspace belongs to another user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManagementError'
+              examples:
+                forbidden:
+                  value:
+                    error:
+                      message: "Access denied"
+                      code: "FORBIDDEN"
+        "404":
+          description: Parent workspace not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManagementError'
+              examples:
+                notFound:
+                  value:
+                    error:
+                      message: "Workspace not found"
+                      code: "NOT_FOUND"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManagementError'
+        "503":
+          description: Service unavailable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManagementError'
+    get:
+      tags: [session-management]
+      summary: List sessions in a workspace
+      description: >
+        Returns a paginated list of sessions within the specified workspace,
+        sorted by `updated_at` descending. Only the workspace owner can list sessions.
+      operationId: listSessions
+      parameters:
+        - $ref: '#/components/parameters/WorkspaceId'
+        - $ref: '#/components/parameters/XUserIdHeader'
+        - name: limit
+          in: query
+          required: false
+          description: Maximum number of items to return (1–100).
+          schema:
+            type: integer
+            default: 25
+            minimum: 1
+            maximum: 100
+        - name: offset
+          in: query
+          required: false
+          description: Number of items to skip for pagination.
+          schema:
+            type: integer
+            default: 0
+            minimum: 0
+        - name: status
+          in: query
+          required: false
+          description: Filter sessions by status.
+          schema:
+            type: string
+            enum: [active, closed, archived]
+      responses:
+        "200":
+          description: Paginated list of sessions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SessionList'
+              examples:
+                twoSessions:
+                  value:
+                    items:
+                      - session_id: "550e8400-e29b-41d4-a716-446655440000"
+                        workspace_id: "abc123"
+                        title: "NVDA earnings prep"
+                        description: null
+                        status: "active"
+                        conversation_count: 2
+                        created_at: "2026-03-22T09:00:00Z"
+                        updated_at: "2026-03-23T10:00:00Z"
+                      - session_id: "660e8400-e29b-41d4-a716-446655440001"
+                        workspace_id: "abc123"
+                        title: "AMD analysis"
+                        description: "Quarterly review"
+                        status: "active"
+                        conversation_count: 1
+                        created_at: "2026-03-21T14:00:00Z"
+                        updated_at: "2026-03-22T08:30:00Z"
+                    total: 2
+                    limit: 25
+                    offset: 0
+        "403":
+          description: Ownership violation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManagementError'
+              examples:
+                forbidden:
+                  value:
+                    error:
+                      message: "Access denied"
+                      code: "FORBIDDEN"
+        "404":
+          description: Parent workspace not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManagementError'
+              examples:
+                notFound:
+                  value:
+                    error:
+                      message: "Workspace not found"
+                      code: "NOT_FOUND"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManagementError'
+        "503":
+          description: Service unavailable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManagementError'
+
+  /api/sessions/{session_id}:
+    get:
+      tags: [session-management]
+      summary: Get session detail
+      description: >
+        Returns the session with its conversation_count.
+        Only the owning user (via workspace ownership) can access it.
+      operationId: getSession
+      parameters:
+        - $ref: '#/components/parameters/SessionId'
+        - $ref: '#/components/parameters/XUserIdHeader'
+      responses:
+        "200":
+          description: Session detail with conversation count
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SessionDetail'
+              examples:
+                detail:
+                  value:
+                    session_id: "550e8400-e29b-41d4-a716-446655440000"
+                    workspace_id: "abc123"
+                    title: "NVDA earnings prep"
+                    description: "Assess post-earnings risk/reward"
+                    status: "active"
+                    conversation_count: 3
+                    created_at: "2026-03-22T09:00:00Z"
+                    updated_at: "2026-03-23T10:00:00Z"
+        "403":
+          description: Ownership violation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManagementError'
+              examples:
+                forbidden:
+                  value:
+                    error:
+                      message: "Access denied"
+                      code: "FORBIDDEN"
+        "404":
+          description: Session not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManagementError'
+              examples:
+                notFound:
+                  value:
+                    error:
+                      message: "Session not found"
+                      code: "NOT_FOUND"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManagementError'
+        "503":
+          description: Service unavailable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManagementError'
+    put:
+      tags: [session-management]
+      summary: Update a session
+      description: >
+        Updates session `title` and/or `description`. Only the owning user
+        can perform this operation.
+      operationId: updateSession
+      parameters:
+        - $ref: '#/components/parameters/SessionId'
+        - $ref: '#/components/parameters/XUserIdHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SessionUpdateRequest'
+            examples:
+              updateTitle:
+                value:
+                  title: "NVDA post-earnings review"
+              updateBoth:
+                value:
+                  title: "NVDA post-earnings review"
+                  description: "Updated risk assessment after Q4 results"
+      responses:
+        "200":
+          description: Updated session
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SessionDetail'
+              examples:
+                updated:
+                  value:
+                    session_id: "550e8400-e29b-41d4-a716-446655440000"
+                    workspace_id: "abc123"
+                    title: "NVDA post-earnings review"
+                    description: "Updated risk assessment after Q4 results"
+                    status: "active"
+                    conversation_count: 3
+                    created_at: "2026-03-22T09:00:00Z"
+                    updated_at: "2026-03-23T11:00:00Z"
+        "400":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManagementError'
+              examples:
+                invalidBody:
+                  value:
+                    error:
+                      message: "Request body must be a JSON object"
+                      code: "VALIDATION_ERROR"
+        "403":
+          description: Ownership violation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManagementError'
+              examples:
+                forbidden:
+                  value:
+                    error:
+                      message: "Access denied"
+                      code: "FORBIDDEN"
+        "404":
+          description: Session not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManagementError'
+              examples:
+                notFound:
+                  value:
+                    error:
+                      message: "Session not found"
+                      code: "NOT_FOUND"
+        "409":
+          description: Conflict — stale entity (concurrent update detected)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManagementError'
+              examples:
+                conflict:
+                  value:
+                    error:
+                      message: "Session was modified by another request"
+                      code: "CONFLICT"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManagementError'
+        "503":
+          description: Service unavailable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManagementError'
+
+  /api/sessions/{session_id}/close:
+    post:
+      tags: [session-management]
+      summary: Close a session
+      description: >
+        Transitions the session from `active` to `closed`. A closed session does not accept
+        new conversations, but existing non-archived conversations remain message-capable.
+        Only the owning user can close it.
+      operationId: closeSession
+      parameters:
+        - $ref: '#/components/parameters/SessionId'
+        - $ref: '#/components/parameters/XUserIdHeader'
+      responses:
+        "200":
+          description: Session closed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SessionDetail'
+              examples:
+                closed:
+                  value:
+                    session_id: "550e8400-e29b-41d4-a716-446655440000"
+                    workspace_id: "abc123"
+                    title: "NVDA earnings prep"
+                    description: "Assess post-earnings risk/reward"
+                    status: "closed"
+                    conversation_count: 3
+                    created_at: "2026-03-22T09:00:00Z"
+                    updated_at: "2026-03-23T12:00:00Z"
+        "403":
+          description: Ownership violation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManagementError'
+              examples:
+                forbidden:
+                  value:
+                    error:
+                      message: "Access denied"
+                      code: "FORBIDDEN"
+        "404":
+          description: Session not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManagementError'
+              examples:
+                notFound:
+                  value:
+                    error:
+                      message: "Session not found"
+                      code: "NOT_FOUND"
+        "400":
+          description: Validation error (e.g., session is not active)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManagementError'
+              examples:
+                validationError:
+                  value:
+                    error:
+                      message: "Invalid state transition"
+                      code: "VALIDATION_ERROR"
+        "409":
+          description: Conflict — stale entity or concurrent modification
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManagementError'
+              examples:
+                conflict:
+                  value:
+                    error:
+                      message: "Session was modified by another request"
+                      code: "CONFLICT"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManagementError'
+        "503":
+          description: Service unavailable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManagementError'
+
+  /api/sessions/{session_id}/archive:
+    post:
+      tags: [session-management]
+      summary: Archive a session
+      description: >
+        Archives the session and all descendant conversations.
+        Repeated archive requests are idempotent.
+        Only the owning user can archive it.
+      operationId: archiveSession
+      parameters:
+        - $ref: '#/components/parameters/SessionId'
+        - $ref: '#/components/parameters/XUserIdHeader'
+      responses:
+        "200":
+          description: Session archived successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SessionDetail'
+              examples:
+                archived:
+                  value:
+                    session_id: "550e8400-e29b-41d4-a716-446655440000"
+                    workspace_id: "abc123"
+                    title: "NVDA earnings prep"
+                    description: "Assess post-earnings risk/reward"
+                    status: "archived"
+                    conversation_count: 3
+                    created_at: "2026-03-22T09:00:00Z"
+                    updated_at: "2026-03-23T12:00:00Z"
+        "403":
+          description: Ownership violation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManagementError'
+              examples:
+                forbidden:
+                  value:
+                    error:
+                      message: "Access denied"
+                      code: "FORBIDDEN"
+        "404":
+          description: Session not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManagementError'
+              examples:
+                notFound:
+                  value:
+                    error:
+                      message: "Session not found"
+                      code: "NOT_FOUND"
+        "400":
+          description: Validation error (e.g., invalid lifecycle transition)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManagementError'
+              examples:
+                validationError:
+                  value:
+                    error:
+                      message: "Invalid state transition"
+                      code: "VALIDATION_ERROR"
+        "409":
+          description: Conflict — stale entity or concurrent modification
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManagementError'
+              examples:
+                conflict:
+                  value:
+                    error:
+                      message: "Session was modified by another request"
+                      code: "CONFLICT"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManagementError'
+        "503":
+          description: Service unavailable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManagementError'
+
+  /api/sessions/{session_id}/conversations:
+    post:
+      tags: [conversation-management]
+      summary: Create a new conversation in a session
+      description: >
+        Creates a conversation within the specified session. The conversation starts in `active` status.
+        The parent session must exist, be owned by the authenticated user, and not be closed or archived.
+      operationId: createConversation
+      parameters:
+        - $ref: '#/components/parameters/SessionId'
+        - $ref: '#/components/parameters/XUserIdHeader'
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConversationCreateRequest'
+            examples:
+              withTitle:
+                value:
+                  title: "Scenario analysis"
+              empty:
+                value: {}
+      responses:
+        "201":
+          description: Conversation created
+          headers:
+            Location:
+              description: Canonical URL for the created conversation
+              schema:
+                type: string
+                example: "/api/conversations/770e8400-e29b-41d4-a716-446655440002"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Conversation'
+              examples:
+                created:
+                  value:
+                    conversation_id: "770e8400-e29b-41d4-a716-446655440002"
+                    thread_id: "770e8400-e29b-41d4-a716-446655440002"
+                    session_id: "550e8400-e29b-41d4-a716-446655440000"
+                    workspace_id: "abc123"
+                    title: "Scenario analysis"
+                    status: "active"
+                    model: null
+                    created_at: "2026-03-23T10:00:00Z"
+                    updated_at: "2026-03-23T10:00:00Z"
+        "400":
+          description: Validation error (invalid request body)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManagementError'
+              examples:
+                invalidBody:
+                  value:
+                    error:
+                      message: "Request body must be a JSON object"
+                      code: "VALIDATION_ERROR"
+        "403":
+          description: Ownership violation — session belongs to another user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManagementError'
+              examples:
+                forbidden:
+                  value:
+                    error:
+                      message: "Access denied"
+                      code: "FORBIDDEN"
+        "404":
+          description: Parent session not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManagementError'
+              examples:
+                notFound:
+                  value:
+                    error:
+                      message: "Session not found"
+                      code: "NOT_FOUND"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManagementError'
+        "503":
+          description: Service unavailable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManagementError'
+    get:
+      tags: [conversation-management]
+      summary: List conversations in a session
+      description: >
+        Returns a paginated list of conversations within the specified session,
+        sorted by `last_activity_at` descending. Only the owning user can list conversations.
+      operationId: listConversations
+      parameters:
+        - $ref: '#/components/parameters/SessionId'
+        - $ref: '#/components/parameters/XUserIdHeader'
+        - name: limit
+          in: query
+          required: false
+          description: Maximum number of items to return (1–100).
+          schema:
+            type: integer
+            default: 25
+            minimum: 1
+            maximum: 100
+        - name: offset
+          in: query
+          required: false
+          description: Number of items to skip for pagination.
+          schema:
+            type: integer
+            default: 0
+            minimum: 0
+        - name: status
+          in: query
+          required: false
+          description: Filter conversations by status.
+          schema:
+            type: string
+            enum: [active, summarized, archived]
+      responses:
+        "200":
+          description: Paginated list of conversations
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConversationList'
+              examples:
+                twoConversations:
+                  value:
+                    items:
+                      - conversation_id: "770e8400-e29b-41d4-a716-446655440002"
+                        thread_id: "770e8400-e29b-41d4-a716-446655440002"
+                        session_id: "550e8400-e29b-41d4-a716-446655440000"
+                        workspace_id: "abc123"
+                        title: "Scenario analysis"
+                        status: "active"
+                        model: null
+                        created_at: "2026-03-22T09:00:00Z"
+                        updated_at: "2026-03-23T10:00:00Z"
+                      - conversation_id: "880e8400-e29b-41d4-a716-446655440003"
+                        thread_id: "880e8400-e29b-41d4-a716-446655440003"
+                        session_id: "550e8400-e29b-41d4-a716-446655440000"
+                        workspace_id: "abc123"
+                        title: "Quick check"
+                        status: "active"
+                        model: null
+                        created_at: "2026-03-21T14:00:00Z"
+                        updated_at: "2026-03-22T08:30:00Z"
+                    total: 2
+                    limit: 25
+                    offset: 0
+        "403":
+          description: Ownership violation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManagementError'
+              examples:
+                forbidden:
+                  value:
+                    error:
+                      message: "Access denied"
+                      code: "FORBIDDEN"
+        "404":
+          description: Parent session not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManagementError'
+              examples:
+                notFound:
+                  value:
+                    error:
+                      message: "Session not found"
+                      code: "NOT_FOUND"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManagementError'
+        "503":
+          description: Service unavailable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManagementError'
+
+  /api/conversations/{conversation_id}:
+    get:
+      tags: [conversation-management]
+      summary: Get conversation detail
+      description: >
+        Returns the conversation with aggregate metadata (message_count, total_tokens, last_activity_at).
+        Only the owning user (via workspace/session ownership) can access it.
+      operationId: getConversation
+      parameters:
+        - $ref: '#/components/parameters/ConversationId'
+        - $ref: '#/components/parameters/XUserIdHeader'
+      responses:
+        "200":
+          description: Conversation detail with metadata
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConversationDetail'
+              examples:
+                detail:
+                  value:
+                    conversation_id: "770e8400-e29b-41d4-a716-446655440002"
+                    thread_id: "770e8400-e29b-41d4-a716-446655440002"
+                    session_id: "550e8400-e29b-41d4-a716-446655440000"
+                    workspace_id: "abc123"
+                    title: "Scenario analysis"
+                    status: "active"
+                    model: null
+                    created_at: "2026-03-22T09:00:00Z"
+                    updated_at: "2026-03-23T10:00:00Z"
+                    message_count: 6
+                    total_tokens: 1250
+                    last_activity_at: "2026-03-23T10:00:00Z"
+        "403":
+          description: Ownership violation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManagementError'
+              examples:
+                forbidden:
+                  value:
+                    error:
+                      message: "Access denied"
+                      code: "FORBIDDEN"
+        "404":
+          description: Conversation not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManagementError'
+              examples:
+                notFound:
+                  value:
+                    error:
+                      message: "Conversation not found"
+                      code: "NOT_FOUND"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManagementError'
+        "503":
+          description: Service unavailable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManagementError'
+    put:
+      tags: [conversation-management]
+      summary: Update a conversation
+      description: >
+        Updates the conversation `title`. Only the owning user can perform
+        this operation.
+      operationId: updateConversation
+      parameters:
+        - $ref: '#/components/parameters/ConversationId'
+        - $ref: '#/components/parameters/XUserIdHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConversationUpdateRequest'
+            examples:
+              updateTitle:
+                value:
+                  title: "Updated scenario analysis"
+      responses:
+        "200":
+          description: Updated conversation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConversationDetail'
+              examples:
+                updated:
+                  value:
+                    conversation_id: "770e8400-e29b-41d4-a716-446655440002"
+                    thread_id: "770e8400-e29b-41d4-a716-446655440002"
+                    session_id: "550e8400-e29b-41d4-a716-446655440000"
+                    workspace_id: "abc123"
+                    title: "Updated scenario analysis"
+                    status: "active"
+                    model: null
+                    created_at: "2026-03-22T09:00:00Z"
+                    updated_at: "2026-03-23T11:00:00Z"
+                    message_count: 6
+                    total_tokens: 1250
+                    last_activity_at: "2026-03-23T10:00:00Z"
+        "400":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManagementError'
+              examples:
+                invalidBody:
+                  value:
+                    error:
+                      message: "Request body must be a JSON object"
+                      code: "VALIDATION_ERROR"
+        "403":
+          description: Ownership violation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManagementError'
+              examples:
+                forbidden:
+                  value:
+                    error:
+                      message: "Access denied"
+                      code: "FORBIDDEN"
+        "404":
+          description: Conversation not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManagementError'
+              examples:
+                notFound:
+                  value:
+                    error:
+                      message: "Conversation not found"
+                      code: "NOT_FOUND"
+        "409":
+          description: Conflict — stale entity (concurrent update detected)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManagementError'
+              examples:
+                conflict:
+                  value:
+                    error:
+                      message: "Conversation was modified by another request"
+                      code: "CONFLICT"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManagementError'
+        "503":
+          description: Service unavailable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManagementError'
+
+  /api/conversations/{conversation_id}/archive:
+    post:
+      tags: [conversation-management]
+      summary: Archive a conversation
+      description: >
+        Archives the conversation. Repeated archive requests are idempotent.
+        Only the owning user can archive it.
+      operationId: archiveConversation
+      parameters:
+        - $ref: '#/components/parameters/ConversationId'
+        - $ref: '#/components/parameters/XUserIdHeader'
+      responses:
+        "200":
+          description: Conversation archived successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConversationDetail'
+              examples:
+                archived:
+                  value:
+                    conversation_id: "770e8400-e29b-41d4-a716-446655440002"
+                    thread_id: "770e8400-e29b-41d4-a716-446655440002"
+                    session_id: "550e8400-e29b-41d4-a716-446655440000"
+                    workspace_id: "abc123"
+                    title: "Scenario analysis"
+                    status: "archived"
+                    model: null
+                    created_at: "2026-03-22T09:00:00Z"
+                    updated_at: "2026-03-23T12:00:00Z"
+                    message_count: 6
+                    total_tokens: 1250
+                    last_activity_at: "2026-03-23T10:00:00Z"
+        "403":
+          description: Ownership violation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManagementError'
+              examples:
+                forbidden:
+                  value:
+                    error:
+                      message: "Access denied"
+                      code: "FORBIDDEN"
+        "404":
+          description: Conversation not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManagementError'
+              examples:
+                notFound:
+                  value:
+                    error:
+                      message: "Conversation not found"
+                      code: "NOT_FOUND"
+        "400":
+          description: Validation error (e.g., invalid lifecycle transition)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManagementError'
+              examples:
+                validationError:
+                  value:
+                    error:
+                      message: "Invalid state transition"
+                      code: "VALIDATION_ERROR"
+        "409":
+          description: Conflict — stale entity or concurrent modification
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManagementError'
+              examples:
+                conflict:
+                  value:
+                    error:
+                      message: "Conversation was modified by another request"
+                      code: "CONFLICT"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManagementError'
+        "503":
+          description: Service unavailable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManagementError'
+
+  /api/conversations/{conversation_id}/summary:
+    get:
+      tags: [conversation-management]
+      summary: Get conversation summary
+      description: >
+        Returns the conversation summary with aggregate metadata. Useful for reviewing
+        a conversation's key outcomes without loading full message history.
+        Only the owning user (via workspace/session ownership) can access it.
+      operationId: getConversationSummary
+      parameters:
+        - $ref: '#/components/parameters/ConversationId'
+        - $ref: '#/components/parameters/XUserIdHeader'
+      responses:
+        "200":
+          description: Conversation summary with metadata
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConversationSummary'
+              examples:
+                summary:
+                  value:
+                    conversation_id: "770e8400-e29b-41d4-a716-446655440002"
+                    session_id: "550e8400-e29b-41d4-a716-446655440000"
+                    workspace_id: "abc123"
+                    status: "summarized"
+                    summary: "Discussed MSFT Azure growth scenarios with bull and bear cases."
+                    message_count: 6
+                    total_tokens: 1250
+                    focused_symbols: ["MSFT"]
+                    time_range:
+                      start: "2026-03-23T09:00:00Z"
+                      end: "2026-03-23T10:00:00Z"
+        "403":
+          description: Ownership violation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManagementError'
+              examples:
+                forbidden:
+                  value:
+                    error:
+                      message: "Access denied"
+                      code: "FORBIDDEN"
+        "404":
+          description: Conversation not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManagementError'
+              examples:
+                notFound:
+                  value:
+                    error:
+                      message: "Conversation not found"
+                      code: "NOT_FOUND"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManagementError'
+        "503":
+          description: Service unavailable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManagementError'
 
   /api/config:
     get:
@@ -732,6 +2170,40 @@ components:
       description: Optional provider override; if also provided in body, body takes precedence.
       schema:
         type: string
+    XUserIdHeader:
+      name: X-User-ID
+      in: header
+      required: true
+      description: User identifier used for ownership scoping (Mongo ObjectId string).
+      schema:
+        type: string
+      example: "507f1f77bcf86cd799439011"
+    WorkspaceId:
+      name: workspace_id
+      in: path
+      required: true
+      description: Unique identifier of the workspace.
+      schema:
+        type: string
+      example: "abc123"
+    SessionId:
+      name: session_id
+      in: path
+      required: true
+      description: Unique identifier of the session (UUID v4).
+      schema:
+        type: string
+        format: uuid
+      example: "550e8400-e29b-41d4-a716-446655440000"
+    ConversationId:
+      name: conversation_id
+      in: path
+      required: true
+      description: Unique identifier of the conversation (UUID v4).
+      schema:
+        type: string
+        format: uuid
+      example: "770e8400-e29b-41d4-a716-446655440002"
 
   schemas:
     HealthResponse:
@@ -757,13 +2229,19 @@ components:
           type: boolean
           description: If true, the response will be streamed via Server-Sent Events.
           default: false
-        session_id:
+        conversation_id:
           type: string
           format: uuid
           description: >
-            Optional UUID v4 identifying the conversation session for multi-turn interactions.
-            Omit for stateless single-turn requests. Sessions support up to 20 turns
-            before automatic archival. Archived sessions return 409 Conflict.
+            Optional UUID v4 identifying the conversation for multi-turn interactions.
+            Omit for stateless single-turn requests. Conversations support up to 20 turns
+            before automatic archival. Archived conversations return 409 Conflict.
+          example: "550e8400-e29b-41d4-a716-446655440000"
+        session_id:
+          type: string
+          format: uuid
+          deprecated: true
+          description: Deprecated alias for conversation_id, accepted for backward compatibility.
           example: "550e8400-e29b-41d4-a716-446655440000"
       required: [message]
 
@@ -786,10 +2264,10 @@ components:
           type: string
           format: date-time
           description: ISO 8601 timestamp (UTC, Z-suffix).
-        session_id:
+        conversation_id:
           type: string
           format: uuid
-          description: Echoed session_id if provided in request. Confirms session context is active.
+          description: Echoed conversation_id if provided in request. Confirms conversation context is active.
         conversation:
           $ref: '#/components/schemas/ConversationStatus'
       required: [response, provider, model, fallback, timestamp]
@@ -898,26 +2376,456 @@ components:
           type: string
       required: [error]
 
-    SessionArchivedError:
+    ManagementError:
       type: object
-      description: Error response when attempting to add messages to an archived session.
+      description: >
+        Error envelope used by Phase C management API endpoints. The `error` field
+        is an object containing a human-readable `message`, a machine-readable `code`,
+        and optional `details` and `correlation_id`.
       properties:
         error:
+          type: object
+          properties:
+            message:
+              type: string
+              description: Human-readable error description.
+            code:
+              type: string
+              description: Machine-readable error code (e.g., VALIDATION_ERROR, NOT_FOUND, FORBIDDEN, INTERNAL_ERROR, CONFLICT).
+            details:
+              type: object
+              additionalProperties: true
+              description: Optional additional detail about the error.
+            correlation_id:
+              type: string
+              format: uuid
+              description: Optional correlation identifier for tracing.
+          required: [message]
+
+    WorkspaceCreateRequest:
+      type: object
+      description: Request body for creating a workspace.
+      properties:
+        name:
           type: string
-          enum: ["SESSION_ARCHIVED"]
-          description: Error code indicating the session has been archived.
-        message:
+          description: Workspace name (required, non-empty).
+        description:
           type: string
-          description: Human-readable explanation of the error.
+          nullable: true
+          description: Optional description of the workspace.
+      required: [name]
+
+    WorkspaceUpdateRequest:
+      type: object
+      description: Request body for updating a workspace. At least one field should be provided.
+      properties:
+        name:
+          type: string
+          description: Updated workspace name.
+        description:
+          type: string
+          nullable: true
+          description: Updated description.
+
+    Workspace:
+      type: object
+      description: Base workspace resource.
+      properties:
+        workspace_id:
+          type: string
+          description: Unique identifier of the workspace.
+        name:
+          type: string
+        description:
+          type: string
+          nullable: true
+        status:
+          type: string
+          enum: [active, archived]
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+      required: [workspace_id, name, status, created_at, updated_at]
+
+    WorkspaceDetail:
+      type: object
+      description: Workspace with aggregate counts for sessions and active conversations.
+      allOf:
+        - $ref: '#/components/schemas/Workspace'
+        - type: object
+          properties:
+            session_count:
+              type: integer
+              minimum: 0
+              description: Total number of sessions in this workspace.
+            active_conversation_count:
+              type: integer
+              minimum: 0
+              description: Number of active (non-archived) conversations across all sessions.
+
+    WorkspaceListItem:
+      type: object
+      description: Workspace item in list responses, includes session_count.
+      allOf:
+        - $ref: '#/components/schemas/Workspace'
+        - type: object
+          properties:
+            session_count:
+              type: integer
+              minimum: 0
+              description: Total number of sessions in this workspace.
+
+    WorkspaceList:
+      type: object
+      description: Paginated list of workspaces.
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/WorkspaceListItem'
+        total:
+          type: integer
+          minimum: 0
+          description: Total number of matching workspaces.
+        limit:
+          type: integer
+        offset:
+          type: integer
+      required: [items, total, limit, offset]
+
+    SessionCreateRequest:
+      type: object
+      description: Request body for creating a session.
+      properties:
+        title:
+          type: string
+          description: Optional session title.
+        description:
+          type: string
+          nullable: true
+          description: Optional description of the session.
+        assumptions:
+          type: string
+          nullable: true
+          description: Optional contextual assumptions for the session.
+        pinned_intent:
+          type: string
+          nullable: true
+          description: Optional pinned intent or goal for the session.
+        focused_symbols:
+          type: array
+          items:
+            type: string
+          description: Optional list of ticker symbols this session focuses on.
+
+    SessionUpdateRequest:
+      type: object
+      description: Request body for updating a session. At least one field should be provided.
+      properties:
+        title:
+          type: string
+          description: Updated session title.
+        description:
+          type: string
+          nullable: true
+          description: Updated description.
+
+    Session:
+      type: object
+      description: Base session resource.
+      properties:
         session_id:
           type: string
           format: uuid
-          description: The ID of the archived session.
-        archived_at:
+          description: Unique identifier of the session.
+        workspace_id:
+          type: string
+          description: Parent workspace identifier.
+        title:
+          type: string
+        description:
+          type: string
+          nullable: true
+        status:
+          type: string
+          enum: [active, closed, archived]
+        assumptions:
+          type: string
+          nullable: true
+          description: Contextual assumptions for the session.
+        pinned_intent:
+          type: string
+          nullable: true
+          description: Pinned intent or goal for the session.
+        focused_symbols:
+          type: array
+          items:
+            type: string
+          description: Ticker symbols this session focuses on.
+        created_at:
           type: string
           format: date-time
-          description: ISO 8601 timestamp when the session was archived.
-      required: [error, message, session_id]
+        updated_at:
+          type: string
+          format: date-time
+      required: [session_id, workspace_id, status, created_at, updated_at]
+
+    SessionDetail:
+      type: object
+      description: Session with conversation count.
+      allOf:
+        - $ref: '#/components/schemas/Session'
+        - type: object
+          properties:
+            conversation_count:
+              type: integer
+              minimum: 0
+              description: Total number of conversations in this session.
+
+    SessionListItem:
+      type: object
+      description: Session item in list responses, includes conversation_count and focused_symbols.
+      allOf:
+        - $ref: '#/components/schemas/Session'
+        - type: object
+          properties:
+            conversation_count:
+              type: integer
+              minimum: 0
+              description: Total number of conversations in this session.
+            focused_symbols:
+              type: array
+              items:
+                type: string
+              description: Ticker symbols this session focuses on.
+
+    SessionList:
+      type: object
+      description: Paginated list of sessions.
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/SessionListItem'
+        total:
+          type: integer
+          minimum: 0
+          description: Total number of matching sessions.
+        limit:
+          type: integer
+        offset:
+          type: integer
+      required: [items, total, limit, offset]
+
+    ConversationCreateRequest:
+      type: object
+      description: Request body for creating a conversation. All fields are optional.
+      properties:
+        title:
+          type: string
+          description: Optional conversation title.
+        context_overrides:
+          type: object
+          nullable: true
+          description: Optional context overrides for this conversation.
+          properties:
+            focused_symbols:
+              type: array
+              items:
+                type: string
+              description: Override focused symbols for this conversation.
+            conversation_intent:
+              type: string
+              description: Override intent for this conversation.
+
+    ConversationUpdateRequest:
+      type: object
+      description: Request body for updating a conversation.
+      properties:
+        title:
+          type: string
+          description: Updated conversation title.
+      required: [title]
+
+    Conversation:
+      type: object
+      description: Base conversation resource.
+      properties:
+        conversation_id:
+          type: string
+          format: uuid
+          description: Unique identifier of the conversation.
+        thread_id:
+          type: string
+          format: uuid
+          description: Thread identifier (1:1 mapping with conversation_id).
+        session_id:
+          type: string
+          format: uuid
+          description: Parent session identifier.
+        workspace_id:
+          type: string
+          description: Parent workspace identifier.
+        title:
+          type: string
+          nullable: true
+        status:
+          type: string
+          enum: [active, summarized, archived]
+        model:
+          type: string
+          nullable: true
+          description: Model used for this conversation (if set).
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+      required: [conversation_id, session_id, status, created_at, updated_at]
+
+    ConversationDetail:
+      type: object
+      description: Conversation with aggregate metadata.
+      allOf:
+        - $ref: '#/components/schemas/Conversation'
+        - type: object
+          properties:
+            message_count:
+              type: integer
+              minimum: 0
+              description: Total number of messages in this conversation.
+            total_tokens:
+              type: integer
+              minimum: 0
+              description: Total tokens consumed by this conversation.
+            summary:
+              type: string
+              nullable: true
+              description: AI-generated summary of the conversation.
+            focused_symbols:
+              type: array
+              items:
+                type: string
+              description: Ticker symbols discussed in this conversation.
+            last_activity_at:
+              type: string
+              format: date-time
+              nullable: true
+              description: Timestamp of the last message or activity.
+
+    ConversationListItem:
+      type: object
+      description: Conversation item in list responses, includes aggregate metadata.
+      allOf:
+        - $ref: '#/components/schemas/Conversation'
+        - type: object
+          properties:
+            message_count:
+              type: integer
+              minimum: 0
+              description: Total number of messages in this conversation.
+            total_tokens:
+              type: integer
+              minimum: 0
+              description: Total tokens consumed by this conversation.
+            focused_symbols:
+              type: array
+              items:
+                type: string
+              description: Ticker symbols discussed in this conversation.
+            last_activity_at:
+              type: string
+              format: date-time
+              nullable: true
+              description: Timestamp of the last message or activity.
+
+    ConversationList:
+      type: object
+      description: Paginated list of conversations.
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/ConversationListItem'
+        total:
+          type: integer
+          minimum: 0
+          description: Total number of matching conversations.
+        limit:
+          type: integer
+        offset:
+          type: integer
+      required: [items, total, limit, offset]
+
+    ConversationSummary:
+      type: object
+      description: Conversation summary with aggregate metadata and time range.
+      properties:
+        conversation_id:
+          type: string
+          format: uuid
+          description: Unique identifier of the conversation.
+        session_id:
+          type: string
+          format: uuid
+          description: Parent session identifier.
+        workspace_id:
+          type: string
+          description: Parent workspace identifier.
+        status:
+          type: string
+          enum: [active, summarized, archived]
+        summary:
+          type: string
+          nullable: true
+          description: AI-generated summary of the conversation.
+        message_count:
+          type: integer
+          minimum: 0
+        total_tokens:
+          type: integer
+          minimum: 0
+        focused_symbols:
+          type: array
+          items:
+            type: string
+          description: Ticker symbols discussed in this conversation.
+        time_range:
+          type: object
+          nullable: true
+          description: Time range of the conversation's messages.
+          properties:
+            start:
+              type: string
+              format: date-time
+            end:
+              type: string
+              format: date-time
+      required: [conversation_id, session_id, workspace_id, status]
+
+    ConversationArchivedError:
+      type: object
+      description: >
+        Error response when attempting to add messages to an archived conversation.
+        Matches the runtime error envelope produced by the chat route.
+      properties:
+        error:
+          type: string
+          description: Human-readable error message including the conversation ID.
+          example: "Conversation 550e8400-e29b-41d4-a716-446655440000 is archived and cannot accept new messages"
+        code:
+          type: string
+          enum: ["CONVERSATION_ARCHIVED"]
+          description: Machine-readable error code.
+        conversation_id:
+          type: string
+          format: uuid
+          description: The ID of the archived conversation.
+      required: [error, code, conversation_id]
 
     ConversationStatus:
       type: object
@@ -938,56 +2846,6 @@ components:
           maximum: 19
           description: Number of turns remaining before auto-archival.
       required: [turn_count, status]
-
-    ConversationHistory:
-      type: object
-      description: Full conversation history for a session.
-      properties:
-        session_id:
-          type: string
-          format: uuid
-          description: The session identifier.
-        status:
-          type: string
-          enum: ["active", "archived"]
-          description: Current session status.
-        turn_count:
-          type: integer
-          description: Total number of turns in the conversation.
-        messages:
-          type: array
-          items:
-            $ref: '#/components/schemas/ConversationMessage'
-        created_at:
-          type: string
-          format: date-time
-          description: When the session was created.
-        updated_at:
-          type: string
-          format: date-time
-          description: When the session was last updated.
-        archived_at:
-          type: string
-          format: date-time
-          description: When the session was archived (if applicable).
-      required: [session_id, status, turn_count, messages]
-
-    ConversationMessage:
-      type: object
-      description: A single message in the conversation history.
-      properties:
-        role:
-          type: string
-          enum: ["user", "assistant"]
-          description: Who sent this message.
-        content:
-          type: string
-          description: The message content.
-        timestamp:
-          type: string
-          format: date-time
-          description: When this message was sent.
-      required: [role, content]
 
     UserProfile:
       type: object
@@ -1069,5 +2927,10 @@ components:
           $ref: '#/components/schemas/UserDocument'
       required: [user]
 security: []
+
+
+
+
+
 
 

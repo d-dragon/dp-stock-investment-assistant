@@ -19,7 +19,33 @@ import re
 import time
 from typing import Any, Dict, Generator, List, Mapping, Optional
 
-from langchain.agents import create_agent
+try:
+    from langchain.agents import create_agent  # type: ignore
+except ImportError:
+    try:
+        from langgraph.prebuilt import create_react_agent
+
+        def create_agent(*, model, tools, system_prompt, checkpointer=None, name=None):
+            """Compatibility wrapper for older LangChain/LangGraph stacks."""
+            kwargs = {}
+            if checkpointer is not None:
+                kwargs["checkpointer"] = checkpointer
+            if name is not None:
+                kwargs["name"] = name
+            return create_react_agent(
+                model=model,
+                tools=tools,
+                prompt=system_prompt,
+                **kwargs,
+            )
+    except ImportError:
+        def create_agent(*, model, tools, system_prompt, checkpointer=None, name=None):
+            """Defer missing optional dependency failure to agent construction time."""
+            raise ImportError(
+                "No compatible agent constructor found. Install a supported "
+                "LangChain/LangGraph version that provides either "
+                "langchain.agents.create_agent or langgraph.prebuilt.create_react_agent."
+            )
 from langchain_core.messages import HumanMessage, SystemMessage, AIMessage
 from langchain_openai import ChatOpenAI
 
