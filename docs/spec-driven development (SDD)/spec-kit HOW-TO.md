@@ -36,7 +36,7 @@ Spec-Kit enables a spec-first workflow, ensuring that features, APIs, and compon
 ## Prerequisites
 
 - Access to this repository and its documentation
-- Familiarity with markdown and the project's [spec format](.specify/templates/spec-template.md)
+- Familiarity with markdown and the project's [spec format](../../.specify/templates/spec-template.md)
 - [Spec-Kit CLI](https://github.com/github/spec-kit#cli) installed (optional but recommended)
 
 ## SDLC with Spec-Kit Workflow
