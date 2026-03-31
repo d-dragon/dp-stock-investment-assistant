@@ -173,7 +173,8 @@ class ConversationProvider(Protocol):
     """Minimal interface for conversation status access.
     
     Used by ChatService to verify a conversation is not archived before
-    processing new messages, enabling proper 409 Conflict responses.
+    processing new messages, auto-create conversation records on first
+    message, and record per-turn metadata after agent responses.
     """
     
     def get_conversation(
@@ -188,6 +189,37 @@ class ConversationProvider(Protocol):
         Returns:
             Conversation dict with at minimum 'status' field, or None if not found.
             Status values include 'active', 'summarized', and 'archived'.
+        """
+        ...
+
+    def ensure_conversation_exists(
+        self,
+        conversation_id: str,
+    ) -> None:
+        """Ensure a conversation record exists, auto-creating if needed (FR-D01).
+        
+        Must not raise — failures are logged internally.
+        
+        Args:
+            conversation_id: The conversation identifier (UUID v4)
+        """
+        ...
+
+    def record_message_metadata(
+        self,
+        conversation_id: str,
+        *,
+        tokens_used: int = 0,
+        symbols: Optional[List[str]] = None,
+    ) -> None:
+        """Record per-turn metadata after agent response (FR-D02/FR-D03).
+        
+        Non-blocking — must not raise. Failures are logged internally.
+        
+        Args:
+            conversation_id: The conversation identifier (UUID v4)
+            tokens_used: Estimated token count for the turn
+            symbols: Stock symbols detected in the response
         """
         ...
 

@@ -570,6 +570,192 @@ class ConversationRepository(MongoGenericRepository):
             return 0
     
     # ─────────────────────────────────────────────────────────────────
+    # Phase C Management Helpers
+    # ─────────────────────────────────────────────────────────────────
+
+    def find_by_session_with_pagination(
+        self,
+        session_id: str,
+        *,
+        limit: int = 25,
+        offset: int = 0,
+        status: Optional[str] = None,
+    ) -> List[Dict[str, Any]]:
+        """Return paginated conversations for a session.
+
+        Sorted by last_activity_at desc, tie-break updated_at desc.
+        """
+        if not session_id:
+            return []
+        try:
+            query: Dict[str, Any] = {"session_id": session_id}
+            if status is not None and status in self.VALID_STATUSES:
+                query["status"] = status
+            cursor = (
+                self.collection.find(query)
+                .sort([("last_activity_at", -1), ("updated_at", -1)])
+                .skip(offset)
+                .limit(limit)
+            )
+            return list(cursor)
+        except PyMongoError as e:
+            self.logger.error(
+                f"Error listing conversations for session {session_id}: {e}"
+            )
+            return []
+
+    def count_by_session(
+        self, session_id: str, *, status: Optional[str] = None
+    ) -> int:
+        """Count conversations in a session, with optional status filter."""
+        if not session_id:
+            return 0
+        try:
+            query: Dict[str, Any] = {"session_id": session_id}
+            if status is not None and status in self.VALID_STATUSES:
+                query["status"] = status
+            return self.collection.count_documents(query)
+        except PyMongoError as e:
+            self.logger.error(
+                f"Error counting conversations for session {session_id}: {e}"
+            )
+            return 0
+
+    def update_fields(
+        self, conversation_id: str, updates: Dict[str, Any]
+    ) -> Optional[Dict[str, Any]]:
+        """Partial update of conversation fields; sets updated_at automatically.
+
+        Refuses to update archived conversations (immutable per ADR-001).
+        Returns the updated document or ``None`` on failure / not-found.
+        """
+        if not conversation_id:
+            return None
+        try:
+            existing = self.collection.find_one(
+                {"conversation_id": conversation_id}, {"status": 1}
+            )
+            if not existing:
+                return None
+            if existing.get("status") == self.STATUS_ARCHIVED:
+                self.logger.warning(
+                    f"Cannot update archived conversation: {conversation_id}"
+                )
+                return None
+            now = self._get_current_timestamp()
+            set_fields = {**updates, "updated_at": now}
+            result = self.collection.find_one_and_update(
+                {"conversation_id": conversation_id},
+                {"$set": set_fields},
+                return_document=True,
+            )
+            return result
+        except PyMongoError as e:
+            self.logger.error(f"Error updating conversation {conversation_id}: {e}")
+            return None
+
+    def get_conversation_metadata(
+        self, conversation_id: str
+    ) -> Optional[Dict[str, Any]]:
+        """Return management-facing metadata for a conversation.
+
+        Fields: message_count, total_tokens, last_activity_at, focused_symbols,
+        summary, status.  All data lives in the conversation document itself.
+        """
+        if not conversation_id:
+            return None
+        try:
+            doc = self.collection.find_one(
+                {"conversation_id": conversation_id},
+                {
+                    "_id": 0,
+                    "conversation_id": 1,
+                    "thread_id": 1,
+                    "session_id": 1,
+                    "workspace_id": 1,
+                    "status": 1,
+                    "message_count": 1,
+                    "total_tokens": 1,
+                    "summary": 1,
+                    "focused_symbols": 1,
+                    "last_activity_at": 1,
+                    "created_at": 1,
+                    "updated_at": 1,
+                },
+            )
+            return doc
+        except PyMongoError as e:
+            self.logger.error(
+                f"Error reading metadata for conversation {conversation_id}: {e}"
+            )
+            return None
+
+    # ─────────────────────────────────────────────────────────────────
+    # Runtime Metadata Update (Phase E — US5)
+    # ─────────────────────────────────────────────────────────────────
+
+    def update_metadata(
+        self,
+        conversation_id: str,
+        *,
+        message_count_delta: int = 0,
+        token_delta: int = 0,
+        last_activity_at: Optional[datetime] = None,
+        focused_symbols: Optional[List[str]] = None,
+    ) -> Optional[Dict[str, Any]]:
+        """Atomic metadata update using $inc and $set.
+
+        Increments counters atomically and sets timestamps/symbols.
+        Refuses to update archived conversations (ADR-001 immutability).
+
+        Returns:
+            Updated document, or None on failure / not-found / archived.
+        """
+        if not conversation_id:
+            return None
+        try:
+            existing = self.collection.find_one(
+                {"conversation_id": conversation_id}, {"status": 1}
+            )
+            if not existing:
+                return None
+            if existing.get("status") == self.STATUS_ARCHIVED:
+                self.logger.warning(
+                    f"Cannot update metadata for archived conversation: {conversation_id}"
+                )
+                return None
+
+            update: Dict[str, Any] = {}
+            inc_ops: Dict[str, int] = {}
+            set_ops: Dict[str, Any] = {"updated_at": self._get_current_timestamp()}
+
+            if message_count_delta:
+                inc_ops["message_count"] = message_count_delta
+            if token_delta:
+                inc_ops["total_tokens"] = token_delta
+            if last_activity_at is not None:
+                set_ops["last_activity_at"] = last_activity_at
+            if focused_symbols is not None:
+                set_ops["metadata.focused_symbols"] = focused_symbols
+
+            if inc_ops:
+                update["$inc"] = inc_ops
+            if set_ops:
+                update["$set"] = set_ops
+
+            if not update:
+                return self.collection.find_one({"conversation_id": conversation_id})
+
+            return self.collection.find_one_and_update(
+                {"conversation_id": conversation_id},
+                update,
+                return_document=True,
+            )
+        except PyMongoError as e:
+            self.logger.error(f"Error updating metadata for {conversation_id}: {e}")
+            return None
+
+    # ─────────────────────────────────────────────────────────────────
     # Override: Disable Delete (ADR-001)
     # ─────────────────────────────────────────────────────────────────
     

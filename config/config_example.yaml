@@ -46,7 +46,7 @@ langchain:
     
     # Summarization Settings (FR-3.1.6)
     summarize_threshold: 4000               # Token count to trigger summarization (valid: 1000-10000)
-    max_messages: 50                        # Max messages per session before pruning (valid: 10-200)
+    max_messages: 50                        # Max messages per conversation before pruning (valid: 10-200)
     messages_to_keep: 10                    # Messages to preserve when pruning (valid: 5-50, must be < max_messages)
     max_content_size: 32768                 # Max bytes for single message content (valid: 1024-65536)
     summary_max_length: 500                 # Max tokens for summary (valid: 100-2000)

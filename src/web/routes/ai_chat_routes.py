@@ -81,8 +81,15 @@ def create_chat_blueprint(context: "APIRouteContext") -> Blueprint:
             provider_override = data.get('provider') or request.args.get('provider')
             stream = data.get('stream', False)
             
-            # Extract and validate conversation_id (optional)
+            # Extract conversation identifier (optional).
+            # Backward compatibility: accept deprecated `session_id` alias.
+            # Migration-window dual-path (FR-D15 / SC-012): legacy stateless
+            # requests omit this field entirely; ChatService guard clauses
+            # skip conversation validation/metadata when None.
             conversation_id = data.get('conversation_id')
+            if conversation_id is None and data.get('session_id') is not None:
+                conversation_id = data.get('session_id')
+                logger.info("chat.request using deprecated session_id alias")
             if conversation_id is not None:
                 if not isinstance(conversation_id, str) or not UUID_V4_REGEX.match(conversation_id):
                     return jsonify({'error': 'conversation_id must be a valid UUID v4'}), 400

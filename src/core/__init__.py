@@ -9,7 +9,12 @@ from .agent import StockAgent
 from .ai_client import AIClient
 from .data_manager import DataManager
 from .routes import RouteResult, StockQueryRoute
-from .stock_query_router import StockQueryRouter, get_stock_query_router
+
+try:
+    from .stock_query_router import StockQueryRouter, get_stock_query_router
+except ModuleNotFoundError:
+    StockQueryRouter = None  # type: ignore
+    get_stock_query_router = None  # type: ignore
 
 __all__ = [
     'StockAgent',

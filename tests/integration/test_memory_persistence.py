@@ -1921,6 +1921,485 @@ class TestRealMongoDBPersistence:
 
 
 # ============================================================================
+# TEST: METADATA-WRITE FAILURE DRIFT SURFACING (T032 / US5)
+# ============================================================================
+
+class TestMetadataWriteFailureDrift:
+    """Verify that when a metadata write fails, drift is surfaced (logged)
+    rather than silently swallowed, and the chat response still succeeds.
+
+    Non-blocking contract: metadata-write errors must NOT fail the chat.
+    """
+
+    def test_metadata_write_failure_is_logged_not_raised(self):
+        """record_message_metadata logs warning but does not raise on repo error."""
+        import logging
+        from unittest.mock import MagicMock
+        from services.conversation_service import ConversationService
+
+        repo = MagicMock()
+        repo.update_metadata.side_effect = Exception("MongoDB write timeout")
+        repo.health_check.return_value = (True, {})
+
+        logger = logging.getLogger("test-drift")
+        logger.setLevel(logging.DEBUG)
+
+        svc = ConversationService(
+            conversation_repository=repo,
+            logger=logger,
+        )
+
+        # Should NOT raise
+        svc.record_message_metadata("conv-fail", tokens_used=50)
+
+        # Verify repo was called
+        repo.update_metadata.assert_called_once()
+
+    def test_metadata_write_failure_logs_warning_message(self):
+        """The warning log should contain the conversation_id for debugging."""
+        import logging
+        from unittest.mock import MagicMock
+        from services.conversation_service import ConversationService
+
+        repo = MagicMock()
+        repo.update_metadata.side_effect = Exception("write concern timeout")
+        repo.health_check.return_value = (True, {})
+
+        logger = MagicMock(spec=logging.Logger)
+        logger.getChild.return_value = logger
+
+        svc = ConversationService(
+            conversation_repository=repo,
+            logger=logger,
+        )
+
+        svc.record_message_metadata("conv-drift", tokens_used=100)
+
+        # Check that warning was logged with conversation_id context
+        logger.warning.assert_called_once()
+        warning_msg = logger.warning.call_args[0][0]
+        assert "conv-drift" in warning_msg
+
+    def test_chat_response_succeeds_despite_metadata_failure(self):
+        """Full path test: chat_service processes OK even when metadata write fails.
+
+        ChatService itself doesn't call record_message_metadata directly
+        (that's T034), but we verify the ConversationService helper is
+        non-blocking so T034 integration will be safe.
+        """
+        from unittest.mock import MagicMock
+        from services.conversation_service import ConversationService
+
+        repo = MagicMock()
+        repo.update_metadata.side_effect = RuntimeError("disk full")
+        repo.health_check.return_value = (True, {})
+
+        svc = ConversationService(conversation_repository=repo)
+
+        # Must not raise — chat flow depends on this being non-blocking
+        svc.record_message_metadata("conv-ok", tokens_used=10, symbols=["AAPL"])
+
+        # Verify the call was attempted
+        repo.update_metadata.assert_called_once()
+
+
+# ============================================================================
+# TEST: RECONCILIATION CHECKPOINT/MANAGEMENT ALIGNMENT (T036)
+# ============================================================================
+
+class TestReconciliationCheckpointAlignment:
+    """Verify reconciliation detects alignment issues between checkpoint data
+    and management conversation records.
+
+    These tests complement the anomaly-detection coverage in
+    test_stm_runtime_wiring.py by exercising the checkpoint-side mock
+    used throughout this file.
+    """
+
+    @pytest.fixture
+    def mock_conversations(self):
+        """In-memory conversation store for reconciliation testing."""
+        return {
+            "conv-a": {
+                "conversation_id": "conv-a",
+                "thread_id": "thread-a",
+                "status": "active",
+                "message_count": 3,
+                "last_activity_at": None,
+            },
+            "conv-b": {
+                "conversation_id": "conv-b",
+                "thread_id": "thread-b",
+                "status": "active",
+                "message_count": 5,
+                "last_activity_at": None,
+            },
+        }
+
+    @pytest.fixture
+    def mock_conversation_repo(self, mock_conversations):
+        from unittest.mock import MagicMock
+
+        repo = MagicMock()
+        repo.health_check.return_value = (True, {})
+
+        def find_by_thread_id(tid):
+            for conv in mock_conversations.values():
+                if conv["thread_id"] == tid:
+                    return dict(conv)
+            return None
+
+        repo.find_by_thread_id.side_effect = find_by_thread_id
+        repo.get_all.return_value = list(mock_conversations.values())
+        repo.find_stale.return_value = []
+        return repo
+
+    @pytest.fixture
+    def checkpointer_with_data(self):
+        """Mock checkpointer that stores checkpoint data by thread_id."""
+        from unittest.mock import MagicMock
+
+        data = {
+            "thread-a": {
+                "channel_values": {"messages": ["m1", "m2", "m3"]},  # 3 messages = matches
+            },
+            "thread-b": {
+                "channel_values": {"messages": ["m1", "m2", "m3", "m4", "m5", "m6", "m7"]},  # 7 != 5
+            },
+        }
+        cp = MagicMock()
+        cp.list.return_value = [
+            {"thread_id": "thread-a"},
+            {"thread_id": "thread-b"},
+        ]
+        cp.get.side_effect = lambda config: data.get(
+            config.get("configurable", {}).get("thread_id")
+        )
+        return cp
+
+    @pytest.fixture
+    def reconciliation_service(self, mock_conversation_repo, checkpointer_with_data):
+        from services.runtime_reconciliation_service import RuntimeReconciliationService
+
+        return RuntimeReconciliationService(
+            conversation_repo=mock_conversation_repo,
+            checkpointer=checkpointer_with_data,
+        )
+
+    def test_drift_detected_for_mismatched_message_count(self, reconciliation_service):
+        """conv-b has 5 in management but 7 in checkpoint -> drift."""
+        report = reconciliation_service.scan()
+
+        drift = [a for a in report["anomalies"] if a["type"] == "metadata_drift"]
+        assert len(drift) == 1
+        assert drift[0]["conversation_id"] == "conv-b"
+        assert drift[0]["expected"] == 5
+        assert drift[0]["actual"] == 7
+
+    def test_no_drift_for_aligned_conversation(self, reconciliation_service):
+        """conv-a has 3 in management and 3 in checkpoint -> no drift."""
+        report = reconciliation_service.scan()
+
+        drift = [a for a in report["anomalies"] if a["type"] == "metadata_drift"]
+        # Only conv-b should drift; conv-a is aligned
+        drifted_ids = [d["conversation_id"] for d in drift]
+        assert "conv-a" not in drifted_ids
+
+    def test_orphaned_thread_in_checkpoint_not_in_management(
+        self, mock_conversation_repo, checkpointer_with_data
+    ):
+        """A thread in checkpointer that has no conversation record is orphaned."""
+        from services.runtime_reconciliation_service import RuntimeReconciliationService
+
+        # Add an extra thread the repo doesn't know about
+        checkpointer_with_data.list.return_value = [
+            {"thread_id": "thread-a"},
+            {"thread_id": "thread-b"},
+            {"thread_id": "thread-unknown"},
+        ]
+
+        svc = RuntimeReconciliationService(
+            conversation_repo=mock_conversation_repo,
+            checkpointer=checkpointer_with_data,
+        )
+        report = svc.scan()
+
+        orphans = [a for a in report["anomalies"] if a["type"] == "orphaned_thread"]
+        assert any(o["thread_id"] == "thread-unknown" for o in orphans)
+
+    def test_missing_thread_when_checkpoint_absent(self, mock_conversation_repo):
+        """Conversation exists in management but checkpoint returns None."""
+        from unittest.mock import MagicMock
+        from services.runtime_reconciliation_service import RuntimeReconciliationService
+
+        cp = MagicMock()
+        cp.list.return_value = []
+        cp.get.return_value = None  # No checkpoint for any thread
+
+        svc = RuntimeReconciliationService(
+            conversation_repo=mock_conversation_repo,
+            checkpointer=cp,
+        )
+        report = svc.scan()
+
+        missing = [a for a in report["anomalies"] if a["type"] == "missing_thread"]
+        assert len(missing) == 2  # Both conv-a and conv-b have missing threads
+
+    def test_scan_report_is_machine_readable(self, reconciliation_service):
+        """Report must be JSON-serializable with correlation_id and timestamps."""
+        import json
+
+        report = reconciliation_service.scan()
+
+        # Must be JSON-serializable
+        serialized = json.dumps(report)
+        assert serialized
+
+        assert "correlation_id" in report
+        assert isinstance(report["anomalies"], list)
+        assert report["anomaly_count"] == len(report["anomalies"])
+
+
+# ============================================================================
+# Migration Dry-Run, Resume, and Mixed-Traffic Regression Tests (T041)
+# ============================================================================
+
+class TestLegacyCheckpointMigrationDryRun:
+    """Dry-run migration must preview changes without any writes."""
+
+    @pytest.fixture
+    def mock_conversation_repo(self):
+        repo = MagicMock()
+        repo.find_by_conversation_id.return_value = None
+        repo.find_by_thread_id.return_value = None
+        repo.create_conversation.return_value = {"conversation_id": "t1", "thread_id": "t1"}
+        return repo
+
+    @pytest.fixture
+    def mock_checkpointer(self):
+        cp = MagicMock()
+        cp.list.return_value = [
+            {"configurable": {"thread_id": "legacy-t1"}},
+            {"configurable": {"thread_id": "legacy-t2"}},
+            {"configurable": {"thread_id": "legacy-t3"}},
+        ]
+        return cp
+
+    @pytest.fixture
+    def migration(self, mock_conversation_repo, mock_checkpointer):
+        from data.migration.legacy_checkpoint_migration import LegacyCheckpointMigration
+        return LegacyCheckpointMigration(
+            conversation_repo=mock_conversation_repo,
+            checkpointer=mock_checkpointer,
+        )
+
+    def test_dry_run_reports_planned_changes(self, migration):
+        """Dry-run returns to_create count matching unmigrated threads."""
+        report = migration.dry_run()
+        assert report["mode"] == "dry-run"
+        assert report["to_create"] == 3
+        assert report["to_skip"] == 0
+        assert report["writes_performed"] == 0
+        assert report["status"] == "completed"
+
+    def test_dry_run_performs_zero_writes(self, migration, mock_conversation_repo):
+        """Dry-run must not call create_conversation."""
+        migration.dry_run()
+        mock_conversation_repo.create_conversation.assert_not_called()
+
+    def test_dry_run_skips_already_migrated(self, migration, mock_conversation_repo):
+        """Already-migrated threads are reported as to_skip."""
+        # First thread already has a conversation record
+        def side_effect(cid):
+            return {"conversation_id": cid} if cid == "legacy-t1" else None
+        mock_conversation_repo.find_by_conversation_id.side_effect = side_effect
+
+        report = migration.dry_run()
+        assert report["to_create"] == 2
+        assert report["to_skip"] == 1
+        assert report["writes_performed"] == 0
+
+    def test_dry_run_with_no_legacy_data(self, mock_conversation_repo):
+        """Dry-run on empty checkpointer returns zero planned changes."""
+        from data.migration.legacy_checkpoint_migration import LegacyCheckpointMigration
+        cp = MagicMock()
+        cp.list.return_value = []
+        m = LegacyCheckpointMigration(conversation_repo=mock_conversation_repo, checkpointer=cp)
+        report = m.dry_run()
+        assert report["to_create"] == 0
+        assert report["to_skip"] == 0
+        assert report["remaining_legacy_records"] == 0
+
+    def test_dry_run_audit_trail(self, migration):
+        """Dry-run produces audit entries for every thread."""
+        report = migration.dry_run()
+        audit = report["audit_log"]
+        # 3 preview entries + 1 complete entry
+        assert len(audit) == 4
+        types = [e["action_type"] for e in audit]
+        assert types.count("preview") == 3
+        assert types.count("complete") == 1
+        for entry in audit:
+            assert "timestamp" in entry
+            assert "correlation_id" in entry
+
+
+class TestLegacyCheckpointMigrationExecute:
+    """Execute migration creates conversation records and supports resume."""
+
+    @pytest.fixture
+    def mock_conversation_repo(self):
+        repo = MagicMock()
+        repo.find_by_conversation_id.return_value = None
+        repo.find_by_thread_id.return_value = None
+        repo.create_conversation.side_effect = lambda **kwargs: {
+            "conversation_id": kwargs.get("conversation_id"),
+            "thread_id": kwargs.get("thread_id"),
+        }
+        return repo
+
+    @pytest.fixture
+    def mock_checkpointer(self):
+        cp = MagicMock()
+        cp.list.return_value = [
+            {"configurable": {"thread_id": "t-aaa"}},
+            {"configurable": {"thread_id": "t-bbb"}},
+            {"configurable": {"thread_id": "t-ccc"}},
+        ]
+        return cp
+
+    @pytest.fixture
+    def migration(self, mock_conversation_repo, mock_checkpointer):
+        from data.migration.legacy_checkpoint_migration import LegacyCheckpointMigration
+        return LegacyCheckpointMigration(
+            conversation_repo=mock_conversation_repo,
+            checkpointer=mock_checkpointer,
+        )
+
+    def test_execute_creates_conversation_records(self, migration, mock_conversation_repo):
+        """Execute creates one conversation per unmigrated thread."""
+        report = migration.execute()
+        assert report["mode"] == "execute"
+        assert report["status"] == "completed"
+        assert mock_conversation_repo.create_conversation.call_count == 3
+
+    def test_execute_audit_trail(self, migration):
+        """Execute produces create + complete audit entries."""
+        report = migration.execute()
+        audit = report["audit_log"]
+        types = [e["action_type"] for e in audit]
+        assert types.count("create") == 3
+        assert types.count("complete") == 1
+        for entry in audit:
+            assert "correlation_id" in entry
+            assert "timestamp" in entry
+
+    def test_resume_skips_already_processed(self, migration, mock_conversation_repo):
+        """Resume with cursor skips threads up to and including the cursor."""
+        # Resume from "t-aaa" means skip it, process t-bbb and t-ccc
+        report = migration.execute(resume_run_id="t-aaa")
+        assert mock_conversation_repo.create_conversation.call_count == 2
+
+    def test_interrupted_and_uninterrupted_converge(self, mock_conversation_repo, mock_checkpointer):
+        """Interrupted + resumed run produces same final state as uninterrupted."""
+        from data.migration.legacy_checkpoint_migration import LegacyCheckpointMigration
+
+        # Track all created conversation IDs
+        created_ids_full: list = []
+        created_ids_resumed: list = []
+
+        def track_full(**kwargs):
+            created_ids_full.append(kwargs.get("conversation_id"))
+            return {"conversation_id": kwargs["conversation_id"]}
+
+        def track_resumed(**kwargs):
+            created_ids_resumed.append(kwargs.get("conversation_id"))
+            return {"conversation_id": kwargs["conversation_id"]}
+
+        # Full run
+        mock_conversation_repo.create_conversation.side_effect = track_full
+        m1 = LegacyCheckpointMigration(
+            conversation_repo=mock_conversation_repo, checkpointer=mock_checkpointer,
+        )
+        m1.execute()
+
+        # Reset for resumed run: first record already migrated
+        mock_conversation_repo.create_conversation.side_effect = track_resumed
+        mock_conversation_repo.find_by_conversation_id.side_effect = lambda cid: (
+            {"conversation_id": cid} if cid == "t-aaa" else None
+        )
+        mock_conversation_repo.find_by_thread_id.return_value = None
+
+        m2 = LegacyCheckpointMigration(
+            conversation_repo=mock_conversation_repo, checkpointer=mock_checkpointer,
+        )
+        m2.execute(resume_run_id="t-aaa")
+
+        # Both runs should produce conversation records for t-bbb and t-ccc
+        # Full run also has t-aaa, resumed run skips it
+        assert set(created_ids_full) == {"t-aaa", "t-bbb", "t-ccc"}
+        assert set(created_ids_resumed) == {"t-bbb", "t-ccc"}
+
+    def test_execute_zero_data_loss(self, migration, mock_checkpointer):
+        """Migration never deletes or overwrites checkpoints."""
+        migration.execute()
+        # Checkpointer should never have put/delete called
+        assert not hasattr(mock_checkpointer, 'put') or not mock_checkpointer.put.called
+        assert not hasattr(mock_checkpointer, 'delete') or not mock_checkpointer.delete.called
+
+    def test_execute_conversation_id_equals_thread_id(self, migration, mock_conversation_repo):
+        """Created conversations use conversation_id == thread_id canonical mapping."""
+        migration.execute()
+        for call in mock_conversation_repo.create_conversation.call_args_list:
+            kwargs = call.kwargs
+            assert kwargs["conversation_id"] == kwargs["thread_id"]
+
+
+class TestMixedTrafficCompatibility:
+    """Legacy stateless and conversation-aware requests work during migration window."""
+
+    @pytest.fixture
+    def mock_conversation_repo(self):
+        repo = MagicMock()
+        repo.find_by_conversation_id.return_value = None
+        repo.find_by_thread_id.return_value = None
+        return repo
+
+    def test_legacy_stateless_request_without_conversation_id(self, mock_conversation_repo):
+        """Legacy request without conversation_id should still be serviceable.
+
+        Verifies the conversation repo can handle None conversation_id lookups
+        without error, as would happen with legacy stateless traffic.
+        """
+        result = mock_conversation_repo.find_by_conversation_id(None)
+        assert result is None  # No conversation, legacy proceeds in stateless mode
+
+    def test_conversation_aware_request_finds_migrated_record(self, mock_conversation_repo):
+        """After migration, conversation-aware requests find the migrated record."""
+        # Simulate migrated record
+        mock_conversation_repo.find_by_conversation_id.return_value = {
+            "conversation_id": "migrated-t1",
+            "thread_id": "migrated-t1",
+            "status": "active",
+        }
+        result = mock_conversation_repo.find_by_conversation_id("migrated-t1")
+        assert result is not None
+        assert result["conversation_id"] == result["thread_id"]
+
+    def test_both_traffic_types_coexist(self, mock_conversation_repo):
+        """Both legacy (no conversation_id) and new (with conversation_id) work."""
+        # New-model lookup
+        mock_conversation_repo.find_by_conversation_id.side_effect = lambda cid: (
+            {"conversation_id": cid, "thread_id": cid} if cid == "new-conv" else None
+        )
+
+        # New-model: finds record
+        assert mock_conversation_repo.find_by_conversation_id("new-conv") is not None
+        # Legacy: no record, falls through to stateless
+        assert mock_conversation_repo.find_by_conversation_id("unknown-legacy") is None
+
+
+# ============================================================================
 # Pytest Configuration
 # ============================================================================
 

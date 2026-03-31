@@ -284,3 +284,176 @@ class TestChatBackwardCompatibility:
         payload = response.get_json()
         # conversation_id should NOT be in the response when null
         assert "conversation_id" not in payload
+
+
+# =============================================================================
+# US5 — Archived Conversation Rejection at Route Level (T031)
+# =============================================================================
+
+
+def _make_test_app_with_archive_rejection():
+    """Create Flask app whose chat_service raises ArchivedConversationError."""
+    from services.exceptions import ArchivedConversationError
+
+    app = Flask("test_chat_routes_archive")
+    agent = DummyAgent()
+
+    mock_chat_service = MagicMock()
+    mock_chat_service.process_chat_query.side_effect = ArchivedConversationError(
+        "550e8400-e29b-41d4-a716-446655440000"
+    )
+    mock_chat_service.stream_chat_response.side_effect = ArchivedConversationError(
+        "550e8400-e29b-41d4-a716-446655440000"
+    )
+    mock_chat_service.extract_meta = lambda raw: ("provider", "model", False)
+    mock_chat_service.strip_fallback_prefix = lambda raw: raw
+    mock_chat_service.get_timestamp = lambda: "2024-01-01T00:00:00Z"
+
+    context = APIRouteContext(
+        app=app,
+        agent=agent,
+        config={"model_provider": "openai", "openai": {"model": "gpt-4"}},
+        logger=logging.getLogger("test-archive-routes"),
+        chat_service=mock_chat_service,
+        stream_chat_response=mock_chat_service.stream_chat_response,
+        extract_meta=mock_chat_service.extract_meta,
+        strip_fallback_prefix=mock_chat_service.strip_fallback_prefix,
+        get_timestamp=mock_chat_service.get_timestamp,
+    )
+
+    blueprint = create_chat_blueprint(context)
+    app.register_blueprint(blueprint, url_prefix="/api")
+    return app
+
+
+class TestChatRouteArchivedConversationRejection:
+    """Route-level tests for archived conversation 409 CONFLICT response."""
+
+    def test_chat_endpoint_rejects_archived_conversation_with_409(self):
+        """POST /api/chat with archived conversation_id returns 409."""
+        app = _make_test_app_with_archive_rejection()
+        client = app.test_client()
+
+        response = client.post("/api/chat", json={
+            "message": "Hello",
+            "conversation_id": "550e8400-e29b-41d4-a716-446655440000",
+        })
+
+        assert response.status_code == 409
+        payload = response.get_json()
+        assert "error" in payload
+        assert payload.get("code") == "CONVERSATION_ARCHIVED"
+        assert payload.get("conversation_id") == "550e8400-e29b-41d4-a716-446655440000"
+
+    def test_chat_endpoint_409_has_correct_error_envelope(self):
+        """Verify the 409 error response matches the standard error envelope."""
+        app = _make_test_app_with_archive_rejection()
+        client = app.test_client()
+
+        response = client.post("/api/chat", json={
+            "message": "Hello",
+            "conversation_id": "550e8400-e29b-41d4-a716-446655440000",
+        })
+
+        assert response.status_code == 409
+        payload = response.get_json()
+        assert "error" in payload
+        assert isinstance(payload["error"], str)
+        assert len(payload["error"]) > 0
+
+
+# =============================================================================
+# STM Conversation Isolation at Route Level (T046 / US8)
+# Verifies conversation_id propagation and isolation through the chat API
+# =============================================================================
+
+
+class TestChatRouteSTMIsolation:
+    """Route-level tests for conversation_id == thread_id STM isolation model.
+
+    Verifies that the chat API properly propagates conversation_id to
+    underlying services and maintains isolation between conversations.
+    """
+
+    def test_conversation_id_propagated_to_chat_service(self):
+        """POST /api/chat with conversation_id passes it to chat_service."""
+        app, agent, _, mock_chat_service = _make_test_app()
+        client = app.test_client()
+
+        cid = "550e8400-e29b-41d4-a716-446655440000"
+        response = client.post("/api/chat", json={
+            "message": "Hello",
+            "conversation_id": cid,
+        })
+
+        assert response.status_code == 200
+        mock_chat_service.process_chat_query.assert_called_once_with(
+            "Hello", provider_override=None, conversation_id=cid
+        )
+
+    def test_different_conversation_ids_isolated_in_service_calls(self):
+        """Two requests with different conversation_ids produce separate service calls."""
+        app, agent, _, mock_chat_service = _make_test_app()
+        client = app.test_client()
+
+        cid_a = "550e8400-e29b-41d4-a716-446655440000"
+        cid_b = "660f9500-f39c-41e5-a827-557766551111"
+
+        resp_a = client.post("/api/chat", json={"message": "Q1", "conversation_id": cid_a})
+        assert resp_a.status_code == 200
+
+        resp_b = client.post("/api/chat", json={"message": "Q2", "conversation_id": cid_b})
+        assert resp_b.status_code == 200
+
+        calls = mock_chat_service.process_chat_query.call_args_list
+        assert len(calls) == 2
+        # First call with cid_a
+        assert calls[0] == (("Q1",), {"provider_override": None, "conversation_id": cid_a})
+        # Second call with cid_b (cross-conversation isolation)
+        assert calls[1] == (("Q2",), {"provider_override": None, "conversation_id": cid_b})
+
+    def test_streaming_propagates_conversation_id(self):
+        """Streaming chat with conversation_id passes it through to stream function."""
+        app, agent, stream_calls, _ = _make_test_app()
+        client = app.test_client()
+
+        cid = "550e8400-e29b-41d4-a716-446655440000"
+        response = client.post("/api/chat", json={
+            "message": "Stream this",
+            "stream": True,
+            "conversation_id": cid,
+        })
+
+        assert response.status_code == 200
+        # stream_calls records (message, provider_override, conversation_id)
+        assert len(stream_calls) == 1
+        assert stream_calls[0] == ("Stream this", None, cid)
+
+    def test_stateless_mode_no_conversation_id_in_service(self):
+        """POST /api/chat without conversation_id passes None (stateless mode)."""
+        app, agent, _, mock_chat_service = _make_test_app()
+        client = app.test_client()
+
+        response = client.post("/api/chat", json={"message": "Stateless query"})
+
+        assert response.status_code == 200
+        mock_chat_service.process_chat_query.assert_called_once_with(
+            "Stateless query", provider_override=None, conversation_id=None
+        )
+
+    def test_same_conversation_id_across_turns_preserves_binding(self):
+        """Two sequential requests with same conversation_id maintain checkpoint binding."""
+        app, agent, _, mock_chat_service = _make_test_app()
+        client = app.test_client()
+
+        cid = "550e8400-e29b-41d4-a716-446655440000"
+
+        client.post("/api/chat", json={"message": "Turn 1", "conversation_id": cid})
+        client.post("/api/chat", json={"message": "Turn 2", "conversation_id": cid})
+
+        calls = mock_chat_service.process_chat_query.call_args_list
+        assert len(calls) == 2
+        # Both turns use the same conversation_id
+        call_1_cid = calls[0][1].get('conversation_id') if len(calls[0]) > 1 else calls[0].kwargs.get('conversation_id')
+        call_2_cid = calls[1][1].get('conversation_id') if len(calls[1]) > 1 else calls[1].kwargs.get('conversation_id')
+        assert call_1_cid == call_2_cid == cid

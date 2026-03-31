@@ -178,6 +178,84 @@ def test_chat_endpoint_streaming_branch():
     assert agent.calls == []
 
 
+# ---------------------------------------------------------------------------
+# Management blueprint registration (T047)
+# ---------------------------------------------------------------------------
+
+
+def test_default_route_factories_include_management_blueprints():
+    """DEFAULT_HTTP_ROUTE_FACTORIES includes workspace, session, conversation blueprints."""
+    from web.api_server import DEFAULT_HTTP_ROUTE_FACTORIES
+    from web.routes.workspace_routes import create_workspace_blueprint
+    from web.routes.session_routes import create_session_blueprint
+    from web.routes.conversation_routes import create_conversation_blueprint
+
+    factory_set = set(DEFAULT_HTTP_ROUTE_FACTORIES)
+    assert create_workspace_blueprint in factory_set
+    assert create_session_blueprint in factory_set
+    assert create_conversation_blueprint in factory_set
+
+
+def test_management_blueprints_register_without_error():
+    """Management blueprints can be registered alongside health/chat."""
+    from unittest.mock import MagicMock
+
+    app = Flask("test_blueprint_reg")
+    app.config["TESTING"] = True
+
+    service_factory = MagicMock()
+    service_factory.get_workspace_service.return_value = MagicMock()
+    service_factory.get_session_service.return_value = MagicMock()
+    service_factory.get_conversation_service.return_value = MagicMock()
+
+    context = APIRouteContext(
+        app=app,
+        agent=DummyAgent(),
+        config={},
+        logger=logging.getLogger("test-reg"),
+        service_factory=service_factory,
+    )
+
+    from web.routes.workspace_routes import create_workspace_blueprint
+    from web.routes.session_routes import create_session_blueprint
+    from web.routes.conversation_routes import create_conversation_blueprint
+
+    # All three register without raising
+    app.register_blueprint(create_health_blueprint(context), url_prefix="/api")
+    app.register_blueprint(create_workspace_blueprint(context), url_prefix="/api")
+    app.register_blueprint(create_session_blueprint(context), url_prefix="/api")
+    app.register_blueprint(create_conversation_blueprint(context), url_prefix="/api")
+
+    # Verify key management routes exist in the url map
+    rules = {rule.rule for rule in app.url_map.iter_rules()}
+    assert "/api/workspaces" in rules
+    assert "/api/workspaces/<workspace_id>" in rules
+    assert "/api/sessions/<session_id>" in rules
+    assert "/api/conversations/<conversation_id>" in rules
+
+
+def test_management_endpoint_returns_503_without_service_factory(management_headers):
+    """Management endpoints return 503 when service_factory is None."""
+    from web.routes.workspace_routes import create_workspace_blueprint
+
+    app = Flask("test_no_factory")
+    app.config["TESTING"] = True
+
+    context = APIRouteContext(
+        app=app,
+        agent=DummyAgent(),
+        config={},
+        logger=logging.getLogger("test-no-factory"),
+        service_factory=None,
+    )
+
+    app.register_blueprint(create_workspace_blueprint(context), url_prefix="/api")
+    client = app.test_client()
+
+    resp = client.get("/api/workspaces", headers=management_headers)
+    assert resp.status_code == 503
+
+
 # Model management tests have been moved to their own test file since
 # model endpoints are now handled by models_routes.py to avoid duplication
 

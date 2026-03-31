@@ -3,6 +3,7 @@
 
 **Status:** Accepted  
 **Date:** 2026-01-22  
+**Last Reviewed:** 2026-03-31  
 **Context:** DP-StockAI-Assistant
 
 ---
@@ -54,7 +55,7 @@ We require a system that:
 ## 4. Architectural Principles (Hard Rules)
 
 1. **Memory never stores facts**  
-   - LTM/STM retain user preferences, session context, and routing hints only.  
+   - LTM/STM retain user preferences, reusable session context, and conversation-scoped routing hints only.  
    - All financial facts originate from external sources or verified data stores (see ADR §6 LTM exclusions; §3 Constraints).  
 2. **RAG never stores opinions**  
    - RAG indices contain sourced documents (filings, news, macro data) and retrieved snippets only.  
@@ -94,7 +95,8 @@ These principles prevent hallucination, leakage, and compounding error.
                ↓
 ┌────────────────────────────┐
 │ Short-Term Memory (STM)    │
-│ Session assumptions       │
+│ Conversation STM +        │
+│ session context           │
 └──────────────┬─────────────┘
                ↓
 ┌────────────────────────────┐
@@ -157,22 +159,25 @@ These principles prevent hallucination, leakage, and compounding error.
 ---
 
 ### 6.2 Short-Term Memory (STM)
-**Decision:** Store all conversations associated with user and workspace. Sessions are short-term entities archived for historical reference rather than deleted.
+**Decision:** Store STM as conversation-scoped threads inside a `workspace -> session -> conversation` hierarchy. Sessions remain reusable business-context containers, while conversations own the LangGraph thread state and are archived instead of hard-deleted.
 
-**Rationale:** Conversations provide valuable context for understanding user behavior patterns and analytical evolution over time. By archiving rather than purging sessions, we enable:
-- Continuity tracking across multiple sessions
-- Pattern analysis for improved personalization
+**Rationale:** Separating reusable session context from conversation-owned STM prevents sibling threads from leaking into each other while preserving the user's analytical workflow. By archiving conversations rather than purging them, we enable:
+- Continuity tracking across related conversations inside a session
+- Pattern analysis for improved personalization without conflating thread state
 - Audit trail for investment reasoning
 - Learning from past assumptions without contaminating active context
 
 **Characteristics:**
-- Session-scoped: Conversations grouped by workspace and time window
-- Support archive option: Active sessions become read-only arcive by user decision.
+- Conversation-scoped: Each conversation owns its own `conversation_id -> thread_id` mapping and metadata.
+- Session-bound reusable context: Sessions group related conversations and can hold shared analytical context without sharing checkpoints.
+- Support archive option: Conversations are archived, while sessions can be closed or archived through lifecycle management.
 - Workspace-bound: Conversations isolated per workspace to prevent context leakage
 - Selective recall: Only recent session summaries loaded into active context
 - Query-specific retrieval: Past conversations retrievable via explicit user request or RAG when semantically relevant
 - Stores conversational state only: User assumptions, focused symbols, pinned intents, summarized turn snippets
 - Never stores: Market data, computed ratios, or analytical conclusions (these remain in RAG/tools layer)
+
+**Implementation Note (2026-03-31):** The current runtime implements conversation-scoped checkpoints, management APIs for workspace/session/conversation lifecycle, and operator tooling for reconciliation and legacy-thread migration. Session-context retrieval helpers exist in the service layer; prompt-level injection of that context into the agent prompt path remains follow-up work.
 
 
 ---
@@ -289,7 +294,7 @@ User: "Đánh giá HSG trung hạn"
    ↓
 Load LTM (risk: moderate, horizon: 6–18m)
    ↓
-Read STM (steel price bottoming assumption)
+Load session context + conversation STM (steel price bottoming assumption)
    ↓
 Route → FINANCIAL_ANALYSIS
    ↓

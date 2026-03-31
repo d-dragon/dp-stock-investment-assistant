@@ -59,11 +59,11 @@ def generate_conversation_id():
 
 
 # ============================================================================
-# TESTS: SESSION_ID PARAMETER HANDLING
+# TESTS: CONVERSATION_ID PARAMETER HANDLING
 # ============================================================================
 
-class TestSessionIdParameter:
-    """Tests for session_id parameter acceptance and threading."""
+class TestConversationIdParameter:
+    """Tests for conversation_id parameter acceptance and thread_id mapping."""
 
     def test_process_query_accepts_conversation_id(self, mock_config, generate_conversation_id):
         """Test process_query accepts conversation_id parameter."""
@@ -92,8 +92,8 @@ class TestSessionIdParameter:
             assert config_arg is not None
             assert config_arg['configurable']['thread_id'] == conversation_id
 
-    def test_process_query_works_without_session_id(self, mock_config):
-        """Test process_query works when session_id is None (backward compat)."""
+    def test_process_query_works_without_conversation_id(self, mock_config):
+        """Test process_query works when conversation_id is None (stateless mode)."""
         from core.stock_assistant_agent import StockAssistantAgent
         
         with patch('core.stock_assistant_agent.StockAssistantAgent._build_agent_executor'):
@@ -106,14 +106,14 @@ class TestSessionIdParameter:
             agent._use_streaming = False
             agent.logger = MagicMock()
             
-            # Should not raise - session_id defaults to None
+            # Should not raise - conversation_id defaults to None
             result = agent.process_query("Hello")
             
             # Invoke should be called without thread_id config
             call_args = agent._agent_executor.invoke.call_args
             config_arg = call_args[1].get('config') if call_args[1] else None
             
-            # When no session_id and no checkpointer, config may be None or not contain thread_id
+            # When no conversation_id and no checkpointer, config may be None or not contain thread_id
             if config_arg is not None and 'configurable' in config_arg:
                 # If configurable exists, thread_id should not be present
                 assert 'thread_id' not in config_arg.get('configurable', {})
@@ -149,11 +149,11 @@ class TestSessionIdParameter:
 # TESTS: SESSION ISOLATION
 # ============================================================================
 
-class TestSessionIsolation:
-    """Tests for session isolation between different session_ids."""
+class TestConversationIsolation:
+    """Tests for STM isolation between different conversation_ids."""
 
-    def test_different_sessions_have_separate_thread_ids(self, mock_config):
-        """Test that different session_ids result in different thread_id configs."""
+    def test_different_conversations_have_separate_thread_ids(self, mock_config):
+        """Test that different conversation_ids yield different thread_ids -> independent checkpoints."""
         from core.stock_assistant_agent import StockAssistantAgent
         
         with patch('core.stock_assistant_agent.StockAssistantAgent._build_agent_executor'):
@@ -166,23 +166,47 @@ class TestSessionIsolation:
             agent._use_streaming = False
             agent.logger = MagicMock()
             
-            session_1 = str(uuid.uuid4())
-            session_2 = str(uuid.uuid4())
+            conversation_1 = str(uuid.uuid4())
+            conversation_2 = str(uuid.uuid4())
             
-            # Call with first session
-            agent.process_query("Hello from session 1", conversation_id=session_1)
+            # Call with first conversation
+            agent.process_query("Hello from conversation 1", conversation_id=conversation_1)
             call_1 = agent._agent_executor.invoke.call_args_list[-1]
             config_1 = call_1[1].get('config', {})
             
-            # Call with second session
-            agent.process_query("Hello from session 2", conversation_id=session_2)
+            # Call with second conversation
+            agent.process_query("Hello from conversation 2", conversation_id=conversation_2)
             call_2 = agent._agent_executor.invoke.call_args_list[-1]
             config_2 = call_2[1].get('config', {})
             
-            # Verify different thread_ids
-            assert config_1['configurable']['thread_id'] == session_1
-            assert config_2['configurable']['thread_id'] == session_2
-            assert session_1 != session_2
+            # Cross-conversation isolation: different conversation_ids -> different thread_ids
+            assert config_1['configurable']['thread_id'] == conversation_1
+            assert config_2['configurable']['thread_id'] == conversation_2
+            assert conversation_1 != conversation_2
+
+    def test_conversation_id_equals_thread_id_canonical_mapping(self, mock_config):
+        """Verify the canonical mapping: conversation_id == thread_id (1:1)."""
+        from core.stock_assistant_agent import StockAssistantAgent
+        
+        with patch('core.stock_assistant_agent.StockAssistantAgent._build_agent_executor'):
+            agent = StockAssistantAgent.__new__(StockAssistantAgent)
+            agent._config = mock_config
+            agent._checkpointer = MagicMock()
+            agent._agent_executor = MagicMock()
+            agent._agent_executor.invoke.return_value = {"output": "Test response"}
+            agent._use_react = True
+            agent._use_streaming = False
+            agent.logger = MagicMock()
+            
+            conversation_id = str(uuid.uuid4())
+            agent.process_query("Test", conversation_id=conversation_id)
+            
+            call_args = agent._agent_executor.invoke.call_args
+            config = call_args[1].get('config', {})
+            thread_id = config['configurable']['thread_id']
+            
+            # Canonical invariant: conversation_id maps 1:1 to thread_id
+            assert thread_id == conversation_id
 
 
 # ============================================================================
@@ -249,10 +273,10 @@ class TestCheckpointerIntegration:
 class TestMultiTurnConversation:
     """Tests for multi-turn conversation context recall (FR-3.1.1)."""
 
-    def test_consecutive_calls_with_same_session_use_same_thread_id(
+    def test_same_conversation_restore_yields_same_thread_id(
         self, mock_config, generate_conversation_id
     ):
-        """Test that consecutive calls with same conversation_id use same thread_id."""
+        """Same-conversation restore: same conversation_id yields same thread_id -> same checkpoint."""
         from core.stock_assistant_agent import StockAssistantAgent
         
         with patch('core.stock_assistant_agent.StockAssistantAgent._build_agent_executor'):
@@ -279,6 +303,33 @@ class TestMultiTurnConversation:
             assert first_call_config['configurable']['thread_id'] == conversation_id
             assert second_call_config['configurable']['thread_id'] == conversation_id
             assert first_call_config['configurable']['thread_id'] == second_call_config['configurable']['thread_id']
+
+    def test_resumed_checkpoint_retrieval(self, mock_config):
+        """Resumed checkpoint: new message in existing conversation retrieves prior checkpoint.
+
+        The thread_id derived from conversation_id must be stable so the
+        checkpointer can locate the previous checkpoint.
+        """
+        from core.stock_assistant_agent import StockAssistantAgent
+
+        with patch('core.stock_assistant_agent.StockAssistantAgent._build_agent_executor'):
+            agent = StockAssistantAgent.__new__(StockAssistantAgent)
+            agent._config = mock_config
+            agent._checkpointer = MagicMock()
+            agent._agent_executor = MagicMock()
+            agent._agent_executor.invoke.return_value = {"output": "Resumed answer"}
+            agent._use_react = True
+            agent._use_streaming = False
+            agent.logger = MagicMock()
+
+            existing_cid = str(uuid.uuid4())
+
+            # Simulate resuming an existing conversation after a gap
+            agent.process_query("Continue where we left off", conversation_id=existing_cid)
+
+            config = agent._agent_executor.invoke.call_args[1].get('config', {})
+            # The checkpointer uses thread_id to locate prior state
+            assert config['configurable']['thread_id'] == existing_cid
 
 
 # ============================================================================
@@ -366,15 +417,15 @@ class TestLangGraphBootstrap:
 
 class TestStatelessFallbackMode:
     """
-    Tests for US3: Agent functions without session tracking when no session_id provided.
+    Tests for US3: Agent functions without conversation tracking when no conversation_id provided.
     
-    FR-3.1.6: Agent responds normally without session_id
+    FR-3.1.6: Agent responds normally without conversation_id (stateless mode)
     - No conversation data persisted to database
     - Subsequent queries have no memory of prior exchange
     """
 
     def test_stateless_query_returns_valid_response(self, mock_config):
-        """Test: Query without session_id returns valid response (FR-3.1.6)."""
+        """Test: Query without conversation_id returns valid response (FR-3.1.6)."""
         from core.stock_assistant_agent import StockAssistantAgent
         from langchain_core.messages import AIMessage
         
@@ -391,7 +442,7 @@ class TestStatelessFallbackMode:
             agent._use_streaming = False
             agent.logger = MagicMock()
             
-            # Query WITHOUT session_id
+            # Query WITHOUT conversation_id (stateless mode)
             result = agent.process_query("What is AAPL price?")
             
             # Should return valid response
@@ -402,7 +453,7 @@ class TestStatelessFallbackMode:
             agent._agent_executor.invoke.assert_called_once()
 
     def test_stateless_mode_no_checkpoint_config(self, mock_config):
-        """Test: No checkpoint configuration when session_id omitted."""
+        """Test: No checkpoint configuration when conversation_id omitted (stateless mode)."""
         from core.stock_assistant_agent import StockAssistantAgent
         from langchain_core.messages import AIMessage
         
@@ -424,7 +475,7 @@ class TestStatelessFallbackMode:
             call_args = agent._agent_executor.invoke.call_args
             config = call_args[1].get('config')
             
-            # When session_id is None, either:
+            # When conversation_id is None, either:
             # 1. config is None
             # 2. config['configurable'] doesn't have 'thread_id'
             # 3. thread_id is None
@@ -433,7 +484,7 @@ class TestStatelessFallbackMode:
                 assert thread_id is None, "thread_id should be None for stateless mode"
 
     def test_stateless_queries_have_no_context_carryover(self, mock_config):
-        """Test: Two sequential queries without session_id have no context carryover."""
+        """Test: Two sequential queries without conversation_id have no context carryover."""
         from core.stock_assistant_agent import StockAssistantAgent
         from langchain_core.messages import AIMessage
         
@@ -476,8 +527,8 @@ class TestStatelessFallbackMode:
             # but the key point is each call starts fresh
             assert agent._agent_executor.invoke.call_count == 2
 
-    def test_stateless_with_explicit_none_session_id(self, mock_config):
-        """Test: Explicit session_id=None is treated as stateless."""
+    def test_stateless_with_explicit_none_conversation_id(self, mock_config):
+        """Test: Explicit conversation_id=None is treated as stateless (no checkpoint binding)."""
         from core.stock_assistant_agent import StockAssistantAgent
         from langchain_core.messages import AIMessage
         
@@ -507,7 +558,7 @@ class TestStatelessFallbackMode:
                 assert config['configurable'].get('thread_id') is None
 
     def test_checkpointer_not_written_in_stateless_mode(self, mock_config, mock_checkpointer):
-        """Test: No checkpoint data created when session_id omitted."""
+        """Test: No checkpoint data created when conversation_id omitted."""
         from core.stock_assistant_agent import StockAssistantAgent
         from langchain_core.messages import AIMessage
         
@@ -523,7 +574,7 @@ class TestStatelessFallbackMode:
             agent._use_streaming = False
             agent.logger = MagicMock()
             
-            # Query without session_id
+            # Query without conversation_id (stateless mode)
             agent.process_query("Hello")
             
             # The checkpointer should NOT be called to save state

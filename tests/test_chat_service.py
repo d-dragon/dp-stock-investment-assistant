@@ -808,5 +808,260 @@ class TestContextLoadingInStreaming:
         mock_session_provider.get_session_context.assert_not_called()
 
 
+# ============================================================================
+# TESTS: RUNTIME METADATA SYNC, ARCHIVED REJECTION, CONCURRENT RACE (T031/US5)
+# ============================================================================
+
+class TestArchivedConversationRejection:
+    """Test that archived conversations are rejected at the service level."""
+
+    def test_process_chat_query_rejects_archived_conversation(
+        self, mock_agent, mock_config, mock_conversation_provider, mock_session_provider
+    ):
+        """Service-level: send_message to archived conversation raises ArchivedConversationError."""
+        from services.exceptions import ArchivedConversationError
+
+        mock_conversation_provider.get_conversation.return_value = {
+            "conversation_id": "conv-archived",
+            "session_id": "sess-1",
+            "status": "archived",
+        }
+
+        service = build_chat_service(
+            mock_agent, mock_config,
+            conversation_provider=mock_conversation_provider,
+            session_provider=mock_session_provider,
+        )
+
+        with pytest.raises(ArchivedConversationError):
+            service.process_chat_query("hello", conversation_id="conv-archived")
+
+        # Agent should NOT have been called
+        mock_agent.process_query.assert_not_called()
+
+    def test_stream_chat_response_rejects_archived_conversation(
+        self, mock_agent, mock_config, mock_conversation_provider, mock_session_provider
+    ):
+        """Streaming path also rejects archived conversations."""
+        from services.exceptions import ArchivedConversationError
+
+        mock_conversation_provider.get_conversation.return_value = {
+            "conversation_id": "conv-archived",
+            "session_id": "sess-1",
+            "status": "archived",
+        }
+
+        service = build_chat_service(
+            mock_agent, mock_config,
+            conversation_provider=mock_conversation_provider,
+            session_provider=mock_session_provider,
+        )
+
+        with pytest.raises(ArchivedConversationError):
+            list(service.stream_chat_response("hello", conversation_id="conv-archived"))
+
+        mock_agent.process_query_streaming.assert_not_called()
+
+    def test_active_conversation_is_not_rejected(
+        self, mock_agent, mock_config, mock_conversation_provider, mock_session_provider
+    ):
+        """Active conversations should pass validation."""
+        mock_conversation_provider.get_conversation.return_value = {
+            "conversation_id": "conv-active",
+            "session_id": "sess-1",
+            "status": "active",
+        }
+        mock_session_provider.get_session_context.return_value = None
+
+        service = build_chat_service(
+            mock_agent, mock_config,
+            conversation_provider=mock_conversation_provider,
+            session_provider=mock_session_provider,
+        )
+
+        # Should NOT raise
+        result = service.process_chat_query("hello", conversation_id="conv-active")
+        assert "response" in result
+
+    def test_nonexistent_conversation_is_not_rejected(
+        self, mock_agent, mock_config, mock_conversation_provider, mock_session_provider
+    ):
+        """Conversations that don't exist yet (first message) should pass."""
+        mock_conversation_provider.get_conversation.return_value = None
+        mock_session_provider.get_session_context.return_value = None
+
+        service = build_chat_service(
+            mock_agent, mock_config,
+            conversation_provider=mock_conversation_provider,
+            session_provider=mock_session_provider,
+        )
+
+        result = service.process_chat_query("hello", conversation_id="conv-new")
+        assert "response" in result
+
+
+class TestConcurrentArchiveVsMessageRace:
+    """Test concurrent archive-vs-message race handling.
+
+    The system validates conversation status before processing. If a
+    conversation is archived between the initial check and agent
+    processing, the system handles the inconsistency gracefully.
+    """
+
+    def test_archive_during_message_processing_raises_on_pre_check(
+        self, mock_agent, mock_config, mock_conversation_provider, mock_session_provider
+    ):
+        """If conversation is archived at validation time, reject immediately."""
+        from services.exceptions import ArchivedConversationError
+
+        mock_conversation_provider.get_conversation.return_value = {
+            "conversation_id": "conv-race",
+            "status": "archived",
+        }
+
+        service = build_chat_service(
+            mock_agent, mock_config,
+            conversation_provider=mock_conversation_provider,
+            session_provider=mock_session_provider,
+        )
+
+        with pytest.raises(ArchivedConversationError):
+            service.process_chat_query("hello", conversation_id="conv-race")
+
+    def test_archive_after_validation_completes_successfully(
+        self, mock_agent, mock_config, mock_conversation_provider, mock_session_provider
+    ):
+        """If conversation is archived AFTER validation passes, message completes.
+
+        The validation check at the start sees active status; the archive
+        happens concurrently during agent processing. The message still
+        succeeds because the check already passed.
+        """
+        call_count = [0]
+
+        def get_conversation_side_effect(cid):
+            call_count[0] += 1
+            if call_count[0] == 1:
+                # First call: validation — active
+                return {"conversation_id": cid, "status": "active", "session_id": "s1"}
+            # Subsequent calls: now archived (concurrent archive happened)
+            return {"conversation_id": cid, "status": "archived", "session_id": "s1"}
+
+        mock_conversation_provider.get_conversation.side_effect = get_conversation_side_effect
+        mock_session_provider.get_session_context.return_value = None
+
+        service = build_chat_service(
+            mock_agent, mock_config,
+            conversation_provider=mock_conversation_provider,
+            session_provider=mock_session_provider,
+        )
+
+        # Should succeed because validation saw active status
+        result = service.process_chat_query("hello", conversation_id="conv-race")
+        assert "response" in result
+
+
+# ============================================================================
+# TESTS: MIGRATION-WINDOW MIXED TRAFFIC (T044 / FR-D15 / SC-012)
+# ============================================================================
+
+
+class TestMigrationWindowMixedTrafficService:
+    """Validate FR-D15 / SC-012: Both legacy stateless and conversation-aware
+    requests work simultaneously during the migration window.
+
+    These tests complement the integration-level TestMixedTrafficCompatibility
+    (in test_memory_persistence.py) by verifying guard-clause behavior at the
+    ChatService unit level.
+    """
+
+    def test_stateless_and_conversation_queries_in_same_service(
+        self, mock_agent, mock_config, mock_conversation_provider, mock_session_provider
+    ):
+        """Same service instance handles stateless then conversation-aware queries."""
+        mock_conversation_provider.get_conversation.return_value = {
+            "conversation_id": "conv-new",
+            "session_id": "sess-1",
+            "status": "active",
+        }
+        mock_session_provider.get_session_context.return_value = None
+
+        service = build_chat_service(
+            mock_agent, mock_config,
+            conversation_provider=mock_conversation_provider,
+            session_provider=mock_session_provider,
+        )
+
+        # Legacy stateless request
+        r1 = service.process_chat_query("stateless query")
+        assert "response" in r1
+
+        # Conversation-aware request
+        r2 = service.process_chat_query("aware query", conversation_id="conv-new")
+        assert "response" in r2
+
+        # Stateless again (interleaved)
+        r3 = service.process_chat_query("another stateless")
+        assert "response" in r3
+
+    def test_stateless_stream_skips_all_conversation_hooks(
+        self, mock_agent, mock_config, mock_conversation_provider, mock_session_provider
+    ):
+        """Stateless streaming path never touches conversation/session providers."""
+        service = build_chat_service(
+            mock_agent, mock_config,
+            conversation_provider=mock_conversation_provider,
+            session_provider=mock_session_provider,
+        )
+
+        events = list(service.stream_chat_response("hello"))
+        assert any("[DONE]" in e for e in events)
+
+        # Conversation provider called once by _validate_conversation_active(None)
+        # which returns immediately. ensure_conversation_exists also returns early.
+        # _load_conversation_context returns early. _record_message_metadata returns early.
+        mock_conversation_provider.ensure_conversation_exists.assert_not_called()
+        mock_session_provider.get_session_context.assert_not_called()
+        mock_conversation_provider.record_message_metadata.assert_not_called()
+
+    def test_conversation_aware_stream_engages_all_hooks(
+        self, mock_agent, mock_config, mock_conversation_provider, mock_session_provider
+    ):
+        """Conversation-aware streaming engages validation, context, and metadata."""
+        mock_conversation_provider.get_conversation.return_value = {
+            "conversation_id": "conv-1",
+            "session_id": "sess-1",
+            "status": "active",
+        }
+        mock_session_provider.get_session_context.return_value = {"focused_symbols": ["AAPL"]}
+
+        service = build_chat_service(
+            mock_agent, mock_config,
+            conversation_provider=mock_conversation_provider,
+            session_provider=mock_session_provider,
+        )
+
+        events = list(service.stream_chat_response("hello", conversation_id="conv-1"))
+        assert any("[DONE]" in e for e in events)
+
+        mock_conversation_provider.ensure_conversation_exists.assert_called_once_with("conv-1")
+        mock_session_provider.get_session_context.assert_called_once_with("sess-1")
+        mock_conversation_provider.record_message_metadata.assert_called_once()
+
+    def test_stateless_query_does_not_record_metadata(
+        self, mock_agent, mock_config, mock_conversation_provider, mock_session_provider
+    ):
+        """process_chat_query without conversation_id skips metadata recording."""
+        service = build_chat_service(
+            mock_agent, mock_config,
+            conversation_provider=mock_conversation_provider,
+            session_provider=mock_session_provider,
+        )
+
+        result = service.process_chat_query("stateless")
+        assert "response" in result
+        mock_conversation_provider.record_message_metadata.assert_not_called()
+
+
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

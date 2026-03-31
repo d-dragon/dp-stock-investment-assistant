@@ -12,7 +12,7 @@ import pytest
 from unittest.mock import MagicMock, patch
 
 from services.session_service import SessionService, _VALID_TRANSITIONS
-from services.exceptions import InvalidLifecycleTransitionError
+from services.exceptions import InvalidLifecycleTransitionError, OwnershipViolationError, ParentNotFoundError
 
 
 # ---------------------------------------------------------------------------
@@ -37,7 +37,8 @@ def conversation_repo():
 @pytest.fixture
 def workspace_repo():
     repo = MagicMock()
-    repo.get_by_id.return_value = {"_id": "ws-001", "name": "Test Workspace"}
+    repo.get_by_id.return_value = {"_id": "ws-001", "name": "Test Workspace", "user_id": "user-001"}
+    repo.find_by_workspace_id = MagicMock(return_value={"_id": "ws-001", "name": "Test Workspace", "user_id": "user-001"})
     repo.health_check.return_value = (True, {"status": "ready"})
     return repo
 
@@ -196,17 +197,17 @@ class TestWorkspaceValidation:
 
         result = service.create_session("s1", "ws-001", "user-001", title="Test")
 
-        workspace_repo.get_by_id.assert_called_once_with("ws-001")
+        workspace_repo.find_by_workspace_id.assert_called_once_with("ws-001")
         assert result is not None
 
     def test_create_session_rejects_unknown_workspace(self, service, workspace_repo, session_repo):
-        """E5: Returns None when workspace does not exist."""
-        workspace_repo.get_by_id.return_value = None
+        """E5: Raises ParentNotFoundError when workspace does not exist."""
+        workspace_repo.find_by_workspace_id.return_value = None
 
-        result = service.create_session("s1", "ws-bad", "user-001", title="Test")
+        with pytest.raises(ParentNotFoundError):
+            service.create_session("s1", "ws-bad", "user-001", title="Test")
 
-        workspace_repo.get_by_id.assert_called_once_with("ws-bad")
-        assert result is None
+        workspace_repo.find_by_workspace_id.assert_called_once_with("ws-bad")
         session_repo.create.assert_not_called()
 
     def test_create_session_works_without_workspace_repo(

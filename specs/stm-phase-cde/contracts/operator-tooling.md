@@ -16,6 +16,15 @@ Execution follows the repository's operational tooling pattern:
 - Public REST routes and Socket.IO events must not invoke these workflows.
 - Tests must verify absence from registered public route maps and rejection of non-operator invocation paths.
 
+### Enforcement points
+
+| Layer | File | Mechanism |
+|-------|------|-----------|
+| Route registration | `src/web/api_server.py` | `DEFAULT_HTTP_ROUTE_FACTORIES` excludes reconciliation/migration; comment guard |
+| Security tests | `tests/security/test_operator_tooling_boundaries.py` | Asserts no `/reconcil*` or `/scan*` in url_map; no field leakage |
+| Service layer | `src/services/runtime_reconciliation_service.py` | Only instantiated via `ServiceFactory.get_reconciliation_service()` |
+| CLI entrypoint | `scripts/reconcile_stm_runtime.py` | Direct script execution; not importable as route |
+
 ## Reconciliation Contract
 
 ### Planned entrypoint
@@ -31,7 +40,7 @@ python scripts/reconcile_stm_runtime.py --mode on-demand --format json --output 
 - `--session-id <uuid>` optional scope filter
 - `--format json`
 - `--output <path>` optional file output
-- `--chunk-size <n>` optional scan batch size override
+- `--verbose` / `-v` enable debug logging
 
 ### Output contract
 
@@ -96,6 +105,7 @@ python scripts/migrate_legacy_threads.py --resume --output reports/migration/lat
 - `--batch-size <n>` optional batch size override
 - `--output <path>` optional output path
 - `--fail-fast` optional execution behavior for operator troubleshooting
+- `--verbose` / `-v` enable debug logging
 
 ### Dry-run output contract
 

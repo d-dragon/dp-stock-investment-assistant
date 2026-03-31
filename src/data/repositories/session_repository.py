@@ -132,3 +132,103 @@ class SessionRepository(MongoGenericRepository):
         except Exception as e:
             self.logger.error(f"Error searching sessions by title: {e}")
             return []
+
+    # -----------------------------------------------------------------
+    # Phase C management helpers
+    # -----------------------------------------------------------------
+
+    def find_by_workspace_with_pagination(
+        self,
+        workspace_id: str,
+        *,
+        limit: int = 25,
+        offset: int = 0,
+        status: Optional[str] = None,
+    ) -> List[Dict[str, Any]]:
+        """Return paginated sessions for a workspace, sorted by updated_at desc."""
+        if not workspace_id:
+            return []
+        try:
+            query: Dict[str, Any] = {"workspace_id": workspace_id}
+            if status is not None:
+                query["status"] = status
+            cursor = (
+                self.collection.find(query)
+                .sort("updated_at", -1)
+                .skip(offset)
+                .limit(limit)
+            )
+            return list(cursor)
+        except PyMongoError as e:
+            self.logger.error(f"Error listing sessions for workspace {workspace_id}: {e}")
+            return []
+
+    def count_by_workspace(self, workspace_id: str, *, status: Optional[str] = None) -> int:
+        """Count sessions in a workspace, with optional status filter."""
+        if not workspace_id:
+            return 0
+        try:
+            query: Dict[str, Any] = {"workspace_id": workspace_id}
+            if status is not None:
+                query["status"] = status
+            return self.collection.count_documents(query)
+        except PyMongoError as e:
+            self.logger.error(f"Error counting sessions for workspace {workspace_id}: {e}")
+            return 0
+
+    def update_fields(self, session_id: str, updates: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+        """Partial update of session fields; sets updated_at automatically.
+
+        Returns the updated document or ``None`` on failure / not-found.
+        """
+        if not session_id:
+            return None
+        try:
+            now = self._get_current_timestamp()
+            set_fields = {**updates, "updated_at": now}
+            result = self.collection.find_one_and_update(
+                {"session_id": session_id},
+                {"$set": set_fields},
+                return_document=True,
+            )
+            return result
+        except PyMongoError as e:
+            self.logger.error(f"Error updating session {session_id}: {e}")
+            return None
+
+    def archive(self, session_id: str) -> Optional[Dict[str, Any]]:
+        """Set status to 'archived', record archived_at and updated_at.
+
+        Returns the updated document or ``None`` on failure / not-found.
+        """
+        if not session_id:
+            return None
+        try:
+            now = self._get_current_timestamp()
+            result = self.collection.find_one_and_update(
+                {"session_id": session_id},
+                {"$set": {
+                    "status": self.STATUS_ARCHIVED,
+                    "archived_at": now,
+                    "updated_at": now,
+                }},
+                return_document=True,
+            )
+            return result
+        except PyMongoError as e:
+            self.logger.error(f"Error archiving session {session_id}: {e}")
+            return None
+
+    def count_conversations(self, session_id: str) -> int:
+        """Count conversations belonging to this session (cross-collection).
+
+        Queries the ``conversations`` collection via the database handle.
+        """
+        if not session_id:
+            return 0
+        try:
+            db = self.collection.database
+            return db["conversations"].count_documents({"session_id": session_id})
+        except PyMongoError as e:
+            self.logger.error(f"Error counting conversations for session {session_id}: {e}")
+            return 0

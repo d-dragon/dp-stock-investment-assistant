@@ -2,7 +2,8 @@
 
 **Feature Branch**: `stm-phase-cde`  
 **Created**: 2026-03-20  
-**Status**: Clarified  
+**Status**: Verified  
+**Last Synced**: 2026-03-31  
 **Input**: Derived from SRS v2.2 (FR-5.3–5.6, FR-7, NFR-1.4, NFR-2.4–2.5, AC-5–7, IR-1.8–1.13), Phase CDE Requirement Analysis, STM Integration Roadmap (Increments 6–9), and Phase A-B feature spec (`agent-session-with-stm-wiring`)
 
 ---
@@ -187,11 +188,11 @@ The existing integration test suite is rewritten and expanded to enforce the cor
 
 #### Phase C: Management API Delivery
 
-**FR-C01**: System MUST provide REST endpoints for workspace management: list user workspaces (GET), create workspace (POST), get workspace details (GET), update workspace metadata (PATCH), and archive workspace (POST action). *(SRS: FR-5.3.1–FR-5.3.5)*
+**FR-C01**: System MUST provide REST endpoints for workspace management: list user workspaces (GET), create workspace (POST), get workspace details (GET), update workspace metadata (PUT), and archive workspace (POST action). *(SRS: FR-5.3.1–FR-5.3.5)*
 
 **FR-C02**: All workspace operations MUST validate that the requesting user owns the workspace; unauthorized requests MUST return 403 or 404. *(SRS: FR-5.3.6)*
 
-**FR-C03**: System MUST provide REST endpoints for session management: create session under workspace (POST), get session (GET), list sessions in workspace (GET with status filter), update session context (PATCH), close session (POST action), and archive session (POST action). *(SRS: FR-5.4.1–FR-5.4.6)*
+**FR-C03**: System MUST provide REST endpoints for session management: create session under workspace (POST), get session (GET), list sessions in workspace (GET with status filter), update session context (PUT), close session (POST action), and archive session (POST action). *(SRS: FR-5.4.1–FR-5.4.6)*
 
 **FR-C04**: Session lifecycle transitions MUST follow the order: active → closed → archived. Reverse transitions MUST NOT be allowed. Invalid transitions MUST be rejected with a clear error message. *(SRS: FR-5.4.7)*
 
