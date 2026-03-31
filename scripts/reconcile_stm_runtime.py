@@ -76,13 +76,27 @@ def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
 
 def _build_service(logger: logging.Logger):
     """Build RuntimeReconciliationService with real dependencies."""
+    from pymongo import MongoClient
     from utils.config_loader import ConfigLoader
+    from utils.cache import CacheBackend
     from data.repositories.factory import RepositoryFactory
     from services.factory import ServiceFactory
 
     config = ConfigLoader.load_config()
-    repo_factory = RepositoryFactory(config)
-    service_factory = ServiceFactory(config, repo_factory)
+
+    # Build MongoDB client and select database
+    mongo_uri = os.environ.get("MONGODB_URI", "mongodb://localhost:27017/stock_assistant")
+    mongo_db_name = os.environ.get("MONGODB_DB", "stock_assistant")
+    client = MongoClient(mongo_uri)
+    db = client[mongo_db_name]
+
+    repo_factory = RepositoryFactory(db, config)
+    cache_backend = CacheBackend.from_config(config)
+    service_factory = ServiceFactory(
+        config,
+        repository_factory=repo_factory,
+        cache_backend=cache_backend,
+    )
     return service_factory.get_reconciliation_service()
 
 
