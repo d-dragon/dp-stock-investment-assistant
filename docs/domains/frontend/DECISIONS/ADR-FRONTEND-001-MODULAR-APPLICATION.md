@@ -1,22 +1,16 @@
 # ADR-Frontend-001: Adopt a Modular Application Frontend Before Any Micro-Frontend Decomposition
 
-## Status
+## Document Control
 
-- Proposed
-
-## Date
-
-- 2026-03-27
-
-## Last Updated
-
-- 2026-04-01
-
-## Decision Owners
-
-- Engineering
-- Architecture
-- Frontend maintainers
+| Field | Value |
+|-------|-------|
+| **ADR ID** | ADR-Frontend-001 |
+| **Domain** | Frontend |
+| **Standards Stance** | Practice-Based ADR discipline |
+| **Status** | Proposed |
+| **Date** | 2026-03-27 |
+| **Last Updated** | 2026-04-01 |
+| **Decision Owners** | Engineering · Architecture · Frontend maintainers |
 
 ## Context
 
@@ -41,7 +35,7 @@ The deeper modernization research also clarifies that Option B should not remain
 - route-based composition
 - typed platform services and contract-generated frontend-backend types
 
-This ADR therefore captures the architectural direction, while the modernization stack and delivery approach are captured separately in ADR-Frontend-002.
+This ADR therefore captures the architectural direction, while the modernization stack and delivery approach are captured separately in [ADR-Frontend-002](./ADR-FRONTEND-002-MODERNIZE-FRONTEND-FOUNDATION.md).
 
 ## Decision
 
@@ -111,7 +105,7 @@ Preferred realization of this ADR:
 - route-composed feature ownership
 - platform services that own API contracts, query orchestration, config, streaming, and shared UI primitives
 
-The selected modernization stack, tooling, and migration sequence for implementing this direction are defined in [ADR-Frontend-002](./adr-frontend-002-modernize-frontend-foundation.md).
+The selected modernization stack, tooling, and migration sequence for implementing this direction are defined in [ADR-Frontend-002](./ADR-FRONTEND-002-MODERNIZE-FRONTEND-FOUNDATION.md).
 
 ## Guardrails
 
@@ -143,11 +137,25 @@ Rejected because it preserves current coupling and does not address root-heavy a
 
 Rejected because the current repository does not yet justify the deployment, governance, and integration overhead of independently delivered frontend applications.
 
+## Requirement Alignment
+
+This decision serves the following system requirement families without owning them. Requirements are defined and governed in the [master system SRS](../../../system/SYSTEM_REQUIREMENTS_SPECIFICATION.md); this section records the traceability link only.
+
+| Requirement Family | Relevance |
+|--------------------|-----------|
+| **SR-1**: User Interaction and Experience Continuity | Modular SPA preserves UX consistency and shared session behavior across all frontend features |
+| **SR-5**: Real-Time Delivery and Streaming Behavior | Shared platform layer centralizes streaming lifecycle instead of fragmenting it across micro-frontends |
+| **SNR-4**: Maintainability, Modularity, and Evolvability | Bounded feature modules with explicit public APIs directly address modularity and evolvability obligations |
+| **SNR-7**: Usability, Accessibility, and Design Governance | Single application shell and controlled platform layer support consistent UX governance |
+
 ## Related Documents
 
-- [frontend-architecture-evolution-report.md](./frontend-architecture-evolution-report.md)
-- [frontend-modernization-and-modularization-strategy-research.md](./frontend-modernization-and-modularization-strategy-research.md)
-- [ADR-Frontend-002: Modernize the Frontend Foundation with a Contract-First Modular Stack](./adr-frontend-002-modernize-frontend-foundation.md)
+- [Frontend Architecture Evolution Report](../../../frontend/frontend-architecture-evolution-report.md)
+- [Frontend Modernization and Modularization Strategy Research](../../../frontend/frontend-modernization-and-modularization-strategy-research.md)
+- [ADR-Frontend-002: Modernize the Frontend Foundation with a Contract-First Modular Stack](./ADR-FRONTEND-002-MODERNIZE-FRONTEND-FOUNDATION.md)
+- [Frontend Domain Technical Design](../TECHNICAL_DESIGN.md)
+- [Master System SRS](../../../system/SYSTEM_REQUIREMENTS_SPECIFICATION.md)
+- [Documentation Methodology](../../../study-hub/project-documentation-and-specification-methodology.md)
 
 ## References
 
@@ -156,3 +164,11 @@ Rejected because the current repository does not yet justify the deployment, gov
 - [React: Scaling Up with Reducer and Context](https://react.dev/learn/scaling-up-with-reducer-and-context)
 - [Feature-Sliced Design](https://feature-sliced.design/)
 - [openapi-typescript Introduction](https://openapi-ts.dev/introduction)
+
+## Revision History
+
+| Version | Date | Author | Change Summary |
+|---------|------|--------|----------------|
+| 0.1 | 2026-03-27 | Engineering | Initial ADR proposed |
+| 0.2 | 2026-04-01 | Engineering | Refined context with contract-first SPA realization and companion ADR-002 linkage |
+| 0.3 | 2026-04-13 | Engineering | Standardized to project ADR discipline; migrated to `docs/domains/frontend/DECISIONS/`; added Document Control, Requirement Alignment, and Revision History |
