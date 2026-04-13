@@ -6,9 +6,10 @@
 2. [Architectural Decision and Design](#architectural-decision-and-design)
 3. [Design Patterns and Software Stacks](#design-patterns-and-software-stacks)
 4. [Component Deep Dive](#component-deep-dive)
-5. [Data Flow and Interactions](#data-flow-and-interactions)
-6. [Space for Improvements (Phase 2)](#space-for-improvements-phase-2)
-7. [Appendix](#appendix)
+5. [Prompt System Architecture](#prompt-system-architecture)
+6. [Data Flow and Interactions](#data-flow-and-interactions)
+7. [Space for Improvements (Phase 2)](#space-for-improvements-phase-2)
+8. [Appendix](#appendix)
 
 ---
 
@@ -59,6 +60,17 @@ src/data/repositories/
 src/services/
 ├── chat_service.py             # Chat orchestration, archive guard, metadata sync (REST path)
 └── conversation_service.py     # ConversationService (lifecycle, management APIs, metadata helpers)
+
+src/prompts/                           # Prompt asset directory (planned — see Prompt System Architecture)
+├── system/                        # Versioned system prompts
+│   ├── _baseline.yaml             # Fallback prompt (always present)
+│   └── v1.0.0.yaml                # Initial versioned system prompt
+├── skills/                        # Composable skill fragments
+│   ├── disclaimer.yaml            # Investment disclaimer injection
+│   ├── anti-hype.yaml             # Anti-hype and anti-manipulation guardrail
+│   └── earnings-analysis.yaml     # Earnings-specific analysis persona
+└── experiments/                   # A/B test prompt variants
+    └── exp-001-concise.yaml       # Concise response variant
 ```
 
 ---
@@ -311,6 +323,9 @@ APIServer.__init__()
 | **Registry** | `ToolRegistry` | Dynamic component registration |
 | **Immutable Config** | `MemoryConfig` | Frozen dataclass with fail-fast validation |
 | **Repository** | `ConversationRepository` | Data access for conversations collection |
+| **Asset Loader** | `PromptAssetLoader` | Discover, validate, and cache versioned prompt files (planned) |
+| **Composer** | `PromptAssembler` | Compose skills + base prompt by route classification (planned) |
+| **Middleware** | `ResponseGuardrailMiddleware` | Post-process agent output for behavioral compliance (planned) |
 
 ### Software Stack
 
@@ -400,6 +415,9 @@ LangGraph to automatically load/save conversation state.
 - Session-context resolution helpers exist in `ChatService` and `ConversationService`, but prompt-level injection of that merged context is still follow-up work.
 
 **System Prompt**:
+
+> **Note:** The system prompt shown below is the current hardcoded implementation. The [Prompt System Architecture](#prompt-system-architecture) section describes the planned migration to externalized, versioned, and composable prompt assets (see [ADR-003](./AGENT_ARCHITECTURE_DECISION_RECORDS.md), [PROMPT_SYSTEM_RESEARCH_PROPOSAL.md](./prompt-system/PROMPT_SYSTEM_RESEARCH_PROPOSAL.md)).
+
 ```
 You are a professional stock investment assistant.
 You help users with stock analysis, price lookups, technical analysis...
@@ -475,6 +493,96 @@ class CachingTool(BaseTool):
 
 ---
 
+## Prompt System Architecture
+
+> **Status:** Proposed design — not yet implemented.  
+> **SRS References:** FR-1.4.5–1.4.9, FR-1.5, NFR-5.2.5–5.2.7, NFR-6.2.3  
+> **ADR References:** [ADR-002 (Skills Pattern)](./AGENT_ARCHITECTURE_DECISION_RECORDS.md), [ADR-003 (Externalized Prompts)](./AGENT_ARCHITECTURE_DECISION_RECORDS.md)  
+> **Research:** [PROMPT_SYSTEM_RESEARCH_PROPOSAL.md v1.2](./prompt-system/PROMPT_SYSTEM_RESEARCH_PROPOSAL.md)  
+
+### Overview
+
+The prompt system replaces the current hardcoded system-prompt string with a three-layer architecture that externalizes, composes, and guards prompt content.
+
+### Three-Layer Architecture
+
+```
+Layer 1: PromptAssetLoader
+  │  Discovers and loads versioned YAML prompt files from src/prompts/
+  │  Validates schema, extracts version metadata, implements fallback
+  │
+  ▼
+Layer 2: PromptAssembler
+  │  Composes base system prompt + active skills + LTM/STM context
+  │  Selects skills by route classification and activation criteria
+  │  Injects prompt version tag into metadata
+  │
+  ▼
+Layer 3: ResponseGuardrailMiddleware
+  │  Post-processes agent output to enforce behavioral guardrails
+  │  Checks: anti-hype blocklist, source attribution, uncertainty disclosure
+  │  Emits guardrail violations as structured trace events
+```
+
+### Component Responsibilities
+
+| Component | Responsibility | SRS Coverage |
+|-----------|---------------|--------------|
+| **PromptAssetLoader** | Load versioned prompt assets from `src/prompts/`; validate YAML schema; extract version identity; fall back to `_baseline.yaml` on failure | FR-1.4.5, FR-1.4.6, FR-1.4.8 |
+| **PromptAssembler** | Compose final prompt from base + skills + context; apply route-specific skill selection; inject prompt version into metadata; support experiment variant assignment | FR-1.4.7, FR-1.4.9, ADR-002 |
+| **ResponseGuardrailMiddleware** | Scan agent output for hype/manipulation language; verify source attribution and uncertainty disclosure; log violations | FR-1.5.1–1.5.5 |
+
+### Prompt Taxonomy
+
+Prompt assets are organized by purpose:
+
+| Type | Directory | Lifecycle | Example |
+|------|-----------|-----------|---------|
+| **System prompts** | `src/prompts/system/` | Versioned, one active at a time | `v1.0.0.yaml` — core persona and instructions |
+| **Skills** | `src/prompts/skills/` | Composable, multiple active per request | `disclaimer.yaml`, `anti-hype.yaml` |
+| **Experiments** | `src/prompts/experiments/` | Temporary variants for A/B testing | `exp-001-concise.yaml` |
+| **Baseline** | `src/prompts/system/_baseline.yaml` | Permanent fallback, never deleted | Last-known-good system prompt |
+
+### Skills Composition Flow
+
+```
+Query arrives
+   │
+   ▼
+Semantic Router classifies route (e.g., FINANCIAL_ANALYSIS)
+   │
+   ▼
+PromptAssetLoader loads:
+   ├─ Base system prompt (version-tagged)
+   ├─ Always-active skills (disclaimer, anti-hype)
+   └─ Route-matched skills (earnings-analysis, if EARNINGS_SUMMARY)
+   │
+   ▼
+PromptAssembler composes final prompt:
+   [Base] + [Always-Active Skills] + [Route Skills] + [LTM/STM] + [RAG] + [Output Schema]
+   │
+   ▼
+Agent invocation with assembled prompt
+   (prompt_version + experiment_id recorded in trace span)
+   │
+   ▼
+ResponseGuardrailMiddleware post-processes output
+   (blocklist scan, attribution check, uncertainty check)
+```
+
+### Observability Integration
+
+Each agent invocation emits trace attributes for prompt observability (NFR-5.2.5–5.2.7):
+
+| Trace Attribute | Source | Example Value |
+|----------------|--------|---------------|
+| `prompt.version` | PromptAssetLoader | `v1.2.0` |
+| `prompt.route` | Semantic Router | `FINANCIAL_ANALYSIS` |
+| `prompt.experiment_id` | PromptAssembler | `exp-001` (or `null`) |
+| `prompt.skills_active` | PromptAssembler | `["disclaimer", "anti-hype", "earnings-analysis"]` |
+| `guardrail.violations` | ResponseGuardrailMiddleware | `[]` or `["hype_language_detected"]` |
+
+---
 ## Data Flow and Interactions
 
 ### Query Processing Flow
@@ -686,6 +794,26 @@ class StockPriceResponse(BaseModel):
 parser = JsonOutputParser(pydantic_object=StockPriceResponse)
 ```
 
+### 4.4 Prompt System Externalization
+
+**Status:** Research complete — design refined in [PROMPT_SYSTEM_RESEARCH_PROPOSAL.md v1.2](./prompt-system/PROMPT_SYSTEM_RESEARCH_PROPOSAL.md)
+
+**Current**: Hardcoded system prompt string in `stock_assistant_agent.py`
+
+**Proposed**: Externalized, versioned, composable prompt system (see [Prompt System Architecture](#prompt-system-architecture))
+
+| Area | Current State | Proposed Improvement |
+|------|---------------|---------------------|
+| **Prompt Storage** | Hardcoded string in Python code | Versioned YAML files in `src/prompts/` |
+| **Composition** | Single monolithic prompt | Skills-based composable fragments (ADR-002) |
+| **Versioning** | None (git blame only) | Embedded version tags, trace attribution |
+| **Guardrails** | Inline instructions only | ResponseGuardrailMiddleware with blocklist scanning |
+| **Experimentation** | Not supported | A/B variant assignment via config |
+| **Rollback** | Code revert + deploy | Config switch to previous version |
+
+**SRS Coverage**: FR-1.4.6–1.4.9, FR-1.5.1–1.5.5, NFR-5.2.5–5.2.7, NFR-6.2.3
+
+**ADRs**: [ADR-002 (Skills Pattern)](./AGENT_ARCHITECTURE_DECISION_RECORDS.md), [ADR-003 (Externalized Prompts)](./AGENT_ARCHITECTURE_DECISION_RECORDS.md)
 ### 5. Semantic Router Enhancements
 
 | Area | Current State | Proposed Improvement |
@@ -944,7 +1072,7 @@ tools/stock_symbol.py
 
 ---
 
-**Document Version**: 2.2  
-**Last Updated**: 2026-03-31  
-**Author**: GitHub Copilot  
-**Branch**: `stm-phase-cde`
+**Document Version**: 2.3  
+**Last Updated**: 2026-04-13  
+
+

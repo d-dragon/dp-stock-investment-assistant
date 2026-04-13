@@ -1,9 +1,9 @@
 # Prompt System Architecture and Design
 
-> **Document Version**: 1.1  
-> **Last Updated**: April 1, 2026  
+> **Document Version**: 1.2  
+> **Last Updated**: April 13, 2026  
 > **Phase**: 2A.2 - System Prompt Refinement and A/B Testing  
-> **Status**: Research complete; technical design refined for multi-agent target architecture  
+> **Status**: Research refined; practical scope narrowed to project-scoped implementation targets  
 > **Primary Source Requirement**: Official vendor and regulator documentation only  
 > **Governing ADR**: [ADR-001 — Layered LLM Architecture](../AGENT_ARCHITECTURE_DECISION_RECORDS.md)
 
@@ -25,7 +25,8 @@
 12. [Implementation Roadmap](#implementation-roadmap)
 13. [Verification Strategy](#verification-strategy)
 14. [Research Log and Decision Log](#research-log-and-decision-log)
-15. [Reference Index](#reference-index)
+15. [Document Update Log](#document-update-log)
+16. [Reference Index](#reference-index)
 
 ---
 
@@ -49,18 +50,24 @@ This project already uses LangChain agents, LangGraph execution, MongoDB-backed 
 
 ### Core Conclusion
 
-The correct architectural move is to adopt a **local prompt registry and versioned prompt asset model** under `src/prompts/`, wire it into `StockAssistantAgent` as the source of truth for the current ReAct path, and extend that registry to support agent-specific prompt contracts for a future orchestrator and RAG specialist. LangSmith remains the **observability and evaluation layer** rather than the runtime prompt source.
+The correct architectural move is to adopt a **local prompt registry and versioned prompt asset model** under `src/prompts/`, wire it into `StockAssistantAgent` as the source of truth for the current ReAct path, and extend that registry to support agent-specific prompt contracts for future specialist agents. The existing `StockQueryRouter` (`src/core/stock_query_router.py`) with its 8-route semantic classification already provides a routing foundation that the prompt system should build on rather than replace. LangSmith remains the **observability and evaluation layer** rather than the runtime prompt source.
 
 ### Multi-Agent Design Conclusion
 
-The recommended target is a **router-orchestrated specialist architecture**:
+The recommended **near-term target** is a **Skills pattern** — a single agent that loads specialized prompt context on demand based on the request category, without requiring a full multi-agent runtime. This is the lowest-cost path from the current single-agent baseline and directly leverages the existing `StockQueryRouter` with its 8 route categories (`PRICE_CHECK`, `NEWS_ANALYSIS`, `PORTFOLIO`, `TECHNICAL_ANALYSIS`, `FUNDAMENTALS`, `IDEAS`, `MARKET_WATCH`, `GENERAL_CHAT`).
+
+The **medium-term target** is a **router-orchestrated specialist architecture**:
 
 - a top-level orchestrator or routing layer decides whether the request stays on the current ReAct analyst path or is delegated to a retrieval-grounded specialist;
 - each specialist receives a smaller, role-specific prompt contract instead of one oversized shared prompt;
 - shared investment-policy and safety rules stay centralized in global prompt partials; and
 - direct user-facing handoffs between agents are avoided initially in favor of centralized orchestration and synthesis.
 
-This direction follows LangChain guidance that multi-agent systems are most useful when context management, specialization, distributed ownership, or parallelization become limiting factors, while also preserving the project’s need for explicit control over safety, tool usage, and auditability.
+LangChain’s multi-agent documentation provides a clear performance trade-off: the Skills pattern uses ~3 model calls for one-shot queries (same as Router pattern), while Subagents and Handoffs require 4+ calls. The Skills pattern is recommended when tasks are “simple and focused” — which matches most stock-analysis queries. Full multi-agent is justified only when context management, specialization, or parallelization become limiting factors.
+
+> **Cost note**: Moving from single-agent to multi-agent doubles or quadruples LLM calls per query (orchestrator call + specialist call + optional validation + synthesis). This cost must be justified by measurable quality gains before adoption.
+
+Source: [LangChain Multi-Agent](https://docs.langchain.com/oss/python/langchain/multi-agent)
 
 ### Implementation Status at Time of Research
 
@@ -202,13 +209,21 @@ However, prompt-version traceability is not currently modeled as a first-class c
 
 Official LangChain guidance confirms that:
 
-- `create_agent` is the production-ready graph-based runtime for agents.
-- agents can accept a `system_prompt` directly;
-- runtime prompt changes should use middleware such as dynamic prompt hooks rather than hard-forking the agent implementation;
-- too many tools can overload the model and increase errors; dynamic tool filtering is a first-class pattern; and
-- middleware is the correct extension point for context injection, tool filtering, guardrails, and analytics.
+- `create_agent` (from `langchain.agents`) is the production-ready graph-based runtime for agents;
+- agents accept a `system_prompt` parameter directly;
+- runtime prompt changes should use **middleware** rather than hard-forking the agent implementation:
+  - `@dynamic_prompt` — generates prompts from agent state and context at runtime;
+  - `@wrap_model_call` — intercepts model invocation for dynamic model selection, retries, or fallback;
+  - `@wrap_tool_call` — intercepts tool execution for error handling, logging, or permissions;
+  - `@before_model` / `@after_model` — hooks for pre/post model-step logic;
+  - `AgentMiddleware` class with `state_schema` for structured custom state;
+  - Built-in middleware: `SummarizationMiddleware`, `HumanInTheLoopMiddleware`;
+- middleware is passed via `middleware=[...]` parameter to `create_agent`;
+- too many tools can overload the model and increase errors; dynamic tool filtering is a first-class pattern;
+- `AgentState` (TypedDict) supports custom state propagation across agent steps; and
+- structured output is available via `response_format` with `ProviderStrategy` or `ToolStrategy`.
 
-Source: [LangChain Agents](https://docs.langchain.com/oss/python/langchain/agents)
+Source: [LangChain Agents](https://docs.langchain.com/oss/python/langchain/agents), [LangChain Middleware](https://docs.langchain.com/oss/python/langchain/middleware)
 
 ### LangChain Multi-Agent Guidance
 
@@ -219,13 +234,23 @@ Official LangChain multi-agent guidance confirms that multi-agent architectures 
 - multiple teams need clean ownership boundaries; or
 - work should run in parallel or through controlled routing.
 
-LangChain documents several patterns, but for this repo the most relevant are:
+LangChain documents five multi-agent patterns with performance characteristics:
 
-- **subagents** when a central controller should invoke specialists as tools;
-- **router** when an explicit routing step should classify a request into one or more specialist paths; and
-- **custom workflow** when deterministic control and agentic steps need to be mixed in LangGraph.
+| Pattern | Model Calls (One-Shot) | Best For |
+|---|---|---|
+| **Skills** | ~3 | Simple focused tasks; single agent loads context on demand |
+| **Router** | ~3 | Parallel execution; explicit classification step |
+| **Subagents** | ~4 | Large-context domains; parallel specialist invocation |
+| **Handoffs** | ~3 (one-shot), 5+ (repeat) | Dynamic state-based routing; single/repeat requests |
+| **Custom workflow** | Varies | Bespoke LangGraph flows mixing deterministic and agentic |
 
-LangChain also warns that not every complex task needs multi-agent architecture. That is important here: the current ReAct agent should remain the baseline until specialization produces measurable gains in correctness, grounding, or control.
+For this repo, the **Skills pattern** is the recommended near-term stepping stone because:
+
+- the existing `StockQueryRouter` already classifies requests into 8 categories;
+- a single agent loading route-specific prompt context avoids multi-agent overhead;
+- migration to a full Router or Subagents pattern is straightforward once specialization gaps are measured.
+
+LangChain explicitly warns: "Not every complex task requires [multi-agent] — a single agent with the right (sometimes dynamic) tools and prompt can often achieve similar results."
 
 Source: [LangChain Multi-Agent](https://docs.langchain.com/oss/python/langchain/multi-agent)
 
@@ -383,11 +408,9 @@ This prompt-system design must comply with the layered LLM rules in [AGENT_ARCHI
 │   └─ registry_manifest.yaml (optional)                             │
 │                                                                    │
 │  Prompt Runtime                                                    │
-│   ├─ PromptRegistry                                                │
-│   ├─ PromptLoader / frontmatter parser                             │
-│   ├─ PromptComposer (global partials + role contract)              │
-│   ├─ PromptSelector (fixed / weighted / eval mode)                 │
-│   └─ PromptContextRenderer (narrow, deterministic sections only)   │
+│   ├─ PromptRegistry (load, resolve, cache prompt assets)           │
+│   ├─ PromptComposer (global partials + role contract + selection)  │
+│   └─ @dynamic_prompt middleware (narrow deterministic sections)     │
 │                                                                    │
 │  Agent Integration                                                 │
 │   ├─ Orchestrator / router prompt                                  │
@@ -405,19 +428,24 @@ This prompt-system design must comply with the layered LLM rules in [AGENT_ARCHI
 └────────────────────────────────────────────────────────────────────┘
 ```
 
-### Recommended Multi-Agent Pattern
+### Recommended Evolution Path
 
-The recommended near-term target is a **custom workflow using router and subagent concepts**, not open-ended peer-to-peer agent interaction.
+**Phase A — Skills pattern (near-term)**:
 
-Recommended flow:
+1. `StockQueryRouter` classifies the request into one of 8 route categories;
+2. the prompt system loads a route-specific prompt context (e.g., `TECHNICAL_ANALYSIS` loads chart interpretation rules, `FUNDAMENTALS` loads financial statement analysis rules);
+3. the single ReAct agent executes with the composed prompt (global policy + route-specific context);
+4. no additional model calls are needed for routing — classification uses semantic-router, not an LLM call.
 
-1. an orchestrator or router classifies the request;
-2. the router either keeps the request on the current ReAct analyst path or delegates to a RAG research specialist;
+**Phase B — Router-orchestrated specialists (medium-term)**:
+
+1. an orchestrator or router classifies the request (may reuse StockQueryRouter or introduce LLM-based routing);
+2. the router delegates to a ReAct analyst or a RAG research specialist;
 3. the selected specialist executes a role-specific prompt contract;
 4. an optional validation step can reject unsupported or weak evidence; and
 5. a final synthesis step produces the user-facing response in the shared response contract.
 
-This design is preferred because it preserves centralized control, isolates specialist context, and keeps the number of model calls and routing states explicit.
+Phase A is preferred as the starting point because it reuses existing infrastructure, adds zero additional LLM calls, and provides measurable baseline data before committing to multi-agent complexity.
 
 ### Proposed Prompt Asset Model
 
@@ -430,20 +458,25 @@ src/prompts/
     │   ├── investment_safety.md
     │   ├── response_contract.md
     │   └── tool_use_policy.md
-    ├── orchestrator/
-    │   ├── v1.md
-    │   └── candidates/
     ├── react_analyst/
     │   ├── v1.md
     │   ├── v1_vi.md
-    │   └── candidates/
-    ├── rag_research/
-    │   ├── v1.md
-    │   └── candidates/
+    │   ├── candidates/
+    │   └── routes/                    # Route-specific context for Skills pattern
+    │       ├── price_check.md
+    │       ├── news_analysis.md
+    │       ├── portfolio.md
+    │       ├── technical_analysis.md
+    │       ├── fundamentals.md
+    │       ├── ideas.md
+    │       ├── market_watch.md
+    │       └── general_chat.md
     ├── partials/
     │   ├── citation_rules.md
     │   ├── uncertainty_contract.md
     │   └── evidence_labeling.md
+    ├── orchestrator/                  # Future: multi-agent orchestration
+    ├── rag_research/                  # Future: RAG specialist
     └── CHANGELOG.md
 ```
 
@@ -484,13 +517,15 @@ Only the first three belong in the prompt-system architecture. Runtime factual c
 | `orchestrator` | classify, route, and synthesize | short, control-focused, no market opinion generation, minimal tool access |
 | `react_analyst` | multi-step tool use and reasoning | tool-aware, evidence-first, explicit uncertainty, broader reasoning latitude |
 | `rag_research` | retrieval-grounded evidence extraction and synthesis | retrieval-first, source-aware, citation-heavy, defensive against indirect prompt injection |
-| `evaluator` (optional future) | quality or safety critique | rubric-bound, non-user-facing, no autonomous tool sprawl |
+| `evaluator` | quality or safety critique (future — only after multi-agent runtime exists) | rubric-bound, non-user-facing, no autonomous tool sprawl |
 
 ### Prompt Contract Rules by Role
 
-#### Orchestrator Contract
+#### Orchestrator Contract (Future)
 
-The orchestrator prompt should:
+> **Note**: The orchestrator role is a medium-term target. In the near-term Skills pattern, `StockQueryRouter` handles classification without an LLM-based orchestrator.
+
+When implemented, the orchestrator prompt should:
 
 - decide whether the request can be answered directly by the ReAct analyst or should be delegated to retrieval-grounded research;
 - keep its context intentionally small;
@@ -508,7 +543,9 @@ The ReAct analyst prompt should:
 - avoid direct dependence on long retrieved corpora unless routed through retrieval support; and
 - inherit all shared finance safety and response-contract rules.
 
-#### RAG Research Contract
+#### RAG Research Contract (Future)
+
+> **Note**: The RAG research role requires retrieval infrastructure that does not yet exist in this project. This contract defines the target requirements for when that infrastructure is built.
 
 The RAG research prompt should:
 
@@ -518,15 +555,17 @@ The RAG research prompt should:
 - decline unsupported claims when retrieval is weak, conflicting, stale, or absent; and
 - return evidence packages or grounded summaries that can be synthesized by the orchestrator or surfaced directly when appropriate.
 
-### Cross-Agent Handoff Contract
+### Cross-Agent Handoff Contract (Future)
 
-Prompt-system design should define a narrow handoff schema between agents so specialist outputs are machine-usable and reviewable. At minimum, handoff payloads should preserve:
+> **Note**: This section describes a target-state contract for when multi-agent orchestration is implemented. It is not required for the near-term Skills pattern.
+
+When a full multi-agent runtime is introduced, handoff payloads between agents should preserve:
 
 - request intent;
 - agent role that produced the payload;
-- evidence summary or retrieved-source bundle;
-- explicit uncertainty or insufficiency flags; and
-- recommended next action such as `answer`, `retrieve_more`, `call_tool`, or `decline`.
+- evidence summary or source bundle;
+- uncertainty or insufficiency flags; and
+- recommended next action (`answer`, `retrieve_more`, `call_tool`, `decline`).
 
 ### Dynamic Sections Policy
 
@@ -562,12 +601,41 @@ Dynamic prompting should **not** be used to inject:
 
 ### Recommended Runtime Flow
 
+**Near-term (Skills pattern)**:
+
 ```python
-route = router.invoke(user_request)
+# StockQueryRouter already exists — reuse it for prompt context selection
+route = stock_query_router.classify(user_request)
+selection = prompt_registry.resolve(
+  agent_role="react_analyst",
+  route_category=route.category,  # e.g. TECHNICAL_ANALYSIS
+  version=config["prompts"]["agents"]["react_analyst"]["active_version"],
+)
+
+# Use @dynamic_prompt middleware for narrow runtime sections
+@dynamic_prompt
+def inject_route_context(state, config):
+    """Load route-specific prompt context based on classification."""
+    route_ctx = prompt_registry.get_route_context(state["route_category"])
+    return f"{selection.system_prompt}\n\n{route_ctx}"
+
+agent = create_agent(
+  model=llm,
+  tools=route.enabled_tools,
+  system_prompt=selection.system_prompt,
+  checkpointer=self._checkpointer,
+  name="react_analyst",
+  middleware=[inject_route_context],
+)
+```
+
+**Medium-term (multi-agent)**:
+
+```python
+route = orchestrator.invoke(user_request)
 selection = prompt_registry.resolve(
   agent_role=route.agent_role,
   version=config["prompts"]["agents"][route.agent_role]["active_version"],
-  context=runtime_context,
 )
 
 specialist = create_agent(
@@ -576,9 +644,13 @@ specialist = create_agent(
   system_prompt=selection.system_prompt,
   checkpointer=self._checkpointer,
   name=route.agent_role,
-  middleware=[...optional dynamic prompt middleware...],
+  middleware=[inject_route_context, analytics_middleware],
 )
+```
 
+**Common metadata injection (both phases)**:
+
+```python
 invoke_config = {
   "configurable": {"thread_id": conversation_id},
   "metadata": {
@@ -586,13 +658,25 @@ invoke_config = {
     "prompt_version": selection.version,
     "prompt_variant": selection.variant,
     "prompt_experiment_id": selection.experiment_id,
+    "route_category": route.category,
   },
 }
 ```
 
 ### Why Middleware Instead of Ad Hoc Prompt String Assembly
 
-LangChain explicitly treats middleware as the extension point for context injection, tool filtering, analytics, and model behavior changes. That aligns with this project’s architecture better than scattering conditional prompt logic across `StockAssistantAgent`, route handlers, and service code. Source: [LangChain Agents](https://docs.langchain.com/oss/python/langchain/agents)
+LangChain explicitly treats middleware as the extension point for context injection, tool filtering, analytics, and model behavior changes. The specific middleware hooks relevant to this project are:
+
+| Hook | Use Case in This Project |
+|---|---|
+| `@dynamic_prompt` | Load route-specific prompt context based on `StockQueryRouter` classification |
+| `@wrap_model_call` | Dynamic model selection aligned with `ModelClientFactory` fallback logic |
+| `@wrap_tool_call` | Tool error handling, logging, permissions enforcement |
+| `@before_model` / `@after_model` | Analytics, trace metadata injection, guardrail checks |
+
+This approach is preferred over scattering conditional prompt logic across `StockAssistantAgent`, route handlers, and service code.
+
+Sources: [LangChain Agents](https://docs.langchain.com/oss/python/langchain/agents), [LangChain Middleware](https://docs.langchain.com/oss/python/langchain/middleware)
 
 ### LangChain-Specific Recommendations
 
@@ -819,15 +903,20 @@ Recommended identifiers:
 
 ### Recommended Dataset Families
 
-- `market_data_verification`
-- `fundamental_analysis`
-- `technical_analysis_with_caveats`
-- `routing_and_specialist_selection`
-- `retrieval_grounding_and_citation_quality`
-- `missing_data_and_staleness`
-- `social_sentiment_and_hype_resistance`
-- `tool_selection_regression`
-- `vietnam_market_context`
+**Core datasets (implement first)**:
+
+- `tool_selection_regression` — verify correct tool invocation for known query types
+- `missing_data_and_staleness` — verify uncertainty disclosure when data is unavailable or stale
+- `finance_safety_and_hype_resistance` — verify rejection of manipulative framing and social hype signals
+- `route_classification_accuracy` — verify `StockQueryRouter` route assignments match expected categories
+
+**Extended datasets (implement when relevant features exist)**:
+
+- `fundamental_analysis` — evaluation of financial statement analysis quality
+- `technical_analysis_with_caveats` — evaluation of chart analysis with appropriate uncertainty
+- `retrieval_grounding_and_citation_quality` — RAG-specific, implement when RAG specialist exists
+- `routing_and_specialist_delegation` — multi-agent routing, implement when orchestrator exists
+- `vietnam_market_context` — locale-specific evaluation
 
 ---
 
@@ -845,14 +934,6 @@ prompts:
     - "global/response_contract.md"
     - "global/tool_use_policy.md"
   agents:
-    orchestrator:
-      active_version: "v1"
-      variants:
-        - name: "baseline"
-          version: "v1"
-          file: "orchestrator/v1.md"
-          weight: 1.0
-          status: "active"
     react_analyst:
       active_version: "v1"
       variants:
@@ -866,16 +947,36 @@ prompts:
           file: "react_analyst/candidates/v2_candidate.md"
           weight: 0.0
           status: "candidate"
-    rag_research:
-      active_version: "v1"
-      variants:
-        - name: "baseline"
-          version: "v1"
-          file: "rag_research/v1.md"
-          weight: 1.0
-          status: "active"
+    # orchestrator:        # Uncomment when multi-agent runtime is introduced
+    #   active_version: "v1"
+    #   variants:
+    #     - name: "baseline"
+    #       version: "v1"
+    #       file: "orchestrator/v1.md"
+    #       weight: 1.0
+    #       status: "active"
+    # rag_research:        # Uncomment when RAG specialist is implemented
+    #   active_version: "v1"
+    #   variants:
+    #     - name: "baseline"
+    #       version: "v1"
+    #       file: "rag_research/v1.md"
+    #       weight: 1.0
+    #       status: "active"
+  route_contexts:
+    enabled: true
+    directory: "react_analyst/routes"
+    supported_routes:
+      - PRICE_CHECK
+      - NEWS_ANALYSIS
+      - PORTFOLIO
+      - TECHNICAL_ANALYSIS
+      - FUNDAMENTALS
+      - IDEAS
+      - MARKET_WATCH
+      - GENERAL_CHAT
   routing:
-    mode: "single_specialist"
+    mode: "skills"  # skills | single_specialist | multi_specialist
     default_agent: "react_analyst"
     allow_parallel_specialists: false
 
@@ -922,11 +1023,19 @@ langsmith:
 - replace `REACT_SYSTEM_PROMPT` as the source of truth;
 - keep legacy fallback prompt builder isolated until intentionally refactored.
 
-### Phase 3 - Multi-Agent Prompt Taxonomy
+### Phase 2.5 - Skills Pattern Integration
+
+- create route-specific prompt context files under `react_analyst/routes/` for each `StockQueryRouter` category;
+- wire `@dynamic_prompt` middleware to compose global policy + route-specific context based on `StockQueryRouter` classification;
+- add `route_category` to LangSmith trace metadata;
+- measure route-classification accuracy and prompt-context relevance as baseline for future multi-agent decision.
+
+### Phase 3 - Multi-Agent Prompt Taxonomy (Future)
 
 - introduce shared global partials for investment safety, response contract, and tool-use policy;
-- define agent-role prompt folders for `orchestrator`, `react_analyst`, and `rag_research`;
-- formalize a handoff schema between specialist outputs and any synthesis layer.
+- define agent-role prompt folders for `orchestrator` and `rag_research`;
+- formalize a handoff schema between specialist outputs and any synthesis layer;
+- prerequisite: measurable evidence that the Skills pattern is insufficient for the project's needs.
 
 ### Phase 4 - Trace and Metadata Wiring
 
@@ -936,11 +1045,10 @@ langsmith:
 
 ### Phase 5 - Offline Evaluation Harness
 
-- create prompt-eval datasets;
+- create the 4 core prompt-eval datasets (tool_selection_regression, missing_data_and_staleness, finance_safety_and_hype_resistance, route_classification_accuracy);
 - add code and rubric evaluators;
 - baseline current prompt performance;
-- compare candidate prompts pairwise and against regression thresholds;
-- add routing and retrieval-grounding cases before enabling multi-agent promotion.
+- compare candidate prompts pairwise and against regression thresholds.
 
 ### Phase 6 - Controlled Rollout
 
@@ -948,11 +1056,14 @@ langsmith:
 - promote only after offline evaluation approval;
 - use `shadow` or small-scope weighted observation before broader rollout if needed.
 
-### Phase 7 - Multi-Agent Runtime Introduction
+### Phase 7 - Multi-Agent Runtime Introduction (Future)
+
+> **Prerequisite**: Phases 1–6 must be stable and producing measurable quality data before multi-agent work begins.
 
 - add a router or orchestrator workflow in LangGraph;
 - keep `react_analyst` as the default fallback path;
 - introduce `rag_research` only after retrieval quality, grounding, and citation behavior are verified;
+- add extended evaluation datasets (retrieval_grounding, routing_and_specialist_delegation);
 - defer direct user-visible handoffs until centralized routing and synthesis are proven stable.
 
 ---
@@ -1002,6 +1113,10 @@ This design is correct only if all of the following remain true:
 | 2026-04-01 | OpenAI agent and retrieval guidance | Confirmed knowledge access, tools, and control flow should remain separate primitives |
 | 2026-04-01 | Agentic design research | Confirmed the repo should prefer a simple composable prompt runtime over a highly abstract prompt framework |
 | 2026-04-01 | Finance-domain research | Confirmed the prompt must explicitly resist hype, guaranteed-return framing, and sole reliance on social-sentiment signals |
+| 2026-04-13 | LangChain 1.0 API verification | Confirmed `create_agent`, `@dynamic_prompt`, `@wrap_model_call`, `@wrap_tool_call`, `AgentMiddleware`, and `SummarizationMiddleware` are official LangChain 1.0 APIs |
+| 2026-04-13 | LangChain multi-agent patterns review | Documented 5 patterns (Subagents, Handoffs, Skills, Router, Custom workflow) with performance comparison; Skills pattern identified as recommended near-term stepping stone |
+| 2026-04-13 | StockQueryRouter alignment | Identified existing 8-route semantic router as foundation for Skills pattern prompt-context loading |
+| 2026-04-13 | Practical scope refinement | Reduced runtime abstractions from 5 to 3, dataset families from 9 to 4 core + 5 extended, config schema narrowed to react_analyst only |
 
 ### Decision Log
 
@@ -1014,6 +1129,10 @@ This design is correct only if all of the following remain true:
 | Start with offline evaluation before live prompt experiments | Reduces regression risk in an investment-analysis product surface | Accepted |
 | Prefer centralized routing over direct user-visible handoffs | Better matches the repo’s need for control, auditability, and bounded context | Accepted |
 | Give RAG specialists their own prompt contract | Retrieval grounding and prompt-injection resistance require different rules than ReAct tool use | Accepted |
+| Adopt Skills pattern as near-term target | Leverages existing StockQueryRouter, avoids multi-agent LLM cost overhead, provides measurable baseline before full multi-agent | Accepted |
+| Build on StockQueryRouter rather than replace it | 8-route semantic classification already exists and works; prompt system should compose route-specific context using this foundation | Accepted |
+| Reduce runtime to 3 components (PromptRegistry, PromptComposer, @dynamic_prompt) | 5 abstractions are over-engineered for a single hardcoded prompt; 3 components cover all near-term needs | Accepted |
+| Start with 4 core evaluation datasets | 9 dataset families are unrealistic before any prompt infrastructure exists; 4 cover the critical path | Accepted |
 
 ### Open Follow-Up Questions
 
@@ -1026,6 +1145,25 @@ This design is correct only if all of the following remain true:
 
 ---
 
+## Document Update Log
+
+This section tracks changes made to other project documents as a result of research findings in this proposal.
+
+### Update Session: 2026-04-13 (v1.2 → Standard Documents Sync)
+
+**Trigger:** Reflect PROMPT_SYSTEM_RESEARCH_PROPOSAL.md v1.2 findings into project-standard SDD documents.
+
+| # | Target Document | Change Summary | SRS/ADR References |
+|---|----------------|----------------|-------------------|
+| 1 | [SOFTWARE_REQUIREMENTS_SPECIFICATION.md](../SOFTWARE_REQUIREMENTS_SPECIFICATION.md) | Version 2.2 → 2.3. Added FR-1.4.6–1.4.9 (prompt version identity, route-specific context, rollback safety, experiment assignment). Added FR-1.5 (Finance-Domain Behavioral Guardrails — 5 items: evidence-first, uncertainty disclosure, anti-hype, fact-assumption separation, source attribution). Added NFR-5.2.5–5.2.7 (prompt version, agent role, and experiment ID in traces). Strengthened NFR-6.2.3 (versioned file assets, no-code-deployment). Added AC-8 (4 prompt system acceptance criteria). Added OI-9 (prompt asset directory structure). Added related document reference. | FR-1.4.6–1.4.9, FR-1.5.1–1.5.5, NFR-5.2.5–5.2.7, NFR-6.2.3, AC-8.1–8.4 |
+| 2 | [AGENT_ARCHITECTURE_DECISION_RECORDS.md](../AGENT_ARCHITECTURE_DECISION_RECORDS.md) | Added ADR-002 (Skills Pattern — composable prompt fragments with activation criteria). Added ADR-003 (Externalized Prompt Assets — versioned YAML files, baseline fallback, directory convention). Annotated ADR-001 §8 (Prompt Compiler) with implementation reference to this research proposal. | ADR-002, ADR-003 |
+| 3 | [LANGCHAIN_AGENT_ARCHITECTURE_AND_DESIGN.md](../LANGCHAIN_AGENT_ARCHITECTURE_AND_DESIGN.md) | Added new “Prompt System Architecture” section (three-layer architecture, component responsibilities, prompt taxonomy, skills composition flow, observability integration). Updated System Prompt block with migration note. Added prompt file structure (`src/prompts/`) to File Structure. Added 3 design pattern rows (Asset Loader, Composer, Middleware). Added §4.4 Prompt System Externalization to Space for Improvements. Updated Table of Contents. | FR-1.4.5–1.4.9, FR-1.5, NFR-5.2.5–5.2.7 |
+| 4 | [PHASE_2_AGENT_ENHANCEMENT_ROADMAP.md](../PHASE_2_AGENT_ENHANCEMENT_ROADMAP.md) | Updated 2A.2 status to “Research complete — design refined.” Replaced 4 generic work items with refined 7-phase implementation roadmap. Updated dependencies with cross-references to this proposal, SRS v2.3, and ADR-002/ADR-003. | FR-1.4.5–1.4.9, FR-1.5, ADR-002, ADR-003 |
+| 5 | [SRS_SPEC_TRACEABILITY.md](../SRS_SPEC_TRACEABILITY.md) | Version 1.4 → 1.5. Updated SRS baseline to v2.3. Added 16 unmapped trace entries: FR-1.4.6–1.4.9 (4), FR-1.5.1–1.5.5 (5), NFR-5.2.5–5.2.7 (3), AC-8.1–8.4 (4). Updated summary counts (302 → 318 total, 179 → 195 unmapped). Added AC-8 to family index. | All new SRS v2.3 items |
+
+**Total changes:** 5 documents, ~80 new or modified content blocks.
+
+---
 ## Reference Index
 
 ### Internal Project References
@@ -1038,16 +1176,19 @@ This design is correct only if all of the following remain true:
 
 ### Code Anchors
 
-- `src/core/stock_assistant_agent.py`
-- `src/core/langchain_adapter.py`
-- `src/core/langgraph_bootstrap.py`
-- `config/config.yaml`
-- `src/prompts/system_stock_assistant.txt`
-- `src/prompts/system_stock_assistant-vn.txt`
+- `src/core/stock_assistant_agent.py` — ReAct agent with hardcoded `REACT_SYSTEM_PROMPT`
+- `src/core/stock_query_router.py` — Semantic router with 8 route categories (StockQueryRouter)
+- `src/core/routes.py` — StockQueryRoute enum definition
+- `src/core/langchain_adapter.py` — PromptBuilder and prompt file loading utilities
+- `src/core/langgraph_bootstrap.py` — LangGraph entry path
+- `config/config.yaml` — Configuration (no `prompts.*` section yet)
+- `src/prompts/system_stock_assistant.txt` — English system prompt (not used by ReAct runtime)
+- `src/prompts/system_stock_assistant-vn.txt` — Vietnamese system prompt (not used by ReAct runtime)
 
 ### External Sources
 
 - [LangChain Agents](https://docs.langchain.com/oss/python/langchain/agents)
+- [LangChain Middleware](https://docs.langchain.com/oss/python/langchain/middleware)
 - [LangChain Multi-Agent](https://docs.langchain.com/oss/python/langchain/multi-agent)
 - [LangGraph Workflows and Agents](https://docs.langchain.com/oss/python/langgraph/workflows-agents)
 - [LangChain Agents Reference](https://reference.langchain.com/python/langchain/agents/)

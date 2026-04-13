@@ -1,8 +1,8 @@
 # Stock Investment Assistant Agent — Software Requirements Specification
 
-> **Document Version**: 2.2  
+> **Document Version**: 2.3  
 > **Created**: January 22, 2026  
-> **Last Updated**: March 19, 2026  
+> **Last Updated**: April 13, 2026  
 > **Status**: Active  
 > **Scope**: LangChain-based AI Agent for Stock Investment Assistant  
 ## Related Documents
@@ -18,6 +18,7 @@ This specification builds upon and references several architectural and design d
 | [AGENT_MEMORY_TECHNICAL_DESIGN.md](./AGENT_MEMORY_TECHNICAL_DESIGN.md) | Detailed technical design for conversation memory, checkpointing, and summarization | Implementation guidance supporting FR-3 (Memory System) |
 | [AGENTIC_APP_WITH_STM_INTEGRATION_ROADMAP.md](../High-level%20Design/AGENTIC_APP_WITH_STM_INTEGRATION_ROADMAP.md) | Technical roadmap for workspace-session-conversation hierarchy and STM integration | Roadmap for FR-5.3–5.5, FR-7 (management, consistency, migration) |
 | [SRS_SPEC_TRACEABILITY.md](./SRS_SPEC_TRACEABILITY.md) | Bidirectional trace between SRS items and spec-kit feature artifacts | Companion delivery trace for implementation coverage and sync status |
+| [PROMPT_SYSTEM_RESEARCH_PROPOSAL.md](./prompt-system/PROMPT_SYSTEM_RESEARCH_PROPOSAL.md) | Prompt system research, design patterns, and implementation roadmap | Research foundation for FR-1.4.6–1.4.9, FR-1.5, NFR-5.2.5–5.2.7 |
 
 
 
@@ -166,9 +167,27 @@ Priority levels:
 | FR-1.4.3 | **Disclaimer Inclusion** | Agent includes investment disclaimers in relevant responses | Response contains financial advice | Disclaimer present in response (verified by keyword match) | P0 |
 | FR-1.4.4 | **Memory Context Injection** | Agent receives prior conversation context as part of its instructions | Session has history | Agent demonstrates awareness of prior conversation | P1 |
 | FR-1.4.5 | **External Prompt Management** | System prompt can be modified without code deployment | — | Prompt changes take effect within 60 seconds without restart | P2 |
+| FR-1.4.6 | **Prompt Version Identity** | Every agent invocation SHALL carry an identifiable prompt version tag derived from the loaded prompt asset | Prompt assets deployed | Prompt version appears in agent response metadata and trace spans | P1 |
+| FR-1.4.7 | **Route-Specific Prompt Context** | Agent SHALL receive route-specific prompt context based on query classification (e.g., analysis, news, general) | Semantic router classifies query | Agent response reflects domain-appropriate persona and instructions for the classified route | P2 |
+| FR-1.4.8 | **Prompt Rollback Safety** | If a configured prompt version fails to load or parse, the system SHALL fall back to the most recent known-good baseline prompt | Prompt asset missing or malformed | Agent operates with baseline prompt; incident logged at WARN level with prompt version identifier | P1 |
+| FR-1.4.9 | **Prompt Experiment Assignment** | System SHALL support assigning prompt variants to conversations via a configurable selection mode (e.g., pinned version, random allocation, weighted distribution) | Experiment configuration provided | Conversation receives the designated prompt variant; variant identifier recorded in trace metadata | P2 |
 
 ---
 
+#### FR-1.5 Finance-Domain Behavioral Guardrails
+
+> **Rationale**: A financial-advisory agent must enforce epistemic discipline — grounding responses in evidence, disclosing uncertainty, and separating facts from inferences — to maintain user trust and regulatory defensibility.
+> **Research Reference**: [PROMPT_SYSTEM_RESEARCH_PROPOSAL.md §7 Behavioral Guardrails](./prompt-system/PROMPT_SYSTEM_RESEARCH_PROPOSAL.md)
+
+| ID | Title | Description | Precondition | Expected Output | Priority |
+|----|-------|-------------|--------------|-----------------|----------|
+| FR-1.5.1 | **Evidence-First Responses** | Agent SHALL ground financial assertions in data retrieved by tools (price, fundamentals, news) rather than parametric training knowledge alone | Tool data available for queried symbol | Response references specific data points (price, ratio, date) obtained from tool results | P0 |
+| FR-1.5.2 | **Uncertainty Disclosure** | Agent SHALL explicitly disclose when it lacks sufficient data or confidence to answer a financial question | Insufficient or stale data for queried topic | Response includes an explicit uncertainty qualifier (e.g., "I don't have enough data to…", "This may be outdated…") | P0 |
+| FR-1.5.3 | **Anti-Hype and Anti-Manipulation** | Agent SHALL NOT generate language that could constitute market hype, price manipulation, or guaranteed-return claims | Any financial query | Response avoids superlatives, guarantees, and urgency language; verified by keyword/phrase blocklist | P0 |
+| FR-1.5.4 | **Fact-Assumption-Inference Separation** | Agent SHALL clearly label which parts of a response are factual data, which are assumptions, and which are inferences or opinions | Response mixes data and analysis | Response uses explicit markers or structure to distinguish data vs. assumption vs. inference | P1 |
+| FR-1.5.5 | **Source Attribution** | Agent SHALL attribute financial data to the originating tool or data source | Tools returned data used in response | Response includes attribution (e.g., "According to Yahoo Finance…", "Based on the latest SEC filing…") | P1 |
+
+---
 ### FR-2: Tool System
 
 > **Priority Levels**: P0 = Must have (MVP), P1 = Should have (production readiness), P2 = Nice to have
@@ -651,6 +670,9 @@ Priority levels:
 | NFR-5.2.2 | Traces SHALL include message history, tool calls, and token usage |
 | NFR-5.2.3 | Trace data SHALL be exportable for analysis |
 | NFR-5.2.4 | Tracing SHALL be configurable (enable/disable per environment) |
+| NFR-5.2.5 | Traces SHALL include the prompt version identifier used for each agent invocation |
+| NFR-5.2.6 | Traces SHALL include the agent role or route classification applied to the request |
+| NFR-5.2.7 | When prompt experiments are active, traces SHALL include the experiment identifier and variant assignment |
 
 #### NFR-5.3 Metrics
 **Priority**: P1
@@ -686,7 +708,7 @@ Priority levels:
 |----|-------------|
 | NFR-6.2.1 | New tools SHALL be addable without modifying agent core |
 | NFR-6.2.2 | New routes SHALL be addable without modifying router core |
-| NFR-6.2.3 | System prompts SHALL be configurable without code changes |
+| NFR-6.2.3 | System prompts SHALL be loaded from versioned file assets and SHALL be configurable without code deployment; prompt changes SHALL take effect via configuration reload or service restart without a new code release |
 | NFR-6.2.4 | Model providers SHALL be pluggable via factory pattern |
 
 #### NFR-6.3 Configuration
@@ -784,6 +806,14 @@ Priority levels:
 | AC-7.3 | Session state transitions follow defined order (active → closed → archived); invalid transitions are rejected | Unit test |
 | AC-7.4 | Cross-workspace session access is rejected | Security test |
 | AC-7.5 | Cross-session conversation access (from outside the owning session's workspace) is rejected | Security test |
+### AC-8: Prompt System
+
+| ID | Criterion | Verification |
+|----|-----------|--------------|
+| AC-8.1 | Prompt version identifier appears in agent response metadata and trace spans for every invocation | Integration test |
+| AC-8.2 | When the configured prompt asset is missing or malformed, the agent falls back to baseline prompt and logs a WARN-level event | Fault-injection test |
+| AC-8.3 | Agent responses to financial queries reference specific tool-sourced data points and include source attribution | Integration test |
+| AC-8.4 | Agent responses do not contain hype, guaranteed-return claims, or urgency language (verified by blocklist scan) | Unit test + regression test |
 
 ---
 
@@ -828,6 +858,10 @@ This section maps acceptance criteria (AC-*) to the functional and non-functiona
 | AC-7.3 | FR-5.4.7, FR-3.2.8 |
 | AC-7.4 | FR-5.4.8, FR-3.2.7 |
 | AC-7.5 | FR-5.5.6, FR-3.2.7, FR-3.4.6 |
+| AC-8.1 | FR-1.4.6, NFR-5.2.5 |
+| AC-8.2 | FR-1.4.8, NFR-2.2.2 |
+| AC-8.3 | FR-1.5.1, FR-1.5.5 |
+| AC-8.4 | FR-1.5.3 |
 
 ---
 
@@ -939,6 +973,7 @@ This section maps acceptance criteria (AC-*) to the functional and non-functiona
 | OI-6 | Define the migration execution window and rollback strategy for legacy thread promotion (FR-7.3) | Required before production migration; determines maintenance-window needs and data-safety guarantees |
 | OI-7 | Define reconciliation schedule and alerting thresholds for orphan/misalignment detection (FR-7.2) | Required to operationalize reconciliation — determines frequency, severity tiers, and notification targets |
 | OI-8 | Define pagination defaults (page size, max page size, sort order) for management API list endpoints (FR-5.6.1) | Required for consistent client behavior and to prevent unbound result sets |
+| OI-9 | Define prompt asset directory structure, naming convention, and version-tagging scheme for externalized prompt files (FR-1.4.6, NFR-6.2.3) | Required before prompt versioning and experiment assignment can be implemented |
 
 ---
 
@@ -952,6 +987,7 @@ This section maps acceptance criteria (AC-*) to the functional and non-functiona
 | 2.0 | 2026-01-23 | System | Major restructure to standard SRS format. (1) Removed MEM-* section containing implementation details—memory behaviors already specified in FR-3. (2) Moved Dependencies to technical design document. (3) Enhanced Introduction with explicit In Scope/Out of Scope boundaries. (4) Cleaned Definitions section—removed implementation terms. (5) Restructured ToC from 8 to 6 sections. (6) Adopted spec-driven development approach for AI-assisted implementation. |
 | 2.1 | 2026-03-17 | System | Realigned terminology and API/memory semantics to the conversation-scoped STM model: updated FR-3 and FR-5 language for `conversation_id -> thread_id`, clarified session-as-parent context behavior, and corrected NFR/constraint wording that previously implied session-scoped STM persistence. |
 | 2.2 | 2026-03-19 | System | Phase C–E requirement integration. Added FR-5.3–5.6 (Management API for workspace, session, conversation, cross-cutting behaviors), FR-7 (Data Integrity and Operational Tooling — runtime metadata consistency, reconciliation, migration). Added NFR-1.4 (Management API Latency), NFR-2.4 (Data Migration Reliability), NFR-2.5 (Reconciliation Safety). Added AC-5 (Management API Functionality), AC-6 (Data Consistency and Reconciliation), AC-7 (Lifecycle Enforcement). Added IR-1.8–IR-1.13 (management API interface contracts). Strengthened FR-3.2.6 to P0 runtime-wiring requirement and FR-5.1.7 to P0 with explicit cross-references. Resolved OI-5; added OI-6–OI-8. Governing analysis: PHASE_CDE_REQUIREMENT_ANALYSIS.md. |
+| 2.3 | 2026-04-13 | System | Prompt system and behavioral guardrails integration. Added FR-1.4.6–1.4.9 (prompt version identity, route-specific context, rollback safety, experiment assignment). Added FR-1.5 (Finance-Domain Behavioral Guardrails — evidence-first responses, uncertainty disclosure, anti-hype, fact-assumption separation, source attribution). Added NFR-5.2.5–5.2.7 (prompt version, agent role, and experiment ID in traces). Strengthened NFR-6.2.3 to require versioned file assets and no-code-deployment configurability. Added AC-8 (Prompt System acceptance criteria). Added related document reference to PROMPT_SYSTEM_RESEARCH_PROPOSAL.md. Added OI-9 (prompt asset directory structure). Research foundation: PROMPT_SYSTEM_RESEARCH_PROPOSAL.md v1.2. |
 ---
 
 *End of Requirements Document*

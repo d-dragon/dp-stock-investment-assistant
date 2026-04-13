@@ -1,20 +1,20 @@
 ﻿# SRS To Spec Traceability
 
-> **Document Version**: 1.4  
-> **Generated**: 2026-03-31 00:00:00Z  
+> **Document Version**: 1.5  
+> **Generated**: 2026-04-13 00:00:00Z  
 > **Status**: Active  
 > **Traceability Manifest Version**: 1  
 
 ## Baseline
 
 - SRS: [docs/langchain-agent/SOFTWARE_REQUIREMENTS_SPECIFICATION.md](SOFTWARE_REQUIREMENTS_SPECIFICATION.md)
-- SRS version: `2.2`
+- SRS version: `2.3`
 
 ## Summary
 
-- Total traced SRS items discovered: `302`
+- Total traced SRS items discovered: `318`
 - Items with linked specs: `123`
-- Items without linked specs: `179`
+- Items without linked specs: `195`
 
 ## Revision History
 
@@ -24,7 +24,8 @@
 | `1.1` | `2026-03-19` | Added line-specific SRS links, embedded document version tracking, and promoted exact pilot overlap to gate-enforced coverage. |
 | `1.2` | `2026-03-19` | Added a requirement-family index and per-family mapping summaries to improve reverse-trace navigation. |
 | `1.3` | `2026-03-19` | Reformatted the family index into a grouped markdown table for easier navigation by requirement type. |
-| `1.4` | `2026-03-31` | Updated stm-phase-cde reverse-trace status labels from clarified to verified after implementation and verification sign-off. |
+| `1.4` | `2026-04-13` | Updated stm-phase-cde reverse-trace status labels from clarified to verified after implementation and verification sign-off. |
+| `1.5` | `2026-04-13` | Added unmapped trace entries for SRS v2.3 prompt-system requirements: FR-1.4.6–1.4.9, FR-1.5.1–1.5.5, NFR-5.2.5–5.2.7, AC-8.1–8.4 (16 new items, 318 total). Updated SRS baseline reference to v2.3. |
 
 ## Family Index
 
@@ -32,7 +33,7 @@
 |------|----------|
 | `FR` | [FR-1](#fr-1), [FR-2](#fr-2), [FR-3](#fr-3), [FR-4](#fr-4), [FR-5](#fr-5), [FR-6](#fr-6), [FR-7](#fr-7) |
 | `NFR` | [NFR-1](#nfr-1), [NFR-2](#nfr-2), [NFR-3](#nfr-3), [NFR-4](#nfr-4), [NFR-5](#nfr-5), [NFR-6](#nfr-6) |
-| `AC` | [AC-1](#ac-1), [AC-2](#ac-2), [AC-3](#ac-3), [AC-4](#ac-4), [AC-5](#ac-5), [AC-6](#ac-6), [AC-7](#ac-7) |
+| `AC` | [AC-1](#ac-1), [AC-2](#ac-2), [AC-3](#ac-3), [AC-4](#ac-4), [AC-5](#ac-5), [AC-6](#ac-6), [AC-7](#ac-7), [AC-8](#ac-8) |
 | `IR` | [IR-1](#ir-1), [IR-2](#ir-2) |
 | `CON` | [CON](#con) |
 | `ERR` | [ERR](#err) |
@@ -42,7 +43,7 @@
 
 ### FR-1
 
-Mapped: `0/20`. Unmapped: `20`.
+Mapped: `0/29`. Unmapped: `29`.
 
 | SRS Item | Linked Spec | Current Status | Sync Status |
 |----------|-------------|----------------|-------------|
@@ -66,6 +67,15 @@ Mapped: `0/20`. Unmapped: `20`.
 | [FR-1.4.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L166) | `-` | `unmapped` | `unmapped` |
 | [FR-1.4.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L167) | `-` | `unmapped` | `unmapped` |
 | [FR-1.4.5](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L168) | `-` | `unmapped` | `unmapped` |
+| [FR-1.4.6](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L170) | `-` | `unmapped` | `unmapped` |
+| [FR-1.4.7](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L171) | `-` | `unmapped` | `unmapped` |
+| [FR-1.4.8](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L172) | `-` | `unmapped` | `unmapped` |
+| [FR-1.4.9](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L173) | `-` | `unmapped` | `unmapped` |
+| [FR-1.5.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L184) | `-` | `unmapped` | `unmapped` |
+| [FR-1.5.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L185) | `-` | `unmapped` | `unmapped` |
+| [FR-1.5.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L186) | `-` | `unmapped` | `unmapped` |
+| [FR-1.5.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L187) | `-` | `unmapped` | `unmapped` |
+| [FR-1.5.5](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L188) | `-` | `unmapped` | `unmapped` |
 
 ### FR-2
 
@@ -335,7 +345,7 @@ Mapped: `2/12`. Unmapped: `10`.
 
 ### NFR-5
 
-Mapped: `0/15`. Unmapped: `15`.
+Mapped: `0/18`. Unmapped: `18`.
 
 | SRS Item | Linked Spec | Current Status | Sync Status |
 |----------|-------------|----------------|-------------|
@@ -348,6 +358,9 @@ Mapped: `0/15`. Unmapped: `15`.
 | [NFR-5.2.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L651) | `-` | `unmapped` | `unmapped` |
 | [NFR-5.2.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L652) | `-` | `unmapped` | `unmapped` |
 | [NFR-5.2.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L653) | `-` | `unmapped` | `unmapped` |
+| [NFR-5.2.5](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L673) | `-` | `unmapped` | `unmapped` |
+| [NFR-5.2.6](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L674) | `-` | `unmapped` | `unmapped` |
+| [NFR-5.2.7](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L675) | `-` | `unmapped` | `unmapped` |
 | [NFR-5.3.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L660) | `-` | `unmapped` | `unmapped` |
 | [NFR-5.3.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L661) | `-` | `unmapped` | `unmapped` |
 | [NFR-5.3.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L662) | `-` | `unmapped` | `unmapped` |
@@ -478,6 +491,16 @@ Mapped: `5/5`. Unmapped: `0`.
 | [AC-7.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L785) | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
 | [AC-7.5](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L786) | [stm-phase-cde](../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
 
+### AC-8
+
+Mapped: `0/4`. Unmapped: `4`.
+
+| SRS Item | Linked Spec | Current Status | Sync Status |
+|----------|-------------|----------------|-------------|
+| [AC-8.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L813) | `-` | `unmapped` | `unmapped` |
+| [AC-8.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L814) | `-` | `unmapped` | `unmapped` |
+| [AC-8.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L815) | `-` | `unmapped` | `unmapped` |
+| [AC-8.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L816) | `-` | `unmapped` | `unmapped` |
 ### IR-1
 
 Mapped: `9/13`. Unmapped: `4`.
