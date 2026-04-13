@@ -140,6 +140,9 @@ def process_query(self, query: str, session_id: str) -> AgentResponse:
 
 **Objective**: Externalize system prompts to files, enable version control, and support A/B testing of prompt variants.
 
+> **Status (2026-04-13):** Research complete — design refined. Comprehensive research and design proposal delivered in [PROMPT_SYSTEM_RESEARCH_PROPOSAL.md v1.2](./prompt-system/PROMPT_SYSTEM_RESEARCH_PROPOSAL.md). Requirements formalized in SRS v2.3 (FR-1.4.6–1.4.9, FR-1.5, NFR-5.2.5–5.2.7, AC-8). Architecture decisions recorded as [ADR-002 (Skills Pattern)](./AGENT_ARCHITECTURE_DECISION_RECORDS.md) and [ADR-003 (Externalized Prompts)](./AGENT_ARCHITECTURE_DECISION_RECORDS.md).  
+> **Next step:** Implementation Phase 1 — PromptAssetLoader and baseline prompt extraction.
+
 #### Current State
 
 - `REACT_SYSTEM_PROMPT` hardcoded in `stock_assistant_agent.py` (lines 56-70)
@@ -153,26 +156,48 @@ def process_query(self, query: str, session_id: str) -> AgentResponse:
 - A/B testing framework with LangSmith evaluation integration
 - Prompt selection configurable via `config.yaml`
 
-#### Work Items
+#### Work Items (Refined — 7-Phase Roadmap)
 
-1. **Extract Prompts to External Files**
-   - Create `src/prompts/react_system/v1.md` (current prompt)
-   - Update `StockAssistantAgent` to load from files using `PromptBuilder`
-   - Support Jinja2 templating for dynamic sections
+> Refined from original 4 items based on [PROMPT_SYSTEM_RESEARCH_PROPOSAL.md §10 Implementation Roadmap](./prompt-system/PROMPT_SYSTEM_RESEARCH_PROPOSAL.md).
 
-2. **Implement Prompt Versioning**
-   - Add `prompts.active_version` to `config.yaml`
-   - Create prompt registry for version management
-   - Log prompt version in LangSmith traces
+1. **Phase 1 — Prompt Asset Extraction** (FR-1.4.5, NFR-6.2.3)
+   - Create `src/prompts/system/_baseline.yaml` with current hardcoded prompt
+   - Create `src/prompts/system/v1.0.0.yaml` as the first versioned prompt
+   - Define YAML prompt asset schema with JSON Schema validation
+   - Implement `PromptAssetLoader` with caching, validation, and `_baseline.yaml` fallback
+   - Update `StockAssistantAgent` to load prompt via `PromptAssetLoader`
 
-3. **A/B Testing Framework**
-   - Implement prompt selector with weighted distribution
-   - Add evaluation harness using LangSmith datasets
-   - Create comparison metrics (response quality, tool usage, latency)
+2. **Phase 2 — Version Identity and Tracing** (FR-1.4.6, NFR-5.2.5–5.2.7)
+   - Inject prompt version tag into agent response metadata
+   - Add prompt version, route classification, and experiment ID to trace span attributes
+   - Log prompt version in every invocation at INFO level
 
-4. **Documentation**
-   - Document prompt authoring guidelines
+3. **Phase 3 — Skills Pattern Foundation** (ADR-002, FR-1.4.7)
+   - Create initial skill files: `disclaimer.yaml`, `anti-hype.yaml`
+   - Implement `PromptAssembler` that composes base prompt + active skills
+   - Wire semantic router classification into skill selection
+   - Add route-matched skills for key intents (FINANCIAL_ANALYSIS, EARNINGS_SUMMARY)
+
+4. **Phase 4 — Behavioral Guardrails** (FR-1.5.1–1.5.5)
+   - Implement `ResponseGuardrailMiddleware` with blocklist scanning
+   - Add source-attribution and uncertainty-disclosure checks
+   - Emit guardrail violations as structured trace events
+   - Add guardrail regression test suite
+
+5. **Phase 5 — Experiment Framework** (FR-1.4.9)
+   - Implement variant selector with configurable selection modes (pinned, random, weighted)
+   - Create `src/prompts/experiments/` directory with schema
+   - Add evaluation harness using LangSmith datasets for variant comparison
+
+6. **Phase 6 — Rollback Safety** (FR-1.4.8)
+   - Implement automatic fallback to `_baseline.yaml` on load/parse failure
+   - Add WARN-level logging for fallback events
+   - Add fault-injection test for missing/malformed prompt assets
+
+7. **Phase 7 — Documentation and Contributor Guide**
+   - Document skill authoring guide (format, metadata, activation criteria)
    - Create prompt changelog template
+   - Update operational runbook with prompt management procedures
 
 #### Implementation Pattern
 
@@ -200,7 +225,11 @@ class StockAssistantAgent:
 
 - Existing `PromptBuilder` pattern in `langchain_adapter.py`
 - LangSmith for evaluation (existing integration)
-- Jinja2 (existing dependency)
+- Jinja2 or YAML-based templating (to be finalized during Phase 1)
+- Semantic router integration for route-based skill activation
+- Research: [PROMPT_SYSTEM_RESEARCH_PROPOSAL.md v1.2](./prompt-system/PROMPT_SYSTEM_RESEARCH_PROPOSAL.md)
+- SRS: FR-1.4.5–1.4.9, FR-1.5, NFR-5.2.5–5.2.7, NFR-6.2.3, AC-8
+- ADRs: [ADR-002](./AGENT_ARCHITECTURE_DECISION_RECORDS.md), [ADR-003](./AGENT_ARCHITECTURE_DECISION_RECORDS.md)
 
 #### Success Criteria
 
