@@ -467,5 +467,5 @@ class ConversationRepository(MongoGenericRepository):
 ## References
 
 - [AGENT_MEMORY_TECHNICAL_DESIGN.md](../../docs/langchain-agent/AGENT_MEMORY_TECHNICAL_DESIGN.md) — MEM-1 data model requirements
-- [ADR-001](../../docs/langchain-agent/AGENT_ARCHITECTURE_DECISION_RECORDS.md) — No-delete policy
+- [ADR-001](../../docs/domains/agent/decisions/AGENT_ARCHITECTURE_DECISION_RECORDS.md) — No-delete policy
 - [MongoDB Schema Patterns](../../.github/instructions/backend-python.instructions.md) — Repository patterns

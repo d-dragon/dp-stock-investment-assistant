@@ -416,7 +416,7 @@ LangGraph to automatically load/save conversation state.
 
 **System Prompt**:
 
-> **Note:** The system prompt shown below is the current hardcoded implementation. The [Prompt System Architecture](#prompt-system-architecture) section describes the planned migration to externalized, versioned, and composable prompt assets (see [ADR-003](./AGENT_ARCHITECTURE_DECISION_RECORDS.md), [PROMPT_SYSTEM_RESEARCH_PROPOSAL.md](./prompt-system/PROMPT_SYSTEM_RESEARCH_PROPOSAL.md)).
+> **Note:** The system prompt shown below is the current hardcoded implementation. The [Prompt System Architecture](#prompt-system-architecture) section describes the planned migration to externalized, versioned, and composable prompt assets (see [ADR-003](../domains/agent/decisions/AGENT_ARCHITECTURE_DECISION_RECORDS.md), [PROMPT_SYSTEM_RESEARCH_PROPOSAL.md](./prompt-system/PROMPT_SYSTEM_RESEARCH_PROPOSAL.md)).
 
 ```
 You are a professional stock investment assistant.
@@ -497,7 +497,7 @@ class CachingTool(BaseTool):
 
 > **Status:** Proposed design — not yet implemented.  
 > **SRS References:** FR-1.4.5–1.4.9, FR-1.5, NFR-5.2.5–5.2.7, NFR-6.2.3  
-> **ADR References:** [ADR-002 (Skills Pattern)](./AGENT_ARCHITECTURE_DECISION_RECORDS.md), [ADR-003 (Externalized Prompts)](./AGENT_ARCHITECTURE_DECISION_RECORDS.md)  
+> **ADR References:** [ADR-002 (Skills Pattern)](../domains/agent/decisions/AGENT_ARCHITECTURE_DECISION_RECORDS.md), [ADR-003 (Externalized Prompts)](../domains/agent/decisions/AGENT_ARCHITECTURE_DECISION_RECORDS.md)  
 > **Research:** [PROMPT_SYSTEM_RESEARCH_PROPOSAL.md v1.2](./prompt-system/PROMPT_SYSTEM_RESEARCH_PROPOSAL.md)  
 
 ### Overview
@@ -813,7 +813,7 @@ parser = JsonOutputParser(pydantic_object=StockPriceResponse)
 
 **SRS Coverage**: FR-1.4.6–1.4.9, FR-1.5.1–1.5.5, NFR-5.2.5–5.2.7, NFR-6.2.3
 
-**ADRs**: [ADR-002 (Skills Pattern)](./AGENT_ARCHITECTURE_DECISION_RECORDS.md), [ADR-003 (Externalized Prompts)](./AGENT_ARCHITECTURE_DECISION_RECORDS.md)
+**ADRs**: [ADR-002 (Skills Pattern)](../domains/agent/decisions/AGENT_ARCHITECTURE_DECISION_RECORDS.md), [ADR-003 (Externalized Prompts)](../domains/agent/decisions/AGENT_ARCHITECTURE_DECISION_RECORDS.md)
 ### 5. Semantic Router Enhancements
 
 | Area | Current State | Proposed Improvement |
