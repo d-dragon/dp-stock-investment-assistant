@@ -6,7 +6,7 @@
 **Governing Documents**:
 - [Constitution v1.1.0](../../.specify/memory/constitution.md) — Project-wide governance
 - [AGENT_MEMORY_TECHNICAL_DESIGN.md](../../docs/langchain-agent/AGENT_MEMORY_TECHNICAL_DESIGN.md) — Full technical design
-- [AGENT_ARCHITECTURE_DECISION_RECORDS.md](../../docs/langchain-agent/AGENT_ARCHITECTURE_DECISION_RECORDS.md) — ADR-001: Layered LLM Architecture
+- [AGENT_ARCHITECTURE_DECISION_RECORDS.md](../../docs/domains/agent/decisions/AGENT_ARCHITECTURE_DECISION_RECORDS.md) — ADR-001: Layered LLM Architecture
 - [LANGCHAIN_AGENT_ARCHITECTURE_AND_DESIGN.md](../../docs/langchain-agent/LANGCHAIN_AGENT_ARCHITECTURE_AND_DESIGN.md) — Current agent architecture
 
 ---

@@ -4,7 +4,7 @@
 > **Last Updated**: March 31, 2026  
 > **Phase**: 2A.1 - Short-Term Conversation Memory  
 > **Status**: STM hierarchy implemented; summarization trigger and Socket.IO parity remain follow-up work  
-> **Governing ADR**: [ADR-001 — Layered LLM Architecture](./AGENT_ARCHITECTURE_DECISION_RECORDS.md)
+> **Governing ADR**: [ADR-001 — Layered LLM Architecture](../domains/agent/decisions/AGENT_ARCHITECTURE_DECISION_RECORDS.md)
 
 ---
 
@@ -1065,7 +1065,7 @@ result = agent_executor.invoke(
 ### D. Memory technical requirements (backup)
 
 > **Architectural Context**: This section details requirements for the conversation memory system as designed in [AGENT_MEMORY_TECHNICAL_DESIGN.md](./AGENT_MEMORY_TECHNICAL_DESIGN.md)  
-> **Governing ADR**: [ADR-001 — Layered LLM Architecture](./AGENT_ARCHITECTURE_DECISION_RECORDS.md)
+> **Governing ADR**: [ADR-001 — Layered LLM Architecture](../domains/agent/decisions/AGENT_ARCHITECTURE_DECISION_RECORDS.md)
 
 #### MEM-1: Data Model Requirements
 

@@ -26,7 +26,7 @@ The findings in this report were derived from the following categories of artifa
 
 - `docs/langchain-agent/SOFTWARE_REQUIREMENTS_SPECIFICATION.md`
 - `docs/langchain-agent/AGENT_MEMORY_TECHNICAL_DESIGN.md`
-- `docs/langchain-agent/AGENT_ARCHITECTURE_DECISION_RECORDS.md`
+- `docs/domains/agent/decisions/AGENT_ARCHITECTURE_DECISION_RECORDS.md`
 - `docs/langchain-agent/LANGCHAIN_AGENT_ARCHITECTURE_AND_DESIGN.md`
 - `docs/langchain-agent/PHASE_2_AGENT_ENHANCEMENT_ROADMAP.md`
 - `specs/spec-driven-development-pilot/data-model.md`

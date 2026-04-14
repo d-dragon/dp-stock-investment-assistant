@@ -11,7 +11,7 @@ This specification builds upon and references several architectural and design d
 
 | Document | Purpose | Reference |
 |----------|---------|-----------|
-| [AGENT_ARCHITECTURE_DECISION_RECORDS.md](./AGENT_ARCHITECTURE_DECISION_RECORDS.md) | Architectural decisions for LTM/STM, RAG, fine-tuning strategy, and memory separation | Design foundations for FR-3 (Memory System) |
+| [AGENT_ARCHITECTURE_DECISION_RECORDS.md](../domains/agent/decisions/AGENT_ARCHITECTURE_DECISION_RECORDS.md) | Architectural decisions for LTM/STM, RAG, fine-tuning strategy, and memory separation | Design foundations for FR-3 (Memory System) |
 | [LANGCHAIN_AGENT_ARCHITECTURE_AND_DESIGN.md](./LANGCHAIN_AGENT_ARCHITECTURE_AND_DESIGN.md) | Comprehensive agent architecture overview, component deep dive, data flow, and Phase 2 improvements | Implementation guidance for FR-1, FR-2, FR-4 |
 | [LANGCHAIN_AGENT_HOWTO.md](./LANGCHAIN_AGENT_HOWTO.md) | Complete guide to ReAct pattern, semantic routing, tool system, and operations | Operational reference for agent deployment and usage |
 | [PHASE_2_AGENT_ENHANCEMENT_ROADMAP.md](./PHASE_2_AGENT_ENHANCEMENT_ROADMAP.md) | Future enhancement roadmap including multi-agent, advanced memory, and observability | Planning for P2 requirements beyond current release |
@@ -229,7 +229,7 @@ Priority levels:
 ### FR-3: Conversation Memory
 
 > **Design Reference**: For implementation details, see [AGENT_MEMORY_TECHNICAL_DESIGN.md](./AGENT_MEMORY_TECHNICAL_DESIGN.md)  
-> **Architecture Context**: [ADR-001 — Layered LLM Architecture](./AGENT_ARCHITECTURE_DECISION_RECORDS.md)
+> **Architecture Context**: [ADR-001 — Layered LLM Architecture](../domains/agent/decisions/AGENT_ARCHITECTURE_DECISION_RECORDS.md)
 
 #### Priority Levels
 | Level | Meaning | Release Criteria |
