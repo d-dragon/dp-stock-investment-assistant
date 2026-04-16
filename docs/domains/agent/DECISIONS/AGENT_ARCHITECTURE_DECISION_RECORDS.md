@@ -1,16 +1,20 @@
-# Architecture Decision Record (ADR)
-## Investment Assistant – Memory, RAG, Prompting & Fine-Tuning
+# Agent Domain — Architecture Decision Records
 
-**Status:** Accepted  
-**Date:** 2026-01-22  
-**Last Reviewed:** 2026-04-13  
-**Context:** DP-StockAI-Assistant
+## Document Control
+
+| Field | Value |
+|-------|-------|
+| **Domain** | Agent |
+| **Standards Stance** | Practice-Based ADR discipline |
+| **Last Updated** | 2026-04-16 |
+| **Context** | DP-StockAI-Assistant |
 
 ---
 
-
 ## Index of Decisions
 
-- [ADR-001 — Adopt a Layered LLM Architecture for Investment Analysis](ADR-AGENT-001-LAYERED-LLM-ARCHITECTURE.md)
-- [ADR-002 — Adopt Skills Pattern for Agent Prompt Composition](ADR-AGENT-002-SKILLS-PATTERN-PROMPT-COMPOSITION.md)
-- [ADR-003 — Externalize and Version Prompt Assets as File-Based Configuration](ADR-AGENT-003-EXTERNALIZE-VERSION-PROMPT-ASSETS.md)
+| ADR | Title | Status | Date |
+|-----|-------|--------|------|
+| [ADR-001](ADR-AGENT-001-LAYERED-LLM-ARCHITECTURE.md) | Adopt a Layered LLM Architecture for Investment Analysis | Accepted | 2026-01-22 |
+| [ADR-002](ADR-AGENT-002-SKILLS-PATTERN-PROMPT-COMPOSITION.md) | Adopt Skills Pattern for Agent Prompt Composition | Proposed | 2026-04-13 |
+| [ADR-003](ADR-AGENT-003-EXTERNALIZE-VERSION-PROMPT-ASSETS.md) | Externalize and Version Prompt Assets as File-Based Configuration | Proposed | 2026-04-13 |

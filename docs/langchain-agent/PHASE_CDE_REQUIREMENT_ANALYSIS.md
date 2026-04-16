@@ -10,7 +10,7 @@
 
 ## 1. Purpose
 
-This report analyzes functional and non-functional requirements derived from Phases C, D, and E of the STM Integration Roadmap, cross-referenced with [AGENT_MEMORY_TECHNICAL_DESIGN.md](./AGENT_MEMORY_TECHNICAL_DESIGN.md) and [LANGCHAIN_AGENT_ARCHITECTURE_AND_DESIGN.md](./LANGCHAIN_AGENT_ARCHITECTURE_AND_DESIGN.md). It identifies gaps in the current SRS (v2.1) and proposes specific additions and revisions.
+This report analyzes functional and non-functional requirements derived from Phases C, D, and E of the STM Integration Roadmap, cross-referenced with [AGENT_MEMORY_TECHNICAL_DESIGN.md](./AGENT_MEMORY_TECHNICAL_DESIGN.md) and [ARCHITECTURE_DESIGN.md](../domains/agent/ARCHITECTURE_DESIGN.md). It identifies gaps in the current SRS (v2.1) and proposes specific additions and revisions.
 
 ---
 

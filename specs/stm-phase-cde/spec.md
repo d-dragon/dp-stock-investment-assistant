@@ -359,7 +359,7 @@ The existing integration test suite is rewritten and expanded to enforce the cor
 | Phase CDE Requirement Analysis | `docs/langchain-agent/PHASE_CDE_REQUIREMENT_ANALYSIS.md` | Gap analysis, baseline assessment, SRS update plan |
 | STM Integration Roadmap | `docs/High-level Design/AGENTIC_APP_WITH_STM_INTEGRATION_ROADMAP.md` | Increments 6–9 (management API, metadata tracking, reconciliation, test strategy) |
 | Phase A-B Feature Spec | `specs/agent-session-with-stm-wiring/spec.md` | Companion feature — delivered foundation this spec builds upon |
-| Agent Memory Technical Design | `docs/langchain-agent/AGENT_MEMORY_TECHNICAL_DESIGN.md` | Checkpoint and STM persistence design |
+| Agent Memory Technical Design | `docs/domains/agent/AGENT_MEMORY_TECHNICAL_DESIGN.md` | Checkpoint and STM persistence design |
 | SRS Spec Traceability | `docs/langchain-agent/SRS_SPEC_TRACEABILITY.md` | Bidirectional trace between SRS items and spec artifacts |
 
 ---

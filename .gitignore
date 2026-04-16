@@ -148,3 +148,6 @@ docs/postman/specs/Stock Investment Assistant API/openapi.yaml
 docs/langchain-agent/LANGCHAIN_AGENT_ARCHITECTURE_AND_DESIGN.md
 
 nul
+tmp/check_refs.py
+tmp/git-diff-staged.txt
+tmp/split_adr.py

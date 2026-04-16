@@ -14,16 +14,24 @@
 
 ## ADR-003 — Externalize and Version Prompt Assets as File-Based Configuration
 
-**Status:** Proposed  
-**Date:** 2026-04-13  
+### Table of Contents
+
+1. [Context](#context)
+2. [Decision](#decision)
+3. [Rationale](#rationale)
+4. [Consequences](#consequences)
+5. [Implementation Checklist](#implementation-checklist)
+
 **Supersedes:** None  
 **Related:** ADR-001 §8 (Prompt Compiler), ADR-002 (Skills Pattern)  
-**Research:** [PROMPT_SYSTEM_RESEARCH_PROPOSAL.md §4, §5](../../../langchain-agent/prompt-system/PROMPT_SYSTEM_RESEARCH_PROPOSAL.md)  
+**Research:** [PROMPT_SYSTEM_RESEARCH_PROPOSAL.md §4, §5](../PROMPT_SYSTEM_RESEARCH_PROPOSAL.md)  
 **SRS:** FR-1.4.5 (External Prompt Management), FR-1.4.6 (Prompt Version Identity), FR-1.4.8 (Prompt Rollback Safety), NFR-6.2.3 (extensibility)  
+
+---
 
 ### Context
 
-The current agent loads its system prompt from a hardcoded string in `src/core/agent.py`. This creates several operational problems:
+The current agent loads its system prompt from a hardcoded string in `src/core/stock_assistant_agent.py`. This creates several operational problems:
 
 - **Code-deployment coupling**: Any prompt change requires a code commit, CI build, and deployment.
 - **No version traceability**: There is no way to identify which prompt version was used for a given agent invocation.

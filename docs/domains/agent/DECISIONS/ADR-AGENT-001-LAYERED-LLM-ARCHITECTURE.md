@@ -15,6 +15,26 @@
 
 ## ADR-001 — Adopt a Layered LLM Architecture for Investment Analysis
 
+### Table of Contents
+
+1. [Decision Summary](#1-decision-summary)
+2. [Problem Statement](#2-problem-statement)
+3. [Constraints and Non-Goals](#3-constraints--non-goals)
+4. [Architectural Principles (Hard Rules)](#4-architectural-principles-hard-rules)
+5. [High-Level Architecture](#5-high-level-architecture)
+6. [Memory Design](#6-memory-design)
+7. [Intent Routing](#7-intent-routing)
+8. [Prompt Compiler](#8-prompt-compiler)
+9. [Retrieval-Augmented Generation (RAG)](#9-retrieval-augmented-generation-rag)
+10. [Fine-Tuning Strategy](#10-fine-tuning-strategy)
+11. [End-to-End Flow Example](#11-end-to-end-flow-example-fundamental-analysis)
+12. [Consequences](#12-consequences)
+13. [Implementation Checklist](#13-implementation-checklist)
+14. [Further Reading](#14-further-reading-official-documentation)
+15. [Strategic Conclusion](#15-strategic-conclusion)
+
+---
+
 ### 1. Decision Summary
 We adopt a **layered architecture** combining:
 - Long-Term Memory (LTM)
@@ -189,17 +209,20 @@ These principles prevent hallucination, leakage, and compounding error.
 
 ## 7. Intent Routing
 
-### 7.1 Supported Intents
+### 7.1 Supported Routes
 
-| Intent | Description |
-|------|------------|
-| PRICE_CHECK | Latest market data |
-| NEWS_ANALYSIS | Event & headline impact |
-| FINANCIAL_ANALYSIS | Fundamental review |
-| EARNINGS_SUMMARY | Quarterly results |
-| TECHNICAL_ANALYSIS | Indicator interpretation |
-| PORTFOLIO_QUERY | Holdings & exposure |
-| EXPLAIN_CONCEPT | Educational |
+> **Implementation Note (2026-04-16):** The route taxonomy below reflects the canonical `StockQueryRoute` enum in `src/core/routes.py`. Earlier drafts of this ADR used working names (`FINANCIAL_ANALYSIS`, `EARNINGS_SUMMARY`, `PORTFOLIO_QUERY`, `EXPLAIN_CONCEPT`) that were refined during implementation.
+
+| Route | Description |
+|-------|-------------|
+| `PRICE_CHECK` | Current prices, quotes, bid/ask spreads, market cap |
+| `NEWS_ANALYSIS` | Headlines, earnings announcements, market events, sentiment |
+| `PORTFOLIO` | Holdings, positions, P&L, allocation, rebalancing |
+| `TECHNICAL_ANALYSIS` | Charts, indicators (MACD, RSI, Bollinger), patterns, trends |
+| `FUNDAMENTALS` | P/E, P/B, DCF, earnings, revenue, financial ratios |
+| `IDEAS` | Stock picks, sector opportunities, investment strategies |
+| `MARKET_WATCH` | Index updates, sector performance, market breadth |
+| `GENERAL_CHAT` | Fallback for unmatched or ambiguous queries |
 
 ---
 
@@ -247,7 +270,7 @@ Use a deterministic prompt compiler rather than ad-hoc prompt concatenation.
     \     |     /
      → Prompt Compiler → LLM
 ```
-> **Implementation Reference (2026-04-13):** The prompt compiler concept described above has been elaborated into a full design in [PROMPT_SYSTEM_RESEARCH_PROPOSAL.md v1.2](../../../langchain-agent/prompt-system/PROMPT_SYSTEM_RESEARCH_PROPOSAL.md). That document details a three-layer architecture (PromptAssetLoader → PromptAssembler → ResponseGuardrailMiddleware), YAML-based prompt versioning, experiment assignment, and behavioral guardrails — grounding the abstract assembly order into concrete implementation patterns. See also ADR-003 below.
+> **Implementation Reference (2026-04-13):** The prompt compiler concept described above has been elaborated into a full design in [PROMPT_SYSTEM_RESEARCH_PROPOSAL.md v1.2](../PROMPT_SYSTEM_RESEARCH_PROPOSAL.md). That document details a three-layer architecture (PromptAssetLoader → PromptAssembler → ResponseGuardrailMiddleware), YAML-based prompt versioning, experiment assignment, and behavioral guardrails — grounding the abstract assembly order into concrete implementation patterns. See also ADR-003 below.
 
 ---
 
@@ -293,7 +316,7 @@ Apply fine-tuning **only to enforce reasoning structure and tone**.
 
 ---
 
-## 11. End-to-End Flow Example (Financial Analysis)
+## 11. End-to-End Flow Example (Fundamental Analysis)
 
 ```
 User: "Đánh giá HSG trung hạn"
@@ -302,7 +325,7 @@ Load LTM (risk: moderate, horizon: 6–18m)
    ↓
 Load session context + conversation STM (steel price bottoming assumption)
    ↓
-Route → FINANCIAL_ANALYSIS
+Route → FUNDAMENTALS
    ↓
 RAG → financials + HRC price
    ↓

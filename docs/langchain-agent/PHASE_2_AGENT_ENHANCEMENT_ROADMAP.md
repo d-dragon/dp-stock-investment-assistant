@@ -140,7 +140,7 @@ def process_query(self, query: str, session_id: str) -> AgentResponse:
 
 **Objective**: Externalize system prompts to files, enable version control, and support A/B testing of prompt variants.
 
-> **Status (2026-04-13):** Research complete — design refined. Comprehensive research and design proposal delivered in [PROMPT_SYSTEM_RESEARCH_PROPOSAL.md v1.2](./prompt-system/PROMPT_SYSTEM_RESEARCH_PROPOSAL.md). Requirements formalized in SRS v2.3 (FR-1.4.6–1.4.9, FR-1.5, NFR-5.2.5–5.2.7, AC-8). Architecture decisions recorded as [ADR-002 (Skills Pattern)](../domains/agent/decisions/AGENT_ARCHITECTURE_DECISION_RECORDS.md) and [ADR-003 (Externalized Prompts)](../domains/agent/decisions/AGENT_ARCHITECTURE_DECISION_RECORDS.md).  
+> **Status (2026-04-13):** Research complete — design refined. Comprehensive research and design proposal delivered in [PROMPT_SYSTEM_RESEARCH_PROPOSAL.md v1.2](../domains/agent/PROMPT_SYSTEM_RESEARCH_PROPOSAL.md). Requirements formalized in SRS v2.3 (FR-1.4.6–1.4.9, FR-1.5, NFR-5.2.5–5.2.7, AC-8). Architecture decisions recorded as [ADR-002 (Skills Pattern)](../domains/agent/decisions/AGENT_ARCHITECTURE_DECISION_RECORDS.md) and [ADR-003 (Externalized Prompts)](../domains/agent/decisions/AGENT_ARCHITECTURE_DECISION_RECORDS.md).  
 > **Next step:** Implementation Phase 1 — PromptAssetLoader and baseline prompt extraction.
 
 #### Current State
@@ -158,7 +158,7 @@ def process_query(self, query: str, session_id: str) -> AgentResponse:
 
 #### Work Items (Refined — 7-Phase Roadmap)
 
-> Refined from original 4 items based on [PROMPT_SYSTEM_RESEARCH_PROPOSAL.md §10 Implementation Roadmap](./prompt-system/PROMPT_SYSTEM_RESEARCH_PROPOSAL.md).
+> Refined from original 4 items based on [PROMPT_SYSTEM_RESEARCH_PROPOSAL.md §10 Implementation Roadmap](../domains/agent/PROMPT_SYSTEM_RESEARCH_PROPOSAL.md).
 
 1. **Phase 1 — Prompt Asset Extraction** (FR-1.4.5, NFR-6.2.3)
    - Create `src/prompts/system/_baseline.yaml` with current hardcoded prompt
@@ -227,7 +227,7 @@ class StockAssistantAgent:
 - LangSmith for evaluation (existing integration)
 - Jinja2 or YAML-based templating (to be finalized during Phase 1)
 - Semantic router integration for route-based skill activation
-- Research: [PROMPT_SYSTEM_RESEARCH_PROPOSAL.md v1.2](./prompt-system/PROMPT_SYSTEM_RESEARCH_PROPOSAL.md)
+- Research: [PROMPT_SYSTEM_RESEARCH_PROPOSAL.md v1.2](../domains/agent/PROMPT_SYSTEM_RESEARCH_PROPOSAL.md)
 - SRS: FR-1.4.5–1.4.9, FR-1.5, NFR-5.2.5–5.2.7, NFR-6.2.3, AC-8
 - ADRs: [ADR-002](../domains/agent/decisions/AGENT_ARCHITECTURE_DECISION_RECORDS.md), [ADR-003](../domains/agent/decisions/AGENT_ARCHITECTURE_DECISION_RECORDS.md)
 

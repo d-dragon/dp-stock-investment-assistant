@@ -14,11 +14,20 @@
 
 ## ADR-002 — Adopt Skills Pattern for Agent Prompt Composition
 
-**Status:** Proposed  
-**Date:** 2026-04-13  
+### Table of Contents
+
+1. [Context](#context)
+2. [Decision](#decision)
+3. [Prompt Assembly with Skills](#prompt-assembly-with-skills)
+4. [Rationale](#rationale)
+5. [Consequences](#consequences)
+6. [Implementation Checklist](#implementation-checklist)
+
 **Supersedes:** None  
 **Related:** ADR-001 §8 (Prompt Compiler), ADR-003 (Externalized Prompts)  
-**Research:** [PROMPT_SYSTEM_RESEARCH_PROPOSAL.md §5](../../../langchain-agent/prompt-system/PROMPT_SYSTEM_RESEARCH_PROPOSAL.md)  
+**Research:** [PROMPT_SYSTEM_RESEARCH_PROPOSAL.md §5](../PROMPT_SYSTEM_RESEARCH_PROPOSAL.md)  
+
+---
 
 ### Context
 

@@ -12,13 +12,13 @@ This specification builds upon and references several architectural and design d
 | Document | Purpose | Reference |
 |----------|---------|-----------|
 | [AGENT_ARCHITECTURE_DECISION_RECORDS.md](../domains/agent/decisions/AGENT_ARCHITECTURE_DECISION_RECORDS.md) | Architectural decisions for LTM/STM, RAG, fine-tuning strategy, and memory separation | Design foundations for FR-3 (Memory System) |
-| [LANGCHAIN_AGENT_ARCHITECTURE_AND_DESIGN.md](./LANGCHAIN_AGENT_ARCHITECTURE_AND_DESIGN.md) | Comprehensive agent architecture overview, component deep dive, data flow, and Phase 2 improvements | Implementation guidance for FR-1, FR-2, FR-4 |
+| [ARCHITECTURE_DESIGN.md](../domains/agent/ARCHITECTURE_DESIGN.md) | Comprehensive agent architecture overview, component deep dive, data flow, and Phase 2 improvements | Implementation guidance for FR-1, FR-2, FR-4 |
 | [LANGCHAIN_AGENT_HOWTO.md](./LANGCHAIN_AGENT_HOWTO.md) | Complete guide to ReAct pattern, semantic routing, tool system, and operations | Operational reference for agent deployment and usage |
 | [PHASE_2_AGENT_ENHANCEMENT_ROADMAP.md](./PHASE_2_AGENT_ENHANCEMENT_ROADMAP.md) | Future enhancement roadmap including multi-agent, advanced memory, and observability | Planning for P2 requirements beyond current release |
 | [AGENT_MEMORY_TECHNICAL_DESIGN.md](./AGENT_MEMORY_TECHNICAL_DESIGN.md) | Detailed technical design for conversation memory, checkpointing, and summarization | Implementation guidance supporting FR-3 (Memory System) |
 | [AGENTIC_APP_WITH_STM_INTEGRATION_ROADMAP.md](../High-level%20Design/AGENTIC_APP_WITH_STM_INTEGRATION_ROADMAP.md) | Technical roadmap for workspace-session-conversation hierarchy and STM integration | Roadmap for FR-5.3–5.5, FR-7 (management, consistency, migration) |
 | [SRS_SPEC_TRACEABILITY.md](./SRS_SPEC_TRACEABILITY.md) | Bidirectional trace between SRS items and spec-kit feature artifacts | Companion delivery trace for implementation coverage and sync status |
-| [PROMPT_SYSTEM_RESEARCH_PROPOSAL.md](./prompt-system/PROMPT_SYSTEM_RESEARCH_PROPOSAL.md) | Prompt system research, design patterns, and implementation roadmap | Research foundation for FR-1.4.6–1.4.9, FR-1.5, NFR-5.2.5–5.2.7 |
+| [PROMPT_SYSTEM_RESEARCH_PROPOSAL.md](../domains/agent/PROMPT_SYSTEM_RESEARCH_PROPOSAL.md) | Prompt system research, design patterns, and implementation roadmap | Research foundation for FR-1.4.6–1.4.9, FR-1.5, NFR-5.2.5–5.2.7 |
 
 
 
@@ -79,7 +79,7 @@ This specification follows **spec-driven development** principles, enabling AI-a
 
 | Area | Reason |
 |------|--------|
-| Implementation architecture | Belongs in [LANGCHAIN_AGENT_ARCHITECTURE_AND_DESIGN.md](./LANGCHAIN_AGENT_ARCHITECTURE_AND_DESIGN.md) |
+| Implementation architecture | Belongs in [ARCHITECTURE_DESIGN.md](../domains/agent/ARCHITECTURE_DESIGN.md) |
 | Database schemas and indexes | Belongs in [AGENT_MEMORY_TECHNICAL_DESIGN.md](./AGENT_MEMORY_TECHNICAL_DESIGN.md) |
 | Library/package dependencies | Belongs in technical design documentation |
 | Infrastructure and deployment | Belongs in IaC documentation |
@@ -177,7 +177,7 @@ Priority levels:
 #### FR-1.5 Finance-Domain Behavioral Guardrails
 
 > **Rationale**: A financial-advisory agent must enforce epistemic discipline — grounding responses in evidence, disclosing uncertainty, and separating facts from inferences — to maintain user trust and regulatory defensibility.
-> **Research Reference**: [PROMPT_SYSTEM_RESEARCH_PROPOSAL.md §7 Behavioral Guardrails](./prompt-system/PROMPT_SYSTEM_RESEARCH_PROPOSAL.md)
+> **Research Reference**: [PROMPT_SYSTEM_RESEARCH_PROPOSAL.md §7 Behavioral Guardrails](../domains/agent/PROMPT_SYSTEM_RESEARCH_PROPOSAL.md)
 
 | ID | Title | Description | Precondition | Expected Output | Priority |
 |----|-------|-------------|--------------|-----------------|----------|

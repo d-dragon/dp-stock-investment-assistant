@@ -312,7 +312,7 @@ langchain:
 
 ## References
 
-- [AGENT_MEMORY_TECHNICAL_DESIGN.md](../../docs/langchain-agent/AGENT_MEMORY_TECHNICAL_DESIGN.md) — Full technical design
+- [AGENT_MEMORY_TECHNICAL_DESIGN.md](../../docs/domains/agent/AGENT_MEMORY_TECHNICAL_DESIGN.md) — Full technical design
 - [ADR-001: Layered LLM Architecture](../../docs/domains/agent/decisions/AGENT_ARCHITECTURE_DECISION_RECORDS.md) — Architectural decisions
 - [LangGraph Documentation](https://langchain-ai.github.io/langgraph/) — Official docs
 - [MongoDBSaver API](https://langchain-ai.github.io/langgraph/reference/checkpoints/mongodb/) — Checkpointer reference
