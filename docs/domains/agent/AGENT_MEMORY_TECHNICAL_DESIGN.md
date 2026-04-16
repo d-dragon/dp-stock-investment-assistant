@@ -1047,7 +1047,7 @@ result = agent_executor.invoke(
 ### B. Related Documents
 
 - [PHASE_2_AGENT_ENHANCEMENT_ROADMAP.md](./PHASE_2_AGENT_ENHANCEMENT_ROADMAP.md) - Full enhancement roadmap
-- [LANGCHAIN_AGENT_ARCHITECTURE_AND_DESIGN.md](./LANGCHAIN_AGENT_ARCHITECTURE_AND_DESIGN.md) - Current architecture
+- [ARCHITECTURE_DESIGN.md](../domains/agent/ARCHITECTURE_DESIGN.md) - Current architecture
 - [LANGCHAIN_AGENT_HOWTO.md](./LANGCHAIN_AGENT_HOWTO.md) - Implementation patterns
 - [backend-python.instructions.md](../../.github/instructions/backend-python.instructions.md) - Coding conventions
 

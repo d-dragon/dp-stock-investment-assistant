@@ -118,7 +118,7 @@ SC-002 says "All existing tests that pass before the refactor continue to pass a
 
 **O-3: W4 (governing doc staleness) is a real downstream risk**
 
-`AGENT_MEMORY_TECHNICAL_DESIGN.md` and `LANGCHAIN_AGENT_ARCHITECTURE_AND_DESIGN.md` will contain stale `session_id` references after implementation. Analysis.md defers this to post-implementation. Acceptable, but a follow-up task should be created promptly to avoid developer confusion.
+`AGENT_MEMORY_TECHNICAL_DESIGN.md` and `ARCHITECTURE_DESIGN.md` will contain stale `session_id` references after implementation. Analysis.md defers this to post-implementation. Acceptable, but a follow-up task should be created promptly to avoid developer confusion.
 
 **O-4: `sessions` collection handling in migration is ambiguous**
 

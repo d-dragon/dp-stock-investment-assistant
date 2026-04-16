@@ -5,9 +5,9 @@
 
 **Governing Documents**:
 - [Constitution v1.1.0](../../.specify/memory/constitution.md) — Project-wide governance
-- [AGENT_MEMORY_TECHNICAL_DESIGN.md](../../docs/langchain-agent/AGENT_MEMORY_TECHNICAL_DESIGN.md) — Full technical design
+- [AGENT_MEMORY_TECHNICAL_DESIGN.md](../../docs/domains/agent/AGENT_MEMORY_TECHNICAL_DESIGN.md) — Full technical design
 - [AGENT_ARCHITECTURE_DECISION_RECORDS.md](../../docs/domains/agent/decisions/AGENT_ARCHITECTURE_DECISION_RECORDS.md) — ADR-001: Layered LLM Architecture
-- [LANGCHAIN_AGENT_ARCHITECTURE_AND_DESIGN.md](../../docs/langchain-agent/LANGCHAIN_AGENT_ARCHITECTURE_AND_DESIGN.md) — Current agent architecture
+- [ARCHITECTURE_DESIGN.md](../../docs/domains/agent/ARCHITECTURE_DESIGN.md) — Current agent architecture
 
 ---
 
@@ -182,8 +182,8 @@ tests/
 |----------|-------------|----------------|
 | [spec.md](../../.specify/specs/1-short-term-memory/spec.md) | Requirements FR-3.1.x, Success Criteria | If implementation changes scope |
 | [constitution.md](../../.specify/memory/constitution.md) | Memory boundaries (Article III) | If new content types stored |
-| [AGENT_MEMORY_TECHNICAL_DESIGN.md](../../docs/langchain-agent/AGENT_MEMORY_TECHNICAL_DESIGN.md) | Data models, sequence diagrams, API contracts | If schema or flow changes |
-| [LANGCHAIN_AGENT_ARCHITECTURE_AND_DESIGN.md](../../docs/langchain-agent/LANGCHAIN_AGENT_ARCHITECTURE_AND_DESIGN.md) | Architecture overview, component descriptions | After implementation complete |
+| [AGENT_MEMORY_TECHNICAL_DESIGN.md](../../docs/domains/agent/AGENT_MEMORY_TECHNICAL_DESIGN.md) | Data models, sequence diagrams, API contracts | If schema or flow changes |
+| [ARCHITECTURE_DESIGN.md](../../docs/domains/agent/ARCHITECTURE_DESIGN.md) | Architecture overview, component descriptions | After implementation complete |
 | [docs/openapi.yaml](../../docs/openapi.yaml) | POST /api/chat request/response schema | When API contract finalized |
 | [config/config_example.yaml](../../config/config_example.yaml) | Memory configuration section | When config schema finalized |
 
@@ -191,7 +191,7 @@ tests/
 
 ## Implementation Roadmap
 
-> **Source**: Adapted from [AGENT_MEMORY_TECHNICAL_DESIGN.md](../../docs/langchain-agent/AGENT_MEMORY_TECHNICAL_DESIGN.md) § Implementation Roadmap
+> **Source**: Adapted from [AGENT_MEMORY_TECHNICAL_DESIGN.md](../../docs/domains/agent/AGENT_MEMORY_TECHNICAL_DESIGN.md) § Implementation Roadmap
 
 ### Phase 1: Foundation (6-7 story points)
 
