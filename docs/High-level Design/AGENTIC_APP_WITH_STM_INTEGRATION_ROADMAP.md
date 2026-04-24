@@ -24,11 +24,11 @@ The findings in this report were derived from the following categories of artifa
 
 ### 2.1 Reviewed Architecture and Requirements Documents
 
-- `docs/langchain-agent/SOFTWARE_REQUIREMENTS_SPECIFICATION.md`
+- `docs/domains/agent/SOFTWARE_REQUIREMENTS_SPECIFICATION.md`
 - `docs/domains/agent/AGENT_MEMORY_TECHNICAL_DESIGN.md`
 - `docs/domains/agent/decisions/AGENT_ARCHITECTURE_DECISION_RECORDS.md`
 - `docs/domains/agent/ARCHITECTURE_DESIGN.md`
-- `docs/langchain-agent/PHASE_2_AGENT_ENHANCEMENT_ROADMAP.md`
+- `docs/domains/agent/PHASE_2_AGENT_ENHANCEMENT_ROADMAP.md`
 - `specs/spec-driven-development-pilot/data-model.md`
 
 ### 2.2 Reviewed Runtime and Persistence Artifacts

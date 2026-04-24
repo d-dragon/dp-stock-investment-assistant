@@ -69,8 +69,8 @@ This proposal is based on and aligned with the current project documents below.
 | Document | Purpose in Current Repository | Role in This Proposal |
 |----------|-------------------------------|-----------------------|
 | [Architecture Review](../architecture-review.md) | Cross-domain and cross-layer architecture assessment of frontend, backend, agent, data, and infrastructure | Provides the system-wide framing and writing style for cross-domain and cross-layer documentation |
-| [Stock Investment Assistant Agent — Software Requirements Specification](../langchain-agent/SOFTWARE_REQUIREMENTS_SPECIFICATION.md) | Detailed domain SRS for the agent system | Reference model for requirement structure, numbering, and wording |
-| [SRS Spec Traceability](../langchain-agent/SRS_SPEC_TRACEABILITY.md) | Reverse trace from SRS items to feature specs | Reference model for requirement-to-delivery traceability |
+| [Stock Investment Assistant Agent — Software Requirements Specification](../domains/agent/SOFTWARE_REQUIREMENTS_SPECIFICATION.md) | Detailed domain SRS for the agent system | Reference model for requirement structure, numbering, and wording |
+| [SRS Spec Traceability](../domains/agent/SRS_SPEC_TRACEABILITY.md) | Reverse trace from SRS items to feature specs | Reference model for requirement-to-delivery traceability |
 | [Frontend Architecture Evolution Report](../frontend/frontend-architecture-evolution-report.md) | Research report for frontend architectural evolution | Reference model for analysis-oriented study documents |
 | [ADR-Frontend-001](../frontend/adr-frontend-001-modular-application.md) | Frontend architectural direction | Reference model for ADR boundary and decision phrasing |
 | [ADR-Frontend-002](../frontend/adr-frontend-002-modernize-frontend-foundation.md) | Frontend modernization stack and delivery direction | Reference model for implementation-oriented architecture decisions |
@@ -423,7 +423,7 @@ This is the recommended compact domain model for this repository. The important 
 | **System Architecture Documents** | `docs/architecture/*.md` | Describe the system as a whole: boundaries, major building blocks, runtime flows, and cross-domain interactions | **Aligned** to ISO/IEC/IEEE 42010 |
 | **ADRs** | `docs/architecture/DECISIONS/` and `docs/stacks/*/DECISIONS/` | Capture architecturally significant decisions and tradeoffs at system or domain scope | **Practice-Based** ADR discipline |
 | **Domain Technical Design** | `docs/stacks/*/TECHNICAL_DESIGN.md` | Explains how each domain realizes the requirements allocated to it and records domain-specific constraints that do not belong in the system-level architecture documents | **Aligned** design practice |
-| **Domain-Specific Requirement Documents** | only where justified, for example `docs/stacks/agent/SOFTWARE_REQUIREMENTS_SPECIFICATION.md` | Holds subordinate requirement sets only when a bounded context is independently complex, specialized, or already mature enough to need its own requirement baseline | **Aligned** subordinate SRS practice |
+| **Domain-Specific Requirement Documents** | only where justified, for example `docs/domains/agent/SOFTWARE_REQUIREMENTS_SPECIFICATION.md` | Holds subordinate requirement sets only when a bounded context is independently complex, specialized, or already mature enough to need its own requirement baseline | **Aligned** subordinate SRS practice |
 | **Executable Contracts** | domain-owned artifacts such as `docs/stacks/backend/api/openapi.yaml` | Defines request/response schemas, event contracts, and integration payloads without duplicating them in prose | **Conformant** to schema or contract standards |
 | **Operations Policy and Runbooks** | `docs/operations/OPERATIONS_AND_RELEASE_POLICY.md`, `docs/operations/RUNBOOKS/` | Defines supportability, release readiness, migration, reconciliation, rollback, and incident handling expectations | **Aligned** for policy; **Practice-Based** for runbooks |
 | **Verification and Traceability Strategy** | `docs/testing/VERIFICATION_AND_TRACEABILITY_STRATEGY.md` | Defines test levels, evidence expectations, and how requirements are proven through specs and tests | **Aligned** internal verification standard |
@@ -627,7 +627,7 @@ The documentation set should use explicit precedence rules so the master system 
 
 #### 11.4.1 Agent Domain
 
-The current [Stock Investment Assistant Agent — Software Requirements Specification](../langchain-agent/SOFTWARE_REQUIREMENTS_SPECIFICATION.md) should remain the primary specialized requirement document for the agent domain, but it should be repositioned conceptually as the future `docs/stacks/agent/SOFTWARE_REQUIREMENTS_SPECIFICATION.md` under the domain-oriented model.
+The current [Stock Investment Assistant Agent — Software Requirements Specification](../domains/agent/SOFTWARE_REQUIREMENTS_SPECIFICATION.md) should remain the primary specialized requirement document for the agent domain, but it should be repositioned conceptually as the future `docs/domains/agent/SOFTWARE_REQUIREMENTS_SPECIFICATION.md` under the domain-oriented model.
 
 It should stop carrying implied full-system responsibility and instead function as a subordinate domain SRS under the master system SRS.
 
@@ -677,7 +677,7 @@ Generate or stabilize only the documents that the rest of the SDD workflow depen
 
 Do not generate parallel replacements for documents the repository already maintains well. Instead:
 
-1. Reclassify the current `docs/langchain-agent/` material into the future `docs/stacks/agent/` ownership model.
+1. Reclassify the current `docs/langchain-agent/` material into the future `docs/domains/agent/` ownership model.
 2. Reclassify the current frontend ADRs into the future `docs/stacks/frontend/DECISIONS/` ownership model.
 3. Reclassify the current `docs/openapi.yaml` into the future `docs/stacks/backend/api/openapi.yaml` ownership model.
 

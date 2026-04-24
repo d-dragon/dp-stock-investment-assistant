@@ -101,7 +101,7 @@ This report analyzes the feasibility of adopting spec-driven development methodo
 | `docs/domains/agent/ARCHITECTURE_DESIGN.md` | 847 | System architecture |
 | `docs/domains/agent/decisions/AGENT_ARCHITECTURE_DECISION_RECORDS.md` | 346 | ADR-001 layered architecture |
 | `docs/domains/agent/AGENT_MEMORY_TECHNICAL_DESIGN.md` | 1143 | Memory subsystem design |
-| `docs/langchain-agent/PHASE_2_AGENT_ENHANCEMENT_ROADMAP.md` | 882 | Enhancement roadmap |
+| `docs/domains/agent/PHASE_2_AGENT_ENHANCEMENT_ROADMAP.md` | 882 | Enhancement roadmap |
 | `docs/openapi.yaml` | - | REST API contract |
 
 ### 2.2 Spec-Driven Maturity Assessment

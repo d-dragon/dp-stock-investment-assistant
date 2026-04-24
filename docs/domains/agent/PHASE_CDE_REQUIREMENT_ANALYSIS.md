@@ -3,14 +3,14 @@
 > **Document Type**: Requirement Analysis  
 > **Date**: March 19, 2026  
 > **Scope**: Phases C (Management API Delivery), D (Runtime Consistency and Reconciliation), E (Test Realignment and Hardening)  
-> **Governing Roadmap**: [AGENTIC_APP_WITH_STM_INTEGRATION_ROADMAP.md](../High-level%20Design/AGENTIC_APP_WITH_STM_INTEGRATION_ROADMAP.md)  
+> **Governing Roadmap**: [AGENTIC_APP_WITH_STM_INTEGRATION_ROADMAP.md](../../High-level%20Design/AGENTIC_APP_WITH_STM_INTEGRATION_ROADMAP.md)  
 > **Target SRS**: [SOFTWARE_REQUIREMENTS_SPECIFICATION.md](./SOFTWARE_REQUIREMENTS_SPECIFICATION.md)
 
 ---
 
 ## 1. Purpose
 
-This report analyzes functional and non-functional requirements derived from Phases C, D, and E of the STM Integration Roadmap, cross-referenced with [AGENT_MEMORY_TECHNICAL_DESIGN.md](./AGENT_MEMORY_TECHNICAL_DESIGN.md) and [ARCHITECTURE_DESIGN.md](../domains/agent/ARCHITECTURE_DESIGN.md). It identifies gaps in the current SRS (v2.1) and proposes specific additions and revisions.
+This report analyzes functional and non-functional requirements derived from Phases C, D, and E of the STM Integration Roadmap, cross-referenced with [AGENT_MEMORY_TECHNICAL_DESIGN.md](./AGENT_MEMORY_TECHNICAL_DESIGN.md) and [ARCHITECTURE_DESIGN.md](./ARCHITECTURE_DESIGN.md). It identifies gaps in the current SRS (v2.1) and proposes specific additions and revisions.
 
 ---
 

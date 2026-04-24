@@ -7,9 +7,9 @@
 
 ## Baseline
 
-- SRS: [docs/langchain-agent/SOFTWARE_REQUIREMENTS_SPECIFICATION.md](../docs/langchain-agent/SOFTWARE_REQUIREMENTS_SPECIFICATION.md)
-- SRS version: `2.2`
-- SRS last updated: `2026-03-19`
+- SRS: [docs/domains/agent/SOFTWARE_REQUIREMENTS_SPECIFICATION.md](../docs/domains/agent/SOFTWARE_REQUIREMENTS_SPECIFICATION.md)
+- SRS version: `2.3`
+- SRS last updated: `2026-04-13`
 
 ## Summary
 
