@@ -355,12 +355,12 @@ The existing integration test suite is rewritten and expanded to enforce the cor
 
 | Document | Path | Relevance |
 |----------|------|-----------|
-| SRS v2.2 | `docs/langchain-agent/SOFTWARE_REQUIREMENTS_SPECIFICATION.md` | Authoritative requirements: FR-5.3–5.6, FR-7, NFR-1.4, NFR-2.4–2.5, AC-5–7, IR-1.8–1.13, OI-6–8 |
-| Phase CDE Requirement Analysis | `docs/langchain-agent/PHASE_CDE_REQUIREMENT_ANALYSIS.md` | Gap analysis, baseline assessment, SRS update plan |
+| SRS v2.3 | `docs/domains/agent/SOFTWARE_REQUIREMENTS_SPECIFICATION.md` | Authoritative requirements: FR-5.3–5.6, FR-7, NFR-1.4, NFR-2.4–2.5, AC-5–8, IR-1.8–1.13, OI-6–9 |
+| Phase CDE Requirement Analysis | `docs/domains/agent/PHASE_CDE_REQUIREMENT_ANALYSIS.md` | Gap analysis, baseline assessment, SRS update plan |
 | STM Integration Roadmap | `docs/High-level Design/AGENTIC_APP_WITH_STM_INTEGRATION_ROADMAP.md` | Increments 6–9 (management API, metadata tracking, reconciliation, test strategy) |
 | Phase A-B Feature Spec | `specs/agent-session-with-stm-wiring/spec.md` | Companion feature — delivered foundation this spec builds upon |
 | Agent Memory Technical Design | `docs/domains/agent/AGENT_MEMORY_TECHNICAL_DESIGN.md` | Checkpoint and STM persistence design |
-| SRS Spec Traceability | `docs/langchain-agent/SRS_SPEC_TRACEABILITY.md` | Bidirectional trace between SRS items and spec artifacts |
+| SRS Spec Traceability | `docs/domains/agent/SRS_SPEC_TRACEABILITY.md` | Bidirectional trace between SRS items and spec artifacts |
 
 ---
 

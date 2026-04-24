@@ -5,7 +5,7 @@
 > **Phase**: 2A.2 - System Prompt Refinement and A/B Testing  
 > **Status**: Research refined; practical scope narrowed to project-scoped implementation targets  
 > **Primary Source Requirement**: Official vendor and regulator documentation only  
-> **Governing ADR**: [ADR-001 — Layered LLM Architecture](.../domains/agent/decisions/AGENT_ARCHITECTURE_DECISION_RECORDS.md)
+> **Governing ADR**: [ADR-001 — Layered LLM Architecture](./decisions/AGENT_ARCHITECTURE_DECISION_RECORDS.md)
 
 ---
 
@@ -129,7 +129,7 @@ This refinement adds **multi-agent prompt-system design** to scope, but not a fu
 
 ### Runtime Reality
 
-The roadmap target in [PHASE_2_AGENT_ENHANCEMENT_ROADMAP.md](../PHASE_2_AGENT_ENHANCEMENT_ROADMAP.md) is materially ahead of the live implementation.
+The roadmap target in [PHASE_2_AGENT_ENHANCEMENT_ROADMAP.md](./PHASE_2_AGENT_ENHANCEMENT_ROADMAP.md) is materially ahead of the live implementation.
 
 The live runtime is still a **single-agent ReAct design**. The multi-agent target described in this refinement is therefore architectural guidance for the next design step, not a claim that orchestrator or RAG specialist paths already exist.
 
@@ -373,7 +373,7 @@ The external research and the repo’s internal architecture both support the sa
 
 ## Alignment with ADR-001
 
-This prompt-system design must comply with the layered LLM rules in [AGENT_ARCHITECTURE_DECISION_RECORDS.md](.../domains/agent/decisions/AGENT_ARCHITECTURE_DECISION_RECORDS.md).
+This prompt-system design must comply with the layered LLM rules in [AGENT_ARCHITECTURE_DECISION_RECORDS.md](./decisions/AGENT_ARCHITECTURE_DECISION_RECORDS.md).
 
 | ADR Principle | Prompt-System Implication |
 |---|---|
@@ -1155,11 +1155,11 @@ This section tracks changes made to other project documents as a result of resea
 
 | # | Target Document | Change Summary | SRS/ADR References |
 |---|----------------|----------------|-------------------|
-| 1 | [SOFTWARE_REQUIREMENTS_SPECIFICATION.md](../SOFTWARE_REQUIREMENTS_SPECIFICATION.md) | Version 2.2 → 2.3. Added FR-1.4.6–1.4.9 (prompt version identity, route-specific context, rollback safety, experiment assignment). Added FR-1.5 (Finance-Domain Behavioral Guardrails — 5 items: evidence-first, uncertainty disclosure, anti-hype, fact-assumption separation, source attribution). Added NFR-5.2.5–5.2.7 (prompt version, agent role, and experiment ID in traces). Strengthened NFR-6.2.3 (versioned file assets, no-code-deployment). Added AC-8 (4 prompt system acceptance criteria). Added OI-9 (prompt asset directory structure). Added related document reference. | FR-1.4.6–1.4.9, FR-1.5.1–1.5.5, NFR-5.2.5–5.2.7, NFR-6.2.3, AC-8.1–8.4 |
-| 2 | [AGENT_ARCHITECTURE_DECISION_RECORDS.md](.../domains/agent/decisions/AGENT_ARCHITECTURE_DECISION_RECORDS.md) | Added ADR-002 (Skills Pattern — composable prompt fragments with activation criteria). Added ADR-003 (Externalized Prompt Assets — versioned YAML files, baseline fallback, directory convention). Annotated ADR-001 §8 (Prompt Compiler) with implementation reference to this research proposal. | ADR-002, ADR-003 |
-| 3 | [ARCHITECTURE_DESIGN.md](../../domains/agent/ARCHITECTURE_DESIGN.md) | Added new “Prompt System Architecture” section (three-layer architecture, component responsibilities, prompt taxonomy, skills composition flow, observability integration). Updated System Prompt block with migration note. Added prompt file structure (`src/prompts/`) to File Structure. Added 3 design pattern rows (Asset Loader, Composer, Middleware). Added §4.4 Prompt System Externalization to Space for Improvements. Updated Table of Contents. | FR-1.4.5–1.4.9, FR-1.5, NFR-5.2.5–5.2.7 |
-| 4 | [PHASE_2_AGENT_ENHANCEMENT_ROADMAP.md](../PHASE_2_AGENT_ENHANCEMENT_ROADMAP.md) | Updated 2A.2 status to “Research complete — design refined.” Replaced 4 generic work items with refined 7-phase implementation roadmap. Updated dependencies with cross-references to this proposal, SRS v2.3, and ADR-002/ADR-003. | FR-1.4.5–1.4.9, FR-1.5, ADR-002, ADR-003 |
-| 5 | [SRS_SPEC_TRACEABILITY.md](../SRS_SPEC_TRACEABILITY.md) | Version 1.4 → 1.5. Updated SRS baseline to v2.3. Added 16 unmapped trace entries: FR-1.4.6–1.4.9 (4), FR-1.5.1–1.5.5 (5), NFR-5.2.5–5.2.7 (3), AC-8.1–8.4 (4). Updated summary counts (302 → 318 total, 179 → 195 unmapped). Added AC-8 to family index. | All new SRS v2.3 items |
+| 1 | [SOFTWARE_REQUIREMENTS_SPECIFICATION.md](./SOFTWARE_REQUIREMENTS_SPECIFICATION.md) | Version 2.2 → 2.3. Added FR-1.4.6–1.4.9 (prompt version identity, route-specific context, rollback safety, experiment assignment). Added FR-1.5 (Finance-Domain Behavioral Guardrails — 5 items: evidence-first, uncertainty disclosure, anti-hype, fact-assumption separation, source attribution). Added NFR-5.2.5–5.2.7 (prompt version, agent role, and experiment ID in traces). Strengthened NFR-6.2.3 (versioned file assets, no-code-deployment). Added AC-8 (4 prompt system acceptance criteria). Added OI-9 (prompt asset directory structure). Added related document reference. | FR-1.4.6–1.4.9, FR-1.5.1–1.5.5, NFR-5.2.5–5.2.7, NFR-6.2.3, AC-8.1–8.4 |
+| 2 | [AGENT_ARCHITECTURE_DECISION_RECORDS.md](./decisions/AGENT_ARCHITECTURE_DECISION_RECORDS.md) | Added ADR-002 (Skills Pattern — composable prompt fragments with activation criteria). Added ADR-003 (Externalized Prompt Assets — versioned YAML files, baseline fallback, directory convention). Annotated ADR-001 §8 (Prompt Compiler) with implementation reference to this research proposal. | ADR-002, ADR-003 |
+| 3 | [ARCHITECTURE_DESIGN.md](./ARCHITECTURE_DESIGN.md) | Added new “Prompt System Architecture” section (three-layer architecture, component responsibilities, prompt taxonomy, skills composition flow, observability integration). Updated System Prompt block with migration note. Added prompt file structure (`src/prompts/`) to File Structure. Added 3 design pattern rows (Asset Loader, Composer, Middleware). Added §4.4 Prompt System Externalization to Space for Improvements. Updated Table of Contents. | FR-1.4.5–1.4.9, FR-1.5, NFR-5.2.5–5.2.7 |
+| 4 | [PHASE_2_AGENT_ENHANCEMENT_ROADMAP.md](./PHASE_2_AGENT_ENHANCEMENT_ROADMAP.md) | Updated 2A.2 status to “Research complete — design refined.” Replaced 4 generic work items with refined 7-phase implementation roadmap. Updated dependencies with cross-references to this proposal, SRS v2.3, and ADR-002/ADR-003. | FR-1.4.5–1.4.9, FR-1.5, ADR-002, ADR-003 |
+| 5 | [SRS_SPEC_TRACEABILITY.md](./SRS_SPEC_TRACEABILITY.md) | Version 1.4 → 1.5. Updated SRS baseline to v2.3. Added 16 unmapped trace entries: FR-1.4.6–1.4.9 (4), FR-1.5.1–1.5.5 (5), NFR-5.2.5–5.2.7 (3), AC-8.1–8.4 (4). Updated summary counts (302 → 318 total, 179 → 195 unmapped). Added AC-8 to family index. | All new SRS v2.3 items |
 
 **Total changes:** 5 documents, ~80 new or modified content blocks.
 
@@ -1168,10 +1168,10 @@ This section tracks changes made to other project documents as a result of resea
 
 ### Internal Project References
 
-- [ADR-001 — Layered LLM Architecture](.../domains/agent/decisions/AGENT_ARCHITECTURE_DECISION_RECORDS.md)
-- [Phase 2 Agent Enhancement Roadmap](../PHASE_2_AGENT_ENHANCEMENT_ROADMAP.md)
-- [Agent Memory Technical Design](../AGENT_MEMORY_TECHNICAL_DESIGN.md)
-- [LangChain Agent Architecture and Design](../../domains/agent/ARCHITECTURE_DESIGN.md)
+- [ADR-001 — Layered LLM Architecture](./decisions/AGENT_ARCHITECTURE_DECISION_RECORDS.md)
+- [Phase 2 Agent Enhancement Roadmap](./PHASE_2_AGENT_ENHANCEMENT_ROADMAP.md)
+- [Agent Memory Technical Design](./AGENT_MEMORY_TECHNICAL_DESIGN.md)
+- [LangChain Agent Architecture and Design](./ARCHITECTURE_DESIGN.md)
 - [LangSmith Studio Guide](../LANGSMITH_STUDIO_GUIDE.md)
 
 ### Code Anchors

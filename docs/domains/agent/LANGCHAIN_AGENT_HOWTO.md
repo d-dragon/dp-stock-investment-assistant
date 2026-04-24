@@ -388,9 +388,9 @@ graph TD
 ```
 
 **📖 Key Documentation:**
-- File: [`src/core/stock_assistant_agent.py`](../../src/core/stock_assistant_agent.py) - Main agent implementation
-- File: [`src/core/tools/base.py`](../../src/core/tools/base.py) - CachingTool base class
-- Example: [`examples/repository_factory_usage.py`](../../examples/repository_factory_usage.py) - Factory pattern usage
+- File: [`src/core/stock_assistant_agent.py`](../../../src/core/stock_assistant_agent.py) - Main agent implementation
+- File: [`src/core/tools/base.py`](../../../src/core/tools/base.py) - CachingTool base class
+- Example: [`examples/repository_factory_usage.py`](../../../examples/repository_factory_usage.py) - Factory pattern usage
 
 ---
 
@@ -1713,7 +1713,7 @@ tool_registry.register(my_tool, enabled=True)
 **📖 Tool Development References:**
 - [LangChain Custom Tools](https://python.langchain.com/docs/how_to/custom_tools/)
 - [Pydantic BaseModel](https://docs.pydantic.dev/latest/concepts/models/)
-- [Tool Testing Guide](../../tests/test_repositories.py)
+- [Tool Testing Guide](../../../tests/test_repositories.py)
 
 ---
 
@@ -2746,7 +2746,7 @@ ALERTS = [
 - [LangSmith Tracing](https://docs.smith.langchain.com/tracing)
 - [Studio Guide](https://docs.smith.langchain.com/studio)
 - [Production Best Practices](https://docs.smith.langchain.com/production)
-- [Bootstrap Reference](../../docs/LANGSMITH_STUDIO_GUIDE.md)
+- [Bootstrap Reference](../../langchain-agent/LANGSMITH_STUDIO_GUIDE.md)
 
 ---
 
@@ -4080,15 +4080,15 @@ print(f"Hits: {metrics.hits}, Misses: {metrics.misses}")
 ### 12.2 Project Documentation
 
 **Core Guides:**
-- [Main README](../../README.md) - Project overview and setup
-- [LangSmith Studio Setup](../../docs/LANGSMITH_STUDIO_GUIDE.md) - Studio integration
-- [Backend Python Instructions](../../.github/instructions/backend-python.instructions.md) - Coding conventions
-- [Architecture Overview](../../.github/instructions/architecture.instructions.md) - System design
+- [Main README](../../../README.md) - Project overview and setup
+- [LangSmith Studio Setup](../../langchain-agent/LANGSMITH_STUDIO_GUIDE.md) - Studio integration
+- [Backend Python Instructions](../../../.github/instructions/backend-python.instructions.md) - Coding conventions
+- [Architecture Overview](../../../.github/instructions/architecture.instructions.md) - System design
 
 **Examples:**
-- [Repository Factory Usage](../../examples/repository_factory_usage.py) - Factory pattern
-- [Service Protocol DI](../../examples/services/protocol_based_di.py) - Dependency injection
-- [Tool Testing](../../examples/testing/test_service_with_protocols.py) - Protocol mocking
+- [Repository Factory Usage](../../../examples/repository_factory_usage.py) - Factory pattern
+- [Service Protocol DI](../../../examples/services/protocol_based_di.py) - Dependency injection
+- [Tool Testing](../../../examples/testing/test_service_with_protocols.py) - Protocol mocking
 
 ### 12.3 Academic Papers
 
@@ -4240,8 +4240,8 @@ If migrating from the old non-LangChain agent:
 
 1. **Check Documentation First:**
    - This guide (comprehensive overview)
-   - [LangSmith Studio Guide](../../docs/LANGSMITH_STUDIO_GUIDE.md)
-   - [Architecture Instructions](../../.github/instructions/)
+    - [LangSmith Studio Guide](../../langchain-agent/LANGSMITH_STUDIO_GUIDE.md)
+    - [Architecture Instructions](../../../.github/instructions/)
 
 2. **Search Issues:**
    - Project GitHub Issues
@@ -4260,7 +4260,7 @@ If migrating from the old non-LangChain agent:
 
 **Contributing:**
 
-Contributions welcome! See [CONTRIBUTING.md](../../CONTRIBUTING.md) for:
+Contributions welcome! See [CONTRIBUTING.md](../../../CONTRIBUTING.md) for:
 - Code style guidelines
 - Pull request process
 - Testing requirements
