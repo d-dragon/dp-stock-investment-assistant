@@ -16,34 +16,6 @@
       },
       "installed_at": "2026-03-16T04:12:21.870110+00:00"
     },
-    "fleet": {
-      "version": "1.0.0",
-      "source": "local",
-      "manifest_hash": "sha256:0397699f61f925ec5745bb32af24420328b1ad27b45770b2c9b241fe84eafdb3",
-      "enabled": true,
-      "registered_commands": {
-        "copilot": [
-          "speckit.fleet.run",
-          "speckit.fleet",
-          "speckit.fleet.review",
-          "speckit.review"
-        ]
-      },
-      "installed_at": "2026-03-16T06:30:36.324513+00:00"
-    },
-    "verify": {
-      "version": "1.0.0",
-      "source": "local",
-      "manifest_hash": "sha256:4baa329349fffb5598a7bd41f958cf193aac77dd624c1c64799de052995ca29a",
-      "enabled": true,
-      "registered_commands": {
-        "copilot": [
-          "speckit.verify.run",
-          "speckit.verify"
-        ]
-      },
-      "installed_at": "2026-03-18T02:14:12.840153+00:00"
-    },
     "verify-tasks": {
       "version": "1.0.0",
       "source": "local",
@@ -75,6 +47,73 @@
         ]
       },
       "installed_at": "2026-03-23T03:58:15.288439+00:00"
+    },
+    "git": {
+      "version": "1.0.0",
+      "source": "local",
+      "manifest_hash": "sha256:9731aa8143a72fbebfdb440f155038ab42642517c2b2bdbbf67c8fdbe076ed79",
+      "enabled": true,
+      "priority": 10,
+      "registered_commands": {
+        "copilot": [
+          "speckit.git.feature",
+          "speckit.git.validate",
+          "speckit.git.remote",
+          "speckit.git.initialize",
+          "speckit.git.commit"
+        ]
+      },
+      "registered_skills": [],
+      "installed_at": "2026-05-04T03:20:00.335901+00:00"
+    },
+    "fleet": {
+      "version": "1.1.0",
+      "source": "local",
+      "manifest_hash": "sha256:329033853690a066ec7c0c2c88ca13a9e4bd971d17270e1a51e0bc49d59f2852",
+      "enabled": true,
+      "priority": 10,
+      "registered_commands": {
+        "copilot": [
+          "speckit.fleet.run",
+          "speckit.fleet.review"
+        ]
+      },
+      "registered_skills": [],
+      "installed_at": "2026-03-16T06:30:36.324513+00:00"
+    },
+    "verify": {
+      "version": "1.0.3",
+      "source": "local",
+      "manifest_hash": "sha256:74202b2c3bb17058b10787838cdf30c9ebe11e8793fc1de04bee75d5f111949a",
+      "enabled": true,
+      "priority": 10,
+      "registered_commands": {
+        "copilot": [
+          "speckit.verify.run"
+        ]
+      },
+      "registered_skills": [],
+      "installed_at": "2026-03-18T02:14:12.840153+00:00"
+    },
+    "security-review": {
+      "version": "1.3.3",
+      "source": "local",
+      "manifest_hash": "sha256:67eea161a98358922becae312814fd963b6523773895a7b4146a91c2955f9582",
+      "enabled": true,
+      "priority": 10,
+      "registered_commands": {
+        "copilot": [
+          "speckit.security-review.audit",
+          "speckit.security-review.staged",
+          "speckit.security-review.branch",
+          "speckit.security-review.plan",
+          "speckit.security-review.tasks",
+          "speckit.security-review.followup",
+          "speckit.security-review.apply"
+        ]
+      },
+      "registered_skills": [],
+      "installed_at": "2026-05-04T04:06:18.177852+00:00"
     }
   }
 }

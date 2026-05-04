@@ -410,3 +410,8 @@ See linked instruction files for comprehensive guidelines:
 - Health check (once app runs): `GET /api/health` → `{ "status": "healthy" }`
 
 This guide is living documentation—update it when you add patterns, services, or workflows the assistant should follow.
+
+<!-- SPECKIT START -->
+For additional context about technologies to be used, project structure,
+shell commands, and other important information, read the current plan
+<!-- SPECKIT END -->
