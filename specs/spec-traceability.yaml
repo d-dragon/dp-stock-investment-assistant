@@ -13,7 +13,7 @@ reports:
         date: 2026-03-31
         summary: Synchronized stm-phase-cde from clarified planning state to verified implementation state and expanded evidence links.
   srs_spec_traceability:
-    version: "1.4"
+    version: "1.5"
     status: Active
     revision_history:
       - version: "1.0"
@@ -31,11 +31,14 @@ reports:
       - version: "1.4"
         date: 2026-03-31
         summary: Updated stm-phase-cde reverse-trace statuses from clarified to verified after implementation and verification completion.
+      - version: "1.5"
+        date: 2026-04-13
+        summary: Added prompt-system trace entries and updated the governing SRS baseline to v2.3.
 
 srs:
-  path: docs/langchain-agent/SOFTWARE_REQUIREMENTS_SPECIFICATION.md
-  version: "2.2"
-  last_updated: 2026-03-19
+  path: docs/domains/agent/SOFTWARE_REQUIREMENTS_SPECIFICATION.md
+  version: "2.3"
+  last_updated: 2026-04-13
 
 status_rules:
   analyzed:

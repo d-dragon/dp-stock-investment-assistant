@@ -98,10 +98,10 @@ This report analyzes the feasibility of adopting spec-driven development methodo
 | Document | Lines | Content |
 |----------|-------|---------|
 | `docs/langchain-agent/Requirements.md` | 728 | Full SRS with FR/NFR/Constraints/AC |
-| `docs/langchain-agent/LANGCHAIN_AGENT_ARCHITECTURE_AND_DESIGN.md` | 847 | System architecture |
-| `docs/langchain-agent/AGENT_ARCHITECTURE_DECISION_RECORDS.md` | 346 | ADR-001 layered architecture |
-| `docs/langchain-agent/AGENT_MEMORY_TECHNICAL_DESIGN.md` | 1143 | Memory subsystem design |
-| `docs/langchain-agent/PHASE_2_AGENT_ENHANCEMENT_ROADMAP.md` | 882 | Enhancement roadmap |
+| `docs/domains/agent/ARCHITECTURE_DESIGN.md` | 847 | System architecture |
+| `docs/domains/agent/decisions/AGENT_ARCHITECTURE_DECISION_RECORDS.md` | 346 | ADR-001 layered architecture |
+| `docs/domains/agent/AGENT_MEMORY_TECHNICAL_DESIGN.md` | 1143 | Memory subsystem design |
+| `docs/domains/agent/PHASE_2_AGENT_ENHANCEMENT_ROADMAP.md` | 882 | Enhancement roadmap |
 | `docs/openapi.yaml` | - | REST API contract |
 
 ### 2.2 Spec-Driven Maturity Assessment
@@ -250,7 +250,7 @@ dp-stock-investment-assistant/
 ├── docs/
 │   ├── langchain-agent/
 │   │   ├── Requirements.md                    # SRS v2.0
-│   │   ├── LANGCHAIN_AGENT_ARCHITECTURE_AND_DESIGN.md
+│   │   ├── ARCHITECTURE_DESIGN.md
 │   │   ├── AGENT_ARCHITECTURE_DECISION_RECORDS.md
 │   │   ├── AGENT_MEMORY_TECHNICAL_DESIGN.md
 │   │   └── PHASE_2_AGENT_ENHANCEMENT_ROADMAP.md

@@ -7,7 +7,7 @@ This enables long-term memory retrieval based on semantic similarity.
 Status: FUTURE IMPLEMENTATION (Phase 2A.2+)
 This schema is defined for planning purposes but not yet active.
 
-Reference: docs/langchain-agent/AGENT_MEMORY_TECHNICAL_DESIGN.md
+Reference: docs/domains/agent/AGENT_MEMORY_TECHNICAL_DESIGN.md
 
 Author: dp-stock-investment-assistant
 Created: 2025-01-21
