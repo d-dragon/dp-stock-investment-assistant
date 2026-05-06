@@ -30,10 +30,13 @@ The composition model is built from:
 
 ## 2. Stakeholders Affected
 
-- AI engineers and agent maintainers
-- Architecture owners
-- Product and domain reviewers
-- QA and test maintainers
+- Product
+- End Users
+- AI Engineers / Agent Maintainers
+- Backend Engineers
+- QA / Test Maintainers
+- Security & Compliance
+- Architecture Owners
 
 ## 3. Architecture Concerns Addressed
 
@@ -109,7 +112,36 @@ The composition flow implied by this decision is:
 - ADR-003 defines how prompt assets and skills are externalized and versioned as file-based configuration.
 - `PROMPT_SYSTEM_RESEARCH_PROPOSAL.md` provides the research basis for the skills-pattern decision.
 
-## 9. Implementation Checklist
+## 9. Affected Views / Impacted Architectural Elements
+
+### 9.1 Views Impacted by This Decision
+
+| View | Impact Scope | Updated / Governed Content |
+|------|--------------|----------------------------|
+| Prompt and Behavior View | Primary | Governs decomposition of monolithic prompt behavior into composable skills with explicit activation and reuse boundaries |
+| Process View | Secondary | Governs where skill selection and prompt composition sit in the runtime flow before model invocation |
+| Development View | Secondary | Governs the expectation that skills are independently authorable assets rather than hardcoded prompt fragments |
+
+### 9.2 Architectural Elements Newly Defined or Reframed
+
+- **Always-Active Skills:** Cross-cutting prompt fragments such as disclaimers or anti-hype guardrails that apply across routes.
+- **Route-Matched Skills:** Route-specific prompt fragments activated according to classification and configuration.
+- **Skill Activation Criteria:** Metadata-driven rules that determine when a skill is applied.
+- **PromptAssembler:** Composition mechanism that orders and merges the active skill set with base instructions and context.
+- **Skills Composition Governance:** Architectural rule that prompt behavior is decomposed into independently governable fragments rather than one monolithic prompt asset.
+
+### 9.3 Applicability Note
+
+This ADR is **Proposed**. The architecture-description package may describe this pattern as the planned direction for prompt behavior and composition, but companion documents must not imply that the full skills runtime, loader behavior, or skill-governance tooling is already implemented unless realization documents explicitly say so.
+
+### 9.4 Consistency Checkpoints
+
+- [ ] Prompt and Behavior, Process, and Development views use the same skills terminology and view names defined in the architecture description.
+- [ ] Skills are described as prompt-behavior components, not as data stores, business-state owners, or substitutes for tool execution.
+- [ ] `PromptAssembler` remains distinct from the higher-level `Prompt Compiler` concept and from `PromptAssetLoader` in ADR-003.
+- [ ] Proposed-status language remains visible anywhere this ADR is reflected in companion documents.
+
+## 10. Implementation Checklist
 
 - [ ] Define skill YAML schema (name, version, description, activation_criteria, content)
 - [ ] Implement PromptAssetLoader to discover and load skill files from `src/prompts/skills/`
@@ -118,7 +150,7 @@ The composition flow implied by this decision is:
 - [ ] Add skill integration tests (composition order, conflict resolution, fallback)
 - [ ] Document skill authoring guide for contributors
 
-## 10. Traceability
+## 11. Traceability
 
 Supports:
 

@@ -29,9 +29,12 @@ The asset model is composed of:
 
 ## 2. Stakeholders Affected
 
-- DevOps
-- AI engineers
 - Product
+- AI Engineers / Agent Maintainers
+- Backend Engineers
+- DevOps / SRE
+- Security & Compliance
+- Architecture Owners
 
 ## 3. Architecture Concerns Addressed
 
@@ -102,7 +105,37 @@ Key design choices:
 - ADR-002 defines the skills-pattern composition model that relies on these externalized assets.
 - `PROMPT_SYSTEM_RESEARCH_PROPOSAL.md` provides the research basis for externalized and versioned prompt assets.
 
-## 9. Implementation Checklist
+## 9. Affected Views / Impacted Architectural Elements
+
+### 9.1 Views Impacted by This Decision
+
+| View | Impact Scope | Updated / Governed Content |
+|------|--------------|----------------------------|
+| Prompt and Behavior View | Primary | Governs versioned prompt assets, baseline fallback behavior, and prompt-version metadata as part of the prompt architecture |
+| Development View | Primary | Governs the architectural expectation of a dedicated `src/prompts/` asset structure for prompt sources |
+| Deployment View | Secondary | Governs inclusion and lifecycle of prompt assets in containers or deployment packages |
+| Operations and Maintenance View | Secondary | Governs prompt-version observability, rollback posture, and baseline fallback during asset failure |
+
+### 9.2 Architectural Elements Newly Defined or Reframed
+
+- **Versioned Prompt Assets:** File-based prompt artifacts that carry explicit version identity and support controlled change.
+- **Baseline Fallback Asset:** Last-known-good prompt asset used when a selected version is missing or invalid.
+- **PromptAssetLoader:** Asset-loading mechanism that discovers, validates, and resolves prompt assets before assembly.
+- **Runtime Reload Behavior:** Architecture-level ability to adopt prompt changes through configuration reload or restart rather than code redeployment.
+- **Prompt-Version Traceability:** Runtime metadata expectation that prompt versions and experiment identifiers remain observable to operators.
+
+### 9.3 Applicability Note
+
+This ADR is **Proposed**. The architecture-description package may describe externalized prompt assets as the intended architecture direction, but companion documents must continue to distinguish the proposed asset model from the current hardcoded runtime prompt until implementation and deployment artifacts actually converge on this design.
+
+### 9.4 Consistency Checkpoints
+
+- [ ] Prompt and Behavior, Development, Deployment, and Operations and Maintenance views use the same asset-model terminology defined by this ADR.
+- [ ] Companion documents do not describe versioned prompt assets, baseline fallback, or reload behavior as current runtime fact unless realization artifacts confirm implementation.
+- [ ] `PromptAssetLoader` remains distinct from `PromptAssembler` and from the broader `Prompt Compiler` concept in concept-evolution discussions.
+- [ ] Prompt observability and rollback language remains consistent with this ADR's proposed status and with the architecture description's planned-state labeling.
+
+## 10. Implementation Checklist
 
 - [ ] Define YAML prompt asset schema with JSON Schema validation
 - [ ] Implement PromptAssetLoader with caching, validation, and fallback logic
@@ -112,7 +145,7 @@ Key design choices:
 - [ ] Update Dockerfile to include `src/prompts/` in container image
 - [ ] Add prompt asset integration tests (load, fallback, version extraction)
 
-## 10. Traceability
+## 11. Traceability
 
 Supports:
 

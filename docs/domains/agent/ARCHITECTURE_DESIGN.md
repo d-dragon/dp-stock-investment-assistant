@@ -39,6 +39,8 @@ The document follows the repository's documentation methodology, where architect
 
 > **Note on scope**: The project methodology defines architecture descriptions at the system level. This is a domain-level architecture description created because the agent domain carries sufficient complexity (multi-layer LLM reasoning, memory management, prompt composition, tooling, and provider fallback) to warrant its own viewpoint-governed description within the system-wide architecture.
 
+> **Architecture-description package statement:** This document set is an agent-domain architecture description aligned to ISO/IEC/IEEE 42010 concepts. It is intended to define the agent domain's entity of interest, stakeholders, concerns, viewpoints, views, correspondences, and rationale across the companion architecture package. It is not a formal certification artifact and does not claim whole-system compliance for the full DP Stock Investment Assistant.
+
 ### 1.2 Entity of Interest
 
 The **entity of interest** is the **agent domain** of the DP Stock Investment Assistant: the LangChain and LangGraph-based reasoning and tool-orchestration subsystem that answers stock-investment queries, manages conversation-scoped short-term memory, applies prompt policies and guardrails, and coordinates model/provider fallback behavior.
@@ -101,14 +103,19 @@ This architecture description does not replace:
 
 ### 2.1 Stakeholders
 
-| Stakeholder | Perspective | Primary Concerns |
-|-------------|-------------|------------------|
-| Agent maintainers | Runtime and behavior perspective | Correct orchestration, extensibility, debugging cost, prompt evolution |
-| Backend/API maintainers | Integration and service perspective | Stable invocation contracts, archive behavior, streaming compatibility |
-| Architecture owners | System and governance perspective | ADR alignment, separation of concerns, bounded responsibilities |
-| Product and domain reviewers | Product behavior perspective | Response usefulness, safety, clarity, future extensibility |
-| Operations and support | Operability perspective | Observability, health, reconciliation, drift visibility |
-| Security and compliance reviewers | Risk and controls perspective | Evidence-first behavior, anti-hype safeguards, memory boundaries |
+The agent-domain architecture package uses the following normalized stakeholder classes across the architecture description and ADR set.
+
+| Stakeholder | Responsibilities | Key Concerns |
+|-------------|------------------|--------------|
+| Product | Feature roadmap, prioritization, and release planning | Capability coverage, iteration speed, user value |
+| Business | Product-risk framing and domain-positioning oversight | Non-advisory boundary, financial-domain risk, adoption confidence |
+| End Users | Use the assistant for investment research and decision support | Transparency, clarity, trust, usability |
+| AI Engineers / Agent Maintainers | Agent orchestration, model behavior, prompt evolution, and retrieval design | Accuracy, explainability, prompt evolution, extensibility |
+| Backend Engineers | Service, API, and metadata integration | Maintainability, extensibility, stable invocation contracts, lifecycle integrity |
+| DevOps / SRE | Runtime operations, deployment, observability, and recovery support | Reliability, observability, rollback safety, drift visibility |
+| Security & Compliance | Data handling, policy controls, and legal safeguards | Privacy, financial disclaimers, evidence-first behavior, anti-hype controls |
+| Architecture Owners | Architecture governance and decision consistency | Boundary integrity, ADR alignment, separation of concerns |
+| QA / Test Maintainers | Verification strategy, regression control, and release-readiness checks | Testability, release confidence, behavior regression detection |
 
 ### 2.2 Concerns
 
@@ -148,14 +155,14 @@ In this document, section 3 defines the viewpoints. Section 4 then provides one 
 
 | Viewpoint | Stakeholders | Concerns Framed | Conventions / Model Kinds |
 |-----------|--------------|-----------------|----------------------------|
-| Context and Boundary Viewpoint | Architecture owners, backend maintainers, product reviewers | Domain scope, environment, external dependencies, system boundary, ownership boundaries | Narrative boundary statements, system context diagrams, context summaries, dependency tables |
-| Logical Viewpoint | Engineers, product reviewers, architecture owners | Modularity, separation of concerns, responsibility allocation, extensibility seams, dependency direction | Component and responsibility tables, logical decomposition summaries, relationship narratives |
-| Process Viewpoint | Agent maintainers, backend engineers, SREs | Runtime flow, route handling, tool orchestration, latency-sensitive paths, provider fallback, fault tolerance | Interaction flows, sequence-style diagrams, runtime decision summaries |
-| Information and State Viewpoint | Architects, backend maintainers, compliance reviewers | STM scope, state ownership, lifecycle, metadata boundaries, hierarchy, memory constraints | State and lifecycle tables, hierarchy summaries, state ownership narratives |
-| Development Viewpoint | Developers, maintainers, technical leads | Code organization, module ownership, maintainability, build-facing structure, extension points | Source-layout views, module-boundary summaries, ownership and dependency tables |
-| Deployment Viewpoint | DevOps, security reviewers, SREs | Runtime topology, containers and services, health endpoints, scaling boundaries, environment overlays, secrets boundaries | Deployment context summaries, topology tables, environment and probe mappings |
-| Operations and Maintenance Viewpoint | DevOps, security reviewers, developers, product owners | Production operation, availability, resilience, observability, drift detection, recovery surfaces, maintainability in service | Operational responsibility tables, resilience summaries, observability and health mappings |
-| Prompt and Behavior Viewpoint | Agent maintainers, architecture owners, compliance reviewers | Prompt composition, guardrails, behavioral policy, prompt observability, prompt evolution | Layered prompt diagrams, taxonomy tables, metadata tables |
+| Context and Boundary Viewpoint | Architecture Owners, Backend Engineers, Product, Security & Compliance | Domain scope, environment, external dependencies, system boundary, ownership boundaries | Narrative boundary statements, system context diagrams, context summaries, dependency tables |
+| Logical Viewpoint | AI Engineers / Agent Maintainers, Backend Engineers, Architecture Owners | Modularity, separation of concerns, responsibility allocation, extensibility seams, dependency direction | Component and responsibility tables, logical decomposition summaries, relationship narratives |
+| Process Viewpoint | AI Engineers / Agent Maintainers, Backend Engineers, DevOps / SRE | Runtime flow, route handling, tool orchestration, latency-sensitive paths, provider fallback, fault tolerance | Interaction flows, sequence-style diagrams, runtime decision summaries |
+| Information and State Viewpoint | Architecture Owners, Backend Engineers, Security & Compliance | STM scope, state ownership, lifecycle, metadata boundaries, hierarchy, memory constraints | State and lifecycle tables, hierarchy summaries, state ownership narratives |
+| Development Viewpoint | AI Engineers / Agent Maintainers, Backend Engineers, QA / Test Maintainers | Code organization, module ownership, maintainability, build-facing structure, extension points | Source-layout views, module-boundary summaries, ownership and dependency tables |
+| Deployment Viewpoint | DevOps / SRE, Security & Compliance, Architecture Owners | Runtime topology, containers and services, health endpoints, scaling boundaries, environment overlays, secrets boundaries | Deployment context summaries, topology tables, environment and probe mappings |
+| Operations and Maintenance Viewpoint | DevOps / SRE, Backend Engineers, Product, Security & Compliance | Production operation, availability, resilience, observability, drift detection, recovery surfaces, maintainability in service | Operational responsibility tables, resilience summaries, observability and health mappings |
+| Prompt and Behavior Viewpoint | AI Engineers / Agent Maintainers, Architecture Owners, Security & Compliance, Product | Prompt composition, guardrails, behavioral policy, prompt observability, prompt evolution | Layered prompt diagrams, taxonomy tables, metadata tables |
 
 These viewpoints govern the corresponding views in section 4. Detailed code-oriented realization belongs in [TECHNICAL_DESIGN.md](./TECHNICAL_DESIGN.md), detailed STM realization belongs in [AGENT_MEMORY_TECHNICAL_DESIGN.md](./AGENT_MEMORY_TECHNICAL_DESIGN.md), and deployment procedure detail belongs in [IaC/README.md](../../../IaC/README.md).
 
@@ -730,6 +737,25 @@ The pre-rewrite architecture document mixed architecture description, technical 
 - memory-specific subsystem detail is preserved in [AGENT_MEMORY_TECHNICAL_DESIGN.md](./AGENT_MEMORY_TECHNICAL_DESIGN.md);
 - prompt-system research, detailed rollout logic, and evaluation design are preserved in [PROMPT_SYSTEM_RESEARCH_PROPOSAL.md](./PROMPT_SYSTEM_RESEARCH_PROPOSAL.md);
 - decision authority remains with the ADR set in [decisions](./decisions).
+
+### 5.5 Correspondence Rules and Consistency Checks
+
+The following rules govern how this architecture-description package stays consistent across ADRs and companion design documents:
+
+1. Accepted ADRs govern architectural decision boundaries and win if a companion document describes a conflicting boundary or responsibility split.
+2. [ARCHITECTURE_DESIGN.md](./ARCHITECTURE_DESIGN.md) governs viewpoint-framed architecture views, cross-document correspondences, and package-level standards-positioning language.
+3. [TECHNICAL_DESIGN.md](./TECHNICAL_DESIGN.md) governs realization detail and implementation-oriented sequencing, but it must not override an accepted ADR or restate planned behavior as implemented.
+4. [AGENT_MEMORY_TECHNICAL_DESIGN.md](./AGENT_MEMORY_TECHNICAL_DESIGN.md) governs STM-specific subsystem detail within the architectural boundaries established by ADR-001 and this architecture description.
+5. Proposed ADRs may shape planned or future-state architecture content, but they do not override accepted decisions until their status changes.
+6. Terminology changes that affect architectural concepts, view names, or decision names must be reconciled across sections 3, 4, 5, and 6 of this document and across the affected ADRs in the same update pass.
+
+Reviewer checklist:
+
+- [ ] ADR status and title references in this document match the current ADR files.
+- [ ] View names used in ADRs match the viewpoint and view names defined in sections 3 and 4.
+- [ ] Accepted ADR boundaries are not contradicted by companion design documents.
+- [ ] Proposed or future-state capabilities remain labeled as planned where runtime implementation is incomplete.
+- [ ] Concept evolution terms such as `Prompt Compiler`, `PromptAssembler`, and `PromptAssetLoader` are used consistently with section 5.3.
 
 ---
 
