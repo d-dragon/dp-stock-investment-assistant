@@ -9,27 +9,38 @@
 | **Standards Stance** | Practice-Based ADR discipline |
 | **Status** | Proposed |
 | **Date** | 2026-04-13 |
-| **Last Updated** | 2026-04-14 |
+| **Last Updated** | 2026-05-06 |
+| **Context** | DP-StockAI-Assistant |
 | **Decision Owners** | Engineering · Architecture · Agent maintainers |
 
 ## ADR-003 — Externalize and Version Prompt Assets as File-Based Configuration
 
-### Table of Contents
+## 1. Decision Summary
 
-1. [Context](#context)
-2. [Decision](#decision)
-3. [Rationale](#rationale)
-4. [Consequences](#consequences)
-5. [Implementation Checklist](#implementation-checklist)
+Externalize prompt assets as versioned file-based configuration so prompt changes, version identity, rollback, and controlled experimentation are managed through governed assets and runtime loading rather than code edits.
 
-**Supersedes:** None  
-**Related:** ADR-001 §8 (Prompt Compiler), ADR-002 (Skills Pattern)  
-**Research:** [PROMPT_SYSTEM_RESEARCH_PROPOSAL.md §4, §5](../PROMPT_SYSTEM_RESEARCH_PROPOSAL.md)  
-**SRS:** FR-1.4.5 (External Prompt Management), FR-1.4.6 (Prompt Version Identity), FR-1.4.8 (Prompt Rollback Safety), NFR-6.2.3 (extensibility)  
+The asset model is composed of:
 
----
+- Versioned system prompt files
+- Baseline fallback assets
+- Skill fragments and prompt variants
+- Runtime prompt loading and validation
+- Configuration-driven reload and rollback behavior
 
-### Context
+## 2. Stakeholders Affected
+
+- DevOps
+- AI engineers
+- Product
+
+## 3. Architecture Concerns Addressed
+
+- Prompt version traceability
+- Decoupling prompt change velocity from code deployment
+- Controlled experimentation and rollback safety
+- Governance of runtime-loaded prompt assets
+
+## 4. Problem Statement
 
 The current agent loads its system prompt from a hardcoded string in `src/core/stock_assistant_agent.py`. This creates several operational problems:
 
@@ -38,7 +49,7 @@ The current agent loads its system prompt from a hardcoded string in `src/core/s
 - **No rollback path**: A bad prompt edit propagates immediately; reverting requires another code deployment.
 - **No experimentation support**: A/B testing different prompts requires conditional code branches.
 
-### Decision
+## 5. Decision
 
 Externalize all prompt content into **versioned file-based assets** under a dedicated directory (e.g., `src/prompts/`), version-tagged via embedded metadata, and loaded at runtime by a `PromptAssetLoader` component.
 
@@ -61,7 +72,7 @@ Key design choices:
        exp-001-concise.yaml
    ```
 
-### Rationale
+## 6. Rationale
 
 | Concern | Hardcoded Prompt | Externalized Assets |
 |---------|-----------------|---------------------|
@@ -71,7 +82,7 @@ Key design choices:
 | Experimentation | Conditional code branches | Variant files + experiment config |
 | Audit / compliance | Implicit in code history | Explicit version tag per invocation |
 
-### Consequences
+## 7. Consequences
 
 **Positive:**
 - Prompt changes decouple from code deployment (aligns with NFR-6.2.3).
@@ -84,7 +95,14 @@ Key design choices:
 - Prompt directory must be included in container images or mounted as a volume.
 - Schema validation needed to prevent malformed assets from reaching production.
 
-### Implementation Checklist
+## 8. Related Documents
+
+- Supersedes: None
+- ADR-001 defines the prompt-compilation and layered runtime boundary that this ADR operationalizes.
+- ADR-002 defines the skills-pattern composition model that relies on these externalized assets.
+- `PROMPT_SYSTEM_RESEARCH_PROPOSAL.md` provides the research basis for externalized and versioned prompt assets.
+
+## 9. Implementation Checklist
 
 - [ ] Define YAML prompt asset schema with JSON Schema validation
 - [ ] Implement PromptAssetLoader with caching, validation, and fallback logic
@@ -93,4 +111,21 @@ Key design choices:
 - [ ] Add prompt version to trace span attributes (NFR-5.2.5)
 - [ ] Update Dockerfile to include `src/prompts/` in container image
 - [ ] Add prompt asset integration tests (load, fallback, version extraction)
+
+## 10. Traceability
+
+Supports:
+
+Functional requirements:
+
+- `FR-1.4.5` External Prompt Management
+- `FR-1.4.6` Prompt Version Identity
+- `FR-1.4.8` Prompt Rollback Safety
+- `FR-1.4.9` Prompt Experiment Assignment
+
+Non-functional requirements:
+
+- `NFR-5.2.5` Prompt version identifier in traces
+- `NFR-5.2.7` Experiment identifier and variant assignment in traces
+- `NFR-6.2.3` Versioned prompt assets configurable without code deployment
 
