@@ -1,7 +1,7 @@
 # Agent Memory Technical Design
 
-> **Document Version**: 1.4  
-> **Last Updated**: March 31, 2026  
+> **Document Version**: 1.5  
+> **Last Updated**: May 6, 2026  
 > **Phase**: 2A.1 - Short-Term Conversation Memory  
 > **Status**: STM hierarchy implemented; summarization trigger and Socket.IO parity remain follow-up work  
 > **Governing ADR**: [ADR-001 — Layered LLM Architecture](./decisions/AGENT_ARCHITECTURE_DECISION_RECORDS.md)
@@ -118,7 +118,7 @@ This technical design implements the **Short-Term Memory (STM)** component defin
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
 
-### STM Design per ADR-001 Section 6.2
+### STM Design per ADR-001 STM Boundary Decision
 
 | ADR Specification | Technical Implementation |
 |-------------------|-------------------------|
@@ -249,9 +249,9 @@ This technical design implements the **Short-Term Memory (STM)** component defin
 - Track conversation metadata (message count, token usage, summary)
 - Enable memory-specific operations without polluting session entity
 - Support conversation archival per ADR-001 (archive over delete)
-- Maintain workspace isolation per ADR-001 Section 6.2
+- Maintain workspace isolation per ADR-001 STM hierarchy boundary
 
-**Archive Strategy (per ADR-001 Section 6.2):**
+**Archive Strategy (per ADR-001 archive-over-delete boundary):**
 
 | Status | Description | Behavior |
 |--------|-------------|----------|

@@ -6,7 +6,7 @@
 |-------|-------|
 | **Domain** | Agent |
 | **Standards Stance** | Practice-Based ADR discipline |
-| **Last Updated** | 2026-04-16 |
+| **Last Updated** | 2026-05-06 |
 | **Context** | DP-StockAI-Assistant |
 
 ---
