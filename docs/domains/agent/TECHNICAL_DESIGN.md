@@ -12,13 +12,15 @@
 | Project | DP Stock Investment Assistant |
 | Domain | Agent |
 | Focus | Technical realization of the LangChain ReAct agent domain, including orchestration, memory, prompt composition, and fallback behavior |
-| Date | 2026-04-16 |
+| Date | 2026-05-06 |
 | Status | Active working scaffold |
 | Audience | Engineering, architecture, agent maintainers, and reviewers |
 
 ## Purpose
 
 Explains how the agent domain realizes allocated requirements and architecture decisions. This document preserves implementation-oriented material extracted from the current architecture description so that the architecture document can focus on viewpoint-governed views while this document holds realization detail.
+
+The corresponding architecture views for context and boundary, logical structure, process flow, information and state, development, deployment, operations and maintenance, and prompt behavior are defined in [ARCHITECTURE_DESIGN.md](./ARCHITECTURE_DESIGN.md). This document complements those views by describing how the codebase realizes them, rather than restating the architecture-level framing.
 
 ## 1. Domain Scope and Boundaries
 
@@ -288,6 +290,21 @@ semantic_router:
 	cache_embeddings: true
 ```
 
+#### Retrieval-Augmented Generation Realization
+
+> **Status:** Planned architecture with partial evidence support today via tool paths; intent-specific retrieval indices are not yet fully implemented in the active runtime.
+
+The layered architecture treats retrieval as a distinct evidence path rather than as an extension of memory. In realization terms, this means route classification determines which evidence sources are eligible for a request and keeps retrieved source material separate from LTM, STM, and prompt-policy assets.
+
+| Intent Family | Retrieval Focus | Expected Freshness Profile |
+|---------------|-----------------|----------------------------|
+| `FUNDAMENTALS` | Filings, financial statements, and valuation-supporting evidence | Medium-lived; refreshed around reporting cycles |
+| `NEWS_ANALYSIS` | Press releases, headlines, and event-driven evidence | Short-lived; refreshed frequently |
+| `MARKET_WATCH` | Macro, sector, and index context | Medium-lived; refreshed on market cadence |
+| `TECHNICAL_ANALYSIS` | Indicator-supporting data and chart-derived context | Near-real-time or recent-window bias |
+
+This design preserves two technical invariants from ADR-001: retrieved evidence is sourced and attributable, and any interpretation produced from that evidence remains in the model output rather than being written back into memory as domain truth.
+
 #### Immutable Response Types
 
 **Decision**: Use frozen dataclasses for all response types.
@@ -384,6 +401,33 @@ Layer 3: ResponseGuardrailMiddleware
 | **Experiments** | `src/prompts/experiments/` | Temporary variants for A/B testing | `exp-001-concise.yaml` |
 | **Baseline** | `src/prompts/system/_baseline.yaml` | Permanent fallback, never deleted | Last-known-good system prompt |
 
+#### Prompt Assembly Order
+
+The prompt path should remain deterministic even after prompt assets are externalized. The intended assembly order is:
+
+1. Base system rules and persona
+2. Always-active skills and behavioral guardrails
+3. Route-matched skills
+4. LTM summary, when available
+5. STM and conversation-scoped assumptions
+6. Retrieved evidence and tool-derived facts
+7. Task-specific instruction
+8. Output schema or formatting contract
+
+This order preserves the separation of concerns defined by ADR-001: behavioral policy arrives before contextual state, retrieved evidence arrives after user and conversation context, and output-shaping instructions are applied last so they do not overwrite factual or policy inputs. The always-active and route-matched skill layers are the ADR-002 realization of the broader ADR-001 system-rules decision, not a competing prompt contract.
+
+```text
+[Base System]
+	+ [Always-Active Skills]
+	+ [Route-Matched Skills]
+	+ [LTM Summary]
+	+ [STM Context]
+	+ [RAG / Tool Evidence]
+	+ [Task Instruction]
+	+ [Output Schema]
+	-> Final Prompt Payload
+```
+
 #### Observability Integration
 
 | Trace Attribute | Source | Example Value |
@@ -393,6 +437,52 @@ Layer 3: ResponseGuardrailMiddleware
 | `prompt.experiment_id` | PromptAssembler | `exp-001` (or `null`) |
 | `prompt.skills_active` | PromptAssembler | `["disclaimer", "anti-hype", "earnings-analysis"]` |
 | `guardrail.violations` | ResponseGuardrailMiddleware | `[]` or `["hype_language_detected"]` |
+
+### 3.6 Fine-Tuning Realization
+
+> **Status:** Planned realization only; fine-tuning is not yet implemented in the current runtime.
+
+ADR-001 constrains fine-tuning to reasoning structure and tone, not knowledge storage. The technical realization of that constraint should keep fine-tuning datasets narrow, human-verified, and explicitly separated from dynamic market facts.
+
+| In Scope for Fine-Tuning | Out of Scope for Fine-Tuning |
+|--------------------------|------------------------------|
+| Earnings summary structure | Valuation logic as source of truth |
+| Risk-framing patterns | Price targets and forecasts |
+| Scenario-table formatting | Macro outlook as durable knowledge |
+| Consistent disclosure tone | Invented numbers or unsupported claims |
+
+Implementation-oriented safeguards:
+
+- Training examples should contain human-verified outputs only.
+- Numerical claims should remain runtime-injected from tools or retrieval, not baked into training data as durable facts.
+- Evaluation should check formatting consistency, uncertainty disclosure, and unsupported-claim rates before any rollout.
+
+### 3.7 Example Reasoning Flow
+
+The following walkthrough preserves the layered contract in a concrete engineering form without making the ADR carry the worked example. It represents the target layered flow once prompt externalization and richer retrieval wiring are fully in place.
+
+```text
+User: "Danh gia HSG trung han"
+	│
+	├─► Resolve LTM summary
+	│      risk profile: moderate
+	│      time horizon: 6-18 months
+	│
+	├─► Load STM and conversation-scoped assumptions
+	│      current thread hypothesis: steel price bottoming
+	│
+	├─► Route classification
+	│      route: FUNDAMENTALS
+	│
+	├─► Retrieve evidence
+	│      company financials + relevant steel-price context
+	│
+	├─► Assemble prompt
+	│      base rules + skills + memory context + evidence + output contract
+	│
+	└─► Generate response
+			 structured reasoning with evidence-backed narrative
+```
 
 ## 4. Engineering Constraints and Extension Paths
 
@@ -497,6 +587,18 @@ parser = JsonOutputParser(pydantic_object=StockPriceResponse)
 | Integration | Limited | Full agent → tool → data flow |
 | E2E | None | Playwright/Selenium for UI |
 | Performance | None | Locust load testing |
+
+### 4.4 Delivery Sequencing for Layered Runtime
+
+The ADR decisions are realized in phases so memory, retrieval, prompt policy, and behavior shaping do not drift out of order.
+
+| Phase | Realization Focus | Current State |
+|------|--------------------|---------------|
+| 1 | Conversation-scoped STM and checkpoint lifecycle | Implemented |
+| 2 | Prompt externalization and composable skills | Planned |
+| 3 | Intent-specific retrieval and evidence wiring | Planned / partial by tool path |
+| 4 | Fine-tuning for structure and tone | Planned |
+| 5 | Guardrail observability and experiment controls | Planned |
 
 ## 5. Supporting Patterns, Stacks, and Relationships
 
@@ -684,3 +786,4 @@ AgentResponse.fallback(content, provider, model, **kwargs)
 | 0.0 | 2026-04-03 | GitHub Copilot | Skeleton created |
 | 0.1 | 2026-04-16 | GitHub Copilot | Scaffolded from implementation-focused content formerly concentrated in `ARCHITECTURE_DESIGN.md` |
 | 0.2 | 2026-04-16 | GitHub Copilot | Route taxonomy aligned to canonical `StockQueryRoute` enum from `src/core/routes.py` |
+| 0.3 | 2026-05-06 | GitHub Copilot | Migrated realization-only material out of ADR-001: retrieval realization boundaries, prompt assembly order, fine-tuning realization, example reasoning flow, and layered runtime delivery sequencing |
