@@ -30,12 +30,14 @@ The architecture is composed of:
 
 ## 2. Stakeholders Affected
 
-- Agent maintainers
-- Backend and API maintainers
-- Architecture owners
-- Product and domain reviewers
-- Security and compliance reviewers
-- Operations and support
+- Product
+- Business
+- End Users
+- AI Engineers / Agent Maintainers
+- Backend Engineers
+- DevOps / SRE
+- Security & Compliance
+- Architecture Owners
 
 ## 3. Architecture Concerns Addressed
 
@@ -113,7 +115,39 @@ Trade-offs:
 - ADR-002 extends the prompt-composition decision with composable skills.
 - ADR-003 extends the prompt-compilation decision with externalized versioned prompt assets.
 
-## 9. Traceability
+## 9. Affected Views / Impacted Architectural Elements
+
+### 9.1 Views Impacted by This Decision
+
+| View | Impact Scope | Updated / Governed Content |
+|------|--------------|----------------------------|
+| Logical View | Primary | Governs the layer decomposition between memory, routing, retrieval, prompting, tools, and fine-tuning responsibilities |
+| Process View | Primary | Governs how routing, evidence use, tool execution, and behavior controls are kept as distinct runtime concerns |
+| Information and State View | Primary | Governs the separation between personalization state, conversation state, sourced evidence, and deterministic financial data |
+| Prompt and Behavior View | Secondary | Constrains prompts and guardrails to behavior control rather than factual storage |
+
+### 9.2 Architectural Elements Newly Defined or Reframed
+
+- **Long-Term Memory (LTM):** Stable personalization and symbol-tracking context that remains separate from financial truth.
+- **Short-Term Memory (STM):** Conversation-scoped state that remains local to the active conversation boundary.
+- **Intent Routing:** Classification layer that selects behavior paths without becoming a persistence or evidence boundary.
+- **Retrieval-Augmented Generation (RAG):** Evidence layer for sourced retrieval rather than memory-backed factual storage.
+- **Prompting and Guardrails:** Behavioral policy layer that governs disclosure, tone, and safety rather than domain data.
+- **Tools and Deterministic Computation:** Auditable computation layer that fetches data and calculates metrics outside the LLM.
+- **Fine-Tuning:** Behavior-shaping layer that affects structure and tone without functioning as a knowledge store.
+
+### 9.3 Applicability Note
+
+This ADR is **Accepted** and therefore governs the architecture-description package wherever layer boundaries, state allocation, evidence handling, or behavior-control responsibilities are described. Some layers defined here remain architectural boundaries ahead of full runtime realization; companion documents must preserve that distinction rather than implying completed implementation.
+
+### 9.4 Consistency Checkpoints
+
+- [ ] Logical, Process, Information and State, and Prompt and Behavior views preserve the same layer boundaries defined by this ADR.
+- [ ] Memory, prompts, and tools are not described elsewhere as alternate stores of financial truth.
+- [ ] Future-state layers such as LTM, RAG, or fine-tuning remain marked as architectural scope where implementation is incomplete.
+- [ ] If a companion document disagrees with this ADR on a boundary decision, this accepted ADR wins and the companion document must be reconciled.
+
+## 10. Traceability
 
 Supports:
 
