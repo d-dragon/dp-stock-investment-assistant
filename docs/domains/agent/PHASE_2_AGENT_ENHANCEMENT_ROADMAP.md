@@ -1,9 +1,10 @@
 # Phase 2: LangChain Agent Enhancement Roadmap
 
-> **Document Version**: 1.0  
+> **Document Version**: 1.1  
 > **Created**: January 15, 2026  
+> **Last Updated**: May 6, 2026  
 > **Status**: Planning  
-> **Branch**: `integrate-langsmith-studio`
+> **Branch**: `enhance-agent-prompt-system`
 
 ## Executive Summary
 
@@ -106,6 +107,51 @@ self.checkpointer = MongoDBSaver(
 
 # In _build_agent_executor()
 self.agent_executor = create_react_agent(
+langchain:
+    memory:
+        enabled: true
+        checkpointer: mongodb  # or "memory" for testing
+        max_messages: 50
+        summarization_threshold: 30
+
+prompts:
+    directory: "src/prompts/agent_system"
+    selection_mode: "fixed"  # fixed | weighted | forced | shadow
+    default_locale: "vi"
+    agents:
+        react_analyst:
+            active_version: "v1"
+            variants:
+                - name: "baseline"
+                    version: "v1"
+                    file: "react_analyst/v1.md"
+                    weight: 1.0
+                    status: "active"
+    route_contexts:
+        enabled: true
+        directory: "react_analyst/routes"
+        supported_routes:
+            - PRICE_CHECK
+            - NEWS_ANALYSIS
+            - PORTFOLIO
+            - TECHNICAL_ANALYSIS
+            - FUNDAMENTALS
+            - IDEAS
+            - MARKET_WATCH
+            - GENERAL_CHAT
+    experiments:
+        enabled: false
+        active_id: ""
+        allow_live_weighted_selection: false
+
+langsmith:
+    prompt_tracking:
+        enabled: true
+        metadata_keys:
+            - prompt_version
+            - prompt_variant
+            - prompt_experiment_id
+            - prompt_selection_mode
     model=self.model,
     tools=self.tools,
     checkpointer=self.checkpointer  # Add checkpointer
@@ -140,8 +186,8 @@ def process_query(self, query: str, session_id: str) -> AgentResponse:
 
 **Objective**: Externalize system prompts to files, enable version control, and support A/B testing of prompt variants.
 
-> **Status (2026-04-13):** Research complete — design refined. Comprehensive research and design proposal delivered in [PROMPT_SYSTEM_RESEARCH_PROPOSAL.md v1.2](./PROMPT_SYSTEM_RESEARCH_PROPOSAL.md). Requirements formalized in SRS v2.3 (FR-1.4.6–1.4.9, FR-1.5, NFR-5.2.5–5.2.7, AC-8). Architecture decisions recorded as [ADR-002 (Skills Pattern)](./decisions/AGENT_ARCHITECTURE_DECISION_RECORDS.md) and [ADR-003 (Externalized Prompts)](./decisions/AGENT_ARCHITECTURE_DECISION_RECORDS.md).  
-> **Next step:** Implementation Phase 1 — PromptAssetLoader and baseline prompt extraction.
+> **Status (2026-05-06):** Research complete — execution plan formalized. The governing design and dependency-ordered backlog now live in [PROMPT_SYSTEM_RESEARCH_PROPOSAL.md v1.3](./PROMPT_SYSTEM_RESEARCH_PROPOSAL.md). This roadmap section mirrors the same backlog IDs, milestone gates, and near-term delivery ordering for Phase 2 planning. Requirements remain formalized in SRS v2.3 (FR-1.4.6–1.4.9, FR-1.5, NFR-5.2.5–5.2.7, AC-8). Architecture decisions remain governed by [ADR-002 (Skills Pattern)](./decisions/AGENT_ARCHITECTURE_DECISION_RECORDS.md) and [ADR-003 (Externalized Prompts)](./decisions/AGENT_ARCHITECTURE_DECISION_RECORDS.md).  
+> **Next step:** Start Milestone M1 with `PS-01` to `PS-03` to establish the prompt asset baseline, prompt loader, and config validation surface.
 
 #### Current State
 
@@ -151,92 +197,88 @@ def process_query(self, query: str, session_id: str) -> AgentResponse:
 
 #### Target State
 
-- System prompts stored in `src/prompts/` directory
-- Prompt variants identified by version/name
-- A/B testing framework with LangSmith evaluation integration
-- Prompt selection configurable via `config.yaml`
+- Prompt assets stored under `src/prompts/agent_system/`
+- Prompt variants identified by version, variant label, and agent role
+- Offline evaluation and guarded rollout integrated with LangSmith metadata
+- Prompt selection configurable through a dedicated `prompts.*` config surface
 
-#### Work Items (Refined — 7-Phase Roadmap)
+#### Execution Backlog Mirror (Synced to Proposal v1.3)
 
-> Refined from original 4 items based on [PROMPT_SYSTEM_RESEARCH_PROPOSAL.md §10 Implementation Roadmap](./PROMPT_SYSTEM_RESEARCH_PROPOSAL.md).
+> Detailed dependency authority remains in [PROMPT_SYSTEM_RESEARCH_PROPOSAL.md](./PROMPT_SYSTEM_RESEARCH_PROPOSAL.md). This roadmap mirrors the execution backlog and milestone gates so planning and design stay synchronized in both directions.
 
-1. **Phase 1 — Prompt Asset Extraction** (FR-1.4.5, NFR-6.2.3)
-   - Create `src/prompts/system/_baseline.yaml` with current hardcoded prompt
-   - Create `src/prompts/system/v1.0.0.yaml` as the first versioned prompt
-   - Define YAML prompt asset schema with JSON Schema validation
-   - Implement `PromptAssetLoader` with caching, validation, and `_baseline.yaml` fallback
-   - Update `StockAssistantAgent` to load prompt via `PromptAssetLoader`
+| Order | Backlog ID | Priority | Depends On | Roadmap Outcome |
+|---|---|---|---|---|
+| 1 | `PS-01` | P0 | None | Extract the current ReAct prompt into `src/prompts/agent_system/react_analyst/v1.md` and preserve it as the canonical baseline asset |
+| 2 | `PS-02` | P0 | `PS-01` | Implement `PromptRegistry` / loader behavior with metadata parsing, caching, validation, and baseline fallback conventions |
+| 3 | `PS-03` | P0 | `PS-01`, `PS-02` | Add `prompts.*` config surface and fail-closed validation rules so only valid prompt assets can activate |
+| 4 | `PS-04` | P0 | `PS-02`, `PS-03` | Replace `REACT_SYSTEM_PROMPT` as the primary source of truth for `StockAssistantAgent` |
+| 5 | `PS-05` | P0 | `PS-04` | Inject prompt identity into response metadata and trace metadata for top-level runs |
+| 6 | `PS-06` | P0 | `PS-02`, `PS-04`, `PS-05` | Add rollback safety, WARN logging, and fault-injection coverage for invalid prompt activation |
+| 7 | `PS-07` | P1 | `PS-04` | Create route-context prompt assets for all 8 `StockQueryRouter` categories |
+| 8 | `PS-08` | P1 | `PS-05`, `PS-07` | Compose route-aware prompt behavior with `PromptComposer` and `@dynamic_prompt` middleware |
+| 9 | `PS-09` | P1 | `PS-05`, `PS-08` | Build the offline evaluation harness and baseline prompt comparison datasets |
+| 10 | `PS-10` | P1 | `PS-06`, `PS-09` | Enforce finance-domain guardrail verification before prompt promotion |
+| 11 | `PS-11` | P2 | `PS-09`, `PS-10` | Add controlled experiment and rollout modes (`fixed`, `forced`, `shadow`, optional `weighted`) |
+| 12 | `PS-12` | P3 | `PS-08`, `PS-09`, `PS-11` | Introduce multi-agent prompt taxonomy only after Skills-pattern evidence justifies it |
 
-2. **Phase 2 — Version Identity and Tracing** (FR-1.4.6, NFR-5.2.5–5.2.7)
-   - Inject prompt version tag into agent response metadata
-   - Add prompt version, route classification, and experiment ID to trace span attributes
-   - Log prompt version in every invocation at INFO level
+#### Milestone Gates
 
-3. **Phase 3 — Skills Pattern Foundation** (ADR-002, FR-1.4.7)
-   - Create initial skill files: `disclaimer.yaml`, `anti-hype.yaml`
-   - Implement `PromptAssembler` that composes base prompt + active skills
-   - Wire semantic router classification into skill selection
-   - Add route-matched skills for key intents (FINANCIAL_ANALYSIS, EARNINGS_SUMMARY)
+| Milestone | Backlog IDs | Outcome | Gate |
+|---|---|---|---|
+| `M1` - Prompt Runtime Parity | `PS-01` to `PS-06` | Externalized, versioned, observable, rollback-safe ReAct prompt runtime | Do not begin route-context composition until the hardcoded prompt is fully removed from the primary ReAct path |
+| `M2` - Route-Aware Skills | `PS-07` to `PS-08` | Deterministic route-specific prompt context using the existing semantic router | Do not enable experiment modes until route-aware composition is stable and traceable |
+| `M3` - Evaluation and Safety Gates | `PS-09` to `PS-10` | Offline comparison and finance-safety regression coverage for prompt changes | No live prompt experimentation before offline gates pass |
+| `M4` - Controlled Rollout | `PS-11` | Safe candidate comparison in `forced` or `shadow` mode, with weighted exposure explicitly optional | Keep production on `fixed` unless a rollout decision explicitly approves change |
+| `M5` - Multi-Agent Prompt Foundation | `PS-12` | Specialist prompt families and handoff contracts ready for future orchestration | Do not start multi-agent runtime work until Skills-pattern evidence shows a real limitation |
 
-4. **Phase 4 — Behavioral Guardrails** (FR-1.5.1–1.5.5)
-   - Implement `ResponseGuardrailMiddleware` with blocklist scanning
-   - Add source-attribution and uncertainty-disclosure checks
-   - Emit guardrail violations as structured trace events
-   - Add guardrail regression test suite
+#### Immediate Delivery Slice
 
-5. **Phase 5 — Experiment Framework** (FR-1.4.9)
-   - Implement variant selector with configurable selection modes (pinned, random, weighted)
-   - Create `src/prompts/experiments/` directory with schema
-   - Add evaluation harness using LangSmith datasets for variant comparison
+- `PS-01`: Externalize the current ReAct prompt as the reviewed baseline asset.
+- `PS-02`: Implement prompt loading, metadata parsing, and validation.
+- `PS-03`: Add prompt config surface and fail-closed activation rules.
+- `PS-04`: Replace the hardcoded prompt path only after `PS-01` to `PS-03` are complete.
 
-6. **Phase 6 — Rollback Safety** (FR-1.4.8)
-   - Implement automatic fallback to `_baseline.yaml` on load/parse failure
-   - Add WARN-level logging for fallback events
-   - Add fault-injection test for missing/malformed prompt assets
-
-7. **Phase 7 — Documentation and Contributor Guide**
-   - Document skill authoring guide (format, metadata, activation criteria)
-   - Create prompt changelog template
-   - Update operational runbook with prompt management procedures
-
-#### Implementation Pattern
+#### Near-Term Implementation Pattern
 
 ```python
-# src/prompts/react_system/v1.md
+# src/prompts/agent_system/react_analyst/v1.md
 ---
-name: react_system_v1
-description: Base ReAct system prompt for stock assistant
+name: react_analyst_v1
 version: 1.0.0
+agent_role: react_analyst
+status: active
 ---
 
-You are a helpful AI assistant specialized in stock market analysis...
+You are a professional stock investment assistant...
 
 # src/core/stock_assistant_agent.py
-from core.langchain_adapter import PromptBuilder
+from core.prompt_registry import PromptRegistry
 
 class StockAssistantAgent:
     def _load_system_prompt(self) -> str:
-        version = self.config.get("prompts", {}).get("active_version", "v1")
-        builder = PromptBuilder(template_dir="src/prompts/react_system")
-        return builder.load(f"{version}.md")
+        selection = self._prompt_registry.resolve(
+            agent_role="react_analyst",
+            version=self.config["prompts"]["agents"]["react_analyst"]["active_version"],
+        )
+        return selection.system_prompt
 ```
 
 #### Dependencies
 
-- Existing `PromptBuilder` pattern in `langchain_adapter.py`
-- LangSmith for evaluation (existing integration)
-- Jinja2 or YAML-based templating (to be finalized during Phase 1)
+- Existing `PromptBuilder` pattern in `langchain_adapter.py` as migration source material, not final authority
+- LangSmith for trace metadata and evaluation (existing integration)
 - Semantic router integration for route-based skill activation
-- Research: [PROMPT_SYSTEM_RESEARCH_PROPOSAL.md v1.2](./PROMPT_SYSTEM_RESEARCH_PROPOSAL.md)
+- Research and dependency authority: [PROMPT_SYSTEM_RESEARCH_PROPOSAL.md v1.3](./PROMPT_SYSTEM_RESEARCH_PROPOSAL.md)
 - SRS: FR-1.4.5–1.4.9, FR-1.5, NFR-5.2.5–5.2.7, NFR-6.2.3, AC-8
 - ADRs: [ADR-002](./decisions/AGENT_ARCHITECTURE_DECISION_RECORDS.md), [ADR-003](./decisions/AGENT_ARCHITECTURE_DECISION_RECORDS.md)
 
 #### Success Criteria
 
-- System prompt loaded from external file
-- Prompt version logged in every LangSmith trace
-- A/B test framework can compare 2+ prompt variants
-- Prompt changes require no code deployment
+- ReAct path loads the prompt from a versioned asset instead of the hardcoded `REACT_SYSTEM_PROMPT`
+- Prompt version and variant are visible in relevant response metadata and trace metadata
+- All 8 semantic routes can resolve explicit route-context assets before non-fixed rollout modes are considered
+- Offline evaluation blocks finance-safety regressions before any live prompt experimentation is enabled
+- Proposal and roadmap remain aligned on backlog IDs, milestone gates, and the next delivery slice
 
 ---
 
@@ -545,26 +587,35 @@ class StockSymbolTool(CachingTool):
                 continue
         raise AllSourcesFailedError("All data sources unavailable")
 ```
-
-#### Dependencies
-
-- `alpha_vantage` package
-- Alpha Vantage API key (free tier available)
-- Optional: Polygon.io subscription
-
-#### Success Criteria
-
-- Failover works seamlessly when Yahoo Finance unavailable
-- Alpha Vantage provides fundamental data not in Yahoo
-- No increase in average response latency
-- Data source logged in responses
-
----
-
-### 2B.4 Reporting Tool Implementation
-
-**Objective**: Implement production-ready reporting tool with templated outputs, PDF generation, and portfolio analytics.
-
+               prompts:
+                  directory: "src/prompts/agent_system"
+                  selection_mode: "fixed"  # fixed | weighted | forced | shadow
+                  default_locale: "vi"
+                  agents:
+                     react_analyst:
+                        active_version: "v1"
+                        variants:
+                           - name: "baseline"
+                              version: "v1"
+                              file: "react_analyst/v1.md"
+                              weight: 1.0
+                              status: "active"
+                  route_contexts:
+                     enabled: true
+                     directory: "react_analyst/routes"
+                     supported_routes:
+                        - PRICE_CHECK
+                        - NEWS_ANALYSIS
+                        - PORTFOLIO
+                        - TECHNICAL_ANALYSIS
+                        - FUNDAMENTALS
+                        - IDEAS
+                        - MARKET_WATCH
+                        - GENERAL_CHAT
+                  experiments:
+                     enabled: false
+                     active_id: ""
+                     allow_live_weighted_selection: false
 #### Current State
 
 - `ReportingTool` exists at `src/core/tools/reporting.py` (273 lines)
@@ -850,14 +901,7 @@ langchain:
     checkpointer: mongodb  # or "memory" for testing
     max_messages: 50
     summarization_threshold: 30
-  
-  prompts:
-    active_version: v1
-    ab_testing:
-      enabled: false
-      variants: [v1, v2]
-      weights: [0.5, 0.5]
-  
+
   tools:
     stock_symbol:
       sources: [yahoo, alpha_vantage]
@@ -872,6 +916,45 @@ langchain:
     enabled: false
     supervisor_model: gpt-4
     specialist_model: gpt-3.5-turbo
+
+prompts:
+    directory: "src/prompts/agent_system"
+    selection_mode: "fixed"  # fixed | weighted | forced | shadow
+    default_locale: "vi"
+    agents:
+        react_analyst:
+            active_version: "v1"
+            variants:
+                - name: "baseline"
+                    version: "v1"
+                    file: "react_analyst/v1.md"
+                    weight: 1.0
+                    status: "active"
+    route_contexts:
+        enabled: true
+        directory: "react_analyst/routes"
+        supported_routes:
+            - PRICE_CHECK
+            - NEWS_ANALYSIS
+            - PORTFOLIO
+            - TECHNICAL_ANALYSIS
+            - FUNDAMENTALS
+            - IDEAS
+            - MARKET_WATCH
+            - GENERAL_CHAT
+    experiments:
+        enabled: false
+        active_id: ""
+        allow_live_weighted_selection: false
+
+langsmith:
+    prompt_tracking:
+        enabled: true
+        metadata_keys:
+            - prompt_version
+            - prompt_variant
+            - prompt_experiment_id
+            - prompt_selection_mode
 ```
 
 ### Documentation Updates

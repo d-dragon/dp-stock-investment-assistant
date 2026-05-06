@@ -1,7 +1,7 @@
 # Prompt System Architecture and Design
 
-> **Document Version**: 1.2  
-> **Last Updated**: April 13, 2026  
+> **Document Version**: 1.3  
+> **Last Updated**: May 6, 2026  
 > **Phase**: 2A.2 - System Prompt Refinement and A/B Testing  
 > **Status**: Research refined; practical scope narrowed to project-scoped implementation targets  
 > **Primary Source Requirement**: Official vendor and regulator documentation only  
@@ -1066,6 +1066,68 @@ langsmith:
 - add extended evaluation datasets (retrieval_grounding, routing_and_specialist_delegation);
 - defer direct user-visible handoffs until centralized routing and synthesis are proven stable.
 
+### Formal Implementation Backlog
+
+The phase outline above expresses architectural intent. The backlog below converts that intent into a dependency-ordered delivery plan that can be executed, estimated, and gated. The milestone-level execution mirror for this backlog is maintained in [PHASE_2_AGENT_ENHANCEMENT_ROADMAP.md](./PHASE_2_AGENT_ENHANCEMENT_ROADMAP.md).
+
+#### Prioritization Model
+
+- **P0**: Required to remove the current hardcoded-prompt risk and establish a safe prompt runtime baseline.
+- **P1**: Required to deliver route-aware behavior, observability completeness, and evaluation-readiness.
+- **P2**: Required for controlled experimentation and broader rollout flexibility, but only after P0/P1 exit gates pass.
+- **P3**: Future-state work for multi-agent prompt families and specialist-runtime evolution.
+
+#### Dependency-Ordered Backlog
+
+| Order | Backlog ID | Priority | Depends On | Scope | Primary Deliverables | Exit Gate |
+|---|---|---|---|---|---|---|
+| 1 | PS-01 | P0 | None | Establish prompt asset baseline | `src/prompts/agent_system/react_analyst/v1.md`; provenance note from `REACT_SYSTEM_PROMPT`; baseline locale decision for current runtime | Baseline prompt file reproduces current ReAct behavior and is reviewed as the canonical initial asset |
+| 2 | PS-02 | P0 | PS-01 | Implement prompt asset loading and validation | `PromptRegistry` or equivalent loader; metadata frontmatter parsing; file cache; schema validation; `_baseline` fallback asset convention | Loader can resolve a valid prompt asset and rejects malformed metadata before activation |
+| 3 | PS-03 | P0 | PS-01, PS-02 | Add prompt config surface and fail-closed validation | `prompts.*` config section in `config/config.yaml`; active version resolution; baseline variant rule; locale fallback rule | Config validation blocks invalid prompt references and guarantees one production-safe baseline |
+| 4 | PS-04 | P0 | PS-02, PS-03 | Replace hardcoded ReAct prompt path | `StockAssistantAgent` loads prompt from registry instead of `REACT_SYSTEM_PROMPT`; legacy `PromptBuilder` isolated as non-authoritative fallback utility | ReAct path loads from versioned asset, not inline constant |
+| 5 | PS-05 | P0 | PS-04 | Wire prompt identity into response and trace metadata | `prompt_version`, `prompt_variant`, `conversation_id`, provider/model metadata on top-level runs and structured response metadata | Relevant runs expose prompt identity consistently for filtering and audit |
+| 6 | PS-06 | P0 | PS-02, PS-04, PS-05 | Add rollback and failure-path hardening | WARN logging for invalid prompt activation; baseline fallback path; fault-injection tests for missing/malformed prompt assets | Invalid prompt config falls back safely and emits diagnosable signals |
+| 7 | PS-07 | P1 | PS-04 | Create route-context prompt assets for Skills pattern | `react_analyst/routes/*.md` for all 8 `StockQueryRouter` categories; route-to-context mapping contract | Every current semantic route has an explicit prompt-context asset or documented no-op mapping |
+| 8 | PS-08 | P1 | PS-05, PS-07 | Compose route-aware prompt behavior in runtime | `PromptComposer`; `@dynamic_prompt` middleware; route-category propagation from `StockQueryRouter`; prompt assembly dump/debug path | Runtime composes base prompt plus route context deterministically and exposes `route_category` in metadata |
+| 9 | PS-09 | P1 | PS-05, PS-08 | Build offline evaluation harness | Core datasets: `tool_selection_regression`, `missing_data_and_staleness`, `finance_safety_and_hype_resistance`, `route_classification_accuracy`; rubric/code evaluators; baseline run storage | Baseline and candidate prompts can be compared offline against regression thresholds |
+| 10 | PS-10 | P1 | PS-06, PS-09 | Enforce finance-domain guardrail verification | Regression gates for hype, unsupported claims, uncertainty disclosure, source attribution, and fact-assumption-inference separation | Prompt candidate cannot advance if finance-safety regressions are detected |
+| 11 | PS-11 | P2 | PS-09, PS-10 | Add controlled experiment and rollout controls | `fixed`, `forced`, `shadow`, optional `weighted` selection modes; candidate variant registry; rollout runbook; enablement guardrails | Production remains fixed by default; non-fixed modes are explicitly gated and observable |
+| 12 | PS-12 | P3 | PS-08, PS-09, PS-11 | Introduce multi-agent prompt taxonomy | Shared global partials; `orchestrator/` and `rag_research/` prompt families; handoff schema; extended eval datasets | Skills-pattern baseline shows measurable limits and specialist prompt contracts are testable offline before runtime adoption |
+
+#### Milestone Plan
+
+| Milestone | Backlog Items | Outcome | Go / No-Go Rule |
+|---|---|---|---|
+| M1 - Prompt Runtime Parity | PS-01 to PS-06 | Current ReAct runtime is externalized, versioned, observable, and rollback-safe | Do not begin route-context work until the hardcoded prompt is fully removed from the primary ReAct path |
+| M2 - Route-Aware Skills | PS-07 to PS-08 | Existing `StockQueryRouter` drives deterministic route-specific prompt context with no extra LLM routing cost | Do not introduce experiment modes until route-aware composition is stable and traceable |
+| M3 - Evaluation and Safety Gates | PS-09 to PS-10 | Offline comparison and finance-safety regression checks are available for every prompt change | No live prompt experimentation before offline gates pass |
+| M4 - Controlled Rollout | PS-11 | Candidate variants can be compared safely in `forced` or `shadow` mode, with weighted live exposure still optional and explicit | Keep production on `fixed` unless an approved rollout decision says otherwise |
+| M5 - Multi-Agent Prompt Foundation | PS-12 | Specialist prompt families and handoff contracts are ready for future orchestration work | Do not start multi-agent runtime work until Skills-pattern evidence shows a real limitation |
+
+#### Critical Path
+
+The critical path is:
+
+`PS-01 -> PS-02 -> PS-03 -> PS-04 -> PS-05 -> PS-06 -> PS-07 -> PS-08 -> PS-09 -> PS-10 -> PS-11`
+
+`PS-12` is intentionally outside the near-term critical path. It remains blocked on measurable evidence that the Skills pattern is insufficient.
+
+#### Recommended Ownership Split
+
+| Workstream | Lead Surface | Backlog Items |
+|---|---|---|
+| Prompt runtime | `src/core/stock_assistant_agent.py`, `src/core/langchain_adapter.py` or successor loader module | PS-01 to PS-06 |
+| Route-aware composition | `src/core/stock_query_router.py`, middleware integration, prompt asset tree | PS-07 to PS-08 |
+| Evaluation and rollout | LangSmith metadata wiring, datasets, evaluators, rollout config | PS-09 to PS-11 |
+| Future multi-agent taxonomy | Prompt asset hierarchy and specialist contracts | PS-12 |
+
+#### Planning Notes
+
+- Treat `PS-01` to `PS-06` as one implementation slice if a single PR can keep reviewable scope; otherwise split after `PS-03`.
+- `PS-09` and `PS-10` should be prepared in parallel where possible, but `PS-10` cannot close until baseline evaluation artifacts from `PS-09` exist.
+- Weighted live selection remains optional even after `PS-11`; `shadow` mode is the safer default for a financial-analysis surface.
+- Prompt-level session-context injection remains follow-up work and should not be implied as complete until it is actually wired into runtime prompt composition.
+
 ---
 
 ## Verification Strategy
@@ -1149,6 +1211,16 @@ This design is correct only if all of the following remain true:
 
 This section tracks changes made to other project documents as a result of research findings in this proposal.
 
+### Update Session: 2026-05-06 (v1.3 → Formal Implementation Backlog)
+
+**Trigger:** Convert the high-level roadmap into a dependency-ordered implementation backlog and milestone plan for execution tracking.
+
+| # | Target Document | Change Summary | SRS/ADR References |
+|---|----------------|----------------|-------------------|
+| 1 | [PROMPT_SYSTEM_RESEARCH_PROPOSAL.md](./PROMPT_SYSTEM_RESEARCH_PROPOSAL.md) | Added a formal implementation backlog with backlog IDs (`PS-01` to `PS-12`), dependency ordering, milestone gates, critical path, ownership split, and prioritization model. Updated document control to v1.3 / 2026-05-06. | FR-1.4.5–1.4.9, FR-1.5, NFR-5.2.5–5.2.7, NFR-6.2.3, ADR-002, ADR-003 |
+
+**Total changes:** 1 document, implementation planning formalized for execution sequencing.
+
 ### Update Session: 2026-04-13 (v1.2 → Standard Documents Sync)
 
 **Trigger:** Reflect PROMPT_SYSTEM_RESEARCH_PROPOSAL.md v1.2 findings into project-standard SDD documents.
@@ -1156,7 +1228,7 @@ This section tracks changes made to other project documents as a result of resea
 | # | Target Document | Change Summary | SRS/ADR References |
 |---|----------------|----------------|-------------------|
 | 1 | [SOFTWARE_REQUIREMENTS_SPECIFICATION.md](./SOFTWARE_REQUIREMENTS_SPECIFICATION.md) | Version 2.2 → 2.3. Added FR-1.4.6–1.4.9 (prompt version identity, route-specific context, rollback safety, experiment assignment). Added FR-1.5 (Finance-Domain Behavioral Guardrails — 5 items: evidence-first, uncertainty disclosure, anti-hype, fact-assumption separation, source attribution). Added NFR-5.2.5–5.2.7 (prompt version, agent role, and experiment ID in traces). Strengthened NFR-6.2.3 (versioned file assets, no-code-deployment). Added AC-8 (4 prompt system acceptance criteria). Added OI-9 (prompt asset directory structure). Added related document reference. | FR-1.4.6–1.4.9, FR-1.5.1–1.5.5, NFR-5.2.5–5.2.7, NFR-6.2.3, AC-8.1–8.4 |
-| 2 | [AGENT_ARCHITECTURE_DECISION_RECORDS.md](./decisions/AGENT_ARCHITECTURE_DECISION_RECORDS.md) | Added ADR-002 (Skills Pattern — composable prompt fragments with activation criteria). Added ADR-003 (Externalized Prompt Assets — versioned YAML files, baseline fallback, directory convention). Annotated ADR-001 §8 (Prompt Compiler) with implementation reference to this research proposal. | ADR-002, ADR-003 |
+| 2 | [AGENT_ARCHITECTURE_DECISION_RECORDS.md](./decisions/AGENT_ARCHITECTURE_DECISION_RECORDS.md) | Added ADR-002 (Skills Pattern — composable prompt fragments with activation criteria). Added ADR-003 (Externalized Prompt Assets — versioned YAML files, baseline fallback, directory convention). Annotated the ADR-001 Prompt Compiler decision with implementation reference to this research proposal. | ADR-002, ADR-003 |
 | 3 | [ARCHITECTURE_DESIGN.md](./ARCHITECTURE_DESIGN.md) | Added new “Prompt System Architecture” section (three-layer architecture, component responsibilities, prompt taxonomy, skills composition flow, observability integration). Updated System Prompt block with migration note. Added prompt file structure (`src/prompts/`) to File Structure. Added 3 design pattern rows (Asset Loader, Composer, Middleware). Added §4.4 Prompt System Externalization to Space for Improvements. Updated Table of Contents. | FR-1.4.5–1.4.9, FR-1.5, NFR-5.2.5–5.2.7 |
 | 4 | [PHASE_2_AGENT_ENHANCEMENT_ROADMAP.md](./PHASE_2_AGENT_ENHANCEMENT_ROADMAP.md) | Updated 2A.2 status to “Research complete — design refined.” Replaced 4 generic work items with refined 7-phase implementation roadmap. Updated dependencies with cross-references to this proposal, SRS v2.3, and ADR-002/ADR-003. | FR-1.4.5–1.4.9, FR-1.5, ADR-002, ADR-003 |
 | 5 | [SRS_SPEC_TRACEABILITY.md](./SRS_SPEC_TRACEABILITY.md) | Version 1.4 → 1.5. Updated SRS baseline to v2.3. Added 16 unmapped trace entries: FR-1.4.6–1.4.9 (4), FR-1.5.1–1.5.5 (5), NFR-5.2.5–5.2.7 (3), AC-8.1–8.4 (4). Updated summary counts (302 → 318 total, 179 → 195 unmapped). Added AC-8 to family index. | All new SRS v2.3 items |
