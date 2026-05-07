@@ -12,7 +12,7 @@
 | Project | DP Stock Investment Assistant |
 | Domain | Agent |
 | Focus | Architecture description of the agent domain, including boundaries, views, concerns, rationale, and evolution |
-| Date | 2026-04-16 |
+| Date | 2026-05-06 |
 | Status | Active |
 | Audience | Engineering, architecture, maintainers, and reviewers |
 
@@ -38,6 +38,8 @@ This document is the architecture description for the agent domain. It expresses
 The document follows the repository's documentation methodology, where architecture descriptions are **aligned** to ISO/IEC/IEEE 42010 rather than presented as formal certification artifacts. In this repo, that means the document should identify the entity of interest, environment, stakeholders, concerns, viewpoints, views, correspondences, and rationale while avoiding duplication of detailed implementation material that belongs in technical design, ADRs, contracts, or delivery-scoped specs.
 
 > **Note on scope**: The project methodology defines architecture descriptions at the system level. This is a domain-level architecture description created because the agent domain carries sufficient complexity (multi-layer LLM reasoning, memory management, prompt composition, tooling, and provider fallback) to warrant its own viewpoint-governed description within the system-wide architecture.
+
+> **Architecture-description package statement:** This document set is an agent-domain architecture description aligned to ISO/IEC/IEEE 42010 concepts. It is intended to define the agent domain's entity of interest, stakeholders, concerns, viewpoints, views, correspondences, and rationale across the companion architecture package. It is not a formal certification artifact and does not claim whole-system compliance for the full DP Stock Investment Assistant.
 
 ### 1.2 Entity of Interest
 
@@ -101,14 +103,19 @@ This architecture description does not replace:
 
 ### 2.1 Stakeholders
 
-| Stakeholder | Perspective | Primary Concerns |
-|-------------|-------------|------------------|
-| Agent maintainers | Runtime and behavior perspective | Correct orchestration, extensibility, debugging cost, prompt evolution |
-| Backend/API maintainers | Integration and service perspective | Stable invocation contracts, archive behavior, streaming compatibility |
-| Architecture owners | System and governance perspective | ADR alignment, separation of concerns, bounded responsibilities |
-| Product and domain reviewers | Product behavior perspective | Response usefulness, safety, clarity, future extensibility |
-| Operations and support | Operability perspective | Observability, health, reconciliation, drift visibility |
-| Security and compliance reviewers | Risk and controls perspective | Evidence-first behavior, anti-hype safeguards, memory boundaries |
+The agent-domain architecture package uses the following normalized stakeholder classes across the architecture description and ADR set.
+
+| Stakeholder | Responsibilities | Key Concerns |
+|-------------|------------------|--------------|
+| Product | Feature roadmap, prioritization, and release planning | Capability coverage, iteration speed, user value |
+| Business | Product-risk framing and domain-positioning oversight | Non-advisory boundary, financial-domain risk, adoption confidence |
+| End Users | Use the assistant for investment research and decision support | Transparency, clarity, trust, usability |
+| AI Engineers / Agent Maintainers | Agent orchestration, model behavior, prompt evolution, and retrieval design | Accuracy, explainability, prompt evolution, extensibility |
+| Backend Engineers | Service, API, and metadata integration | Maintainability, extensibility, stable invocation contracts, lifecycle integrity |
+| DevOps / SRE | Runtime operations, deployment, observability, and recovery support | Reliability, observability, rollback safety, drift visibility |
+| Security & Compliance | Data handling, policy controls, and legal safeguards | Privacy, financial disclaimers, evidence-first behavior, anti-hype controls |
+| Architecture Owners | Architecture governance and decision consistency | Boundary integrity, ADR alignment, separation of concerns |
+| QA / Test Maintainers | Verification strategy, regression control, and release-readiness checks | Testability, release confidence, behavior regression detection |
 
 ### 2.2 Concerns
 
@@ -135,17 +142,29 @@ This architecture description uses the following concern categories to frame con
 
 ## 3. Viewpoint Catalog
 
+### 3.1 How Viewpoints and Views Are Used in This Document
+
+This architecture description follows the ISO 42010 distinction between a **viewpoint** and a **view**:
+
+- a **viewpoint** is the template that defines which stakeholders, concerns, and model kinds govern a view;
+- a **view** is the actual architecture content produced using that viewpoint.
+
+In this document, section 3 defines the viewpoints. Section 4 then provides one architecture view for each viewpoint so the framing rules and the resulting architecture description stay clearly separated.
+
+### 3.2 Viewpoint Catalog
+
 | Viewpoint | Stakeholders | Concerns Framed | Conventions / Model Kinds |
 |-----------|--------------|-----------------|----------------------------|
-| Context and Boundary Viewpoint | Architects, backend maintainers, product reviewers | Domain boundary, environment, dependencies, scope | Narrative scope statements, dependency summary tables |
-| Static Structure Viewpoint | Architects, maintainers | Major components, responsibilities, patterns, source layout | Source tree, component tables, pattern/stack summaries |
-| Runtime Interaction Viewpoint | Backend maintainers, agent maintainers, operators | Query flow, routing, tool execution, fallback, response generation | Interaction flows and sequence-style diagrams |
-| Memory and State Viewpoint | Architects, backend maintainers, compliance reviewers | STM scope, hierarchy, lifecycle, metadata separation | State/lifecycle tables, hierarchy summaries, subsystem references |
-| Prompt and Behavior Viewpoint | Agent maintainers, architecture owners, compliance reviewers | Prompt composition, guardrails, observability, prompt evolution | Layered prompt diagrams, taxonomy tables, metadata tables |
-| Evolution Viewpoint | Architects, product reviewers, maintainers | Major extension paths, unresolved considerations, planned direction | Concern-oriented change tables and future-state summaries |
-| Evolution Viewpoint | Architects, product reviewers, maintainers | Major extension paths and unresolved architectural considerations | Concern-oriented change tables and future-state summaries |
+| Context and Boundary Viewpoint | Architecture Owners, Backend Engineers, Product, Security & Compliance | Domain scope, environment, external dependencies, system boundary, ownership boundaries | Narrative boundary statements, system context diagrams, context summaries, dependency tables |
+| Logical Viewpoint | AI Engineers / Agent Maintainers, Backend Engineers, Architecture Owners | Modularity, separation of concerns, responsibility allocation, extensibility seams, dependency direction | Component and responsibility tables, logical decomposition summaries, relationship narratives |
+| Process Viewpoint | AI Engineers / Agent Maintainers, Backend Engineers, DevOps / SRE | Runtime flow, route handling, tool orchestration, latency-sensitive paths, provider fallback, fault tolerance | Interaction flows, sequence-style diagrams, runtime decision summaries |
+| Information and State Viewpoint | Architecture Owners, Backend Engineers, Security & Compliance | STM scope, state ownership, lifecycle, metadata boundaries, hierarchy, memory constraints | State and lifecycle tables, hierarchy summaries, state ownership narratives |
+| Development Viewpoint | AI Engineers / Agent Maintainers, Backend Engineers, QA / Test Maintainers | Code organization, module ownership, maintainability, build-facing structure, extension points | Source-layout views, module-boundary summaries, ownership and dependency tables |
+| Deployment Viewpoint | DevOps / SRE, Security & Compliance, Architecture Owners | Runtime topology, containers and services, health endpoints, scaling boundaries, environment overlays, secrets boundaries | Deployment context summaries, topology tables, environment and probe mappings |
+| Operations and Maintenance Viewpoint | DevOps / SRE, Backend Engineers, Product, Security & Compliance | Production operation, availability, resilience, observability, drift detection, recovery surfaces, maintainability in service | Operational responsibility tables, resilience summaries, observability and health mappings |
+| Prompt and Behavior Viewpoint | AI Engineers / Agent Maintainers, Architecture Owners, Security & Compliance, Product | Prompt composition, guardrails, behavioral policy, prompt observability, prompt evolution | Layered prompt diagrams, taxonomy tables, metadata tables |
 
-These viewpoints govern the views in \u00a74. Detailed code-oriented realization belongs in [TECHNICAL_DESIGN.md](./TECHNICAL_DESIGN.md).
+These viewpoints govern the corresponding views in section 4. Detailed code-oriented realization belongs in [TECHNICAL_DESIGN.md](./TECHNICAL_DESIGN.md), detailed STM realization belongs in [AGENT_MEMORY_TECHNICAL_DESIGN.md](./AGENT_MEMORY_TECHNICAL_DESIGN.md), and deployment procedure detail belongs in [IaC/README.md](../../../IaC/README.md).
 
 ---
 
@@ -153,7 +172,7 @@ These viewpoints govern the views in \u00a74. Detailed code-oriented realization
 
 ### 4.1 Context and Boundary View
 
-The agent domain sits between the API/service layer and external data/model providers. It does not own the frontend UI, REST/Socket transport surface, or the repository-wide operational policy layer. It does own reasoning workflow, tool orchestration, route-aware behavior, provider fallback, and conversation-scoped STM binding.
+The agent domain sits between the API and service layer and the external data and model-provider ecosystem. It does not own the frontend UI, REST or Socket.IO transport surface, or repository-wide operational policy. It does own reasoning workflow, tool orchestration, route-aware behavior, provider fallback, and conversation-scoped STM binding.
 
 The primary context relationships are:
 
@@ -165,22 +184,267 @@ The primary context relationships are:
 
 This boundary is consistent with the repository methodology's rule that architecture descriptions should explain **what structures and interactions exist**, while implementation detail and contract detail remain in companion documents.
 
-### 4.2 Static Structure View
+#### 4.1.1 System Context
 
-#### 4.2.1 Domain Building Blocks
+The system context view clarifies the trust and integration boundary between client applications, internal services, external LLM providers, and external market data providers. This boundary is operationally important because security, compliance, and production-support responsibilities differ across these interfaces.
+
+```text
+┌────────────────────────────── External Clients ──────────────────────────────┐
+│                                                                              │
+│  Web Frontend / Browser Clients / Future API Consumers                       │
+│                                                                              │
+└─────────────────────────────────────┬────────────────────────────────────────┘
+                                      │ HTTPS / WebSocket
+                                      ▼
+┌─────────────────────────── Internal Service Boundary ────────────────────────┐
+│                                                                              │
+│  API Routes / Socket.IO Handlers                                             │
+│          │                                                                   │
+│          ▼                                                                   │
+│  ChatService / ConversationService                                           │
+│          │                                                                   │
+│          ▼                                                                   │
+│  StockAssistantAgent                                                         │
+│          │                                                                   │
+│          ├──────────────► Tool Layer ───────────────► Redis Cache            │
+│          │                                      └──► MongoDB Metadata / STM  │
+│          │                                                                   │
+│          └──────────────► Model Client Factory / Prompt Logic                │
+│                                                                              │
+└──────────────────────┬──────────────────────────────┬────────────────────────┘
+                       │                              │
+                       │ External model calls         │ External market-data calls
+                       ▼                              ▼
+             ┌────────────────────┐        ┌─────────────────────────┐
+             │ LLM Providers      │        │ Market Data Providers   │
+             │ OpenAI / Grok      │        │ Yahoo Finance / others  │
+             └────────────────────┘        └─────────────────────────┘
+```
+
+```text
+Boundary classification
+-----------------------
+Client apps            : Outside internal trust boundary
+Internal services      : Inside application control boundary
+LLM providers          : External AI processing boundary
+Market data providers  : External evidence and pricing boundary
+MongoDB / Redis        : Internal persistence and cache boundary
+```
+
+The architecture intentionally routes all external interactions through internal service and agent seams rather than allowing client applications to call providers directly. This preserves a single enforcement point for authentication, authorization, archive safety, observability, prompt policy, and provider fallback.
+
+| Boundary | Primary Responsibility | Security / Compliance / Operations Significance |
+|----------|------------------------|-------------------------------------------------|
+| Client apps -> Internal services | Transport, authentication, request validation, streaming control | Protects internal capabilities from direct exposure and centralizes auditability |
+| Internal services -> LLM providers | Prompted reasoning and generated responses | External AI providers must be treated as non-authoritative processors; prompts and outputs require policy and logging controls |
+| Internal services -> Market data providers | Evidence and pricing retrieval through tools | Keeps factual market-data sourcing explicit and separable from model reasoning |
+| Internal services -> MongoDB / Redis | Metadata, STM persistence, and cache management | Preserves operational recovery, drift detection, and lifecycle governance inside the system boundary |
+
+From a compliance and operational perspective, this context establishes three hard boundaries:
+
+1. Client applications are consumers of the system, not participants in internal orchestration.
+2. LLM providers are external reasoning services and do not become the source of truth for market facts or conversation ownership.
+3. Market data providers are external evidence sources and are accessed only through controlled internal tool paths.
+
+This system context complements the deployment and operations views by showing who is inside the controlled system boundary and which dependencies remain external.
+
+### 4.2 Logical View
+
+#### 4.2.1 Logical Building Blocks
 
 | Building Block | Responsibility |
 |----------------|----------------|
 | `stock_assistant_agent.py` | Main ReAct runtime and conversation-aware agent entry points |
 | `langgraph_bootstrap.py` | Agent/bootstrap utilities including checkpointer creation |
 | `stock_query_router.py` | Semantic route classification |
-| `model_factory.py` and provider clients | Provider/model selection and cached client construction |
+| `model_factory.py` and provider clients | Provider and model selection with cached client construction |
 | `tools/` | Tool registration, caching, and domain data access |
 | `conversation_repository.py` | Conversation metadata persistence |
 | `chat_service.py` and `conversation_service.py` | Orchestration, archive guards, lifecycle and metadata helpers |
 | `src/prompts/` | Planned prompt asset directory for system prompts, skills, and experiments |
 
-#### 4.2.2 Source Layout View
+These building blocks are separated so that reasoning orchestration, state management, metadata ownership, and provider integration can evolve independently. The agent runtime owns reasoning and tool orchestration, service-layer components own business lifecycle enforcement, repositories own metadata persistence, and prompt assets govern behavior rather than domain data.
+
+#### 4.2.2 Responsibility and Dependency Boundaries
+
+| Logical Concern | Primary Owner | Architectural Boundary |
+|-----------------|---------------|------------------------|
+| Reasoning and tool selection | `StockAssistantAgent` | Does not own conversation lifecycle or repository persistence |
+| Semantic route classification | `stock_query_router.py` | Classifies requests but does not execute tools or persist state |
+| Provider and model selection | `ModelClientFactory` and provider clients | Isolates provider-specific concerns from routes and services |
+| Conversation lifecycle and archive rules | `ChatService`, `ConversationService` | Owns business guards and metadata synchronization outside the agent core |
+| Conversation metadata persistence | `ConversationRepository` | Persists application metadata, separate from LangGraph checkpoint state |
+| Prompt behavior and guardrails | Runtime prompt logic and planned `src/prompts/` assets | Controls behavioral policy, not business state or financial facts |
+
+This logical separation is the primary extensibility mechanism for the domain. New providers, tools, prompt assets, or conversation-management behaviors should be added by extending the relevant building block rather than by collapsing responsibilities into the agent runtime.
+
+#### 4.2.3 Layered Architecture Boundaries
+
+The agent domain uses a layered architecture so personalization, conversation state, external evidence, behavioral policy, and deterministic computation remain separable concerns rather than blending into a single prompt or storage surface.
+
+| Layer | Primary Purpose | Architectural Boundary |
+|-------|-----------------|------------------------|
+| Long-Term Memory (LTM) | Persist stable user preferences and symbol-tracking context across conversations | Personalization layer only; not a source of market facts, valuations, or recommendations |
+| Short-Term Memory (STM) | Retain conversation-scoped state and thread-local reasoning context | Scoped to a conversation boundary; does not become a cross-session factual store |
+| Intent Routing | Classify requests so the runtime selects the right tools, retrieval path, and response behavior | Classification layer only; does not own persistence, tool execution, or lifecycle rules |
+| Retrieval-Augmented Generation (RAG) | Supply sourced evidence for domain-specific reasoning | Evidence layer only; stores retrieved source content, not user preferences or model-authored conclusions |
+| Prompting and Guardrails | Control behavior, disclosure, and response framing | Policy layer only; governs how the model behaves, not where domain truth is stored |
+| Tools and Deterministic Computation | Fetch data and compute auditable metrics | Computation layer only; performs data retrieval and calculations that the LLM then interprets |
+| Fine-Tuning | Enforce reasoning structure and tone for selected workflows | Behavior-shaping layer only; does not function as a knowledge store |
+
+This boundary model is the core rationale for ADR-001: it reduces hallucination pressure, keeps market facts external to memory and prompt state, and allows retrieval, prompting, and execution behavior to evolve independently.
+
+#### 4.2.4 Structural Patterns and Stack Summary
+
+| Category | Architectural Role |
+|----------|--------------------|
+| Factory | `ModelClientFactory`, `create_checkpointer()` |
+| Registry / Singleton | `ToolRegistry` |
+| Strategy | Provider-specific model clients |
+| Template Method / Decorator | `CachingTool` |
+| Repository | `ConversationRepository` |
+| Planned Asset Loader / Composer / Middleware | Prompt system evolution path aligned to ADR-002 and ADR-003 |
+
+The detailed class hierarchy, patterns catalog, configuration snippets, and file relationships are preserved in [TECHNICAL_DESIGN.md](./TECHNICAL_DESIGN.md).
+
+### 4.3 Process View
+
+The process view describes the runtime interactions that turn a user request into a routed, tool-aware, and provider-backed response. It focuses on the execution path and degraded-operation behavior rather than on class-level realization.
+
+#### 4.3.1 Primary Query Processing Flow
+
+```text
+User Query
+    │
+    ▼
+┌──────────────────────────────────────────────────────────────────┐
+│ StockAssistantAgent                                             │
+│                                                                  │
+│  ┌─────────────┐    ┌──────────────────┐    ┌─────────────────┐ │
+│  │ ReAct Agent ├───►│ Tool Selection   ├───►│ Tool Execution  │ │
+│  │ (LangChain) │    │ (LLM Decision)   │    │ (CachingTool)   │ │
+│  └─────────────┘    └──────────────────┘    └─────────────────┘ │
+│         │                                          │             │
+│         ▼                                          ▼             │
+│  ┌─────────────┐                          ┌─────────────────┐   │
+│  │ LLM Response│◄────────────────────────│ Tool Output     │   │
+│  │ Generation  │                         │ (Cached/Fresh)  │   │
+│  └─────────────┘                          └─────────────────┘   │
+└──────────────────────────────────────────────────────────────────┘
+    │
+    ▼
+AgentResponse (content, provider, model, tool_calls, token_usage)
+```
+
+Service-layer orchestration remains on the outer edge of this process. Archive safety, ownership validation, and metadata synchronization are intentionally handled outside the core reasoning loop so the process path can stay focused on classification, tool use, and generation.
+
+#### 4.3.2 Route Classification View
+
+The runtime uses `semantic-router` with OpenAI embeddings and HuggingFace fallback to classify user requests into one of eight route categories.
+
+| Route | Description | Example Queries |
+|-------|-------------|-----------------|
+| `PRICE_CHECK` | Current prices, quotes, market cap | "What is AAPL trading at?" |
+| `NEWS_ANALYSIS` | Headlines, earnings, market events | "Latest news on Tesla" |
+| `PORTFOLIO` | Holdings, P&L, allocation | "Show my portfolio value" |
+| `TECHNICAL_ANALYSIS` | Charts, MACD, RSI, patterns | "Show RSI for NVDA" |
+| `FUNDAMENTALS` | P/E, P/B, DCF, financial ratios | "What's Apple's P/E ratio?" |
+| `IDEAS` | Stock picks, investment strategies | "Recommend growth stocks" |
+| `MARKET_WATCH` | Index updates, sector performance | "How is VN-Index doing?" |
+| `GENERAL_CHAT` | Fallback for unmatched queries | "Hello, how are you?" |
+
+#### 4.3.3 Provider Selection and Fallback View
+
+The provider and model path is mediated by `ModelClientFactory`, which caches provider-model client instances. Runtime fallback behavior preserves a graceful-degradation path if the primary provider fails or if the ReAct executor is unavailable.
+
+```text
+ModelClientFactory.get_client(config)
+    │
+    ├─► Check _CACHE for "provider:model_name" key
+    │       │
+    │       ├─► Found: Return cached client
+    │       │
+    │       └─► Not found: Create new client
+    │               │
+    │               ├─► provider="openai" → OpenAIModelClient
+    │               ├─► provider="grok"   → GrokModelClient
+    │               └─► other             → ValueError
+    │
+    └─► Return BaseModelClient instance
+```
+
+```text
+_generate_with_fallback(client, prompt, query)
+    │
+    ├─► Build sequence: [primary_provider] + fallback_order
+    │       Example: ["openai", "grok"]
+    │
+    ├─► For each provider in sequence:
+    │       │
+    │       ├─► Try generate/generate_with_search
+    │       │       │
+    │       │       ├─► Success: Return result (with fallback prefix if not primary)
+    │       │       │
+    │       │       └─► Exception: Log warning, continue to next
+    │       │
+    └─► All failed: Return "All providers failed. Last error: {e}"
+```
+
+These process flows express the domain's latency and fault-tolerance posture: semantic routing limits unnecessary tool exploration, provider fallback preserves degraded operation, and service-layer lifecycle checks keep archived or invalid conversation states out of the reasoning path.
+
+### 4.4 Information and State View
+
+The agent domain uses LangGraph's `MongoDBSaver` for conversation-scoped STM persistence, with `conversation_id -> thread_id` as the canonical binding. Sessions remain parent business context, while conversations own STM.
+
+The layered LLM architecture (ADR-001) also defines a Long-Term Memory (LTM) layer for stable, slow-changing user preferences and symbol-tracking context. LTM is architecturally distinct from STM: it persists across conversations, enables personalization and routing, and explicitly excludes financial facts, which remain in RAG or tools. LTM is not yet implemented in the runtime; the design and scope boundaries are governed by the ADR-001 LTM boundary decision.
+
+ADR-001 further defines **Retrieval-Augmented Generation (RAG)** and **Fine-Tuning** as distinct architectural layers. RAG provides intent-specific vector indices for sourced documents, while Fine-Tuning enforces reasoning structure and tone without storing knowledge. Neither layer is implemented in the current runtime; their scope and boundaries are governed by ADR-001.
+
+#### 4.4.1 State and Evidence Allocation Boundaries
+
+The state model is intentionally split so user context, conversation state, retrieved evidence, and computed financial results do not collapse into one storage boundary.
+
+| Concern | Canonical Architectural Home | Explicit Exclusions |
+|---------|------------------------------|---------------------|
+| Stable personalization and reusable user context | LTM | Prices, ratios, valuations, forecasts, recommendations |
+| Active conversation state and thread-local assumptions | STM via LangGraph checkpoints plus conversation metadata | Cross-conversation factual store, retrieved document corpus, durable financial truth |
+| Sourced market and filing evidence | RAG indices and external data sources | User preferences, model-authored interpretations, long-lived conversation state |
+| Deterministic metrics and fetched numbers | Tool execution and approved data providers | Prompt state, LTM/STM persistence, model-only inferred facts |
+| Output behavior, disclosure, and tone | Prompt and guardrail policy | Persistent domain data and financial truth |
+
+This allocation is what allows the domain to enforce the ADR-001 hard rules in architecture terms: memory personalizes and contextualizes, RAG informs, tools compute, and prompts govern behavior without becoming a shadow data layer.
+
+| Aspect | Architectural Position |
+|--------|------------------------|
+| State owner | LangGraph checkpointer for agent execution state; application metadata in `conversations` |
+| Binding | Direct 1:1 `conversation_id -> thread_id` |
+| Hierarchy | `workspace -> session -> conversation` |
+| Lifecycle | `active -> summarized -> archived` |
+| Scope boundary | Conversation text and state only; no prices, ratios, or tool outputs in memory |
+
+The runtime contract is now `conversation_id` across agent methods, REST chat, management APIs, repositories, reconciliation, and migration tooling. The REST `POST /api/chat` route still accepts a deprecated `session_id` alias and normalizes it into `conversation_id`; the Socket.IO handler accepts `conversation_id` only.
+
+The information boundary is deliberate: LangGraph checkpoints retain agent execution state for a conversation, while the `conversations` collection and service layer retain application metadata and lifecycle control. This keeps behavioral state and business metadata aligned without making the checkpointer the source of truth for application ownership or archival rules.
+
+```text
+APIServer.__init__()
+    │
+    ├─► create_checkpointer(config)  → MongoDBSaver | None
+    │
+    └─► StockAssistantAgent(config, data_manager, checkpointer=checkpointer)
+            │
+            └─► create_agent(..., checkpointer=checkpointer)
+                    │
+                └─► invoke(messages, config={"configurable": {"thread_id": conversation_id}})
+```
+
+The full memory data model, API impact, reconciliation behavior, and sequence diagrams are preserved in [AGENT_MEMORY_TECHNICAL_DESIGN.md](./AGENT_MEMORY_TECHNICAL_DESIGN.md).
+
+### 4.5 Development View
+
+The development view captures how the architecture is realized in the repository so maintainers can evolve the domain without eroding responsibility boundaries.
+
+#### 4.5.1 Source Layout View
 
 ```text
 src/core/
@@ -218,133 +482,130 @@ src/prompts/
 └── experiments/
 ```
 
-#### 4.2.3 Structural Patterns and Stack Summary
+#### 4.5.2 Maintainability and Extension Boundaries
 
-| Category | Architectural Role |
-|----------|--------------------|
-| Factory | `ModelClientFactory`, `create_checkpointer()` |
-| Registry / Singleton | `ToolRegistry` |
-| Strategy | Provider-specific model clients |
-| Template Method / Decorator | `CachingTool` |
-| Repository | `ConversationRepository` |
-| Planned Asset Loader / Composer / Middleware | Prompt system evolution path aligned to ADR-002 and ADR-003 |
+| Development Concern | Architectural Guidance |
+|---------------------|------------------------|
+| Module ownership | Keep agent reasoning in `src/core/`, business orchestration in `src/services/`, and persistence in `src/data/repositories/` |
+| Extending providers | Add provider-specific clients behind `BaseModelClient` and register through `ModelClientFactory` |
+| Extending tools | Add tool implementations under `src/core/tools/` and expose them through `ToolRegistry` rather than wiring ad hoc calls |
+| Memory changes | Preserve `conversation_id -> thread_id` as the canonical STM binding and keep business metadata outside checkpoints |
+| Prompt evolution | Add versioned assets under `src/prompts/` and keep prompt composition policy separate from tool or repository logic |
 
-The detailed class hierarchy, patterns catalog, configuration snippets, and file relationships are preserved in [TECHNICAL_DESIGN.md](./TECHNICAL_DESIGN.md).
+This view is intentionally about code organization and maintainability, not low-level realization. Detailed implementation behavior, configuration, and extension mechanics remain in [TECHNICAL_DESIGN.md](./TECHNICAL_DESIGN.md).
 
-### 4.3 Runtime Interaction View
+### 4.6 Deployment View
 
-#### 4.3.1 Primary Query Processing Flow
+The agent domain runs inside a broader multi-service deployment topology. At architecture level, the important concern is how the agent-related runtime depends on API, cache, database, and model-provider boundaries across local and production-like environments.
 
-```text
-User Query
-    │
-    ▼
-┌──────────────────────────────────────────────────────────────────┐
-│ StockAssistantAgent                                             │
-│                                                                  │
-│  ┌─────────────┐    ┌──────────────────┐    ┌─────────────────┐ │
-│  │ ReAct Agent ├───►│ Tool Selection   ├───►│ Tool Execution  │ │
-│  │ (LangChain) │    │ (LLM Decision)   │    │ (CachingTool)   │ │
-│  └─────────────┘    └──────────────────┘    └─────────────────┘ │
-│         │                                          │             │
-│         ▼                                          ▼             │
-│  ┌─────────────┐                          ┌─────────────────┐   │
-│  │ LLM Response│◄────────────────────────│ Tool Output     │   │
-│  │ Generation  │                         │ (Cached/Fresh)  │   │
-│  └─────────────┘                          └─────────────────┘   │
-└──────────────────────────────────────────────────────────────────┘
-    │
-    ▼
-AgentResponse (content, provider, model, tool_calls, token_usage)
-```
+#### 4.6.1 Runtime Topology Summary
 
-#### 4.3.2 Route Classification View
+| Runtime Element | Deployment Role | Boundary Notes |
+|-----------------|-----------------|----------------|
+| API container | Hosts Flask routes, Socket.IO handlers, and the agent invocation path | Primary entry point for frontend and service integration |
+| Agent container | Background worker and health surface | Separates long-running or asynchronous work from request-serving flow |
+| MongoDB | Stores conversation metadata and LangGraph checkpoint state | Metadata and checkpoint concerns remain logically separate even when stored on the same platform family |
+| Redis | Cache and transient coordination layer | Supports performance and graceful degradation paths |
+| Frontend container | User-facing interface | Consumes API and streaming surfaces but does not host agent logic |
 
-The runtime uses `semantic-router` with OpenAI embeddings and HuggingFace fallback to classify user requests into one of eight route categories.
+#### 4.6.2 Environment and Reliability Boundaries
 
-| Route | Description | Example Queries |
-|-------|-------------|-----------------|
-| `PRICE_CHECK` | Current prices, quotes, market cap | "What is AAPL trading at?" |
-| `NEWS_ANALYSIS` | Headlines, earnings, market events | "Latest news on Tesla" |
-| `PORTFOLIO` | Holdings, P&L, allocation | "Show my portfolio value" |
-| `TECHNICAL_ANALYSIS` | Charts, MACD, RSI, patterns | "Show RSI for NVDA" |
-| `FUNDAMENTALS` | P/E, P/B, DCF, financial ratios | "What's Apple's P/E ratio?" |
-| `IDEAS` | Stock picks, investment strategies | "Recommend growth stocks" |
-| `MARKET_WATCH` | Index updates, sector performance | "How is VN-Index doing?" |
-| `GENERAL_CHAT` | Fallback for unmatched queries | "Hello, how are you?" |
+| Concern | Architecture Position |
+|---------|-----------------------|
+| Local development topology | Docker Compose provides an integration-faithful multi-service environment |
+| Production-like topology | Helm-managed Kubernetes deployment scales API, agent, and frontend independently |
+| Health contracts | API `GET /api/health`, agent `GET /health`, frontend `GET /healthz` |
+| Configuration overlays | `APP_ENV` and environment-specific config overlays select environment behavior without changing architecture boundaries |
+| Secrets boundary | Local secrets come from environment variables; production secrets are intended to come from Azure Key Vault or equivalent managed secret stores |
 
-#### 4.3.3 Provider Selection and Fallback View
+Detailed deployment procedures, port mappings, Docker and Helm specifics, and runbooks belong in [IaC/README.md](../../../IaC/README.md) and the infrastructure artifacts under `IaC/`.
 
-The provider/model path is mediated by `ModelClientFactory`, which caches provider/model client instances. Runtime fallback behavior preserves a graceful-degradation path if the primary provider fails or if the ReAct executor is unavailable.
+### 4.7 Operations and Maintenance View
 
-```text
-ModelClientFactory.get_client(config)
-    │
-    ├─► Check _CACHE for "provider:model_name" key
-    │       │
-    │       ├─► Found: Return cached client
-    │       │
-    │       └─► Not found: Create new client
-    │               │
-    │               ├─► provider="openai" → OpenAIModelClient
-    │               ├─► provider="grok"   → GrokModelClient
-    │               └─► other             → ValueError
-    │
-    └─► Return BaseModelClient instance
-```
+The operations and maintenance view addresses how the architecture supports production operation, resilience, and maintainability after deployment.
 
-```text
-_generate_with_fallback(client, prompt, query)
-    │
-    ├─► Build sequence: [primary_provider] + fallback_order
-    │       Example: ["openai", "grok"]
-    │
-    ├─► For each provider in sequence:
-    │       │
-    │       ├─► Try generate/generate_with_search
-    │       │       │
-    │       │       ├─► Success: Return result (with fallback prefix if not primary)
-    │       │       │
-    │       │       └─► Exception: Log warning, continue to next
-    │       │
-    └─► All failed: Return "All providers failed. Last error: {e}"
-```
+#### 4.7.1 Health, Observability, and Drift Surfaces
 
-### 4.4 Memory and State View
+| Operational Concern | Current Architectural Surface |
+|---------------------|-------------------------------|
+| Health reporting | Agent and service health aggregate through explicit health endpoints and service health checks |
+| Logging and traceability | Runtime logging exists now; the architecture anticipates structured logs and prompt-level trace metadata |
+| Prompt observability | Prompt version, route, experiment, and guardrail outcomes are intended as traceable runtime metadata |
+| Drift detection | Reconciliation and migration tooling provide visibility into conversation and checkpoint drift |
+| Archive safety | `ChatService` protects the REST path from invalid archived-conversation execution |
 
-The agent domain uses LangGraph's `MongoDBSaver` for conversation-scoped STM persistence, with `conversation_id -> thread_id` as the canonical binding. Sessions remain parent business context, while conversations own STM.
+#### 4.7.2 Resilience and Recovery Boundaries
 
-The layered LLM architecture (ADR-001) also defines a Long-Term Memory (LTM) layer for stable, slow-changing user preferences and symbol-tracking context. LTM is architecturally distinct from STM: it persists across conversations, enables personalization and routing, and explicitly excludes financial facts (which remain in RAG/tools). LTM is not yet implemented in the runtime; the design and scope boundaries are governed by ADR-001 §6.1.
+| Failure Mode | Architectural Response |
+|--------------|------------------------|
+| Provider failure or timeout | Fallback order enables degraded continuation rather than immediate hard failure |
+| Cache unavailability | In-memory fallback paths preserve partial operation where supported |
+| Checkpointer unavailability | Agent runtime can run without checkpoint persistence, with reduced STM capability |
+| Metadata and checkpoint drift | Reconciliation tooling and service ownership boundaries contain and repair mismatch risk |
+| Archived conversation access | Service-layer guards prevent invalid runtime mutation of archived context |
 
-ADR-001 further defines **Retrieval-Augmented Generation (RAG)** (§9) and **Fine-Tuning** (§10) as distinct architectural layers. RAG provides intent-specific vector indices for sourced documents (filings, news, macro data), while Fine-Tuning enforces reasoning structure and tone without storing knowledge. Neither layer is implemented in the current runtime; their scope and boundaries are governed by ADR-001.
+#### 4.7.3 Quality Attribute Scenarios
 
-| Aspect | Architectural Position |
-|--------|------------------------|
-| State owner | LangGraph checkpointer for agent execution state; application metadata in `conversations` |
-| Binding | Direct 1:1 `conversation_id -> thread_id` |
-| Hierarchy | `workspace -> session -> conversation` |
-| Lifecycle | `active -> summarized -> archived` |
-| Scope boundary | Conversation text and state only; no prices, ratios, or tool outputs in memory |
+The following quality scenarios summarize the failure, degradation, recovery, and performance expectations already established in this architecture description and its governing companion artifacts. They are expressed at architecture level so reviewers can assess whether the system's control boundaries and fallback paths are adequate without reading implementation detail.
 
-The runtime contract is now `conversation_id` across agent methods, REST chat, management APIs, repositories, reconciliation, and migration tooling. The REST `POST /api/chat` route still accepts a deprecated `session_id` alias and normalizes it into `conversation_id`; the Socket.IO handler accepts `conversation_id` only.
+##### 4.7.3.1 Reliability and Fault-Tolerance Scenarios
 
-```text
-APIServer.__init__()
-    │
-    ├─► create_checkpointer(config)  → MongoDBSaver | None
-    │
-    └─► StockAssistantAgent(config, data_manager, checkpointer=checkpointer)
-            │
-            └─► create_agent(..., checkpointer=checkpointer)
-                    │
-                └─► invoke(messages, config={"configurable": {"thread_id": conversation_id}})
-```
+| Scenario | Stimulus and Environment | Expected Architectural Response |
+|----------|--------------------------|---------------------------------|
+| LLM provider outage or timeout | The primary model provider becomes unavailable during active query processing and fallback is enabled | Route generation to the next provider in `fallback_order`, preserve service continuity in degraded mode, and surface fallback metadata in the response path |
+| Semantic-router primary encoder failure | The primary embeddings provider is unavailable during route classification | Use the configured secondary encoder and continue classification; if confidence remains insufficient, preserve a safe fallback route rather than fail the request outright |
+| Cache backend unavailable | Redis or the primary cache path is unavailable during tool execution | Continue with in-memory fallback or uncached execution where supported so tool use remains available with reduced efficiency |
+| Checkpointer unavailable | Checkpoint persistence cannot be reached during a conversation-scoped request | Continue without checkpoint persistence so the agent remains usable, but with reduced STM capability and no assumption of durable thread state |
+| Legacy executor fallback required | The preferred ReAct execution path is unavailable or cannot be initialized | Use the retained legacy execution path so the system degrades functionally rather than becoming unavailable |
 
-The full memory data model, API impact, reconciliation behavior, and sequence diagrams are preserved in [AGENT_MEMORY_TECHNICAL_DESIGN.md](./AGENT_MEMORY_TECHNICAL_DESIGN.md).
+##### 4.7.3.2 Data Integrity and Lifecycle Scenarios
 
-### 4.5 Prompt and Behavior View
+| Scenario | Stimulus and Environment | Expected Architectural Response |
+|----------|--------------------------|---------------------------------|
+| Archived conversation mutation attempt | A request targets a conversation whose lifecycle state is `archived` | Service-layer guards reject invalid mutation before the request enters the reasoning path |
+| Metadata and checkpoint drift detected | Reconciliation tooling or runtime checks detect mismatch between application metadata and LangGraph checkpoint state | Contain the mismatch within service and repository boundaries, expose drift to operators, and use reconciliation tooling to repair alignment |
+| Stateless request path | A request omits `conversation_id` and therefore does not bind to conversation-scoped STM | Preserve single-turn operation by using a stateless path rather than forcing checkpoint-dependent behavior |
+| Migration interruption or partial progress | A migration or repair operation stops mid-run due to interruption or failure | Preserve non-destructive, resumable behavior with dry-run support so operators can recover without data loss |
 
-#### 4.5.1 Current Behavior Contract
+##### 4.7.3.3 Interface and Streaming Scenarios
+
+| Scenario | Stimulus and Environment | Expected Architectural Response |
+|----------|--------------------------|---------------------------------|
+| Streaming pipeline failure | An error occurs after a streaming response has started | End the stream with a machine-detectable terminal error condition rather than leaving the client with an indeterminate open channel |
+| Client-initiated cancellation | A client cancels an in-progress streaming response | Stop further generation promptly and avoid continued background work for a cancelled response path |
+| Transient upstream failure during active request | A retry-safe external failure occurs during generation or tool access | Preserve retry-safe or failover-safe behavior without corrupting conversation state or leaking partial invalid output as completed work |
+
+##### 4.7.3.4 Prompt and Behavior Scenarios
+
+| Scenario | Stimulus and Environment | Expected Architectural Response |
+|----------|--------------------------|---------------------------------|
+| Unmatched or ambiguous intent | A user query does not match a stronger domain route with sufficient confidence | Route to `GENERAL_CHAT` so the request remains serviceable rather than producing a routing failure |
+| Guardrail violation candidate detected | Generated output appears to contain hype, manipulation, or missing uncertainty or attribution signals | Keep guardrail enforcement in the prompt and response-policy layer and emit violation metadata for traceability |
+| Prompt asset parse or validation failure | A versioned prompt asset cannot be loaded or validated in the planned externalized prompt system | Load `_baseline.yaml` as the last-known-good prompt asset instead of blocking response generation entirely |
+
+##### 4.7.3.5 Planned Retrieval and Asset-Dependency Scenarios
+
+The following scenarios are architecture-relevant but remain future-state because the associated prompt-asset and retrieval layers are not yet fully implemented in the active runtime.
+
+| Scenario | Stimulus and Environment | Expected Architectural Response |
+|----------|--------------------------|---------------------------------|
+| Vector-backed retrieval unavailable | A future LTM or RAG retrieval store is unavailable when retrieval-augmented behavior is expected | Degrade to a non-retrieval response path that continues to use available tools and prompt policy, while making reduced evidence coverage observable |
+| Prompt experiment or version asset unavailable | A selected experimental or version-specific prompt asset cannot be resolved | Fall back to the baseline prompt path and preserve prompt-version traceability for operators |
+
+##### 4.7.3.6 Performance and Availability Scenarios
+
+| Scenario | Stimulus and Environment | Expected Architectural Response |
+|----------|--------------------------|---------------------------------|
+| Simple query under normal operating load | A price lookup or similar lightweight request is processed during steady-state operation | Preserve the architecture's low-latency path through routing, limited tool use, and bounded response generation |
+| Multi-tool analytical query under normal operating load | A request requires multiple tool calls or a longer reasoning path | Preserve service availability while accepting a slower bounded path than lightweight requests |
+| Sustained concurrent conversational load | Multiple active conversations and requests are processed concurrently | Preserve availability through independent service boundaries, cache support, and separation of API, agent, and persistence concerns |
+| Partial observability degradation | Logging, metrics, or tracing coverage is reduced while the runtime remains healthy | Continue serving requests while keeping health and drift surfaces available so operators can detect reduced observability without mistaking it for full outage |
+
+This view is architecture-level only. Runbook steps, CLI usage, monitoring dashboards, and operational procedures remain outside this document and belong in [TECHNICAL_DESIGN.md](./TECHNICAL_DESIGN.md) only where realization detail is needed, or in operational documentation such as [IaC/README.md](../../../IaC/README.md).
+
+### 4.8 Prompt and Behavior View
+
+#### 4.8.1 Current Behavior Contract
 
 The current runtime still carries a hardcoded system prompt in the agent runtime. The prompt system architecture below describes the planned transition to externalized, versioned, and composable prompt assets.
 
@@ -359,7 +620,7 @@ When answering questions:
 4. Be concise but comprehensive in your responses
 ```
 
-#### 4.5.2 Prompt Architecture View
+#### 4.8.2 Prompt Architecture View
 
 > **Status:** Proposed design — not yet implemented.
 > **Research Authority:** [PROMPT_SYSTEM_RESEARCH_PROPOSAL.md](./PROMPT_SYSTEM_RESEARCH_PROPOSAL.md)
@@ -387,9 +648,9 @@ Layer 3: ResponseGuardrailMiddleware
 |-----------|----------------|---------------|
 | **PromptAssetLoader** | Load versioned prompt assets from `src/prompts/`; validate YAML schema; extract version identity; fall back to `_baseline.yaml` on failure | ADR-003 |
 | **PromptAssembler** | Compose final prompt from base + skills + context; apply route-specific skill selection; inject prompt version into metadata; support experiment variant assignment | ADR-002 |
-| **ResponseGuardrailMiddleware** | Scan agent output for hype/manipulation language; verify source attribution and uncertainty disclosure; log violations | ADR-001 §4.7 |
+| **ResponseGuardrailMiddleware** | Scan agent output for hype or manipulation language; verify source attribution and uncertainty disclosure; log violations | ADR-001 hard rules on behavior and evidence boundaries |
 
-#### 4.5.3 Prompt Taxonomy and Skills Composition
+#### 4.8.3 Prompt Taxonomy and Skills Composition
 
 | Type | Directory | Lifecycle | Example |
 |------|-----------|-----------|---------|
@@ -423,7 +684,7 @@ ResponseGuardrailMiddleware post-processes output
    (blocklist scan, attribution check, uncertainty check)
 ```
 
-#### 4.5.4 Prompt Observability View
+#### 4.8.4 Prompt Observability View
 
 | Trace Attribute | Source | Example Value |
 |----------------|--------|---------------|
@@ -432,18 +693,6 @@ ResponseGuardrailMiddleware post-processes output
 | `prompt.experiment_id` | PromptAssembler | `exp-001` (or `null`) |
 | `prompt.skills_active` | PromptAssembler | `['disclaimer', 'anti-hype', 'earnings-analysis']` |
 | `guardrail.violations` | ResponseGuardrailMiddleware | `[]` or `['hype_language_detected']` |
-
-### 4.6 Operational and Quality View
-
-Operationally significant architecture concerns include:
-
-- archive-safe chat handling through `ChatService` on the REST path;
-- separation of metadata persistence from LangGraph checkpoint persistence;
-- route-aware evolution of prompt composition and observability metadata;
-- maintainability through explicit factory, registry, and repository seams;
-- future observability extension toward structured logs, metrics, and tracing.
-
-The detailed configuration reference, metrics examples, testing structures, and code-oriented extension paths are preserved in [TECHNICAL_DESIGN.md](./TECHNICAL_DESIGN.md).
 
 ---
 
@@ -454,11 +703,13 @@ The detailed configuration reference, metrics examples, testing structures, and 
 | Architecture View | Primary Companion Documents |
 |-------------------|-----------------------------|
 | Context and Boundary View | [TECHNICAL_DESIGN.md](./TECHNICAL_DESIGN.md), [SOFTWARE_REQUIREMENTS_SPECIFICATION.md](./SOFTWARE_REQUIREMENTS_SPECIFICATION.md) |
-| Static Structure View | [TECHNICAL_DESIGN.md](./TECHNICAL_DESIGN.md) |
-| Runtime Interaction View | [TECHNICAL_DESIGN.md](./TECHNICAL_DESIGN.md), [AGENT_MEMORY_TECHNICAL_DESIGN.md](./AGENT_MEMORY_TECHNICAL_DESIGN.md) |
-| Memory and State View | [AGENT_MEMORY_TECHNICAL_DESIGN.md](./AGENT_MEMORY_TECHNICAL_DESIGN.md), [ADR-AGENT-001-LAYERED-LLM-ARCHITECTURE.md](./decisions/ADR-AGENT-001-LAYERED-LLM-ARCHITECTURE.md) |
+| Logical View | [TECHNICAL_DESIGN.md](./TECHNICAL_DESIGN.md), [ADR-AGENT-001-LAYERED-LLM-ARCHITECTURE.md](./decisions/ADR-AGENT-001-LAYERED-LLM-ARCHITECTURE.md) |
+| Process View | [TECHNICAL_DESIGN.md](./TECHNICAL_DESIGN.md), [AGENT_MEMORY_TECHNICAL_DESIGN.md](./AGENT_MEMORY_TECHNICAL_DESIGN.md) |
+| Information and State View | [AGENT_MEMORY_TECHNICAL_DESIGN.md](./AGENT_MEMORY_TECHNICAL_DESIGN.md), [ADR-AGENT-001-LAYERED-LLM-ARCHITECTURE.md](./decisions/ADR-AGENT-001-LAYERED-LLM-ARCHITECTURE.md) |
+| Development View | [TECHNICAL_DESIGN.md](./TECHNICAL_DESIGN.md), [README.md](../../../README.md) |
+| Deployment View | [IaC/README.md](../../../IaC/README.md), [TECHNICAL_DESIGN.md](./TECHNICAL_DESIGN.md) |
+| Operations and Maintenance View | [TECHNICAL_DESIGN.md](./TECHNICAL_DESIGN.md), [IaC/README.md](../../../IaC/README.md) |
 | Prompt and Behavior View | [PROMPT_SYSTEM_RESEARCH_PROPOSAL.md](./PROMPT_SYSTEM_RESEARCH_PROPOSAL.md), [ADR-AGENT-002-SKILLS-PATTERN-PROMPT-COMPOSITION.md](./decisions/ADR-AGENT-002-SKILLS-PATTERN-PROMPT-COMPOSITION.md), [ADR-AGENT-003-EXTERNALIZE-VERSION-PROMPT-ASSETS.md](./decisions/ADR-AGENT-003-EXTERNALIZE-VERSION-PROMPT-ASSETS.md) |
-| Evolution View | [TECHNICAL_DESIGN.md](./TECHNICAL_DESIGN.md), [PHASE_2_AGENT_ENHANCEMENT_ROADMAP.md](./PHASE_2_AGENT_ENHANCEMENT_ROADMAP.md) |
 
 ### 5.2 Concern-to-Decision Correspondence
 
@@ -472,9 +723,9 @@ The detailed configuration reference, metrics examples, testing structures, and 
 
 ### 5.3 Terminology and Concept Evolution
 
-| Original Concept (ADR-001 §8) | Evolved Realization (ADR-002, ADR-003) | Note |
+| Original Concept (ADR-001 Prompt Compiler decision) | Evolved Realization (ADR-002, ADR-003) | Note |
 |-------------------------------|----------------------------------------|------|
-| Prompt Compiler | PromptAssetLoader → PromptAssembler → ResponseGuardrailMiddleware | The single-step compiler concept was elaborated into a three-layer architecture. See ADR-001 §8 Implementation Reference. |
+| Prompt Compiler | PromptAssetLoader → PromptAssembler → ResponseGuardrailMiddleware | The single-step compiler concept was elaborated into a three-layer architecture. See the ADR-001 Prompt Compiler decision and `TECHNICAL_DESIGN.md` for realization detail. |
 | Intent-based routing | `StockQueryRoute` enum with 8 canonical routes | Originally described with 7 working-name intents; refined to 8 routes during implementation. |
 
 ### 5.4 Content Preservation Correspondence
@@ -486,6 +737,25 @@ The pre-rewrite architecture document mixed architecture description, technical 
 - memory-specific subsystem detail is preserved in [AGENT_MEMORY_TECHNICAL_DESIGN.md](./AGENT_MEMORY_TECHNICAL_DESIGN.md);
 - prompt-system research, detailed rollout logic, and evaluation design are preserved in [PROMPT_SYSTEM_RESEARCH_PROPOSAL.md](./PROMPT_SYSTEM_RESEARCH_PROPOSAL.md);
 - decision authority remains with the ADR set in [decisions](./decisions).
+
+### 5.5 Correspondence Rules and Consistency Checks
+
+The following rules govern how this architecture-description package stays consistent across ADRs and companion design documents:
+
+1. Accepted ADRs govern architectural decision boundaries and win if a companion document describes a conflicting boundary or responsibility split.
+2. [ARCHITECTURE_DESIGN.md](./ARCHITECTURE_DESIGN.md) governs viewpoint-framed architecture views, cross-document correspondences, and package-level standards-positioning language.
+3. [TECHNICAL_DESIGN.md](./TECHNICAL_DESIGN.md) governs realization detail and implementation-oriented sequencing, but it must not override an accepted ADR or restate planned behavior as implemented.
+4. [AGENT_MEMORY_TECHNICAL_DESIGN.md](./AGENT_MEMORY_TECHNICAL_DESIGN.md) governs STM-specific subsystem detail within the architectural boundaries established by ADR-001 and this architecture description.
+5. Proposed ADRs may shape planned or future-state architecture content, but they do not override accepted decisions until their status changes.
+6. Terminology changes that affect architectural concepts, view names, or decision names must be reconciled across sections 3, 4, 5, and 6 of this document and across the affected ADRs in the same update pass.
+
+Reviewer checklist:
+
+- [ ] ADR status and title references in this document match the current ADR files.
+- [ ] View names used in ADRs match the viewpoint and view names defined in sections 3 and 4.
+- [ ] Accepted ADR boundaries are not contradicted by companion design documents.
+- [ ] Proposed or future-state capabilities remain labeled as planned where runtime implementation is incomplete.
+- [ ] Concept evolution terms such as `Prompt Compiler`, `PromptAssembler`, and `PromptAssetLoader` are used consistently with section 5.3.
 
 ---
 
@@ -499,7 +769,7 @@ The pre-rewrite architecture document mixed architecture description, technical 
 | [ADR-AGENT-002-SKILLS-PATTERN-PROMPT-COMPOSITION.md](./decisions/ADR-AGENT-002-SKILLS-PATTERN-PROMPT-COMPOSITION.md) | **Proposed** | Governs the composable skills model used in the prompt architecture view |
 | [ADR-AGENT-003-EXTERNALIZE-VERSION-PROMPT-ASSETS.md](./decisions/ADR-AGENT-003-EXTERNALIZE-VERSION-PROMPT-ASSETS.md) | **Proposed** | Governs the move from hardcoded prompts to versioned external assets |
 
-#### 6.1.1 Architectural Hard Rules (from ADR-001 §4)
+#### 6.1.1 Architectural Hard Rules (from ADR-001 Hard Rules)
 
 The following governing principles are established as accepted architectural constraints:
 
@@ -575,3 +845,7 @@ The detailed extension catalog, example snippets, configuration candidates, and 
 |---------|------|--------|-------|
 | 0.0 | 2026-04-16 | GitHub Copilot | Reorganized the former mixed architecture document into an ISO 42010-aligned architecture description and redirected realization detail to companion documents |
 | 0.1 | 2026-04-16 | GitHub Copilot | Applied cross-document review fixes: route taxonomy reconciliation with code ground truth, ADR-001 principles surfaced, status column added, methodology justification, prompt compiler correspondence, LTM acknowledgment, concern category terminology, SRS coverage simplified |
+| 0.2 | 2026-05-05 | GitHub Copilot | Reframed the document around explicit ISO 42010 viewpoints versus views, added logical, process, development, deployment, and operations-and-maintenance coverage, and updated cross-document correspondences |
+| 0.3 | 2026-05-05 | GitHub Copilot | Added a System Context subsection to the Context and Boundary View to make client, internal-service, LLM-provider, and market-data-provider boundaries explicit for security, compliance, and operations concerns |
+| 0.4 | 2026-05-05 | GitHub Copilot | Added architecture-level quality attribute scenarios covering current failure, degradation, lifecycle, prompt, and planned retrieval cases under the Operations and Maintenance View |
+| 0.5 | 2026-05-06 | GitHub Copilot | Migrated layered-boundary and state-versus-evidence allocation content out of ADR-001 into architecture views and replaced stale section-number references with concept-based citations |
