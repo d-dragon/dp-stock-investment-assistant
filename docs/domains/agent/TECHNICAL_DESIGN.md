@@ -93,10 +93,20 @@ src/services/
 └── conversation_service.py     # ConversationService (lifecycle, management APIs, metadata helpers)
 
 src/prompts/
-├── system/
-├── skills/
-└── experiments/
+├── analysis_prompt.j2
+├── generic_query.j2
+├── system_stock_assistant-vn.txt
+└── system_stock_assistant.txt
 ```
+
+### 2.3 Prompt Asset Mapping (Current vs Planned)
+
+| View | Prompt Asset Model | Status |
+|------|--------------------|--------|
+| Current runtime layout | Template/text assets under `src/prompts/` | Implemented |
+| ADR taxonomy target (canonical) | `src/prompts/system/`, `src/prompts/skills/`, `src/prompts/experiments/` | Proposed |
+
+The technical design treats ADR taxonomy as canonical for prompt assets. Planning-artifact path aliases are non-authoritative and must map back to ADR taxonomy paths.
 
 ## 3. Core Realization
 
@@ -135,6 +145,22 @@ The constructor accepts an optional `checkpointer` parameter injected by `APISer
 - The REST chat path uses `ChatService` to reject archived conversations and record per-turn metadata non-blocking.
 - Workspace/session/conversation ownership and lifecycle validation live in the management APIs and services, not inside `StockAssistantAgent` itself.
 - Session-context resolution helpers exist in `ChatService` and `ConversationService`, but prompt-level injection of that merged context is still follow-up work.
+
+#### 3.1.1 Mirror — Component Interface Diagram
+
+This realization-oriented mirror corresponds to the architecture-level interface diagrams in [ARCHITECTURE_DESIGN.md](./ARCHITECTURE_DESIGN.md) section 4.1.1a and section 4.2.2a.
+
+```mermaid
+flowchart LR
+	Entry["API Routes / Socket.IO"] -->|"validated request interface"| Orchestration["ChatService / ConversationService"]
+	Orchestration -->|"conversation lifecycle interface"| Agent["StockAssistantAgent"]
+	Agent -->|"route classification interface"| Router["stock_query_router"]
+	Agent -->|"model client interface"| Factory["ModelClientFactory"]
+	Agent -->|"tool execution interface"| Tools["ToolRegistry + Tools"]
+	Agent -->|"checkpoint interface"| Checkpoint["MongoDBSaver"]
+	Orchestration -->|"metadata persistence interface"| Repo["ConversationRepository"]
+	Tools -->|"cache interface"| Cache["Redis / CacheBackend"]
+```
 
 ### 3.2 Tool Registry and Tool Execution
 
@@ -228,16 +254,16 @@ The canonical runtime contract is now `conversation_id` across agent methods, RE
 
 **Wiring Flow**:
 
-```text
-APIServer.__init__()
-		│
-		├─► create_checkpointer(config)  → MongoDBSaver | None
-		│
-		└─► StockAssistantAgent(config, data_manager, checkpointer=checkpointer)
-						│
-						└─► create_agent(..., checkpointer=checkpointer)
-										│
-								└─► invoke(messages, config={"configurable": {"thread_id": conversation_id}})
+```mermaid
+flowchart TD
+	API["APIServer.__init__()"]
+	CreateCheckpointer["create_checkpointer(config) -> MongoDBSaver | None"]
+	AgentInit["StockAssistantAgent(config, data_manager, checkpointer=checkpointer)"]
+	CreateAgent["create_agent(..., checkpointer=checkpointer)"]
+	Invoke["invoke(messages, config={configurable: {thread_id: conversation_id}})"]
+
+	API --> CreateCheckpointer
+	API --> AgentInit --> CreateAgent --> Invoke
 ```
 
 **Detailed Design**: [AGENT_MEMORY_TECHNICAL_DESIGN.md](./AGENT_MEMORY_TECHNICAL_DESIGN.md)
@@ -348,8 +374,32 @@ def process_query(
 ### 3.5 Prompt Realization and Guardrails
 
 > **Status:** Proposed design — not yet implemented.
+> **Decision coupling:** This section remains planned-state because ADR-002 and ADR-003 are Proposed.
 
 The prompt system replaces the current hardcoded system prompt with a three-layer architecture that externalizes, composes, and guards prompt content.
+
+| Concept | Technical Design Term | Notes |
+|---------|-----------------------|-------|
+| Prompt compiler (ADR-001) | `PromptAssetLoader -> PromptAssembler -> ResponseGuardrailMiddleware` | Compiler concept realized as explicit component boundaries in planned state |
+| Loader facade naming in implementation discussions | `PromptRegistry` (or equivalent) | Implementation naming may vary; boundary responsibilities remain unchanged |
+| Asset taxonomy mapping | ADR taxonomy (`src/prompts/system|skills|experiments`) | Canonical architecture-package taxonomy for prompt assets |
+
+#### 3.5.1 Mirror — Prompt Layer Interface Diagram
+
+This realization-oriented mirror corresponds to the architecture prompt view in [ARCHITECTURE_DESIGN.md](./ARCHITECTURE_DESIGN.md) section 4.8.2.
+
+```mermaid
+flowchart LR
+	Route["Route classification"] --> Loader["PromptAssetLoader"]
+	Config["Prompt config + ADR taxonomy paths"] --> Loader
+	Loader -->|"base prompt + metadata"| Assembler["PromptAssembler"]
+	LTM["LTM summary (planned)"] --> Assembler
+	STM["STM context"] --> Assembler
+	Skills["Skills assets"] --> Assembler
+	Assembler -->|"assembled prompt"| Agent["StockAssistantAgent invocation"]
+	Agent --> Guard["ResponseGuardrailMiddleware"]
+	Guard -->|"response + guardrail metadata"| Out["Response surface"]
+```
 
 #### Current Hardcoded System Prompt
 
@@ -366,38 +416,29 @@ When answering questions:
 
 #### Three-Layer Prompt Architecture
 
-```text
-Layer 1: PromptAssetLoader
-	│  Discovers and loads versioned YAML prompt files from src/prompts/
-	│  Validates schema, extracts version metadata, implements fallback
-	│
-	▼
-Layer 2: PromptAssembler
-	│  Composes base system prompt + active skills + LTM/STM context
-	│  Selects skills by route classification and activation criteria
-	│  Injects prompt version tag into metadata
-	│
-	▼
-Layer 3: ResponseGuardrailMiddleware
-	│  Post-processes agent output to enforce behavioral guardrails
-	│  Checks: anti-hype blocklist, source attribution, uncertainty disclosure
-	│  Emits guardrail violations as structured trace events
+```mermaid
+flowchart TD
+	L1["Layer 1: PromptAssetLoader\nDiscovers and loads versioned prompt assets from ADR taxonomy paths\nValidates schema, extracts version metadata, implements fallback"]
+	L2["Layer 2: PromptAssembler\nComposes base system prompt + active skills + LTM/STM context\nSelects skills by route classification and activation criteria\nInjects prompt version tag into metadata"]
+	L3["Layer 3: ResponseGuardrailMiddleware\nPost-processes agent output to enforce behavioral guardrails\nChecks: anti-hype blocklist, source attribution, uncertainty disclosure\nEmits guardrail violations as structured trace events"]
+
+	L1 --> L2 --> L3
 ```
 
 #### Component Responsibilities
 
 | Component | Responsibility | SRS Coverage |
 |-----------|----------------|--------------|
-| **PromptAssetLoader** | Load versioned prompt assets from `src/prompts/`; validate YAML schema; extract version identity; fall back to `_baseline.yaml` on failure | FR-1.4.5, FR-1.4.6, FR-1.4.8 |
+| **PromptAssetLoader** | Load versioned prompt assets from ADR taxonomy paths; validate metadata; extract version identity; fall back to baseline asset on failure | FR-1.4.5, FR-1.4.6, FR-1.4.8 |
 | **PromptAssembler** | Compose final prompt from base + skills + context; apply route-specific skill selection; inject prompt version into metadata; support experiment variant assignment | FR-1.4.7, FR-1.4.9, ADR-002 |
 | **ResponseGuardrailMiddleware** | Scan agent output for hype/manipulation language; verify source attribution and uncertainty disclosure; log violations | FR-1.5.1–1.5.5 |
 
 #### Prompt Taxonomy
 
-| Type | Directory | Lifecycle | Example |
-|------|-----------|-----------|---------|
-| **System prompts** | `src/prompts/system/` | Versioned, one active at a time | `v1.0.0.yaml` — core persona and instructions |
-| **Skills** | `src/prompts/skills/` | Composable, multiple active per request | `disclaimer.yaml`, `anti-hype.yaml` |
+| Type | ADR Taxonomy Path | Lifecycle | Example |
+|------|-------------------|-----------|---------|
+| **System prompts** | `src/prompts/system/` | Versioned, one active at a time | `v1.0.0.yaml` |
+| **Skills** | `src/prompts/skills/` | Composable, multiple active per request | `disclaimer.yaml`, `anti-hype.yaml`, `earnings-analysis.yaml` |
 | **Experiments** | `src/prompts/experiments/` | Temporary variants for A/B testing | `exp-001-concise.yaml` |
 | **Baseline** | `src/prompts/system/_baseline.yaml` | Permanent fallback, never deleted | Last-known-good system prompt |
 
@@ -416,16 +457,16 @@ The prompt path should remain deterministic even after prompt assets are externa
 
 This order preserves the separation of concerns defined by ADR-001: behavioral policy arrives before contextual state, retrieved evidence arrives after user and conversation context, and output-shaping instructions are applied last so they do not overwrite factual or policy inputs. The always-active and route-matched skill layers are the ADR-002 realization of the broader ADR-001 system-rules decision, not a competing prompt contract.
 
-```text
-[Base System]
-	+ [Always-Active Skills]
-	+ [Route-Matched Skills]
-	+ [LTM Summary]
-	+ [STM Context]
-	+ [RAG / Tool Evidence]
-	+ [Task Instruction]
-	+ [Output Schema]
-	-> Final Prompt Payload
+```mermaid
+flowchart TD
+	Base["[Base System]"] --> Always["[Always-Active Skills]"]
+	Always --> Route["[Route-Matched Skills]"]
+	Route --> LTM["[LTM Summary]"]
+	LTM --> STM["[STM Context]"]
+	STM --> RAG["[RAG / Tool Evidence]"]
+	RAG --> Task["[Task Instruction]"]
+	Task --> Output["[Output Schema]"]
+	Output --> Final["Final Prompt Payload"]
 ```
 
 #### Observability Integration
@@ -435,7 +476,9 @@ This order preserves the separation of concerns defined by ADR-001: behavioral p
 | `prompt.version` | PromptAssetLoader | `v1.2.0` |
 | `prompt.route` | Semantic Router | `FUNDAMENTALS` |
 | `prompt.experiment_id` | PromptAssembler | `exp-001` (or `null`) |
+| `prompt_selection_mode` | PromptAssembler / config | `fixed`, `forced`, `shadow`, `weighted` |
 | `prompt.skills_active` | PromptAssembler | `["disclaimer", "anti-hype", "earnings-analysis"]` |
+| `prompt_fallback_reason` | PromptAssetLoader | `asset_parse_failed`, `route_skill_missing` |
 | `guardrail.violations` | ResponseGuardrailMiddleware | `[]` or `["hype_language_detected"]` |
 
 ### 3.6 Fine-Tuning Realization
@@ -461,27 +504,14 @@ Implementation-oriented safeguards:
 
 The following walkthrough preserves the layered contract in a concrete engineering form without making the ADR carry the worked example. It represents the target layered flow once prompt externalization and richer retrieval wiring are fully in place.
 
-```text
-User: "Danh gia HSG trung han"
-	│
-	├─► Resolve LTM summary
-	│      risk profile: moderate
-	│      time horizon: 6-18 months
-	│
-	├─► Load STM and conversation-scoped assumptions
-	│      current thread hypothesis: steel price bottoming
-	│
-	├─► Route classification
-	│      route: FUNDAMENTALS
-	│
-	├─► Retrieve evidence
-	│      company financials + relevant steel-price context
-	│
-	├─► Assemble prompt
-	│      base rules + skills + memory context + evidence + output contract
-	│
-	└─► Generate response
-			 structured reasoning with evidence-backed narrative
+```mermaid
+flowchart TD
+	Q["User: \"Danh gia HSG trung han\""] --> LTMNode["Resolve LTM summary\nrisk profile: moderate\ntime horizon: 6-18 months"]
+	LTMNode --> STMNode["Load STM and conversation-scoped assumptions\ncurrent thread hypothesis: steel price bottoming"]
+	STMNode --> RouteNode["Route classification\nroute: FUNDAMENTALS"]
+	RouteNode --> Evidence["Retrieve evidence\ncompany financials + relevant steel-price context"]
+	Evidence --> Assemble["Assemble prompt\nbase rules + skills + memory context + evidence + output contract"]
+	Assemble --> Response["Generate response\nstructured reasoning with evidence-backed narrative"]
 ```
 
 ## 4. Engineering Constraints and Extension Paths
@@ -523,15 +553,16 @@ class TradingViewTool(CachingTool):
 
 **Proposed**: Specialized agents with routing
 
-```text
-┌─────────────────────────────────────────────────────────────────┐
-│ Orchestrator Agent (Router)                                     │
-│                                                                 │
-│  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐ │
-│  │ Price Agent     │  │ Analysis Agent  │  │ Research Agent  │ │
-│  │ (fast queries)  │  │ (technical)     │  │ (deep analysis) │ │
-│  └─────────────────┘  └─────────────────┘  └─────────────────┘ │
-└─────────────────────────────────────────────────────────────────┘
+```mermaid
+flowchart TD
+	Orchestrator["Orchestrator Agent (Router)"]
+	Price["Price Agent\n(fast queries)"]
+	Analysis["Analysis Agent\n(technical)"]
+	Research["Research Agent\n(deep analysis)"]
+
+	Orchestrator --> Price
+	Orchestrator --> Analysis
+	Orchestrator --> Research
 ```
 
 #### Structured Output Mode
@@ -587,6 +618,29 @@ parser = JsonOutputParser(pydantic_object=StockPriceResponse)
 | Integration | Limited | Full agent → tool → data flow |
 | E2E | None | Playwright/Selenium for UI |
 | Performance | None | Locust load testing |
+
+#### Mirror — Unified Degraded-Operation Diagram
+
+This realization-oriented mirror corresponds to [ARCHITECTURE_DESIGN.md](./ARCHITECTURE_DESIGN.md) section 4.7.3.7.
+
+```mermaid
+flowchart TD
+	Start["Inbound request"] --> Prompt{"Prompt asset load succeeds?"}
+	Prompt -- "No" --> Baseline["Baseline prompt fallback"]
+	Prompt -- "Yes" --> Checkpoint{"Checkpoint available?"}
+	Checkpoint -- "No" --> Stateless["Stateless invocation path"]
+	Checkpoint -- "Yes" --> Cache{"Cache available?"}
+	Cache -- "No" --> Uncached["Uncached tool execution path"]
+	Cache -- "Yes" --> Normal["Cached execution path"]
+	Baseline --> Provider{"Primary provider succeeds?"}
+	Stateless --> Provider
+	Uncached --> Provider
+	Normal --> Provider
+	Provider -- "Yes" --> Success["Served response"]
+	Provider -- "No" --> Fallback{"Fallback provider succeeds?"}
+	Fallback -- "Yes" --> Degraded["Served degraded response"]
+	Fallback -- "No" --> ControlledError["Controlled terminal error"]
+```
 
 ### 4.4 Delivery Sequencing for Layered Runtime
 
@@ -712,6 +766,28 @@ stock_query_router.py
 		imports: semantic_router.encoders (OpenAIEncoder, HuggingFaceEncoder)
 ```
 
+#### 5.4.1 Mirror — Dependency and Ownership Diagram
+
+This realization-oriented mirror corresponds to [ARCHITECTURE_DESIGN.md](./ARCHITECTURE_DESIGN.md) section 4.2.3a.
+
+```mermaid
+flowchart TD
+	Entry["Transport Entry\nAPI + Socket.IO"]
+	Services["Service Ownership\nChatService + ConversationService"]
+	Agent["Reasoning Runtime\nStockAssistantAgent"]
+	Prompt["Prompt Policy Boundary\nLoader + Assembler + Guardrail"]
+	Exec["Execution Boundary\nRouter + ModelFactory + Tools"]
+	State["Persistence + Cache\nConversations + Checkpoints + Redis"]
+	External["External Providers\nLLM + Market Data"]
+
+	Entry --> Services --> Agent
+	Agent --> Prompt
+	Agent --> Exec
+	Services --> State
+	Agent --> State
+	Exec --> External
+```
+
 ## 6. Configuration and Reference Material
 
 ### 6.1 Configuration Reference
@@ -787,3 +863,4 @@ AgentResponse.fallback(content, provider, model, **kwargs)
 | 0.1 | 2026-04-16 | GitHub Copilot | Scaffolded from implementation-focused content formerly concentrated in `ARCHITECTURE_DESIGN.md` |
 | 0.2 | 2026-04-16 | GitHub Copilot | Route taxonomy aligned to canonical `StockQueryRoute` enum from `src/core/routes.py` |
 | 0.3 | 2026-05-06 | GitHub Copilot | Migrated realization-only material out of ADR-001: retrieval realization boundaries, prompt assembly order, fine-tuning realization, example reasoning flow, and layered runtime delivery sequencing |
+| 0.4 | 2026-05-12 | GitHub Copilot | Aligned prompt taxonomy references to ADR-canonical paths (`src/prompts/system|skills|experiments`) and removed hybrid path language |
