@@ -1,10 +1,10 @@
 # Phase 2: LangChain Agent Enhancement Roadmap
 
-> **Document Version**: 1.1  
+> **Document Version**: 1.2  
 > **Created**: January 15, 2026  
-> **Last Updated**: May 6, 2026  
+> **Last Updated**: May 12, 2026  
 > **Status**: Planning  
-> **Branch**: `enhance-agent-prompt-system`
+> **Branch**: `enhance-agent-prompt-system-followup`
 
 ## Executive Summary
 
@@ -107,51 +107,6 @@ self.checkpointer = MongoDBSaver(
 
 # In _build_agent_executor()
 self.agent_executor = create_react_agent(
-langchain:
-    memory:
-        enabled: true
-        checkpointer: mongodb  # or "memory" for testing
-        max_messages: 50
-        summarization_threshold: 30
-
-prompts:
-    directory: "src/prompts/agent_system"
-    selection_mode: "fixed"  # fixed | weighted | forced | shadow
-    default_locale: "vi"
-    agents:
-        react_analyst:
-            active_version: "v1"
-            variants:
-                - name: "baseline"
-                    version: "v1"
-                    file: "react_analyst/v1.md"
-                    weight: 1.0
-                    status: "active"
-    route_contexts:
-        enabled: true
-        directory: "react_analyst/routes"
-        supported_routes:
-            - PRICE_CHECK
-            - NEWS_ANALYSIS
-            - PORTFOLIO
-            - TECHNICAL_ANALYSIS
-            - FUNDAMENTALS
-            - IDEAS
-            - MARKET_WATCH
-            - GENERAL_CHAT
-    experiments:
-        enabled: false
-        active_id: ""
-        allow_live_weighted_selection: false
-
-langsmith:
-    prompt_tracking:
-        enabled: true
-        metadata_keys:
-            - prompt_version
-            - prompt_variant
-            - prompt_experiment_id
-            - prompt_selection_mode
     model=self.model,
     tools=self.tools,
     checkpointer=self.checkpointer  # Add checkpointer
@@ -197,7 +152,7 @@ def process_query(self, query: str, session_id: str) -> AgentResponse:
 
 #### Target State
 
-- Prompt assets stored under `src/prompts/agent_system/`
+- Prompt assets organized by ADR taxonomy under `src/prompts/system/`, `src/prompts/skills/`, and `src/prompts/experiments/`
 - Prompt variants identified by version, variant label, and agent role
 - Offline evaluation and guarded rollout integrated with LangSmith metadata
 - Prompt selection configurable through a dedicated `prompts.*` config surface
@@ -208,7 +163,7 @@ def process_query(self, query: str, session_id: str) -> AgentResponse:
 
 | Order | Backlog ID | Priority | Depends On | Roadmap Outcome |
 |---|---|---|---|---|
-| 1 | `PS-01` | P0 | None | Extract the current ReAct prompt into `src/prompts/agent_system/react_analyst/v1.md` and preserve it as the canonical baseline asset |
+| 1 | `PS-01` | P0 | None | Extract the current ReAct prompt into `src/prompts/system/react_analyst/v1.md` and preserve it as the canonical baseline asset |
 | 2 | `PS-02` | P0 | `PS-01` | Implement `PromptRegistry` / loader behavior with metadata parsing, caching, validation, and baseline fallback conventions |
 | 3 | `PS-03` | P0 | `PS-01`, `PS-02` | Add `prompts.*` config surface and fail-closed validation rules so only valid prompt assets can activate |
 | 4 | `PS-04` | P0 | `PS-02`, `PS-03` | Replace `REACT_SYSTEM_PROMPT` as the primary source of truth for `StockAssistantAgent` |
@@ -241,7 +196,7 @@ def process_query(self, query: str, session_id: str) -> AgentResponse:
 #### Near-Term Implementation Pattern
 
 ```python
-# src/prompts/agent_system/react_analyst/v1.md
+# src/prompts/system/react_analyst/v1.md
 ---
 name: react_analyst_v1
 version: 1.0.0
@@ -258,7 +213,7 @@ class StockAssistantAgent:
     def _load_system_prompt(self) -> str:
         selection = self._prompt_registry.resolve(
             agent_role="react_analyst",
-            version=self.config["prompts"]["agents"]["react_analyst"]["active_version"],
+            version=self.config["prompts"]["system"]["active_version"],
         )
         return selection.system_prompt
 ```
@@ -587,35 +542,7 @@ class StockSymbolTool(CachingTool):
                 continue
         raise AllSourcesFailedError("All data sources unavailable")
 ```
-               prompts:
-                  directory: "src/prompts/agent_system"
-                  selection_mode: "fixed"  # fixed | weighted | forced | shadow
-                  default_locale: "vi"
-                  agents:
-                     react_analyst:
-                        active_version: "v1"
-                        variants:
-                           - name: "baseline"
-                              version: "v1"
-                              file: "react_analyst/v1.md"
-                              weight: 1.0
-                              status: "active"
-                  route_contexts:
-                     enabled: true
-                     directory: "react_analyst/routes"
-                     supported_routes:
-                        - PRICE_CHECK
-                        - NEWS_ANALYSIS
-                        - PORTFOLIO
-                        - TECHNICAL_ANALYSIS
-                        - FUNDAMENTALS
-                        - IDEAS
-                        - MARKET_WATCH
-                        - GENERAL_CHAT
-                  experiments:
-                     enabled: false
-                     active_id: ""
-                     allow_live_weighted_selection: false
+
 #### Current State
 
 - `ReportingTool` exists at `src/core/tools/reporting.py` (273 lines)
@@ -918,21 +845,21 @@ langchain:
     specialist_model: gpt-3.5-turbo
 
 prompts:
-    directory: "src/prompts/agent_system"
+    directory: "src/prompts"
     selection_mode: "fixed"  # fixed | weighted | forced | shadow
     default_locale: "vi"
-    agents:
-        react_analyst:
-            active_version: "v1"
-            variants:
-                - name: "baseline"
-                    version: "v1"
-                    file: "react_analyst/v1.md"
-                    weight: 1.0
-                    status: "active"
+    system:
+        active_role: "react_analyst"
+        active_version: "v1"
+        variants:
+            - name: "baseline"
+              version: "v1"
+              file: "system/react_analyst/v1.md"
+              weight: 1.0
+              status: "active"
     route_contexts:
         enabled: true
-        directory: "react_analyst/routes"
+        directory: "skills/routes"
         supported_routes:
             - PRICE_CHECK
             - NEWS_ANALYSIS

@@ -85,6 +85,7 @@ This architecture description does not replace:
 | Memory | LangGraph `MongoDBSaver` checkpointer for conversation-scoped STM, with sessions as reusable parent business context |
 | Semantic Router | `semantic-router` library with OpenAI/HuggingFace encoders |
 | Response Types | Structured (`AgentResponse`) with immutable dataclasses |
+| Prompt System | Current runtime uses a hardcoded system prompt; target prompt architecture is planned (ADR-002 and ADR-003 are Proposed) and uses a three-layer compiler path with ADR taxonomy (`src/prompts/system|skills|experiments`) |
 
 ### 1.6 Document Authority Split
 
@@ -172,7 +173,7 @@ These viewpoints govern the corresponding views in section 4. Detailed code-orie
 
 ### 4.1 Context and Boundary View
 
-The agent domain sits between the API and service layer and the external data and model-provider ecosystem. It does not own the frontend UI, REST or Socket.IO transport surface, or repository-wide operational policy. It does own reasoning workflow, tool orchestration, route-aware behavior, provider fallback, and conversation-scoped STM binding.
+The agent domain sits between the API and service layer and the external data and model-provider ecosystem. It does not own the frontend UI, REST or Socket.IO transport surface, or repository-wide operational policy. It does own reasoning workflow, tool orchestration, route-aware behavior, prompt-system policy composition, provider fallback, and conversation-scoped STM binding.
 
 The primary context relationships are:
 
@@ -180,45 +181,52 @@ The primary context relationships are:
 - service-layer components govern ownership, archival checks, and metadata synchronization around conversations;
 - LangGraph checkpointer infrastructure stores conversation-scoped execution state;
 - tool implementations gather external or repository-backed data;
+- prompt-system components (`PromptAssetLoader`, `PromptAssembler`, `ResponseGuardrailMiddleware`) apply ADR-governed prompt taxonomy before model invocation;
 - prompt assets and prompt composition logic govern model behavior, not factual storage.
 
 This boundary is consistent with the repository methodology's rule that architecture descriptions should explain **what structures and interactions exist**, while implementation detail and contract detail remain in companion documents.
 
 #### 4.1.1 System Context
 
-The system context view clarifies the trust and integration boundary between client applications, internal services, external LLM providers, and external market data providers. This boundary is operationally important because security, compliance, and production-support responsibilities differ across these interfaces.
+The system context view clarifies the trust and integration boundary between client applications, internal services, internal prompt-system assets, external LLM providers, and external market data providers. This boundary is operationally important because security, compliance, and production-support responsibilities differ across these interfaces.
 
-```text
-┌────────────────────────────── External Clients ──────────────────────────────┐
-│                                                                              │
-│  Web Frontend / Browser Clients / Future API Consumers                       │
-│                                                                              │
-└─────────────────────────────────────┬────────────────────────────────────────┘
-                                      │ HTTPS / WebSocket
-                                      ▼
-┌─────────────────────────── Internal Service Boundary ────────────────────────┐
-│                                                                              │
-│  API Routes / Socket.IO Handlers                                             │
-│          │                                                                   │
-│          ▼                                                                   │
-│  ChatService / ConversationService                                           │
-│          │                                                                   │
-│          ▼                                                                   │
-│  StockAssistantAgent                                                         │
-│          │                                                                   │
-│          ├──────────────► Tool Layer ───────────────► Redis Cache            │
-│          │                                      └──► MongoDB Metadata / STM  │
-│          │                                                                   │
-│          └──────────────► Model Client Factory / Prompt Logic                │
-│                                                                              │
-└──────────────────────┬──────────────────────────────┬────────────────────────┘
-                       │                              │
-                       │ External model calls         │ External market-data calls
-                       ▼                              ▼
-             ┌────────────────────┐        ┌─────────────────────────┐
-             │ LLM Providers      │        │ Market Data Providers   │
-             │ OpenAI / Grok      │        │ Yahoo Finance / others  │
-             └────────────────────┘        └─────────────────────────┘
+```mermaid
+flowchart TD
+  subgraph ExternalClients["External Clients"]
+    Client["Web Frontend / Browser Clients / Future API Consumers"]
+  end
+
+  subgraph InternalBoundary["Internal Service Boundary"]
+    Entry["API Routes / Socket.IO Handlers"]
+    Service["ChatService / ConversationService"]
+    Agent["StockAssistantAgent"]
+    ToolLayer["Tool Layer"]
+    Redis["Redis Cache"]
+    Mongo["MongoDB Metadata / STM"]
+    PromptSystem["Prompt System"]
+    PromptAssetLoader["PromptAssetLoader"]
+    PromptAssembler["PromptAssembler"]
+    ResponseGuardrailMiddleware["ResponseGuardrailMiddleware"]
+    PromptAssets["src/prompts/{system,skills,experiments}"]
+    ModelFactory["Model Client Factory"]
+  end
+
+  LLM["LLM Providers\nOpenAI / Grok"]
+  Market["Market Data Providers\nYahoo Finance / others"]
+
+  Client -->|"HTTPS / WebSocket"| Entry
+  Entry --> Service --> Agent
+  Agent --> ToolLayer
+  ToolLayer --> Redis
+  ToolLayer --> Mongo
+  Agent --> PromptSystem
+  PromptSystem --> PromptAssetLoader
+  PromptSystem --> PromptAssembler
+  PromptSystem --> ResponseGuardrailMiddleware
+  ResponseGuardrailMiddleware --> PromptAssets
+  Agent --> ModelFactory
+  ModelFactory -->|"External model calls"| LLM
+  ToolLayer -->|"External market-data calls"| Market
 ```
 
 ```text
@@ -226,27 +234,64 @@ Boundary classification
 -----------------------
 Client apps            : Outside internal trust boundary
 Internal services      : Inside application control boundary
+Prompt system assets   : Internal behavioral policy boundary (ADR-governed taxonomy)
 LLM providers          : External AI processing boundary
 Market data providers  : External evidence and pricing boundary
 MongoDB / Redis        : Internal persistence and cache boundary
 ```
 
-The architecture intentionally routes all external interactions through internal service and agent seams rather than allowing client applications to call providers directly. This preserves a single enforcement point for authentication, authorization, archive safety, observability, prompt policy, and provider fallback.
+The architecture intentionally routes all external interactions through internal service and agent seams rather than allowing client applications to call providers directly. This preserves a single enforcement point for authentication, authorization, archive safety, observability, prompt policy, and provider fallback. Prompt behavior is mediated internally through ADR taxonomy assets and guardrail middleware before provider calls.
 
 | Boundary | Primary Responsibility | Security / Compliance / Operations Significance |
 |----------|------------------------|-------------------------------------------------|
 | Client apps -> Internal services | Transport, authentication, request validation, streaming control | Protects internal capabilities from direct exposure and centralizes auditability |
+| Internal services -> Prompt system assets | Prompt policy composition and behavioral guardrail enforcement | Keeps behavioral policy versioned, auditable, and governed within the internal control boundary |
 | Internal services -> LLM providers | Prompted reasoning and generated responses | External AI providers must be treated as non-authoritative processors; prompts and outputs require policy and logging controls |
 | Internal services -> Market data providers | Evidence and pricing retrieval through tools | Keeps factual market-data sourcing explicit and separable from model reasoning |
 | Internal services -> MongoDB / Redis | Metadata, STM persistence, and cache management | Preserves operational recovery, drift detection, and lifecycle governance inside the system boundary |
 
-From a compliance and operational perspective, this context establishes three hard boundaries:
+From a compliance and operational perspective, this context establishes four hard boundaries:
 
 1. Client applications are consumers of the system, not participants in internal orchestration.
-2. LLM providers are external reasoning services and do not become the source of truth for market facts or conversation ownership.
-3. Market data providers are external evidence sources and are accessed only through controlled internal tool paths.
+2. Prompt behavior is composed from internal ADR-governed assets (`src/prompts/system|skills|experiments`) before model invocation.
+3. LLM providers are external reasoning services and do not become the source of truth for market facts or conversation ownership.
+4. Market data providers are external evidence sources and are accessed only through controlled internal tool paths.
 
 This system context complements the deployment and operations views by showing who is inside the controlled system boundary and which dependencies remain external.
+
+#### 4.1.1a External and Internal Interface Diagram (Architecture-Level)
+
+The following diagram keeps an architecture-level view of system components and primary interfaces across the trust boundary.
+
+```mermaid
+flowchart LR
+  subgraph External["External Actors and Providers"]
+    Client["Client Apps\n(Web, Browser, API Consumers)"]
+    LLM["LLM Providers\n(OpenAI, Grok)"]
+    Market["Market Data Providers\n(Yahoo Finance, Others)"]
+  end
+
+  subgraph Internal["Internal Service Boundary"]
+    Entry["API Routes / Socket.IO Handlers"]
+    Svc["ChatService / ConversationService"]
+    Agent["StockAssistantAgent"]
+    Prompt["Prompt System\nPromptAssetLoader + PromptAssembler + ResponseGuardrailMiddleware"]
+    Tools["Tool Layer"]
+    Factory["Model Client Factory"]
+    State["State and Cache\nMongoDB + Redis"]
+  end
+
+  Client -->|"HTTPS / WebSocket interface"| Entry
+  Entry -->|"validated request interface"| Svc
+  Svc -->|"conversation lifecycle interface"| Agent
+  Agent -->|"prompt policy interface"| Prompt
+  Agent -->|"tool invocation interface"| Tools
+  Agent -->|"model selection interface"| Factory
+  Agent -->|"checkpoint and metadata interface"| State
+  Tools -->|"cache interface"| State
+  Factory -->|"model inference interface"| LLM
+  Tools -->|"market evidence interface"| Market
+```
 
 ### 4.2 Logical View
 
@@ -261,7 +306,7 @@ This system context complements the deployment and operations views by showing w
 | `tools/` | Tool registration, caching, and domain data access |
 | `conversation_repository.py` | Conversation metadata persistence |
 | `chat_service.py` and `conversation_service.py` | Orchestration, archive guards, lifecycle and metadata helpers |
-| `src/prompts/` | Planned prompt asset directory for system prompts, skills, and experiments |
+| `src/prompts/` | Current runtime prompt templates and text assets; planned externalized prompt asset model remains Proposed under ADR-002 and ADR-003 |
 
 These building blocks are separated so that reasoning orchestration, state management, metadata ownership, and provider integration can evolve independently. The agent runtime owns reasoning and tool orchestration, service-layer components own business lifecycle enforcement, repositories own metadata persistence, and prompt assets govern behavior rather than domain data.
 
@@ -274,9 +319,38 @@ These building blocks are separated so that reasoning orchestration, state manag
 | Provider and model selection | `ModelClientFactory` and provider clients | Isolates provider-specific concerns from routes and services |
 | Conversation lifecycle and archive rules | `ChatService`, `ConversationService` | Owns business guards and metadata synchronization outside the agent core |
 | Conversation metadata persistence | `ConversationRepository` | Persists application metadata, separate from LangGraph checkpoint state |
-| Prompt behavior and guardrails | Runtime prompt logic and planned `src/prompts/` assets | Controls behavioral policy, not business state or financial facts |
+| Prompt behavior and guardrails | Current runtime prompt sources plus planned prompt compiler boundary (`PromptAssetLoader -> PromptAssembler -> ResponseGuardrailMiddleware`) | Controls behavioral policy, not business state or financial facts |
 
 This logical separation is the primary extensibility mechanism for the domain. New providers, tools, prompt assets, or conversation-management behaviors should be added by extending the relevant building block rather than by collapsing responsibilities into the agent runtime.
+
+#### 4.2.2a Logical Component Interface View
+
+This view focuses on logical component categories and interface seams, without introducing implementation-level method detail.
+
+```mermaid
+flowchart LR
+  subgraph App["Application Control Boundary"]
+    Routes["Transport Edge\n(API + Socket.IO)"]
+    Orch["Service Orchestration\nChatService + ConversationService"]
+    Runtime["Reasoning Runtime\nStockAssistantAgent"]
+    PromptComp["Prompt Composition Boundary\nLoader + Assembler + Guardrail"]
+    Router["Intent Routing\nstock_query_router"]
+    ModelSel["Provider Selection\nModelClientFactory"]
+    ToolReg["Tooling Boundary\nToolRegistry + Tools"]
+    Repo["Metadata Persistence\nConversationRepository"]
+    Mem["Checkpoint and Cache\nMongoDBSaver + Redis"]
+  end
+
+  Routes -->|"request/stream interface"| Orch
+  Orch -->|"conversation interface"| Runtime
+  Runtime -->|"route classification interface"| Router
+  Runtime -->|"prompt assembly interface"| PromptComp
+  Runtime -->|"model client interface"| ModelSel
+  Runtime -->|"tool execution interface"| ToolReg
+  Orch -->|"metadata CRUD interface"| Repo
+  Runtime -->|"thread state interface"| Mem
+  ToolReg -->|"cache interface"| Mem
+```
 
 #### 4.2.3 Layered Architecture Boundaries
 
@@ -293,6 +367,29 @@ The agent domain uses a layered architecture so personalization, conversation st
 | Fine-Tuning | Enforce reasoning structure and tone for selected workflows | Behavior-shaping layer only; does not function as a knowledge store |
 
 This boundary model is the core rationale for ADR-001: it reduces hallucination pressure, keeps market facts external to memory and prompt state, and allows retrieval, prompting, and execution behavior to evolve independently.
+
+#### 4.2.3a Dependency and Ownership Diagram
+
+This diagram emphasizes dependency direction and ownership boundaries at architecture abstraction level.
+
+```mermaid
+flowchart TD
+  L1["Layer 1: Client and Transport\nClients -> API/Socket Entry"]
+  L2["Layer 2: Service Ownership\nChatService + ConversationService"]
+  L3["Layer 3: Agent Runtime\nStockAssistantAgent"]
+  L4A["Layer 4A: Prompt Policy\nPromptAssetLoader + PromptAssembler + ResponseGuardrailMiddleware"]
+  L4B["Layer 4B: Routing and Execution\nRouter + Model Factory + Tool Layer"]
+  L5["Layer 5: Persistence and Cache\nConversations + Checkpoints + Redis"]
+  EXT["External Providers\nLLM + Market Data"]
+
+  L1 --> L2
+  L2 --> L3
+  L3 --> L4A
+  L3 --> L4B
+  L2 --> L5
+  L3 --> L5
+  L4B --> EXT
+```
 
 #### 4.2.4 Structural Patterns and Stack Summary
 
@@ -313,27 +410,24 @@ The process view describes the runtime interactions that turn a user request int
 
 #### 4.3.1 Primary Query Processing Flow
 
-```text
-User Query
-    │
-    ▼
-┌──────────────────────────────────────────────────────────────────┐
-│ StockAssistantAgent                                             │
-│                                                                  │
-│  ┌─────────────┐    ┌──────────────────┐    ┌─────────────────┐ │
-│  │ ReAct Agent ├───►│ Tool Selection   ├───►│ Tool Execution  │ │
-│  │ (LangChain) │    │ (LLM Decision)   │    │ (CachingTool)   │ │
-│  └─────────────┘    └──────────────────┘    └─────────────────┘ │
-│         │                                          │             │
-│         ▼                                          ▼             │
-│  ┌─────────────┐                          ┌─────────────────┐   │
-│  │ LLM Response│◄────────────────────────│ Tool Output     │   │
-│  │ Generation  │                         │ (Cached/Fresh)  │   │
-│  └─────────────┘                          └─────────────────┘   │
-└──────────────────────────────────────────────────────────────────┘
-    │
-    ▼
-AgentResponse (content, provider, model, tool_calls, token_usage)
+```mermaid
+flowchart TD
+  Query["User Query"] --> ReAct
+
+  subgraph StockAssistantAgent["StockAssistantAgent"]
+    ReAct["ReAct Agent\n(LangChain)"]
+    ToolSelection["Tool Selection\n(LLM Decision)"]
+    ToolExecution["Tool Execution\n(CachingTool)"]
+    ToolOutput["Tool Output\n(Cached/Fresh)"]
+    LLMResponse["LLM Response\nGeneration"]
+
+    ReAct --> ToolSelection --> ToolExecution
+    ReAct --> LLMResponse
+    ToolExecution --> ToolOutput
+    ToolOutput --> LLMResponse
+  end
+
+  LLMResponse --> Response["AgentResponse\n(content, provider, model, tool_calls, token_usage)"]
 ```
 
 Service-layer orchestration remains on the outer edge of this process. Archive safety, ownership validation, and metadata synchronization are intentionally handled outside the core reasoning loop so the process path can stay focused on classification, tool use, and generation.
@@ -357,37 +451,28 @@ The runtime uses `semantic-router` with OpenAI embeddings and HuggingFace fallba
 
 The provider and model path is mediated by `ModelClientFactory`, which caches provider-model client instances. Runtime fallback behavior preserves a graceful-degradation path if the primary provider fails or if the ReAct executor is unavailable.
 
-```text
-ModelClientFactory.get_client(config)
-    │
-    ├─► Check _CACHE for "provider:model_name" key
-    │       │
-    │       ├─► Found: Return cached client
-    │       │
-    │       └─► Not found: Create new client
-    │               │
-    │               ├─► provider="openai" → OpenAIModelClient
-    │               ├─► provider="grok"   → GrokModelClient
-    │               └─► other             → ValueError
-    │
-    └─► Return BaseModelClient instance
+```mermaid
+flowchart TD
+  Start["ModelClientFactory.get_client(config)"] --> Cache{"Check _CACHE for provider:model_name key"}
+  Cache -->|"Found"| Cached["Return cached client"]
+  Cache -->|"Not found"| Create["Create new client"]
+  Create --> OpenAI["provider=openai -> OpenAIModelClient"]
+  Create --> Grok["provider=grok -> GrokModelClient"]
+  Create --> Other["other -> ValueError"]
+  Cached --> Return["Return BaseModelClient instance"]
+  OpenAI --> Return
+  Grok --> Return
 ```
 
-```text
-_generate_with_fallback(client, prompt, query)
-    │
-    ├─► Build sequence: [primary_provider] + fallback_order
-    │       Example: ["openai", "grok"]
-    │
-    ├─► For each provider in sequence:
-    │       │
-    │       ├─► Try generate/generate_with_search
-    │       │       │
-    │       │       ├─► Success: Return result (with fallback prefix if not primary)
-    │       │       │
-    │       │       └─► Exception: Log warning, continue to next
-    │       │
-    └─► All failed: Return "All providers failed. Last error: {e}"
+```mermaid
+flowchart TD
+  Start["_generate_with_fallback(client, prompt, query)"] --> Sequence["Build sequence: [primary_provider] + fallback_order\nExample: [openai, grok]"]
+  Sequence --> Loop["For each provider in sequence"]
+  Loop --> Try["Try generate/generate_with_search"]
+  Try -->|"Success"| Success["Return result (with fallback prefix if not primary)"]
+  Try -->|"Exception"| Continue["Log warning, continue to next"]
+  Continue --> Loop
+  Loop --> Failed["All failed: Return All providers failed. Last error: {e}"]
 ```
 
 These process flows express the domain's latency and fault-tolerance posture: semantic routing limits unnecessary tool exploration, provider fallback preserves degraded operation, and service-layer lifecycle checks keep archived or invalid conversation states out of the reasoning path.
@@ -426,16 +511,16 @@ The runtime contract is now `conversation_id` across agent methods, REST chat, m
 
 The information boundary is deliberate: LangGraph checkpoints retain agent execution state for a conversation, while the `conversations` collection and service layer retain application metadata and lifecycle control. This keeps behavioral state and business metadata aligned without making the checkpointer the source of truth for application ownership or archival rules.
 
-```text
-APIServer.__init__()
-    │
-    ├─► create_checkpointer(config)  → MongoDBSaver | None
-    │
-    └─► StockAssistantAgent(config, data_manager, checkpointer=checkpointer)
-            │
-            └─► create_agent(..., checkpointer=checkpointer)
-                    │
-                └─► invoke(messages, config={"configurable": {"thread_id": conversation_id}})
+```mermaid
+flowchart TD
+  API["APIServer.__init__()"]
+  CreateCheckpointer["create_checkpointer(config) -> MongoDBSaver | None"]
+  AgentInit["StockAssistantAgent(config, data_manager, checkpointer=checkpointer)"]
+  CreateAgent["create_agent(..., checkpointer=checkpointer)"]
+  Invoke["invoke(messages, config={configurable: {thread_id: conversation_id}})"]
+
+  API --> CreateCheckpointer
+  API --> AgentInit --> CreateAgent --> Invoke
 ```
 
 The full memory data model, API impact, reconciliation behavior, and sequence diagrams are preserved in [AGENT_MEMORY_TECHNICAL_DESIGN.md](./AGENT_MEMORY_TECHNICAL_DESIGN.md).
@@ -477,10 +562,20 @@ src/services/
 └── conversation_service.py     # ConversationService (lifecycle, management APIs, metadata helpers)
 
 src/prompts/
-├── system/
-├── skills/
-└── experiments/
+├── analysis_prompt.j2
+├── generic_query.j2
+├── system_stock_assistant-vn.txt
+└── system_stock_assistant.txt
 ```
+
+#### 4.5.1.1 Prompt Asset Layout: Current vs Target
+
+| View | Prompt Asset Model | Status |
+|------|--------------------|--------|
+| Current runtime layout | Template/text assets under `src/prompts/` | Implemented |
+| ADR taxonomy target (canonical) | `src/prompts/system/`, `src/prompts/skills/`, `src/prompts/experiments/` | Proposed |
+
+The architecture package treats ADR taxonomy as canonical for prompt assets. Planning-artifact path aliases are non-authoritative and must map back to the ADR taxonomy.
 
 #### 4.5.2 Maintainability and Extension Boundaries
 
@@ -582,6 +677,8 @@ The following quality scenarios summarize the failure, degradation, recovery, an
 | Unmatched or ambiguous intent | A user query does not match a stronger domain route with sufficient confidence | Route to `GENERAL_CHAT` so the request remains serviceable rather than producing a routing failure |
 | Guardrail violation candidate detected | Generated output appears to contain hype, manipulation, or missing uncertainty or attribution signals | Keep guardrail enforcement in the prompt and response-policy layer and emit violation metadata for traceability |
 | Prompt asset parse or validation failure | A versioned prompt asset cannot be loaded or validated in the planned externalized prompt system | Load `_baseline.yaml` as the last-known-good prompt asset instead of blocking response generation entirely |
+| Route-context skill asset unavailable | A route resolves successfully but one or more route-bound skills cannot be resolved | Continue with base prompt plus always-active skills, emit prompt fallback metadata, and avoid hard request failure |
+| Guardrail middleware internal failure | Guardrail evaluation fails due to internal middleware error or unavailable policy dependency | Preserve service continuity through a safe conservative response path and emit machine-detectable guardrail pipeline failure metadata |
 
 ##### 4.7.3.5 Planned Retrieval and Asset-Dependency Scenarios
 
@@ -600,6 +697,40 @@ The following scenarios are architecture-relevant but remain future-state becaus
 | Multi-tool analytical query under normal operating load | A request requires multiple tool calls or a longer reasoning path | Preserve service availability while accepting a slower bounded path than lightweight requests |
 | Sustained concurrent conversational load | Multiple active conversations and requests are processed concurrently | Preserve availability through independent service boundaries, cache support, and separation of API, agent, and persistence concerns |
 | Partial observability degradation | Logging, metrics, or tracing coverage is reduced while the runtime remains healthy | Continue serving requests while keeping health and drift surfaces available so operators can detect reduced observability without mistaking it for full outage |
+
+##### 4.7.3.7 Unified Degraded-Operation Decision Diagram
+
+This diagram consolidates architecture-level degraded-operation paths and fallback interfaces across routing, prompt loading, memory, cache, and provider boundaries.
+
+```mermaid
+flowchart TD
+  Start["Request enters internal boundary"]
+  Route["Route classification"]
+  PromptLoad{"Prompt asset available?"}
+  Checkpoint{"Checkpoint available?"}
+  Cache{"Cache available?"}
+  Invoke{"Primary provider successful?"}
+  Fallback{"Fallback provider available?"}
+  Full["Full-path response"]
+  Degraded["Degraded response\n(stateless/uncached/fallback metadata)"]
+  ControlledError["Controlled terminal error"]
+  Served["Response surface"]
+
+  Start --> Route --> PromptLoad
+  PromptLoad -- "No" --> Degraded
+  PromptLoad -- "Yes" --> Checkpoint
+  Checkpoint -- "No" --> Invoke
+  Checkpoint -- "Yes" --> Cache
+  Cache -- "No" --> Invoke
+  Cache -- "Yes" --> Invoke
+  Invoke -- "Yes" --> Full
+  Invoke -- "No" --> Fallback
+  Fallback -- "Yes" --> Degraded
+  Fallback -- "No" --> ControlledError
+  Full --> Served
+  Degraded --> Served
+  ControlledError --> Served
+```
 
 This view is architecture-level only. Runbook steps, CLI usage, monitoring dashboards, and operational procedures remain outside this document and belong in [TECHNICAL_DESIGN.md](./TECHNICAL_DESIGN.md) only where realization detail is needed, or in operational documentation such as [IaC/README.md](../../../IaC/README.md).
 
@@ -626,62 +757,54 @@ When answering questions:
 > **Research Authority:** [PROMPT_SYSTEM_RESEARCH_PROPOSAL.md](./PROMPT_SYSTEM_RESEARCH_PROPOSAL.md)
 > **Governing ADRs:** [ADR-AGENT-002-SKILLS-PATTERN-PROMPT-COMPOSITION.md](./decisions/ADR-AGENT-002-SKILLS-PATTERN-PROMPT-COMPOSITION.md), [ADR-AGENT-003-EXTERNALIZE-VERSION-PROMPT-ASSETS.md](./decisions/ADR-AGENT-003-EXTERNALIZE-VERSION-PROMPT-ASSETS.md)
 
-```text
-Layer 1: PromptAssetLoader
-  │  Discovers and loads versioned YAML prompt files from src/prompts/
-  │  Validates schema, extracts version metadata, implements fallback
-  │
-  ▼
-Layer 2: PromptAssembler
-  │  Composes base system prompt + active skills + LTM/STM context
-  │  Selects skills by route classification and activation criteria
-  │  Injects prompt version tag into metadata
-  │
-  ▼
-Layer 3: ResponseGuardrailMiddleware
-  │  Post-processes agent output to enforce behavioral guardrails
-  │  Checks: anti-hype blocklist, source attribution, uncertainty disclosure
-  │  Emits guardrail violations as structured trace events
+| Concept | Architecture Term | Notes |
+|---------|-------------------|-------|
+| Prompt compiler (ADR-001) | `PromptAssetLoader -> PromptAssembler -> ResponseGuardrailMiddleware` | The compiler concept is realized as an explicit three-layer architecture in planned state |
+| Loader facade naming in implementation discussions | `PromptRegistry` (or equivalent) | Implementation naming may vary; architecture vocabulary stays on loader/assembler/middleware boundaries |
+| Asset taxonomy mapping | ADR taxonomy (`src/prompts/system|skills|experiments`) | Canonical architecture taxonomy for prompt assets |
+
+```mermaid
+flowchart TD
+  L1["Layer 1: PromptAssetLoader\nDiscovers and loads versioned prompt assets from ADR taxonomy paths\nValidates schema, extracts version metadata, implements fallback"]
+  L2["Layer 2: PromptAssembler\nComposes base system prompt + active skills + LTM/STM context\nSelects skills by route classification and activation criteria\nInjects prompt version tag into metadata"]
+  L3["Layer 3: ResponseGuardrailMiddleware\nPost-processes agent output to enforce behavioral guardrails\nChecks: anti-hype blocklist, source attribution, uncertainty disclosure\nEmits guardrail violations as structured trace events"]
+
+  L1 --> L2 --> L3
 ```
 
 | Component | Responsibility | Governing ADR |
 |-----------|----------------|---------------|
-| **PromptAssetLoader** | Load versioned prompt assets from `src/prompts/`; validate YAML schema; extract version identity; fall back to `_baseline.yaml` on failure | ADR-003 |
+| **PromptAssetLoader** | Load versioned prompt assets from ADR taxonomy paths; validate metadata; extract version identity; fall back to baseline asset on failure | ADR-003 |
 | **PromptAssembler** | Compose final prompt from base + skills + context; apply route-specific skill selection; inject prompt version into metadata; support experiment variant assignment | ADR-002 |
 | **ResponseGuardrailMiddleware** | Scan agent output for hype or manipulation language; verify source attribution and uncertainty disclosure; log violations | ADR-001 hard rules on behavior and evidence boundaries |
 
 #### 4.8.3 Prompt Taxonomy and Skills Composition
 
-| Type | Directory | Lifecycle | Example |
-|------|-----------|-----------|---------|
-| **System prompts** | `src/prompts/system/` | Versioned, one active at a time | `v1.0.0.yaml` — core persona and instructions |
-| **Skills** | `src/prompts/skills/` | Composable, multiple active per request | `disclaimer.yaml`, `anti-hype.yaml` |
-| **Experiments** | `src/prompts/experiments/` | Temporary variants for A/B testing | `exp-001-concise.yaml` |
+| Type | ADR Taxonomy Path | Lifecycle | Example |
+|------|-------------------|-----------|---------|
+| **System prompts** | `src/prompts/system/` | Versioned, one active at a time | `v1.0.0.yaml` |
+| **Skills** | `src/prompts/skills/` | Composable, multiple active per request | `disclaimer.yaml`, `anti-hype.yaml`, `earnings-analysis.yaml` |
+| **Experiments** | `src/prompts/experiments/` | Temporary variants for controlled rollout | `exp-001-concise.yaml` |
 | **Baseline** | `src/prompts/system/_baseline.yaml` | Permanent fallback, never deleted | Last-known-good system prompt |
 
-```text
-Query arrives
-   │
-   ▼
-Semantic Router classifies route (e.g., FUNDAMENTALS)
-   │
-   ▼
-PromptAssetLoader loads:
-   ├─ Base system prompt (version-tagged)
-   ├─ Always-active skills (disclaimer, anti-hype)
-   └─ Route-matched skills (earnings-analysis, if FUNDAMENTALS)
-   │
-   ▼
-PromptAssembler composes final prompt:
-   [Base] + [Always-Active Skills] + [Route Skills] + [LTM/STM] + [RAG] + [Output Schema]
-   │
-   ▼
-Agent invocation with assembled prompt
-   (prompt_version + experiment_id recorded in trace span)
-   │
-   ▼
-ResponseGuardrailMiddleware post-processes output
-   (blocklist scan, attribution check, uncertainty check)
+Prompt composition precedence in planned state:
+
+1. Base system rules and persona
+2. Always-active skills and behavioral guardrails
+3. Route-matched skills
+4. LTM summary (when available)
+5. STM and conversation-scoped assumptions
+6. Retrieved evidence and tool-derived facts
+7. Task-specific instruction
+8. Output schema or formatting contract
+
+```mermaid
+flowchart TD
+  Q["Query arrives"] --> R["Semantic Router classifies route (e.g., FUNDAMENTALS)"]
+  R --> L["PromptAssetLoader loads:\n- Base system prompt (version-tagged)\n- Always-active skills (disclaimer, anti-hype)\n- Route-matched skills (earnings-analysis, if FUNDAMENTALS)"]
+  L --> A["PromptAssembler composes final prompt:\n[Base] + [Always-Active Skills] + [Route Skills] + [LTM/STM] + [RAG] + [Output Schema]"]
+  A --> I["Agent invocation with assembled prompt\n(prompt_version + experiment_id recorded in trace span)"]
+  I --> G["ResponseGuardrailMiddleware post-processes output\n(blocklist scan, attribution check, uncertainty check)"]
 ```
 
 #### 4.8.4 Prompt Observability View
@@ -691,7 +814,9 @@ ResponseGuardrailMiddleware post-processes output
 | `prompt.version` | PromptAssetLoader | `v1.2.0` |
 | `prompt.route` | Semantic Router | `FUNDAMENTALS` |
 | `prompt.experiment_id` | PromptAssembler | `exp-001` (or `null`) |
+| `prompt.selection_mode` | PromptAssembler / config | `fixed`, `forced`, `shadow`, `weighted` |
 | `prompt.skills_active` | PromptAssembler | `['disclaimer', 'anti-hype', 'earnings-analysis']` |
+| `prompt.fallback_reason` | PromptAssetLoader | `asset_parse_failed`, `route_skill_missing` |
 | `guardrail.violations` | ResponseGuardrailMiddleware | `[]` or `['hype_language_detected']` |
 
 ---
@@ -726,6 +851,7 @@ ResponseGuardrailMiddleware post-processes output
 | Original Concept (ADR-001 Prompt Compiler decision) | Evolved Realization (ADR-002, ADR-003) | Note |
 |-------------------------------|----------------------------------------|------|
 | Prompt Compiler | PromptAssetLoader → PromptAssembler → ResponseGuardrailMiddleware | The single-step compiler concept was elaborated into a three-layer architecture. See the ADR-001 Prompt Compiler decision and `TECHNICAL_DESIGN.md` for realization detail. |
+| Prompt asset taxonomy | ADR taxonomy (`src/prompts/system|skills|experiments`) | ADR taxonomy is canonical for architecture and decision authority. |
 | Intent-based routing | `StockQueryRoute` enum with 8 canonical routes | Originally described with 7 working-name intents; refined to 8 routes during implementation. |
 
 ### 5.4 Content Preservation Correspondence
@@ -756,6 +882,7 @@ Reviewer checklist:
 - [ ] Accepted ADR boundaries are not contradicted by companion design documents.
 - [ ] Proposed or future-state capabilities remain labeled as planned where runtime implementation is incomplete.
 - [ ] Concept evolution terms such as `Prompt Compiler`, `PromptAssembler`, and `PromptAssetLoader` are used consistently with section 5.3.
+- [ ] ADR taxonomy references are stated consistently where prompt asset directories are referenced.
 
 ---
 
@@ -821,11 +948,11 @@ This section retains the major evolution themes from the previous architecture d
 
 | Area | Current State | Planned Direction |
 |------|---------------|------------------|
-| Prompt storage | Hardcoded runtime prompt plus planned files | Versioned file assets in `src/prompts/` |
-| Composition | Single monolithic runtime prompt | Skills-based composable fragments |
-| Versioning | Implicit in code changes | Embedded prompt identity and trace metadata |
-| Guardrails | Inline instructions | Middleware-enforced response guardrails |
-| Experimentation | Not supported in runtime | Controlled prompt variants and experiment metadata |
+| Prompt storage | Hardcoded runtime prompt plus current template/text assets under `src/prompts/` | ADR taxonomy target: `src/prompts/system|skills|experiments` |
+| Composition | Single monolithic runtime prompt | Planned prompt compiler layering (`PromptAssetLoader -> PromptAssembler -> ResponseGuardrailMiddleware`) aligned to PS-01..PS-08 milestone path |
+| Versioning | Implicit in code changes | Embedded prompt identity and trace metadata with baseline fallback policy |
+| Guardrails | Inline instructions | Middleware-enforced response guardrails with failure metadata and conservative fallback behavior |
+| Experimentation | Not supported in runtime | Controlled prompt variants and rollout modes (`fixed`, `forced`, `shadow`, optional `weighted`) aligned to M3/M4 gates |
 
 ### 7.4 Quality and Operations Evolution
 
@@ -849,3 +976,4 @@ The detailed extension catalog, example snippets, configuration candidates, and 
 | 0.3 | 2026-05-05 | GitHub Copilot | Added a System Context subsection to the Context and Boundary View to make client, internal-service, LLM-provider, and market-data-provider boundaries explicit for security, compliance, and operations concerns |
 | 0.4 | 2026-05-05 | GitHub Copilot | Added architecture-level quality attribute scenarios covering current failure, degradation, lifecycle, prompt, and planned retrieval cases under the Operations and Maintenance View |
 | 0.5 | 2026-05-06 | GitHub Copilot | Migrated layered-boundary and state-versus-evidence allocation content out of ADR-001 into architecture views and replaced stale section-number references with concept-based citations |
+| 0.6 | 2026-05-12 | GitHub Copilot | Added target-state prompt architecture refinements: explicit planned-status framing, ADR taxonomy alignment, expanded prompt failure scenarios, observability attributes, and correspondence-rule updates aligned to proposal/roadmap synchronization |
