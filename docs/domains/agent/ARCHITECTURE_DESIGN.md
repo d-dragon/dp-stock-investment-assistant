@@ -157,7 +157,7 @@ In this document, section 3 defines the viewpoints. Section 4 then provides one 
 | Viewpoint | Stakeholders | Concerns Framed | Conventions / Model Kinds |
 |-----------|--------------|-----------------|----------------------------|
 | Context and Boundary Viewpoint | Architecture Owners, Backend Engineers, Product, Security & Compliance | Domain scope, environment, external dependencies, system boundary, ownership boundaries | Narrative boundary statements, system context diagrams, context summaries, dependency tables |
-| Logical Viewpoint | AI Engineers / Agent Maintainers, Backend Engineers, Architecture Owners | Modularity, separation of concerns, responsibility allocation, extensibility seams, dependency direction | Component and responsibility tables, logical decomposition summaries, relationship narratives |
+| Logical Viewpoint | AI Engineers / Agent Maintainers, Backend Engineers, Architecture Owners | Modularity, separation of concerns, responsibility allocation, integration boundaries, dependency direction | Component and responsibility tables, logical decomposition summaries, relationship narratives |
 | Process Viewpoint | AI Engineers / Agent Maintainers, Backend Engineers, DevOps / SRE | Runtime flow, route handling, tool orchestration, latency-sensitive paths, provider fallback, fault tolerance | Interaction flows, sequence-style diagrams, runtime decision summaries |
 | Information and State Viewpoint | Architecture Owners, Backend Engineers, Security & Compliance | STM scope, state ownership, lifecycle, metadata boundaries, hierarchy, memory constraints | State and lifecycle tables, hierarchy summaries, state ownership narratives |
 | Development Viewpoint | AI Engineers / Agent Maintainers, Backend Engineers, QA / Test Maintainers | Code organization, module ownership, maintainability, build-facing structure, extension points | Source-layout views, module-boundary summaries, ownership and dependency tables |
@@ -240,7 +240,7 @@ Market data providers  : External evidence and pricing boundary
 MongoDB / Redis        : Internal persistence and cache boundary
 ```
 
-The architecture intentionally routes all external interactions through internal service and agent seams rather than allowing client applications to call providers directly. This preserves a single enforcement point for authentication, authorization, archive safety, observability, prompt policy, and provider fallback. Prompt behavior is mediated internally through ADR taxonomy assets and guardrail middleware before provider calls.
+The architecture intentionally routes all external interactions through internal service and agent boundaries rather than allowing client applications to call providers directly. This preserves a single enforcement point for authentication, authorization, archive safety, observability, prompt policy, and provider fallback. Prompt behavior is mediated internally through ADR taxonomy assets and guardrail middleware before provider calls.
 
 | Boundary | Primary Responsibility | Security / Compliance / Operations Significance |
 |----------|------------------------|-------------------------------------------------|
@@ -261,7 +261,7 @@ This system context complements the deployment and operations views by showing w
 
 #### 4.1.1a External and Internal Interface Diagram (Architecture-Level)
 
-The following diagram keeps an architecture-level view of system components and primary interfaces across the trust boundary.
+The following diagram keeps an architecture-level view of system components and primary interfaces across the trust boundary. The labels use a canonical interface vocabulary for this architecture package so the boundary can be described consistently across context, logical, and technical views without forcing implementation detail into the architecture narrative.
 
 ```mermaid
 flowchart LR
@@ -272,26 +272,49 @@ flowchart LR
   end
 
   subgraph Internal["Internal Service Boundary"]
-    Entry["API Routes / Socket.IO Handlers"]
-    Svc["ChatService / ConversationService"]
-    Agent["StockAssistantAgent"]
-    Prompt["Prompt System\nPromptAssetLoader + PromptAssembler + ResponseGuardrailMiddleware"]
-    Tools["Tool Layer"]
+    Entry["Transport Edge\n/api/chat + Socket.IO events"]
+    Svc["Chat and Conversation Services\nChatService + ConversationService"]
+    Agent["Agent Runtime\nStockAssistantAgent"]
+    Prompt["Prompt Policy Boundary\nCurrent runtime prompt; planned Loader + Assembler + Guardrail"]
+    Tools["Tool Registry and Tools\nToolRegistry + enabled tools"]
     Factory["Model Client Factory"]
-    State["State and Cache\nMongoDB + Redis"]
+    Meta["Conversation and Session State\nConversationProvider + SessionProvider"]
+    Checkpoint["STM Checkpointer\nLangGraph MongoDBSaver"]
+    Cache["Cache Boundary\nRedis / CacheBackend"]
   end
 
-  Client -->|"HTTPS / WebSocket interface"| Entry
-  Entry -->|"validated request interface"| Svc
-  Svc -->|"conversation lifecycle interface"| Agent
-  Agent -->|"prompt policy interface"| Prompt
+  Client -->|"client transport interface"| Entry
+  Entry -->|"request orchestration interface"| Svc
+  Svc -->|"agent execution interface"| Agent
+  Svc -->|"conversation lifecycle interface"| Meta
+  Agent -->|"behavioral policy interface"| Prompt
   Agent -->|"tool invocation interface"| Tools
-  Agent -->|"model selection interface"| Factory
-  Agent -->|"checkpoint and metadata interface"| State
-  Tools -->|"cache interface"| State
+  Agent -->|"provider selection interface"| Factory
+  Agent -->|"conversational state interface"| Checkpoint
+  Tools -->|"cache interaction interface"| Cache
   Factory -->|"model inference interface"| LLM
-  Tools -->|"market evidence interface"| Market
+  Tools -->|"market data integration interface"| Market
 ```
+
+The architecture-relevant interfaces expressed in this view are:
+
+| Interaction Direction | Canonical Interface Name | Architectural Meaning |
+|-----------------------|--------------------------|-----------------------|
+| Client -> Transport edge | Client transport interface | Admits user requests and response streams across the trust boundary while keeping transport concerns separate from reasoning concerns |
+| Transport edge -> service orchestration | Request orchestration interface | Hands normalized user work into the internal control boundary where validation, delivery mode, and downstream coordination are governed |
+| Service orchestration -> agent runtime | Agent execution interface | Transfers a conversation-qualified unit of work into the reasoning runtime without making the runtime own client or transport semantics |
+| Service orchestration -> conversation and session state | Conversation lifecycle interface | Applies lifecycle governance, context-resolution, and archive-integrity controls to conversations outside the reasoning runtime |
+| Agent runtime -> prompt policy boundary | Behavioral policy interface | Separates behavior shaping and guardrail policy from state management and evidence acquisition |
+| Agent runtime -> tool boundary | Tool invocation interface | Delegates evidence gathering and deterministic computation to governed tool surfaces rather than embedding external access into the runtime core |
+| Agent runtime -> model factory | Provider selection interface | Isolates provider choice, model binding, and fallback policy from the reasoning workflow itself |
+| Agent runtime -> STM checkpointer | Conversational state interface | Binds thread-local conversational state to a dedicated persistence boundary without collapsing application metadata into runtime memory |
+| Tool boundary -> cache boundary | Cache interaction interface | Keeps execution acceleration separate from authoritative business or evidence state |
+| Model factory -> external LLMs | Model inference interface | Carries outbound reasoning requests to external providers while preserving internal control over policy and provider selection |
+| Tool boundary -> market data providers | Market data integration interface | Constrains factual evidence acquisition to explicit internal mediation points |
+
+Detailed realization anchors for this vocabulary are intentionally deferred to [TECHNICAL_DESIGN.md](./TECHNICAL_DESIGN.md), where the same interface names are bound to routes, protocols, factories, and concrete methods.
+
+This interface view makes two architectural boundaries explicit that are easy to miss in a simpler adjacency diagram. First, conversation lifecycle and archive-integrity responsibilities are exercised in the service layer before and after agent execution rather than inside the reasoning core. Second, conversation memory, metadata persistence, provider selection, prompt policy, tool execution, and cache use are separate integration boundaries with distinct owners and evolution paths even though they contribute to one end-user interaction.
 
 ### 4.2 Logical View
 
@@ -325,32 +348,52 @@ This logical separation is the primary extensibility mechanism for the domain. N
 
 #### 4.2.2a Logical Component Interface View
 
-This view focuses on logical component categories and interface seams, without introducing implementation-level method detail.
+This view focuses on logical component categories and architectural interfaces, using the same canonical interface vocabulary as section 4.1.1a but at a logical decomposition level. The goal is to show which logical boundary owns each interaction, not how that interaction is implemented.
 
 ```mermaid
 flowchart LR
   subgraph App["Application Control Boundary"]
     Routes["Transport Edge\n(API + Socket.IO)"]
     Orch["Service Orchestration\nChatService + ConversationService"]
+    LifeSvc["Conversation and Session Lifecycle\nConversationService + SessionProvider"]
     Runtime["Reasoning Runtime\nStockAssistantAgent"]
     PromptComp["Prompt Composition Boundary\nLoader + Assembler + Guardrail"]
     Router["Intent Routing\nstock_query_router"]
     ModelSel["Provider Selection\nModelClientFactory"]
     ToolReg["Tooling Boundary\nToolRegistry + Tools"]
     Repo["Metadata Persistence\nConversationRepository"]
-    Mem["Checkpoint and Cache\nMongoDBSaver + Redis"]
+    CheckpointStore["Conversational State Store\nLangGraph MongoDBSaver"]
+    CacheStore["Tool Cache\nRedis / CacheBackend"]
   end
 
-  Routes -->|"request/stream interface"| Orch
-  Orch -->|"conversation interface"| Runtime
-  Runtime -->|"route classification interface"| Router
-  Runtime -->|"prompt assembly interface"| PromptComp
-  Runtime -->|"model client interface"| ModelSel
-  Runtime -->|"tool execution interface"| ToolReg
-  Orch -->|"metadata CRUD interface"| Repo
-  Runtime -->|"thread state interface"| Mem
-  ToolReg -->|"cache interface"| Mem
+  Routes -->|"request orchestration interface"| Orch
+  Orch -->|"agent execution interface"| Runtime
+  Orch -->|"conversation lifecycle interface"| LifeSvc
+  Runtime -->|"intent classification interface"| Router
+  Runtime -->|"behavioral policy interface"| PromptComp
+  Runtime -->|"provider selection interface"| ModelSel
+  Runtime -->|"tool invocation interface"| ToolReg
+  Orch -->|"metadata persistence interface"| Repo
+  Runtime -->|"conversational state interface"| CheckpointStore
+  ToolReg -->|"cache interaction interface"| CacheStore
 ```
+
+The logical architectural interfaces are interpreted as follows:
+
+| Interaction Direction | Canonical Interface Name | Architectural Meaning |
+|-----------------------|--------------------------|-----------------------|
+| Transport edge -> service orchestration | Request orchestration interface | Converts externally initiated work into an internally governed work item |
+| Service orchestration -> reasoning runtime | Agent execution interface | Preserves a clean handoff between business governance and reasoning execution |
+| Service orchestration -> conversation and session lifecycle | Conversation lifecycle interface | Enforces conversation existence, archive status, session-context resolution, and per-turn metadata governance outside the reasoning runtime |
+| Reasoning runtime -> intent routing | Intent classification interface | Lets classification evolve independently from tool execution and provider binding |
+| Reasoning runtime -> prompt composition boundary | Behavioral policy interface | Keeps response behavior and guardrails as a distinct policy concern |
+| Reasoning runtime -> provider selection | Provider selection interface | Prevents provider mechanics from leaking into service or transport layers |
+| Reasoning runtime -> tooling boundary | Tool invocation interface | Contains external evidence access and deterministic computation behind a governed surface |
+| Service orchestration -> metadata persistence | Metadata persistence interface | Separates business metadata ownership from checkpoint-managed conversational state |
+| Reasoning runtime -> conversational state store | Conversational state interface | Isolates thread-local LangGraph checkpoint state from broader application lifecycle metadata |
+| Tooling boundary -> tool cache | Cache interaction interface | Limits execution acceleration to the tooling boundary rather than the broader reasoning model |
+
+Taken together, these boundaries show that the logical decomposition is not only a grouping of components but also a partitioning of authority. Orchestration owns business governance, the runtime owns reasoning, routing classifies, prompt composition governs behavior, provider selection mediates model access, tooling mediates evidence access, and persistence boundaries remain separated by state type.
 
 #### 4.2.3 Layered Architecture Boundaries
 
