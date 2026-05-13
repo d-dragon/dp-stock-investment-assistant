@@ -148,19 +148,44 @@ The constructor accepts an optional `checkpointer` parameter injected by `APISer
 
 #### 3.1.1 Mirror — Component Interface Diagram
 
-This realization-oriented mirror corresponds to the architecture-level interface diagrams in [ARCHITECTURE_DESIGN.md](./ARCHITECTURE_DESIGN.md) section 4.1.1a and section 4.2.2a.
+This realization-oriented mirror corresponds to the architecture-level interface diagrams in [ARCHITECTURE_DESIGN.md](./ARCHITECTURE_DESIGN.md) section 4.1.1a and section 4.2.2a. It deliberately reuses the same canonical interface vocabulary, then ties each architectural interface to the concrete routes, protocols, factories, registries, and state adapters that realize it in the current codebase.
 
 ```mermaid
 flowchart LR
-	Entry["API Routes / Socket.IO"] -->|"validated request interface"| Orchestration["ChatService / ConversationService"]
-	Orchestration -->|"conversation lifecycle interface"| Agent["StockAssistantAgent"]
-	Agent -->|"route classification interface"| Router["stock_query_router"]
-	Agent -->|"model client interface"| Factory["ModelClientFactory"]
-	Agent -->|"tool execution interface"| Tools["ToolRegistry + Tools"]
-	Agent -->|"checkpoint interface"| Checkpoint["MongoDBSaver"]
+	Client["Client Apps\n(Web, Browser, API Consumers)"] -->|"client transport interface"| Entry["API Routes / Socket.IO"]
+	Entry -->|"request orchestration interface"| Orchestration["ChatService / ConversationService"]
+	Orchestration -->|"agent execution interface"| Agent["StockAssistantAgent"]
+	Orchestration -->|"conversation lifecycle interface"| StateSvc["ConversationProvider + SessionProvider"]
 	Orchestration -->|"metadata persistence interface"| Repo["ConversationRepository"]
-	Tools -->|"cache interface"| Cache["Redis / CacheBackend"]
+	Agent -->|"intent classification interface"| Router["stock_query_router"]
+	Agent -->|"behavioral policy interface"| Prompt["Current system prompt / planned prompt compiler"]
+	Agent -->|"provider selection interface"| Factory["ModelClientFactory"]
+	Agent -->|"tool invocation interface"| Tools["ToolRegistry + Tools"]
+	Agent -->|"conversational state interface"| Checkpoint["MongoDBSaver"]
+	Tools -->|"cache interaction interface"| Cache["Redis / CacheBackend"]
+	Tools -->|"market data integration interface"| MarketData["DataManager\n(Yahoo Finance)"]
+	Factory -->|"model inference interface"| Providers["OpenAIModelClient / GrokModelClient"]
 ```
+
+The current realization of those canonical interfaces is:
+
+| Canonical Interface Name | Realization Path in Current Code | Primary Anchors |
+|--------------------------|----------------------------------|-----------------|
+| Client transport interface | User traffic enters through HTTP and Socket.IO entry points, with request-body validation and conversation identifier normalization at the transport edge | `src/web/routes/ai_chat_routes.py`, `src/web/sockets/chat_events.py` |
+| Request orchestration interface | The transport edge dispatches into `ChatService` for non-streaming and SSE paths, preserving transport-mode handling outside the agent runtime | `create_chat_blueprint()`, `ChatService.process_chat_query()`, `ChatService.stream_chat_response()` |
+| Agent execution interface | `ChatService` depends on the `AgentProvider` protocol and delegates query execution and model-info lookup through that contract | `src/services/protocols.py`, `ChatService`, `StockAssistantAgent.process_query*()` |
+| Conversation lifecycle interface | Service-layer logic checks archive status, ensures conversation existence, resolves parent session context, and records message metadata outside the agent runtime | `ConversationProvider`, `SessionProvider`, `_validate_conversation_active()`, `_ensure_conversation_exists()`, `_record_message_metadata()`, `_load_conversation_context()` |
+| Metadata persistence interface | Conversation-management metadata is persisted through service and repository paths rather than through the LangGraph checkpoint store | `ConversationService`, `ConversationRepository`, service-factory wiring |
+| Intent classification interface | The runtime consults `stock_query_router` as the query classification boundary, keeping intent selection separate from provider binding and tool execution | `src/core/stock_query_router.py`, runtime routing flow |
+| Behavioral policy interface | The active runtime passes a built-in system prompt into agent construction; the explicit `PromptAssetLoader -> PromptAssembler -> ResponseGuardrailMiddleware` boundary remains planned | `StockAssistantAgent.REACT_SYSTEM_PROMPT`, `create_agent(... system_prompt=...)`, planned prompt components in section 3.5 |
+| Provider selection interface | The runtime uses `ModelClientFactory` to resolve provider/model clients and fallback ordering without embedding provider construction logic into route or service code | `ModelClientFactory.get_client()`, `ModelClientFactory.get_fallback_sequence()`, `StockAssistantAgent._select_client()` |
+| Tool invocation interface | The runtime materializes enabled tools from `ToolRegistry`, then passes that governed tool surface into the LangGraph ReAct agent | `get_tool_registry()`, `ToolRegistry.get_enabled_tools()`, `StockAssistantAgent._initialize_tools()`, `_build_agent_executor()` |
+| Conversational state interface | `APIServer` injects the LangGraph checkpointer, and the runtime binds `conversation_id` into `configurable.thread_id` during invoke so checkpoints stay conversation-scoped | `create_checkpointer()`, `APIServer.__init__()`, `process_query_structured()`, `_process_with_react()` / streaming invoke path |
+| Cache interaction interface | Cache-aware tools delegate lookup and write-through behavior to `CacheBackend` and Redis without making cache state part of the agent-facing reasoning contract | `CachingTool`, `CacheBackend`, `StockSymbolTool`, `ReportingTool` |
+| Market data integration interface | Tool implementations invoke `DataManager` as the outbound data-access boundary to Yahoo Finance, keeping all market data retrieval behind the tooling surface | `src/core/data_manager.py`, `DataManager`, `StockSymbolTool` |
+| Model inference interface | Provider-specific client classes encapsulate the outbound call contract to OpenAI or Grok once the factory has selected the provider/model binding | `OpenAIModelClient`, `GrokModelClient`, `BaseModelClient` |
+
+This split keeps the architecture package disciplined. The architecture description names the architectural boundaries and their ownership, while this technical view records the concrete adapters, protocol contracts, and call sites that currently realize those interfaces.
 
 ### 3.2 Tool Registry and Tool Execution
 
