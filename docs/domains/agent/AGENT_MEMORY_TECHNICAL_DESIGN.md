@@ -184,7 +184,7 @@ This technical design implements the **Short-Term Memory (STM)** component defin
 
 **Pros:**
 - Native integration with LangGraph's agent execution
-- Auto-serialization of agent state (messages, tool calls, metadata)
+- Auto-serialization of agent runtime state (messages, tool calls, checkpoint data)
 - Built-in support for checkpoint versioning
 - Maintained by LangGraph team
 
@@ -195,7 +195,9 @@ This technical design implements the **Short-Term Memory (STM)** component defin
 **Trade-off Resolution:**
 - Use `MongoDBSaver` for agent state persistence
 - Continue using `ChatRepository` for UI chat history display
-- Sync between collections is NOT required (different concerns)
+- Keep `agent_checkpoints` and `conversations` as distinct authorities with different concerns
+- Let the service layer remain authoritative for ownership, archive status, and metadata while checkpoints remain authoritative only for recoverable thread-local runtime state
+- Tolerate bounded divergence and resolve it through service logic and reconciliation tooling rather than forcing synchronous store coupling
 
 **Implementation Notes (post-implementation):**
 - Config path for connection string: `config["database"]["mongodb"]["connection_string"]`
@@ -251,20 +253,25 @@ This technical design implements the **Short-Term Memory (STM)** component defin
 - Support conversation archival per ADR-001 (archive over delete)
 - Maintain workspace isolation per ADR-001 STM hierarchy boundary
 
+**Authority split:**
+- `conversations` is authoritative for lifecycle status, ownership lineage, and per-turn metadata
+- `agent_checkpoints` is authoritative for recoverable LangGraph thread state only
+- Session context is resolved through service helpers and may influence a conversation without sharing checkpoints across sibling conversations
+
 **Archive Strategy (per ADR-001 archive-over-delete boundary):**
 
 | Status | Description | Behavior |
 |--------|-------------|----------|
 | `active` | Current working conversation | Full context available |
-| `summarized` | Long conversation compressed | Summary in active context |
+| `summarized` | Schema-supported compressed form | Used only once summarization is explicitly wired into runtime flow |
 | `archived` | Conversation closed by user or policy | Not in active context, query-retrievable |
 | ~~`deleted`~~ | **Never used** | ADR: Archive over delete |
 
 **Archive Lifecycle:**
 ```
-┌──────────┐    auto-summarize    ┌─────────────┐    user closes    ┌──────────┐
-│  active  │ ──────────────────►  │ summarized  │ ────────────────► │ archived │
-└──────────┘    (token limit)     └─────────────┘   conversation    └──────────┘
+┌──────────┐ planned auto-summarize ┌─────────────┐ close/archive flow ┌──────────┐
+│  active  │ ─────────────────────► │ summarized  │ ──────────────────► │ archived │
+└──────────┘  (not yet runtime)     └─────────────┘                     └──────────┘
                                                                          │
                                                                          │ explicit
                                                                          │ request
@@ -302,7 +309,7 @@ This technical design implements the **Short-Term Memory (STM)** component defin
 | **Window Buffer** | Keep last N messages | `memory.max_messages: 50` |
 | **Summary Mode** | Planned runtime behavior once summarization is wired | `memory.summarize_threshold: 4000` |
 
-**Summarization Strategy:**
+**Planned Summarization Strategy:**
 ```
 When total_tokens > summarize_threshold:
   1. Keep last K messages (configurable, default 10)
@@ -737,54 +744,40 @@ MEMORY_VECTORS_INDEXES = [
 
 ---
 
-### Sequence 4: Streaming Response with Memory
+### Sequence 4: Socket.IO Request/Response with Conversation Memory
 
 ```
-┌─────────┐  ┌──────────────┐  ┌──────────────────────┐  ┌───────────────┐
-│  Client │  │ Socket.IO    │  │  StockAssistantAgent │  │ MongoDBSaver  │
-└────┬────┘  └──────┬───────┘  └──────────┬───────────┘  └───────┬───────┘
-     │              │                     │                      │
-    │ emit('chat_message',              │                      │
-    │  {message, provider?,             │                      │
-    │   conversation_id?})              │                      │
-     │ ────────────────────────►         │                      │
-     │              │                     │                      │
-    │              │ process_query(message, conversation_id)   │
-    │              │ ───────────────────►│                      │
-     │              │                     │                      │
-     │              │                     │ Load checkpoint      │
-     │              │                     │ ────────────────────►│
-     │              │                     │                      │
-     │              │                     │◄──── prev messages   │
-     │              │                     │                      │
-     │              │                     │ ┌─────────────────┐  │
-     │              │                     │ │ astream_events  │  │
-     │              │                     │ │ with config:    │  │
-     │              │                     │ │ {thread_id}     │  │
-     │              │                     │ └─────────────────┘  │
-     │              │                     │                      │
-     │              │◄────────────────────│                      │
-     │              │   yield chunk_1     │                      │
-     │◄─────────────│                     │                      │
-     │ emit('chat_chunk', chunk_1)        │                      │
-     │              │                     │                      │
-     │              │◄────────────────────│                      │
-     │              │   yield chunk_2     │                      │
-     │◄─────────────│                     │                      │
-     │ emit('chat_chunk', chunk_2)        │                      │
-     │              │                     │                      │
-     │              │  ... more chunks    │                      │
-     │              │                     │                      │
-     │              │                     │ Save checkpoint      │
-     │              │                     │ (final state)        │
-     │              │                     │ ────────────────────►│
-     │              │                     │                      │
-     │◄─────────────│                     │                      │
-     │ emit('chat_stream_end')            │                      │
-     │              │                     │                      │
+┌─────────┐  ┌────────────────┐  ┌──────────────────────┐  ┌───────────────┐
+│  Client │  │ Socket.IO      │  │  StockAssistantAgent │  │ MongoDBSaver  │
+└────┬────┘  └───────┬────────┘  └──────────┬───────────┘  └───────┬───────┘
+    │               │                      │                      │
+    │ emit('chat_message',                 │                      │
+    │  {message, provider?,                │                      │
+    │   conversation_id?})                 │                      │
+    │ ─────────────────────────►           │                      │
+    │               │                      │                      │
+    │               │ validate UUID v4     │                      │
+    │               │                      │                      │
+    │               │ process_query(message, conversation_id)     │
+    │               │ ────────────────────►│                      │
+    │               │                      │ Load checkpoint      │
+    │               │                      │ ────────────────────►│
+    │               │                      │                      │
+    │               │                      │◄──── prev messages   │
+    │               │                      │                      │
+    │               │                      │ invoke / compute     │
+    │               │                      │ final response       │
+    │               │                      │                      │
+    │               │                      │ Save checkpoint      │
+    │               │                      │ (final state)        │
+    │               │                      │ ────────────────────►│
+    │               │                      │                      │
+    │◄──────────────│ emit('chat_response', {response, provider, model,
+    │               │                        fallback, conversation_id?})
+    │               │                      │                      │
 ```
 
-> **Current Limitation**: The Socket.IO path validates UUID format and preserves `conversation_id`, but it still bypasses `ChatService`, so it does not yet enforce archived-conversation rejection or REST-style metadata recording.
+> **Current Limitation**: The Socket.IO path validates UUID format and preserves `conversation_id`, but it still bypasses `ChatService`, so it does not yet enforce archived-conversation rejection, REST-style metadata recording, or SSE-style orchestration behavior.
 
 ---
 
@@ -1006,7 +999,7 @@ During implementation, five critical wiring gaps were discovered and fixed:
 |--------|--------|-------------|
 | Memory load latency | <100ms | Load checkpoint benchmark |
 | Memory save latency | <50ms | Save checkpoint benchmark |
-| Summarization latency | <2s | Trigger summarization test |
+| Summarization latency | <2s | Planned trigger summarization test |
 
 ---
 
