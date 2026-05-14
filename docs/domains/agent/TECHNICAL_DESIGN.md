@@ -141,10 +141,12 @@ The constructor accepts an optional `checkpointer` parameter injected by `APISer
 
 **Hierarchy behavior**:
 
-- Conversation state stores thread-specific checkpoints, message counters, and lifecycle metadata without leaking STM across sibling conversations.
+- LangGraph checkpoints store thread-specific reasoning state without leaking STM across sibling conversations.
+- Conversation lifecycle metadata, archive status, and per-turn counters remain outside the checkpoint store in service and repository surfaces.
 - The REST chat path uses `ChatService` to reject archived conversations and record per-turn metadata non-blocking.
+- The Socket.IO path validates `conversation_id` and preserves it through to the agent, but currently bypasses `ChatService` lifecycle and metadata helpers.
 - Workspace/session/conversation ownership and lifecycle validation live in the management APIs and services, not inside `StockAssistantAgent` itself.
-- Session-context resolution helpers exist in `ChatService` and `ConversationService`, but prompt-level injection of that merged context is still follow-up work.
+- Session-context resolution helpers exist in `ChatService` and `ConversationService`; merged context is resolved at query time in service helpers, but prompt-level injection of that merged context is still follow-up work.
 
 #### 3.1.1 Mirror — Component Interface Diagram
 
@@ -172,9 +174,9 @@ The current realization of those canonical interfaces is:
 | Canonical Interface Name | Realization Path in Current Code | Primary Anchors |
 |--------------------------|----------------------------------|-----------------|
 | Client transport interface | User traffic enters through HTTP and Socket.IO entry points, with request-body validation and conversation identifier normalization at the transport edge | `src/web/routes/ai_chat_routes.py`, `src/web/sockets/chat_events.py` |
-| Request orchestration interface | The transport edge dispatches into `ChatService` for non-streaming and SSE paths, preserving transport-mode handling outside the agent runtime | `create_chat_blueprint()`, `ChatService.process_chat_query()`, `ChatService.stream_chat_response()` |
+| Request orchestration interface | The REST transport edge dispatches into `ChatService` for non-streaming and SSE paths, preserving transport-mode handling outside the agent runtime; the Socket.IO path currently implements a thinner passthrough and does not yet have full orchestration parity | `create_chat_blueprint()`, `ChatService.process_chat_query()`, `ChatService.stream_chat_response()`, `register_chat_events()` |
 | Agent execution interface | `ChatService` depends on the `AgentProvider` protocol and delegates query execution and model-info lookup through that contract | `src/services/protocols.py`, `ChatService`, `StockAssistantAgent.process_query*()` |
-| Conversation lifecycle interface | Service-layer logic checks archive status, ensures conversation existence, resolves parent session context, and records message metadata outside the agent runtime | `ConversationProvider`, `SessionProvider`, `_validate_conversation_active()`, `_ensure_conversation_exists()`, `_record_message_metadata()`, `_load_conversation_context()` |
+| Conversation lifecycle interface | Service-layer logic checks archive status, ensures conversation existence, resolves parent session context, and records message metadata outside the agent runtime; this boundary is fully realized on the REST path and remains a known parity gap on Socket.IO | `ConversationProvider`, `SessionProvider`, `_validate_conversation_active()`, `_ensure_conversation_exists()`, `_record_message_metadata()`, `_load_conversation_context()` |
 | Metadata persistence interface | Conversation-management metadata is persisted through service and repository paths rather than through the LangGraph checkpoint store | `ConversationService`, `ConversationRepository`, service-factory wiring |
 | Intent classification interface | The runtime consults `stock_query_router` as the query classification boundary, keeping intent selection separate from provider binding and tool execution | `src/core/stock_query_router.py`, runtime routing flow |
 | Behavioral policy interface | The active runtime passes a built-in system prompt into agent construction; the explicit `PromptAssetLoader -> PromptAssembler -> ResponseGuardrailMiddleware` boundary remains planned | `StockAssistantAgent.REACT_SYSTEM_PROMPT`, `create_agent(... system_prompt=...)`, planned prompt components in section 3.5 |
@@ -184,6 +186,8 @@ The current realization of those canonical interfaces is:
 | Cache interaction interface | Cache-aware tools delegate lookup and write-through behavior to `CacheBackend` and Redis without making cache state part of the agent-facing reasoning contract | `CachingTool`, `CacheBackend`, `StockSymbolTool`, `ReportingTool` |
 | Market data integration interface | Tool implementations invoke `DataManager` as the outbound data-access boundary to Yahoo Finance, keeping all market data retrieval behind the tooling surface | `src/core/data_manager.py`, `DataManager`, `StockSymbolTool` |
 | Model inference interface | Provider-specific client classes encapsulate the outbound call contract to OpenAI or Grok once the factory has selected the provider/model binding | `OpenAIModelClient`, `GrokModelClient`, `BaseModelClient` |
+
+Current transport note: the REST path fully realizes the request-orchestration and conversation-lifecycle interfaces through `ChatService`, while the Socket.IO path currently realizes client transport plus direct agent invocation with UUID validation only.
 
 This split keeps the architecture package disciplined. The architecture description names the architectural boundaries and their ownership, while this technical view records the concrete adapters, protocol contracts, and call sites that currently realize those interfaces.
 
@@ -267,15 +271,37 @@ class CachingTool(BaseTool):
 | Checkpointer | LangGraph `MongoDBSaver` — native integration with agent execution |
 | Thread ID Mapping | Direct 1:1: `conversation_id` → `thread_id` |
 | Hierarchy Model | `workspace -> session -> conversation`, where the session owns reusable business context and the conversation owns STM |
-| Dual Collections | `agent_checkpoints` (LangGraph-owned) + `conversations` (app-managed metadata) |
+| Dual Collections | `agent_checkpoints` (LangGraph-owned runtime state) + `conversations` (app-managed lifecycle metadata) |
 | Backward Compatibility | `conversation_id` is optional — omitting preserves stateless single-turn behavior |
 | Memory Scope | Stores conversation text only; never stores prices, ratios, or tool outputs |
-| Lifecycle | `active` → `summarized` → `archived` |
+| Current lifecycle behavior | `active` and `archived` are current-state service controls; `summarized` remains schema-supported but not universally active runtime flow |
+| Transport parity | REST uses `ChatService` lifecycle and metadata helpers; Socket.IO currently bypasses them |
+| Session-context timing | Resolved at query time in service helpers via conversation-to-session lookup; not yet injected into the prompt path |
 | Configuration | `MemoryConfig` frozen dataclass with 9 configurable parameters and fail-fast validation |
 
 **Architecture Note**:
 
 The canonical runtime contract is now `conversation_id` across agent methods, REST chat, management APIs, repositories, reconciliation, and migration tooling. The REST `POST /api/chat` route still accepts a deprecated `session_id` alias and normalizes it into `conversation_id` before validation; the Socket.IO handler accepts `conversation_id` only.
+
+#### 3.3.1 STM Store Boundaries and Authority
+
+The current runtime keeps checkpoint state and business metadata in separate stores on purpose.
+
+| Concern | Authoritative Surface | Supporting Surface | Current Behavior |
+|---------|-----------------------|--------------------|------------------|
+| Recoverable conversation execution state | `agent_checkpoints` via LangGraph `MongoDBSaver` | `conversation_id -> thread_id` mapping from app surfaces | The runtime binds `conversation_id` into `configurable.thread_id` and lets LangGraph load and save thread state |
+| Archive status, ownership, and per-turn metadata | `conversations` plus service-layer helpers | Checkpoints may indirectly reflect message history only | Archive guards and metadata recording live outside the checkpoint store |
+| Reusable parent business context | Session service plus conversation-linked `session_id` | Conversation `context_overrides` | `ChatService._load_conversation_context()` resolves merged context at query time |
+| Stateless fallback | No STM store required | None | Requests without `conversation_id` preserve the single-turn path |
+
+This split means the stores may diverge temporarily without collapsing into one source of truth. A metadata record may exist even when checkpoint persistence is unavailable, and a checkpoint may exist before metadata has been ensured. In those cases the service layer remains authoritative for ownership and lifecycle, while checkpoints remain authoritative only for recoverable thread-local reasoning state.
+
+#### 3.3.2 Current Runtime Caveats
+
+- The REST route is the only chat path that currently realizes archive guards, `ensure_conversation_exists()`, metadata sync, and session-context lookup through `ChatService`.
+- The Socket.IO handler validates `conversation_id` and passes it to `agent.process_query(...)`, but it does not yet call the lifecycle and metadata helpers used by REST.
+- `MemoryConfig` exposes `summarize_threshold`, `max_messages`, and related limits, but the chat execution path does not yet trigger automatic summarization when those thresholds are exceeded.
+- The REST route still accepts deprecated `session_id` only as an alias normalized into `conversation_id` before validation.
 
 **Wiring Flow**:
 

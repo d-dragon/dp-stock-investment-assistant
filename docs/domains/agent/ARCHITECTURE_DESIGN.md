@@ -188,7 +188,7 @@ This boundary is consistent with the repository methodology's rule that architec
 
 #### 4.1.1 System Context
 
-The system context view clarifies the trust and integration boundary between client applications, internal services, internal prompt-system assets, external LLM providers, and external market data providers. This boundary is operationally important because security, compliance, and production-support responsibilities differ across these interfaces.
+The system context view clarifies the trust and control boundaries between client applications, service orchestration, conversation lifecycle governance, conversation-scoped checkpoint persistence, prompt-system assets, external LLM providers, and external market data providers. This boundary is operationally important because security, archive governance, runtime-state persistence, and evidence acquisition are owned by different internal layers.
 
 ```mermaid
 flowchart TD
@@ -198,11 +198,12 @@ flowchart TD
 
   subgraph InternalBoundary["Internal Service Boundary"]
     Entry["API Routes / Socket.IO Handlers"]
-    Service["ChatService / ConversationService"]
+    Service["Service Orchestration\nChatService / ConversationService"]
+    Lifecycle["Conversation Lifecycle + Metadata\nArchive guards / conversation records / session-context resolution"]
     Agent["StockAssistantAgent"]
+    Checkpoint["Conversational State Persistence\nLangGraph MongoDBSaver"]
     ToolLayer["Tool Layer"]
-    Redis["Redis Cache"]
-    Mongo["MongoDB Metadata / STM"]
+    Redis["Tool Cache\nRedis / CacheBackend"]
     PromptSystem["Prompt System"]
     PromptAssetLoader["PromptAssetLoader"]
     PromptAssembler["PromptAssembler"]
@@ -216,9 +217,10 @@ flowchart TD
 
   Client -->|"HTTPS / WebSocket"| Entry
   Entry --> Service --> Agent
+  Service --> Lifecycle
+  Agent --> Checkpoint
   Agent --> ToolLayer
   ToolLayer --> Redis
-  ToolLayer --> Mongo
   Agent --> PromptSystem
   PromptSystem --> PromptAssetLoader
   PromptSystem --> PromptAssembler
@@ -233,29 +235,34 @@ flowchart TD
 Boundary classification
 -----------------------
 Client apps            : Outside internal trust boundary
-Internal services      : Inside application control boundary
+Service orchestration  : Internal request-governance boundary
+Conversation lifecycle : Internal business-state and archive-governance boundary
+Checkpoint persistence : Internal conversational-state boundary
 Prompt system assets   : Internal behavioral policy boundary (ADR-governed taxonomy)
 LLM providers          : External AI processing boundary
 Market data providers  : External evidence and pricing boundary
-MongoDB / Redis        : Internal persistence and cache boundary
+Redis cache            : Internal cache acceleration boundary
 ```
 
-The architecture intentionally routes all external interactions through internal service and agent boundaries rather than allowing client applications to call providers directly. This preserves a single enforcement point for authentication, authorization, archive safety, observability, prompt policy, and provider fallback. Prompt behavior is mediated internally through ADR taxonomy assets and guardrail middleware before provider calls.
+The architecture intentionally routes external reasoning and evidence flows through distinct internal control points rather than allowing client applications to call providers or state stores directly. Service orchestration owns request validation and conversation lifecycle governance, the agent runtime binds conversation-scoped checkpoints, the tool layer mediates cache and market-data access, and prompt behavior is mediated internally through ADR taxonomy assets and guardrail middleware before provider calls. The current REST chat path enforces the lifecycle boundary directly through `ChatService`, while Socket.IO parity remains a documented follow-up in companion technical-design material.
 
 | Boundary | Primary Responsibility | Security / Compliance / Operations Significance |
 |----------|------------------------|-------------------------------------------------|
-| Client apps -> Internal services | Transport, authentication, request validation, streaming control | Protects internal capabilities from direct exposure and centralizes auditability |
-| Internal services -> Prompt system assets | Prompt policy composition and behavioral guardrail enforcement | Keeps behavioral policy versioned, auditable, and governed within the internal control boundary |
-| Internal services -> LLM providers | Prompted reasoning and generated responses | External AI providers must be treated as non-authoritative processors; prompts and outputs require policy and logging controls |
-| Internal services -> Market data providers | Evidence and pricing retrieval through tools | Keeps factual market-data sourcing explicit and separable from model reasoning |
-| Internal services -> MongoDB / Redis | Metadata, STM persistence, and cache management | Preserves operational recovery, drift detection, and lifecycle governance inside the system boundary |
+| Client Apps -> Transport and Service Edge | Transport, authentication, request validation, and streaming control | Protects internal capabilities from direct exposure and centralizes auditability |
+| Service Orchestration -> Conversation Lifecycle and Metadata | Archive guards, conversation existence, metadata recording, and session-context resolution | Keeps business lifecycle and ownership control outside the reasoning runtime |
+| Agent Runtime -> Conversational Checkpoint Persistence | Thread-local reasoning state and checkpoint recovery | Prevents checkpoint storage from becoming the source of truth for ownership or archive policy |
+| Agent Runtime -> Prompt System Assets | Prompt policy composition and behavioral guardrail enforcement | Keeps behavioral policy versioned, auditable, and governed within the internal control boundary |
+| Agent Runtime / Model Factory -> LLM Providers | Prompted reasoning and generated responses | External AI providers must be treated as non-authoritative processors; prompts and outputs require policy and logging controls |
+| Tool Layer -> Market Data Providers | Evidence and pricing retrieval through tools | Keeps factual market-data sourcing explicit and separable from model reasoning |
+| Tool Layer -> Redis Cache | Execution acceleration for tool paths | Preserves cache separation from authoritative business or conversational state |
 
-From a compliance and operational perspective, this context establishes four hard boundaries:
+From a compliance and operational perspective, this context establishes five hard boundaries:
 
 1. Client applications are consumers of the system, not participants in internal orchestration.
-2. Prompt behavior is composed from internal ADR-governed assets (`src/prompts/system|skills|experiments`) before model invocation.
-3. LLM providers are external reasoning services and do not become the source of truth for market facts or conversation ownership.
-4. Market data providers are external evidence sources and are accessed only through controlled internal tool paths.
+2. Conversation lifecycle governance and application metadata remain in the service layer and do not collapse into the checkpoint store.
+3. Conversation-scoped checkpoints retain reasoning state for a thread but do not become the source of truth for archive policy, ownership, or business metadata.
+4. LLM providers are external reasoning services and do not become the source of truth for market facts or conversation ownership.
+5. Market data providers are external evidence sources and are accessed only through controlled internal tool paths.
 
 This system context complements the deployment and operations views by showing who is inside the controlled system boundary and which dependencies remain external.
 
@@ -278,7 +285,7 @@ flowchart LR
     Prompt["Prompt Policy Boundary\nCurrent runtime prompt; planned Loader + Assembler + Guardrail"]
     Tools["Tool Registry and Tools\nToolRegistry + enabled tools"]
     Factory["Model Client Factory"]
-    Meta["Conversation and Session State\nConversationProvider + SessionProvider"]
+    Meta["Conversation Lifecycle and Metadata\nConversationProvider + SessionProvider"]
     Checkpoint["STM Checkpointer\nLangGraph MongoDBSaver"]
     Cache["Cache Boundary\nRedis / CacheBackend"]
   end
@@ -303,7 +310,7 @@ The architecture-relevant interfaces expressed in this view are:
 | Client -> Transport edge | Client transport interface | Admits user requests and response streams across the trust boundary while keeping transport concerns separate from reasoning concerns |
 | Transport edge -> service orchestration | Request orchestration interface | Hands normalized user work into the internal control boundary where validation, delivery mode, and downstream coordination are governed |
 | Service orchestration -> agent runtime | Agent execution interface | Transfers a conversation-qualified unit of work into the reasoning runtime without making the runtime own client or transport semantics |
-| Service orchestration -> conversation and session state | Conversation lifecycle interface | Applies lifecycle governance, context-resolution, and archive-integrity controls to conversations outside the reasoning runtime |
+| Service orchestration -> conversation lifecycle and metadata boundary | Conversation lifecycle interface | Applies lifecycle governance, context-resolution, and archive-integrity controls to conversations outside the reasoning runtime |
 | Agent runtime -> prompt policy boundary | Behavioral policy interface | Separates behavior shaping and guardrail policy from state management and evidence acquisition |
 | Agent runtime -> tool boundary | Tool invocation interface | Delegates evidence gathering and deterministic computation to governed tool surfaces rather than embedding external access into the runtime core |
 | Agent runtime -> model factory | Provider selection interface | Isolates provider choice, model binding, and fallback policy from the reasoning workflow itself |
@@ -522,7 +529,7 @@ These process flows express the domain's latency and fault-tolerance posture: se
 
 ### 4.4 Information and State View
 
-The agent domain uses LangGraph's `MongoDBSaver` for conversation-scoped STM persistence, with `conversation_id -> thread_id` as the canonical binding. Sessions remain parent business context, while conversations own STM.
+The agent domain uses LangGraph's `MongoDBSaver` for conversation-scoped STM persistence, with `conversation_id -> thread_id` as the canonical binding. The architecture deliberately separates three related but distinct state surfaces: service-owned conversation lifecycle and metadata, session-owned reusable business context, and agent-owned checkpoint state. Sessions remain parent business context, conversations own STM identity, and checkpoints retain only thread-local execution state.
 
 The layered LLM architecture (ADR-001) also defines a Long-Term Memory (LTM) layer for stable, slow-changing user preferences and symbol-tracking context. LTM is architecturally distinct from STM: it persists across conversations, enables personalization and routing, and explicitly excludes financial facts, which remain in RAG or tools. LTM is not yet implemented in the runtime; the design and scope boundaries are governed by the ADR-001 LTM boundary decision.
 
@@ -535,7 +542,9 @@ The state model is intentionally split so user context, conversation state, retr
 | Concern | Canonical Architectural Home | Explicit Exclusions |
 |---------|------------------------------|---------------------|
 | Stable personalization and reusable user context | LTM | Prices, ratios, valuations, forecasts, recommendations |
-| Active conversation state and thread-local assumptions | STM via LangGraph checkpoints plus conversation metadata | Cross-conversation factual store, retrieved document corpus, durable financial truth |
+| Conversation-scoped reasoning state and thread-local message history | STM via LangGraph checkpoints | Archive policy, ownership metadata, cross-conversation factual store, durable financial truth |
+| Conversation lifecycle, archive status, and per-turn metadata | Service layer plus `conversations` metadata boundary | Checkpoint-managed agent state as the source of truth for ownership or archive policy |
+| Session-owned reusable business context | Session provider and management-service boundary | Shared checkpoint state across sibling conversations, cross-conversation factual store, prompt-level injection claims unless explicitly realized |
 | Sourced market and filing evidence | RAG indices and external data sources | User preferences, model-authored interpretations, long-lived conversation state |
 | Deterministic metrics and fetched numbers | Tool execution and approved data providers | Prompt state, LTM/STM persistence, model-only inferred facts |
 | Output behavior, disclosure, and tone | Prompt and guardrail policy | Persistent domain data and financial truth |
@@ -544,15 +553,30 @@ This allocation is what allows the domain to enforce the ADR-001 hard rules in a
 
 | Aspect | Architectural Position |
 |--------|------------------------|
-| State owner | LangGraph checkpointer for agent execution state; application metadata in `conversations` |
+| State authorities | LangGraph checkpointer owns thread-local agent execution state; service layer and `conversations` own lifecycle and metadata; sessions own reusable parent context |
 | Binding | Direct 1:1 `conversation_id -> thread_id` |
 | Hierarchy | `workspace -> session -> conversation` |
-| Lifecycle | `active -> summarized -> archived` |
+| Current lifecycle control | `active` and `archived` are current-state control boundaries in the service-governance path |
+| Planned / partial lifecycle capability | `summarized` and automated summarization remain schema-supported but not yet universal runtime control flow |
 | Scope boundary | Conversation text and state only; no prices, ratios, or tool outputs in memory |
 
 The runtime contract is now `conversation_id` across agent methods, REST chat, management APIs, repositories, reconciliation, and migration tooling. The REST `POST /api/chat` route still accepts a deprecated `session_id` alias and normalizes it into `conversation_id`; the Socket.IO handler accepts `conversation_id` only.
 
-The information boundary is deliberate: LangGraph checkpoints retain agent execution state for a conversation, while the `conversations` collection and service layer retain application metadata and lifecycle control. This keeps behavioral state and business metadata aligned without making the checkpointer the source of truth for application ownership or archival rules.
+The information boundary is deliberate: LangGraph checkpoints retain recoverable agent execution state for a conversation, while the `conversations` collection and service layer retain application metadata and lifecycle control. This keeps behavioral state and business metadata aligned without making the checkpointer the source of truth for application ownership or archival rules. Session context is resolved in service helpers as reusable parent business context, but prompt-level injection of that merged context is not yet a universally realized runtime behavior.
+
+#### 4.4.2 STM Correspondence and Authority Model
+
+STM is represented through cooperating but non-identical boundaries so the architecture can distinguish runtime recovery state from business lifecycle control.
+
+| Question or Concern | Authoritative Boundary | Supporting Boundary | Architectural Note |
+|---------------------|------------------------|---------------------|--------------------|
+| Can a conversation accept new turns? | Service-layer lifecycle governance and `conversations` metadata | LangGraph checkpoints | Archive status and ownership remain business controls outside the reasoning runtime |
+| What thread state should the runtime resume? | LangGraph checkpoint boundary keyed by `thread_id` | `conversations` metadata | Recovery state is conversation-scoped and is bound through `conversation_id -> thread_id` |
+| What reusable parent context applies to a conversation? | Session boundary resolved through service helpers | `conversations` metadata and checkpoints | Sessions provide lineage and reusable business context without sharing checkpoints across sibling conversations |
+| Where are per-turn counters, status, and metadata recorded? | `conversations` metadata boundary | Checkpoints may reflect message history indirectly | Business metadata remains outside checkpoint serialization |
+| What if metadata and checkpoints diverge? | Service layer remains authoritative for ownership, archive status, and context lineage | Checkpoints remain authoritative only for recoverable thread-local reasoning state | Divergence is tolerated as a degraded-state condition rather than collapsed into one source of truth |
+
+This correspondence model allows bounded divergence. A checkpoint may temporarily exist before a metadata record is ensured, metadata may outlive checkpoint availability during degraded operation, and stateless requests may bypass STM entirely. Those cases do not redefine ownership: lifecycle authority remains with the service-governance path, while checkpoint authority remains limited to conversation-scoped runtime state.
 
 ```mermaid
 flowchart TD
@@ -917,6 +941,8 @@ The following rules govern how this architecture-description package stays consi
 4. [AGENT_MEMORY_TECHNICAL_DESIGN.md](./AGENT_MEMORY_TECHNICAL_DESIGN.md) governs STM-specific subsystem detail within the architectural boundaries established by ADR-001 and this architecture description.
 5. Proposed ADRs may shape planned or future-state architecture content, but they do not override accepted decisions until their status changes.
 6. Terminology changes that affect architectural concepts, view names, or decision names must be reconciled across sections 3, 4, 5, and 6 of this document and across the affected ADRs in the same update pass.
+7. STM descriptions across this package must preserve the ownership split between service-governed lifecycle metadata, session-owned reusable context, and checkpoint-managed runtime state.
+8. Current-state STM caveats, including REST-only lifecycle enforcement, Socket.IO parity gaps, and unwired automatic summarization, must remain labeled consistently across this document and both STM companion design documents.
 
 Reviewer checklist:
 
@@ -924,6 +950,8 @@ Reviewer checklist:
 - [ ] View names used in ADRs match the viewpoint and view names defined in sections 3 and 4.
 - [ ] Accepted ADR boundaries are not contradicted by companion design documents.
 - [ ] Proposed or future-state capabilities remain labeled as planned where runtime implementation is incomplete.
+- [ ] STM ownership statements consistently distinguish lifecycle metadata, session context, and checkpoint state.
+- [ ] STM transport caveats remain synchronized across architecture, technical design, and memory technical design documents.
 - [ ] Concept evolution terms such as `Prompt Compiler`, `PromptAssembler`, and `PromptAssetLoader` are used consistently with section 5.3.
 - [ ] ADR taxonomy references are stated consistently where prompt asset directories are referenced.
 
