@@ -85,7 +85,7 @@ This architecture description does not replace:
 | Memory | LangGraph `MongoDBSaver` checkpointer for conversation-scoped STM, with sessions as reusable parent business context |
 | Semantic Router | `semantic-router` library with OpenAI/HuggingFace encoders |
 | Response Types | Structured (`AgentResponse`) with immutable dataclasses |
-| Prompt System | Current runtime uses a hardcoded system prompt; target prompt architecture is planned (ADR-002 and ADR-003 are Proposed) and uses a three-layer compiler path with ADR taxonomy (`src/prompts/system|skills|experiments`) |
+| Prompt System | Architecture baseline uses a single governed runtime prompt; planned evolution externalizes shared policy, route-aware skills, and prompt guardrails through the ADR-governed prompt compiler path |
 
 ### 1.6 Document Authority Split
 
@@ -181,7 +181,7 @@ The primary context relationships are:
 - service-layer components govern ownership, archival checks, and metadata synchronization around conversations;
 - LangGraph checkpointer infrastructure stores conversation-scoped execution state;
 - tool implementations gather external or repository-backed data;
-- prompt-system components (`PromptAssetLoader`, `PromptAssembler`, `ResponseGuardrailMiddleware`) apply ADR-governed prompt taxonomy before model invocation;
+- prompt policy is governed inside the system boundary through the current runtime baseline and the planned prompt compiler path;
 - prompt assets and prompt composition logic govern model behavior, not factual storage.
 
 This boundary is consistent with the repository methodology's rule that architecture descriptions should explain **what structures and interactions exist**, while implementation detail and contract detail remain in companion documents.
@@ -204,11 +204,8 @@ flowchart TD
     Checkpoint["Conversational State Persistence\nLangGraph MongoDBSaver"]
     ToolLayer["Tool Layer"]
     Redis["Tool Cache\nRedis / CacheBackend"]
-    PromptSystem["Prompt System"]
-    PromptAssetLoader["PromptAssetLoader"]
-    PromptAssembler["PromptAssembler"]
-    ResponseGuardrailMiddleware["ResponseGuardrailMiddleware"]
-    PromptAssets["src/prompts/{system,skills,experiments}"]
+    PromptSystem["Prompt Policy Boundary\nCurrent baseline + planned compiler path"]
+    PromptAssets["Prompt Assets\nCurrent src/prompts + planned ADR taxonomy"]
     ModelFactory["Model Client Factory"]
   end
 
@@ -222,10 +219,7 @@ flowchart TD
   Agent --> ToolLayer
   ToolLayer --> Redis
   Agent --> PromptSystem
-  PromptSystem --> PromptAssetLoader
-  PromptSystem --> PromptAssembler
-  PromptSystem --> ResponseGuardrailMiddleware
-  ResponseGuardrailMiddleware --> PromptAssets
+  PromptSystem --> PromptAssets
   Agent --> ModelFactory
   ModelFactory -->|"External model calls"| LLM
   ToolLayer -->|"External market-data calls"| Market
@@ -349,7 +343,7 @@ These building blocks are separated so that reasoning orchestration, state manag
 | Provider and model selection | `ModelClientFactory` and provider clients | Isolates provider-specific concerns from routes and services |
 | Conversation lifecycle and archive rules | `ChatService`, `ConversationService` | Owns business guards and metadata synchronization outside the agent core |
 | Conversation metadata persistence | `ConversationRepository` | Persists application metadata, separate from LangGraph checkpoint state |
-| Prompt behavior and guardrails | Current runtime prompt sources plus planned prompt compiler boundary (`PromptAssetLoader -> PromptAssembler -> ResponseGuardrailMiddleware`) | Controls behavioral policy, not business state or financial facts |
+| Prompt behavior and guardrails | Current runtime prompt baseline plus planned prompt compiler path (`PromptAssetLoader -> PromptAssembler -> ResponseGuardrailMiddleware`) | Controls behavioral policy, not business state or financial facts |
 
 This logical separation is the primary extensibility mechanism for the domain. New providers, tools, prompt assets, or conversation-management behaviors should be added by extending the relevant building block rather than by collapsing responsibilities into the agent runtime.
 
@@ -364,7 +358,7 @@ flowchart LR
     Orch["Service Orchestration\nChatService + ConversationService"]
     LifeSvc["Conversation and Session Lifecycle\nConversationService + SessionProvider"]
     Runtime["Reasoning Runtime\nStockAssistantAgent"]
-    PromptComp["Prompt Composition Boundary\nLoader + Assembler + Guardrail"]
+    PromptComp["Prompt Policy Boundary\nCurrent prompt baseline + planned compiler path"]
     Router["Intent Routing\nstock_query_router"]
     ModelSel["Provider Selection\nModelClientFactory"]
     ToolReg["Tooling Boundary\nToolRegistry + Tools"]
@@ -427,7 +421,7 @@ flowchart TD
   L1["Layer 1: Client and Transport\nClients -> API/Socket Entry"]
   L2["Layer 2: Service Ownership\nChatService + ConversationService"]
   L3["Layer 3: Agent Runtime\nStockAssistantAgent"]
-  L4A["Layer 4A: Prompt Policy\nPromptAssetLoader + PromptAssembler + ResponseGuardrailMiddleware"]
+  L4A["Layer 4A: Prompt Policy\nCurrent baseline + planned compiler path"]
   L4B["Layer 4B: Routing and Execution\nRouter + Model Factory + Tool Layer"]
   L5["Layer 5: Persistence and Cache\nConversations + Checkpoints + Redis"]
   EXT["External Providers\nLLM + Market Data"]
@@ -742,19 +736,19 @@ The following quality scenarios summarize the failure, degradation, recovery, an
 | Scenario | Stimulus and Environment | Expected Architectural Response |
 |----------|--------------------------|---------------------------------|
 | Unmatched or ambiguous intent | A user query does not match a stronger domain route with sufficient confidence | Route to `GENERAL_CHAT` so the request remains serviceable rather than producing a routing failure |
-| Guardrail violation candidate detected | Generated output appears to contain hype, manipulation, or missing uncertainty or attribution signals | Keep guardrail enforcement in the prompt and response-policy layer and emit violation metadata for traceability |
-| Prompt asset parse or validation failure | A versioned prompt asset cannot be loaded or validated in the planned externalized prompt system | Load `_baseline.yaml` as the last-known-good prompt asset instead of blocking response generation entirely |
-| Route-context skill asset unavailable | A route resolves successfully but one or more route-bound skills cannot be resolved | Continue with base prompt plus always-active skills, emit prompt fallback metadata, and avoid hard request failure |
-| Guardrail middleware internal failure | Guardrail evaluation fails due to internal middleware error or unavailable policy dependency | Preserve service continuity through a safe conservative response path and emit machine-detectable guardrail pipeline failure metadata |
+| Guardrail violation candidate detected | Generated output appears to weaken investment-safety rules, evidence discipline, or disclosure expectations | Keep enforcement in the prompt and response-policy boundary, prefer a conservative response path, and emit machine-detectable guardrail outcomes for traceability |
+| Preferred prompt contract unavailable | A selected prompt lineage or governed prompt contract cannot be resolved in the planned prompt system | Fall back to a stable baseline prompt lineage rather than blocking response generation entirely |
+| Route-specific prompt context unavailable | A route resolves successfully but the route-aware prompt context cannot be applied | Continue with shared policy and general analyst behavior, emit prompt fallback metadata, and avoid hard request failure |
+| Guardrail enforcement degraded | Response-policy evaluation is unavailable or incomplete because the guardrail path is degraded | Preserve service continuity through a conservative response path and emit machine-detectable guardrail degradation metadata |
 
 ##### 4.7.3.5 Planned Retrieval and Asset-Dependency Scenarios
 
-The following scenarios are architecture-relevant but remain future-state because the associated prompt-asset and retrieval layers are not yet fully implemented in the active runtime.
+The following scenarios are architecture-relevant but remain future-state because the richer retrieval and prompt-variant layers are not yet fully implemented in the active runtime.
 
 | Scenario | Stimulus and Environment | Expected Architectural Response |
 |----------|--------------------------|---------------------------------|
 | Vector-backed retrieval unavailable | A future LTM or RAG retrieval store is unavailable when retrieval-augmented behavior is expected | Degrade to a non-retrieval response path that continues to use available tools and prompt policy, while making reduced evidence coverage observable |
-| Prompt experiment or version asset unavailable | A selected experimental or version-specific prompt asset cannot be resolved | Fall back to the baseline prompt path and preserve prompt-version traceability for operators |
+| Selected prompt variant or experimental contract unavailable | A planned experimental or version-specific prompt contract cannot be resolved | Fall back to the stable prompt lineage and keep the degraded selection observable to operators |
 
 ##### 4.7.3.6 Performance and Availability Scenarios
 
@@ -767,19 +761,19 @@ The following scenarios are architecture-relevant but remain future-state becaus
 
 ##### 4.7.3.7 Unified Degraded-Operation Decision Diagram
 
-This diagram consolidates architecture-level degraded-operation paths and fallback interfaces across routing, prompt loading, memory, cache, and provider boundaries.
+This diagram consolidates architecture-level degraded-operation paths and fallback interfaces across routing, prompt selection, memory, cache, and provider boundaries.
 
 ```mermaid
 flowchart TD
   Start["Request enters internal boundary"]
   Route["Route classification"]
-  PromptLoad{"Prompt asset available?"}
+  PromptLoad{"Preferred prompt contract available?"}
   Checkpoint{"Checkpoint available?"}
   Cache{"Cache available?"}
   Invoke{"Primary provider successful?"}
   Fallback{"Fallback provider available?"}
   Full["Full-path response"]
-  Degraded["Degraded response\n(stateless/uncached/fallback metadata)"]
+  Degraded["Degraded response\n(baseline/stateless/uncached/fallback metadata)"]
   ControlledError["Controlled terminal error"]
   Served["Response surface"]
 
@@ -803,88 +797,99 @@ This view is architecture-level only. Runbook steps, CLI usage, monitoring dashb
 
 ### 4.8 Prompt and Behavior View
 
-#### 4.8.1 Current Behavior Contract
+This view addresses prompt policy as a governed behavioral boundary. It distinguishes the current architectural baseline from the planned prompt-system evolution so the architecture package can describe where prompt responsibilities belong without collapsing into code-level implementation detail.
 
-The current runtime still carries a hardcoded system prompt in the agent runtime. The prompt system architecture below describes the planned transition to externalized, versioned, and composable prompt assets.
+#### 4.8.1 Architectural Baseline
 
-```text
-You are a professional stock investment assistant.
-You help users with stock analysis, price lookups, technical analysis...
+The current baseline is a single runtime prompt contract that shapes agent behavior centrally, supported by prompt assets that are useful source material but not yet the full architectural system of record. At architecture level, the important point is not the literal prompt text but the role it plays: behavioral policy is already separated from tools, memory, and external evidence, even though it has not yet been externalized into the planned versioned asset model.
 
-When answering questions:
-1. Use the appropriate tools when you need real-time data
-2. Provide accurate, factual information based on tool outputs
-3. Include relevant disclaimers for investment-related advice
-4. Be concise but comprehensive in your responses
-```
+This baseline establishes three constraints that the evolved prompt architecture must preserve:
 
-#### 4.8.2 Prompt Architecture View
+1. Prompt policy governs behavior and response framing, not domain facts.
+2. Prompt policy may reference memory, tools, and retrieval boundaries, but it does not replace them.
+3. Prompt changes remain an internal system concern rather than a provider-managed or user-edited runtime surface.
+
+#### 4.8.2 Planned Prompt Architecture
 
 > **Status:** Proposed design — not yet implemented.
 > **Research Authority:** [PROMPT_SYSTEM_RESEARCH_PROPOSAL.md](./PROMPT_SYSTEM_RESEARCH_PROPOSAL.md)
 > **Governing ADRs:** [ADR-AGENT-002-SKILLS-PATTERN-PROMPT-COMPOSITION.md](./decisions/ADR-AGENT-002-SKILLS-PATTERN-PROMPT-COMPOSITION.md), [ADR-AGENT-003-EXTERNALIZE-VERSION-PROMPT-ASSETS.md](./decisions/ADR-AGENT-003-EXTERNALIZE-VERSION-PROMPT-ASSETS.md)
 
-| Concept | Architecture Term | Notes |
-|---------|-------------------|-------|
-| Prompt compiler (ADR-001) | `PromptAssetLoader -> PromptAssembler -> ResponseGuardrailMiddleware` | The compiler concept is realized as an explicit three-layer architecture in planned state |
-| Loader facade naming in implementation discussions | `PromptRegistry` (or equivalent) | Implementation naming may vary; architecture vocabulary stays on loader/assembler/middleware boundaries |
-| Asset taxonomy mapping | ADR taxonomy (`src/prompts/system|skills|experiments`) | Canonical architecture taxonomy for prompt assets |
+| Architectural Concern | Planned Boundary | Purpose |
+|-----------------------|------------------|---------|
+| Prompt policy source | Versioned prompt assets under the ADR-governed taxonomy | Keeps behavioral policy repo-owned, reviewable, and separable from runtime code |
+| Prompt composition | Prompt compiler path: `PromptAssetLoader -> PromptAssembler -> ResponseGuardrailMiddleware` | Separates asset discovery, composition, and response-policy enforcement into explicit boundaries |
+| Route-aware behavior | Skills-pattern composition using route-specific prompt context | Lets behavior narrow by request category without immediately requiring a multi-agent runtime |
+| Prompt observability | Prompt identity, selection, fallback, and guardrail outcomes as runtime metadata | Makes prompt behavior traceable without turning prompt metadata into business-state persistence |
+| Role-specific prompt contracts | Shared policy plus bounded analyst, orchestrator, and retrieval-specialist contracts | Centralizes common safety rules while allowing narrower role responsibilities over time |
 
 ```mermaid
 flowchart TD
-  L1["Layer 1: PromptAssetLoader\nDiscovers and loads versioned prompt assets from ADR taxonomy paths\nValidates schema, extracts version metadata, implements fallback"]
-  L2["Layer 2: PromptAssembler\nComposes base system prompt + active skills + LTM/STM context\nSelects skills by route classification and activation criteria\nInjects prompt version tag into metadata"]
-  L3["Layer 3: ResponseGuardrailMiddleware\nPost-processes agent output to enforce behavioral guardrails\nChecks: anti-hype blocklist, source attribution, uncertainty disclosure\nEmits guardrail violations as structured trace events"]
+  Policy["Prompt Policy Assets\nShared policy, role contracts, skills, experiments"]
+  Loader["PromptAssetLoader\nResolve the governed asset set for one request"]
+  Assembler["PromptAssembler\nCompose shared policy, role contract, route context, and bounded runtime context"]
+  Guard["ResponseGuardrailMiddleware\nEnforce response-policy rules and emit behavioral metadata"]
+  Surface["Response Surface\nUser-visible answer plus prompt-related observability"]
 
-  L1 --> L2 --> L3
+  Policy --> Loader --> Assembler --> Guard --> Surface
 ```
 
-| Component | Responsibility | Governing ADR |
-|-----------|----------------|---------------|
-| **PromptAssetLoader** | Load versioned prompt assets from ADR taxonomy paths; validate metadata; extract version identity; fall back to baseline asset on failure | ADR-003 |
-| **PromptAssembler** | Compose final prompt from base + skills + context; apply route-specific skill selection; inject prompt version into metadata; support experiment variant assignment | ADR-002 |
-| **ResponseGuardrailMiddleware** | Scan agent output for hype or manipulation language; verify source attribution and uncertainty disclosure; log violations | ADR-001 hard rules on behavior and evidence boundaries |
+| Planned Boundary | Architectural Responsibility | Governing Basis |
+|------------------|-----------------------------|-----------------|
+| **PromptAssetLoader** | Resolve the correct prompt asset set for a request, including stable fallback behavior when preferred assets are unavailable | ADR-003 |
+| **PromptAssembler** | Compose one prompt contract from shared policy, role-specific guidance, route-aware context, and bounded runtime inputs | ADR-002 |
+| **ResponseGuardrailMiddleware** | Keep response-policy enforcement separate from prompt assembly so behavioral controls remain visible and governable | ADR-001 hard rules on behavior and evidence boundaries |
 
-#### 4.8.3 Prompt Taxonomy and Skills Composition
+#### 4.8.3 Prompt Composition and Role Contracts
 
-| Type | ADR Taxonomy Path | Lifecycle | Example |
-|------|-------------------|-----------|---------|
-| **System prompts** | `src/prompts/system/` | Versioned, one active at a time | `v1.0.0.yaml` |
-| **Skills** | `src/prompts/skills/` | Composable, multiple active per request | `disclaimer.yaml`, `anti-hype.yaml`, `earnings-analysis.yaml` |
-| **Experiments** | `src/prompts/experiments/` | Temporary variants for controlled rollout | `exp-001-concise.yaml` |
-| **Baseline** | `src/prompts/system/_baseline.yaml` | Permanent fallback, never deleted | Last-known-good system prompt |
+The architecture treats prompt composition as an ordered behavioral-policy concern rather than an arbitrary string assembly problem. The intended composition path is deterministic so that shared safety rules stay authoritative while route-aware or role-specific behavior remains bounded.
 
-Prompt composition precedence in planned state:
+Planned composition order:
 
-1. Base system rules and persona
-2. Always-active skills and behavioral guardrails
-3. Route-matched skills
-4. LTM summary (when available)
-5. STM and conversation-scoped assumptions
-6. Retrieved evidence and tool-derived facts
-7. Task-specific instruction
-8. Output schema or formatting contract
+1. Shared system policy and investment-safety rules
+2. Always-active behavioral skills
+3. Route-specific prompt context via the Skills pattern
+4. Bounded memory context, when architecturally available
+5. Retrieved evidence and tool-derived facts
+6. Task-specific framing
+7. Output contract and formatting rules
+
+| Prompt Contract | Architectural Role | Boundary Rule |
+|-----------------|--------------------|---------------|
+| Shared policy contract | Carries investment-safety rules, evidence discipline, and general response expectations across all agent roles | Must remain stronger than any specialist-local customization |
+| ReAct analyst contract | Governs the primary tool-using analyst behavior | May reason with tools and evidence, but does not become a source of truth for facts |
+| Orchestrator contract | Future routing or delegation contract for deciding which specialist path should handle a request | Must stay narrow, classification-oriented, and not silently broaden into analyst behavior |
+| Retrieval specialist contract | Future retrieval-grounded synthesis contract | Must remain source-aware and treat retrieved content as bounded evidence rather than policy |
+
+The near-term architectural direction is the Skills pattern: one agent, one shared policy layer, and route-aware prompt context selected without requiring a full specialist-agent runtime. Richer multi-agent prompt contracts remain a later evolution path once the architecture needs explicit orchestration and synthesis boundaries.
 
 ```mermaid
 flowchart TD
-  Q["Query arrives"] --> R["Semantic Router classifies route (e.g., FUNDAMENTALS)"]
-  R --> L["PromptAssetLoader loads:\n- Base system prompt (version-tagged)\n- Always-active skills (disclaimer, anti-hype)\n- Route-matched skills (earnings-analysis, if FUNDAMENTALS)"]
-  L --> A["PromptAssembler composes final prompt:\n[Base] + [Always-Active Skills] + [Route Skills] + [LTM/STM] + [RAG] + [Output Schema]"]
-  A --> I["Agent invocation with assembled prompt\n(prompt_version + experiment_id recorded in trace span)"]
-  I --> G["ResponseGuardrailMiddleware post-processes output\n(blocklist scan, attribution check, uncertainty check)"]
+  Query["Query enters prompt boundary"] --> Route["Route-aware context selection"]
+  Route --> Shared["Shared policy contract"]
+  Shared --> Role["Role-specific prompt contract"]
+  Role --> Context["Bounded runtime context\n(memory, tools, retrieval)"]
+  Context --> Guardrail["Guardrail enforcement boundary"]
+  Guardrail --> Response["Response plus prompt metadata"]
 ```
 
-#### 4.8.4 Prompt Observability View
+#### 4.8.4 Prompt Observability and Degraded Modes
 
-| Trace Attribute | Source | Example Value |
-|----------------|--------|---------------|
-| `prompt.version` | PromptAssetLoader | `v1.2.0` |
-| `prompt.route` | Semantic Router | `FUNDAMENTALS` |
-| `prompt.experiment_id` | PromptAssembler | `exp-001` (or `null`) |
-| `prompt.selection_mode` | PromptAssembler / config | `fixed`, `forced`, `shadow`, `weighted` |
-| `prompt.skills_active` | PromptAssembler | `['disclaimer', 'anti-hype', 'earnings-analysis']` |
-| `prompt.fallback_reason` | PromptAssetLoader | `asset_parse_failed`, `route_skill_missing` |
-| `guardrail.violations` | ResponseGuardrailMiddleware | `[]` or `['hype_language_detected']` |
+Prompt observability is an architectural requirement because prompt behavior is part of the governed response path. The goal is not to expose raw prompt internals to end users, but to preserve enough metadata for review, evaluation, rollback analysis, and guarded evolution.
+
+| Observability Concern | Architectural Expectation | Why It Matters |
+|-----------------------|---------------------------|----------------|
+| Prompt identity | The active prompt contract should be attributable to a stable version or baseline lineage | Supports auditability, rollback analysis, and evaluation |
+| Route and role selection | Prompt behavior should remain attributable to the route-aware or role-aware contract chosen for the request | Makes behavior shifts understandable during operations and review |
+| Prompt fallback visibility | Degraded prompt selection should remain visible as metadata rather than silently changing behavior | Prevents hidden policy drift during asset or selection failures |
+| Guardrail outcomes | Response-policy checks should emit machine-detectable outcomes suitable for tracing and evaluation | Keeps behavior controls observable and reviewable |
+
+| Degraded Prompt Condition | Expected Architectural Response |
+|---------------------------|--------------------------------|
+| Preferred prompt asset unavailable | Continue on a stable baseline prompt path rather than blocking the entire response path |
+| Route-specific context unavailable | Preserve shared policy and general analyst behavior rather than failing the request outright |
+| Experiment or variant unavailable | Fall back to the stable prompt lineage while keeping the degraded selection observable |
+| Guardrail evaluation degraded | Preserve a conservative response path and emit machine-detectable degradation metadata |
 
 ---
 
@@ -917,7 +922,8 @@ flowchart TD
 
 | Original Concept (ADR-001 Prompt Compiler decision) | Evolved Realization (ADR-002, ADR-003) | Note |
 |-------------------------------|----------------------------------------|------|
-| Prompt Compiler | PromptAssetLoader → PromptAssembler → ResponseGuardrailMiddleware | The single-step compiler concept was elaborated into a three-layer architecture. See the ADR-001 Prompt Compiler decision and `TECHNICAL_DESIGN.md` for realization detail. |
+| Prompt Compiler | PromptAssetLoader → PromptAssembler → ResponseGuardrailMiddleware | The single-step compiler concept was elaborated into a governed composition path that separates asset resolution, composition, and response-policy enforcement. See `TECHNICAL_DESIGN.md` for realization detail. |
+| PromptRegistry (implementation-discussion alias) | Loader-facade naming for prompt asset resolution | When this name is used in proposal or implementation discussion, it should be understood as a technical facade within the PromptAssetLoader boundary rather than a separate architectural concept. |
 | Prompt asset taxonomy | ADR taxonomy (`src/prompts/system|skills|experiments`) | ADR taxonomy is canonical for architecture and decision authority. |
 | Intent-based routing | `StockQueryRoute` enum with 8 canonical routes | Originally described with 7 working-name intents; refined to 8 routes during implementation. |
 

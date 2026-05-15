@@ -424,113 +424,99 @@ def process_query(
 
 ### 3.5 Prompt Realization and Guardrails
 
-> **Status:** Proposed design — not yet implemented.
-> **Decision coupling:** This section remains planned-state because ADR-002 and ADR-003 are Proposed.
+> **Status:** Planned realization path.
+> **Decision coupling:** This section reflects the prompt-system direction proposed in the companion research document and the prompt-related ADRs.
 
-The prompt system replaces the current hardcoded system prompt with a three-layer architecture that externalizes, composes, and guards prompt content.
+The prompt system should evolve from a single governed runtime prompt into a structured realization path that externalizes prompt assets, composes route-aware behavior deterministically, and keeps response-policy enforcement visible. This section focuses on the intended realization model and extension path rather than on a full code-level walkthrough.
 
-| Concept | Technical Design Term | Notes |
-|---------|-----------------------|-------|
-| Prompt compiler (ADR-001) | `PromptAssetLoader -> PromptAssembler -> ResponseGuardrailMiddleware` | Compiler concept realized as explicit component boundaries in planned state |
-| Loader facade naming in implementation discussions | `PromptRegistry` (or equivalent) | Implementation naming may vary; boundary responsibilities remain unchanged |
-| Asset taxonomy mapping | ADR taxonomy (`src/prompts/system|skills|experiments`) | Canonical architecture-package taxonomy for prompt assets |
+#### 3.5.1 Current Baseline and Transition Direction
 
-#### 3.5.1 Mirror — Prompt Layer Interface Diagram
+The current baseline is a single runtime prompt contract supported by prompt assets under `src/prompts/`. The planned prompt system does not replace that baseline with an unrelated design; it formalizes it into explicit technical boundaries for asset resolution, prompt assembly, and guardrail enforcement.
 
-This realization-oriented mirror corresponds to the architecture prompt view in [ARCHITECTURE_DESIGN.md](./ARCHITECTURE_DESIGN.md) section 4.8.2.
+For the purposes of technical design, the important transition is:
+
+- from one centrally managed prompt contract to versioned prompt assets;
+- from implicit behavior shaping to explicit composition rules;
+- from broad prompt changes to bounded route-aware prompt context via the Skills pattern; and
+- from opaque prompt behavior to attributable prompt metadata and guardrail outcomes.
+
+#### 3.5.2 Planned Prompt Compiler Path
+
+The planned prompt compiler path realizes the architectural prompt boundary as three cooperating components.
+
+| Concept | Planned Realization | Technical Note |
+|---------|---------------------|----------------|
+| Prompt compiler | `PromptAssetLoader -> PromptAssembler -> ResponseGuardrailMiddleware` | The compiler concept is realized as an explicit path rather than a single opaque step |
+| Loader facade naming in implementation discussions | `PromptRegistry` (or equivalent) | When used, this name should be treated as a loader-facing facade rather than a separate design concept |
+| Prompt asset taxonomy | ADR-governed system, skills, experiments, and baseline assets | Technical layout should remain consistent with the architecture-package taxonomy |
 
 ```mermaid
 flowchart LR
 	Route["Route classification"] --> Loader["PromptAssetLoader"]
-	Config["Prompt config + ADR taxonomy paths"] --> Loader
-	Loader -->|"base prompt + metadata"| Assembler["PromptAssembler"]
-	LTM["LTM summary (planned)"] --> Assembler
-	STM["STM context"] --> Assembler
-	Skills["Skills assets"] --> Assembler
-	Assembler -->|"assembled prompt"| Agent["StockAssistantAgent invocation"]
+	Assets["Prompt assets + baseline lineage"] --> Loader
+	Loader --> Assembler["PromptAssembler"]
+	Context["Bounded runtime context"] --> Assembler
+	Assembler --> Agent["Agent invocation"]
 	Agent --> Guard["ResponseGuardrailMiddleware"]
-	Guard -->|"response + guardrail metadata"| Out["Response surface"]
+	Guard --> Out["Response + prompt metadata"]
 ```
 
-#### Current Hardcoded System Prompt
+| Component | Responsibility | Planned Outcome |
+|-----------|----------------|-----------------|
+| **PromptAssetLoader** | Resolve the correct prompt asset set for a request, including stable fallback behavior | Prompt identity remains attributable even when selection degrades |
+| **PromptAssembler** | Compose shared policy, role-specific guidance, route-aware context, and bounded runtime context into one prompt contract | Prompt behavior stays deterministic and reviewable |
+| **ResponseGuardrailMiddleware** | Enforce anti-hype, attribution, uncertainty, and related response-policy checks after model generation | Behavioral controls remain explicit and traceable |
 
-```text
-You are a professional stock investment assistant.
-You help users with stock analysis, price lookups, technical analysis...
+#### 3.5.3 Prompt Asset Model and Composition Rules
 
-When answering questions:
-1. Use the appropriate tools when you need real-time data
-2. Provide accurate, factual information based on tool outputs
-3. Include relevant disclaimers for investment-related advice
-4. Be concise but comprehensive in your responses
-```
+| Asset Type | Technical Purpose | Planned Lifecycle |
+|------------|-------------------|-------------------|
+| Shared policy assets | Carry investment-safety rules, response contract, and common tool-use guidance | Versioned and stable; inherited across roles |
+| Role contracts | Define the behavioral contract for the primary analyst role and future specialist roles | Versioned; activated by selected runtime path |
+| Skills assets | Add route-specific context without replacing the shared policy layer | Composable; activated by route-aware selection |
+| Experiment or variant assets | Support controlled evaluation and rollout of alternative prompt behaviors | Temporary and explicitly attributable |
+| Baseline asset | Provides the last-known-stable prompt lineage when preferred assets are unavailable | Permanent fallback path |
 
-#### Three-Layer Prompt Architecture
+The intended composition order remains deterministic:
 
-```mermaid
-flowchart TD
-	L1["Layer 1: PromptAssetLoader\nDiscovers and loads versioned prompt assets from ADR taxonomy paths\nValidates schema, extracts version metadata, implements fallback"]
-	L2["Layer 2: PromptAssembler\nComposes base system prompt + active skills + LTM/STM context\nSelects skills by route classification and activation criteria\nInjects prompt version tag into metadata"]
-	L3["Layer 3: ResponseGuardrailMiddleware\nPost-processes agent output to enforce behavioral guardrails\nChecks: anti-hype blocklist, source attribution, uncertainty disclosure\nEmits guardrail violations as structured trace events"]
+1. Shared policy and investment-safety rules
+2. Always-active behavioral skills
+3. Route-specific prompt context
+4. Bounded memory context, when available
+5. Retrieved evidence and tool-derived facts
+6. Task framing
+7. Output contract
 
-	L1 --> L2 --> L3
-```
+This order preserves ADR-001 separation of concerns. Behavioral policy is established before contextual evidence, and output shaping remains last so it cannot silently overwrite policy or factual grounding.
 
-#### Component Responsibilities
+#### 3.5.4 Near-Term Skills Pattern and Future Expansion
 
-| Component | Responsibility | SRS Coverage |
-|-----------|----------------|--------------|
-| **PromptAssetLoader** | Load versioned prompt assets from ADR taxonomy paths; validate metadata; extract version identity; fall back to baseline asset on failure | FR-1.4.5, FR-1.4.6, FR-1.4.8 |
-| **PromptAssembler** | Compose final prompt from base + skills + context; apply route-specific skill selection; inject prompt version into metadata; support experiment variant assignment | FR-1.4.7, FR-1.4.9, ADR-002 |
-| **ResponseGuardrailMiddleware** | Scan agent output for hype/manipulation language; verify source attribution and uncertainty disclosure; log violations | FR-1.5.1–1.5.5 |
+The near-term realization path is the Skills pattern: one agent, one shared policy layer, and route-aware prompt context selected from the existing route taxonomy. This is the preferred technical bridge because it improves specialization without immediately introducing orchestrator overhead or user-visible multi-agent complexity.
 
-#### Prompt Taxonomy
+| Direction | Technical Meaning | Scope |
+|-----------|-------------------|-------|
+| Near-term Skills pattern | Route classification selects additional prompt context for one agent invocation | Primary planned realization path |
+| Future orchestrator contract | A narrow routing contract may later choose between prompt families or specialist paths | Later evolution only |
+| Future retrieval specialist contract | Retrieval-grounded prompt contract may later narrow synthesis behavior around sourced evidence | Later evolution only |
 
-| Type | ADR Taxonomy Path | Lifecycle | Example |
-|------|-------------------|-----------|---------|
-| **System prompts** | `src/prompts/system/` | Versioned, one active at a time | `v1.0.0.yaml` |
-| **Skills** | `src/prompts/skills/` | Composable, multiple active per request | `disclaimer.yaml`, `anti-hype.yaml`, `earnings-analysis.yaml` |
-| **Experiments** | `src/prompts/experiments/` | Temporary variants for A/B testing | `exp-001-concise.yaml` |
-| **Baseline** | `src/prompts/system/_baseline.yaml` | Permanent fallback, never deleted | Last-known-good system prompt |
+#### 3.5.5 Prompt Observability and Fault Tolerance
 
-#### Prompt Assembly Order
+The technical design should preserve prompt behavior as observable runtime metadata rather than hidden implicit state.
 
-The prompt path should remain deterministic even after prompt assets are externalized. The intended assembly order is:
+| Metadata Category | Technical Expectation |
+|------------------|-----------------------|
+| Prompt identity | Stable version or baseline lineage should be attributable in traces or response metadata |
+| Route and role selection | Selected route-aware or role-aware contract should remain visible for diagnostics and evaluation |
+| Active prompt components | Selected skills or variant lineage should be reviewable when behavior changes |
+| Prompt fallback outcome | Degraded asset resolution should remain machine-detectable |
+| Guardrail outcome | Response-policy checks should emit reviewable success, warning, or degradation outcomes |
 
-1. Base system rules and persona
-2. Always-active skills and behavioral guardrails
-3. Route-matched skills
-4. LTM summary, when available
-5. STM and conversation-scoped assumptions
-6. Retrieved evidence and tool-derived facts
-7. Task-specific instruction
-8. Output schema or formatting contract
-
-This order preserves the separation of concerns defined by ADR-001: behavioral policy arrives before contextual state, retrieved evidence arrives after user and conversation context, and output-shaping instructions are applied last so they do not overwrite factual or policy inputs. The always-active and route-matched skill layers are the ADR-002 realization of the broader ADR-001 system-rules decision, not a competing prompt contract.
-
-```mermaid
-flowchart TD
-	Base["[Base System]"] --> Always["[Always-Active Skills]"]
-	Always --> Route["[Route-Matched Skills]"]
-	Route --> LTM["[LTM Summary]"]
-	LTM --> STM["[STM Context]"]
-	STM --> RAG["[RAG / Tool Evidence]"]
-	RAG --> Task["[Task Instruction]"]
-	Task --> Output["[Output Schema]"]
-	Output --> Final["Final Prompt Payload"]
-```
-
-#### Observability Integration
-
-| Trace Attribute | Source | Example Value |
-|----------------|--------|---------------|
-| `prompt.version` | PromptAssetLoader | `v1.2.0` |
-| `prompt.route` | Semantic Router | `FUNDAMENTALS` |
-| `prompt.experiment_id` | PromptAssembler | `exp-001` (or `null`) |
-| `prompt_selection_mode` | PromptAssembler / config | `fixed`, `forced`, `shadow`, `weighted` |
-| `prompt.skills_active` | PromptAssembler | `["disclaimer", "anti-hype", "earnings-analysis"]` |
-| `prompt_fallback_reason` | PromptAssetLoader | `asset_parse_failed`, `route_skill_missing` |
-| `guardrail.violations` | ResponseGuardrailMiddleware | `[]` or `["hype_language_detected"]` |
+| Failure Mode | Planned Response |
+|--------------|------------------|
+| Preferred prompt asset unavailable | Continue with baseline lineage rather than block the request |
+| Route-specific skill unavailable | Continue with shared policy and stable analyst behavior |
+| Experiment or variant unavailable | Fall back to the stable prompt line while preserving attribution |
+| Guardrail evaluation degraded | Preserve a conservative response path and emit machine-detectable degradation metadata |
 
 ### 3.6 Fine-Tuning Realization
 
