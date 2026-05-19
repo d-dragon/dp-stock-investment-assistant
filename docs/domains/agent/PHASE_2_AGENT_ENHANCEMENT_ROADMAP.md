@@ -1,20 +1,20 @@
 # Phase 2: LangChain Agent Enhancement Roadmap
 
-> **Document Version**: 1.2  
+> **Document Version**: 1.3  
 > **Created**: January 15, 2026  
-> **Last Updated**: May 12, 2026  
+> **Last Updated**: May 15, 2026  
 > **Status**: Planning  
 > **Branch**: `enhance-agent-prompt-system-followup`
 
 ## Executive Summary
 
-This roadmap outlines the Phase 2 enhancements for the Stock Investment Assistant's LangChain agent. Building on the Phase 1 foundation (ReAct agent, CachingTool pattern, ToolRegistry, semantic routing), Phase 2 focuses on **memory persistence**, **production-ready tools**, **structured outputs**, and **multi-agent orchestration**.
+This roadmap outlines the Phase 2 enhancements for the Stock Investment Assistant's LangChain agent. Building on the Phase 1 foundation (ReAct agent, CachingTool pattern, ToolRegistry, semantic routing), Phase 2 focuses on **conversation-scoped STM and context-boundary hardening**, **prompt-system evolution**, **production-ready tools**, **structured outputs**, and **multi-agent orchestration**.
 
 ### Phase Overview
 
 | Phase | Focus Area | Key Deliverables |
 |-------|------------|------------------|
-| **2A** | Foundation | Long-term memory, prompt management, structured outputs |
+| **2A** | Foundation | STM foundation, future LTM design, prompt management, structured outputs |
 | **2B** | Features | TradingView integration, enhanced semantic routing, multi-source data, reporting |
 | **2C** | Advanced | Multi-agent orchestration, technical refinements |
 
@@ -22,155 +22,157 @@ This roadmap outlines the Phase 2 enhancements for the Stock Investment Assistan
 
 ## Phase 2A: Foundation Enhancements
 
-### 2A.1 Long-Term Conversation Memory
+### 2A.1 Conversation Memory Foundation
 
-**Objective**: Enable the agent to maintain conversation context across sessions using LangGraph's memory primitives and MongoDB persistence.
+**Objective**: Establish conversation-scoped short-term memory (STM) as the current runtime baseline, keep session context as reusable parent business context, and prepare a separate future long-term memory (LTM) track for stable personalization.
 
-#### Current State
+> **Status (2026-05-15):** The STM foundation is implemented on the REST path. The canonical runtime contract is `conversation_id -> thread_id` with the hierarchy `workspace -> session -> conversation`. Socket.IO lifecycle parity, automated summarization, and future LTM remain follow-up work.
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│                    CURRENT: Stateless                       │
-├─────────────────────────────────────────────────────────────┤
-│  API Request                                                │
-│      ↓                                                      │
-│  agent.invoke({"messages": [HumanMessage(query)]})         │
-│      ↓                                                      │
-│  Response (no history retained)                             │
-└─────────────────────────────────────────────────────────────┘
-```
-
-- Agent processes each query in isolation with single `HumanMessage`
-- No `thread_id` passed to agent `invoke()` configuration
-- No checkpointer configured in LangGraph
-- MongoDB `chats` and `sessions` schemas exist but not connected to agent
-- `ChatRepository.get_by_session()` methods available but unused
-
-#### Target State
+#### Current Baseline
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                    TARGET: Persistent Memory                │
-├─────────────────────────────────────────────────────────────┤
-│  API Request (with session_id)                              │
-│      ↓                                                      │
-│  ChatService (validates session, gets workspace context)    │
-│      ↓                                                      │
-│  agent.invoke(                                              │
-│      {"messages": [HumanMessage(query)]},                   │
-│      config={"configurable": {"thread_id": session_id}}    │
-│  )                                                          │
-│      ↓                                                      │
-│  MongoDBSaver Checkpointer (auto-persists conversation)     │
-│      ↓                                                      │
-│  Response (with full history context)                       │
-└─────────────────────────────────────────────────────────────┘
+┌────────────────────────────────────────────────────────────────────┐
+│              CURRENT BASELINE: Conversation-Scoped STM            │
+├────────────────────────────────────────────────────────────────────┤
+│  API Request (conversation_id optional)                           │
+│      ↓                                                            │
+│  REST: ChatService validates lifecycle, loads parent context      │
+│      ↓                                                            │
+│  agent.invoke(..., config={"configurable": {                     │
+│      "thread_id": conversation_id}}) when stateful               │
+│      ↓                                                            │
+│  MongoDBSaver persists recoverable thread-local state             │
+│      ↓                                                            │
+│  Response + metadata sync on REST path                            │
+└────────────────────────────────────────────────────────────────────┘
 ```
 
-#### Work Items
+- `APIServer` creates and injects a LangGraph `MongoDBSaver` checkpointer.
+- The canonical STM binding is `conversation_id -> thread_id`, not `session_id -> thread_id`.
+- Sessions remain parent business context; sibling conversations do not share checkpoints.
+- The REST chat path uses `ChatService` to reject archived conversations, ensure metadata records, and record per-turn metadata.
+- Requests that omit `conversation_id` continue through the stateless single-turn path.
+- Socket.IO preserves `conversation_id` but still bypasses `ChatService` lifecycle and metadata helpers.
+- Summary fields and thresholds exist, but automated summarization is not yet triggered during chat execution.
+- Future LTM personalization storage is not yet implemented.
 
-1. **Add LangGraph Checkpointer Integration**
-   - Install `langgraph-checkpoint-mongodb` package
-   - Configure `MongoDBSaver` with existing MongoDB connection
-   - Wire checkpointer into `StockAssistantAgent._build_agent_executor()`
+#### Target Architecture
 
-2. **Implement Thread ID Flow**
-   - Modify `ChatService` to pass `session_id` as `thread_id`
-   - Update API routes to accept and propagate `session_id`
-   - Update Socket.IO handlers for streaming with session context
+```
+┌────────────────────────────────────────────────────────────────────┐
+│         TARGET: Layered Memory with Explicit Boundary Split       │
+├────────────────────────────────────────────────────────────────────┤
+│  Session context (parent business context)                        │
+│      ↓                                                            │
+│  Conversation-scoped STM via checkpoints                          │
+│      ↓                                                            │
+│  Agent runtime resumes thread-local state with conversation_id    │
+│      ↓                                                            │
+│  Future LTM store persists stable personalization only            │
+│      ↓                                                            │
+│  RAG and tools remain separate evidence and computation layers    │
+└────────────────────────────────────────────────────────────────────┘
+```
 
-3. **Add Memory Configuration**
-   - Add memory settings to `config.yaml` (max messages, summarization threshold)
-   - Implement conversation summarization for long threads
-   - Add memory-aware system prompt section
+- STM remains conversation-scoped, with thread-local checkpoint state persisted through LangGraph using the canonical `conversation_id -> thread_id` binding.
+- Session context is resolved outside the agent thread as service-owned parent business context and may be merged into active conversation context without collapsing sibling conversations into one checkpoint surface.
+- Conversation lifecycle metadata and archive status remain service-owned authorities alongside, but outside, checkpoint persistence.
+- Future LTM is a cross-conversation personalization layer for stable preferences and symbol-tracking context only.
+- RAG remains the home for sourced evidence, tools remain the home for fetched numbers and deterministic computation, and the prompt system remains a behavioral boundary rather than a storage layer.
 
-4. **Cross-Thread Memory Store (Optional)**
-   - Implement `InMemoryStore` or MongoDB-backed store for user facts
-   - Enable agent to remember user preferences across sessions
+#### Remaining Work Items
+
+1. **Close transport parity gaps**
+    - Route Socket.IO through the same lifecycle and metadata helpers as REST, or provide an equivalent service-owned boundary.
+    - Preserve archive enforcement and metadata synchronization across both transports.
+
+2. **Wire STM summarization behavior**
+    - Convert the current summary schema and thresholds into an actual runtime trigger.
+    - Keep summarization framed as STM context management, not as LTM or RAG.
+
+3. **Clarify session-context realization**
+    - Keep service-side context resolution authoritative.
+    - Document prompt or runtime injection only where the behavior is actually realized.
+
+4. **Design future LTM phase**
+    - Introduce a namespaced store for stable personalization and symbol-tracking context.
+    - Keep LTM separate from financial facts, RAG evidence, and prompt assets.
+
+5. **Extend observability and repair posture**
+    - Keep reconciliation and migration tooling aligned with the canonical `conversation_id` contract.
+    - Expand test and runbook coverage for degraded-state conditions such as checkpoint loss or metadata divergence.
 
 #### Architecture Decision
 
-> **Design Note**: Use LangGraph's `MongoDBSaver` for checkpointer integration (simpler, built-in support). Continue using existing `ChatRepository` for UI queries (chat history display, search). This dual approach leverages both LangGraph's memory primitives and existing repository patterns.
+> **Design Note**: Treat session context, lifecycle metadata, STM, future LTM, RAG, tools, and the prompt system as separate boundaries. The implemented STM baseline uses LangGraph `MongoDBSaver` for recoverable thread-local state, while service-owned metadata and lifecycle controls stay outside checkpoint persistence.
 
 #### Implementation Pattern
 
 ```python
-from langgraph.checkpoint.mongodb import MongoDBSaver
-from langchain_core.messages import HumanMessage
+def process_query(self, query: str, *, conversation_id: str | None = None) -> AgentResponse:
+     config = None
+     if self.checkpointer is not None and conversation_id:
+          config = {"configurable": {"thread_id": conversation_id}}
 
-# In StockAssistantAgent.__init__()
-self.checkpointer = MongoDBSaver(
-    connection_string=config["mongodb"]["uri"],
-    db_name=config["mongodb"]["database"],
-    collection_name="agent_checkpoints"
-)
-
-# In _build_agent_executor()
-self.agent_executor = create_react_agent(
-    model=self.model,
-    tools=self.tools,
-    checkpointer=self.checkpointer  # Add checkpointer
-)
-
-# In process_query()
-def process_query(self, query: str, session_id: str) -> AgentResponse:
-    config = {"configurable": {"thread_id": session_id}}
-    result = self.agent_executor.invoke(
-        {"messages": [HumanMessage(content=query)]},
-        config=config
-    )
-    return self._build_response(result)
+     result = self.agent_executor.invoke(
+          {"messages": [HumanMessage(content=query)]},
+          config=config,
+     )
+     return self._build_response(result)
 ```
 
 #### Dependencies
 
-- `langgraph-checkpoint-mongodb` package
-- MongoDB connection (existing)
-- Session management service (existing `ChatService`)
+- LangGraph checkpointer wiring through the API server bootstrap
+- Service-owned conversation lifecycle and metadata boundary in `ChatService`
+- Session and conversation management services that preserve `workspace -> session -> conversation`
+- Future LTM design and storage strategy for Phase 2A.2+
 
 #### Success Criteria
 
-- Agent recalls previous conversation turns within same session
-- Conversation state persists across API restarts
-- Memory does not degrade response latency by >100ms
-- LangSmith traces show message history in context
+- The same `conversation_id` resumes the same conversation thread across requests and restarts.
+- Requests without `conversation_id` preserve stateless single-turn behavior.
+- Archived conversations are rejected on the service-governed path rather than silently resumed.
+- Socket.IO parity and automated summarization are tracked as explicit remaining work, not implied as completed runtime behavior.
+- Future LTM work remains separate from STM, RAG, and prompt-asset plans.
 
 ---
 
-### 2A.2 System Prompt Refinement & A/B Testing
+### 2A.2 Prompt Compiler Path & Controlled Rollout
 
-**Objective**: Externalize system prompts to files, enable version control, and support A/B testing of prompt variants.
+**Objective**: Externalize prompt assets, establish the planned prompt compiler path (`PromptAssetLoader -> PromptAssembler -> ResponseGuardrailMiddleware`), and support controlled evaluation and rollout of prompt changes.
 
-> **Status (2026-05-06):** Research complete — execution plan formalized. The governing design and dependency-ordered backlog now live in [PROMPT_SYSTEM_RESEARCH_PROPOSAL.md v1.3](./PROMPT_SYSTEM_RESEARCH_PROPOSAL.md). This roadmap section mirrors the same backlog IDs, milestone gates, and near-term delivery ordering for Phase 2 planning. Requirements remain formalized in SRS v2.3 (FR-1.4.6–1.4.9, FR-1.5, NFR-5.2.5–5.2.7, AC-8). Architecture decisions remain governed by [ADR-002 (Skills Pattern)](./decisions/AGENT_ARCHITECTURE_DECISION_RECORDS.md) and [ADR-003 (Externalized Prompts)](./decisions/AGENT_ARCHITECTURE_DECISION_RECORDS.md).  
-> **Next step:** Start Milestone M1 with `PS-01` to `PS-03` to establish the prompt asset baseline, prompt loader, and config validation surface.
+> **Status (2026-05-15):** Research complete and terminology aligned. The governing design and dependency-ordered backlog now live in [PROMPT_SYSTEM_RESEARCH_PROPOSAL.md v1.4](./PROMPT_SYSTEM_RESEARCH_PROPOSAL.md). This roadmap section mirrors the same backlog IDs, milestone gates, and near-term delivery ordering for Phase 2 planning. Requirements remain formalized in SRS v2.3 (FR-1.4.6–1.4.9, FR-1.5, NFR-5.2.5–5.2.7, AC-8). Architecture decisions remain governed by [ADR-002 (Skills Pattern)](./decisions/AGENT_ARCHITECTURE_DECISION_RECORDS.md) and [ADR-003 (Externalized Prompts)](./decisions/AGENT_ARCHITECTURE_DECISION_RECORDS.md).  
+> **Next step:** Start Milestone M1 with `PS-01` to `PS-03` to establish the baseline asset, prompt loader, and config validation surface.
 
-#### Current State
+#### Current Baseline
 
 - `REACT_SYSTEM_PROMPT` hardcoded in `stock_assistant_agent.py` (lines 56-70)
 - No mechanism to test prompt variants
 - `langchain_adapter.py` has `PromptBuilder` pattern but used only for legacy fallback
 
-#### Target State
+#### Target Compiler Path
 
 - Prompt assets organized by ADR taxonomy under `src/prompts/system/`, `src/prompts/skills/`, and `src/prompts/experiments/`
 - Prompt variants identified by version, variant label, and agent role
+- Shared policy, route-aware skills, and bounded runtime context composed through the planned compiler path
 - Offline evaluation and guarded rollout integrated with LangSmith metadata
 - Prompt selection configurable through a dedicated `prompts.*` config surface
 
-#### Execution Backlog Mirror (Synced to Proposal v1.3)
+#### Execution Backlog Mirror (Synced to Proposal v1.4)
 
 > Detailed dependency authority remains in [PROMPT_SYSTEM_RESEARCH_PROPOSAL.md](./PROMPT_SYSTEM_RESEARCH_PROPOSAL.md). This roadmap mirrors the execution backlog and milestone gates so planning and design stay synchronized in both directions.
 
 | Order | Backlog ID | Priority | Depends On | Roadmap Outcome |
 |---|---|---|---|---|
 | 1 | `PS-01` | P0 | None | Extract the current ReAct prompt into `src/prompts/system/react_analyst/v1.md` and preserve it as the canonical baseline asset |
-| 2 | `PS-02` | P0 | `PS-01` | Implement `PromptRegistry` / loader behavior with metadata parsing, caching, validation, and baseline fallback conventions |
+| 2 | `PS-02` | P0 | `PS-01` | Implement `PromptAssetLoader` / loader-facade behavior with metadata parsing, caching, validation, and baseline fallback conventions |
 | 3 | `PS-03` | P0 | `PS-01`, `PS-02` | Add `prompts.*` config surface and fail-closed validation rules so only valid prompt assets can activate |
 | 4 | `PS-04` | P0 | `PS-02`, `PS-03` | Replace `REACT_SYSTEM_PROMPT` as the primary source of truth for `StockAssistantAgent` |
 | 5 | `PS-05` | P0 | `PS-04` | Inject prompt identity into response metadata and trace metadata for top-level runs |
 | 6 | `PS-06` | P0 | `PS-02`, `PS-04`, `PS-05` | Add rollback safety, WARN logging, and fault-injection coverage for invalid prompt activation |
 | 7 | `PS-07` | P1 | `PS-04` | Create route-context prompt assets for all 8 `StockQueryRouter` categories |
-| 8 | `PS-08` | P1 | `PS-05`, `PS-07` | Compose route-aware prompt behavior with `PromptComposer` and `@dynamic_prompt` middleware |
+| 8 | `PS-08` | P1 | `PS-05`, `PS-07` | Compose route-aware prompt behavior with `PromptAssembler` and `@dynamic_prompt` middleware |
 | 9 | `PS-09` | P1 | `PS-05`, `PS-08` | Build the offline evaluation harness and baseline prompt comparison datasets |
 | 10 | `PS-10` | P1 | `PS-06`, `PS-09` | Enforce finance-domain guardrail verification before prompt promotion |
 | 11 | `PS-11` | P2 | `PS-09`, `PS-10` | Add controlled experiment and rollout modes (`fixed`, `forced`, `shadow`, optional `weighted`) |
@@ -207,11 +209,11 @@ status: active
 You are a professional stock investment assistant...
 
 # src/core/stock_assistant_agent.py
-from core.prompt_registry import PromptRegistry
+from core.prompt_asset_loader import PromptAssetLoader
 
 class StockAssistantAgent:
     def _load_system_prompt(self) -> str:
-        selection = self._prompt_registry.resolve(
+        selection = self._prompt_asset_loader.resolve(
             agent_role="react_analyst",
             version=self.config["prompts"]["system"]["active_version"],
         )
@@ -223,7 +225,7 @@ class StockAssistantAgent:
 - Existing `PromptBuilder` pattern in `langchain_adapter.py` as migration source material, not final authority
 - LangSmith for trace metadata and evaluation (existing integration)
 - Semantic router integration for route-based skill activation
-- Research and dependency authority: [PROMPT_SYSTEM_RESEARCH_PROPOSAL.md v1.3](./PROMPT_SYSTEM_RESEARCH_PROPOSAL.md)
+- Research and dependency authority: [PROMPT_SYSTEM_RESEARCH_PROPOSAL.md v1.4](./PROMPT_SYSTEM_RESEARCH_PROPOSAL.md)
 - SRS: FR-1.4.5–1.4.9, FR-1.5, NFR-5.2.5–5.2.7, NFR-6.2.3, AC-8
 - ADRs: [ADR-002](./decisions/AGENT_ARCHITECTURE_DECISION_RECORDS.md), [ADR-003](./decisions/AGENT_ARCHITECTURE_DECISION_RECORDS.md)
 
@@ -787,7 +789,7 @@ async def stream_with_retry(self, query: str, max_retries: int = 3):
 from langsmith import trace
 
 @trace(name="process_query", tags=["agent"])
-def process_query(self, query: str, session_id: str) -> AgentResponse:
+def process_query(self, query: str, conversation_id: str) -> AgentResponse:
     with trace.span("route_query"):
         route = self.router.route(query)
     with trace.span("invoke_agent"):
@@ -905,7 +907,7 @@ langsmith:
 
 | Item | Impact | Effort | Priority |
 |------|--------|--------|----------|
-| 2A.1 Long-term Memory | High | Medium | P0 |
+| 2A.1 Conversation Memory Foundation | High | Medium | P0 |
 | 2A.2 Prompt Refinement | Medium | Low | P1 |
 | 2A.3 Structured Outputs | High | Low | P0 |
 | 2B.1 TradingView Tool | Medium | Medium | P1 |

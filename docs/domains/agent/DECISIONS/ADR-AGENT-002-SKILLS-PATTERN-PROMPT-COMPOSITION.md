@@ -9,7 +9,7 @@
 | **Standards Stance** | Practice-Based ADR discipline |
 | **Status** | Proposed |
 | **Date** | 2026-04-13 |
-| **Last Updated** | 2026-05-06 |
+| **Last Updated** | 2026-05-15 |
 | **Context** | DP-StockAI-Assistant |
 | **Decision Owners** | Engineering · Architecture · Agent maintainers |
 
@@ -17,14 +17,14 @@
 
 ## 1. Decision Summary
 
-Adopt a skills pattern for agent prompt composition so route-specific behavior, cross-cutting guardrails, and reusable domain instructions can be authored, tested, versioned, and activated independently rather than being maintained as one monolithic system prompt.
+Adopt a skills pattern as the near-term prompt-composition model inside the governed prompt compiler path so route-specific behavior, cross-cutting guardrails, and reusable domain instructions can be authored, tested, versioned, and activated independently rather than being maintained as one monolithic system prompt.
 
 The composition model is built from:
 
-- Base system instructions
+- Shared policy and base system instructions
 - Always-active skills
 - Route-matched skills
-- Conversation and memory context
+- Bounded runtime context
 - Retrieved evidence
 - Output schema constraints
 
@@ -48,7 +48,7 @@ The composition model is built from:
 
 ## 4. Problem Statement
 
-ADR-001 defines a deterministic prompt compiler that assembles system rules, LTM, STM, RAG evidence, task instructions, and output schema into a single prompt payload. As the agent scope grows (new intents, new financial domains, regulatory constraints), monolithic prompt definitions become increasingly fragile:
+ADR-001 defines a deterministic prompt compiler that assembles system rules, LTM, STM, RAG evidence, task instructions, and output schema into a single prompt payload. As the prompt package evolves from the current hardcoded ReAct baseline toward the planned `PromptAssetLoader -> PromptAssembler -> ResponseGuardrailMiddleware` path, monolithic prompt definitions become increasingly fragile:
 
 - **Change collision risk**: Editing one domain’s instructions can inadvertently affect unrelated behaviors.
 - **Testing burden**: The entire prompt must be regression-tested on every edit.
@@ -56,30 +56,26 @@ ADR-001 defines a deterministic prompt compiler that assembles system rules, LTM
 
 ## 5. Decision
 
-Adopt a **Skills pattern** that decomposes the agent’s behavioral repertoire into independently authorable, testable, and composable prompt fragments called *skills*.
+Adopt a **Skills pattern** that decomposes the agent’s behavioral repertoire into independently authorable, testable, and composable prompt fragments called *skills* within the planned prompt compiler path.
 
 Each skill:
-- Is a self-contained YAML/Markdown file with metadata (name, version, description, tags).
+- Is a self-contained governed prompt asset with front-matter metadata (name, version, description, tags, activation criteria).
 - Targets a single domain concern (e.g., `earnings-analysis`, `risk-framing`, `disclaimer-injection`, `anti-hype-guardrail`).
 - Declares its own activation criteria (e.g., route match, keyword trigger, always-active).
-- Is loaded and composed by the PromptAssembler at invocation time according to the active route and configuration.
+- Is resolved by `PromptAssetLoader` and ordered by `PromptAssembler` according to the active route and configuration.
 
 The composition flow implied by this decision is:
 
 ```
-[Base System Instructions]
+[Governed Prompt Assets]
+      ↓ PromptAssetLoader
+[Shared Policy + Always-Active Skills]
       +
-[Always-Active Skills]     (e.g., disclaimer, anti-hype)
-      +
-[Route-Matched Skills]     (e.g., earnings-analysis for EARNINGS_SUMMARY route)
-      +
-[LTM + STM Context]
-      +
-[RAG Evidence]
-      +
-[Output Schema]
-      ↓
-   Prompt Compiler → LLM
+[Route-Matched Skills]
+      ↓ PromptAssembler
+[Bounded Runtime Context + Evidence + Output Contract]
+      ↓ Model Invocation
+   ResponseGuardrailMiddleware → Response Surface
 ```
 
 ## 6. Rationale
@@ -98,10 +94,11 @@ The composition flow implied by this decision is:
 - Skills can be authored, reviewed, and versioned independently.
 - Route-specific behaviors are encapsulated, reducing cross-domain regressions.
 - Cross-cutting concerns (disclaimers, guardrails) are defined once and applied consistently.
+- Keeps the near-term target on one agent plus route-aware composition instead of prematurely requiring a multi-agent runtime.
 - Enables prompt A/B experimentation at the skill level (see FR-1.4.9).
 
 **Trade-offs:**
-- Introduces a skill registry/loader component (PromptAssetLoader) with file-system I/O.
+- Depends on a governed asset-loading boundary (`PromptAssetLoader`) and externalized prompt assets defined by ADR-003.
 - Skill composition order and conflict resolution rules must be defined (priority, override semantics).
 - Debugging assembled prompts requires tooling to dump the final composed payload.
 
@@ -128,22 +125,24 @@ The composition flow implied by this decision is:
 - **Route-Matched Skills:** Route-specific prompt fragments activated according to classification and configuration.
 - **Skill Activation Criteria:** Metadata-driven rules that determine when a skill is applied.
 - **PromptAssembler:** Composition mechanism that orders and merges the active skill set with base instructions and context.
+- **Compiler-Scoped Skills Model:** Near-term architectural rule that skills are one composition layer inside the broader prompt compiler path, not a separate runtime system.
 - **Skills Composition Governance:** Architectural rule that prompt behavior is decomposed into independently governable fragments rather than one monolithic prompt asset.
 
 ### 9.3 Applicability Note
 
-This ADR is **Proposed**. The architecture-description package may describe this pattern as the planned direction for prompt behavior and composition, but companion documents must not imply that the full skills runtime, loader behavior, or skill-governance tooling is already implemented unless realization documents explicitly say so.
+This ADR is **Proposed**. The architecture-description package may describe this pattern as the planned near-term composition layer inside the prompt compiler path, but companion documents must not imply that route-aware skills runtime behavior, loader behavior, or skill-governance tooling are already implemented unless realization documents explicitly say so.
 
 ### 9.4 Consistency Checkpoints
 
 - [ ] Prompt and Behavior, Process, and Development views use the same skills terminology and view names defined in the architecture description.
 - [ ] Skills are described as prompt-behavior components, not as data stores, business-state owners, or substitutes for tool execution.
 - [ ] `PromptAssembler` remains distinct from the higher-level `Prompt Compiler` concept and from `PromptAssetLoader` in ADR-003.
+- [ ] Skills are described as the near-term route-aware composition model before any later specialist prompt families or multi-agent runtime evolution.
 - [ ] Proposed-status language remains visible anywhere this ADR is reflected in companion documents.
 
 ## 10. Implementation Checklist
 
-- [ ] Define skill YAML schema (name, version, description, activation_criteria, content)
+- [ ] Define skill asset schema (name, version, activation_criteria, tags, content)
 - [ ] Implement PromptAssetLoader to discover and load skill files from `src/prompts/skills/`
 - [ ] Implement PromptAssembler that composes skills based on active route and configuration
 - [ ] Migrate existing hardcoded system prompt into base + skill files

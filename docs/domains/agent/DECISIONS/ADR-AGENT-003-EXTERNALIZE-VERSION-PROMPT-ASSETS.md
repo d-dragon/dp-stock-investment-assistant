@@ -9,7 +9,7 @@
 | **Standards Stance** | Practice-Based ADR discipline |
 | **Status** | Proposed |
 | **Date** | 2026-04-13 |
-| **Last Updated** | 2026-05-06 |
+| **Last Updated** | 2026-05-15 |
 | **Context** | DP-StockAI-Assistant |
 | **Decision Owners** | Engineering · Architecture · Agent maintainers |
 
@@ -17,15 +17,15 @@
 
 ## 1. Decision Summary
 
-Externalize prompt assets as versioned file-based configuration so prompt changes, version identity, rollback, and controlled experimentation are managed through governed assets and runtime loading rather than code edits.
+Externalize prompt assets as versioned, repo-owned prompt assets so prompt changes, version identity, rollback, and controlled experimentation are managed through governed assets and runtime loading rather than code edits.
 
 The asset model is composed of:
 
-- Versioned system prompt files
-- Baseline fallback assets
-- Skill fragments and prompt variants
-- Runtime prompt loading and validation
-- Configuration-driven reload and rollback behavior
+- Versioned system prompt assets
+- Baseline fallback assets per prompt lineage
+- Skill fragments and experiment variants
+- Runtime prompt loading and validation through `PromptAssetLoader`
+- Configuration-driven activation, reload, and rollback behavior
 
 ## 2. Stakeholders Affected
 
@@ -54,34 +54,35 @@ The current agent loads its system prompt from a hardcoded string in `src/core/s
 
 ## 5. Decision
 
-Externalize all prompt content into **versioned file-based assets** under a dedicated directory (e.g., `src/prompts/`), version-tagged via embedded metadata, and loaded at runtime by a `PromptAssetLoader` component.
+Externalize all prompt content into **versioned prompt assets** under a dedicated directory (e.g., `src/prompts/`), tagged with embedded metadata and loaded at runtime by a `PromptAssetLoader` component inside the planned prompt compiler path.
 
 Key design choices:
-1. **YAML format** with front-matter metadata (name, version, description, author, activation_criteria) and content body.
+1. **Governed text-asset format** with front-matter metadata (name, version, description, author, activation criteria) and content body.
 2. **Version identity**: Each prompt asset embeds a version string (e.g., `v1.0.0`); the loader injects this into agent response metadata and trace spans (FR-1.4.6, NFR-5.2.5).
-3. **Baseline fallback**: A `_baseline.yaml` prompt is always present and is loaded when the configured prompt version fails to parse or is missing (FR-1.4.8).
-4. **Hot-reload capability**: The loader supports configuration-driven reload (via config change or service restart) without requiring a new code release (NFR-6.2.3).
+3. **Baseline fallback**: Each governed prompt lineage has a known-good baseline asset or designated baseline alias that is loaded when the selected asset fails to parse or is missing (FR-1.4.8).
+4. **Activation and reload behavior**: The loader supports configuration-driven activation and reload without requiring a new code release or a mandatory full service restart, aligning with the external-prompt-management contract (FR-1.4.5, NFR-6.2.3).
 5. **Directory convention**:
    ```
    src/prompts/
-     system/           # Base system prompts
-       _baseline.yaml  # Fallback prompt (always present)
-       v1.0.0.yaml     # Versioned system prompt
-     skills/            # Composable skill fragments (see ADR-002)
-       disclaimer.yaml
-       anti-hype.yaml
-       earnings-analysis.yaml
-     experiments/       # Prompt variants for A/B testing
-       exp-001-concise.yaml
+     system/
+       shared/                    # Shared policy assets
+       react_analyst/             # Current primary role lineage
+         _baseline.md             # Example baseline asset
+         v1.md                    # Example versioned asset
+     skills/
+       always_on/                 # Cross-cutting skills (see ADR-002)
+       routes/                    # Route-matched skills
+     experiments/
+       react_analyst/             # Candidate prompt variants
    ```
 
 ## 6. Rationale
 
 | Concern | Hardcoded Prompt | Externalized Assets |
 |---------|-----------------|---------------------|
-| Change velocity | Code commit + deploy per edit | File edit + reload |
+| Change velocity | Code commit + deploy per edit | Asset edit + governed activation path |
 | Version traceability | None (git blame only) | Embedded version in metadata and traces |
-| Rollback | Revert commit + redeploy | Switch config to previous version |
+| Rollback | Revert commit + redeploy | Switch selection to the baseline or prior version |
 | Experimentation | Conditional code branches | Variant files + experiment config |
 | Audit / compliance | Implicit in code history | Explicit version tag per invocation |
 
@@ -92,6 +93,7 @@ Key design choices:
 - Every agent invocation is traceable to a specific prompt version (FR-1.4.6).
 - Rollback is a configuration change, not a code revert (FR-1.4.8).
 - Enables prompt experimentation without code branches (FR-1.4.9).
+- Keeps the near-term target on the compiler path for the current ReAct baseline while still allowing later specialist prompt families.
 
 **Trade-offs:**
 - Requires a file-based loader with validation and caching.
@@ -121,25 +123,27 @@ Key design choices:
 - **Versioned Prompt Assets:** File-based prompt artifacts that carry explicit version identity and support controlled change.
 - **Baseline Fallback Asset:** Last-known-good prompt asset used when a selected version is missing or invalid.
 - **PromptAssetLoader:** Asset-loading mechanism that discovers, validates, and resolves prompt assets before assembly.
-- **Runtime Reload Behavior:** Architecture-level ability to adopt prompt changes through configuration reload or restart rather than code redeployment.
+- **Prompt Lineage:** A governed family of related prompt assets for one role or runtime path with a defined baseline and candidate versions.
+- **Runtime Reload Behavior:** Architecture-level ability to adopt prompt changes through configuration refresh or watcher-driven reload rather than code redeployment.
 - **Prompt-Version Traceability:** Runtime metadata expectation that prompt versions and experiment identifiers remain observable to operators.
 
 ### 9.3 Applicability Note
 
-This ADR is **Proposed**. The architecture-description package may describe externalized prompt assets as the intended architecture direction, but companion documents must continue to distinguish the proposed asset model from the current hardcoded runtime prompt until implementation and deployment artifacts actually converge on this design.
+This ADR is **Proposed**. The architecture-description package may describe externalized prompt assets as the intended asset layer inside the planned prompt compiler path, but companion documents must continue to distinguish the proposed asset model from the current hardcoded runtime prompt until implementation and deployment artifacts actually converge on this design.
 
 ### 9.4 Consistency Checkpoints
 
 - [ ] Prompt and Behavior, Development, Deployment, and Operations and Maintenance views use the same asset-model terminology defined by this ADR.
 - [ ] Companion documents do not describe versioned prompt assets, baseline fallback, or reload behavior as current runtime fact unless realization artifacts confirm implementation.
 - [ ] `PromptAssetLoader` remains distinct from `PromptAssembler` and from the broader `Prompt Compiler` concept in concept-evolution discussions.
+- [ ] Companion documents use the same near-term prompt asset taxonomy (`src/prompts/system|skills|experiments`) when describing planned file layout.
 - [ ] Prompt observability and rollback language remains consistent with this ADR's proposed status and with the architecture description's planned-state labeling.
 
 ## 10. Implementation Checklist
 
-- [ ] Define YAML prompt asset schema with JSON Schema validation
+- [ ] Define prompt asset schema with front-matter validation
 - [ ] Implement PromptAssetLoader with caching, validation, and fallback logic
-- [ ] Create `src/prompts/system/_baseline.yaml` with current system prompt content
+- [ ] Create the baseline asset for the current ReAct lineage under `src/prompts/system/react_analyst/`
 - [ ] Add prompt version injection into agent response metadata
 - [ ] Add prompt version to trace span attributes (NFR-5.2.5)
 - [ ] Update Dockerfile to include `src/prompts/` in container image

@@ -1,9 +1,9 @@
 # Prompt System Architecture and Design
 
-> **Document Version**: 1.3  
-> **Last Updated**: May 6, 2026  
+> **Document Version**: 1.5  
+> **Last Updated**: May 19, 2026  
 > **Phase**: 2A.2 - System Prompt Refinement and A/B Testing  
-> **Status**: Research refined; practical scope narrowed to project-scoped implementation targets  
+> **Status**: Research refined; near-term target aligned to the governed prompt compiler path and later specialist-prompt evolution  
 > **Primary Source Requirement**: Official vendor and regulator documentation only  
 > **Governing ADR**: [ADR-001 — Layered LLM Architecture](./decisions/AGENT_ARCHITECTURE_DECISION_RECORDS.md)
 
@@ -46,24 +46,24 @@ Define an industrial-standard prompt management architecture for the Stock Inves
 ### Design Position
 
 The prompt system should remain **project-scoped, repo-owned, and provider-neutral**.
-This project already uses LangChain agents, LangGraph execution, MongoDB-backed short-term memory, and LangSmith-oriented tracing guidance. The prompt system must therefore be implemented as an internal runtime capability of the existing agent stack, not as a provider-specific dashboard feature or a separate orchestration service. The design target is now a controlled **multi-agent system**, but it should evolve from the current single-agent baseline rather than bypass it.
+This project already uses LangChain agents, LangGraph execution, MongoDB-backed short-term memory, and LangSmith-oriented tracing guidance. The prompt system must therefore be implemented as an internal runtime capability of the existing agent stack, not as a provider-specific dashboard feature or a separate orchestration service. The near-term design target is a governed prompt compiler path that evolves from the current single-agent baseline rather than bypassing it.
 
 ### Core Conclusion
 
-The correct architectural move is to adopt a **local prompt registry and versioned prompt asset model** under `src/prompts/`, wire it into `StockAssistantAgent` as the source of truth for the current ReAct path, and extend that registry to support agent-specific prompt contracts for future specialist agents. The existing `StockQueryRouter` (`src/core/stock_query_router.py`) with its 8-route semantic classification already provides a routing foundation that the prompt system should build on rather than replace. LangSmith remains the **observability and evaluation layer** rather than the runtime prompt source.
+The correct architectural move is to adopt a **governed prompt asset and compiler model** under `src/prompts/`, wire it into `StockAssistantAgent` as the source of truth for the current ReAct path, and extend that path to support future role-specific prompt contracts only when specialist runtime boundaries are justified. The existing `StockQueryRouter` (`src/core/stock_query_router.py`) with its 8-route semantic classification already provides a routing foundation that the prompt system should build on rather than replace. LangSmith remains the **observability and evaluation layer** rather than the runtime prompt source.
 
-### Multi-Agent Design Conclusion
+### Prompt Compiler and Evolution Conclusion
 
-The recommended **near-term target** is a **Skills pattern** — a single agent that loads specialized prompt context on demand based on the request category, without requiring a full multi-agent runtime. This is the lowest-cost path from the current single-agent baseline and directly leverages the existing `StockQueryRouter` with its 8 route categories (`PRICE_CHECK`, `NEWS_ANALYSIS`, `PORTFOLIO`, `TECHNICAL_ANALYSIS`, `FUNDAMENTALS`, `IDEAS`, `MARKET_WATCH`, `GENERAL_CHAT`).
+The recommended **near-term target** is a **Skills-pattern prompt compiler path** — one agent, one shared policy layer, route-aware prompt context, and explicit prompt observability without requiring a full multi-agent runtime. This is the lowest-cost path from the current single-agent baseline and directly leverages the existing `StockQueryRouter` with its 8 route categories (`PRICE_CHECK`, `NEWS_ANALYSIS`, `PORTFOLIO`, `TECHNICAL_ANALYSIS`, `FUNDAMENTALS`, `IDEAS`, `MARKET_WATCH`, `GENERAL_CHAT`).
 
-The **medium-term target** is a **router-orchestrated specialist architecture**:
+The **later evolution target** is a **router-orchestrated specialist architecture**:
 
 - a top-level orchestrator or routing layer decides whether the request stays on the current ReAct analyst path or is delegated to a retrieval-grounded specialist;
 - each specialist receives a smaller, role-specific prompt contract instead of one oversized shared prompt;
 - shared investment-policy and safety rules stay centralized in global prompt partials; and
 - direct user-facing handoffs between agents are avoided initially in favor of centralized orchestration and synthesis.
 
-LangChain’s multi-agent documentation provides a clear performance trade-off: the Skills pattern uses ~3 model calls for one-shot queries (same as Router pattern), while Subagents and Handoffs require 4+ calls. The Skills pattern is recommended when tasks are “simple and focused” — which matches most stock-analysis queries. Full multi-agent is justified only when context management, specialization, or parallelization become limiting factors.
+LangChain’s multi-agent documentation provides a clear performance trade-off: the Skills pattern uses ~3 model calls for one-shot queries (same as Router pattern), while Subagents and Handoffs require 4+ calls. The Skills pattern is recommended when tasks are “simple and focused” — which matches most stock-analysis queries. Full multi-agent is justified only when the governed prompt compiler path and Skills-pattern baseline show measurable limits in context management, specialization, or parallelization.
 
 > **Cost note**: Moving from single-agent to multi-agent doubles or quadruples LLM calls per query (orchestrator call + specialist call + optional validation + synthesis). This cost must be justified by measurable quality gains before adoption.
 
@@ -91,7 +91,7 @@ Source: [LangChain Multi-Agent](https://docs.langchain.com/oss/python/langchain/
 
 - The primary ReAct system prompt for `StockAssistantAgent`
 - Shared global prompt policy for multiple future agent roles
-- Specialist prompt contracts for orchestrator, ReAct, and RAG-style agents
+- Future specialist prompt contracts for orchestrator, ReAct, and RAG-style agents once the compiler path and Skills-pattern baseline are proven
 - Version-controlled prompt assets under the repository
 - Prompt selection rules and experiment assignment
 - LangChain middleware and agent integration points relevant to prompting
@@ -131,7 +131,7 @@ This refinement adds **multi-agent prompt-system design** to scope, but not a fu
 
 The roadmap target in [PHASE_2_AGENT_ENHANCEMENT_ROADMAP.md](./PHASE_2_AGENT_ENHANCEMENT_ROADMAP.md) is materially ahead of the live implementation.
 
-The live runtime is still a **single-agent ReAct design**. The multi-agent target described in this refinement is therefore architectural guidance for the next design step, not a claim that orchestrator or RAG specialist paths already exist.
+The live runtime is still a **single-agent ReAct design**. The near-term target in this refinement is therefore the governed prompt compiler path and Skills-pattern baseline, while orchestrator or RAG specialist paths remain later architectural guidance rather than current runtime claims.
 
 #### Current Prompt Path
 
@@ -189,17 +189,39 @@ The project already has a LangSmith dependency and local Studio guide:
 
 However, prompt-version traceability is not currently modeled as a first-class concern.
 
-### Current State vs Target State
+### Current Baseline vs Target Compiler Path
 
-| Area | Current State | Target State |
+| Area | Current Baseline | Target Compiler Path |
 |---|---|---|
-| Prompt source of truth | Hardcoded string in agent class | Versioned file assets in repo |
-| Prompt structure | Single static prompt blob | Shared global policy + role-specific prompt contracts + controlled dynamic sections |
-| Prompt selection | Fixed at import/runtime construction | Config-driven fixed, weighted, or evaluation mode |
+| Prompt source of truth | Hardcoded string in agent class | Versioned prompt assets resolved through a governed loader with baseline fallback |
+| Prompt structure | Single static prompt blob | Shared policy + route-aware skills + bounded dynamic sections |
+| Prompt selection | Fixed at import/runtime construction | Config-driven fixed, forced, shadow, or guarded candidate mode |
 | Prompt observability | No prompt identity on traces | `prompt_version`, `prompt_variant`, `experiment_id` tagged in LangSmith |
 | Experimentation | Manual prompt edits only | Dataset-backed offline evaluation plus guarded online observation |
 | Finance safeguards | Mixed across prompt text and docs | Explicit, documented rules grounded in project ADR and regulator guidance |
-| Agent topology | Single ReAct agent | Router-orchestrated ReAct and RAG specialists with centralized synthesis |
+| Agent topology | Single ReAct agent | Skills-pattern compiler path first; router-orchestrated specialists only if later evidence justifies them |
+
+### Prompt-System Gap Matrix and Risk Analysis
+
+The baseline-versus-target summary above captures the architectural delta. The matrix below turns that delta into an execution-oriented gap view so implementation work can prioritize the missing controls that carry the highest operational and finance-domain risk.
+
+| Capability | Current Runtime | Target Runtime | Missing Realization | Primary Risks and Pitfalls if Unchanged |
+|---|---|---|---|---|
+| Prompt source of truth | `REACT_SYSTEM_PROMPT` remains inline in `StockAssistantAgent`; prompt files exist only as supporting utilities | Repo-owned versioned prompt assets resolved through `PromptAssetLoader` with baseline fallback | The primary ReAct path bypasses external prompt assets | Code-deployment coupling for prompt changes; no governed rollback path; split-brain behavior between code and asset files |
+| Runtime prompt-path consistency | ReAct path uses an inline English prompt; legacy/fallback path can load file-based English or Vietnamese prompts | One authoritative prompt pipeline governs every user-facing runtime path | Execution mode and locale can change the effective policy surface | Finance safeguards, tone, and disclosure behavior can drift depending on whether the request stays on ReAct or falls back |
+| Asset taxonomy and ownership | Prompt files exist in a flat, partially legacy layout with no enforced role, route, or lifecycle metadata | Canonical `system`, `skills`, and `experiments` taxonomy with explicit ownership and status | No machine-readable governance over prompt assets | Contributors can place assets inconsistently; reuse boundaries remain unclear; review and approval discipline weakens over time |
+| Prompt composition boundary | Behavior is defined by a monolithic prompt string or a simple template wrapper | `PromptAssembler` composes shared policy, role contract, route context, and bounded dynamic context deterministically | No explicit composition contract or precedence model | As prompt scope grows, regressions become harder to isolate; prompt bloat and contradictory instructions become more likely |
+| Route-aware behavior | `StockQueryRouter` classifies requests, but route classification does not yet load route-specific prompt context | Skills-pattern composition activates route-specific prompt assets without extra LLM routing calls | Routing and prompting remain disconnected | One oversized general-purpose prompt must carry all route behavior; specialist-quality answers degrade as the domain surface expands |
+| Finance safety policy centralization | Safety posture is split across docs, prompt files, and a simpler inline runtime prompt | Always-on shared policy assets and route-aware skills enforce one finance-domain contract | The strongest finance rules are not yet on the authoritative runtime path | Hype language, certainty theater, weak source discipline, or uneven disclaimer behavior can leak through the primary runtime |
+| Locale governance | English and Vietnamese prompt content exist, but they are not governed as synchronized variants of one policy lineage | Locale-specific variants inherit the same shared safety and response contract with explicit fallback rules | No validated locale-equivalence model | One locale can become stricter, safer, or more structured than another; QA cost rises and silent policy drift becomes difficult to detect |
+| Dynamic context contract | Session context, tool outputs, and prompt text meet only through ad hoc path-specific code; prompt-level session-context injection is still follow-up work | Narrow, typed dynamic sections carry only approved runtime deltas such as locale, route, workspace mode, and experiment marker | No explicit contract for what may enter prompt assembly and at what authority | Responsibility creep from services or tools into prompt logic; ad hoc string injection; unclear separation between policy and runtime facts |
+| Prompt observability | No prompt identity, variant, fallback reason, or guardrail outcome is attached to runs or responses | LangSmith metadata and tags expose prompt lineage, variant, route, role, fallback, and experiment state | Prompt behavior is not yet directly traceable | Root-cause analysis is slow or speculative; prompt regressions are hard to audit; controlled rollout decisions lack evidence |
+| Guardrail enforcement | Safety is mostly encoded as prompt text and behavioral intent | `ResponseGuardrailMiddleware` emits machine-detectable outcomes and conservative degraded behavior | No separated response-policy enforcement layer exists | Prompt-only safeguards are too weak for a financial-analysis surface; unsupported certainty or manipulative phrasing can still escape |
+| Experimentation and rollout control | Prompt changes are effectively manual edits with no asset registry, candidate lifecycle, or governed selection mode | `fixed`, `forced`, `shadow`, and optional `weighted` modes control prompt rollout explicitly | No safe experimentation control plane | Silent behavior changes reach users; A/B testing cannot be isolated cleanly; finance-domain regressions may be discovered only after release |
+| Evaluation and regression control | No prompt-specific offline dataset family or finance-safety gate exists today | Curated datasets and offline evaluation gates approve prompt candidates before live exposure | Prompt changes are still mostly reviewed by judgment instead of measured baselines | Quality drift remains invisible until users notice it; safety regressions can ship with otherwise good-looking prompt edits |
+| Retrieval-ready specialist prompting | No RAG-specific prompt contract or explicit retrieval prompt-injection defense is wired into the runtime | Retrieval specialist prompt treats retrieved content as data only, with source-aware and injection-resistant rules | Future retrieval work would otherwise inherit the wrong prompt contract | Retrieved text can blur into instruction authority; groundedness claims become overstated; indirect prompt injection risk rises sharply |
+
+The highest-priority near-term gaps are prompt source of truth, runtime prompt-path consistency, prompt observability, and finance safety policy centralization. Together they create the current control problem: the repository already contains stronger finance-domain prompt material, but the primary ReAct runtime is not yet governed by it.
 
 ---
 
@@ -389,6 +411,8 @@ This prompt-system design must comply with the layered LLM rules in [AGENT_ARCHI
 
 ## Target Prompt System Architecture
 
+> **Status:** Target-state design. The active runtime still uses a single built-in prompt contract. The compiler path below is the intended near-term realization, while multi-agent prompt families remain later evolution work.
+
 ### Design Overview
 
 ```
@@ -397,26 +421,29 @@ This prompt-system design must comply with the layered LLM rules in [AGENT_ARCHI
 ├────────────────────────────────────────────────────────────────────┤
 │                                                                    │
 │  Shared Prompt Assets (repo-owned)                                 │
-│  src/prompts/agent_system/                                         │
-│   ├─ global/                                                       │
-│   │   ├─ investment_safety.md                                      │
-│   │   ├─ response_contract.md                                      │
-│   │   └─ tool_use_policy.md                                        │
-│   ├─ orchestrator/                                                 │
-│   ├─ react_analyst/                                                │
-│   ├─ rag_research/                                                 │
-│   └─ registry_manifest.yaml (optional)                             │
+│  src/prompts/                                                      │
+│   ├─ system/                                                       │
+│   │   ├─ shared/                                                   │
+│   │   │   ├─ investment_safety.md                                  │
+│   │   │   ├─ response_contract.md                                  │
+│   │   │   └─ tool_use_policy.md                                    │
+│   │   └─ react_analyst/                                            │
+│   ├─ skills/                                                       │
+│   │   ├─ always_on/                                                │
+│   │   └─ routes/                                                   │
+│   └─ experiments/                                                  │
 │                                                                    │
 │  Prompt Runtime                                                    │
-│   ├─ PromptRegistry (load, resolve, cache prompt assets)           │
-│   ├─ PromptComposer (global partials + role contract + selection)  │
-│   └─ @dynamic_prompt middleware (narrow deterministic sections)     │
+│   ├─ PromptAssetLoader (load, resolve, cache prompt assets)        │
+│   ├─ PromptAssembler (shared policy + skills + bounded context)    │
+│   └─ ResponseGuardrailMiddleware + @dynamic_prompt                 │
+│      (narrow deterministic sections and response-policy outcomes)  │
 │                                                                    │
 │  Agent Integration                                                 │
-│   ├─ Orchestrator / router prompt                                  │
-│   ├─ ReAct specialist prompt                                       │
-│   ├─ RAG specialist prompt                                         │
-│   └─ RunnableConfig / LangSmith metadata injection                 │
+│   ├─ Current ReAct analyst path                                    │
+│   ├─ Route-aware skill activation                                  │
+│   ├─ RunnableConfig / LangSmith metadata injection                 │
+│   └─ Future role families only when specialist runtime is justified│
 │                                                                    │
 │  Evaluation Layer                                                  │
 │   ├─ LangSmith datasets                                             │
@@ -453,51 +480,138 @@ Recommended directory shape:
 
 ```text
 src/prompts/
-└── agent_system/
-    ├── global/
-    │   ├── investment_safety.md
-    │   ├── response_contract.md
-    │   └── tool_use_policy.md
-    ├── react_analyst/
-    │   ├── v1.md
-    │   ├── v1_vi.md
-    │   ├── candidates/
-    │   └── routes/                    # Route-specific context for Skills pattern
-    │       ├── price_check.md
-    │       ├── news_analysis.md
-    │       ├── portfolio.md
-    │       ├── technical_analysis.md
-    │       ├── fundamentals.md
-    │       ├── ideas.md
-    │       ├── market_watch.md
-    │       └── general_chat.md
-    ├── partials/
-    │   ├── citation_rules.md
-    │   ├── uncertainty_contract.md
-    │   └── evidence_labeling.md
-    ├── orchestrator/                  # Future: multi-agent orchestration
-    ├── rag_research/                  # Future: RAG specialist
-    └── CHANGELOG.md
+├── system/
+│   ├── shared/
+│   │   ├── investment_safety.md
+│   │   ├── response_contract.md
+│   │   └── tool_use_policy.md
+│   ├── react_analyst.md
+│   ├── react_analyst.vi.md
+│   ├── orchestrator.md                # Future: multi-agent orchestration
+│   └── rag_research.md                # Future: RAG specialist
+├── skills/
+│   ├── always_on/
+│   │   ├── evidence_first.md
+│   │   ├── uncertainty_contract.md
+│   │   └── anti_hype_guardrail.md
+│   └── routes/
+│       ├── price_check.md
+│       ├── news_analysis.md
+│       ├── portfolio.md
+│       ├── technical_analysis.md
+│       ├── fundamentals.md
+│       ├── ideas.md
+│       ├── market_watch.md
+│       └── general_chat.md
+├── experiments/
+│   ├── react_analyst.evidence_strict.md
+│   └── manifest.yaml
+└── CHANGELOG.md
 ```
 
-Each prompt file should support lightweight metadata frontmatter:
+This shape is intentionally shallow. It keeps the canonical taxonomy (`system`, `skills`, `experiments`) but moves version, locale, variant, and activation semantics into file metadata instead of nested directories. That makes the structure easier to scan today while still leaving room for richer prompt assets later, such as additional locale variants, route skills, experiment manifests, or reusable supporting snippets, without forcing another major layout rewrite.
+
+Each selectable prompt asset should support governed metadata frontmatter:
 
 ```yaml
 ---
-name: react_analyst_v1
+schema_version: 1
+asset_kind: system
+asset_id: react_analyst
 version: 1.0.0
+variant: baseline
 locale: en
 status: active
 owner: core-agent
-change_type: behavioral
 agent_role: react_analyst
+route_scope:
+  - ALL
+market_scope:
+  primary: vn_equities
+  exchanges: [HOSE, HNX, UPCoM]
 inherits:
-  - global/investment_safety
-  - global/response_contract
-  - global/tool_use_policy
-last_reviewed: 2026-04-01
+  - system/shared/investment_safety.md@1.0.0
+  - system/shared/response_contract.md@1.0.0
+  - system/shared/tool_use_policy.md@1.0.0
+activation:
+  mode: always_on
+  selection_modes: [fixed, forced, shadow]
+finance_policy:
+  fact_inference_separation: required
+  source_attribution: required
+  uncertainty_disclosure: required
+  non_advisory_disclaimer: conditional
+  guaranteed_return_language: prohibited
+  social_signal_primary_basis: prohibited
+tool_policy:
+  allowed_tools: [stock_symbol, reporting]
+  require_tool_for_routes: [PRICE_CHECK, FUNDAMENTALS, TECHNICAL_ANALYSIS]
+  fallback_behavior: explain_limits_and_continue
+output_contract:
+  template: executive_summary_evidence_risks_next_steps
+  require_sections:
+    - executive_summary
+    - verified_evidence
+    - interpretation_and_risks
+    - missing_or_uncertain_inputs
+    - what_to_watch_next
+review:
+  approval_state: prod_approved
+  last_reviewed: 2026-05-19
+  review_cycle_days: 90
 ---
 ```
+
+### Concrete Finance-Grade Prompt Asset Schema
+
+The repo needs a schema that is strict enough for validation, review, and audit, but still simple enough to author by hand in Markdown files. The schema below separates frontmatter governance from the prompt-body contract so policy inheritance, finance safeguards, and route activation remain machine-checkable.
+
+#### Required Frontmatter Fields
+
+| Field | Type | Required | Purpose / Validation Rule |
+|---|---|---|---|
+| `schema_version` | integer | Yes | Fail closed if the loader does not support the declared schema version |
+| `asset_kind` | enum | Yes | `system`, `skill`, `partial`, or `experiment`; must match the asset's path and selectable behavior |
+| `asset_id` | string | Yes | Stable identifier used in config, traces, and evaluation output |
+| `version` | semver string | Yes | Human-readable version identity for rollback and audit |
+| `variant` | string | Yes | Stable cohort label such as `baseline`, `concise`, or `evidence_strict` |
+| `status` | enum | Yes | `active`, `candidate`, `deprecated`, or `retired`; only `active` assets may serve as production baselines |
+| `owner` | string | Yes | Ownership boundary for review and incident handling |
+| `locale` | enum | Yes | `vi` or `en`; locale fallback must fail closed to the configured default locale |
+| `agent_role` | enum | Yes for `system` and `skill` assets | `react_analyst`, `orchestrator`, `rag_research`, or `shared`; prevents role drift |
+| `route_scope` | list or `ALL` | Yes for `skill` assets; recommended for `system` assets | Must resolve only to canonical `StockQueryRouter` categories or `ALL` |
+| `market_scope` | mapping | Yes | Makes geographic and exchange assumptions explicit; default should be `vn_equities` for this repo |
+| `inherits` | list | Recommended | Declares required shared-policy dependencies and preserves policy lineage |
+| `activation` | mapping | Yes for `skill` and `experiment` assets | Declares `mode` and allowed selection modes; prevents experiments from being silently treated as baseline policy |
+| `finance_policy` | mapping | Yes for selectable system and skill assets | Declares finance-domain safeguards such as fact/inference separation, uncertainty disclosure, and hype restrictions |
+| `tool_policy` | mapping | Yes for analyst-facing system assets; recommended for route skills | Declares allowed tools and which routes require tool-backed evidence |
+| `output_contract` | mapping | Yes for selectable system and skill assets | Declares response template and required sections for downstream consistency |
+| `review` | mapping | Yes | Captures approval state, review timestamp, and review cadence for governance |
+
+#### Recommended Prompt Body Contract
+
+Each asset body should follow a stable Markdown section contract so reviewers and validators can reason about intent, precedence, and safety expectations without reverse-engineering one large text blob.
+
+| Section | Required For | Purpose |
+|---|---|---|
+| `# Identity` | system, skill | Defines role, audience, and operating stance in one concise block |
+| `# Scope and Authority` | system, skill | States what the asset may and may not do; prevents prompts from silently acquiring ownership over facts, memory, or lifecycle logic |
+| `# Required Behaviors` | selectable assets | Encodes evidence-first behavior, uncertainty rules, and finance-domain discipline |
+| `# Tool-Use Rules` | analyst/system assets, route skills where applicable | States when tools are required, preferred, or unavailable |
+| `# Evidence and Freshness Rules` | analyst assets, route skills, RAG assets | Forces explicit handling of stale, missing, conflicting, or partial data |
+| `# Output Contract` | selectable assets | Defines required sections such as executive summary, evidence, risks, and next checks |
+| `# Degraded Modes and Refusals` | selectable assets | Defines conservative fallback behavior when tools, prompt assets, or evidence are unavailable |
+
+#### Finance-Grade Validation Rules
+
+- `system` and `skill` assets must declare `finance_policy`, `tool_policy`, and `output_contract`; otherwise activation fails.
+- `partial` assets cannot be selected directly by config or experiment logic.
+- `experiment` assets must reference an inherited baseline lineage and cannot be promoted to `active` without offline evaluation approval.
+- `route_scope` must resolve only to canonical `StockQueryRouter` categories.
+- `allowed_tools` must reference registered tool names; unknown tool references fail closed.
+- Locale variants must preserve the same finance-policy semantics as the default locale even if wording differs.
+- Assets targeting `vn_equities` must not imply unsupported coverage of other markets unless `market_scope` explicitly expands.
+- No asset may weaken inherited prohibitions on guaranteed returns, hype language, or social-signal-only reasoning.
 
 ### Prompt Composition Rules
 
@@ -862,7 +976,7 @@ Recommended identifiers:
 
 | Field | Example |
 |---|---|
-| Prompt file | `react_analyst/v1.md` |
+| Prompt file | `system/react_analyst.md` |
 | Prompt name | `react_analyst_v1` |
 | Semantic version | `1.0.0` |
 | Variant label | `baseline`, `concise`, `evidence_strict` |
@@ -926,25 +1040,25 @@ Recommended identifiers:
 
 ```yaml
 prompts:
-  directory: "src/prompts/agent_system"
+  directory: "src/prompts"
   selection_mode: "fixed"  # fixed | weighted | forced | shadow
   default_locale: "vi"
   global_partials:
-    - "global/investment_safety.md"
-    - "global/response_contract.md"
-    - "global/tool_use_policy.md"
+    - "system/shared/investment_safety.md"
+    - "system/shared/response_contract.md"
+    - "system/shared/tool_use_policy.md"
   agents:
     react_analyst:
       active_version: "v1"
       variants:
         - name: "baseline"
           version: "v1"
-          file: "react_analyst/v1.md"
+          file: "system/react_analyst.md"
           weight: 1.0
           status: "active"
         - name: "evidence_strict"
           version: "v2_candidate"
-          file: "react_analyst/candidates/v2_candidate.md"
+          file: "experiments/react_analyst.evidence_strict.md"
           weight: 0.0
           status: "candidate"
     # orchestrator:        # Uncomment when multi-agent runtime is introduced
@@ -952,7 +1066,7 @@ prompts:
     #   variants:
     #     - name: "baseline"
     #       version: "v1"
-    #       file: "orchestrator/v1.md"
+    #       file: "system/orchestrator.md"
     #       weight: 1.0
     #       status: "active"
     # rag_research:        # Uncomment when RAG specialist is implemented
@@ -960,7 +1074,7 @@ prompts:
     #   variants:
     #     - name: "baseline"
     #       version: "v1"
-    #       file: "rag_research/v1.md"
+    #       file: "system/rag_research.md"
     #       weight: 1.0
     #       status: "active"
   route_contexts:
@@ -1012,20 +1126,20 @@ langsmith:
 
 ### Phase 1 - ReAct Baseline Extraction
 
-- move the current ReAct system prompt into `src/prompts/agent_system/react_analyst/v1.md`;
+- move the current ReAct system prompt into `src/prompts/system/react_analyst.md`;
 - preserve the current behavior as the baseline variant;
 - document provenance from the existing hardcoded string and Vietnamese source prompt.
 
 ### Phase 2 - Shared Prompt Runtime Refactor
 
 - add prompt-loading utilities with metadata parsing;
-- introduce `PromptRegistry` or equivalent;
+- introduce `PromptAssetLoader` or equivalent loader facade;
 - replace `REACT_SYSTEM_PROMPT` as the source of truth;
 - keep legacy fallback prompt builder isolated until intentionally refactored.
 
 ### Phase 2.5 - Skills Pattern Integration
 
-- create route-specific prompt context files under `react_analyst/routes/` for each `StockQueryRouter` category;
+- create route-specific prompt context files under `skills/routes/` for each `StockQueryRouter` category;
 - wire `@dynamic_prompt` middleware to compose global policy + route-specific context based on `StockQueryRouter` classification;
 - add `route_category` to LangSmith trace metadata;
 - measure route-classification accuracy and prompt-context relevance as baseline for future multi-agent decision.
@@ -1081,18 +1195,18 @@ The phase outline above expresses architectural intent. The backlog below conver
 
 | Order | Backlog ID | Priority | Depends On | Scope | Primary Deliverables | Exit Gate |
 |---|---|---|---|---|---|---|
-| 1 | PS-01 | P0 | None | Establish prompt asset baseline | `src/prompts/agent_system/react_analyst/v1.md`; provenance note from `REACT_SYSTEM_PROMPT`; baseline locale decision for current runtime | Baseline prompt file reproduces current ReAct behavior and is reviewed as the canonical initial asset |
-| 2 | PS-02 | P0 | PS-01 | Implement prompt asset loading and validation | `PromptRegistry` or equivalent loader; metadata frontmatter parsing; file cache; schema validation; `_baseline` fallback asset convention | Loader can resolve a valid prompt asset and rejects malformed metadata before activation |
+| 1 | PS-01 | P0 | None | Establish prompt asset baseline | `src/prompts/system/react_analyst.md`; provenance note from `REACT_SYSTEM_PROMPT`; baseline locale decision for current runtime | Baseline prompt file reproduces current ReAct behavior and is reviewed as the canonical initial asset |
+| 2 | PS-02 | P0 | PS-01 | Implement prompt asset loading and validation | `PromptAssetLoader` or equivalent loader facade; metadata frontmatter parsing; file cache; schema validation; baseline-variant fallback rule | Loader can resolve a valid prompt asset and rejects malformed metadata before activation |
 | 3 | PS-03 | P0 | PS-01, PS-02 | Add prompt config surface and fail-closed validation | `prompts.*` config section in `config/config.yaml`; active version resolution; baseline variant rule; locale fallback rule | Config validation blocks invalid prompt references and guarantees one production-safe baseline |
 | 4 | PS-04 | P0 | PS-02, PS-03 | Replace hardcoded ReAct prompt path | `StockAssistantAgent` loads prompt from registry instead of `REACT_SYSTEM_PROMPT`; legacy `PromptBuilder` isolated as non-authoritative fallback utility | ReAct path loads from versioned asset, not inline constant |
 | 5 | PS-05 | P0 | PS-04 | Wire prompt identity into response and trace metadata | `prompt_version`, `prompt_variant`, `conversation_id`, provider/model metadata on top-level runs and structured response metadata | Relevant runs expose prompt identity consistently for filtering and audit |
 | 6 | PS-06 | P0 | PS-02, PS-04, PS-05 | Add rollback and failure-path hardening | WARN logging for invalid prompt activation; baseline fallback path; fault-injection tests for missing/malformed prompt assets | Invalid prompt config falls back safely and emits diagnosable signals |
-| 7 | PS-07 | P1 | PS-04 | Create route-context prompt assets for Skills pattern | `react_analyst/routes/*.md` for all 8 `StockQueryRouter` categories; route-to-context mapping contract | Every current semantic route has an explicit prompt-context asset or documented no-op mapping |
-| 8 | PS-08 | P1 | PS-05, PS-07 | Compose route-aware prompt behavior in runtime | `PromptComposer`; `@dynamic_prompt` middleware; route-category propagation from `StockQueryRouter`; prompt assembly dump/debug path | Runtime composes base prompt plus route context deterministically and exposes `route_category` in metadata |
+| 7 | PS-07 | P1 | PS-04 | Create route-context prompt assets for Skills pattern | `skills/routes/*.md` for all 8 `StockQueryRouter` categories; route-to-context mapping contract | Every current semantic route has an explicit prompt-context asset or documented no-op mapping |
+| 8 | PS-08 | P1 | PS-05, PS-07 | Compose route-aware prompt behavior in runtime | `PromptAssembler`; `@dynamic_prompt` middleware; route-category propagation from `StockQueryRouter`; prompt assembly dump/debug path | Runtime composes shared policy plus route context deterministically and exposes `route_category` in metadata |
 | 9 | PS-09 | P1 | PS-05, PS-08 | Build offline evaluation harness | Core datasets: `tool_selection_regression`, `missing_data_and_staleness`, `finance_safety_and_hype_resistance`, `route_classification_accuracy`; rubric/code evaluators; baseline run storage | Baseline and candidate prompts can be compared offline against regression thresholds |
 | 10 | PS-10 | P1 | PS-06, PS-09 | Enforce finance-domain guardrail verification | Regression gates for hype, unsupported claims, uncertainty disclosure, source attribution, and fact-assumption-inference separation | Prompt candidate cannot advance if finance-safety regressions are detected |
 | 11 | PS-11 | P2 | PS-09, PS-10 | Add controlled experiment and rollout controls | `fixed`, `forced`, `shadow`, optional `weighted` selection modes; candidate variant registry; rollout runbook; enablement guardrails | Production remains fixed by default; non-fixed modes are explicitly gated and observable |
-| 12 | PS-12 | P3 | PS-08, PS-09, PS-11 | Introduce multi-agent prompt taxonomy | Shared global partials; `orchestrator/` and `rag_research/` prompt families; handoff schema; extended eval datasets | Skills-pattern baseline shows measurable limits and specialist prompt contracts are testable offline before runtime adoption |
+| 12 | PS-12 | P3 | PS-08, PS-09, PS-11 | Introduce multi-agent prompt taxonomy | Shared global partials; `system/orchestrator.md` and `system/rag_research.md`; handoff schema; extended eval datasets | Skills-pattern baseline shows measurable limits and specialist prompt contracts are testable offline before runtime adoption |
 
 #### Milestone Plan
 
@@ -1193,7 +1307,7 @@ This design is correct only if all of the following remain true:
 | Give RAG specialists their own prompt contract | Retrieval grounding and prompt-injection resistance require different rules than ReAct tool use | Accepted |
 | Adopt Skills pattern as near-term target | Leverages existing StockQueryRouter, avoids multi-agent LLM cost overhead, provides measurable baseline before full multi-agent | Accepted |
 | Build on StockQueryRouter rather than replace it | 8-route semantic classification already exists and works; prompt system should compose route-specific context using this foundation | Accepted |
-| Reduce runtime to 3 components (PromptRegistry, PromptComposer, @dynamic_prompt) | 5 abstractions are over-engineered for a single hardcoded prompt; 3 components cover all near-term needs | Accepted |
+| Reduce runtime to 3 core compiler concerns (`PromptAssetLoader`, `PromptAssembler`, bounded dynamic prompt behavior) | More elaborate layering is over-engineered for a single hardcoded baseline; a small governed compiler path covers the near-term need | Accepted |
 | Start with 4 core evaluation datasets | 9 dataset families are unrealistic before any prompt infrastructure exists; 4 cover the critical path | Accepted |
 
 ### Open Follow-Up Questions
@@ -1210,6 +1324,27 @@ This design is correct only if all of the following remain true:
 ## Document Update Log
 
 This section tracks changes made to other project documents as a result of research findings in this proposal.
+
+### Update Session: 2026-05-19 (v1.5 → Gap Matrix and Finance-Grade Asset Schema)
+
+**Trigger:** Convert the proposal's current-versus-target narrative into an execution-oriented gap matrix and formalize a concrete finance-grade prompt asset schema aligned to the canonical prompt taxonomy.
+
+| # | Target Document | Change Summary | SRS/ADR References |
+|---|----------------|----------------|-------------------|
+| 1 | [PROMPT_SYSTEM_RESEARCH_PROPOSAL.md](./PROMPT_SYSTEM_RESEARCH_PROPOSAL.md) | Updated document control to v1.5 / 2026-05-19. Added a prompt-system gap matrix under Current State Assessment with explicit current-runtime versus target-runtime risks, replaced the drifting `agent_system` layout example with the canonical `system` / `skills` / `experiments` taxonomy, and added a concrete finance-grade prompt asset schema covering frontmatter fields, body contract, and validation rules. | FR-1.4.5–1.4.9, FR-1.5, NFR-5.2.5–5.2.7, NFR-6.2.3, ADR-002, ADR-003 |
+
+**Total changes:** 1 document, gap analysis and prompt asset governance formalized.
+
+### Update Session: 2026-05-15 (v1.4 → Prompt Compiler Alignment)
+
+**Trigger:** Align the proposal and its roadmap mirror with the architecture package's future-targeted prompt compiler terminology and prompt asset taxonomy.
+
+| # | Target Document | Change Summary | SRS/ADR References |
+|---|----------------|----------------|-------------------|
+| 1 | [PROMPT_SYSTEM_RESEARCH_PROPOSAL.md](./PROMPT_SYSTEM_RESEARCH_PROPOSAL.md) | Updated document control to v1.4 / 2026-05-15. Reframed the near-term target around the governed prompt compiler path, replaced older `PromptRegistry` / `PromptComposer` terminology with `PromptAssetLoader` / `PromptAssembler`, aligned prompt asset taxonomy to `src/prompts/system|skills|experiments`, and clarified that multi-agent prompt families remain later evolution work. | FR-1.4.5–1.4.9, FR-1.5, NFR-5.2.5–5.2.7, NFR-6.2.3, ADR-002, ADR-003 |
+| 2 | [PHASE_2_AGENT_ENHANCEMENT_ROADMAP.md](./PHASE_2_AGENT_ENHANCEMENT_ROADMAP.md) | Renamed 2A.2 around the prompt compiler path and controlled rollout, synchronized the roadmap mirror to proposal v1.4, updated backlog terminology and pseudocode examples, and aligned current-baseline versus target-compiler-path wording. | FR-1.4.5–1.4.9, FR-1.5, ADR-002, ADR-003 |
+
+**Total changes:** 2 documents, prompt compiler terminology and target-state framing synchronized.
 
 ### Update Session: 2026-05-06 (v1.3 → Formal Implementation Backlog)
 
