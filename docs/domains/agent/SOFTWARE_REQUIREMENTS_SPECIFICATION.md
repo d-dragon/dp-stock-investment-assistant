@@ -1,8 +1,8 @@
 # Stock Investment Assistant Agent — Software Requirements Specification
 
-> **Document Version**: 2.3  
+> **Document Version**: 2.4  
 > **Created**: January 22, 2026  
-> **Last Updated**: April 13, 2026  
+> **Last Updated**: May 15, 2026  
 > **Status**: Active  
 > **Scope**: LangChain-based AI Agent for Stock Investment Assistant  
 ## Related Documents
@@ -14,8 +14,8 @@ This specification builds upon and references several architectural and design d
 | [AGENT_ARCHITECTURE_DECISION_RECORDS.md](./decisions/AGENT_ARCHITECTURE_DECISION_RECORDS.md) | Architectural decisions for LTM/STM, RAG, fine-tuning strategy, and memory separation | Design foundations for FR-3 (Memory System) |
 | [ARCHITECTURE_DESIGN.md](./ARCHITECTURE_DESIGN.md) | Comprehensive agent architecture overview, component deep dive, data flow, and Phase 2 improvements | Implementation guidance for FR-1, FR-2, FR-4 |
 | [LANGCHAIN_AGENT_HOWTO.md](./LANGCHAIN_AGENT_HOWTO.md) | Complete guide to ReAct pattern, semantic routing, tool system, and operations | Operational reference for agent deployment and usage |
-| [PHASE_2_AGENT_ENHANCEMENT_ROADMAP.md](./PHASE_2_AGENT_ENHANCEMENT_ROADMAP.md) | Future enhancement roadmap including multi-agent, advanced memory, and observability | Planning for P2 requirements beyond current release |
-| [AGENT_MEMORY_TECHNICAL_DESIGN.md](./AGENT_MEMORY_TECHNICAL_DESIGN.md) | Detailed technical design for conversation memory, checkpointing, and summarization | Implementation guidance supporting FR-3 (Memory System) |
+| [PHASE_2_AGENT_ENHANCEMENT_ROADMAP.md](./PHASE_2_AGENT_ENHANCEMENT_ROADMAP.md) | Future enhancement roadmap including conversation-scoped STM evolution, future LTM personalization, prompt-system rollout, and observability | Planning for P2 requirements beyond current release |
+| [AGENT_MEMORY_TECHNICAL_DESIGN.md](./AGENT_MEMORY_TECHNICAL_DESIGN.md) | Detailed technical design for conversation-scoped STM, session-context boundaries, checkpointing, and summarization | Implementation guidance supporting FR-3 (Memory System) |
 | [AGENTIC_APP_WITH_STM_INTEGRATION_ROADMAP.md](../../High-level%20Design/AGENTIC_APP_WITH_STM_INTEGRATION_ROADMAP.md) | Technical roadmap for workspace-session-conversation hierarchy and STM integration | Roadmap for FR-5.3–5.5, FR-7 (management, consistency, migration) |
 | [SRS_SPEC_TRACEABILITY.md](./SRS_SPEC_TRACEABILITY.md) | Bidirectional trace between SRS items and spec-kit feature artifacts | Companion delivery trace for implementation coverage and sync status |
 | [PROMPT_SYSTEM_RESEARCH_PROPOSAL.md](./PROMPT_SYSTEM_RESEARCH_PROPOSAL.md) | Prompt system research, design patterns, and implementation roadmap | Research foundation for FR-1.4.6–1.4.9, FR-1.5, NFR-5.2.5–5.2.7 |
@@ -69,7 +69,7 @@ This specification follows **spec-driven development** principles, enabling AI-a
 |------|-------------|
 | **Agent Behavior** | Natural language query processing, response generation, and conversation management |
 | **Tool Capabilities** | What tools can accomplish (stock prices, news, analysis, reports) |
-| **Memory Behavior** | Conversation persistence, context recall, summarization |
+| **Memory Behavior** | Conversation-scoped STM, session context reuse, summarization, and future LTM requirements |
 | **Query Understanding** | How the agent categorizes and routes user intents |
 | **API Contracts** | Request/response formats for REST and WebSocket interfaces |
 | **Response Delivery** | Streaming behavior and incremental content delivery |
@@ -95,6 +95,10 @@ This specification follows **spec-driven development** principles, enabling AI-a
 | **Session** | A business workflow container within a workspace that groups related conversations under a shared analytical context |
 | **Conversation** | A discrete agent interaction thread within a session that owns its own STM state and metadata |
 | **Thread** | The stateful memory identifier bound 1:1 to a conversation for checkpoint tracking |
+| **Session Context** | Service-owned reusable parent business context that can inform multiple conversations within the same session without sharing STM checkpoints |
+| **STM** | Conversation-scoped checkpoint-managed runtime state bound through `conversation_id -> thread_id` |
+| **LTM** | A planned future cross-conversation personalization layer for stable user preferences and symbol-tracking context only |
+| **RAG** | A separate sourced-evidence retrieval layer; not an authority for conversation state or stable personalization |
 | **Tool** | A capability the agent can invoke to retrieve data or perform actions |
 | **Streaming** | Incremental delivery of response content as it's generated |
 | **Summarization** | Condensing a conversation thread's prior exchanges to manage context size while preserving recent continuity |
@@ -165,7 +169,7 @@ Priority levels:
 | FR-1.4.1 | **Behavioral Instructions** | Agent behavior is guided by configurable instructions | Configuration provided | Agent responses align with defined persona and guidelines | P0 |
 | FR-1.4.2 | **Tool Awareness** | Agent knows what tools are available and their purposes | Tools registered | Agent can describe available capabilities when asked | P1 |
 | FR-1.4.3 | **Disclaimer Inclusion** | Agent includes investment disclaimers in relevant responses | Response contains financial advice | Disclaimer present in response (verified by keyword match) | P0 |
-| FR-1.4.4 | **Memory Context Injection** | Agent receives prior conversation context as part of its instructions | Session has history | Agent demonstrates awareness of prior conversation | P1 |
+| FR-1.4.4 | **Active Context Injection** | Agent receives active conversation context and any approved parent session context as part of its runtime context | Conversation has prior exchanges or the parent session has reusable context | Agent demonstrates awareness of prior conversation context and inherited session context where applicable | P1 |
 | FR-1.4.5 | **External Prompt Management** | System prompt can be modified without code deployment | — | Prompt changes take effect within 60 seconds without restart | P2 |
 | FR-1.4.6 | **Prompt Version Identity** | Every agent invocation SHALL carry an identifiable prompt version tag derived from the loaded prompt asset | Prompt assets deployed | Prompt version appears in agent response metadata and trace spans | P1 |
 | FR-1.4.7 | **Route-Specific Prompt Context** | Agent SHALL receive route-specific prompt context based on query classification (e.g., analysis, news, general) | Semantic router classifies query | Agent response reflects domain-appropriate persona and instructions for the classified route | P2 |
@@ -231,6 +235,8 @@ Priority levels:
 > **Design Reference**: For implementation details, see [AGENT_MEMORY_TECHNICAL_DESIGN.md](./AGENT_MEMORY_TECHNICAL_DESIGN.md)  
 > **Architecture Context**: [ADR-001 — Layered LLM Architecture](./decisions/AGENT_ARCHITECTURE_DECISION_RECORDS.md)
 
+FR-3 distinguishes four separate requirement surfaces: service-owned session context, conversation-scoped STM, future LTM personalization, and evidence or computation surfaces such as RAG and tools. Requirements in this section SHALL NOT be interpreted as permitting those boundaries to collapse into one persistence layer.
+
 #### Priority Levels
 | Level | Meaning | Release Criteria |
 |-------|---------|------------------|
@@ -241,7 +247,7 @@ Priority levels:
 
 ---
 
-#### FR-3.1 Short-Term Memory (Conversation Thread Buffer)
+#### FR-3.1 Short-Term Memory (Conversation-Scoped STM)
 
 | ID | Title | Description | Precondition | Expected Output | Priority |
 |----|-------|-------------|--------------|-----------------|----------|
@@ -251,8 +257,8 @@ Priority levels:
 | FR-3.1.4 | **Conversation Context Binding** | Agent responses incorporate prior context from the same conversation thread | Conversation has ≥2 prior messages | Response demonstrates awareness of earlier exchanges from the same conversation and does not mix context from sibling conversations in the same session | P0 |
 | FR-3.1.5 | **Conversation Recall on Reconnect** | User can resume a conversation after disconnection by reconnecting to the same conversation resource | Valid `conversation_id` provided | First response after reconnect includes acknowledgment of prior context from that conversation | P1 |
 | FR-3.1.6 | **Stateless Fallback Mode** | Agent functions without conversation tracking when no `conversation_id` is provided | `conversation_id` is null or omitted | Agent responds normally; no stateful conversation thread is loaded or persisted | P0 |
-| FR-3.1.7 | **No Financial Data Persistence** | Memory stores conversation text only, never computed financial metrics | — | Inspection of stored data shows zero price values, ratios, or calculated figures | P0 |
-| FR-3.1.8 | **Conversational Content Only** | Memory contains user messages and agent responses, not raw tool outputs | Tools were invoked during session | Stored content includes "I found the price" but not the actual price data | P0 |
+| FR-3.1.7 | **No Financial Data Persistence** | Conversation-scoped STM stores conversational context only, never computed financial metrics | — | Inspection of stored STM data shows zero price values, ratios, or calculated figures | P0 |
+| FR-3.1.8 | **Conversational Content Only** | Conversation-scoped STM contains user messages and agent responses, not raw tool outputs | Tools were invoked during session | Stored content includes "I found the price" but not the actual price data | P0 |
 
 ---
 
@@ -273,7 +279,9 @@ Priority levels:
 
 ---
 
-#### FR-3.3 Memory Summarization
+#### FR-3.3 STM Summarization and Compaction
+
+Summarization in this section is an STM compaction mechanism for a single conversation. It does not create LTM records, replace session context, or redefine RAG and tool evidence boundaries.
 
 | ID | Title | Description | Precondition | Expected Output | Priority |
 |----|-------|-------------|--------------|-----------------|----------|
@@ -302,15 +310,17 @@ Priority levels:
 
 ---
 
-#### FR-3.5 Long-Term Memory (Future)
+#### FR-3.5 Long-Term Memory Personalization (Future)
+
+Future LTM requirements in this section complement session context and STM. They do not authorize raw checkpoint reuse across conversations, storage of sourced financial facts, or substitution for RAG and tool-backed evidence.
 
 | ID | Title | Description | Precondition | Expected Output | Priority |
 |----|-------|-------------|--------------|-----------------|----------|
-| FR-3.5.1 | **Semantic Memory Search** | System SHALL find relevant past conversations based on meaning, not keywords | User asks about topic discussed in prior session | Relevant past exchanges surface with ≥70% relevance score | P3 |
-| FR-3.5.2 | **Cross-Session Recall** | Agent SHALL be able to reference information from previous sessions with same user | User has completed ≥2 sessions previously | Agent can retrieve context from any prior session when prompted | P3 |
-| FR-3.5.3 | **Conversation Indexing** | Past conversations SHALL be indexed for efficient retrieval | Session completed and archived | Conversation searchable within 60 seconds of archival | P3 |
-| FR-3.5.4 | **User Preference Learning** | System SHALL learn user's investment style and preferences over time | User has ≥5 completed sessions | Agent proactively applies learned preferences without explicit instruction | P3 |
-| FR-3.5.5 | **Symbol Interest Tracking** | System SHALL remember which symbols user has researched across sessions | User has researched symbols in past sessions | Agent can list user's historically researched symbols on request | P3 |
+| FR-3.5.1 | **Meaning-Based Memory Search** | System SHALL find relevant future LTM entries or approved conversation-derived memory records based on meaning, not keywords | User asks about topic discussed in prior session | Relevant prior context surfaces with ≥70% relevance score | P3 |
+| FR-3.5.2 | **Cross-Session Recall** | Agent SHALL be able to reference approved cross-session memory context for the same user without reopening raw STM checkpoints | User has completed ≥2 sessions previously | Agent can retrieve relevant prior context from the future LTM layer when prompted | P3 |
+| FR-3.5.3 | **Memory Indexing** | Archived conversations or derived memory records SHALL be indexed for efficient future-memory retrieval | Session completed and archived | Relevant memory entry searchable within 60 seconds of archival or memory extraction | P3 |
+| FR-3.5.4 | **User Preference Learning** | System SHALL learn user's investment style and preferences over time as stable personalization signals | User has ≥5 completed sessions | Agent proactively applies learned preferences without explicit instruction | P3 |
+| FR-3.5.5 | **Symbol Interest Tracking** | System SHALL remember which symbols user has researched across sessions as durable interest markers rather than sourced financial facts | User has researched symbols in past sessions | Agent can list user's historically researched symbols on request | P3 |
 
 ---
 
@@ -462,7 +472,7 @@ Priority levels:
 | FR-7.1.2 | **User Turn Tracking** | Each user message processed by the chat flow increments the conversation's message_count and updates last_activity_at | User sends a chat message within a conversation | message_count incremented by 1; last_activity_at updated to current timestamp; visible via conversation GET endpoint within 5 seconds | P0 |
 | FR-7.1.3 | **Assistant Turn Tracking** | Each assistant response updates the conversation's message_count and total_tokens estimate | Agent produces a response | message_count incremented by 1; total_tokens updated with estimated token count; visible via conversation GET endpoint within 5 seconds | P0 |
 | FR-7.1.4 | **Focused Symbol Refresh** | When the agent detects new stock symbols during processing, the conversation-level focused_symbols field is updated | Agent processes a query mentioning a new symbol | focused_symbols array includes newly detected symbols without removing previously tracked ones | P1 |
-| FR-7.1.5 | **Dual Persistence Coordination** | Checkpoint state (managed by LangGraph) and conversation metadata (managed by application) are treated as two coordinated but distinct persistence layers; neither is authoritative over the other's domain | Chat flow executes with STM enabled | Checkpoint stores agent graph state; conversation record stores searchable application metadata; both updated in the same request cycle | P0 |
+| FR-7.1.5 | **Dual Persistence Coordination** | Checkpoint state (managed by LangGraph), conversation metadata (managed by application), and session context (managed by session services) are treated as coordinated but distinct persistence and context layers; neither checkpoint nor conversation metadata is authoritative over the other's domain | Chat flow executes with STM enabled | Checkpoint stores agent graph state; conversation record stores searchable application metadata; session record stores reusable parent business context; each is updated or resolved in the same request cycle as applicable | P0 |
 
 ---
 
@@ -988,6 +998,7 @@ This section maps acceptance criteria (AC-*) to the functional and non-functiona
 | 2.1 | 2026-03-17 | System | Realigned terminology and API/memory semantics to the conversation-scoped STM model: updated FR-3 and FR-5 language for `conversation_id -> thread_id`, clarified session-as-parent context behavior, and corrected NFR/constraint wording that previously implied session-scoped STM persistence. |
 | 2.2 | 2026-03-19 | System | Phase C–E requirement integration. Added FR-5.3–5.6 (Management API for workspace, session, conversation, cross-cutting behaviors), FR-7 (Data Integrity and Operational Tooling — runtime metadata consistency, reconciliation, migration). Added NFR-1.4 (Management API Latency), NFR-2.4 (Data Migration Reliability), NFR-2.5 (Reconciliation Safety). Added AC-5 (Management API Functionality), AC-6 (Data Consistency and Reconciliation), AC-7 (Lifecycle Enforcement). Added IR-1.8–IR-1.13 (management API interface contracts). Strengthened FR-3.2.6 to P0 runtime-wiring requirement and FR-5.1.7 to P0 with explicit cross-references. Resolved OI-5; added OI-6–OI-8. Governing analysis: PHASE_CDE_REQUIREMENT_ANALYSIS.md. |
 | 2.3 | 2026-04-13 | System | Prompt system and behavioral guardrails integration. Added FR-1.4.6–1.4.9 (prompt version identity, route-specific context, rollback safety, experiment assignment). Added FR-1.5 (Finance-Domain Behavioral Guardrails — evidence-first responses, uncertainty disclosure, anti-hype, fact-assumption separation, source attribution). Added NFR-5.2.5–5.2.7 (prompt version, agent role, and experiment ID in traces). Strengthened NFR-6.2.3 to require versioned file assets and no-code-deployment configurability. Added AC-8 (Prompt System acceptance criteria). Added related document reference to PROMPT_SYSTEM_RESEARCH_PROPOSAL.md. Added OI-9 (prompt asset directory structure). Research foundation: PROMPT_SYSTEM_RESEARCH_PROPOSAL.md v1.2. |
+| 2.4 | 2026-05-15 | System | Reconciled roadmap and requirements wording to the updated memory model: added explicit glossary boundaries for session context, STM, LTM, and RAG; clarified FR-1.4.4 active-context wording; reframed FR-3 summarization as STM compaction; refined future-LTM requirements to emphasize personalization rather than raw checkpoint reuse; and clarified FR-7.1.5 as coordinated but distinct checkpoint, metadata, and session-context layers. |
 ---
 
 *End of Requirements Document*

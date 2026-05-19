@@ -12,7 +12,7 @@
 | Project | DP Stock Investment Assistant |
 | Domain | Agent |
 | Focus | Technical realization of the LangChain ReAct agent domain, including orchestration, memory, prompt composition, and fallback behavior |
-| Date | 2026-05-06 |
+| Date | 2026-05-19 |
 | Status | Active working scaffold |
 | Audience | Engineering, architecture, agent maintainers, and reviewers |
 
@@ -56,7 +56,7 @@ The StockAssistantAgent is a LangChain-based ReAct agent designed for stock inve
 | AI Framework | LangChain >=1.0.0 with `langchain_core` and `langchain_openai` |
 | Model Providers | OpenAI (GPT-5-nano), Grok (grok-4-1-fast-reasoning) with automatic fallback |
 | Tool System | Registry-based with caching support |
-| Memory | LangGraph `MongoDBSaver` checkpointer for conversation-scoped STM, with sessions as reusable parent business context |
+| Memory | Service-owned session context and lifecycle metadata, LangGraph `MongoDBSaver` for conversation-scoped STM, and a planned future LTM personalization boundary |
 | Semantic Router | `semantic-router` library with OpenAI/HuggingFace encoders |
 | Response Types | Structured (`AgentResponse`) with immutable dataclasses |
 
@@ -104,9 +104,11 @@ src/prompts/
 | View | Prompt Asset Model | Status |
 |------|--------------------|--------|
 | Current runtime layout | Template/text assets under `src/prompts/` | Implemented |
-| ADR taxonomy target (canonical) | `src/prompts/system/`, `src/prompts/skills/`, `src/prompts/experiments/` | Proposed |
+| ADR taxonomy target (canonical) | Shallow metadata-driven layout under `src/prompts/system/`, `src/prompts/skills/`, and `src/prompts/experiments/` with files such as `system/react_analyst.md`, `system/react_analyst.vi.md`, `skills/routes/price_check.md`, and `experiments/react_analyst.evidence_strict.md` | Proposed |
 
 The technical design treats ADR taxonomy as canonical for prompt assets. Planning-artifact path aliases are non-authoritative and must map back to ADR taxonomy paths.
+
+The planned structure stays intentionally shallow. Asset class is conveyed by directory, while version, locale, variant, activation mode, and baseline fallback semantics are resolved through metadata and loader policy rather than deeper directory nesting.
 
 ## 3. Core Realization
 
@@ -260,9 +262,16 @@ class CachingTool(BaseTool):
 
 #### Short-Term Memory (STM) via LangGraph Checkpointer
 
-**Decision in force**: Use LangGraph's `MongoDBSaver` checkpointer for conversation-scoped STM persistence, with `conversation_id -> thread_id` as the canonical memory mapping and sessions retained as parent workflow context.
+**Decision in force**: Use LangGraph's `MongoDBSaver` checkpointer for conversation-scoped STM persistence, with `conversation_id -> thread_id` as the canonical memory mapping and service-owned session context retained as reusable parent business context.
 
 **Status**: Implemented in the current runtime. Conversation-scoped checkpoints, management APIs, reconciliation tooling, and legacy-thread migration tooling are live on this branch.
+
+**Reference model in force**:
+
+- Session context remains a service-owned parent business context boundary rather than a memory tier.
+- STM remains the implemented conversation-scoped, checkpoint-managed runtime state surface.
+- Future LTM remains a planned cross-conversation personalization boundary only.
+- RAG and tools remain evidence and computation surfaces rather than extensions of STM or LTM.
 
 **Key Design Choices**:
 
@@ -277,6 +286,7 @@ class CachingTool(BaseTool):
 | Current lifecycle behavior | `active` and `archived` are current-state service controls; `summarized` remains schema-supported but not universally active runtime flow |
 | Transport parity | REST uses `ChatService` lifecycle and metadata helpers; Socket.IO currently bypasses them |
 | Session-context timing | Resolved at query time in service helpers via conversation-to-session lookup; not yet injected into the prompt path |
+| Future LTM boundary | Planned cross-conversation personalization only; separate from session context, STM, and RAG |
 | Configuration | `MemoryConfig` frozen dataclass with 9 configurable parameters and fail-fast validation |
 
 **Architecture Note**:
@@ -448,7 +458,7 @@ The planned prompt compiler path realizes the architectural prompt boundary as t
 |---------|---------------------|----------------|
 | Prompt compiler | `PromptAssetLoader -> PromptAssembler -> ResponseGuardrailMiddleware` | The compiler concept is realized as an explicit path rather than a single opaque step |
 | Loader facade naming in implementation discussions | `PromptRegistry` (or equivalent) | When used, this name should be treated as a loader-facing facade rather than a separate design concept |
-| Prompt asset taxonomy | ADR-governed system, skills, experiments, and baseline assets | Technical layout should remain consistent with the architecture-package taxonomy |
+| Prompt asset taxonomy | ADR-governed shallow `system`, `skills`, and `experiments` files with metadata-governed baseline fallback | Technical layout should remain consistent with the architecture-package taxonomy and avoid encoding version or locale primarily through deep directory structure |
 
 ```mermaid
 flowchart LR
@@ -475,7 +485,9 @@ flowchart LR
 | Role contracts | Define the behavioral contract for the primary analyst role and future specialist roles | Versioned; activated by selected runtime path |
 | Skills assets | Add route-specific context without replacing the shared policy layer | Composable; activated by route-aware selection |
 | Experiment or variant assets | Support controlled evaluation and rollout of alternative prompt behaviors | Temporary and explicitly attributable |
-| Baseline asset | Provides the last-known-stable prompt lineage when preferred assets are unavailable | Permanent fallback path |
+| Baseline variant and fallback lineage | Marks the last-known-stable prompt line when preferred assets are unavailable | Persistent selection rule carried through metadata and loader policy |
+
+In the planned layout, these assets remain easy to locate by class without forcing future prompts into deep trees. Representative paths are `system/react_analyst.md`, `system/react_analyst.vi.md`, `skills/always_on/evidence_first.md`, `skills/routes/price_check.md`, and `experiments/react_analyst.evidence_strict.md`.
 
 The intended composition order remains deterministic:
 
@@ -539,17 +551,19 @@ Implementation-oriented safeguards:
 
 ### 3.7 Example Reasoning Flow
 
-The following walkthrough preserves the layered contract in a concrete engineering form without making the ADR carry the worked example. It represents the target layered flow once prompt externalization and richer retrieval wiring are fully in place.
+The following walkthrough preserves the layered contract in a concrete engineering form without making the ADR carry the worked example. It represents the target layered flow while keeping current-runtime caveats explicit: service-owned session context and STM are available today, while future LTM enrichment remains optional follow-up work rather than an active runtime dependency.
 
 ```mermaid
 flowchart TD
-	Q["User: \"Danh gia HSG trung han\""] --> LTMNode["Resolve LTM summary\nrisk profile: moderate\ntime horizon: 6-18 months"]
-	LTMNode --> STMNode["Load STM and conversation-scoped assumptions\ncurrent thread hypothesis: steel price bottoming"]
+	Q["User: \"Danh gia HSG trung han\""] --> SessionNode["Resolve service-owned session context\nrisk profile: moderate\ntime horizon: 6-18 months"]
+	SessionNode --> STMNode["Load STM and conversation-scoped assumptions\ncurrent thread hypothesis: steel price bottoming"]
 	STMNode --> RouteNode["Route classification\nroute: FUNDAMENTALS"]
 	RouteNode --> Evidence["Retrieve evidence\ncompany financials + relevant steel-price context"]
 	Evidence --> Assemble["Assemble prompt\nbase rules + skills + memory context + evidence + output contract"]
 	Assemble --> Response["Generate response\nstructured reasoning with evidence-backed narrative"]
 ```
+
+Future LTM, when introduced, should enrich the assembly step as optional cross-conversation personalization rather than replacing session context, STM, or evidence retrieval.
 
 ## 4. Engineering Constraints and Extension Paths
 
@@ -901,3 +915,4 @@ AgentResponse.fallback(content, provider, model, **kwargs)
 | 0.2 | 2026-04-16 | GitHub Copilot | Route taxonomy aligned to canonical `StockQueryRoute` enum from `src/core/routes.py` |
 | 0.3 | 2026-05-06 | GitHub Copilot | Migrated realization-only material out of ADR-001: retrieval realization boundaries, prompt assembly order, fine-tuning realization, example reasoning flow, and layered runtime delivery sequencing |
 | 0.4 | 2026-05-12 | GitHub Copilot | Aligned prompt taxonomy references to ADR-canonical paths (`src/prompts/system|skills|experiments`) and removed hybrid path language |
+| 0.5 | 2026-05-19 | GitHub Copilot | Synchronized prompt-asset realization language with the simplified proposal layout by describing the ADR taxonomy as a shallow metadata-driven `system` / `skills` / `experiments` structure and replacing separate baseline-asset wording with metadata-governed fallback lineage |

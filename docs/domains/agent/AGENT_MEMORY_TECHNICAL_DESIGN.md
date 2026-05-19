@@ -1,9 +1,9 @@
 # Agent Memory Technical Design
 
-> **Document Version**: 1.5  
-> **Last Updated**: May 6, 2026  
-> **Phase**: 2A.1 - Short-Term Conversation Memory  
-> **Status**: STM hierarchy implemented; summarization trigger and Socket.IO parity remain follow-up work  
+> **Document Version**: 1.6  
+> **Last Updated**: May 15, 2026  
+> **Phase**: 2A.1 - Conversation-Scoped STM Foundation  
+> **Status**: STM foundation implemented on the REST path; summarization trigger, Socket.IO parity, and future LTM remain follow-up work  
 > **Governing ADR**: [ADR-001 — Layered LLM Architecture](./decisions/AGENT_ARCHITECTURE_DECISION_RECORDS.md)
 
 ---
@@ -26,7 +26,18 @@
 
 ### Objective
 
-Implement persistent conversation memory for the Stock Assistant LangChain agent, enabling multi-turn conversations where the agent recalls previous exchanges within a conversation thread while allowing a single session to own multiple conversations.
+Document and govern the implemented conversation-scoped STM subsystem for the Stock Assistant LangChain agent, while defining the target-state boundary to future LTM personalization and keeping session context separate from both STM and RAG.
+
+### Target-State Reference Model
+
+| Surface | Status | Role |
+|---------|--------|------|
+| Session context | Implemented boundary | Service-owned reusable parent business context resolved outside the checkpoint store |
+| Conversation-scoped STM | Implemented boundary | Checkpoint-managed runtime state bound through `conversation_id -> thread_id` |
+| Future LTM | Planned boundary | Optional cross-conversation personalization and symbol-tracking context only |
+| RAG and tools | Separate evidence/computation surfaces | Sourced evidence and deterministic values remain outside memory tiers |
+
+This document uses that reference model throughout: session context does not become a checkpoint layer, STM does not become a factual store, future LTM does not replace session context, and summarization remains STM compaction rather than LTM formation.
 
 ### Implementation Status
 
@@ -43,6 +54,7 @@ Implement persistent conversation memory for the Stock Assistant LangChain agent
 | Socket.IO `conversation_id` passthrough support | ✅ Done | `src/web/sockets/chat_events.py` |
 | Conversation-scoped `conversation_id -> thread_id` contract | ✅ Done | Agent + chat service + conversation repository |
 | Session-owned multi-conversation hierarchy | ✅ Done | Routes + services + repositories |
+| Session context resolution and conversation overrides | ⚠ Partial | `src/services/chat_service.py`, `src/services/conversation_service.py` |
 | Management APIs for workspace/session/conversation lifecycle | ✅ Done | `src/web/routes/*_routes.py`, `src/services/*_service.py` |
 | Runtime reconciliation service + operator CLI | ✅ Done | `src/services/runtime_reconciliation_service.py`, `scripts/reconcile_stm_runtime.py` |
 | Legacy checkpoint migration CLI | ✅ Done | `src/data/migration/legacy_checkpoint_migration.py`, `scripts/migrate_legacy_threads.py` |
@@ -58,12 +70,13 @@ Implement persistent conversation memory for the Stock Assistant LangChain agent
 
 | Principle | Description |
 |-----------|-------------|
-| **Dual Memory Strategy** | Short-term (checkpointer) + Long-term (vector store for personalization) |
+| **Separated Memory Surfaces** | Session context, conversation-scoped STM, future LTM, and RAG remain distinct authorities |
 | **Memory Never Stores Facts** | Financial data stays in RAG/Tools layer per ADR-001 |
-| **Session Is Business Context** | Session stores reusable assumptions, intent, and symbol focus across conversations |
+| **Session Is Parent Business Context** | Session stores reusable assumptions, intent, and symbol focus across conversations without sharing checkpoints |
 | **Conversation Owns STM Thread** | Each conversation maps 1:1 to the LangGraph `thread_id` used for checkpoint recovery |
-| **Backward Compatibility** | APIs continue to support stateless operation when `conversation_id` is omitted |
-| **Separation of Concerns** | LangGraph handles agent state; ChatRepository handles UI queries |
+| **Stateless Fallback Remains Valid** | APIs continue to support stateless operation when `conversation_id` is omitted or checkpoint persistence is unavailable |
+| **Service Owns Lifecycle and Metadata** | LangGraph handles thread state; service and repository boundaries govern archive rules, metadata, and parent context |
+| **Summarization Is STM Management** | Summaries compact STM context; they do not become LTM or RAG by themselves |
 | **Native Integration** | Use LangGraph's built-in MongoDBSaver for checkpoints |
 | **Archive Over Delete** | Conversations are archived for historical reference, not purged |
 
@@ -74,13 +87,16 @@ Implement persistent conversation memory for the Stock Assistant LangChain agent
 - New MongoDB collections for agent memory
 - API changes to support `conversation_id`, with a deprecated REST-only `session_id` alias during the migration window
 - Explicit session -> conversation -> thread hierarchy
+- Service-owned session context resolution and conversation override boundaries
 - Summarization schema/config groundwork for long conversations
 - Conversation archival strategy
+- Reconciliation and migration tooling for STM integrity
 
 **Out of Scope (Phase 2A.2+):**
-- Long-term vector store memory (semantic search over past conversations)
-- Cross-session memory retrieval
+- Long-term namespaced personalization store
+- Cross-conversation retrieval and memory recall policy
 - User preference learning (LTM personalization layer)
+- Universal prompt-level injection of merged session context or future LTM
 
 ---
 
@@ -93,7 +109,7 @@ This technical design implements the **Short-Term Memory (STM)** component defin
 | **Memory never stores facts** | Conversation checkpoints and summaries store messages, preferences, and routing hints only; no prices, ratios, filings, or conclusions. |
 | **RAG never stores opinions** | RAG indices are sourced evidence only; interpretations remain in LLM output with citations. |
 | **Fine-tuning never stores knowledge** | Fine-tuning enforces structure and tone; training excludes invented data and forecasts. |
-| **Prompting controls behavior, not data** | Prompt compiler injects rules and schema; data is injected at runtime from STM/LTM/RAG/tools. |
+| **Prompting controls behavior, not data** | This design assumes data reaches the runtime through session context, STM, future LTM, RAG, and tools rather than being hidden in prompt assets; current prompt ADRs remain partly planned. |
 | **Tools compute numbers, LLM reasons about them** | Calculations are performed by tools; summaries reference tool calls without persisting outputs. |
 | **Investment data sources are external** | Market data and filings come from approved sources or internal databases via tools; memory only stores references. |
 | **Market manipulation safeguards are enforced** | Responses are informational and grounded in verifiable sources; no price influence or trade instructions. |
@@ -126,55 +142,56 @@ This technical design implements the **Short-Term Memory (STM)** component defin
 | Archive option (not delete) | `status: archived` with read-only enforcement |
 | Workspace-bound isolation | `session.workspace_id` ensures context isolation |
 | Selective recall | `summarize_threshold` triggers condensation |
-| Query-specific retrieval | Future: RAG over `memory_vectors` collection |
+| Query-specific retrieval | Future: explicit retrieval policy over RAG and optional LTM recall; not current runtime behavior |
 | Stores conversational state only | Checkpoint stores messages, not financial data |
 
 ---
 
 ## Architectural Decisions
 
-### Decision 1: Dual Memory Architecture
+### Decision 1: Separated Memory Surfaces
 
-**Decision**: Implement two types of memory with distinct purposes aligned with ADR-001.
+**Decision**: Represent memory as distinct surfaces with different authorities: session context, conversation-scoped STM, future LTM, and evidence or computation layers that remain outside memory.
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
-│                     MEMORY ARCHITECTURE (ADR-001 Aligned)                    │
+│                  MEMORY SURFACES (ADR-001 Aligned)                          │
 ├─────────────────────────────────────────────────────────────────────────────┤
 │                                                                              │
+│  CURRENT AUTHORITIES                                                        │
 │  ┌─────────────────────────────┐    ┌─────────────────────────────────────┐ │
-│  │   SHORT-TERM MEMORY (STM)   │    │   LONG-TERM MEMORY (LTM)            │ │
-│  │   (Conversation Buffer)     │    │   (Personalization - FUTURE)        │ │
+│  │ Session Context             │    │ Short-Term Memory (STM)             │ │
+│  │ (Service-Owned)             │    │ (Conversation-Scoped)               │ │
 │  ├─────────────────────────────┤    ├─────────────────────────────────────┤ │
-│  │ • Thread-scoped             │    │ • User preferences & risk profile  │ │
-│  │ • LangGraph Checkpointer    │    │ • Symbol tracking context          │ │
-│  │ • Summary metadata support  │    │ • Investment style preferences     │ │
-│  │ • Full message history      │    │ • NO financial facts (ADR rule)    │ │
-│  │ • Archive over delete       │    │ • Audit trail for changes          │ │
-│  └─────────────────────────────┘    └─────────────────────────────────────┘ │
-│              │                                   │                          │
-│              ▼                                   ▼                          │
-│  ┌─────────────────────────────┐    ┌─────────────────────────────────────┐ │
-│  │  agent_checkpoints          │    │  user_preferences (FUTURE)          │ │
-│  │  conversations              │    │  symbol_tracking (FUTURE)           │ │
-│  │  (MongoDB Collections)      │    │  (MongoDB Collections)              │ │
+│  │ • Assumptions and intent    │    │ • LangGraph checkpoints            │ │
+│  │ • Focus symbols             │    │ • Message history                  │ │
+│  │ • Reusable parent context   │    │ • Summary metadata support         │ │
+│  │ • No shared checkpoints     │    │ • Archive over delete policy input │ │
 │  └─────────────────────────────┘    └─────────────────────────────────────┘ │
 │                                                                              │
+│  FUTURE AUTHORITY                                                            │
 │  ┌──────────────────────────────────────────────────────────────────────┐   │
-│  │   SEMANTIC MEMORY (Future - memory_vectors)                          │   │
-│  │   • Cross-session retrieval via embeddings                           │   │
-│  │   • Query-specific recall (RAG over past conversations)              │   │
+│  │ Long-Term Memory (LTM)                                               │   │
+│  │ • Stable personalization and symbol-tracking context                 │   │
+│  │ • Cross-conversation scope                                           │   │
+│  │ • No financial facts                                                 │   │
+│  │ • Optional retrieval support via explicit future policy              │   │
 │  └──────────────────────────────────────────────────────────────────────┘   │
+│                                                                              │
+│  NOT MEMORY                                                                  │
+│  • RAG stores sourced evidence only                                          │
+│  • Tools fetch and compute deterministic values                              │
+│  • Prompt assets govern behavior rather than store state                     │
 │                                                                              │
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
 
 **Rationale:**
-- Short-term memory enables coherent multi-turn conversations within a single conversation thread
-- Session-level context can be propagated across multiple sibling conversations without merging their STM buffers
-- Long-term memory (future) enables personalization without contaminating factual analysis
-- Semantic memory (future) enables cross-session retrieval via explicit user request
-- Clear separation prevents hallucination and maintains analytical integrity per ADR-001
+- STM enables coherent multi-turn reasoning within one conversation thread.
+- Session context can be reused across sibling conversations without merging their checkpoints.
+- Future LTM enables stable personalization across threads without contaminating factual analysis.
+- Retrieval over prior artifacts is a future capability, not a third memory tier that collapses LTM, STM, and RAG.
+- Clear separation prevents hallucination and maintains analytical integrity per ADR-001.
 
 ---
 
@@ -277,8 +294,9 @@ This technical design implements the **Short-Term Memory (STM)** component defin
                                                                          │ request
                                                                          ▼
                                                                ┌──────────────────┐
-                                                               │ Query-retrievable │
-                                                               │ via RAG (future)  │
+                                                               │ Future explicit   │
+                                                               │ retrieval/export  │
+                                                               │ policy only       │
                                                                └──────────────────┘
 ```
 
@@ -301,13 +319,13 @@ This technical design implements the **Short-Term Memory (STM)** component defin
 
 ### Decision 5: Memory Scope and Limits
 
-**Decision**: Support full history with configurable summarization thresholds and schema support. The automatic summarization trigger remains a planned follow-up, not an active runtime behavior.
+**Decision**: Manage STM growth with configurable token-based thresholds and summary metadata support. The automatic summarization trigger remains a planned STM follow-up, not an active runtime behavior and not a substitute for LTM.
 
 | Mode | Description | Configuration |
 |------|-------------|---------------|
 | **Full History** | Keep all messages in context | Default mode |
 | **Window Buffer** | Keep last N messages | `memory.max_messages: 50` |
-| **Summary Mode** | Planned runtime behavior once summarization is wired | `memory.summarize_threshold: 4000` |
+| **Summary Mode** | Planned STM compaction behavior once summarization is wired | `memory.summarize_threshold: 4000` |
 
 **Planned Summarization Strategy:**
 ```
@@ -318,7 +336,7 @@ When total_tokens > summarize_threshold:
   4. Store summary in conversations.summary field
 ```
 
-**Current Runtime Note:** The configuration, schema fields, and repository helpers for summaries exist today, but the chat execution path does not yet invoke this workflow automatically.
+**Current Runtime Note:** The configuration, schema fields, and repository helpers for summaries exist today, but the chat execution path does not yet invoke this workflow automatically. When implemented, the flow should compact STM state and update summary metadata; it should not be treated as automatic LTM persistence or RAG ingestion.
 
 ---
 
@@ -540,33 +558,38 @@ AGENT_CHECKPOINTS_INDEXES = [
 
 #### 3. `memory_vectors` Collection (FUTURE - Phase 2A.2+)
 
-**Purpose**: Store conversation embeddings for semantic search.
+**Purpose**: Support future LTM personalization lookup and optional retrieval augmentation without collapsing LTM into STM or raw RAG content.
 
 ```javascript
 // memory_vectors_schema.py equivalent (Future implementation)
 MEMORY_VECTORS_SCHEMA = {
     "bsonType": "object",
-    "required": ["session_id", "content", "embedding", "created_at"],
+    "required": ["user_id", "namespace", "memory_kind", "content", "embedding", "created_at"],
     "properties": {
         "_id": {
             "bsonType": "objectId"
-        },
-        "session_id": {
-            "bsonType": "string",
-            "description": "Reference to source session (UUID v4)"
         },
         "user_id": {
             "bsonType": "objectId",
             "description": "User who owns this memory"
         },
+        "namespace": {
+            "bsonType": "array",
+            "items": {"bsonType": "string"},
+            "description": "Namespace-scoped memory path, e.g. [\"users\", \"<user_id>\", \"preferences\"]"
+        },
+        "memory_kind": {
+            "bsonType": "string",
+            "enum": ["preference", "symbol_tracking", "episodic_summary"],
+            "description": "Future LTM category"
+        },
+        "source_conversation_id": {
+            "bsonType": "string",
+            "description": "Optional source conversation for audit and traceability"
+        },
         "content": {
             "bsonType": "string",
             "description": "Text content that was embedded"
-        },
-        "content_type": {
-            "bsonType": "string",
-            "enum": ["user_query", "assistant_response", "summary", "insight"],
-            "description": "Type of content"
         },
         "embedding": {
             "bsonType": "array",
@@ -575,7 +598,7 @@ MEMORY_VECTORS_SCHEMA = {
         },
         "metadata": {
             "bsonType": "object",
-            "description": "Additional context (symbols mentioned, topics, etc.)"
+            "description": "Additional context such as symbols, source references, or retention policy"
         },
         "created_at": {
             "bsonType": "date"
@@ -585,12 +608,12 @@ MEMORY_VECTORS_SCHEMA = {
 
 MEMORY_VECTORS_INDEXES = [
     {
-        "keys": [("user_id", 1), ("created_at", -1)],
-        "options": {"name": "idx_memory_vectors_user"}
+        "keys": [("user_id", 1), ("namespace", 1), ("created_at", -1)],
+        "options": {"name": "idx_memory_vectors_user_namespace"}
     },
     {
-        "keys": [("session_id", 1)],
-        "options": {"name": "idx_memory_vectors_session"}
+        "keys": [("source_conversation_id", 1)],
+        "options": {"name": "idx_memory_vectors_source_conversation"}
     }
     // Vector search index created separately via MongoDB Atlas
 ]
@@ -606,7 +629,7 @@ MEMORY_VECTORS_INDEXES = [
 | `chats` | UI chat message display | Application | Existing |
 | `conversations` | Memory metadata and state | Application | **NEW** |
 | `agent_checkpoints` | LangGraph agent state | MongoDBSaver | **NEW** |
-| `memory_vectors` | Semantic search embeddings | Application | **FUTURE** |
+| `memory_vectors` | Future LTM personalization and optional retrieval embeddings | Application | **FUTURE** |
 
 ---
 
@@ -693,7 +716,7 @@ MEMORY_VECTORS_INDEXES = [
 
 ### Sequence 3: Memory Summarization Flow
 
-> **Status**: Planned follow-up. The current runtime exposes summary fields and thresholds but does not yet trigger automated summarization from the chat execution path.
+> **Status**: Planned STM follow-up. The current runtime exposes summary fields and thresholds but does not yet trigger automated summarization from the chat execution path.
 
 ```
 ┌─────────────────────┐  ┌───────────────────┐  ┌─────────────────┐  ┌─────────┐
@@ -742,6 +765,8 @@ MEMORY_VECTORS_INDEXES = [
            │                       │                     │                │
 ```
 
+> **Boundary Note**: When implemented, this flow compacts STM and updates conversation summary metadata. It does not by itself create LTM entries or automatic RAG ingestion.
+
 ---
 
 ### Sequence 4: Socket.IO Request/Response with Conversation Memory
@@ -777,7 +802,7 @@ MEMORY_VECTORS_INDEXES = [
     │               │                      │                      │
 ```
 
-> **Current Limitation**: The Socket.IO path validates UUID format and preserves `conversation_id`, but it still bypasses `ChatService`, so it does not yet enforce archived-conversation rejection, REST-style metadata recording, or SSE-style orchestration behavior.
+> **Current Limitation**: The Socket.IO path validates UUID format and preserves `conversation_id`, but it still bypasses `ChatService`, so it does not yet enforce archived-conversation rejection, REST-style metadata recording, or SSE-style orchestration behavior. Target-state parity should route this transport through the same service-owned lifecycle boundary or an equivalent abstraction.
 
 ---
 
@@ -952,6 +977,16 @@ and database name from `config["database"]["mongodb"]["database_name"]` (default
 | 24 | Implement runtime reconciliation service and operator CLI | M | ✅ Done |
 | 25 | Implement additive legacy-checkpoint migration CLI with resume cursor | M | ✅ Done |
 
+### Phase 2A.2+ Planned Follow-On Work
+
+| Area | Target Outcome |
+|------|----------------|
+| Socket.IO parity | Route Socket.IO requests through the same lifecycle and metadata boundary as REST, or provide an equivalent service abstraction |
+| Automated summarization | Trigger token-based STM compaction and summary metadata updates without redefining LTM or RAG |
+| Session-context realization | Make merged session context and conversation overrides available to the runtime or prompt path only where the behavior is explicitly implemented |
+| Future LTM store | Introduce a namespace-scoped personalization store for stable preferences and symbol-tracking context |
+| Retrieval policy | Define how future LTM recall, archived conversation retrieval, and RAG stay separated |
+
 ### Key Implementation Gaps Resolved
 
 During implementation, five critical wiring gaps were discovered and fixed:
@@ -970,6 +1005,8 @@ During implementation, five critical wiring gaps were discovered and fixed:
 
 1. **Automated summarization trigger**: Summary fields, status values, and thresholds exist, but the chat execution path does not yet invoke summarization when thresholds are exceeded.
 2. **Socket.IO parity**: The Socket.IO handler preserves `conversation_id`, but it still bypasses `ChatService`, so archive guards and metadata sync remain REST-only.
+3. **Session-context prompt realization**: Service helpers can resolve session context plus conversation overrides, but that merged context is not yet a universally realized runtime input to the prompt path.
+4. **Future LTM definition and store**: The target-state personalization boundary is defined architecturally, but its storage model, write policy, and retrieval semantics remain future work.
 
 ---
 
@@ -993,13 +1030,23 @@ During implementation, five critical wiring gaps were discovered and fixed:
 | `tests/integration/test_stm_runtime_wiring.py` | Runtime wiring verification (checkpointer → agent → API) |
 | `tests/api/test_chat_routes_memory.py` | REST API conversation_id handling, optional session_id validation |
 
+### Failure and Recovery Coverage Priorities
+
+| Scenario | Expected Verification Focus |
+|----------|-----------------------------|
+| Checkpointer unavailable | Verify degraded stateless or non-persistent behavior does not break request handling |
+| Metadata and checkpoint divergence | Verify drift detection and non-destructive reconciliation behavior |
+| Archived conversation mutation | Verify service-owned guards reject mutation before agent invocation |
+| Session-context resolution failure | Verify reduced-context fallback does not promote checkpoint state into parent-context authority |
+| Socket.IO parity follow-up | Add transport-parity coverage once lifecycle and metadata helpers are shared across transports |
+
 ### Performance Tests
 
 | Metric | Target | Test Method |
 |--------|--------|-------------|
 | Memory load latency | <100ms | Load checkpoint benchmark |
 | Memory save latency | <50ms | Save checkpoint benchmark |
-| Summarization latency | <2s | Planned trigger summarization test |
+| Summarization latency | <2s | Planned STM compaction benchmark |
 
 ---
 
@@ -1051,8 +1098,8 @@ result = agent_executor.invoke(
 
 ---
 
-> **Document Status**: STM hierarchy implemented and verified; summarization trigger and Socket.IO parity remain follow-up work  
-> **Next Step**: Phase 2A.2 — Long-Term Memory (vector store, cross-session recall)  
+> **Document Status**: STM hierarchy implemented and verified; summarization trigger, Socket.IO parity, and future LTM remain follow-up work  
+> **Next Step**: Phase 2A.2+ — Future LTM personalization design plus remaining STM follow-up items  
 > **Review Required**: Architecture Team
 
 ### D. Memory technical requirements (backup)
