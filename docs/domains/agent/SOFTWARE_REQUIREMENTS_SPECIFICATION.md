@@ -1,8 +1,8 @@
 # Stock Investment Assistant Agent — Software Requirements Specification
 
-> **Document Version**: 2.4  
+> **Document Version**: 2.6  
 > **Created**: January 22, 2026  
-> **Last Updated**: May 15, 2026  
+> **Last Updated**: May 21, 2026  
 > **Status**: Active  
 > **Scope**: LangChain-based AI Agent for Stock Investment Assistant  
 ## Related Documents
@@ -18,7 +18,8 @@ This specification builds upon and references several architectural and design d
 | [AGENT_MEMORY_TECHNICAL_DESIGN.md](./AGENT_MEMORY_TECHNICAL_DESIGN.md) | Detailed technical design for conversation-scoped STM, session-context boundaries, checkpointing, and summarization | Implementation guidance supporting FR-3 (Memory System) |
 | [AGENTIC_APP_WITH_STM_INTEGRATION_ROADMAP.md](../../High-level%20Design/AGENTIC_APP_WITH_STM_INTEGRATION_ROADMAP.md) | Technical roadmap for workspace-session-conversation hierarchy and STM integration | Roadmap for FR-5.3–5.5, FR-7 (management, consistency, migration) |
 | [SRS_SPEC_TRACEABILITY.md](./SRS_SPEC_TRACEABILITY.md) | Bidirectional trace between SRS items and spec-kit feature artifacts | Companion delivery trace for implementation coverage and sync status |
-| [PROMPT_SYSTEM_RESEARCH_PROPOSAL.md](./PROMPT_SYSTEM_RESEARCH_PROPOSAL.md) | Prompt system research, design patterns, and implementation roadmap | Research foundation for FR-1.4.6–1.4.9, FR-1.5, NFR-5.2.5–5.2.7 |
+| [PROMPT_SYSTEM_RESEARCH_PROPOSAL.md](./PROMPT_SYSTEM_RESEARCH_PROPOSAL.md) | Prompt system research, design patterns, release gates, and implementation roadmap | Research foundation for FR-1.4.5–1.4.16, FR-1.5, NFR-5.2.5–5.2.11, NFR-6.2.3 |
+| [PROMPT_SYSTEM_BENCHMARK_REVIEW.md](./PROMPT_SYSTEM_BENCHMARK_REVIEW.md) | External benchmark review of prompt-governance design against vendor and framework guidance | Governance reference for FR-1.4.10–1.4.16, FR-1.5.6, AC-8.5–8.11 |
 
 
 
@@ -175,6 +176,13 @@ Priority levels:
 | FR-1.4.7 | **Route-Specific Prompt Context** | Agent SHALL receive route-specific prompt context based on query classification (e.g., analysis, news, general) | Semantic router classifies query | Agent response reflects domain-appropriate persona and instructions for the classified route | P2 |
 | FR-1.4.8 | **Prompt Rollback Safety** | If a configured prompt version fails to load or parse, the system SHALL fall back to the most recent known-good baseline prompt | Prompt asset missing or malformed | Agent operates with baseline prompt; incident logged at WARN level with prompt version identifier | P1 |
 | FR-1.4.9 | **Prompt Experiment Assignment** | System SHALL support assigning prompt variants to conversations via a configurable selection mode (e.g., pinned version, random allocation, weighted distribution) | Experiment configuration provided | Conversation receives the designated prompt variant; variant identifier recorded in trace metadata | P2 |
+| FR-1.4.10 | **Instruction Authority Separation** | Prompt assembly SHALL treat retrieved documents, tool outputs, quoted attachments, and summarized memory as data-only inputs unless a higher-authority repo-owned policy explicitly admits a bounded use | Dynamic evidence or summarized context present | Imperative text from data-only inputs does not alter policy, tool behavior, or refusal posture | P0 |
+| FR-1.4.11 | **Prompt Authority Precedence** | Shared prompt policy SHALL remain authoritative over role, route, experiment, user, and session-level prompt inputs | Shared policy and lower-authority prompt layers configured | Lower-authority layers can narrow task framing but cannot weaken safety, evidence, or disclosure rules | P0 |
+| FR-1.4.12 | **Prompt Release Gate Enforcement** | Candidate prompt variants SHALL NOT enter `shadow`, `weighted`, or `active` selection until required offline evaluation gates pass and mandatory prompt-governance metadata is complete on all relevant evaluation runs | Candidate prompt variant configured | Promotion is blocked until finance-safety blocker sets pass at 100%, missing-data handling passes at >=98%, applicable routing or tool datasets pass at >=95%, and required metadata keys are 100% complete | P1 |
+| FR-1.4.13 | **Prompt Rollback Triggering** | System SHALL automatically revert to the last approved baseline prompt when live candidate observation detects a critical finance-safety violation, obedience to instruction content from a data-only input, or more than 0.5% missing mandatory prompt-governance metadata across relevant live runs | Candidate prompt variant active in `shadow`, `weighted`, or `active` mode | Candidate is removed from live selection, baseline prompt resumes, and rollback reason is recorded with prompt identifiers | P0 |
+| FR-1.4.14 | **Tool Risk Envelope Enforcement** | Prompt-governed tool exposure SHALL classify each exposed tool into a governed risk class and SHALL prevent a prompt asset from exposing tools above its approved risk envelope | Prompt asset selects one or more tools | Only tools whose registry-declared risk class fits the asset-approved envelope are exposed; higher-risk paths surface required approval state before execution | P1 |
+| FR-1.4.15 | **Locale Parity Promotion Control** | Non-default locale prompt variants SHALL NOT enter `shadow`, `weighted`, or `active` selection until parity review verifies equivalent finance-policy behavior to the default-locale lineage | Non-default locale candidate configured | Candidate remains evaluation-only until paired parity evidence and locale-competent review are recorded | P1 |
+| FR-1.4.16 | **Prompt Segment Classification and Reuse** | Prompt assembly SHALL distinguish static policy segments, dynamic control segments, and data-only runtime evidence, and SHALL apply reuse rules by segment class | Prompt compiler assembles a request | Static policy reuse is tied to exact prompt lineage, dynamic control remains request-scoped unless explicitly equivalent, and data-only evidence never becomes policy | P1 |
 
 ---
 
@@ -190,6 +198,7 @@ Priority levels:
 | FR-1.5.3 | **Anti-Hype and Anti-Manipulation** | Agent SHALL NOT generate language that could constitute market hype, price manipulation, or guaranteed-return claims | Any financial query | Response avoids superlatives, guarantees, and urgency language; verified by keyword/phrase blocklist | P0 |
 | FR-1.5.4 | **Fact-Assumption-Inference Separation** | Agent SHALL clearly label which parts of a response are factual data, which are assumptions, and which are inferences or opinions | Response mixes data and analysis | Response uses explicit markers or structure to distinguish data vs. assumption vs. inference | P1 |
 | FR-1.5.5 | **Source Attribution** | Agent SHALL attribute financial data to the originating tool or data source | Tools returned data used in response | Response includes attribution (e.g., "According to Yahoo Finance…", "Based on the latest SEC filing…") | P1 |
+| FR-1.5.6 | **Boundary-Aware Guardrail Enforcement** | Agent SHALL apply guardrail checks at input, tool, output, and approval boundaries rather than relying only on prompt wording | Request exercises a guarded input path, tool call, output check, or future approval-gated action | Unsafe input is blocked or narrowed, tool usage is validated, unsafe output is intercepted, and high-impact actions are paused for human review when such actions are available | P1 |
 
 ---
 ### FR-2: Tool System
@@ -683,6 +692,10 @@ Future LTM requirements in this section complement session context and STM. They
 | NFR-5.2.5 | Traces SHALL include the prompt version identifier used for each agent invocation |
 | NFR-5.2.6 | Traces SHALL include the agent role or route classification applied to the request |
 | NFR-5.2.7 | When prompt experiments are active, traces SHALL include the experiment identifier and variant assignment |
+| NFR-5.2.8 | Traces SHALL include prompt selection mode and machine-detectable guardrail outcomes for prompt-governed requests that exercise input, tool, output, or approval controls |
+| NFR-5.2.9 | Evaluation and live-observation runs used for prompt promotion or rollback decisions SHALL contain complete prompt-governance metadata: `prompt_version`, `prompt_variant`, `prompt_selection_mode`, `agent_role`, `model_provider`, `model_name`, and, when applicable, `prompt_experiment_id`, `routing_decision`, and `conversation_id` |
+| NFR-5.2.10 | Locale-governed prompt runs SHALL include `prompt_locale` and `parity_group` metadata on all evaluation or live-observation runs used for locale promotion or rollback decisions |
+| NFR-5.2.11 | Guarded tool runs SHALL include `tool_risk_class` and, when applicable, approval-state metadata on traces used for prompt-governed tool review |
 
 #### NFR-5.3 Metrics
 **Priority**: P1
@@ -824,6 +837,13 @@ Future LTM requirements in this section complement session context and STM. They
 | AC-8.2 | When the configured prompt asset is missing or malformed, the agent falls back to baseline prompt and logs a WARN-level event | Fault-injection test |
 | AC-8.3 | Agent responses to financial queries reference specific tool-sourced data points and include source attribution | Integration test |
 | AC-8.4 | Agent responses do not contain hype, guaranteed-return claims, or urgency language (verified by blocklist scan) | Unit test + regression test |
+| AC-8.5 | Imperative text embedded in retrieved content, tool outputs, quoted attachments, or summarized memory does not override shared prompt policy or change tool behavior | Security regression test |
+| AC-8.6 | Candidate prompt variants cannot enter `shadow`, `weighted`, or `active` selection until offline dataset thresholds pass and all mandatory prompt-governance metadata keys are present on relevant evaluation runs | Governance integration test |
+| AC-8.7 | A live candidate prompt that triggers a critical finance-safety violation, obeys instruction content from a data-only surface, or exceeds the 0.5% metadata-missing threshold is rolled back automatically to the approved baseline prompt | Fault-injection + integration test |
+| AC-8.8 | Trace records for guarded prompt paths include prompt selection mode, guardrail outcomes, and any applicable routing, experiment, and conversation identifiers required for promotion decisions | Integration test + trace audit |
+| AC-8.9 | Prompt assets cannot expose tools above their approved risk envelope, and guarded tool traces include the effective `tool_risk_class` plus approval state when required | Governance integration test + trace audit |
+| AC-8.10 | Non-default locale variants cannot enter `shadow`, `weighted`, or `active` selection until paired parity evidence exists and locale-governed runs include `prompt_locale` and `parity_group` metadata | Governance integration test + trace audit |
+| AC-8.11 | Prompt assembly keeps static policy, dynamic control, and runtime evidence in distinct segment classes; request-scoped evidence is not reused as policy across requests | Integration test + security regression test |
 
 ---
 
@@ -872,6 +892,13 @@ This section maps acceptance criteria (AC-*) to the functional and non-functiona
 | AC-8.2 | FR-1.4.8, NFR-2.2.2 |
 | AC-8.3 | FR-1.5.1, FR-1.5.5 |
 | AC-8.4 | FR-1.5.3 |
+| AC-8.5 | FR-1.4.10, FR-1.4.11, FR-1.5.6 |
+| AC-8.6 | FR-1.4.12, NFR-5.2.9 |
+| AC-8.7 | FR-1.4.13 |
+| AC-8.8 | FR-1.5.6, NFR-5.2.8, NFR-5.2.9 |
+| AC-8.9 | FR-1.4.14, NFR-5.2.11 |
+| AC-8.10 | FR-1.4.15, NFR-5.2.10 |
+| AC-8.11 | FR-1.4.16 |
 
 ---
 
@@ -999,6 +1026,8 @@ This section maps acceptance criteria (AC-*) to the functional and non-functiona
 | 2.2 | 2026-03-19 | System | Phase C–E requirement integration. Added FR-5.3–5.6 (Management API for workspace, session, conversation, cross-cutting behaviors), FR-7 (Data Integrity and Operational Tooling — runtime metadata consistency, reconciliation, migration). Added NFR-1.4 (Management API Latency), NFR-2.4 (Data Migration Reliability), NFR-2.5 (Reconciliation Safety). Added AC-5 (Management API Functionality), AC-6 (Data Consistency and Reconciliation), AC-7 (Lifecycle Enforcement). Added IR-1.8–IR-1.13 (management API interface contracts). Strengthened FR-3.2.6 to P0 runtime-wiring requirement and FR-5.1.7 to P0 with explicit cross-references. Resolved OI-5; added OI-6–OI-8. Governing analysis: PHASE_CDE_REQUIREMENT_ANALYSIS.md. |
 | 2.3 | 2026-04-13 | System | Prompt system and behavioral guardrails integration. Added FR-1.4.6–1.4.9 (prompt version identity, route-specific context, rollback safety, experiment assignment). Added FR-1.5 (Finance-Domain Behavioral Guardrails — evidence-first responses, uncertainty disclosure, anti-hype, fact-assumption separation, source attribution). Added NFR-5.2.5–5.2.7 (prompt version, agent role, and experiment ID in traces). Strengthened NFR-6.2.3 to require versioned file assets and no-code-deployment configurability. Added AC-8 (Prompt System acceptance criteria). Added related document reference to PROMPT_SYSTEM_RESEARCH_PROPOSAL.md. Added OI-9 (prompt asset directory structure). Research foundation: PROMPT_SYSTEM_RESEARCH_PROPOSAL.md v1.2. |
 | 2.4 | 2026-05-15 | System | Reconciled roadmap and requirements wording to the updated memory model: added explicit glossary boundaries for session context, STM, LTM, and RAG; clarified FR-1.4.4 active-context wording; reframed FR-3 summarization as STM compaction; refined future-LTM requirements to emphasize personalization rather than raw checkpoint reuse; and clarified FR-7.1.5 as coordinated but distinct checkpoint, metadata, and session-context layers. |
+| 2.5 | 2026-05-19 | System | Formalized prompt-governance follow-ups from the benchmark review. Added FR-1.4.10–1.4.13 (instruction authority separation, prompt authority precedence, release gate enforcement, rollback triggering), FR-1.5.6 (boundary-aware guardrail enforcement), NFR-5.2.8–5.2.9 (guardrail outcome and metadata-completeness tracing), and AC-8.5–8.8 (instruction-authority, release-gate, rollback, and trace-audit verification). Added PROMPT_SYSTEM_BENCHMARK_REVIEW.md as a related governance reference. |
+| 2.6 | 2026-05-21 | System | Formalized prompt-governance P1 follow-ups from the benchmark review. Added FR-1.4.14–1.4.16 (tool-risk envelope enforcement, locale-parity promotion control, prompt-segment classification and reuse), NFR-5.2.10–5.2.11 (locale and tool-risk trace metadata), and AC-8.9–8.11 (tool-risk, locale-parity, and segment-class verification). |
 ---
 
 *End of Requirements Document*
