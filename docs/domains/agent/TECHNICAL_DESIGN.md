@@ -12,7 +12,7 @@
 | Project | DP Stock Investment Assistant |
 | Domain | Agent |
 | Focus | Technical realization of the LangChain ReAct agent domain, including orchestration, memory, prompt composition, and fallback behavior |
-| Date | 2026-05-19 |
+| Date | 2026-05-21 |
 | Status | Active working scaffold |
 | Audience | Engineering, architecture, agent maintainers, and reviewers |
 
@@ -258,6 +258,23 @@ class CachingTool(BaseTool):
 | `set_enabled(name, bool)` | Toggle tool state |
 | `health_check()` | Aggregate tool health |
 
+#### Tool Risk Realization
+
+The runtime should expose tool risk as first-class control metadata so prompt policy, tool guardrails, and future approval hooks share one vocabulary instead of ad hoc per-tool assumptions.
+
+| Risk Class | Current Technical Meaning | Registry / Runtime Requirement | Current Status |
+|------------|---------------------------|-------------------------------|----------------|
+| `read_only_evidence` | Fetches data without mutating durable state | Registry records class; runtime validates arguments and preserves provenance in traces | Supported target for current baseline |
+| `bounded_transformation` | Computes or reformats governed inputs without mutating durable state | Registry records class; runtime validates input and output schema before results re-enter prompt assembly | Supported target for current baseline |
+| `workflow_mutation` | Changes repo-owned or user-owned durable state | Requires service-owned authorization, approval-capable workflow hooks, and audit metadata before enablement | Future only |
+| `external_side_effect` | Writes to third-party systems or triggers real-world actions | Requires explicit allowlisting, human approval, and fail-closed defaults before enablement | Not admitted in the current baseline |
+
+Runtime rules:
+
+1. `ToolRegistry.get_enabled_tools()` should filter by both enablement and the strongest risk class admitted by the selected prompt asset.
+2. Prompt-facing tool policy may narrow exposure but must not reclassify a tool below the registry-declared risk class.
+3. Any runtime path that exercises a class above `bounded_transformation` must emit approval-state and `tool_risk_class` metadata for tracing and audit.
+
 ### 3.3 Memory Architecture and Lifecycle
 
 #### Short-Term Memory (STM) via LangGraph Checkpointer
@@ -437,7 +454,7 @@ def process_query(
 > **Status:** Planned realization path.
 > **Decision coupling:** This section reflects the prompt-system direction proposed in the companion research document and the prompt-related ADRs.
 
-The prompt system should evolve from a single governed runtime prompt into a structured realization path that externalizes prompt assets, composes route-aware behavior deterministically, and keeps response-policy enforcement visible. This section focuses on the intended realization model and extension path rather than on a full code-level walkthrough.
+The prompt system should evolve from a single governed runtime prompt into a structured realization path that externalizes prompt assets, composes route-aware behavior deterministically, and keeps response-policy enforcement visible. This section focuses on the intended realization model and extension path rather than a full code-level walkthrough.
 
 #### 3.5.1 Current Baseline and Transition Direction
 
@@ -501,7 +518,37 @@ The intended composition order remains deterministic:
 
 This order preserves ADR-001 separation of concerns. Behavioral policy is established before contextual evidence, and output shaping remains last so it cannot silently overwrite policy or factual grounding.
 
-#### 3.5.4 Near-Term Skills Pattern and Future Expansion
+#### 3.5.4 Static and Dynamic Segment Realization
+
+`PromptAssembler` should assign each fragment to a segment class before provider invocation so caching, reuse, and authority treatment remain deterministic.
+
+| Segment Class | Typical Contents | Realization Rule |
+|---------------|------------------|------------------|
+| Static policy fragments | Shared policy assets, role contracts, route skills, always-on behavioral snippets | Key by prompt lineage (`asset_id`, `version`, `variant`, `locale`) and allow loader or provider caching only for exact approved matches |
+| Dynamic control fragments | Locale selection, workspace mode, expertise mode, experiment markers, role markers | Build from schema-approved request inputs only; default to request-scoped treatment and avoid cross-request reuse unless equivalence is explicit |
+| Runtime evidence payloads | Tool outputs, retrieved documents, quoted attachments, summarized memory | Attach after policy selection as data-only context; never hash them into prompt lineage or reuse them as policy blocks |
+
+Segment-handling rules:
+
+1. Provider prompt caching may optimize static policy fragments only when the cached unit remains attributable to one approved prompt lineage.
+2. Dynamic control fragments may share cache entries only when identical, non-sensitive, and explicitly admitted by implementation policy; otherwise they are rebuilt per request.
+3. Runtime evidence may be cached by tool or retrieval layers for performance, but prompt assembly must reattach it as request-scoped data with no instruction authority.
+4. If fragment classification is ambiguous, the safer implementation default is request-scoped data rather than static policy.
+
+#### 3.5.5 Locale Parity and Variant Realization
+
+Locale variants should be resolved as governed siblings in one policy lineage rather than isolated files. In runtime terms, locale choice changes which asset is selected, not which safety model applies.
+
+| Locale Concern | Technical Handling |
+|----------------|--------------------|
+| Variant resolution | `PromptAssetLoader` should resolve locale by `asset_id`, `locale`, and shared lineage metadata such as `parity_group` |
+| Metadata requirements | Evaluation and live-observation runs should record `prompt_locale` and `parity_group` whenever locale-specific variants are exercised |
+| Promotion rule | Non-default locale variants remain `forced`-only until paired parity evaluation and locale-competent review are complete |
+| Fallback rule | Missing, malformed, or parity-blocked locale variants fail closed to the configured default locale rather than to empty prompt content |
+
+The technical goal is semantic parity rather than literal translation identity. Prompt assets may differ in wording or local examples while still inheriting the same finance-policy and output-contract obligations.
+
+#### 3.5.6 Near-Term Skills Pattern and Future Expansion
 
 The near-term realization path is the Skills pattern: one agent, one shared policy layer, and route-aware prompt context selected from the existing route taxonomy. This is the preferred technical bridge because it improves specialization without immediately introducing orchestrator overhead or user-visible multi-agent complexity.
 
@@ -511,21 +558,24 @@ The near-term realization path is the Skills pattern: one agent, one shared poli
 | Future orchestrator contract | A narrow routing contract may later choose between prompt families or specialist paths | Later evolution only |
 | Future retrieval specialist contract | Retrieval-grounded prompt contract may later narrow synthesis behavior around sourced evidence | Later evolution only |
 
-#### 3.5.5 Prompt Observability and Fault Tolerance
+#### 3.5.7 Prompt Observability and Fault Tolerance
 
 The technical design should preserve prompt behavior as observable runtime metadata rather than hidden implicit state.
 
 | Metadata Category | Technical Expectation |
 |------------------|-----------------------|
 | Prompt identity | Stable version or baseline lineage should be attributable in traces or response metadata |
+| Prompt locale and parity lineage | Locale-specific runs should expose `prompt_locale` and `parity_group` whenever locale governance applies |
 | Route and role selection | Selected route-aware or role-aware contract should remain visible for diagnostics and evaluation |
 | Active prompt components | Selected skills or variant lineage should be reviewable when behavior changes |
+| Tool risk class | Guarded tool paths should record the effective `tool_risk_class` that governed execution |
 | Prompt fallback outcome | Degraded asset resolution should remain machine-detectable |
 | Guardrail outcome | Response-policy checks should emit reviewable success, warning, or degradation outcomes |
 
 | Failure Mode | Planned Response |
 |--------------|------------------|
 | Preferred prompt asset unavailable | Continue with baseline lineage rather than block the request |
+| Preferred locale variant unavailable | Fall back to the configured default locale while preserving locale-degradation metadata |
 | Route-specific skill unavailable | Continue with shared policy and stable analyst behavior |
 | Experiment or variant unavailable | Fall back to the stable prompt line while preserving attribution |
 | Guardrail evaluation degraded | Preserve a conservative response path and emit machine-detectable degradation metadata |
@@ -916,3 +966,4 @@ AgentResponse.fallback(content, provider, model, **kwargs)
 | 0.3 | 2026-05-06 | GitHub Copilot | Migrated realization-only material out of ADR-001: retrieval realization boundaries, prompt assembly order, fine-tuning realization, example reasoning flow, and layered runtime delivery sequencing |
 | 0.4 | 2026-05-12 | GitHub Copilot | Aligned prompt taxonomy references to ADR-canonical paths (`src/prompts/system|skills|experiments`) and removed hybrid path language |
 | 0.5 | 2026-05-19 | GitHub Copilot | Synchronized prompt-asset realization language with the simplified proposal layout by describing the ADR taxonomy as a shallow metadata-driven `system` / `skills` / `experiments` structure and replacing separate baseline-asset wording with metadata-governed fallback lineage |
+| 0.6 | 2026-05-21 | GitHub Copilot | Added runtime tool-risk realization, static-versus-dynamic prompt segment handling, locale-parity selection rules, and observability metadata for locale and tool-risk governed prompt paths |

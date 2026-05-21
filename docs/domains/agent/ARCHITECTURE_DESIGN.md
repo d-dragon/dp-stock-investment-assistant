@@ -12,7 +12,7 @@
 | Project | DP Stock Investment Assistant |
 | Domain | Agent |
 | Focus | Architecture description of the agent domain, including boundaries, views, concerns, rationale, and evolution |
-| Date | 2026-05-19 |
+| Date | 2026-05-21 |
 | Status | Active |
 | Audience | Engineering, architecture, maintainers, and reviewers |
 
@@ -998,9 +998,64 @@ flowchart TD
   Guardrail --> Response["Response plus prompt metadata"]
 ```
 
-#### 4.8.4 Prompt Observability and Degraded Modes
+#### 4.8.4 Guardrail Boundary Model
 
-Prompt observability is an architectural requirement because prompt behavior is part of the governed response path. The goal is not to expose raw prompt internals to end users, but to preserve enough metadata for review, evaluation, rollback analysis, and guarded evolution.
+Prompt policy is only one part of behavioral control. The architecture therefore places guardrails at the boundary where a risk first becomes material, rather than relying on post-generation prompt wording alone to correct problems that should have been constrained earlier.
+
+| Guardrail Boundary | Architectural Scope | Primary Risks | Expected Architectural Response |
+|--------------------|---------------------|---------------|---------------------------------|
+| Input guardrail boundary | Before prompt assembly and agent execution | Unsafe request classes, malformed override attempts, and instruction-shaped content arriving from low-trust surfaces | Block, narrow, annotate, or route the request into a conservative path before main prompt execution |
+| Prompt-assembly guardrail boundary | During `PromptAssetLoader` and `PromptAssembler` selection | Authority inversion, unapproved dynamic fields, and instruction pollution from retrieved or quoted content | Admit only schema-approved dynamic inputs and preserve higher-authority policy over lower-authority context |
+| Tool guardrail boundary | Around tool eligibility, argument shaping, and tool-result handling | Invalid tool use, unsafe escalation, malformed arguments, and future side-effecting actions | Validate tool availability and arguments, constrain execution by tool risk class, and preserve approval hooks for high-impact actions |
+| Output guardrail boundary | After model generation but before user-visible response leaves the system | Unsupported certainty, hype framing, weak attribution, and missing disclosure or refusal behavior | Enforce conservative response-policy checks and emit machine-detectable guardrail outcomes |
+| Approval boundary | Before any future high-impact or irreversible side effect | Actions whose risk exceeds what prompt-only or model-only controls should authorize | Pause the workflow for human review rather than relying on autonomous execution |
+
+These guardrail boundaries are cumulative. Later checks do not replace earlier ones; they provide defense in depth across request admission, prompt construction, tool mediation, and response release.
+
+```mermaid
+flowchart TD
+  Inbound["Inbound request"] --> Input["Input guardrail boundary"]
+  Input --> Assemble["Prompt-assembly boundary"]
+  Assemble --> Tooling["Tool boundary"]
+  Tooling --> Model["Model generation"]
+  Model --> Output["Output guardrail boundary"]
+  Output --> Surface["User-visible response"]
+  Tooling --> Approval["Approval boundary\nfor future high-impact actions"]
+```
+
+#### 4.8.5 Tool Risk and Approval Envelope
+
+The architecture does not treat all tool paths as equivalent. Tool classes are architectural control categories because the line between evidence gathering and state-changing or externally side-effecting actions determines where authorization, validation, and approval must live.
+
+| Tool Risk Class | Architectural Meaning | Current Admission | Boundary Requirement |
+|-----------------|-----------------------|-------------------|----------------------|
+| `read_only_evidence` | Retrieves internal or external evidence without mutating durable state | Admitted in the current baseline | Tool guardrail boundary validates eligibility, arguments, provenance, and result handling; no approval boundary is required |
+| `bounded_transformation` | Produces deterministic calculations or reformatted outputs from governed inputs without mutating durable state | Admitted in the current baseline | Tool guardrail boundary validates input and output contracts and keeps results inside the data-only evidence boundary |
+| `workflow_mutation` | Creates, updates, archives, or otherwise changes repo-owned or user-owned durable state | Future only | Requires service-owned authorization plus an approval-capable boundary before execution |
+| `external_side_effect` | Triggers actions outside repo-owned state, such as brokerage actions, messaging, or third-party writes | Prohibited in the current baseline | Requires the strongest approval boundary, explicit allowlisting, and fail-closed runtime defaults |
+
+Architectural rules:
+
+1. The tool registry or equivalent runtime control surface owns the authoritative class of each tool.
+2. Prompt policy may narrow tool exposure but must never downgrade a tool's architectural risk class.
+3. The current analyst-facing architecture should remain bounded to `read_only_evidence` and `bounded_transformation` tools until stronger approval flows are explicitly designed.
+
+#### 4.8.6 Prompt Segment and Locale Governance
+
+The prompt boundary stays governable only if it distinguishes durable policy from request-scoped controls and data-only evidence. Locale variants belong to that same governance model: they are separate prompt assets in one policy lineage, not free-form translations with independent safety posture.
+
+| Segment or Variant Class | Architectural Role | Reuse Rule | Governance Requirement |
+|--------------------------|--------------------|------------|------------------------|
+| Static policy assets | Shared policy, role contracts, and route skills that shape behavior | Reusable only by exact approved prompt lineage | Must remain versioned, attributable, and stronger than any request-scoped control |
+| Dynamic control segments | Locale choice, workspace mode, expertise mode, and experiment markers | Request-scoped by default; reuse requires explicit equivalence and non-sensitive inputs | Must be schema-approved and must not change finance-policy semantics |
+| Runtime evidence segments | Tool outputs, retrieved documents, quoted attachments, and summarized memory | Never reusable as policy; attached per request as data-only context | Must remain non-authoritative and cannot introduce executable instruction content |
+| Non-default locale variants | Parallel `vi` and `en` assets within one policy lineage | Promotion beyond evaluation requires parity evidence; unresolved drift fails closed to the default locale | Must preserve the same finance-policy, disclosure, and anti-hype posture as the default locale |
+
+Provider-specific prompt caching, long-context packaging, and reasoning features are architectural optimizations only. They may accelerate static policy segments but must not redefine instruction authority order, segment class, or locale-parity obligations.
+
+#### 4.8.7 Prompt Observability and Degraded Modes
+
+Prompt observability is an architectural requirement because prompt behavior is part of the governed response path. The goal is not to expose raw prompt internals to end users but to preserve enough metadata for review, evaluation, rollback analysis, and controlled evolution.
 
 | Observability Concern | Architectural Expectation | Why It Matters |
 |-----------------------|---------------------------|----------------|
@@ -1184,4 +1239,6 @@ The detailed extension catalog, example snippets, configuration candidates, and 
 | 0.7 | 2026-05-15 | GitHub Copilot | Refined the system-context, logical, deployment, and operations views so session context, lifecycle metadata, conversation-scoped STM, and planned future LTM are represented as separate architectural authorities with explicit current-versus-planned status labeling. Added a dedicated consolidated memory reference diagram under the Information and State View so session context, STM, future LTM, RAG, prompt policy, tools, and lifecycle metadata can be understood in one architectural view|
 | 0.8 | 2026-05-19 | GitHub Copilot | Synchronized prompt-asset references with the simplified proposal layout by describing the ADR taxonomy as a shallow metadata-driven `system` / `skills` / `experiments` structure and clarifying that version, locale, variant, and baseline fallback semantics belong in metadata and loader policy rather than deeper directory nesting |
 | 0.9 | 2026-05-19 | GitHub Copilot | Updated the Source Layout View to show the prompt-subsystem transition in place: canonical shallow prompt assets under `src/prompts/system|skills|experiments` plus the still-current legacy prompt files retained until prompt compiler cutover |
+| 1.0 | 2026-05-19 | GitHub Copilot | Added an explicit guardrail boundary model to the Prompt and Behavior View so input, prompt-assembly, tool, output, and approval controls are represented as separate architectural boundaries rather than as response-only behavior shaping |
+| 1.1 | 2026-05-21 | GitHub Copilot | Added architectural tool-risk classes plus prompt-segment and locale-governance boundaries so approval posture, static-versus-dynamic segment treatment, and locale parity remain explicit as the prompt system evolves |
 

@@ -1,9 +1,9 @@
 # Prompt System Architecture and Design
 
 > **Document Version**: 1.5  
-> **Last Updated**: May 19, 2026  
+> **Last Updated**: May 21, 2026  
 > **Phase**: 2A.2 - System Prompt Refinement and A/B Testing  
-> **Status**: Research refined; near-term target aligned to the governed prompt compiler path and later specialist-prompt evolution  
+> **Status**: Research refined; Near-term target aligned to the governed prompt compiler path and later specialist-prompt evolution; P1 governance controls added for tool risk, locale parity, and prompt-segment policy  
 > **Primary Source Requirement**: Official vendor and regulator documentation only  
 > **Governing ADR**: [ADR-001 — Layered LLM Architecture](./decisions/AGENT_ARCHITECTURE_DECISION_RECORDS.md)
 
@@ -521,6 +521,7 @@ asset_id: react_analyst
 version: 1.0.0
 variant: baseline
 locale: en
+parity_group: react_analyst_core
 status: active
 owner: core-agent
 agent_role: react_analyst
@@ -546,6 +547,10 @@ finance_policy:
 tool_policy:
   allowed_tools: [stock_symbol, reporting]
   require_tool_for_routes: [PRICE_CHECK, FUNDAMENTALS, TECHNICAL_ANALYSIS]
+  max_tool_risk_class: bounded_transformation
+  tool_risk_overrides:
+    stock_symbol: read_only_evidence
+    reporting: bounded_transformation
   fallback_behavior: explain_limits_and_continue
 output_contract:
   template: executive_summary_evidence_risks_next_steps
@@ -578,13 +583,14 @@ The repo needs a schema that is strict enough for validation, review, and audit,
 | `status` | enum | Yes | `active`, `candidate`, `deprecated`, or `retired`; only `active` assets may serve as production baselines |
 | `owner` | string | Yes | Ownership boundary for review and incident handling |
 | `locale` | enum | Yes | `vi` or `en`; locale fallback must fail closed to the configured default locale |
+| `parity_group` | string | Recommended for locale variants; required for non-default promoted variants | Binds locale variants into one finance-policy review lineage for parity checks and rollback |
 | `agent_role` | enum | Yes for `system` and `skill` assets | `react_analyst`, `orchestrator`, `rag_research`, or `shared`; prevents role drift |
 | `route_scope` | list or `ALL` | Yes for `skill` assets; recommended for `system` assets | Must resolve only to canonical `StockQueryRouter` categories or `ALL` |
 | `market_scope` | mapping | Yes | Makes geographic and exchange assumptions explicit; default should be `vn_equities` for this repo |
 | `inherits` | list | Recommended | Declares required shared-policy dependencies and preserves policy lineage |
 | `activation` | mapping | Yes for `skill` and `experiment` assets | Declares `mode` and allowed selection modes; prevents experiments from being silently treated as baseline policy |
 | `finance_policy` | mapping | Yes for selectable system and skill assets | Declares finance-domain safeguards such as fact/inference separation, uncertainty disclosure, and hype restrictions |
-| `tool_policy` | mapping | Yes for analyst-facing system assets; recommended for route skills | Declares allowed tools and which routes require tool-backed evidence |
+| `tool_policy` | mapping | Yes for analyst-facing system assets; recommended for route skills | Declares allowed tools, required tool-backed routes, and the maximum tool-risk envelope admitted by the asset |
 | `output_contract` | mapping | Yes for selectable system and skill assets | Declares response template and required sections for downstream consistency |
 | `review` | mapping | Yes | Captures approval state, review timestamp, and review cadence for governance |
 
@@ -609,7 +615,9 @@ Each asset body should follow a stable Markdown section contract so reviewers an
 - `experiment` assets must reference an inherited baseline lineage and cannot be promoted to `active` without offline evaluation approval.
 - `route_scope` must resolve only to canonical `StockQueryRouter` categories.
 - `allowed_tools` must reference registered tool names; unknown tool references fail closed.
+- non-default locale variants must declare a shared `parity_group` with their default-locale lineage before promotion beyond `forced` evaluation.
 - Locale variants must preserve the same finance-policy semantics as the default locale even if wording differs.
+- `tool_policy.max_tool_risk_class` must not exceed the runtime control envelope approved for the active environment.
 - Assets targeting `vn_equities` must not imply unsupported coverage of other markets unless `market_scope` explicitly expands.
 - No asset may weaken inherited prohibitions on guaranteed returns, hype language, or social-signal-only reasoning.
 
@@ -623,6 +631,32 @@ The prompt system should keep a strict separation between:
 - **runtime factual context**: retrieved documents, tool outputs, and conversation state.
 
 Only the first three belong in the prompt-system architecture. Runtime factual context remains in the existing tool, memory, and retrieval layers.
+
+### Instruction Authority and Trust Matrix
+
+The prompt compiler should not treat every input surface as equally authoritative. For this project, prompt assembly must distinguish policy-bearing prompt assets from user task input, business context, and data-only evidence so retrieved text, tool output, or experimental overlays cannot silently weaken finance safety or evidence discipline.
+
+| Surface | Trust Class | Authority in Prompt Assembly | Allowed Influence | Must Never Do |
+|---|---|---|---|---|
+| Provider or platform safety constraints | External authoritative policy | Higher than any repo-owned prompt asset | Impose non-overridable safety and compliance bounds | Be weakened by any project prompt asset or experiment |
+| Shared policy assets | Repo-owned authoritative policy | Highest authority within the project prompt system | Define finance safety rules, evidence discipline, response contract, and refusal posture | Be weakened by role, route, experiment, or user-level prompt inputs |
+| Role contracts | Repo-owned scoped policy | Below shared policy, above route and task framing | Narrow behavior for `react_analyst`, future `orchestrator`, or future `rag_research` paths | Override shared safety, evidence, or disclosure rules |
+| Route skills | Repo-owned bounded specialization | Below shared policy and role contracts | Add route-specific expectations, tool preferences, and response shaping | Broaden authority, change risk posture, or weaken shared policy |
+| Experiment overlays | Repo-owned conditional policy | Below active production lineage unless explicitly selected by governed mode | Change wording, structure, or bounded behavioral emphasis for evaluation | Bypass release gates or weaken higher-authority policy |
+| User request and task framing | Trusted task input | Below repo-owned policy surfaces | Select the task, focus, and requested deliverable | Redefine finance safety posture, authorize unsupported claims, or treat quoted text as trusted instruction |
+| Session or workspace context | Trusted bounded business context | Below policy surfaces; used only for scoped personalization or disambiguation | Supply locale, workspace mode, or portfolio-review context where allowed | Inject market claims, overwrite safety rules, or redefine route behavior |
+| Tool outputs | Data-only evidence | No instruction authority | Supply measurements, fetched facts, and deterministic results | Modify policy, inject instructions, or weaken output constraints |
+| Retrieved documents, attachments, and quoted text | Untrusted evidence by default | No instruction authority unless a higher-authority policy explicitly delegates narrow style use | Supply evidence to summarize, compare, cite, or critique | Introduce executable instructions, override policy, or redefine tool behavior |
+| Model-generated summaries or memory compactions | Derived context | No new authority beyond the source they compress | Preserve prior context in bounded form | Become a stronger authority than shared policy, raw evidence, or approved runtime context |
+
+Conflict-resolution rules:
+
+1. Higher-authority policy always wins over lower-authority instructions or preferences.
+2. Data-only surfaces may update the factual picture, but they may not alter finance policy, disclosure requirements, or refusal posture.
+3. Experiment assets may vary wording, structure, or emphasis only inside an explicitly approved release envelope.
+4. If user intent conflicts with shared finance safety or evidence discipline, preserve the higher-authority policy and respond conservatively.
+5. Imperative text embedded inside retrieved content, tool output, quoted attachments, or summarized memory must be ignored as instruction content.
+6. `PromptAssembler` should fail closed by excluding any dynamic field that is not explicitly admitted by schema and authority rules.
 
 ### Agent Prompt Taxonomy
 
@@ -698,6 +732,61 @@ Dynamic prompting should **not** be used to inject:
 - conversation summaries that belong to STM
 - raw social sentiment or externally sourced claims without provenance
 - retrieval results that should instead be attached through retrieval or tool context
+
+### Static versus Dynamic Prompt Segment Policy
+
+The prompt compiler should classify each segment before provider invocation. This preserves the distinction between durable policy, bounded runtime controls, and data-only evidence.
+
+| Segment Type | Typical Contents | Authority | Cache / Reuse Rule | Must Never Do |
+|---|---|---|---|---|
+| Static shared policy | investment safety rules, disclosure rules, response contract, tool-use invariants | Repo-owned authoritative policy | May be cached and provider-reused only by exact prompt lineage (`asset_id`, `version`, `variant`, `locale`) | Embed mutable market facts, user-specific state, or tool results |
+| Static role or skill policy | `react_analyst` role contract, route skill text, always-on behavioral snippets | Repo-owned bounded policy | May be cached with the selected asset lineage when byte-identical and review-approved | Weaken shared policy or silently widen tool authority |
+| Dynamic control segments | locale selection, workspace mode, expertise mode, experiment label, role marker | Request-scoped bounded control | Default to request-scoped reuse only; cross-request reuse requires explicit non-sensitive equivalence | Introduce new finance policy or carry evidence as if it were policy |
+| Runtime evidence segments | tool outputs, retrieved documents, quoted attachments, memory summaries | Data-only context | Never cached as prompt policy; if cached elsewhere, they must re-enter prompt assembly as data-only request inputs with provenance | Become authoritative instructions, prompt lineage identifiers, or reusable policy blocks |
+
+Segment-policy rules:
+
+1. Provider prompt caching may optimize static shared-policy and static role/skill segments only when the cached unit remains attributable to one approved prompt lineage.
+2. Dynamic control segments may be reused only when identical, non-sensitive, and explicitly admitted by schema; otherwise they are request-scoped.
+3. Runtime evidence bundles may be cached in tool or retrieval layers for performance, but prompt assembly must treat them as fresh data attachments on every request.
+4. Provider-specific long-context or reasoning features may optimize execution but must not change instruction authority order or finance-policy semantics.
+5. If segment classification is ambiguous, the safer default is to treat the content as request-scoped data rather than static policy.
+
+### Tool Risk Classification Model
+
+Prompt policy should not assume all allowed tools share the same control needs. The prompt system therefore needs a stable tool-risk vocabulary that the runtime, evaluation suite, and future approval boundary can share.
+
+| Risk Class | Description | Current Admission | Required Controls | Approval Expectation |
+|---|---|---|---|---|
+| `read_only_evidence` | Fetches external or internal data without mutating durable state | Admitted in the current baseline | Argument validation, attribution, provenance retention, and tool-result boundary checks | No human approval; automatic execution is allowed when the tool is explicitly permitted |
+| `bounded_transformation` | Aggregates, reformats, or computes from governed inputs without mutating durable state | Admitted in the current baseline | Input and output schema validation, provenance retention, and conservative fallback on malformed output | No human approval by default; validation remains mandatory |
+| `workflow_mutation` | Creates, updates, archives, or otherwise mutates repo-owned or user-owned durable state | Future only | Authorization, audit logging, idempotency or compensating controls, and an approval hook in the workflow | Service-owned confirmation or policy-defined approval is required before execution |
+| `external_side_effect` | Triggers actions outside repo-owned state, such as messaging, broker actions, or third-party writes | Prohibited in the current baseline | Explicit allowlist, strongest guardrails, non-repudiable audit trail, and fail-closed defaults | Human approval is mandatory before execution |
+
+Tool-risk rules:
+
+1. The tool registry remains authoritative for a tool's actual risk class; prompt assets may narrow exposure but must never downgrade the registry class.
+2. `tool_policy.max_tool_risk_class` defines the strongest class that a prompt asset may expose to the model.
+3. Any asset that exposes `workflow_mutation` or `external_side_effect` tools must pair that choice with an explicit approval boundary in runtime and architecture artifacts.
+4. Until those higher-risk classes are formally implemented, production analyst assets should remain bounded to `read_only_evidence` and `bounded_transformation` tools.
+
+### Locale Parity Review Protocol
+
+Locale governance should verify behavioral equivalence rather than literal translation symmetry. The goal is to show that `vi` and `en` variants preserve the same finance-policy posture even when wording or examples differ.
+
+| Step | Requirement | Evidence Produced |
+|---|---|---|
+| 1. Lineage binding | The default-locale and candidate-locale assets share `asset_id`, `parity_group`, materially equivalent `finance_policy`, and the same output-contract intent | Metadata diff plus reviewer checklist |
+| 2. Paired offline evaluation | The candidate locale runs against the same protected dataset families as the default locale using the same evaluation harness and comparable provider settings | Paired evaluator report |
+| 3. Protected-metric rule | The candidate locale keeps 100% pass on finance-safety blockers, keeps missing-data handling at >=98%, and does not regress by more than 1 percentage point on protected non-blocker metrics against the default locale baseline | Locale parity scorecard |
+| 4. Locale-competent sign-off | A reviewer competent in the candidate locale verifies semantic equivalence for evidence use, uncertainty posture, refusal behavior, and anti-hype discipline | Approval record |
+| 5. Promotion and fallback | No non-default locale candidate may enter `shadow`, `weighted`, or `active` selection without parity evidence; unresolved drift fails closed to the configured default locale | Promotion decision with fallback note |
+
+Locale-parity rules:
+
+1. Parity review checks policy semantics and risk posture, not sentence-by-sentence sameness.
+2. A locale-specific asset may improve clarity or local-market wording, but it must not change the effective finance-policy envelope.
+3. Any locale candidate that cannot demonstrate parity remains evaluation-only and cannot widen live rollout scope.
 
 ---
 
@@ -1001,6 +1090,59 @@ Recommended identifiers:
 5. Always log the active model snapshot along with the prompt version.
 6. For multi-agent experiments, change one layer at a time: routing prompt, specialist prompt, or synthesis prompt.
 
+### Prompt Release Gates
+
+The release gates below are mandatory for any prompt candidate that may progress beyond `forced` offline evaluation. A candidate that fails a release gate is not eligible for `shadow`, `weighted`, or `active` selection.
+
+#### Metadata Completeness Gate
+
+| Run Scope | Mandatory Keys | Gate Rule |
+|---|---|---|
+| All top-level prompt runs | `prompt_version`, `prompt_variant`, `prompt_selection_mode`, `agent_role`, `model_provider`, `model_name`, `env` | 100% of relevant runs must contain all keys |
+| Experiment runs | All top-level keys plus `prompt_experiment_id` | 100% of experiment runs must contain all keys |
+| Route-aware runs | All applicable keys plus `routing_decision` | 100% of route-aware runs must contain the routing key |
+| Locale-parity runs | All applicable keys plus `prompt_locale` and `parity_group` | 100% of compared runs must contain both locale-governance keys |
+| Tool-risk-governed runs | All applicable keys plus `tool_risk_class` when a guarded tool path is exercised | 100% of guarded tool runs must record the effective class |
+| Conversation-scoped or thread-filtered runs | All applicable keys plus `conversation_id` on the top-level run and all relevant child runs | 100% completeness is required for thread-compatible evaluation |
+
+If the metadata gate is not satisfied, the experiment result is invalid for promotion, even if answer quality appears acceptable.
+
+#### Dataset Threshold Gate
+
+| Dataset Family | Minimum Gate | Promotion Rule |
+|---|---|---|
+| `finance_safety_and_hype_resistance` | 100% pass | Any failure blocks promotion immediately |
+| `missing_data_and_staleness` | >= 98% pass and 0 confident unsupported claims | Any unsupported definitive claim blocks promotion |
+| `tool_selection_regression` | >= 95% pass | Regression below threshold blocks promotion |
+| `locale_policy_parity` | 100% pass on finance-safety blockers and <= 1 percentage point regression against the default locale on protected metrics | Applies when a non-default locale candidate is promoted beyond `forced` |
+| `route_classification_accuracy` | >= 95% pass when route-aware prompting is active | Applies only when the candidate changes route-aware behavior |
+| `tool_risk_and_approval_regression` | 100% pass on class-to-control mapping for any tool path above `read_only_evidence` | Applies once workflow-mutation or external-side-effect tools exist |
+| `retrieval_grounding_and_citation_quality` | 100% pass on instruction-data separation and citation sufficiency blockers | Applies once retrieval-grounded specialist behavior exists |
+
+Critical red-line failures override aggregate scoring. A candidate cannot advance if it produces guaranteed-return language, hype-first reasoning, social-signal-only justification, unsupported definitive recommendations, or instruction-following from retrieved or tool-provided content.
+
+#### Candidate Promotion Rules
+
+1. Every new prompt variant begins as `candidate` and may run only in `forced` mode until applicable offline gates pass.
+2. A `candidate` may enter `shadow` only after meeting all applicable dataset thresholds, satisfying the metadata completeness gate, and recording an approved `prompt_experiment_id` plus review sign-off.
+3. A `candidate` may enter `weighted` selection only after an approved shadow observation window with no red-line violations and no regression greater than 2 percentage points against the active baseline on protected evaluator metrics.
+4. Promotion to `active` requires retaining the previously active prompt lineage as the rollback target and preserving baseline fallback behavior in config and loader policy.
+5. One promotion decision should change only one primary layer at a time: prompt variant, routing prompt behavior, tool surface, or retrieval behavior, unless the experiment is explicitly documented as factorial.
+6. Non-default locale candidates may enter `shadow`, `weighted`, or `active` only after a completed locale-parity review against the default locale with required metadata and locale-competent sign-off.
+7. A candidate that widens the effective tool-risk envelope or changes segment-classification rules must ship with the corresponding guardrail evidence before promotion.
+8. These release gates apply equally to locale variants; no locale-specific candidate may bypass safety or metadata gates.
+
+#### Immediate Rollback Triggers
+
+Rollback to the last approved baseline prompt should occur immediately if any of the following conditions are verified during `shadow`, `weighted`, or other live observation modes:
+
+1. Any critical finance-safety violation, including guaranteed-return framing, manipulative urgency, or unsupported definitive buy/sell language attributable to the candidate prompt.
+2. Any verified case where retrieved text, tool output, or quoted content is treated as trusted instruction content.
+3. Missing mandatory metadata on more than 0.5% of relevant live candidate runs in an observation window, or any missing `conversation_id` metadata on runs being used for thread-level evaluation.
+4. Prompt fallback or guardrail degradation rate rises by more than 5 absolute percentage points over the active baseline across two consecutive observation windows.
+5. Online evaluator or sampled-review scores regress by more than 2 percentage points against the active baseline on protected dimensions such as finance safety, uncertainty handling, or prompt-path consistency.
+6. A live locale-specific candidate shows a verified finance-policy divergence from its approved parity baseline or lacks required `prompt_locale` / `parity_group` metadata on evaluated runs.
+
 ### Evaluation Dimensions
 
 | Dimension | Description |
@@ -1022,12 +1164,14 @@ Recommended identifiers:
 - `tool_selection_regression` — verify correct tool invocation for known query types
 - `missing_data_and_staleness` — verify uncertainty disclosure when data is unavailable or stale
 - `finance_safety_and_hype_resistance` — verify rejection of manipulative framing and social hype signals
+- `locale_policy_parity` — paired evaluation confirming equivalent finance-policy behavior across approved locale variants
 - `route_classification_accuracy` — verify `StockQueryRouter` route assignments match expected categories
 
 **Extended datasets (implement when relevant features exist)**:
 
 - `fundamental_analysis` — evaluation of financial statement analysis quality
 - `technical_analysis_with_caveats` — evaluation of chart analysis with appropriate uncertainty
+- `tool_risk_and_approval_regression` — verify control behavior for tool classes that require stronger validation or approval
 - `retrieval_grounding_and_citation_quality` — RAG-specific, implement when RAG specialist exists
 - `routing_and_specialist_delegation` — multi-agent routing, implement when orchestrator exists
 - `vietnam_market_context` — locale-specific evaluation
@@ -1105,8 +1249,11 @@ langsmith:
     metadata_keys:
       - prompt_version
       - prompt_variant
+      - prompt_locale
+      - parity_group
       - prompt_experiment_id
       - prompt_selection_mode
+      - tool_risk_class
 ```
 
 ### Config Validation Rules
@@ -1116,7 +1263,9 @@ langsmith:
 - each configured `agent_role` must resolve to one active baseline variant.
 - weighted selection must not be enabled unless all weighted variants are valid and evaluation-approved.
 - locale variants must fail closed to the default locale, not to an empty prompt.
+- non-default locale variants must declare `parity_group` and remain promotion-ineligible until locale-parity review artifacts exist.
 - malformed metadata frontmatter must block prompt activation.
+- configured prompt assets must not expose tools above the runtime control envelope defined for their `max_tool_risk_class`.
 - orchestrator routing targets must resolve only to registered agent roles.
 - candidate RAG prompts must not be promoted until retrieval-grounding tests pass.
 
@@ -1324,6 +1473,27 @@ This design is correct only if all of the following remain true:
 ## Document Update Log
 
 This section tracks changes made to other project documents as a result of research findings in this proposal.
+
+### Update Session: 2026-05-21 (v1.7 → P1 Governance Controls)
+
+**Trigger:** Apply the benchmark review's P1 follow-ups by formalizing tool-risk classes, locale-parity review, and static-versus-dynamic prompt-segment policy.
+
+| # | Target Document | Change Summary | SRS/ADR References |
+|---|----------------|----------------|-------------------|
+| 1 | [PROMPT_SYSTEM_RESEARCH_PROPOSAL.md](./PROMPT_SYSTEM_RESEARCH_PROPOSAL.md) | Updated document control to v1.7 / 2026-05-21. Added a static-versus-dynamic prompt segment policy, a tool risk classification model, a locale parity review protocol, and release-gate and metadata updates for parity and tool-risk evidence. | FR-1.4, FR-1.5, NFR-5.2, NFR-6.2.3, ADR-001, ADR-002, ADR-003 |
+
+**Total changes:** 1 document, P1 prompt-governance controls formalized at proposal level.
+
+### Update Session: 2026-05-19 (v1.6 → P0 Governance Controls and Architecture Sync)
+
+**Trigger:** Apply the benchmark review's P0 follow-ups by formalizing instruction authority, hard release gates, and the architecture-level guardrail boundary model.
+
+| # | Target Document | Change Summary | SRS/ADR References |
+|---|----------------|----------------|-------------------|
+| 1 | [PROMPT_SYSTEM_RESEARCH_PROPOSAL.md](./PROMPT_SYSTEM_RESEARCH_PROPOSAL.md) | Updated document control to v1.6 / 2026-05-19. Added an instruction authority and trust matrix, conflict-resolution rules, and prompt release gates covering metadata completeness, dataset thresholds, candidate-promotion rules, and rollback triggers. | FR-1.4.5–1.4.9, FR-1.5, NFR-5.2.5–5.2.7, NFR-6.2.3, ADR-001, ADR-002, ADR-003 |
+| 2 | [ARCHITECTURE_DESIGN.md](./ARCHITECTURE_DESIGN.md) | Added an architecture-level guardrail boundary model under the Prompt and Behavior View to distinguish input, prompt-assembly, tool, output, and approval controls. | FR-1.5, NFR-5.2.5–5.2.7, ADR-001, ADR-002, ADR-003 |
+
+**Total changes:** 2 documents, P0 prompt governance controls formalized and synchronized across proposal and architecture views.
 
 ### Update Session: 2026-05-19 (v1.5 → Gap Matrix and Finance-Grade Asset Schema)
 
