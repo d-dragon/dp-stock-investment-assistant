@@ -4,12 +4,7 @@
 
 **Purpose**: Make AI coding agents productive and safe in this repository by encoding our conventions, workflows, and gotchas. Favor precise, minimal edits with tests green before done.
 
-> **Domain-Specific Instructions**: For detailed guidance, see:
-> - [Architecture & System Design](instructions/architecture.instructions.md)
-> - [Backend Python API](instructions/backend-python.instructions.md)
-> - [Frontend React](instructions/frontend-react.instructions.md)
-> - [Infrastructure & Deployment](instructions/infrastructure-deployment.instructions.md)
-> - [Testing](instructions/testing.instructions.md)
+> **Priority Order**: Use the matching instruction file in `instructions/` first, then use the workflow commands in this file for setup and verification, and treat the remaining repository-wide and project-specific rules as fallback defaults when no narrower rule applies.
 
 > **Project Summary**: AI-powered stock investment assistant with Flask API, React UI, MongoDB/Redis persistence, and multi-model AI support (OpenAI + fallback providers via ModelClientFactory). Architecture uses service/repository factories for DI, health checks on all components, and layered separation (routes → services → repositories → DB).
 
