@@ -114,6 +114,58 @@
       },
       "registered_skills": [],
       "installed_at": "2026-05-04T04:06:18.177852+00:00"
+    },
+    "architecture-guard": {
+      "version": "1.8.4",
+      "source": "local",
+      "manifest_hash": "sha256:5a78f292d5b334e866a69c47d68450991c9ca31f2b92ed629545f3c69c504681",
+      "enabled": true,
+      "priority": 10,
+      "registered_commands": {
+        "copilot": [
+          "speckit.architecture-guard.governed-plan",
+          "speckit.architecture-guard.governed-tasks",
+          "speckit.architecture-guard.governed-implement",
+          "speckit.architecture-guard.architecture-workflow",
+          "speckit.architecture-guard.architecture-review",
+          "speckit.architecture-guard.violation-detection",
+          "speckit.architecture-guard.refactor-generator",
+          "speckit.architecture-guard.architecture-apply",
+          "speckit.architecture-guard.init",
+          "speckit.architecture-guard.architecture-verify"
+        ]
+      },
+      "registered_skills": [],
+      "installed_at": "2026-05-21T07:20:36.956085+00:00"
+    },
+    "memory-loader": {
+      "version": "1.0.0",
+      "source": "local",
+      "manifest_hash": "sha256:d1caef45965accd4316d8aede0a4ac67f910017ea3c501814cfc7e2d8177ab0b",
+      "enabled": true,
+      "priority": 10,
+      "registered_commands": {
+        "copilot": [
+          "speckit.memory-loader.load"
+        ]
+      },
+      "registered_skills": [],
+      "installed_at": "2026-05-21T07:31:57.127747+00:00"
+    },
+    "arch": {
+      "version": "1.1.0",
+      "source": "local",
+      "manifest_hash": "sha256:0b60506363a4876729e78ee7da0ef7ed9ceb01f0e5e25efab40c1db0a5a356aa",
+      "enabled": true,
+      "priority": 10,
+      "registered_commands": {
+        "copilot": [
+          "speckit.arch.generate",
+          "speckit.arch.reverse"
+        ]
+      },
+      "registered_skills": [],
+      "installed_at": "2026-05-21T07:37:22.755969+00:00"
     }
   }
 }

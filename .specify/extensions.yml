@@ -1,4 +1,7 @@
-installed: []
+installed:
+- arch
+- architecture-guard
+- memory-loader
 settings:
   auto_execute_hooks: true
 hooks:
@@ -24,6 +27,13 @@ hooks:
     prompt: Run cross-model review to evaluate plan and tasks before implementation?
     description: Pre-implementation review gate
     condition: null
+  - extension: architecture-guard
+    command: speckit.architecture-guard.refactor-generator
+    enabled: true
+    optional: true
+    prompt: Would you like to generate architectural refactor tasks before implementation?
+    description: ''
+    condition: null
   after_implement:
   - extension: verify-tasks
     command: speckit.verify-tasks.run
@@ -45,6 +55,13 @@ hooks:
     optional: true
     prompt: Run verify to validate implementation against specification?
     description: Post-implementation verification gate
+    condition: null
+  - extension: architecture-guard
+    command: speckit.architecture-guard.architecture-review
+    enabled: true
+    optional: true
+    prompt: Would you like to run a post-implementation architecture review?
+    description: ''
     condition: null
   after_specify:
   - extension: speckit-utils
@@ -76,6 +93,14 @@ hooks:
     prompt: Commit plan changes?
     description: Auto-commit after implementation planning
     condition: null
+  - extension: architecture-guard
+    command: speckit.architecture-guard.violation-detection
+    enabled: true
+    optional: true
+    prompt: Would you like to scan the technical plan for architectural drift and
+      Constitution violations?
+    description: ''
+    condition: null
   before_constitution:
   - extension: git
     command: speckit.git.initialize
@@ -92,6 +117,13 @@ hooks:
     prompt: Execute speckit.git.feature?
     description: Create feature branch before specification
     condition: null
+  - extension: memory-loader
+    command: speckit.memory-loader.load
+    enabled: true
+    optional: false
+    prompt: Execute speckit.memory-loader.load?
+    description: Load project memory files before specification
+    condition: null
   before_clarify:
   - extension: git
     command: speckit.git.commit
@@ -99,6 +131,13 @@ hooks:
     optional: true
     prompt: Commit outstanding changes before clarification?
     description: Auto-commit before spec clarification
+    condition: null
+  - extension: memory-loader
+    command: speckit.memory-loader.load
+    enabled: true
+    optional: false
+    prompt: Execute speckit.memory-loader.load?
+    description: Load project memory files before clarification
     condition: null
   before_plan:
   - extension: git
@@ -108,6 +147,13 @@ hooks:
     prompt: Commit outstanding changes before planning?
     description: Auto-commit before implementation planning
     condition: null
+  - extension: memory-loader
+    command: speckit.memory-loader.load
+    enabled: true
+    optional: false
+    prompt: Execute speckit.memory-loader.load?
+    description: Load project memory files before planning
+    condition: null
   before_tasks:
   - extension: git
     command: speckit.git.commit
@@ -115,6 +161,13 @@ hooks:
     optional: true
     prompt: Commit outstanding changes before task generation?
     description: Auto-commit before task generation
+    condition: null
+  - extension: memory-loader
+    command: speckit.memory-loader.load
+    enabled: true
+    optional: false
+    prompt: Execute speckit.memory-loader.load?
+    description: Load project memory files before task generation
     condition: null
   before_implement:
   - extension: git
@@ -124,6 +177,13 @@ hooks:
     prompt: Commit outstanding changes before implementation?
     description: Auto-commit before implementation
     condition: null
+  - extension: memory-loader
+    command: speckit.memory-loader.load
+    enabled: true
+    optional: false
+    prompt: Execute speckit.memory-loader.load?
+    description: Load project memory files before implementation
+    condition: null
   before_checklist:
   - extension: git
     command: speckit.git.commit
@@ -132,6 +192,13 @@ hooks:
     prompt: Commit outstanding changes before checklist?
     description: Auto-commit before checklist generation
     condition: null
+  - extension: memory-loader
+    command: speckit.memory-loader.load
+    enabled: true
+    optional: false
+    prompt: Execute speckit.memory-loader.load?
+    description: Load project memory files before checklist generation
+    condition: null
   before_analyze:
   - extension: git
     command: speckit.git.commit
@@ -139,6 +206,13 @@ hooks:
     optional: true
     prompt: Commit outstanding changes before analysis?
     description: Auto-commit before analysis
+    condition: null
+  - extension: memory-loader
+    command: speckit.memory-loader.load
+    enabled: true
+    optional: false
+    prompt: Execute speckit.memory-loader.load?
+    description: Load project memory files before analysis
     condition: null
   before_taskstoissues:
   - extension: git
