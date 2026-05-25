@@ -1,9 +1,9 @@
 # Prompt System Benchmark Review
 
-> **Status**: Active review; refreshed after P1 documentation sync  
+> **Status**: Active review; refreshed after prompt-governance authority and traceability sync  
 > **Review Mode**: Design artifacts only; implementation excluded  
 > **Benchmark Basis**: Official vendor and framework documentation only  
-> **Companion Documents**: [PROMPT_SYSTEM_RESEARCH_PROPOSAL.md](./PROMPT_SYSTEM_RESEARCH_PROPOSAL.md), [ARCHITECTURE_DESIGN.md](./ARCHITECTURE_DESIGN.md), [TECHNICAL_DESIGN.md](./TECHNICAL_DESIGN.md), [SOFTWARE_REQUIREMENTS_SPECIFICATION.md](./SOFTWARE_REQUIREMENTS_SPECIFICATION.md)
+> **Companion Documents**: [PROMPT_SYSTEM_RESEARCH_PROPOSAL.md](./PROMPT_SYSTEM_RESEARCH_PROPOSAL.md), [PHASE_2_AGENT_ENHANCEMENT_ROADMAP.md](./PHASE_2_AGENT_ENHANCEMENT_ROADMAP.md), [ARCHITECTURE_DESIGN.md](./ARCHITECTURE_DESIGN.md), [TECHNICAL_DESIGN.md](./TECHNICAL_DESIGN.md), [SOFTWARE_REQUIREMENTS_SPECIFICATION.md](./SOFTWARE_REQUIREMENTS_SPECIFICATION.md)
 
 ## Document Control
 
@@ -12,8 +12,8 @@
 | Project | DP Stock Investment Assistant |
 | Domain | Agent |
 | Focus | External benchmark review of the prompt-system design against current official guidance from OpenAI, Anthropic, Google Gemini, LangChain, LangGraph, and LangSmith |
-| Date | 2026-05-21 |
-| Status | Active; refreshed after P1 documentation sync |
+| Date | 2026-05-22 |
+| Status | Active; refreshed after prompt-governance authority and traceability sync |
 | Audience | Engineering, architecture, maintainers, reviewers, prompt-system owners, and requirement custodians |
 | Review Scope | Prompt-system design, architecture framing, governance model, evaluation model, documented evolution path, and resulting requirement codification |
 | Explicit Exclusion | No runtime or code-implementation review is performed in this document |
@@ -44,6 +44,7 @@ This review is based on the current prompt-system design statements in:
 - [ARCHITECTURE_DESIGN.md](./ARCHITECTURE_DESIGN.md), especially the Source Layout View and Prompt and Behavior View.
 - [TECHNICAL_DESIGN.md](./TECHNICAL_DESIGN.md), especially Prompt Asset Mapping, the Planned Prompt Compiler Path, and Prompt Asset Model and Composition Rules.
 - [PROMPT_SYSTEM_RESEARCH_PROPOSAL.md](./PROMPT_SYSTEM_RESEARCH_PROPOSAL.md), especially the Current State Assessment, Prompt-System Gap Matrix and Risk Analysis, Proposed Prompt Asset Model, Concrete Finance-Grade Prompt Asset Schema, Required Trace Metadata, Evaluation Scope, and Finance-Domain Guardrails.
+- [PHASE_2_AGENT_ENHANCEMENT_ROADMAP.md](./PHASE_2_AGENT_ENHANCEMENT_ROADMAP.md), as the sequencing mirror for the same release-gate and rollout model defined in the proposal and formalized in the SRS.
 - [SOFTWARE_REQUIREMENTS_SPECIFICATION.md](./SOFTWARE_REQUIREMENTS_SPECIFICATION.md), where the latest prompt-governance controls are now formalized as requirements and acceptance criteria.
 
 ### Benchmark Sources
@@ -80,7 +81,7 @@ The review uses the following benchmark expectations:
 
 The current prompt-system design is directionally strong and broadly aligned with current agent-engineering guidance. In particular, the design correctly favors a repo-owned prompt system, a skills-first evolution path, route-aware prompt composition, metadata-driven observability, offline evaluation before broader rollout, and a delayed move to multi-agent specialization only when single-agent limits are measurable. Those positions continue to align well with current guidance from OpenAI on orchestration and guardrails, Anthropic on effective agents, Google Gemini on agentic prompting, and LangChain on skills, middleware, and multi-agent tradeoffs.
 
-Since the earlier benchmark passes, the design package has incorporated the P0 and P1 governance follow-ups identified by this review. The proposal now defines instruction authority, release gates, tool-risk classes, locale-parity review, and prompt-segment policy; the architecture now expresses the guardrail, tool-risk, and segment-governance boundaries; the technical design now realizes those controls; and the agent-domain SRS now codifies them as testable requirements and acceptance criteria. This materially improves control-plane completeness across the design set.
+Since the earlier benchmark passes, the design package has incorporated the P0 and P1 governance follow-ups identified by this review. The proposal now defines instruction authority, release gates, tool-risk classes, locale-parity review, and prompt-segment policy; the roadmap mirrors the same rollout model and milestone ordering; the architecture expresses the guardrail, tool-risk, and segment-governance boundaries; the technical design now describes the intended realization of those controls; and the agent-domain SRS now codifies them as testable requirements and acceptance criteria. This materially improves control-plane completeness across the design set.
 
 The main remaining weaknesses are now future-state orchestration questions rather than missing control-plane or rollout-governance layers. Manager-versus-specialist answer ownership, cross-agent handoff trust, and deeper adversarial evaluation for future RAG or multi-agent flows remain intentionally open. For a finance-oriented assistant, those questions should remain deferred until broader orchestration scope is justified.
 
@@ -92,6 +93,8 @@ Overall assessment:
 - **Readiness for multi-agent expansion**: Correctly deferred until ownership and handoff rules are explicit
 
 The strongest near-term design work is still not to add more agents. It is to preserve the newly documented governance controls during implementation and to formalize future orchestration ownership before multi-agent scope expands.
+
+Authority remains intentionally split across the design set: the proposal owns target-design governance, the SRS owns normative thresholds and acceptance criteria, and the roadmap owns sequencing only. This review validates that chain; it does not replace it.
 
 ---
 
@@ -268,6 +271,7 @@ The recommendations below are documentation and design follow-ups only. The form
 The most natural document placements are:
 
 - `PROMPT_SYSTEM_RESEARCH_PROPOSAL.md` now owns authority, release-gate, tool-risk, locale-parity, and prompt-segment governance.
+- `PHASE_2_AGENT_ENHANCEMENT_ROADMAP.md` now owns backlog ordering and milestone sequencing for the same release-gate model without redefining the governing thresholds.
 - `ARCHITECTURE_DESIGN.md` now owns the architecture-level guardrail, tool-risk, and segment-governance boundaries; future orchestration ownership rules belong there.
 - `TECHNICAL_DESIGN.md` now owns the realization detail for segment treatment, tool risk classes, locale-parity selection, and trace completeness expectations.
 - `SOFTWARE_REQUIREMENTS_SPECIFICATION.md` now carries the formal requirement and acceptance-criteria authority for the completed P0 and P1 governance controls.
@@ -278,7 +282,7 @@ The most natural document placements are:
 
 The current project prompt-system design is substantively aligned with the current direction of agentic AI engineering. It is more mature than a simple prompt-externalization proposal and already reflects several ideas that matter: skills-first evolution, explicit prompt observability, repo-owned prompt policy, evaluation before live expansion, and domain-specific behavioral discipline.
 
-The earlier P0 and P1 governance follow-ups identified by this review are now present in the proposal, architecture, technical design, and governing SRS. Within the scope of a design-only review, that moves the design from "strong direction with governance gaps" to "well-governed finance-grade prompt-system architecture" for the current single-agent, skills-first runtime.
+The earlier P0 and P1 governance follow-ups identified by this review are now present in the proposal, roadmap, architecture, technical design, and governing SRS. Within the scope of a design-only review, that moves the design from "strong direction with governance gaps" to "well-governed finance-grade prompt-system architecture" for the current single-agent, skills-first runtime.
 
 The remaining work is now chiefly about future-state orchestration governance and deeper adversarial evaluation before the project expands into retrieval-grounded or multi-agent runtime designs. That means the next design step is still not broader capability. It is explicit ownership and handoff design for the later runtime shapes that are intentionally deferred today.
 
