@@ -1,8 +1,8 @@
 # Stock Investment Assistant Agent — Software Requirements Specification
 
-> **Document Version**: 2.6  
+> **Document Version**: 2.7  
 > **Created**: January 22, 2026  
-> **Last Updated**: May 21, 2026  
+> **Last Updated**: May 22, 2026  
 > **Status**: Active  
 > **Scope**: LangChain-based AI Agent for Stock Investment Assistant  
 ## Related Documents
@@ -14,12 +14,12 @@ This specification builds upon and references several architectural and design d
 | [AGENT_ARCHITECTURE_DECISION_RECORDS.md](./decisions/AGENT_ARCHITECTURE_DECISION_RECORDS.md) | Architectural decisions for LTM/STM, RAG, fine-tuning strategy, and memory separation | Design foundations for FR-3 (Memory System) |
 | [ARCHITECTURE_DESIGN.md](./ARCHITECTURE_DESIGN.md) | Comprehensive agent architecture overview, component deep dive, data flow, and Phase 2 improvements | Implementation guidance for FR-1, FR-2, FR-4 |
 | [LANGCHAIN_AGENT_HOWTO.md](./LANGCHAIN_AGENT_HOWTO.md) | Complete guide to ReAct pattern, semantic routing, tool system, and operations | Operational reference for agent deployment and usage |
-| [PHASE_2_AGENT_ENHANCEMENT_ROADMAP.md](./PHASE_2_AGENT_ENHANCEMENT_ROADMAP.md) | Future enhancement roadmap including conversation-scoped STM evolution, future LTM personalization, prompt-system rollout, and observability | Planning for P2 requirements beyond current release |
+| [PHASE_2_AGENT_ENHANCEMENT_ROADMAP.md](./PHASE_2_AGENT_ENHANCEMENT_ROADMAP.md) | Future enhancement roadmap including conversation-scoped STM evolution, future LTM personalization, prompt-system rollout, and observability | Planning and sequencing for P2 requirements beyond current release; does not redefine SRS thresholds |
 | [AGENT_MEMORY_TECHNICAL_DESIGN.md](./AGENT_MEMORY_TECHNICAL_DESIGN.md) | Detailed technical design for conversation-scoped STM, session-context boundaries, checkpointing, and summarization | Implementation guidance supporting FR-3 (Memory System) |
 | [AGENTIC_APP_WITH_STM_INTEGRATION_ROADMAP.md](../../High-level%20Design/AGENTIC_APP_WITH_STM_INTEGRATION_ROADMAP.md) | Technical roadmap for workspace-session-conversation hierarchy and STM integration | Roadmap for FR-5.3–5.5, FR-7 (management, consistency, migration) |
 | [SRS_SPEC_TRACEABILITY.md](./SRS_SPEC_TRACEABILITY.md) | Bidirectional trace between SRS items and spec-kit feature artifacts | Companion delivery trace for implementation coverage and sync status |
-| [PROMPT_SYSTEM_RESEARCH_PROPOSAL.md](./PROMPT_SYSTEM_RESEARCH_PROPOSAL.md) | Prompt system research, design patterns, release gates, and implementation roadmap | Research foundation for FR-1.4.5–1.4.16, FR-1.5, NFR-5.2.5–5.2.11, NFR-6.2.3 |
-| [PROMPT_SYSTEM_BENCHMARK_REVIEW.md](./PROMPT_SYSTEM_BENCHMARK_REVIEW.md) | External benchmark review of prompt-governance design against vendor and framework guidance | Governance reference for FR-1.4.10–1.4.16, FR-1.5.6, AC-8.5–8.11 |
+| [PROMPT_SYSTEM_RESEARCH_PROPOSAL.md](./PROMPT_SYSTEM_RESEARCH_PROPOSAL.md) | Prompt system research, design patterns, release gates, and implementation roadmap | Research foundation and target-design authority for FR-1.4.5–1.4.16, FR-1.5, NFR-5.2.5–5.2.11, NFR-6.2.3 |
+| [PROMPT_SYSTEM_BENCHMARK_REVIEW.md](./PROMPT_SYSTEM_BENCHMARK_REVIEW.md) | External benchmark review of prompt-governance design against vendor and framework guidance | External validation reference for FR-1.4.10–1.4.16, FR-1.5.6, AC-8.5–8.11 |
 
 
 
@@ -838,7 +838,7 @@ Future LTM requirements in this section complement session context and STM. They
 | AC-8.3 | Agent responses to financial queries reference specific tool-sourced data points and include source attribution | Integration test |
 | AC-8.4 | Agent responses do not contain hype, guaranteed-return claims, or urgency language (verified by blocklist scan) | Unit test + regression test |
 | AC-8.5 | Imperative text embedded in retrieved content, tool outputs, quoted attachments, or summarized memory does not override shared prompt policy or change tool behavior | Security regression test |
-| AC-8.6 | Candidate prompt variants cannot enter `shadow`, `weighted`, or `active` selection until offline dataset thresholds pass and all mandatory prompt-governance metadata keys are present on relevant evaluation runs | Governance integration test |
+| AC-8.6 | Candidate prompt variants cannot enter `shadow`, `weighted`, or `active` selection until finance-safety blocker sets pass at 100%, missing-data handling passes at >=98%, applicable route or tool datasets pass at >=95%, and all mandatory prompt-governance metadata keys are present on relevant evaluation runs | Governance integration test |
 | AC-8.7 | A live candidate prompt that triggers a critical finance-safety violation, obeys instruction content from a data-only surface, or exceeds the 0.5% metadata-missing threshold is rolled back automatically to the approved baseline prompt | Fault-injection + integration test |
 | AC-8.8 | Trace records for guarded prompt paths include prompt selection mode, guardrail outcomes, and any applicable routing, experiment, and conversation identifiers required for promotion decisions | Integration test + trace audit |
 | AC-8.9 | Prompt assets cannot expose tools above their approved risk envelope, and guarded tool traces include the effective `tool_risk_class` plus approval state when required | Governance integration test + trace audit |
@@ -1028,6 +1028,7 @@ This section maps acceptance criteria (AC-*) to the functional and non-functiona
 | 2.4 | 2026-05-15 | System | Reconciled roadmap and requirements wording to the updated memory model: added explicit glossary boundaries for session context, STM, LTM, and RAG; clarified FR-1.4.4 active-context wording; reframed FR-3 summarization as STM compaction; refined future-LTM requirements to emphasize personalization rather than raw checkpoint reuse; and clarified FR-7.1.5 as coordinated but distinct checkpoint, metadata, and session-context layers. |
 | 2.5 | 2026-05-19 | System | Formalized prompt-governance follow-ups from the benchmark review. Added FR-1.4.10–1.4.13 (instruction authority separation, prompt authority precedence, release gate enforcement, rollback triggering), FR-1.5.6 (boundary-aware guardrail enforcement), NFR-5.2.8–5.2.9 (guardrail outcome and metadata-completeness tracing), and AC-8.5–8.8 (instruction-authority, release-gate, rollback, and trace-audit verification). Added PROMPT_SYSTEM_BENCHMARK_REVIEW.md as a related governance reference. |
 | 2.6 | 2026-05-21 | System | Formalized prompt-governance P1 follow-ups from the benchmark review. Added FR-1.4.14–1.4.16 (tool-risk envelope enforcement, locale-parity promotion control, prompt-segment classification and reuse), NFR-5.2.10–5.2.11 (locale and tool-risk trace metadata), and AC-8.9–8.11 (tool-risk, locale-parity, and segment-class verification). |
+| 2.7 | 2026-05-22 | System | Synchronized prompt-governance document authority across the proposal, benchmark review, roadmap, and reverse trace. Clarified that AC-8 release-gate thresholds remain normative in the SRS while the roadmap carries sequencing only. |
 ---
 
 *End of Requirements Document*

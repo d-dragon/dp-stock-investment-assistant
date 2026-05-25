@@ -1,7 +1,7 @@
 # SRS To Spec Traceability
 
-> **Document Version**: 1.6  
-> **Generated**: 2026-05-21 04:02:04Z  
+> **Document Version**: 1.7  
+> **Generated**: 2026-05-22 (manual reconciliation)  
 > **Status**: Active  
 > **Traceability Manifest Version**: 1  
 
@@ -13,8 +13,10 @@
 ## Summary
 
 - Total traced SRS items discovered: `337`
-- Items with linked specs: `142`
-- Items without linked specs: `195`
+- Items with linked specs: `151`
+- Items without linked specs: `186`
+
+For prompt-system entries that do not yet have a dedicated `specs/*` artifact, the `Linked Spec` column may point to an equivalent design-governance artifact in `docs/domains/agent/` or `docs/domains/agent/DECISIONS/`.
 
 ## Revision History
 
@@ -27,6 +29,7 @@
 | `1.4` | `2026-03-31` | Updated stm-phase-cde reverse-trace statuses from clarified to verified after implementation and verification completion. |
 | `1.5` | `2026-04-13` | Added prompt-system trace entries and updated the governing SRS baseline to v2.3. |
 | `1.6` | `2026-05-21` | Updated the governing SRS baseline to v2.6 and added prompt-governance trace entries for FR-1.4.10–1.4.16, FR-1.5.6, NFR-5.2.8–5.2.11, and AC-8.5–8.11. |
+| `1.7` | `2026-05-22` | Repointed prompt-system reverse-trace entries from the missing prompt-governance spec reference to existing design-governance artifacts in the proposal, roadmap, benchmark review, and ADR set. |
 
 ## Family Index
 
@@ -44,7 +47,7 @@
 
 ### FR-1
 
-Mapped: `8/37`. Unmapped: `29`.
+Mapped: `17/37`. Unmapped: `20`.
 
 | SRS Item | Linked Spec | Current Status | Sync Status |
 |----------|-------------|----------------|-------------|
@@ -63,28 +66,28 @@ Mapped: `8/37`. Unmapped: `29`.
 | [FR-1.3.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L162) | `-` | `unmapped` | `unmapped` |
 | [FR-1.3.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L163) | `-` | `unmapped` | `unmapped` |
 | [FR-1.3.5](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L164) | `-` | `unmapped` | `unmapped` |
-| [FR-1.4.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L170) | `-` | `unmapped` | `unmapped` |
-| [FR-1.4.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L171) | `-` | `unmapped` | `unmapped` |
-| [FR-1.4.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L172) | `-` | `unmapped` | `unmapped` |
-| [FR-1.4.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L173) | `-` | `unmapped` | `unmapped` |
-| [FR-1.4.5](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L174) | `-` | `unmapped` | `unmapped` |
-| [FR-1.4.6](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L175) | `-` | `unmapped` | `unmapped` |
-| [FR-1.4.7](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L176) | `-` | `unmapped` | `unmapped` |
-| [FR-1.4.8](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L177) | `-` | `unmapped` | `unmapped` |
-| [FR-1.4.9](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L178) | `-` | `unmapped` | `unmapped` |
-| [FR-1.4.10](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L179) | [prompt-system-governance](../../../specs/prompt-system-governance/spec.md#requirements-mandatory) | `clarified` | `current` |
-| [FR-1.4.11](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L180) | [prompt-system-governance](../../../specs/prompt-system-governance/spec.md#requirements-mandatory) | `clarified` | `current` |
-| [FR-1.4.12](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L181) | [prompt-system-governance](../../../specs/prompt-system-governance/spec.md#requirements-mandatory) | `clarified` | `current` |
-| [FR-1.4.13](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L182) | [prompt-system-governance](../../../specs/prompt-system-governance/spec.md#requirements-mandatory) | `clarified` | `current` |
-| [FR-1.4.14](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L183) | [prompt-system-governance](../../../specs/prompt-system-governance/spec.md#requirements-mandatory) | `clarified` | `current` |
-| [FR-1.4.15](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L184) | [prompt-system-governance](../../../specs/prompt-system-governance/spec.md#requirements-mandatory) | `clarified` | `current` |
-| [FR-1.4.16](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L185) | [prompt-system-governance](../../../specs/prompt-system-governance/spec.md#requirements-mandatory) | `clarified` | `current` |
+| [FR-1.4.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L170) | [PROMPT_SYSTEM_RESEARCH_PROPOSAL.md](PROMPT_SYSTEM_RESEARCH_PROPOSAL.md) | `clarified` | `current` |
+| [FR-1.4.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L171) | [PROMPT_SYSTEM_RESEARCH_PROPOSAL.md](PROMPT_SYSTEM_RESEARCH_PROPOSAL.md) | `clarified` | `current` |
+| [FR-1.4.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L172) | [PROMPT_SYSTEM_RESEARCH_PROPOSAL.md](PROMPT_SYSTEM_RESEARCH_PROPOSAL.md) | `clarified` | `current` |
+| [FR-1.4.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L173) | [PROMPT_SYSTEM_RESEARCH_PROPOSAL.md](PROMPT_SYSTEM_RESEARCH_PROPOSAL.md) | `clarified` | `current` |
+| [FR-1.4.5](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L174) | [ADR-AGENT-003-EXTERNALIZE-VERSION-PROMPT-ASSETS.md](DECISIONS/ADR-AGENT-003-EXTERNALIZE-VERSION-PROMPT-ASSETS.md) | `clarified` | `current` |
+| [FR-1.4.6](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L175) | [ADR-AGENT-003-EXTERNALIZE-VERSION-PROMPT-ASSETS.md](DECISIONS/ADR-AGENT-003-EXTERNALIZE-VERSION-PROMPT-ASSETS.md) | `clarified` | `current` |
+| [FR-1.4.7](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L176) | [ADR-AGENT-002-SKILLS-PATTERN-PROMPT-COMPOSITION.md](DECISIONS/ADR-AGENT-002-SKILLS-PATTERN-PROMPT-COMPOSITION.md) | `clarified` | `current` |
+| [FR-1.4.8](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L177) | [PROMPT_SYSTEM_RESEARCH_PROPOSAL.md](PROMPT_SYSTEM_RESEARCH_PROPOSAL.md) | `clarified` | `current` |
+| [FR-1.4.9](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L178) | [PHASE_2_AGENT_ENHANCEMENT_ROADMAP.md](PHASE_2_AGENT_ENHANCEMENT_ROADMAP.md) | `clarified` | `current` |
+| [FR-1.4.10](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L179) | [PROMPT_SYSTEM_RESEARCH_PROPOSAL.md](PROMPT_SYSTEM_RESEARCH_PROPOSAL.md) | `clarified` | `current` |
+| [FR-1.4.11](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L180) | [PROMPT_SYSTEM_RESEARCH_PROPOSAL.md](PROMPT_SYSTEM_RESEARCH_PROPOSAL.md) | `clarified` | `current` |
+| [FR-1.4.12](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L181) | [PROMPT_SYSTEM_RESEARCH_PROPOSAL.md](PROMPT_SYSTEM_RESEARCH_PROPOSAL.md) | `clarified` | `current` |
+| [FR-1.4.13](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L182) | [PROMPT_SYSTEM_RESEARCH_PROPOSAL.md](PROMPT_SYSTEM_RESEARCH_PROPOSAL.md) | `clarified` | `current` |
+| [FR-1.4.14](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L183) | [PROMPT_SYSTEM_RESEARCH_PROPOSAL.md](PROMPT_SYSTEM_RESEARCH_PROPOSAL.md) | `clarified` | `current` |
+| [FR-1.4.15](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L184) | [PROMPT_SYSTEM_RESEARCH_PROPOSAL.md](PROMPT_SYSTEM_RESEARCH_PROPOSAL.md) | `clarified` | `current` |
+| [FR-1.4.16](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L185) | [PROMPT_SYSTEM_RESEARCH_PROPOSAL.md](PROMPT_SYSTEM_RESEARCH_PROPOSAL.md) | `clarified` | `current` |
 | [FR-1.5.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L196) | `-` | `unmapped` | `unmapped` |
 | [FR-1.5.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L197) | `-` | `unmapped` | `unmapped` |
 | [FR-1.5.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L198) | `-` | `unmapped` | `unmapped` |
 | [FR-1.5.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L199) | `-` | `unmapped` | `unmapped` |
 | [FR-1.5.5](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L200) | `-` | `unmapped` | `unmapped` |
-| [FR-1.5.6](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L201) | [prompt-system-governance](../../../specs/prompt-system-governance/spec.md#requirements-mandatory) | `clarified` | `current` |
+| [FR-1.5.6](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L201) | [PROMPT_SYSTEM_BENCHMARK_REVIEW.md](PROMPT_SYSTEM_BENCHMARK_REVIEW.md) | `clarified` | `current` |
 
 ### FR-2
 
@@ -370,10 +373,10 @@ Mapped: `4/22`. Unmapped: `18`.
 | [NFR-5.2.5](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L692) | `-` | `unmapped` | `unmapped` |
 | [NFR-5.2.6](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L693) | `-` | `unmapped` | `unmapped` |
 | [NFR-5.2.7](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L694) | `-` | `unmapped` | `unmapped` |
-| [NFR-5.2.8](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L695) | [prompt-system-governance](../../../specs/prompt-system-governance/spec.md#requirements-mandatory) | `clarified` | `current` |
-| [NFR-5.2.9](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L696) | [prompt-system-governance](../../../specs/prompt-system-governance/spec.md#requirements-mandatory) | `clarified` | `current` |
-| [NFR-5.2.10](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L697) | [prompt-system-governance](../../../specs/prompt-system-governance/spec.md#requirements-mandatory) | `clarified` | `current` |
-| [NFR-5.2.11](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L698) | [prompt-system-governance](../../../specs/prompt-system-governance/spec.md#requirements-mandatory) | `clarified` | `current` |
+| [NFR-5.2.8](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L695) | [PROMPT_SYSTEM_RESEARCH_PROPOSAL.md](PROMPT_SYSTEM_RESEARCH_PROPOSAL.md) | `clarified` | `current` |
+| [NFR-5.2.9](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L696) | [PROMPT_SYSTEM_RESEARCH_PROPOSAL.md](PROMPT_SYSTEM_RESEARCH_PROPOSAL.md) | `clarified` | `current` |
+| [NFR-5.2.10](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L697) | [PROMPT_SYSTEM_RESEARCH_PROPOSAL.md](PROMPT_SYSTEM_RESEARCH_PROPOSAL.md) | `clarified` | `current` |
+| [NFR-5.2.11](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L698) | [PROMPT_SYSTEM_RESEARCH_PROPOSAL.md](PROMPT_SYSTEM_RESEARCH_PROPOSAL.md) | `clarified` | `current` |
 | [NFR-5.3.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L705) | `-` | `unmapped` | `unmapped` |
 | [NFR-5.3.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L706) | `-` | `unmapped` | `unmapped` |
 | [NFR-5.3.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L707) | `-` | `unmapped` | `unmapped` |
@@ -514,13 +517,13 @@ Mapped: `7/11`. Unmapped: `4`.
 | [AC-8.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L837) | `-` | `unmapped` | `unmapped` |
 | [AC-8.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L838) | `-` | `unmapped` | `unmapped` |
 | [AC-8.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L839) | `-` | `unmapped` | `unmapped` |
-| [AC-8.5](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L840) | [prompt-system-governance](../../../specs/prompt-system-governance/spec.md#requirements-mandatory) | `clarified` | `current` |
-| [AC-8.6](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L841) | [prompt-system-governance](../../../specs/prompt-system-governance/spec.md#requirements-mandatory) | `clarified` | `current` |
-| [AC-8.7](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L842) | [prompt-system-governance](../../../specs/prompt-system-governance/spec.md#requirements-mandatory) | `clarified` | `current` |
-| [AC-8.8](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L843) | [prompt-system-governance](../../../specs/prompt-system-governance/spec.md#requirements-mandatory) | `clarified` | `current` |
-| [AC-8.9](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L844) | [prompt-system-governance](../../../specs/prompt-system-governance/spec.md#requirements-mandatory) | `clarified` | `current` |
-| [AC-8.10](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L845) | [prompt-system-governance](../../../specs/prompt-system-governance/spec.md#requirements-mandatory) | `clarified` | `current` |
-| [AC-8.11](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L846) | [prompt-system-governance](../../../specs/prompt-system-governance/spec.md#requirements-mandatory) | `clarified` | `current` |
+| [AC-8.5](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L840) | [PROMPT_SYSTEM_BENCHMARK_REVIEW.md](PROMPT_SYSTEM_BENCHMARK_REVIEW.md) | `clarified` | `current` |
+| [AC-8.6](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L841) | [PROMPT_SYSTEM_BENCHMARK_REVIEW.md](PROMPT_SYSTEM_BENCHMARK_REVIEW.md) | `clarified` | `current` |
+| [AC-8.7](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L842) | [PROMPT_SYSTEM_BENCHMARK_REVIEW.md](PROMPT_SYSTEM_BENCHMARK_REVIEW.md) | `clarified` | `current` |
+| [AC-8.8](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L843) | [PROMPT_SYSTEM_BENCHMARK_REVIEW.md](PROMPT_SYSTEM_BENCHMARK_REVIEW.md) | `clarified` | `current` |
+| [AC-8.9](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L844) | [PROMPT_SYSTEM_BENCHMARK_REVIEW.md](PROMPT_SYSTEM_BENCHMARK_REVIEW.md) | `clarified` | `current` |
+| [AC-8.10](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L845) | [PROMPT_SYSTEM_BENCHMARK_REVIEW.md](PROMPT_SYSTEM_BENCHMARK_REVIEW.md) | `clarified` | `current` |
+| [AC-8.11](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L846) | [PROMPT_SYSTEM_BENCHMARK_REVIEW.md](PROMPT_SYSTEM_BENCHMARK_REVIEW.md) | `clarified` | `current` |
 
 ### IR-1
 

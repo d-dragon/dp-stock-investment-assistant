@@ -1,9 +1,9 @@
 # Prompt System Architecture and Design
 
-> **Document Version**: 1.5  
-> **Last Updated**: May 21, 2026  
+> **Document Version**: 1.8  
+> **Last Updated**: May 22, 2026  
 > **Phase**: 2A.2 - System Prompt Refinement and A/B Testing  
-> **Status**: Research refined; Near-term target aligned to the governed prompt compiler path and later specialist-prompt evolution; P1 governance controls added for tool risk, locale parity, and prompt-segment policy  
+> **Status**: Research consolidated; target prompt-compiler design aligned to SRS v2.7 release gates, roadmap milestone sequencing, and later specialist-prompt evolution; P1 governance controls retained for tool risk, locale parity, and prompt-segment policy  
 > **Primary Source Requirement**: Official vendor and regulator documentation only  
 > **Governing ADR**: [ADR-001 — Layered LLM Architecture](./decisions/AGENT_ARCHITECTURE_DECISION_RECORDS.md)
 
@@ -222,6 +222,8 @@ The baseline-versus-target summary above captures the architectural delta. The m
 | Retrieval-ready specialist prompting | No RAG-specific prompt contract or explicit retrieval prompt-injection defense is wired into the runtime | Retrieval specialist prompt treats retrieved content as data only, with source-aware and injection-resistant rules | Future retrieval work would otherwise inherit the wrong prompt contract | Retrieved text can blur into instruction authority; groundedness claims become overstated; indirect prompt injection risk rises sharply |
 
 The highest-priority near-term gaps are prompt source of truth, runtime prompt-path consistency, prompt observability, and finance safety policy centralization. Together they create the current control problem: the repository already contains stronger finance-domain prompt material, but the primary ReAct runtime is not yet governed by it.
+
+For the target design, release-gate and rollback precision are intentionally delegated to the governing SRS surface: [SOFTWARE_REQUIREMENTS_SPECIFICATION.md](./SOFTWARE_REQUIREMENTS_SPECIFICATION.md) FR-1.4.12 through FR-1.4.16 and AC-8.5 through AC-8.11 define the normative promotion, metadata-completeness, and rollback thresholds. This proposal remains the design-rationale and gate-model source, while the roadmap mirrors those thresholds for M3 and M4 sequencing without redefining them.
 
 ---
 
@@ -1094,6 +1096,8 @@ Recommended identifiers:
 
 The release gates below are mandatory for any prompt candidate that may progress beyond `forced` offline evaluation. A candidate that fails a release gate is not eligible for `shadow`, `weighted`, or `active` selection.
 
+These release gates are the target-design basis for [SOFTWARE_REQUIREMENTS_SPECIFICATION.md](./SOFTWARE_REQUIREMENTS_SPECIFICATION.md) FR-1.4.12 through FR-1.4.16 and AC-8.6 through AC-8.11. [PHASE_2_AGENT_ENHANCEMENT_ROADMAP.md](./PHASE_2_AGENT_ENHANCEMENT_ROADMAP.md) should mirror these thresholds and rollback rules in milestone planning, but it should not redefine them.
+
 #### Metadata Completeness Gate
 
 | Run Scope | Mandatory Keys | Gate Rule |
@@ -1363,8 +1367,8 @@ The phase outline above expresses architectural intent. The backlog below conver
 |---|---|---|---|
 | M1 - Prompt Runtime Parity | PS-01 to PS-06 | Current ReAct runtime is externalized, versioned, observable, and rollback-safe | Do not begin route-context work until the hardcoded prompt is fully removed from the primary ReAct path |
 | M2 - Route-Aware Skills | PS-07 to PS-08 | Existing `StockQueryRouter` drives deterministic route-specific prompt context with no extra LLM routing cost | Do not introduce experiment modes until route-aware composition is stable and traceable |
-| M3 - Evaluation and Safety Gates | PS-09 to PS-10 | Offline comparison and finance-safety regression checks are available for every prompt change | No live prompt experimentation before offline gates pass |
-| M4 - Controlled Rollout | PS-11 | Candidate variants can be compared safely in `forced` or `shadow` mode, with weighted live exposure still optional and explicit | Keep production on `fixed` unless an approved rollout decision says otherwise |
+| M3 - Evaluation and Safety Gates | PS-09 to PS-10 | Offline comparison and finance-safety regression checks are available for every prompt change | Do not enter `shadow`, `weighted`, or `active` until finance-safety blockers pass at 100%, missing-data handling passes at >=98%, applicable route or tool datasets pass at >=95%, and mandatory metadata keys are present on 100% of relevant runs |
+| M4 - Controlled Rollout | PS-11 | Candidate variants can be compared safely in `forced` or `shadow` mode, with weighted live exposure still optional and explicit | Keep production on `fixed` unless the approved baseline fallback, rollback target, and FR-1.4.13 live rollback triggers remain active for any live candidate path |
 | M5 - Multi-Agent Prompt Foundation | PS-12 | Specialist prompt families and handoff contracts are ready for future orchestration work | Do not start multi-agent runtime work until Skills-pattern evidence shows a real limitation |
 
 #### Critical Path
@@ -1473,6 +1477,20 @@ This design is correct only if all of the following remain true:
 ## Document Update Log
 
 This section tracks changes made to other project documents as a result of research findings in this proposal.
+
+### Update Session: 2026-05-22 (v1.8 -> Design-Governance Alignment)
+
+**Trigger:** Synchronize the target prompt-system design, release-gate references, benchmark-backed governance language, and reverse-trace mappings across the existing prompt-system documentation set without introducing new spec artifacts.
+
+| # | Target Document | Change Summary | SRS/ADR References |
+|---|----------------|----------------|-------------------|
+| 1 | [PROMPT_SYSTEM_RESEARCH_PROPOSAL.md](./PROMPT_SYSTEM_RESEARCH_PROPOSAL.md) | Updated document control to v1.8 / 2026-05-22. Clarified that the proposal is the design-rationale source for prompt release gates while the SRS remains the normative threshold source for promotion, metadata completeness, and rollback behavior. | FR-1.4.12–1.4.16, AC-8.5–8.11, ADR-001, ADR-002, ADR-003 |
+| 2 | [PHASE_2_AGENT_ENHANCEMENT_ROADMAP.md](./PHASE_2_AGENT_ENHANCEMENT_ROADMAP.md) | Refreshed the prompt-system roadmap mirror to proposal v1.8, updated milestone-gate wording to the same release-gate thresholds, and clarified that proposed ADR-002 and ADR-003 govern the target design rather than implemented runtime behavior. | FR-1.4.5–1.4.16, FR-1.5.6, AC-8.5–8.11, ADR-002, ADR-003 |
+| 3 | [SOFTWARE_REQUIREMENTS_SPECIFICATION.md](./SOFTWARE_REQUIREMENTS_SPECIFICATION.md) | Refined prompt-governance document references so the proposal remains the target-design authority, the benchmark review remains the validation reference, and the roadmap remains sequencing-only for AC-8 governance work. | FR-1.4.12–1.4.16, FR-1.5.6, AC-8.5–8.11 |
+| 4 | [PROMPT_SYSTEM_BENCHMARK_REVIEW.md](./PROMPT_SYSTEM_BENCHMARK_REVIEW.md) | Reframed benchmark findings to stay explicitly design-only, added the roadmap as a sequencing companion, and aligned the authority chain to proposal -> SRS -> roadmap without implying runtime completion. | FR-1.4.10–1.4.16, FR-1.5.6, AC-8.5–8.11 |
+| 5 | [SRS_SPEC_TRACEABILITY.md](./SRS_SPEC_TRACEABILITY.md) | Repaired prompt-system reverse-trace entries to existing design-governance artifacts in the proposal, roadmap, benchmark review, and ADR set after removing references to the missing prompt-system-governance spec path. | FR-1.4.1–1.4.16, FR-1.5.6, NFR-5.2.8–5.2.11, AC-8.5–8.11 |
+
+**Total changes:** 5 documents, prompt-system design-governance references synchronized across proposal, roadmap, SRS, benchmark review, and reverse trace.
 
 ### Update Session: 2026-05-21 (v1.7 → P1 Governance Controls)
 

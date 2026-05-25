@@ -1,8 +1,8 @@
 # Phase 2: LangChain Agent Enhancement Roadmap
 
-> **Document Version**: 1.3  
+> **Document Version**: 1.4  
 > **Created**: January 15, 2026  
-> **Last Updated**: May 15, 2026  
+> **Last Updated**: May 22, 2026  
 > **Status**: Planning  
 > **Branch**: `enhance-agent-prompt-system-followup`
 
@@ -142,7 +142,7 @@ def process_query(self, query: str, *, conversation_id: str | None = None) -> Ag
 
 **Objective**: Externalize prompt assets, establish the planned prompt compiler path (`PromptAssetLoader -> PromptAssembler -> ResponseGuardrailMiddleware`), and support controlled evaluation and rollout of prompt changes.
 
-> **Status (2026-05-15):** Research complete and terminology aligned. The governing design and dependency-ordered backlog now live in [PROMPT_SYSTEM_RESEARCH_PROPOSAL.md v1.4](./PROMPT_SYSTEM_RESEARCH_PROPOSAL.md). This roadmap section mirrors the same backlog IDs, milestone gates, and near-term delivery ordering for Phase 2 planning. Requirements remain formalized in SRS v2.3 (FR-1.4.6–1.4.9, FR-1.5, NFR-5.2.5–5.2.7, AC-8). Architecture decisions remain governed by [ADR-002 (Skills Pattern)](./decisions/AGENT_ARCHITECTURE_DECISION_RECORDS.md) and [ADR-003 (Externalized Prompts)](./decisions/AGENT_ARCHITECTURE_DECISION_RECORDS.md).  
+> **Status (2026-05-22):** Design authority and sequencing are refreshed. The governing target design and dependency-ordered backlog now live in [PROMPT_SYSTEM_RESEARCH_PROPOSAL.md v1.8](./PROMPT_SYSTEM_RESEARCH_PROPOSAL.md). This roadmap section mirrors the same backlog IDs, milestone gates, and near-term delivery ordering for Phase 2 planning. Release-gate thresholds remain formalized in SRS v2.7 (FR-1.4.12–1.4.16, FR-1.5.6, NFR-5.2.8–5.2.11, AC-8.5–8.11). Planned prompt-compiler decisions remain governed by proposed [ADR-002 (Skills Pattern)](./decisions/AGENT_ARCHITECTURE_DECISION_RECORDS.md) and [ADR-003 (Externalized Prompts)](./decisions/AGENT_ARCHITECTURE_DECISION_RECORDS.md). This roadmap mirrors sequencing only and does not redefine the target-design thresholds.  
 > **Next step:** Start Milestone M1 with `PS-01` to `PS-03` to establish the baseline asset, prompt loader, and config validation surface.
 
 #### Current Baseline
@@ -159,24 +159,24 @@ def process_query(self, query: str, *, conversation_id: str | None = None) -> Ag
 - Offline evaluation and guarded rollout integrated with LangSmith metadata
 - Prompt selection configurable through a dedicated `prompts.*` config surface
 
-#### Execution Backlog Mirror (Synced to Proposal v1.4)
+#### Execution Backlog Mirror (Synced to Proposal v1.8)
 
 > Detailed dependency authority remains in [PROMPT_SYSTEM_RESEARCH_PROPOSAL.md](./PROMPT_SYSTEM_RESEARCH_PROPOSAL.md). This roadmap mirrors the execution backlog and milestone gates so planning and design stay synchronized in both directions.
 
-| Order | Backlog ID | Priority | Depends On | Roadmap Outcome |
-|---|---|---|---|---|
-| 1 | `PS-01` | P0 | None | Extract the current ReAct prompt into `src/prompts/system/react_analyst/v1.md` and preserve it as the canonical baseline asset |
-| 2 | `PS-02` | P0 | `PS-01` | Implement `PromptAssetLoader` / loader-facade behavior with metadata parsing, caching, validation, and baseline fallback conventions |
-| 3 | `PS-03` | P0 | `PS-01`, `PS-02` | Add `prompts.*` config surface and fail-closed validation rules so only valid prompt assets can activate |
-| 4 | `PS-04` | P0 | `PS-02`, `PS-03` | Replace `REACT_SYSTEM_PROMPT` as the primary source of truth for `StockAssistantAgent` |
-| 5 | `PS-05` | P0 | `PS-04` | Inject prompt identity into response metadata and trace metadata for top-level runs |
-| 6 | `PS-06` | P0 | `PS-02`, `PS-04`, `PS-05` | Add rollback safety, WARN logging, and fault-injection coverage for invalid prompt activation |
-| 7 | `PS-07` | P1 | `PS-04` | Create route-context prompt assets for all 8 `StockQueryRouter` categories |
-| 8 | `PS-08` | P1 | `PS-05`, `PS-07` | Compose route-aware prompt behavior with `PromptAssembler` and `@dynamic_prompt` middleware |
-| 9 | `PS-09` | P1 | `PS-05`, `PS-08` | Build the offline evaluation harness and baseline prompt comparison datasets |
-| 10 | `PS-10` | P1 | `PS-06`, `PS-09` | Enforce finance-domain guardrail verification before prompt promotion |
-| 11 | `PS-11` | P2 | `PS-09`, `PS-10` | Add controlled experiment and rollout modes (`fixed`, `forced`, `shadow`, optional `weighted`) |
-| 12 | `PS-12` | P3 | `PS-08`, `PS-09`, `PS-11` | Introduce multi-agent prompt taxonomy only after Skills-pattern evidence justifies it |
+| Order | Backlog ID | Priority | SRS Alignment | Depends On | Roadmap Outcome |
+|---|---|---|---|---|---|
+| 1 | `PS-01` | P0 | FR-1.4.5, FR-1.4.8, NFR-6.2.3 | None | Extract the current ReAct prompt into `src/prompts/system/react_analyst/v1.md` and preserve it as the canonical baseline asset |
+| 2 | `PS-02` | P0 | FR-1.4.5, FR-1.4.8, FR-1.4.16 | `PS-01` | Implement `PromptAssetLoader` / loader-facade behavior with metadata parsing, caching, validation, and baseline fallback conventions |
+| 3 | `PS-03` | P0 | FR-1.4.5, FR-1.4.8, NFR-6.2.3 | `PS-01`, `PS-02` | Add `prompts.*` config surface and fail-closed validation rules so only valid prompt assets can activate |
+| 4 | `PS-04` | P0 | FR-1.4.5, FR-1.4.6 | `PS-02`, `PS-03` | Replace `REACT_SYSTEM_PROMPT` as the primary source of truth for `StockAssistantAgent` |
+| 5 | `PS-05` | P0 | FR-1.4.6, NFR-5.2.5–5.2.9 | `PS-04` | Inject prompt identity into response metadata and trace metadata for top-level runs |
+| 6 | `PS-06` | P0 | FR-1.4.8, FR-1.4.13, AC-8.2, AC-8.7 | `PS-02`, `PS-04`, `PS-05` | Add rollback safety, WARN logging, and fault-injection coverage for invalid prompt activation |
+| 7 | `PS-07` | P1 | FR-1.4.7 | `PS-04` | Create route-context prompt assets for all 8 `StockQueryRouter` categories |
+| 8 | `PS-08` | P1 | FR-1.4.7, FR-1.4.11, FR-1.4.16, NFR-5.2.8 | `PS-05`, `PS-07` | Compose route-aware prompt behavior with `PromptAssembler` and `@dynamic_prompt` middleware |
+| 9 | `PS-09` | P1 | FR-1.4.12, AC-8.6 | `PS-05`, `PS-08` | Build the offline evaluation harness and baseline prompt comparison datasets |
+| 10 | `PS-10` | P1 | FR-1.4.12, FR-1.5.6, AC-8.5–8.8 | `PS-06`, `PS-09` | Enforce finance-domain guardrail verification before prompt promotion |
+| 11 | `PS-11` | P2 | FR-1.4.9, FR-1.4.12, FR-1.4.13, AC-8.6–8.8 | `PS-09`, `PS-10` | Add controlled experiment and rollout modes (`fixed`, `forced`, `shadow`, optional `weighted`) |
+| 12 | `PS-12` | P3 | Later evolution; no current release gate | `PS-08`, `PS-09`, `PS-11` | Introduce multi-agent prompt taxonomy only after Skills-pattern evidence justifies it |
 
 #### Milestone Gates
 
@@ -184,9 +184,11 @@ def process_query(self, query: str, *, conversation_id: str | None = None) -> Ag
 |---|---|---|---|
 | `M1` - Prompt Runtime Parity | `PS-01` to `PS-06` | Externalized, versioned, observable, rollback-safe ReAct prompt runtime | Do not begin route-context composition until the hardcoded prompt is fully removed from the primary ReAct path |
 | `M2` - Route-Aware Skills | `PS-07` to `PS-08` | Deterministic route-specific prompt context using the existing semantic router | Do not enable experiment modes until route-aware composition is stable and traceable |
-| `M3` - Evaluation and Safety Gates | `PS-09` to `PS-10` | Offline comparison and finance-safety regression coverage for prompt changes | No live prompt experimentation before offline gates pass |
-| `M4` - Controlled Rollout | `PS-11` | Safe candidate comparison in `forced` or `shadow` mode, with weighted exposure explicitly optional | Keep production on `fixed` unless a rollout decision explicitly approves change |
+| `M3` - Evaluation and Safety Gates | `PS-09` to `PS-10` | Offline comparison and finance-safety regression coverage for prompt changes | Do not enter `shadow`, `weighted`, or `active` until finance-safety blockers pass at 100%, missing-data handling passes at >=98%, applicable route or tool datasets pass at >=95%, and mandatory metadata keys are present on 100% of relevant runs |
+| `M4` - Controlled Rollout | `PS-11` | Safe candidate comparison in `forced` or `shadow` mode, with weighted exposure explicitly optional | Keep production on `fixed` unless the approved baseline fallback, rollback target, and FR-1.4.13 live rollback triggers remain active for any live candidate path |
 | `M5` - Multi-Agent Prompt Foundation | `PS-12` | Specialist prompt families and handoff contracts ready for future orchestration | Do not start multi-agent runtime work until Skills-pattern evidence shows a real limitation |
+
+These milestone gates mirror the target design in [PROMPT_SYSTEM_RESEARCH_PROPOSAL.md](./PROMPT_SYSTEM_RESEARCH_PROPOSAL.md) and the authoritative thresholds in [SOFTWARE_REQUIREMENTS_SPECIFICATION.md](./SOFTWARE_REQUIREMENTS_SPECIFICATION.md); later implementation plans should inherit them unchanged.
 
 #### Immediate Delivery Slice
 
@@ -225,8 +227,9 @@ class StockAssistantAgent:
 - Existing `PromptBuilder` pattern in `langchain_adapter.py` as migration source material, not final authority
 - LangSmith for trace metadata and evaluation (existing integration)
 - Semantic router integration for route-based skill activation
-- Research and dependency authority: [PROMPT_SYSTEM_RESEARCH_PROPOSAL.md v1.4](./PROMPT_SYSTEM_RESEARCH_PROPOSAL.md)
-- SRS: FR-1.4.5–1.4.9, FR-1.5, NFR-5.2.5–5.2.7, NFR-6.2.3, AC-8
+- Research and dependency authority: [PROMPT_SYSTEM_RESEARCH_PROPOSAL.md v1.8](./PROMPT_SYSTEM_RESEARCH_PROPOSAL.md)
+- SRS: FR-1.4.5–1.4.16, FR-1.5.6, NFR-5.2.8–5.2.11, NFR-6.2.3, AC-8.5–8.11
+- Governance validation reference: [PROMPT_SYSTEM_BENCHMARK_REVIEW.md](./PROMPT_SYSTEM_BENCHMARK_REVIEW.md)
 - ADRs: [ADR-002](./decisions/AGENT_ARCHITECTURE_DECISION_RECORDS.md), [ADR-003](./decisions/AGENT_ARCHITECTURE_DECISION_RECORDS.md)
 
 #### Success Criteria
