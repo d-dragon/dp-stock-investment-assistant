@@ -12,7 +12,7 @@
 | Project | DP Stock Investment Assistant |
 | Domain | Agent |
 | Focus | Technical realization of the LangChain ReAct agent domain, including orchestration, memory, prompt composition, and fallback behavior |
-| Date | 2026-05-21 |
+| Date | 2026-05-27 |
 | Status | Active working scaffold |
 | Audience | Engineering, architecture, agent maintainers, and reviewers |
 
@@ -454,13 +454,62 @@ def process_query(
 > **Status:** Planned realization path.
 > **Decision coupling:** This section reflects the prompt-system direction proposed in the companion research document and the prompt-related ADRs.
 
-The prompt system should evolve from a single governed runtime prompt into a structured realization path that externalizes prompt assets, composes route-aware behavior deterministically, and keeps response-policy enforcement visible. This section focuses on the intended realization model and extension path rather than a full code-level walkthrough.
+The prompt system should evolve from one governed runtime prompt into a structured realization path that externalizes prompt assets, composes route-aware behavior deterministically, and keeps response-policy enforcement visible. This section therefore emphasizes the technical-design views needed for implementation and review: realization stack, component interfaces, request flow, data flow, runtime contracts, degradation behavior, and control-plane configuration.
+
+| Concern family | Primary authority | Use this section for |
+|----------------|-------------------|----------------------|
+| Boundary, precedence, and component ownership | [ARCHITECTURE_DESIGN.md §4.8 Prompt and Behavior View](./ARCHITECTURE_DESIGN.md#48-prompt-and-behavior-view), [ADR-AGENT-001-LAYERED-LLM-ARCHITECTURE.md](./decisions/ADR-AGENT-001-LAYERED-LLM-ARCHITECTURE.md), [ADR-AGENT-002-SKILLS-PATTERN-PROMPT-COMPOSITION.md](./decisions/ADR-AGENT-002-SKILLS-PATTERN-PROMPT-COMPOSITION.md), [ADR-AGENT-003-EXTERNALIZE-VERSION-PROMPT-ASSETS.md](./decisions/ADR-AGENT-003-EXTERNALIZE-VERSION-PROMPT-ASSETS.md) | Realization views that stay inside the architecture boundary rather than redefining it |
+| Requirements, rollout gates, and release controls | [SOFTWARE_REQUIREMENTS_SPECIFICATION.md §FR-1.4 System Prompt](./SOFTWARE_REQUIREMENTS_SPECIFICATION.md#fr-14-system-prompt), [SOFTWARE_REQUIREMENTS_SPECIFICATION.md §NFR-5: Observability](./SOFTWARE_REQUIREMENTS_SPECIFICATION.md#nfr-5-observability), [SOFTWARE_REQUIREMENTS_SPECIFICATION.md §AC-8: Prompt System](./SOFTWARE_REQUIREMENTS_SPECIFICATION.md#ac-8-prompt-system), [PHASE_2_AGENT_ENHANCEMENT_ROADMAP.md §2A.2 Prompt Compiler Path & Controlled Rollout](./PHASE_2_AGENT_ENHANCEMENT_ROADMAP.md#22-prompt-compiler-path--controlled-rollout) | Mapping technical contracts, diagrams, and residual rules back to FR, NFR, AC, and rollout controls |
+| Design rationale, benchmark alignment, and sync | [PROMPT_SYSTEM_RESEARCH_PROPOSAL.md §Target Prompt System Architecture](./PROMPT_SYSTEM_RESEARCH_PROPOSAL.md#target-prompt-system-architecture), [PROMPT_SYSTEM_BENCHMARK_REVIEW.md §4.3 Guardrails Belong at Boundaries](./PROMPT_SYSTEM_BENCHMARK_REVIEW.md#43-guardrails-belong-at-boundaries), [SRS_SPEC_TRACEABILITY.md §Reverse Trace](./SRS_SPEC_TRACEABILITY.md#reverse-trace) | Checking whether the realization stays aligned with the target design, benchmark guidance, and post-change traceability duties |
+
+The following planned stack shows which runtime technologies realize the prompt control plane, orchestration loop, and observability boundary.
+
+```mermaid
+flowchart LR
+	subgraph Control["Prompt control plane [Planned]"]
+		Assets["Prompt assets\nsystem | skills | experiments"]
+		Manifest["Manifest + review state"]
+		Config["prompts.* config"]
+	end
+	subgraph Runtime["Request runtime"]
+		Router["Route classification"]
+		Loader["PromptAssetLoader"]
+		Assembler["PromptAssembler"]
+		Agent["LangGraph + LangChain agent loop"]
+		Guard["ResponseGuardrailMiddleware"]
+		Surface["REST / SSE / Socket.IO surface"]
+	end
+	subgraph StateObs["State and observability"]
+		STM["LangGraph checkpoint / STM boundary"]
+		Tools["Tool and retrieval layer"]
+		Trace["LangSmith traces + prompt metadata"]
+	end
+	Model["Model providers\nOpenAI | Grok | future providers"]
+
+	Assets --> Loader
+	Manifest --> Loader
+	Config --> Loader
+	Router --> Loader
+	Loader --> Assembler
+	STM --> Assembler
+	Tools --> Assembler
+	Assembler --> Agent
+	Model --> Agent
+	Agent --> Guard
+	Guard --> Surface
+	Loader -.-> Trace
+	Assembler -.-> Trace
+	Guard -.-> Trace
+	Surface -.-> Trace
+```
+
+The current baseline remains relevant only to explain the transition into the planned target design. It should not be read as evidence that the prompt compiler path, rollout controls, or prompt-governance verification model are already fully implemented.
 
 #### 3.5.1 Current Baseline and Transition Direction
 
-The current baseline is a single runtime prompt contract supported by prompt assets under `src/prompts/`. The planned prompt system does not replace that baseline with an unrelated design; it formalizes it into explicit technical boundaries for asset resolution, prompt assembly, and guardrail enforcement.
+The current baseline is one centrally managed runtime prompt contract supported by prompt assets under `src/prompts/`. The planned prompt system does not replace that baseline with an unrelated design; it formalizes it into explicit technical boundaries for asset resolution, prompt assembly, and guardrail enforcement.
 
-For the purposes of technical design, the important transition is:
+For technical design purposes, the key transition is:
 
 - from one centrally managed prompt contract to versioned prompt assets;
 - from implicit behavior shaping to explicit composition rules;
@@ -469,116 +518,391 @@ For the purposes of technical design, the important transition is:
 
 #### 3.5.2 Planned Prompt Compiler Path
 
-The planned prompt compiler path realizes the architectural prompt boundary as three cooperating components.
+The planned prompt compiler path remains `PromptAssetLoader -> PromptAssembler -> ResponseGuardrailMiddleware`. The following views explain the interfaces, call flow, and request-scoped data movement for that path.
 
-| Concept | Planned Realization | Technical Note |
-|---------|---------------------|----------------|
-| Prompt compiler | `PromptAssetLoader -> PromptAssembler -> ResponseGuardrailMiddleware` | The compiler concept is realized as an explicit path rather than a single opaque step |
-| Loader facade naming in implementation discussions | `PromptRegistry` (or equivalent) | When used, this name should be treated as a loader-facing facade rather than a separate design concept |
-| Prompt asset taxonomy | ADR-governed shallow `system`, `skills`, and `experiments` files with metadata-governed baseline fallback | Technical layout should remain consistent with the architecture-package taxonomy and avoid encoding version or locale primarily through deep directory structure |
+##### 3.5.2.1 Component Boundaries and Interfaces
+
+The following component diagram shows the planned service interfaces and the runtime contracts that move between them.
+
+```mermaid
+classDiagram
+	class PromptAssetLoader {
+		<<Service>>
+		+select(requestEnvelope) PromptSelection
+	}
+	class PromptAssembler {
+		<<Service>>
+		+compile(selection, runtimeContext) CompiledPrompt
+	}
+	class ResponseGuardrailMiddleware {
+		<<Service>>
+		+finalize(compiledPrompt, modelDraft) GuardrailResult
+	}
+	class PromptSelection {
+		<<Contract>>
+		+selected_assets
+		+prompt_version
+		+prompt_variant
+		+locale
+		+parity_group
+		+selection_mode
+		+fallback_used
+		+degraded_reason
+		+tool_risk_ceiling
+		+output_contract_id
+		+trace_metadata
+	}
+	class CompiledPrompt {
+		<<Contract>>
+		+segment_manifest
+		+dropped_dynamic_fields
+		+tool_policy_snapshot
+		+prompt_metadata
+	}
+	class GuardrailResult {
+		<<Contract>>
+		+status
+		+triggered_rules
+		+response_contract_status
+		+rewrite_applied
+		+user_visible_action
+		+trace_metadata
+	}
+
+	PromptAssetLoader --> PromptSelection : emits
+	PromptSelection --> PromptAssembler : input
+	PromptAssembler --> CompiledPrompt : emits
+	CompiledPrompt --> ResponseGuardrailMiddleware : input
+	ResponseGuardrailMiddleware --> GuardrailResult : emits
+```
+
+| Component | Primary interface | Must not own |
+|-----------|-------------------|--------------|
+| `PromptAssetLoader` | `select(requestEnvelope) -> PromptSelection` | Route classification, prompt concatenation, tool execution, or model invocation |
+| `PromptAssembler` | `compile(selection, runtimeContext) -> CompiledPrompt` | Asset approval, route reclassification, tool-authorization policy, or response disposition |
+| `ResponseGuardrailMiddleware` | `finalize(compiledPrompt, modelDraft) -> GuardrailResult` | Prompt assembly, retrieval, tool execution, or request-level policy selection |
+
+##### 3.5.2.2 PromptAssetLoader Realization Contract
+
+- The selection tuple remains explicit: `agent_role`, `route`, `locale`, `selection_mode`, `requested_version`, `prompt_experiment_id`, `workspace_mode`, and `env`. Hidden global switching should not bypass this tuple.
+- Asset admissibility should come only from asset frontmatter, the canonical manifest, review state, and baseline-lineage metadata.
+- Failure remains fail-closed: missing manifest rows, malformed frontmatter, review-state rejection, or unresolved lineage should fall back to approved baseline lineage when available; otherwise the loader emits a controlled degraded selection outcome rather than passing unknown assets downstream.
+
+##### 3.5.2.3 PromptAssembler Realization Contract
+
+- `PromptAssembler` admits only `PromptSelection`, normalized route result, approved dynamic controls, bounded memory summary, evidence bundles, and output-contract requirements.
+- Assembly remains deterministic in this order: shared policy -> always-active skills -> route-specific skill -> bounded memory context -> evidence and tool-derived facts -> task framing -> output contract.
+- If route skills are missing or dynamic fields are rejected, the assembler continues with approved inputs only, records the gaps in metadata, and never synthesizes substitute instructions.
+
+##### 3.5.2.4 ResponseGuardrailMiddleware Realization Contract
+
+- The middleware executes after model generation and before any response is committed to a non-streaming or streaming surface.
+- The ordered check sequence remains: output-contract completeness, evidence attribution, uncertainty and disclosure, anti-hype controls, instruction-data separation, and tool-risk or approval consistency.
+- `GuardrailResult.status` remains one of `pass`, `warn`, `block`, or `degraded`; the middleware is the final boundary check and must not act as a second orchestrator.
+
+##### 3.5.2.5 Request-Scoped Call Flow
+
+The following sequence shows how one request moves through selection, assembly, generation, and final response commitment.
+
+```mermaid
+sequenceDiagram
+	autonumber
+	participant Router as Route classification
+	participant Loader as PromptAssetLoader
+	participant Assembler as PromptAssembler
+	participant Agent as Agent invocation
+	participant Guard as ResponseGuardrailMiddleware
+	participant Surface as Response surface
+	participant Trace as LangSmith / trace sink
+
+	Router->>Loader: selection envelope
+	alt Preferred lineage admissible
+		Loader-->>Assembler: PromptSelection(fallback_used=false)
+	else Approved baseline fallback
+		Loader-->>Assembler: PromptSelection(fallback_used=true, degraded_reason)
+	end
+	opt Route skill missing or dynamic fields rejected
+		Assembler->>Trace: prompt_metadata + dropped_dynamic_fields
+	end
+	Assembler-->>Agent: CompiledPrompt(segment_manifest, tool_policy_snapshot)
+	Agent-->>Guard: model draft + evidence map + tool summary
+	alt GuardrailResult.status is pass or warn
+		Guard-->>Surface: response or bounded rewrite + trace metadata
+	else GuardrailResult.status is block or degraded
+		Guard-->>Surface: safe refusal or conservative terminal response
+		Guard-->>Trace: triggered_rules + degraded state
+	end
+	Surface-->>Trace: prompt_version + locale + route + guardrail_outcome
+```
+
+##### 3.5.2.6 Data Flow and Request-Scoped Inputs
+
+The following data-flow view separates control components from the request-scoped payloads they consume and emit.
 
 ```mermaid
 flowchart LR
-	Route["Route classification"] --> Loader["PromptAssetLoader"]
-	Assets["Prompt assets + baseline lineage"] --> Loader
-	Loader --> Assembler["PromptAssembler"]
-	Context["Bounded runtime context"] --> Assembler
-	Assembler --> Agent["Agent invocation"]
-	Agent --> Guard["ResponseGuardrailMiddleware"]
-	Guard --> Out["Response + prompt metadata"]
-```
+	Manifest[("Prompt manifest")]
+	Assets[("Prompt assets")]
+	Config[("prompts.* config")]
+	Memory["Bounded memory summary"]
+	Evidence["Evidence bundles"]
+	Contract["Output contract"]
+	Trace[("Prompt trace metadata")]
 
-| Component | Responsibility | Planned Outcome |
-|-----------|----------------|-----------------|
-| **PromptAssetLoader** | Resolve the correct prompt asset set for a request, including stable fallback behavior | Prompt identity remains attributable even when selection degrades |
-| **PromptAssembler** | Compose shared policy, role-specific guidance, route-aware context, and bounded runtime context into one prompt contract | Prompt behavior stays deterministic and reviewable |
-| **ResponseGuardrailMiddleware** | Enforce anti-hype, attribution, uncertainty, and related response-policy checks after model generation | Behavioral controls remain explicit and traceable |
+	Manifest --> Loader["PromptAssetLoader"]
+	Assets --> Loader
+	Config --> Loader
+	Loader -->|PromptSelection| Assembler["PromptAssembler"]
+	Memory --> Assembler
+	Evidence --> Assembler
+	Contract --> Assembler
+	Assembler -->|CompiledPrompt + segment_manifest| Agent["Agent invocation"]
+	Agent -->|model draft + tool summary| Guard["ResponseGuardrailMiddleware"]
+	Guard -->|GuardrailResult| Surface["Response surface"]
+	Loader -.-> Trace
+	Assembler -.-> Trace
+	Guard -.-> Trace
+	Surface -.-> Trace
+```
 
 #### 3.5.3 Prompt Asset Model and Composition Rules
 
-| Asset Type | Technical Purpose | Planned Lifecycle |
-|------------|-------------------|-------------------|
-| Shared policy assets | Carry investment-safety rules, response contract, and common tool-use guidance | Versioned and stable; inherited across roles |
-| Role contracts | Define the behavioral contract for the primary analyst role and future specialist roles | Versioned; activated by selected runtime path |
-| Skills assets | Add route-specific context without replacing the shared policy layer | Composable; activated by route-aware selection |
-| Experiment or variant assets | Support controlled evaluation and rollout of alternative prompt behaviors | Temporary and explicitly attributable |
-| Baseline variant and fallback lineage | Marks the last-known-stable prompt line when preferred assets are unavailable | Persistent selection rule carried through metadata and loader policy |
+The planned asset taxonomy stays shallow: `system`, `skills`, and `experiments`, with baseline fallback governed by metadata rather than deep directory layout. The following composition view shows the deterministic layering rule that drives assembly.
 
-In the planned layout, these assets remain easy to locate by class without forcing future prompts into deep trees. Representative paths are `system/react_analyst.md`, `system/react_analyst.vi.md`, `skills/always_on/evidence_first.md`, `skills/routes/price_check.md`, and `experiments/react_analyst.evidence_strict.md`.
+```mermaid
+flowchart TB
+	Shared["1. Shared policy + investment-safety rules"]
+	Always["2. Always-active behavioral skills"]
+	Route["3. Route-specific skill"]
+	Memory["4. Bounded memory context"]
+	Evidence["5. Retrieved evidence + tool-derived facts"]
+	Task["6. Task framing"]
+	Output["7. Output contract"]
+	Shared --> Always --> Route --> Memory --> Evidence --> Task --> Output
+```
 
-The intended composition order remains deterministic:
-
-1. Shared policy and investment-safety rules
-2. Always-active behavioral skills
-3. Route-specific prompt context
-4. Bounded memory context, when available
-5. Retrieved evidence and tool-derived facts
-6. Task framing
-7. Output contract
-
-This order preserves ADR-001 separation of concerns. Behavioral policy is established before contextual evidence, and output shaping remains last so it cannot silently overwrite policy or factual grounding.
+- Higher-authority policy wins from top to bottom in this stack.
+- Baseline fallback remains a lineage rule carried by metadata and loader policy.
+- The output contract may shape structure, but it must not override earlier policy or evidence constraints.
 
 #### 3.5.4 Static and Dynamic Segment Realization
 
-`PromptAssembler` should assign each fragment to a segment class before provider invocation so caching, reuse, and authority treatment remain deterministic.
+`PromptAssembler` should classify every fragment before provider invocation so caching, reuse, and authority treatment remain deterministic.
 
-| Segment Class | Typical Contents | Realization Rule |
-|---------------|------------------|------------------|
-| Static policy fragments | Shared policy assets, role contracts, route skills, always-on behavioral snippets | Key by prompt lineage (`asset_id`, `version`, `variant`, `locale`) and allow loader or provider caching only for exact approved matches |
-| Dynamic control fragments | Locale selection, workspace mode, expertise mode, experiment markers, role markers | Build from schema-approved request inputs only; default to request-scoped treatment and avoid cross-request reuse unless equivalence is explicit |
-| Runtime evidence payloads | Tool outputs, retrieved documents, quoted attachments, summarized memory | Attach after policy selection as data-only context; never hash them into prompt lineage or reuse them as policy blocks |
+```mermaid
+flowchart TD
+	Start["Prompt fragment enters assembler"] --> Policy{"Approved instruction-bearing asset?"}
+	Policy -->|Yes| Static["Static policy fragment\ncache by approved lineage only"]
+	Policy -->|No| Dynamic{"Schema-approved request control?"}
+	Dynamic -->|Yes| Control["Dynamic control fragment\nrequest-scoped by default"]
+	Dynamic -->|No| Evidence["Runtime evidence payload\ndata-only context"]
+	Control --> Reuse{"Safe and explicit reuse?"}
+	Reuse -->|Yes| Limited["Equivalent-only reuse"]
+	Reuse -->|No| Request["Rebuild per request"]
+```
 
-Segment-handling rules:
-
-1. Provider prompt caching may optimize static policy fragments only when the cached unit remains attributable to one approved prompt lineage.
-2. Dynamic control fragments may share cache entries only when identical, non-sensitive, and explicitly admitted by implementation policy; otherwise they are rebuilt per request.
-3. Runtime evidence may be cached by tool or retrieval layers for performance, but prompt assembly must reattach it as request-scoped data with no instruction authority.
-4. If fragment classification is ambiguous, the safer implementation default is request-scoped data rather than static policy.
+- Static policy fragments are keyed by approved prompt lineage only.
+- Dynamic controls are admitted only from schema-approved request fields and are request-scoped unless explicit equivalence is safe.
+- Runtime evidence remains data-only context and must never be promoted into instruction-bearing policy.
+- If fragment classification is ambiguous, the safer implementation default is request-scoped data rather than static policy.
 
 #### 3.5.5 Locale Parity and Variant Realization
 
-Locale variants should be resolved as governed siblings in one policy lineage rather than isolated files. In runtime terms, locale choice changes which asset is selected, not which safety model applies.
+The following logical model shows how approved lineages, locale variants, selections, compiled prompts, and guardrail outcomes relate in the planned runtime.
 
-| Locale Concern | Technical Handling |
-|----------------|--------------------|
-| Variant resolution | `PromptAssetLoader` should resolve locale by `asset_id`, `locale`, and shared lineage metadata such as `parity_group` |
-| Metadata requirements | Evaluation and live-observation runs should record `prompt_locale` and `parity_group` whenever locale-specific variants are exercised |
-| Promotion rule | Non-default locale variants remain `forced`-only until paired parity evaluation and locale-competent review are complete |
-| Fallback rule | Missing, malformed, or parity-blocked locale variants fail closed to the configured default locale rather than to empty prompt content |
+```mermaid
+erDiagram
+	PROMPT_LINEAGE ||--|{ PROMPT_ASSET : governs
+	PARITY_GROUP ||--|{ PROMPT_ASSET : groups
+	PROMPT_SELECTION }|--|{ PROMPT_ASSET : selects
+	PROMPT_SELECTION ||--|| COMPILED_PROMPT : compiles_to
+	COMPILED_PROMPT ||--|| GUARDRAIL_RESULT : finalizes_as
 
-The technical goal is semantic parity rather than literal translation identity. Prompt assets may differ in wording or local examples while still inheriting the same finance-policy and output-contract obligations.
+	PROMPT_LINEAGE {
+		string lineage_id PK
+		string baseline_lineage_id FK
+		string review_state
+	}
+	PARITY_GROUP {
+		string parity_group PK
+		string default_locale
+	}
+	PROMPT_ASSET {
+		string asset_id PK
+		string version
+		string variant
+		string locale
+	}
+	PROMPT_SELECTION {
+		string selection_mode
+		boolean fallback_used
+		string degraded_reason
+	}
+	COMPILED_PROMPT {
+		string output_contract_id
+		string prompt_metadata_ref
+	}
+	GUARDRAIL_RESULT {
+		string status
+		string triggered_rules
+	}
+```
+
+- Locale resolution should use `asset_id`, `locale`, and `parity_group` together rather than treating locale files as isolated prompt families.
+- Non-default locale variants remain `forced`-only until parity evaluation and locale-competent review are complete.
+- Missing, malformed, or parity-blocked variants fall back to the configured default locale with explicit degradation metadata.
 
 #### 3.5.6 Near-Term Skills Pattern and Future Expansion
 
-The near-term realization path is the Skills pattern: one agent, one shared policy layer, and route-aware prompt context selected from the existing route taxonomy. This is the preferred technical bridge because it improves specialization without immediately introducing orchestrator overhead or user-visible multi-agent complexity.
+The near-term specialization path remains the Skills pattern: one agent, one shared policy layer, and route-aware prompt context selected from the existing route taxonomy. Multi-agent routing and retrieval-specialist prompt families remain later evolutions only when contracts materially diverge.
 
-| Direction | Technical Meaning | Scope |
-|-----------|-------------------|-------|
-| Near-term Skills pattern | Route classification selects additional prompt context for one agent invocation | Primary planned realization path |
-| Future orchestrator contract | A narrow routing contract may later choose between prompt families or specialist paths | Later evolution only |
-| Future retrieval specialist contract | Retrieval-grounded prompt contract may later narrow synthesis behavior around sourced evidence | Later evolution only |
+| Route | Canonical route skill |
+|-------|-----------------------|
+| `PRICE_CHECK` | `skills/routes/price_check.md` |
+| `NEWS_ANALYSIS` | `skills/routes/news_analysis.md` |
+| `PORTFOLIO` | `skills/routes/portfolio.md` |
+| `TECHNICAL_ANALYSIS` | `skills/routes/technical_analysis.md` |
+| `FUNDAMENTALS` | `skills/routes/fundamentals.md` |
+| `IDEAS` | `skills/routes/ideas.md` |
+| `MARKET_WATCH` | `skills/routes/market_watch.md` |
+| `GENERAL_CHAT` | `skills/routes/general_chat.md` |
+
+Each route skill inherits shared policy and always-on skills so specialization narrows behavior without redefining common investment-safety or output-contract obligations.
 
 #### 3.5.7 Prompt Observability and Fault Tolerance
 
-The technical design should preserve prompt behavior as observable runtime metadata rather than hidden implicit state.
+Prompt behavior should remain observable runtime metadata rather than hidden implicit state. The minimum metadata families are:
 
-| Metadata Category | Technical Expectation |
-|------------------|-----------------------|
-| Prompt identity | Stable version or baseline lineage should be attributable in traces or response metadata |
-| Prompt locale and parity lineage | Locale-specific runs should expose `prompt_locale` and `parity_group` whenever locale governance applies |
-| Route and role selection | Selected route-aware or role-aware contract should remain visible for diagnostics and evaluation |
-| Active prompt components | Selected skills or variant lineage should be reviewable when behavior changes |
-| Tool risk class | Guarded tool paths should record the effective `tool_risk_class` that governed execution |
-| Prompt fallback outcome | Degraded asset resolution should remain machine-detectable |
-| Guardrail outcome | Response-policy checks should emit reviewable success, warning, or degradation outcomes |
+- prompt identity: `prompt_version`, `prompt_variant`, `prompt_locale`, `parity_group`;
+- request classification: selected route, role, skills, and effective tool-risk class; and
+- outcome metadata: `fallback_used`, `degraded_reason`, and final `guardrail_outcome`.
 
-| Failure Mode | Planned Response |
-|--------------|------------------|
-| Preferred prompt asset unavailable | Continue with baseline lineage rather than block the request |
-| Preferred locale variant unavailable | Fall back to the configured default locale while preserving locale-degradation metadata |
-| Route-specific skill unavailable | Continue with shared policy and stable analyst behavior |
-| Experiment or variant unavailable | Fall back to the stable prompt line while preserving attribution |
-| Guardrail evaluation degraded | Preserve a conservative response path and emit machine-detectable degradation metadata |
+The following planned flow shows how preferred selection, locale fallback, route-skill degradation, and final guardrail outcomes converge on traceable response states.
+
+```mermaid
+flowchart TD
+	Preferred{"Preferred lineage admissible?"}
+	Preferred -->|Yes| Locale{"Locale variant admissible?"}
+	Preferred -->|No| Baseline{"Approved baseline lineage?"}
+	Baseline -->|Yes| Locale
+	Baseline -->|No| Conservative["Conservative degraded path\ntrace fallback failure"]
+	Locale -->|Yes| Skill{"Route-specific skill available?"}
+	Locale -->|No| DefaultLocale["Default locale fallback\ntrace locale degradation"]
+	DefaultLocale --> Skill
+	Skill -->|Yes| Guardrail{"Guardrail result"}
+	Skill -->|No| SharedOnly["Shared-policy-only assembly\ntrace route-skill gap"]
+	SharedOnly --> Guardrail
+	Guardrail -->|pass / warn| Normal["Response + prompt metadata"]
+	Guardrail -->|block / degraded| Conservative
+```
+
+When any planned prompt-governance surface changes, this section should be synchronized with [SRS_SPEC_TRACEABILITY.md §Reverse Trace](./SRS_SPEC_TRACEABILITY.md#reverse-trace) and the post-delivery synchronization duties in [spec-kit HOW-TO.md §3.3.5 Synchronization and Maintenance](../../spec-driven%20development%20%28SDD%29/spec-kit%20HOW-TO.md#335-synchronization-and-maintenance).
+
+#### 3.5.7.1 Streaming Guardrail and Terminal Behavior
+
+> **Status:** Planned streaming realization only. This subsection defines the target streaming boundary and does not claim full current-runtime parity across all response surfaces.
+
+Streaming reuses the same guardrail rule set and `GuardrailResult` vocabulary as the non-streaming path. The streaming specialization is temporal rather than policy-specific: emission windows, blocker timing, cancellation semantics, and terminal framing.
+
+- Partial output may be emitted only after local admission checks pass for the current emission window.
+- Later blocker detection stops further emission immediately and forces a safe terminal action rather than an implied completed answer.
+- Cancellation must be recorded as cancelled rather than completed.
+- A success-complete marker must never be emitted before final guardrail commitment.
+
+The following state flow shows how buffering, checkpoint evaluation, cancellation, and terminal behavior should work on streaming surfaces.
+
+```mermaid
+stateDiagram-v2
+	[*] --> Generating
+	Generating --> Buffered : draft tokens available
+	Buffered --> Checkpoint : emission window closes
+	Checkpoint --> Emitting : local admission passes
+	Checkpoint --> SafeTerminal : block or degraded terminal path
+	Emitting --> Buffered : more draft content
+	Emitting --> FinalCheck : model completes
+	Generating --> Cancelled : client cancellation
+	Buffered --> Cancelled : client cancellation
+	FinalCheck --> Completed : pass or warn with bounded rewrite
+	FinalCheck --> SafeTerminal : block or degraded final check
+	Cancelled --> [*]
+	Completed --> [*]
+	SafeTerminal --> [*]
+```
+
+#### 3.5.8 Prompt-System Config Surface
+
+> **Status:** Planned control-plane surface only. The current runtime configuration is transitioning toward this shape; this subsection defines the target localized `prompts.*` design surface.
+
+The following namespace map shows how the planned prompt control plane is grouped and which components each namespace governs.
+
+```mermaid
+flowchart LR
+	subgraph Registry["prompts.registry"]
+		Dir["directory"]
+		Man["manifest"]
+		Refresh["refresh_window_seconds"]
+	end
+	subgraph AgentCfg["prompts.agents.{role}"]
+		Version["baseline_asset_id + active_version"]
+		Mode["selection_mode + output_contract_id"]
+		RouteMap["route_skill_map"]
+	end
+	subgraph Controls["prompts.dynamic_controls"]
+		Allow["allowed_fields"]
+		Reject["reject_unknown_fields"]
+	end
+	subgraph GuardCfg["prompts.guardrails + prompts.streaming"]
+		GuardKeys["blocking + rewrite policy"]
+		StreamKeys["checkpoint + terminal behavior"]
+	end
+	subgraph Policy["prompts.locale + prompts.selection + prompts.trace + prompts.cache"]
+		Locale["default_locale + fallback_behavior"]
+		Rollout["fixed | forced | shadow | weighted"]
+		TraceFields["required_fields"]
+		Cache["static segment cache"]
+	end
+
+	Registry --> Loader["PromptAssetLoader"]
+	AgentCfg --> Loader
+	AgentCfg --> Assembler["PromptAssembler"]
+	Controls --> Assembler
+	GuardCfg --> Guard["ResponseGuardrailMiddleware"]
+	Policy --> Loader
+	Policy --> Assembler
+	Policy --> Guard
+```
+
+| Namespace family | Key responsibilities | Fail-closed note |
+|------------------|----------------------|------------------|
+| `prompts.registry` | Directory, manifest, refresh window, manifest validation behavior | Manifest or lineage errors must not widen selection authority |
+| `prompts.agents.{role}` and `prompts.dynamic_controls` | Role defaults, active version, selection mode, output contract, route skills, allowed request controls | Unknown or out-of-policy dynamic fields are dropped and traced |
+| `prompts.guardrails` and `prompts.streaming` | Blocking policy, bounded rewrite policy, checkpoint timing, cancellation handling, terminal behavior | Streaming completion requires final guardrail commitment |
+| `prompts.locale`, `prompts.selection`, `prompts.trace`, and `prompts.cache` | Locale fallback, rollout mode, mandatory trace fields, static-segment reuse | Missing mandatory trace fields block promotion to wider rollout |
+
+Supported selection modes remain `fixed`, `forced`, `shadow`, and `weighted`, aligned directly with the roadmap and SRS vocabulary.
+
+#### 3.5.9 Component-Level Verification Matrix
+
+This section defines the minimum component-level verification surface implied by the planned prompt compiler path. It states what must be proven for readiness and promotion; it does not prescribe the concrete test harness or repository-specific automation. Detailed verification execution remains governed by [SOFTWARE_REQUIREMENTS_SPECIFICATION.md §AC-8: Prompt System](./SOFTWARE_REQUIREMENTS_SPECIFICATION.md#ac-8-prompt-system), [SOFTWARE_REQUIREMENTS_SPECIFICATION.md §NFR-5: Observability](./SOFTWARE_REQUIREMENTS_SPECIFICATION.md#nfr-5-observability), and [VERIFICATION_AND_TRACEABILITY_STRATEGY.md](../../testing/VERIFICATION_AND_TRACEABILITY_STRATEGY.md).
+
+| Component or slice | Planned scenario | Expected outcome | Required emitted metadata or evidence | Governing authority | Verification level |
+|--------------------|------------------|------------------|---------------------------------------|---------------------|--------------------|
+| `PromptAssetLoader` | Preferred asset version is unavailable, withdrawn, or fails manifest validation | Baseline lineage is selected instead of empty prompt resolution; fallback remains attributable | `prompt_version`, `prompt_variant=baseline`, `fallback_used=true`, `degraded_reason` | [SOFTWARE_REQUIREMENTS_SPECIFICATION.md §FR-1.4 System Prompt](./SOFTWARE_REQUIREMENTS_SPECIFICATION.md#fr-14-system-prompt) with FR-1.4.8 and FR-1.4.13 | Component contract |
+| `PromptAssetLoader` | Requested locale variant is missing or parity-blocked | Configured default locale is selected and locale degradation remains visible | `prompt_locale`, `parity_group`, `fallback_used`, `degraded_reason` | [SOFTWARE_REQUIREMENTS_SPECIFICATION.md §FR-1.4 System Prompt](./SOFTWARE_REQUIREMENTS_SPECIFICATION.md#fr-14-system-prompt) with FR-1.4.15 and [SOFTWARE_REQUIREMENTS_SPECIFICATION.md §NFR-5: Observability](./SOFTWARE_REQUIREMENTS_SPECIFICATION.md#nfr-5-observability) | Component contract |
+| `PromptAssembler` | Request includes unknown or unapproved dynamic control fields | Unknown fields are dropped, recorded, and not elevated into policy segments | `dropped_dynamic_fields`, `segment_manifest`, request-to-segment classification evidence | [SOFTWARE_REQUIREMENTS_SPECIFICATION.md §FR-1.4 System Prompt](./SOFTWARE_REQUIREMENTS_SPECIFICATION.md#fr-14-system-prompt) with FR-1.4.7 and FR-1.4.16, plus [SOFTWARE_REQUIREMENTS_SPECIFICATION.md §AC-8: Prompt System](./SOFTWARE_REQUIREMENTS_SPECIFICATION.md#ac-8-prompt-system) | Component contract |
+| `PromptAssembler` | Route-specific skill cannot be resolved for the classified route | Shared policy plus role contract still compile; route-specific degradation remains traceable | `route`, `selected_skills`, `fallback_used` or `degraded_reason`, `prompt_metadata` | [SOFTWARE_REQUIREMENTS_SPECIFICATION.md §FR-1.4 System Prompt](./SOFTWARE_REQUIREMENTS_SPECIFICATION.md#fr-14-system-prompt) with FR-1.4.7 and FR-1.4.8 | Component contract |
+| `PromptAssembler` | Bounded memory summary is included during assembly | Memory context remains a data-bearing runtime-evidence segment rather than policy text | `segment_manifest`, memory-summary classification evidence, prompt lineage preserved independently of memory content | [AGENT_MEMORY_TECHNICAL_DESIGN.md](./AGENT_MEMORY_TECHNICAL_DESIGN.md) and [SOFTWARE_REQUIREMENTS_SPECIFICATION.md §FR-1.4 System Prompt](./SOFTWARE_REQUIREMENTS_SPECIFICATION.md#fr-14-system-prompt) with FR-1.4.16 | Component contract |
+| `ResponseGuardrailMiddleware` | Output contract is incomplete or required disclosures are missing | Final response is blocked or conservatively rewritten before any completed-answer state is recorded | `status`, `triggered_rules`, `response_contract_status`, `user_visible_action` | [SOFTWARE_REQUIREMENTS_SPECIFICATION.md §FR-1.5 Finance-Domain Behavioral Guardrails](./SOFTWARE_REQUIREMENTS_SPECIFICATION.md#fr-15-finance-domain-behavioral-guardrails) with FR-1.5.6, plus [SOFTWARE_REQUIREMENTS_SPECIFICATION.md §AC-8: Prompt System](./SOFTWARE_REQUIREMENTS_SPECIFICATION.md#ac-8-prompt-system) | Component contract |
+| `ResponseGuardrailMiddleware` | Anti-hype, unsupported certainty, instruction-data separation, or tool-risk inconsistencies are detected | The middleware emits `warn`, `block`, or `degraded` exactly as required by the rule class and preserves rule identifiers through any rewrite | `status`, `triggered_rules`, `rewrite_applied`, `trace_metadata` | [PROMPT_SYSTEM_BENCHMARK_REVIEW.md §4.3 Guardrails Belong at Boundaries](./PROMPT_SYSTEM_BENCHMARK_REVIEW.md#43-guardrails-belong-at-boundaries), [SOFTWARE_REQUIREMENTS_SPECIFICATION.md §FR-1.5 Finance-Domain Behavioral Guardrails](./SOFTWARE_REQUIREMENTS_SPECIFICATION.md#fr-15-finance-domain-behavioral-guardrails), and [SOFTWARE_REQUIREMENTS_SPECIFICATION.md §AC-8: Prompt System](./SOFTWARE_REQUIREMENTS_SPECIFICATION.md#ac-8-prompt-system) | Component contract |
+| Cross-component streaming path | A blocker is detected after partial buffering has begun | No further chunks are admitted, a safe terminal frame or equivalent action is emitted, and the stream is not marked complete | `guardrail_outcome`, `triggered_rules`, `stream_terminal_reason`, `prompt_version`, `fallback_used` | [ARCHITECTURE_DESIGN.md §4.8.4 Guardrail Boundary Model](./ARCHITECTURE_DESIGN.md#484-guardrail-boundary-model), [ARCHITECTURE_DESIGN.md §4.8.7 Prompt Observability and Degraded Modes](./ARCHITECTURE_DESIGN.md#487-prompt-observability-and-degraded-modes), and [SOFTWARE_REQUIREMENTS_SPECIFICATION.md §FR-1.5 Finance-Domain Behavioral Guardrails](./SOFTWARE_REQUIREMENTS_SPECIFICATION.md#fr-15-finance-domain-behavioral-guardrails) | Integration slice |
+| Cross-component streaming path | Client cancellation occurs before final guardrail commitment | Generation stops, cancellation is attributed, and no terminal success marker is emitted | `cancelled=true`, `stream_terminal_reason=client_cancelled`, request-level prompt identity metadata | [ARCHITECTURE_DESIGN.md §4.8.7 Prompt Observability and Degraded Modes](./ARCHITECTURE_DESIGN.md#487-prompt-observability-and-degraded-modes) and [SOFTWARE_REQUIREMENTS_SPECIFICATION.md §NFR-5: Observability](./SOFTWARE_REQUIREMENTS_SPECIFICATION.md#nfr-5-observability) | Integration slice |
+
+Interpret this matrix as the minimum design-level verification contract:
+
+1. Each component row must be provable before the corresponding prompt compiler slice is considered ready for broader rollout.
+2. Streaming-path rows are required before user-visible streaming prompt behavior is treated as promotion-ready.
+3. Missing mandatory prompt identity, fallback, locale, or guardrail metadata is a verification failure even when the text output appears acceptable.
+4. Release-gate evidence should be collected in the repository verification and traceability workflow rather than duplicated as a test procedure in this document.
 
 ### 3.6 Fine-Tuning Realization
 
@@ -967,3 +1291,7 @@ AgentResponse.fallback(content, provider, model, **kwargs)
 | 0.4 | 2026-05-12 | GitHub Copilot | Aligned prompt taxonomy references to ADR-canonical paths (`src/prompts/system|skills|experiments`) and removed hybrid path language |
 | 0.5 | 2026-05-19 | GitHub Copilot | Synchronized prompt-asset realization language with the simplified proposal layout by describing the ADR taxonomy as a shallow metadata-driven `system` / `skills` / `experiments` structure and replacing separate baseline-asset wording with metadata-governed fallback lineage |
 | 0.6 | 2026-05-21 | GitHub Copilot | Added runtime tool-risk realization, static-versus-dynamic prompt segment handling, locale-parity selection rules, and observability metadata for locale and tool-risk governed prompt paths |
+| 0.7 | 2026-05-27 | GitHub Copilot | Reframed section 3.5 as a realization-level traceability hub with explicit companion-document ownership, subsection-specific prompt-governance references, and synchronization guidance for reverse trace and Spec Kit workflow updates |
+| 0.8 | 2026-05-27 | GitHub Copilot | Deepened section 3.5.2 with explicit planned component contracts, canonical route-to-skill mapping, and request-scoped prompt lifecycle and guardrail behavior |
+| 0.9 | 2026-05-27 | GitHub Copilot | Added planned streaming guardrail behavior, localized `prompts.*` control-plane design, and a component-level verification matrix to section 3.5 |
+| 0.10 | 2026-05-27 | GitHub Copilot | Simplified section 3.5 into diagram-first technical-design views for the prompt realization stack, component interfaces, call flow, data flow, logical model, degradation behavior, and config surface |

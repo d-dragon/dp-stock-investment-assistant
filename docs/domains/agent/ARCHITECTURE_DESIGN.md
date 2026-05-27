@@ -340,15 +340,15 @@ This interface view makes two architectural boundaries explicit that are easy to
 
 | Building Block | Responsibility |
 |----------------|----------------|
-| `stock_assistant_agent.py` | Main ReAct runtime and conversation-aware agent entry points |
-| `langgraph_bootstrap.py` | STM infrastructure boundary, including checkpointer creation and conversation-scoped checkpoint wiring |
-| `stock_query_router.py` | Semantic route classification |
-| `model_factory.py` and provider clients | Provider and model selection with cached client construction |
-| `tools/` | Tool registration, caching, and domain data access |
-| `conversation_repository.py` | Conversation metadata persistence, archive status, and session linkage outside checkpoint state |
-| `chat_service.py` and `conversation_service.py` | Service orchestration, archive guards, session-context resolution, lifecycle governance, and metadata helpers |
-| Future LTM personalization boundary (planned) | Optional cross-conversation personalization and symbol-tracking context outside the current runtime baseline |
-| `src/prompts/` | Current runtime prompt templates and text assets; planned externalized prompt asset model remains Proposed under ADR-002 and ADR-003 as a shallow metadata-driven `system` / `skills` / `experiments` taxonomy |
+| `[Implemented]` [stock_assistant_agent.py](../../../src/core/stock_assistant_agent.py) | Main ReAct runtime and conversation-aware agent entry points |
+| `[Implemented]` [langgraph_bootstrap.py](../../../src/core/langgraph_bootstrap.py) | STM infrastructure boundary, including checkpointer creation and conversation-scoped checkpoint wiring |
+| `[Implemented]` [stock_query_router.py](../../../src/core/stock_query_router.py) | Semantic route classification |
+| `[Implemented]` [model_factory.py](../../../src/core/model_factory.py) and provider clients | Provider and model selection with cached client construction |
+| `[Implemented]` [src/core/tools/](../../../src/core/tools/) | Tool registration, caching, and domain data access |
+| `[Implemented]` [conversation_repository.py](../../../src/data/repositories/conversation_repository.py) | Conversation metadata persistence, archive status, and session linkage outside checkpoint state |
+| `[Implemented]` [chat_service.py](../../../src/services/chat_service.py) and [conversation_service.py](../../../src/services/conversation_service.py) | Service orchestration, archive guards, session-context resolution, lifecycle governance, and metadata helpers |
+| `[Planned]` Future LTM personalization boundary | Optional cross-conversation personalization and symbol-tracking context outside the current runtime baseline |
+| `[Implemented]` [src/prompts/](../../../src/prompts/) | Current runtime prompt templates and text assets; planned externalized prompt asset model remains `[Proposed]` under ADR-002 and ADR-003 as a shallow metadata-driven `system` / `skills` / `experiments` taxonomy |
 
 These building blocks are separated so that reasoning orchestration, session context, STM persistence, metadata ownership, provider integration, and future personalization can evolve independently. The agent runtime owns reasoning and tool orchestration, service-layer components own reusable parent context and business lifecycle enforcement, checkpoints own recoverable conversation-scoped runtime state only, repositories own metadata persistence, and prompt assets govern behavior rather than domain data.
 
@@ -356,14 +356,14 @@ These building blocks are separated so that reasoning orchestration, session con
 
 | Logical Concern | Primary Owner | Architectural Boundary |
 |-----------------|---------------|------------------------|
-| Reasoning, tool selection, and STM binding | `StockAssistantAgent` | Binds `conversation_id -> thread_id` into conversation-scoped runtime state but does not own lifecycle authority, session context, or checkpoint persistence policy |
-| STM persistence infrastructure | `langgraph_bootstrap.py` plus LangGraph checkpointer boundary | Preserves recoverable thread-local runtime state only; not a source of truth for archive policy, ownership, or metadata |
-| Semantic route classification | `stock_query_router.py` | Classifies requests but does not execute tools or persist state |
-| Provider and model selection | `ModelClientFactory` and provider clients | Isolates provider-specific concerns from routes and services |
-| Session context resolution and conversation lifecycle | `ChatService`, `ConversationService` | Owns reusable parent context, archive guards, and metadata synchronization outside the agent core; REST path currently enforces this boundary directly |
-| Conversation metadata persistence | `ConversationRepository` | Persists application metadata and session linkage, separate from LangGraph checkpoint state |
-| Future cross-conversation personalization (planned) | Future LTM boundary | Optional personalization only; not factual store or required orchestration state |
-| Prompt behavior and guardrails | Current runtime prompt baseline plus planned prompt compiler path (`PromptAssetLoader -> PromptAssembler -> ResponseGuardrailMiddleware`) | Controls behavioral policy, not business state or financial facts |
+| Reasoning, tool selection, and STM binding | `[Implemented]` [StockAssistantAgent](../../../src/core/stock_assistant_agent.py) | Binds `conversation_id -> thread_id` into conversation-scoped runtime state but does not own lifecycle authority, session context, or checkpoint persistence policy |
+| STM persistence infrastructure | `[Implemented]` [langgraph_bootstrap.py](../../../src/core/langgraph_bootstrap.py) plus LangGraph checkpointer boundary | Preserves recoverable thread-local runtime state only; not a source of truth for archive policy, ownership, or metadata |
+| Semantic route classification | `[Implemented]` [stock_query_router.py](../../../src/core/stock_query_router.py) | Classifies requests but does not execute tools or persist state |
+| Provider and model selection | `[Implemented]` [ModelClientFactory](../../../src/core/model_factory.py) and provider clients | Isolates provider-specific concerns from routes and services |
+| Session context resolution and conversation lifecycle | `[Implemented]` [ChatService](../../../src/services/chat_service.py), [ConversationService](../../../src/services/conversation_service.py) | Owns reusable parent context, archive guards, and metadata synchronization outside the agent core; REST path currently enforces this boundary directly |
+| Conversation metadata persistence | `[Implemented]` [ConversationRepository](../../../src/data/repositories/conversation_repository.py) | Persists application metadata and session linkage, separate from LangGraph checkpoint state |
+| Future cross-conversation personalization | `[Planned]` Future LTM boundary | Optional personalization only; not factual store or required orchestration state |
+| Prompt behavior and guardrails | `[Implemented]` Current runtime prompt baseline plus `[Planned]` prompt compiler path (`PromptAssetLoader -> PromptAssembler -> ResponseGuardrailMiddleware`) | Controls behavioral policy, not business state or financial facts |
 
 This logical separation is the primary extensibility mechanism for the domain. New providers, tools, prompt assets, or conversation-management behaviors should be added by extending the relevant building block rather than by collapsing responsibilities into the agent runtime.
 
@@ -477,11 +477,11 @@ Metadata authority, STM persistence, and cache acceleration may share deployment
 
 | Category | Architectural Role |
 |----------|--------------------|
-| Factory | `ModelClientFactory`, `create_checkpointer()` with explicit separation between provider wiring and STM persistence boundary setup |
-| Registry / Singleton | `ToolRegistry` |
+| Factory | `[Implemented]` [ModelClientFactory](../../../src/core/model_factory.py), `create_checkpointer()` with explicit separation between provider wiring and STM persistence boundary setup |
+| Registry / Singleton | `[Implemented]` [ToolRegistry](../../../src/core/tools/registry.py) |
 | Strategy | Provider-specific model clients |
-| Template Method / Decorator | `CachingTool` |
-| Repository | `ConversationRepository` |
+| Template Method / Decorator | `[Implemented]` [CachingTool](../../../src/core/tools/base.py) |
+| Repository | `[Implemented]` [ConversationRepository](../../../src/data/repositories/conversation_repository.py) |
 | Planned Asset Loader / Composer / Middleware | Prompt system evolution path aligned to ADR-002 and ADR-003 |
 
 Memory-specific realization follows the same separation-of-authority rule: checkpointer factories govern STM persistence, repositories govern lifecycle metadata and session linkage, and any future LTM store remains a separate extension point rather than an extension of the checkpoint boundary. The detailed class hierarchy, patterns catalog, configuration snippets, and file relationships are preserved in [TECHNICAL_DESIGN.md](./TECHNICAL_DESIGN.md).
@@ -510,6 +510,57 @@ flowchart TD
   end
 
   LLMResponse --> Response["AgentResponse\n(content, provider, model, tool_calls, token_usage)"]
+```
+
+##### End-to-End Request/Response & Streaming Sequence (UML Notation)
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Client as Client App (Web / Browser)
+    participant Transport as Transport Edge (Socket.IO / API)
+    participant Service as ChatService / ConversationService
+    participant Agent as StockAssistantAgent (LangGraph)
+    participant Cache as Redis (Tool Cache)
+    participant LLM as External LLM (OpenAI / Grok)
+
+    Client->>Transport: POST /api/chat or emit("chat_message")
+    activate Transport
+    Transport->>Service: execute_chat_turn(query, conversation_id)
+    activate Service
+    Service->>Service: enforce_lifecycle_guards()
+    Service->>Agent: invoke(messages, thread_id)
+    activate Agent
+    Agent->>Agent: route_classification(semantic-router)
+    
+    rect rgb(240, 248, 255)
+        note right of Agent: ReAct Reasoning Loop (LLM decides tool execution)
+        Agent->>LLM: decide_action(messages)
+        LLM-->>Agent: Action (call tool) / or final message
+        alt Tool Execution Required
+            Agent->>Cache: check_cache(tool_params)
+            alt Cache Hit
+                Cache-->>Agent: Return cached result
+            else Cache Miss
+                Agent->>Agent: execute_tool()
+                Agent->>Cache: set_cache(tool_params, result)
+            end
+        end
+    end
+
+    Agent-->>Service: AgentResponse
+    deactivate Agent
+    Service->>Service: sync_metadata_and_tokens()
+    Service-->>Transport: message_turn_completed
+    deactivate Service
+    
+    loop Streaming Output (Tokens)
+        Agent->>Transport: stream_chunk(token)
+        Transport->>Client: socket.emit("token", token)
+    end
+    
+    Transport-->>Client: HTTP response / stream_close
+    deactivate Transport
 ```
 
 Service-layer orchestration remains on the outer edge of this process. Archive safety, ownership validation, and metadata synchronization are intentionally handled outside the core reasoning loop so the process path can stay focused on classification, tool use, and generation.
@@ -631,6 +682,34 @@ This allocation is what allows the domain to enforce the ADR-001 hard rules in a
 The runtime contract is now `conversation_id` across agent methods, REST chat, management APIs, repositories, reconciliation, and migration tooling. The REST `POST /api/chat` route still accepts a deprecated `session_id` alias and normalizes it into `conversation_id`; the Socket.IO handler accepts `conversation_id` only.
 
 The information boundary is deliberate: LangGraph checkpoints retain recoverable agent execution state for a conversation, while the `conversations` collection and service layer retain application metadata and lifecycle control. This keeps behavioral state and business metadata aligned without making the checkpointer the source of truth for application ownership or archival rules. Session context is resolved in service helpers as reusable parent business context, but prompt-level injection of that merged context is not yet a universally realized runtime behavior. The target-state architecture allows LTM-backed personalization to complement that session context, but not replace the service-owned parent context boundary.
+
+##### Conversation & STM Lifecycle State Machine (UML Notation)
+
+```mermaid
+stateDiagram-v2
+    [*] --> Created : Client Request / init_conversation()
+    Created --> Active : Ensure metadata & checkpoints / [valid_session]
+    
+    state Active {
+        [*] --> Idle
+        Idle --> Processing : User turn / handle_query()
+        Processing --> Idle : Response streaming complete / [success]
+        Processing --> Degraded : Checkpoint failure / [database_offline]
+    }
+    
+    Active --> Summarized : Auto-compaction trigger / run_compaction()
+    Summarized --> Active : User turn / resume()
+    
+    Active --> Archived : Archive window elapsed or Admin action / archive()
+    Summarized --> Archived : Admin action / archive()
+    
+    state Archived {
+        [*] --> ReadOnly
+        ReadOnly --> RejectTurn : User turn / [always_false]
+    }
+    
+    Archived --> [*] : Conversation purge / delete()
+```
 
 #### 4.4.3 STM Correspondence and Authority Model
 
@@ -763,11 +842,11 @@ The target layout is intentionally shallow. Directory ownership communicates ass
 
 | Development Concern | Architectural Guidance |
 |---------------------|------------------------|
-| Module ownership | Keep agent reasoning in `src/core/`, business orchestration in `src/services/`, and persistence in `src/data/repositories/` |
-| Extending providers | Add provider-specific clients behind `BaseModelClient` and register through `ModelClientFactory` |
-| Extending tools | Add tool implementations under `src/core/tools/` and expose them through `ToolRegistry` rather than wiring ad hoc calls |
+| Module ownership | Keep agent reasoning in `[Implemented]` [src/core/](../../../src/core/), business orchestration in `[Implemented]` [src/services/](../../../src/services/), and persistence in `[Implemented]` [src/data/repositories/](../../../src/data/repositories/) |
+| Extending providers | Add provider-specific clients behind `[Implemented]` [BaseModelClient](../../../src/core/base_model_client.py) and register through `[Implemented]` [ModelClientFactory](../../../src/core/model_factory.py) |
+| Extending tools | Add tool implementations under `[Implemented]` [src/core/tools/](../../../src/core/tools/) and expose them through `[Implemented]` [ToolRegistry](../../../src/core/tools/registry.py) rather than wiring ad hoc calls |
 | Memory changes | Preserve `conversation_id -> thread_id` as the canonical STM binding and keep business metadata outside checkpoints |
-| Prompt evolution | Add metadata-governed assets under `src/prompts/system|skills|experiments`, keep file layout shallow, and keep prompt composition policy separate from tool or repository logic |
+| Prompt evolution | Add metadata-governed assets under `[Proposed]` [src/prompts/](../../../src/prompts/) `system|skills|experiments`, keep file layout shallow, and keep prompt composition policy separate from tool or repository logic |
 
 This view is intentionally about code organization and maintainability, not low-level realization. Detailed implementation behavior, configuration, and extension mechanics remain in [TECHNICAL_DESIGN.md](./TECHNICAL_DESIGN.md).
 
@@ -990,12 +1069,32 @@ The near-term architectural direction is the Skills pattern: one agent, one shar
 
 ```mermaid
 flowchart TD
-  Query["Query enters prompt boundary"] --> Route["Route-aware context selection"]
-  Route --> Shared["Shared policy contract"]
-  Shared --> Role["Role-specific prompt contract"]
-  Role --> Context["Bounded runtime context\n(memory, tools, retrieval)"]
-  Context --> Guardrail["Guardrail enforcement boundary"]
-  Guardrail --> Response["Response plus prompt metadata"]
+    subgraph InstructionSpace["Instruction & Policy Space (Highest Authority)"]
+        direction TB
+        L1["1. Shared System Policy & Safety Rules\n(Anti-hype, disclosures, evidence discipline)"]
+        L2["2. Always-Active Behavioral Skills\n(Uncertainty contract, evidence-first)"]
+        L3["3. Route-Specific Prompts\n(Specific template chosen by Router)"]
+        L1 --> L2 --> L3
+    end
+    
+    subgraph DataSpace["Data & Context Space (Dynamic Inputs)"]
+        direction TB
+        L4["4. Bounded Memory Context\n(STM checkpoints & messages)"]
+        L5["5. Sourced Evidence & Tool Metrics\n(Redis Cache / Yahoo Finance facts)"]
+        L6["6. Request-Specific Framing & Outputs\n(Formatting constraints, schemas)"]
+        L4 --> L5 --> L6
+    end
+    
+    InstructionSpace -->|"Merged & Compiled by\nPromptAssembler"| Assembler["PromptAssembler"]
+    DataSpace -->|"Injected at runtime"| Assembler
+    
+    Assembler -->|"Completed Prompt String"| LLM["LLM Reasoner"]
+    LLM -->|"Generated Raw Response"| Guardrail["ResponseGuardrailMiddleware\n(Enforce compliance & structure)"]
+    Guardrail -->|"Parsed AgentResponse"| Client["Client Surface"]
+
+    style InstructionSpace fill:#e3f2fd,stroke:#1565c0,stroke-width:2px
+    style DataSpace fill:#f1f8e9,stroke:#558b2f,stroke-width:2px
+    style Guardrail fill:#ffe0b2,stroke:#ef6c00,stroke-width:2px
 ```
 
 #### 4.8.4 Guardrail Boundary Model
@@ -1086,7 +1185,7 @@ Prompt observability is an architectural requirement because prompt behavior is 
 | Development View | [TECHNICAL_DESIGN.md](./TECHNICAL_DESIGN.md), [README.md](../../../README.md) |
 | Deployment View | [IaC/README.md](../../../IaC/README.md), [TECHNICAL_DESIGN.md](./TECHNICAL_DESIGN.md) |
 | Operations and Maintenance View | [TECHNICAL_DESIGN.md](./TECHNICAL_DESIGN.md), [IaC/README.md](../../../IaC/README.md) |
-| Prompt and Behavior View | [PROMPT_SYSTEM_RESEARCH_PROPOSAL.md](./PROMPT_SYSTEM_RESEARCH_PROPOSAL.md), [ADR-AGENT-002-SKILLS-PATTERN-PROMPT-COMPOSITION.md](./decisions/ADR-AGENT-002-SKILLS-PATTERN-PROMPT-COMPOSITION.md), [ADR-AGENT-003-EXTERNALIZE-VERSION-PROMPT-ASSETS.md](./decisions/ADR-AGENT-003-EXTERNALIZE-VERSION-PROMPT-ASSETS.md) |
+| Prompt and Behavior View | [PROMPT_SYSTEM_RESEARCH_PROPOSAL.md](./PROMPT_SYSTEM_RESEARCH_PROPOSAL.md), [TECHNICAL_DESIGN.md §3.5](./TECHNICAL_DESIGN.md#35-prompt-realization-and-guardrails), [ADR-AGENT-002-SKILLS-PATTERN-PROMPT-COMPOSITION.md](./decisions/ADR-AGENT-002-SKILLS-PATTERN-PROMPT-COMPOSITION.md), [ADR-AGENT-003-EXTERNALIZE-VERSION-PROMPT-ASSETS.md](./decisions/ADR-AGENT-003-EXTERNALIZE-VERSION-PROMPT-ASSETS.md) |
 
 ### 5.2 Concern-to-Decision Correspondence
 
@@ -1102,7 +1201,7 @@ Prompt observability is an architectural requirement because prompt behavior is 
 
 | Original Concept (ADR-001 Prompt Compiler decision) | Evolved Realization (ADR-002, ADR-003) | Note |
 |-------------------------------|----------------------------------------|------|
-| Prompt Compiler | PromptAssetLoader → PromptAssembler → ResponseGuardrailMiddleware | The single-step compiler concept was elaborated into a governed composition path that separates asset resolution, composition, and response-policy enforcement. See `TECHNICAL_DESIGN.md` for realization detail. |
+| Prompt Compiler | PromptAssetLoader → PromptAssembler → ResponseGuardrailMiddleware | The single-step compiler concept was elaborated into a governed composition path that separates asset resolution, composition, and response-policy enforcement. See [TECHNICAL_DESIGN.md §3.5.2](./TECHNICAL_DESIGN.md#352-planned-prompt-compiler-path) for realization detail. |
 | PromptRegistry (implementation-discussion alias) | Loader-facade naming for prompt asset resolution | When this name is used in proposal or implementation discussion, it should be understood as a technical facade within the PromptAssetLoader boundary rather than a separate architectural concept. |
 | Prompt asset taxonomy | ADR taxonomy (`src/prompts/system|skills|experiments`) with a shallow metadata-driven file layout | ADR taxonomy is canonical for architecture and decision authority; version, locale, and baseline semantics belong in metadata and loader rules rather than deeper directory nesting. |
 | Intent-based routing | `StockQueryRoute` enum with 8 canonical routes | Originally described with 7 working-name intents; refined to 8 routes during implementation. |
