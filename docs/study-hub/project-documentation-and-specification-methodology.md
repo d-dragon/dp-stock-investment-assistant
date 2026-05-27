@@ -160,6 +160,7 @@ This proposal uses three standards stances so the project can be disciplined wit
 | **ISO/IEC/IEEE 42010** | Use as the framing model for architecture descriptions and viewpoint separation |
 | **OpenAPI 3.1** | Use as the authoritative HTTP API contract standard |
 | **WCAG 2.2 AA** | Use as the baseline accessibility standard for UI and UX design specifications |
+| **Mermaid with selective C4, UML, and BPMN usage** | Use as the repository-default text-based diagram approach; apply document-type-specific notation limits through Section 9.3 |
 | **ADR / Nygard-style decision records** | Use as the practice model for architecture-significant decision capture |
 | **Spec-Kit / Spec-Driven Development** | Use as the **primary delivery and governance methodology** for feature planning, implementation, verification, and documentation maintenance |
 
@@ -416,6 +417,8 @@ This is the recommended compact domain model for this repository. The important 
 
 ### 9.2 Purpose and Standards Stance by Document Type
 
+Each document type has both a standards stance and a notation policy. The standards stance describes how the artifact relates to external standards; Section 9.3 defines the diagram and notation rules that keep visuals consistent across the documentation set.
+
 | Document Type | Target Files | Purpose | Standards Stance |
 |---------------|--------------|---------|------------------|
 | **Master System SRS** | `docs/system/SYSTEM_REQUIREMENTS_SPECIFICATION.md` | Authoritative source for cross-domain functional, non-functional, interface, lifecycle, and maintenance requirements | **Aligned** to ISO/IEC/IEEE 29148 |
@@ -431,7 +434,32 @@ This is the recommended compact domain model for this repository. The important 
 | **Feature Specs** | `specs/<feature-id>/...` | Delivery-scoped realization documents for approved requirements | **Practice-Based** Spec-Kit workflow |
 | **Traceability Registry and Reports** | `specs/spec-traceability.yaml`, `specs/spec-sync-status.md` | Maintains bidirectional requirement-to-delivery traceability | **Practice-Based** RTM-style governance |
 
-### 9.3 Functional and Non-Functional Requirements in the Domain Model
+### 9.3 Diagram and Notation Standards by Document Type
+
+Consistent notation reduces ambiguity, keeps Markdown-native reviews readable, and makes long-lived documents easier to compare over time. The policy below formalizes the repository's existing bias toward text-based, diffable diagrams while still allowing more specialized notations where they materially improve clarity.
+
+| Document Type | Allowed Diagram Styles | Preferred Authoring Format | Best-Fit Use Cases | Notes / Constraints |
+|---------------|------------------------|----------------------------|--------------------|---------------------|
+| **System Architecture Documents** | C4-style context, container, component, deployment, flow, sequence, and state views | **Mermaid** with C4-style structure where applicable | System boundaries, major building blocks, runtime flows, and cross-domain interactions | Prefer C4 abstractions for static architecture views; use UML-style behavior diagrams only when interaction or state semantics matter |
+| **ADRs** | Decision context sketches, option comparison visuals, and simple impact flowcharts | Markdown tables first; Mermaid only when it adds clarity | Tradeoffs, consequence summaries, and decision impact scope | Keep visuals minimal; do not move architecture description or detailed technical realization into ADRs |
+| **Domain Technical Design** | Flowcharts, sequence, state, class, ER, and interface diagrams | **Mermaid** | Domain internals, internal interfaces, persistence mapping, and realization flows | UML-style precision is acceptable when behavior, lifecycle, or interface semantics need tighter expression |
+| **Requirements and Specification Baselines** | Scope/context diagrams, lifecycle flows, allocation views, and traceability visuals | Markdown tables first; Mermaid when a visual materially improves comprehension | Requirement scope, allocation, traceability flow, and governance lifecycle | Do not duplicate executable contract schemas in prose diagrams; use visuals to explain boundaries and relationships |
+| **Feature Specs** | Lightweight flowcharts, sequence diagrams, state sketches, and local data models | **Mermaid** | Delivery-scoped scenarios, rollout paths, verification flow, and implementation coordination | When promoted into `docs/`, normalize diagrams to the target document type's notation rules |
+| **Operations Policy and Runbooks** | Flowcharts, swimlane-style flows, sequence diagrams, and BPMN process models | Mermaid by default; BPMN selectively | Release, rollback, migration, reconciliation, incident response, and approval-heavy workflows | Use BPMN only when human handoffs, approvals, or recovery paths are central to the process |
+| **Executable Contracts and Traceability Reports** | Minimal context visuals only; schema-first artifacts remain primary | OpenAPI, JSON Schema, and tables; Mermaid only for supporting context visuals | API/event contracts, payload compatibility, and mapping evidence | Machine-readable contracts remain the source of truth for structure; diagrams must not override schema definitions |
+
+Mermaid is the repository default because it is text-based, diffable, and already established across architecture and technical design documents. BPMN and stricter UML usage are selective tools, not the default notation for all artifacts.
+
+Regardless of document type, diagram visualization should follow these quality rules:
+
+1. Precede each non-trivial diagram with a short sentence that states its scope and why the visual is needed.
+2. Label diagrams explicitly as current-state, target-state, planned-state, or transition-state when implementation status is not obvious.
+3. Prefer direct labels and consistent naming for actors, systems, boundaries, and data stores; add a legend only when repeated symbols or line styles would otherwise be ambiguous.
+4. Keep reading direction predictable and split dense visuals into multiple diagrams when crossings, node count, or mixed concerns reduce readability.
+5. Do not rely on color alone to carry meaning; essential distinctions must remain visible in labels, grouping, or captions for plain Markdown renderers and accessibility.
+6. When a single diagram cannot stay simple, pair it with a compact table or short interpretation notes instead of forcing all meaning into the visual.
+
+### 9.4 Functional and Non-Functional Requirements in the Domain Model
 
 Under the domain model, **functional requirements and non-functional requirements remain canonical at the system level first**, then are allocated to domains as ownership metadata.
 
@@ -445,7 +473,7 @@ The recommended rules are:
 
 In short: the master SRS remains the source of truth for SR and SNR requirements, domain documents explain realization and specialization, and feature specs provide delivery detail and verification evidence.
 
-### 9.4 Promotion Rules for New Long-Lived Documents
+### 9.5 Promotion Rules for New Long-Lived Documents
 
 Before creating a new long-lived document under `docs/`, the project should answer yes to at least one of these questions:
 
@@ -703,6 +731,7 @@ As features are delivered, promote only stable, repeated knowledge from `specs/`
 2. stable decisions into ADRs
 3. stable contracts into domain-owned executable artifacts such as `docs/stacks/backend/api/openapi.yaml`
 4. stable operating procedures into runbooks
+5. stable diagrams into the target long-lived document only after they have been normalized to the notation policy for that document type
 
 This keeps `docs/` lean and keeps `specs/` as the place where most delivery complexity lives.
 
@@ -712,6 +741,7 @@ On an ongoing basis, every documentation change should answer two questions:
 
 1. Does this belong in a stable source under `docs/`, or is it really delivery detail that should remain in `specs/`?
 2. If it belongs in `docs/`, which existing document should absorb it so the structure stays small?
+3. If it includes diagrams, do those diagrams follow the notation policy for the target document type in Section 9.3?
 
 ## 13. Summary Recommendation
 
@@ -749,3 +779,4 @@ The practical recommendation is to keep `docs/` small, keep `specs/` rich, and p
 | 0.5 | 2026-04-03 | GitHub Copilot | Added an explicit SRS versioning and change-control mechanism; defined precedence and conflict-resolution rules between the master system SRS and subordinate domain SRS documents; reduced conceptual overuse of “stack” in prose by reframing the model around domains and layers while retaining `docs/stacks/` as the repository path; added a Mermaid visualization of the SRS lifecycle during delivery and documentation sync |
 | 0.6 | 2026-04-03 | GitHub Copilot | Added a normative canonical glossary section to lock taxonomy usage across contributors, including explicit definitions for domain, bounded context, layer, technology stack, domain ownership terms, SRS hierarchy terms, and executable contracts |
 | 0.7 | 2026-04-03 | GitHub Copilot | Resolved remaining glossary drift by aligning the target file tree back to `docs/domains/`, correcting lifecycle wording to the 18-step SDD lifecycle consistently, and adding an explicit API Boundary / API Contract glossary entry to clarify that API is a backend domain boundary rather than a separate ownership domain |
+| 0.8 | 2026-05-27 | GitHub Copilot | Added a document-type notation policy and explicit diagram visualization quality rules covering diagram scope statements, state labeling, readable flow direction, legend discipline, accessibility of meaning without color, and when to split visuals or pair them with tables |

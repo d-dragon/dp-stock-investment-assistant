@@ -1,5 +1,6 @@
 | 'g:\00_Work\Projects\dp-stock-investment-assistant\.github\instructions\infrastructure-deployment.instructions.md' | IaC/** | Infrastructure, deployment, and IaC conventions for Docker, Kubernetes, Terraform, and CI/CD |
 | 'g:\00_Work\Projects\dp-stock-investment-assistant\.github\instructions\testing.instructions.md' | tests/** | Comprehensive testing strategy across all levels - unit, integration, E2E, performance, security |
+| 'g:\00_Work\Projects\dp-stock-investment-assistant\.github\instructions\documentation-and-specification.instructions.md' | docs/**,specs/**,.github/instructions/*.md,.github/copilot-instructions.md | Documentation, specification, markdown, and diagram conventions for repo docs and instruction files |
 # Copilot Instructions for dp-stock-investment-assistant
 
 **Purpose**: Make AI coding agents productive and safe in this repository by encoding our conventions, workflows, and gotchas. Favor precise, minimal edits with tests green before done.
@@ -328,10 +329,18 @@ See domain-specific instruction files for step-by-step guides:
 - Deploy to AKS Production
 - Configure CI/CD Pipeline
 
+**Documentation & Specification Tasks** - See [documentation-and-specification.instructions.md](instructions/documentation-and-specification.instructions.md):
+- Add or update ADRs
+- Write or refine technical design and methodology docs
+- Promote stable content out of `specs/`
+- Keep notation choices and document boundaries consistent
+- Keep diagrams readable with explicit scope/state labeling and split dense visuals when needed
+
 ## Domain-Specific Conventions Summary
 See linked instruction files for comprehensive guidelines:
 - **Architecture**: Design patterns, deployment strategies, IaC conventions
 - **Backend (Python)**: Flask blueprints, model factory, pytest patterns, ConfigLoader usage
+- **Documentation & Specification**: Notation policy, diagram visualization quality, Markdown structure, document boundaries, and sync discipline for `docs/`, `specs/`, and instruction files
 - **Frontend (React)**: Component architecture, hooks, Socket.IO, Jest + RTL testing
 - **Infrastructure & Deployment**: Docker, Kubernetes/Helm, Terraform, CI/CD pipelines, monitoring
 - **Testing**: Unit, integration, E2E, performance, security testing across all stacks
