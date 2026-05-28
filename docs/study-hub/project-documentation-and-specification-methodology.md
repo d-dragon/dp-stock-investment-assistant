@@ -75,6 +75,7 @@ This proposal is based on and aligned with the current project documents below.
 | [ADR-Frontend-001](../frontend/adr-frontend-001-modular-application.md) | Frontend architectural direction | Reference model for ADR boundary and decision phrasing |
 | [ADR-Frontend-002](../frontend/adr-frontend-002-modernize-frontend-foundation.md) | Frontend modernization stack and delivery direction | Reference model for implementation-oriented architecture decisions |
 | [Spec-Kit HOW-TO](../spec-driven%20development%20(SDD)/spec-kit%20HOW-TO.md) | Repository-specific SDD workflow guidance with the 18-step SDD lifecycle | Defines the canonical SDD phase chain that this proposal integrates with system-level documentation |
+| [Documentation Spec Maintainer Agent](../../.github/agents/documentation.spec-maintainer.agent.md) | Documentation-focused Copilot custom agent for long-lived docs, delivery-scoped specs, traceability, and customization files | Provides a fast entry point for contributors who need to apply the same SDD promotion, reconciliation, and traceability rules described in this methodology |
 | [Project Constitution](../../.specify/memory/constitution.md) | Non-negotiable governance layer: 7 core principles, 9 golden rules, memory boundaries, SOLID constraints, quality gates | Defines the governance authority that all system-level and feature-level documentation must satisfy |
 | [Spec Traceability Registry](../../specs/spec-traceability.yaml) | Machine-readable traceability manifest linking SRS items to feature specs with status gates | Defines the automated traceability model that system-level documentation must integrate with |
 | [OpenAPI Specification](../openapi.yaml) | Executable API contract for the backend | Canonical contract artifact in the proposed documentation model |
@@ -350,7 +351,7 @@ The target structure should remain intentionally lean. It should organize docume
 1. **System** — canonical cross-domain requirements and governance
 2. **Architecture** — whole-system structure, runtime flows, and architectural decisions
 3. **Domains (Bounded Contexts)** — domain-owned realization, domain-specific constraints, and owned contracts
-4. **Specs (SDD spec-kit)** — delivery-scoped feature artifacts created and maintained through the SDD lifecycle
+4. **Specs (`specs/`)** — delivery-scoped feature artifacts created and maintained through the SDD lifecycle
 
 ```text
 docs/
@@ -780,3 +781,4 @@ The practical recommendation is to keep `docs/` small, keep `specs/` rich, and p
 | 0.6 | 2026-04-03 | GitHub Copilot | Added a normative canonical glossary section to lock taxonomy usage across contributors, including explicit definitions for domain, bounded context, layer, technology stack, domain ownership terms, SRS hierarchy terms, and executable contracts |
 | 0.7 | 2026-04-03 | GitHub Copilot | Resolved remaining glossary drift by aligning the target file tree back to `docs/domains/`, correcting lifecycle wording to the 18-step SDD lifecycle consistently, and adding an explicit API Boundary / API Contract glossary entry to clarify that API is a backend domain boundary rather than a separate ownership domain |
 | 0.8 | 2026-05-27 | GitHub Copilot | Added a document-type notation policy and explicit diagram visualization quality rules covering diagram scope statements, state labeling, readable flow direction, legend discipline, accessibility of meaning without color, and when to split visuals or pair them with tables |
+| 0.9 | 2026-05-28 | GitHub Copilot | Added a discoverability pointer to the documentation-focused custom agent and aligned related-document guidance with the repository's Spec Kit HOW-TO and documentation maintenance workflow |

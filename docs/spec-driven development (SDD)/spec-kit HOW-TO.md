@@ -98,6 +98,8 @@ specify extension list
 specify workflow list
 ```
 
+For documentation-first work in Copilot, contributors can start with the [Documentation Spec Maintainer Agent](../../.github/agents/documentation.spec-maintainer.agent.md). It is the fastest entry point for maintaining long-lived docs, delivery-scoped specs, traceability, and Copilot customization files while staying inside the same SDD lifecycle described in this HOW-TO. When feature-scoped artifacts are needed, the agent can hand off to `speckit.specify`, `speckit.plan`, and `speckit.verify.run`.
+
 ### 2.3 Install or Recreate Local CLI Access
 
 Persistent installation:
@@ -199,9 +201,9 @@ Testing and QA are woven into the loop rather than deferred to the end. Steps `1
 | Delivery and Verification | `12-14` | tasks, review findings, [../../docs/testing/VERIFICATION_AND_TRACEABILITY_STRATEGY.md](../../docs/testing/VERIFICATION_AND_TRACEABILITY_STRATEGY.md)<br/>[../../docs/testing/backend-api-service/HOWTO_PYTEST_RUNTIME_API_INTEGRATION.md](../../docs/testing/backend-api-service/HOWTO_PYTEST_RUNTIME_API_INTEGRATION.md) | implemented application changes in `src/` and `frontend/`<br/>IaC artifacts in `IaC/Dockerfile.api`, `IaC/Dockerfile.agent`, `IaC/helm/dp-stock/`, `IaC/infra/terraform/`, and `IaC/ci-cd/`<br/>QA and testing results in `tests/` and `specs/feature/review.md` |
 | Synchronization and Maintenance | `15-17` | delivered code, IaC outputs, QA evidence, review evidence, operational policy, and API contract references | [../../specs/spec-traceability.yaml](../../specs/spec-traceability.yaml)<br/>[../../specs/spec-sync-status.md](../../specs/spec-sync-status.md)<br/>[../../docs/domains/agent/SRS_SPEC_TRACEABILITY.md](../../docs/domains/agent/SRS_SPEC_TRACEABILITY.md)<br/>[../../docs/openapi.yaml](../../docs/openapi.yaml)<br/>updated technical design, release, and maintenance notes<br/>for prompt-system changes: [../../docs/domains/agent/TECHNICAL_DESIGN.md#35-prompt-realization-and-guardrails](../../docs/domains/agent/TECHNICAL_DESIGN.md#35-prompt-realization-and-guardrails), [../../docs/domains/agent/ARCHITECTURE_DESIGN.md](../../docs/domains/agent/ARCHITECTURE_DESIGN.md), [../../docs/domains/agent/PROMPT_SYSTEM_RESEARCH_PROPOSAL.md](../../docs/domains/agent/PROMPT_SYSTEM_RESEARCH_PROPOSAL.md), [../../docs/domains/agent/PHASE_2_AGENT_ENHANCEMENT_ROADMAP.md](../../docs/domains/agent/PHASE_2_AGENT_ENHANCEMENT_ROADMAP.md), and [../../docs/domains/agent/PROMPT_SYSTEM_BENCHMARK_REVIEW.md](../../docs/domains/agent/PROMPT_SYSTEM_BENCHMARK_REVIEW.md) |
 
-### 3.3 17-Step Lifecycle Aligned to the Loop
+### 3.3 18-Step Lifecycle Aligned to the Loop
 
-The 17-step lifecycle below is the detailed execution model inside the SDLC loop. The steps are grouped by SDLC phase so they complement the loop rather than compete with it.
+The 18-step lifecycle below is the detailed execution model inside the SDLC loop. The steps are grouped by SDLC phase so they complement the loop rather than compete with it.
 
 #### 3.3.1 Requirements and Architecture Foundation
 
@@ -238,9 +240,9 @@ The 17-step lifecycle below is the detailed execution model inside the SDLC loop
 
 ### 3.4 Workflow Visuals
 
-The diagrams below answer three different workflow questions: where the 17 steps sit inside the SDLC loop, where repository hooks and gates attach, and which project artifacts move through the governed delivery flow.
+The diagrams below answer three different workflow questions: where the 18 steps sit inside the SDLC loop, where repository hooks and gates attach, and which project artifacts move through the governed delivery flow.
 
-#### 3.4.1 17-Step Placement in the SDLC Loop
+#### 3.4.1 18-Step Placement in the SDLC Loop
 
 ```mermaid
 flowchart TB
@@ -427,6 +429,7 @@ When documenting or adjusting this automation, prefer what is actually configure
 
 ### 8.1 Repository References
 
+- [../../.github/agents/documentation.spec-maintainer.agent.md](../../.github/agents/documentation.spec-maintainer.agent.md)
 - [../../.specify/templates/spec-template.md](../../.specify/templates/spec-template.md)
 - [../../.specify/extensions.yml](../../.specify/extensions.yml)
 - [../../.specify/extension-catalogs.yml](../../.specify/extension-catalogs.yml)
