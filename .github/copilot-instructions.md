@@ -119,6 +119,12 @@ docker-compose down
 
 ## Project-Specific Guidelines
 
+### Documentation and Spec-Driven Artifacts
+- **`docs/` is long-lived**: Use it for stable requirements, architecture, technical design, ADRs, policy, and runbooks.
+- **`specs/` is delivery-scoped**: Use it for Spec Kit feature artifacts such as `spec.md`, `plan.md`, `tasks.md`, `review.md`, evidence, and temporary design exploration. Promote content into `docs/` only after implementation is verified and the knowledge is stable enough to become reusable.
+- **`.specify/` is runtime and governance state**: Use it for Spec Kit templates, extensions, presets, scripts, and governance artifacts such as the Constitution. It is not the repo-governed feature evidence area.
+- **Sync authoritative artifacts together**: When verified feature work changes stable behavior, update the smallest owning long-lived document, relevant delivery-scoped artifacts, and `specs/spec-traceability.yaml` together when practical.
+
 ### Import & Module Organization
 - **Absolute imports**: Always use `from ` for application code; relative imports break tooling and tests
 - **Import order**: stdlib → third-party → local project modules, alphabetically sorted within groups
@@ -199,6 +205,9 @@ docker-compose down
   - `docker-compose.yml` (+ `.override.yml` for local tweaks) – local dev with MongoDB, Redis, API, Agent, Frontend.
   - `IaC/` – Dockerfiles (Dockerfile.api, Dockerfile.agent), Helm chart, Terraform.
 - Docs
+  - `docs/` – long-lived requirements, architecture, technical design, policy, and operations baselines.
+  - `specs/` – delivery-scoped Spec Kit feature artifacts, verification evidence, and sync metadata.
+  - `.specify/` – Spec Kit runtime area for constitution, templates, extensions, presets, and scripts.
   - `README.md` – setup, testing, DB migration, API architecture.
   - `.github/MODEL_ROUTING.md` – multi-model routing and fallback strategy.
   - `.github/instructions/*.instructions.md` – domain-specific detailed conventions.
@@ -332,7 +341,8 @@ See domain-specific instruction files for step-by-step guides:
 **Documentation & Specification Tasks** - See [documentation-and-specification.instructions.md](instructions/documentation-and-specification.instructions.md):
 - Add or update ADRs
 - Write or refine technical design and methodology docs
-- Promote stable content out of `specs/`
+- Promote stable content out of `specs/` into `docs/` only after verification
+- Keep `docs/`, `specs/`, and `.specify/` responsibilities distinct
 - Keep notation choices and document boundaries consistent
 - Keep diagrams readable with explicit scope/state labeling and split dense visuals when needed
 
@@ -340,7 +350,7 @@ See domain-specific instruction files for step-by-step guides:
 See linked instruction files for comprehensive guidelines:
 - **Architecture**: Design patterns, deployment strategies, IaC conventions
 - **Backend (Python)**: Flask blueprints, model factory, pytest patterns, ConfigLoader usage
-- **Documentation & Specification**: Notation policy, diagram visualization quality, Markdown structure, document boundaries, and sync discipline for `docs/`, `specs/`, and instruction files
+- **Documentation & Specification**: Notation policy, diagram visualization quality, Markdown structure, document boundaries, and sync discipline for `docs/`, `specs/`, `.specify/`, and instruction files
 - **Frontend (React)**: Component architecture, hooks, Socket.IO, Jest + RTL testing
 - **Infrastructure & Deployment**: Docker, Kubernetes/Helm, Terraform, CI/CD pipelines, monitoring
 - **Testing**: Unit, integration, E2E, performance, security testing across all stacks
