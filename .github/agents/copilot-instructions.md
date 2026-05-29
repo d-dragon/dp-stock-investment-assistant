@@ -11,14 +11,19 @@ Auto-generated from all feature plans. Last updated: 2026-03-23
 ## Project Structure
 
 ```text
-backend/
+src/
 frontend/
 tests/
+docs/
+specs/
+IaC/
 ```
 
 ## Commands
 
-cd src; pytest; ruff check .
+python -m pytest -v
+$env:PYTHONPATH = "$PWD\src"; python -m pytest -v
+cd frontend; npm test -- --watchAll=false
 
 ## Code Style
 

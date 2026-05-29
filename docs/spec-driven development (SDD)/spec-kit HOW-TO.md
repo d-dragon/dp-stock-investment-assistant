@@ -123,6 +123,73 @@ specify init --here --integration copilot --script ps
 
 Only re-run initialization when you intentionally need to restore or recreate `.specify/` and related managed assets.
 
+### 2.4 Upgrade an Existing Spec Kit Setup
+
+When upgrading Spec Kit in this repository, treat the CLI tool and the project files as separate layers. Upgrade the CLI to get new features and bug fixes, then refresh the repository's installed Spec Kit assets so prompts, templates, scripts, and shared memory stay aligned with the version you are actually running.
+
+#### Check Current State First
+
+Use the following commands before upgrading:
+
+```powershell
+specify self check
+specify version
+specify check
+```
+
+- `specify self check` looks for newer released CLI versions.
+- `specify version` confirms which persistent `specify` is on your `PATH`.
+- `specify check` validates the local installation and environment.
+
+#### Upgrade the CLI Tool
+
+If you installed `specify` with `uv tool install`, upgrade it with:
+
+```powershell
+uv tool install specify-cli --force --from git+https://github.com/github/spec-kit.git@vX.Y.Z
+```
+
+If you installed it with `pipx`, use:
+
+```powershell
+pipx install --force git+https://github.com/github/spec-kit.git@vX.Y.Z
+```
+
+If you rely on one-shot `uvx` commands, remember that `uvx` does not upgrade a persistent CLI installation. It only runs a temporary copy for that command.
+
+#### Back Up Repository Customizations Before Refreshing Project Files
+
+The official upgrade path warns that `specify init --here --force` can overwrite customized files under `.specify/`, especially `.specify/memory/constitution.md`, `.specify/templates/`, and `.specify/scripts/`. In this repository, back up those files before refreshing project assets.
+
+```powershell
+Copy-Item .specify\memory\constitution.md .specify\memory\constitution.backup.md
+Copy-Item .specify\templates .specify\templates-backup -Recurse
+Copy-Item .specify\scripts .specify\scripts-backup -Recurse
+```
+
+If the repository is clean in Git, you can also restore customized files afterward with `git restore` instead of manual copies.
+
+#### Refresh Project Files for This Repository
+
+After upgrading the CLI and backing up customizations, refresh the repository's Spec Kit assets with the same integration style this project uses:
+
+```powershell
+specify init --here --force --integration copilot --script ps
+```
+
+This updates the repository's installed Spec Kit infrastructure such as command files, templates, scripts, and shared memory content. It does **not** overwrite your governed feature work under [../../specs/](../../specs/), your source code, or your Git history.
+
+#### After the Upgrade
+
+After refreshing project files:
+
+- restore or manually merge customized `.specify` files if needed
+- restart VS Code completely if new or updated slash commands do not appear immediately
+- verify that the expected command files still exist under [../../.github/prompts/](../../.github/prompts/)
+- keep CLI and project files in sync, especially for major-version upgrades
+
+For this repository, treat upgrades as governed maintenance work: preserve local customizations, validate command availability, and avoid assuming that `--force` is safe for customized `.specify` assets unless you have a backup or a clean Git restore path.
+
 ## 3. Workflow and SDLC Loop
 
 This section describes the repository's full Spec-Driven Development operating model across the SDLC, not only the core Spec Kit command chain. In this project, the loop starts with requirements engineering, architecture, and technical design; uses Spec Kit to govern specification, clarification, planning, task generation, implementation, and review; and then closes through QA and testing evidence, traceability refresh, operational alignment, and maintenance synchronization.

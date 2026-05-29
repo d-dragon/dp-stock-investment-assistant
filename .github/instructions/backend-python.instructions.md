@@ -175,7 +175,7 @@ tests/
 1. Create `src/core/<provider>_client.py` extending BaseModelClient ABC
 2. Update `ModelClientFactory.get_client()` in model_factory
 3. Add provider config to `config/config.yaml`
-4. Update `.github/copilot-model-config.yaml`
+4. Update any active prompt, docs, or agent guidance that references the provider list
 5. Add tests for selection and fallback
 
 **See also:**
@@ -1202,16 +1202,9 @@ myprovider:
   timeout: 30
 ```
 
-**Step 4: Update Copilot Configuration**
+**Step 4: Update AI Tooling Guidance**
 
-Add to `.github/copilot-model-config.yaml` for AI tooling integration:
-
-```yaml
-providers:
-  - name: myprovider
-    models:
-      - my-model-name
-```
+If active Copilot prompt, instruction, agent, or skill files mention the provider list, update those references. Do not add a model-routing config unless an external router implementation is being restored.
 
 **Step 5: Add Tests**
 
