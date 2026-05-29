@@ -209,9 +209,11 @@ docker-compose down
   - `specs/` – delivery-scoped Spec Kit feature artifacts, verification evidence, and sync metadata.
   - `.specify/` – Spec Kit runtime area for constitution, templates, extensions, presets, and scripts.
   - `README.md` – setup, testing, DB migration, API architecture.
-  - `.github/MODEL_ROUTING.md` – multi-model routing and fallback strategy.
   - `.github/instructions/*.instructions.md` – domain-specific detailed conventions.
-  - `.github/chatmodes/*` – custom Copilot chat modes (docs; model routing not enforced by Copilot yet).
+  - `.github/prompts/*` – reusable prompt files for common tasks.
+  - `.github/agents/*` – custom agent profiles for Spec Kit and documentation workflows.
+  - `.github/chatmodes/*` – custom Copilot chat modes for IDE workflows.
+  - `.github/skills/*` – Copilot CLI skills for project-specific agent development.
 
 ## Setup and run (Windows PowerShell examples)
 - Python en v
@@ -290,7 +292,7 @@ docker-compose down
 - Fallback behavior
   - Configure `model.allow_fallback` and `model.fallback_order` in config.
   - Agent automatically retries with fallback models on primary failure.
-  - See `.github/MODEL_ROUTING.md` for detailed fallback strategy.
+  - Treat model routing docs/config under `.github/` as external-orchestration artifacts only if they are explicitly restored.
 
 ## Testing Patterns
 
@@ -408,7 +410,7 @@ See linked instruction files for comprehensive guidelines:
 
 ## References
 - API surface: `docs/openapi.yaml`
-- Model routing: `.github/MODEL_ROUTING.md`, `.github/copilot-model-config.yaml`, `src/utils/model_router.py`
+- Model provider fallback: `config/config.yaml`, `src/core/model_factory.py`
 - DB setup: README “DB setup and migration” section
 - IaC/K8s: `IaC/helm/dp-stock`, `IaC/infra/terraform`
 

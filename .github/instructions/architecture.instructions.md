@@ -7,7 +7,7 @@ applyTo: "**"
 
 ## Project Architecture Overview
 - **Microservices Pattern**: API, Agent (background worker), and Frontend served independently
-- **Tech Stack**: Python 3.8+ (Flask/FastAPI), React 18, MongoDB 5.0, Redis 6.2
+- **Tech Stack**: Python 3.8+ with Flask blueprints, React 18, MongoDB 5.0, Redis 6.2
 - **Communication**: REST API + Socket.IO for real-time chat streaming
 - **Deployment**: Docker Compose (local), Kubernetes/AKS (production via Helm)
 
@@ -23,7 +23,7 @@ applyTo: "**"
   - `helm/dp-stock/` - Kubernetes Helm chart
   - `infra/terraform/` - Azure resource provisioning
 - `config/` - YAML configuration files with environment overlays
-- `.github/` - Copilot instructions, chat modes, model routing config
+- `.github/` - Copilot instructions, prompts, chat modes, agents, skills, and workflows
 
 ## Design Patterns
 - **Immutable Configuration Context**: Use dataclasses (frozen=True) for dependency injection in Flask blueprints
@@ -85,5 +85,5 @@ applyTo: "**"
 
 ## References
 - IaC/K8s details: `IaC/README.md`
-- Model routing: `.github/MODEL_ROUTING.md`, `.github/copilot-model-config.yaml`
+- AI provider fallback: `config/config.yaml`, `src/core/model_factory.py`, and related model client tests
 - API specification: `docs/openapi.yaml`
