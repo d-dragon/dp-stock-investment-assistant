@@ -40,7 +40,18 @@
 
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-[Gates determined based on constitution file]
+- [ ] Governing artifacts identified: relevant SRS items, architecture or technical design,
+  ADRs, contracts, runbooks, or existing feature specs.
+- [ ] Artifact ownership confirmed: long-lived updates belong in `docs/`, delivery-scoped work
+  belongs in `specs/`, and Spec Kit runtime or tooling changes belong in `.specify/`.
+- [ ] Required sync targets listed up front: `docs/openapi.yaml`,
+  `specs/spec-traceability.yaml`, `specs/spec-sync-status.md`, affected reverse-trace docs,
+  technical design docs, and runbooks as applicable.
+- [ ] Affected architecture layers, dependency seams, and migration or rollback implications are
+  documented.
+- [ ] Validation strategy is defined with executable evidence where possible: tests,
+  diagnostics, type or lint checks, health checks, trace metadata, or migration verification.
+- [ ] Any necessary complexity or backward-incompatible change is explicitly justified.
 
 ## Project Structure
 

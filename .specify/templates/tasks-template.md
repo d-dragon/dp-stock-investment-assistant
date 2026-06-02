@@ -9,7 +9,10 @@ description: "Task list template for feature implementation"
 
 **Prerequisites**: plan.md (required), spec.md (required for user stories), research.md, data-model.md, contracts/
 
-**Tests**: The examples below include test tasks. Tests are OPTIONAL - only include them if explicitly requested in the feature specification.
+**Tests**: Include validation tasks whenever user-visible behavior, contracts, data or schema,
+prompt behavior, or regression risk changes. Omit explicit test tasks only when the spec or plan
+records a justified docs-only or no-runtime-impact slice; even then, include the required
+diagnostic or verification tasks.
 
 **Organization**: Tasks are grouped by user story to enable independent implementation and testing of each story.
 
@@ -152,6 +155,8 @@ Examples of foundational tasks (adjust based on your project):
 **Purpose**: Improvements that affect multiple user stories
 
 - [ ] TXXX [P] Documentation updates in docs/
+- [ ] TXXX [P] Synchronize affected long-lived docs and traceability artifacts in `docs/` and `specs/`
+- [ ] TXXX [P] Update `docs/openapi.yaml` and verify the public API surface when REST API behavior changes
 - [ ] TXXX Code cleanup and refactoring
 - [ ] TXXX Performance optimization across all stories
 - [ ] TXXX [P] Additional unit tests (if requested) in tests/unit/
@@ -247,6 +252,9 @@ With multiple developers:
 - [Story] label maps task to specific user story for traceability
 - Each user story should be independently completable and testable
 - Verify tests fail before implementing
+- Include explicit sync tasks for `docs/openapi.yaml`, `specs/spec-traceability.yaml`,
+  `specs/spec-sync-status.md`, and affected long-lived design or runbook docs whenever those
+  surfaces change
 - Commit after each task or logical group
 - Stop at any checkpoint to validate story independently
 - Avoid: vague tasks, same file conflicts, cross-story dependencies that break independence
