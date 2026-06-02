@@ -1,311 +1,353 @@
 <!--
 SYNC IMPACT REPORT
 ==================
-Version Change: 1.2.0 → 1.3.0 (MINOR)
-Bump Rationale: Added explicit governance requiring the project-scoped REST API
-  document (`docs/openapi.yaml`) to be included in spec-kit planning, task generation,
-  implementation, and review whenever REST API behavior changes.
+Version Change: 1.3.0 → 2.0.0 (MAJOR)
+Bump Rationale: Replaced an agent-memory-centric constitution with a repo-wide practical
+  constitution aligned to current Spec-Driven Development, layered architecture, contract
+  synchronization, multi-surface delivery, and AI runtime governance. v2.1.0 adds explicit
+  document-referencing rules governing how `docs/` documents are referenced during spec-kit
+  phases, including anchor-level precision, lifecycle obligations, and cross-reference
+  validation.
 
-Modified Sections:
-- Added Golden Development Rule 9 requiring public API contract synchronization.
-- Added a Spec-Kit REST API Gate under Quality Gates.
+Modified Principles:
+- Memory Never Stores Facts → Spec-Driven, Traceable Delivery
+- RAG Never Stores Opinions → Layered Boundaries and Explicit Ownership
+- Fine-Tuning Never Stores Knowledge → Evidence-Grounded Financial Intelligence
+- Prompting Controls Behavior, Not Data → Prompts, Memory, and Fine-Tuning Control Behavior, Not Truth
+- Tools Compute Numbers, LLM Reasons About Them → Deterministic Tools and Contracted Interfaces
+- Investment Data Sources Are External → Testability and Observability Are First-Class
+- Market Manipulation Safeguards Are Enforced → Secure, Simple, Reversible Change
 
-Added Sections: None
-Removed Sections: None
+Added Sections:
+- Artifact and Documentation Boundaries
+- Document Referencing in Spec-Kit Workflows
+- Spec Kit Lifecycle Obligations
+- Delivery Sync Gates
+
+Removed Sections:
+- None; earlier agent-specific governance was absorbed into repo-wide principles and Memory and AI Runtime Boundaries.
 
 Template Consistency Check:
-- .specify/templates/plan-template.md: ✅ Constitution Check section is generic; no update needed
-- .specify/templates/spec-template.md: ✅ Constitution compliance section compatible
-- .specify/templates/tasks-template.md: ✅ Task types align with principle-driven standards
-- .specify/templates/constitution-template.md: ✅ Structure now aligned
+- .specify/templates/plan-template.md: ✅ updated in v2.0.0; doc-referencing rules are cross-cutting and are now captured in the constitution directly; no template structural change needed
+- .specify/templates/spec-template.md: ✅ updated in v2.0.0
+- .specify/templates/tasks-template.md: ✅ updated in v2.0.0
+- .specify/templates/constitution-template.md: ✅ checked, no change required
+- .github/prompts/speckit.constitution.prompt.md: ✅ checked, no change required
 
 Follow-up TODOs:
-- Spec-kit task generation should now treat `docs/openapi.yaml` as mandatory whenever REST API changes are in scope.
+- None
 -->
 
 # DP Stock Investment Assistant Constitution
 
 > **Purpose**: This constitution defines the governing principles for the DP Stock Investment
-> Assistant project. It establishes hard rules for AI memory architecture, development practices,
-> design patterns, and quality standards that all contributors and AI agents MUST follow.
+> Assistant project. It establishes hard rules for spec-driven delivery, architecture boundaries,
+> financial-AI safety, contract synchronization, and quality gates that all contributors and AI
+> agents MUST follow.
 
 ---
 
 ## Core Principles
 
-These seven principles from ADR-001 form the foundation of the LangChain agent architecture.
-They are **non-negotiable** and prevent hallucination, data leakage, and compounding errors.
+These seven principles govern practical current development across backend, agent, frontend,
+data, operations, documentation, and infrastructure. They are **non-negotiable**.
 
-### I. Memory Never Stores Facts
-Long-Term Memory (LTM) and Short-Term Memory (STM) retain **user preferences, session context,
-and routing hints only**. All financial facts MUST originate from external sources or verified
-data stores. Memory is for personalization, not truth.
+### I. Spec-Driven, Traceable Delivery
+Every non-trivial change MUST start from governed artifacts and named authorities. `docs/` owns
+long-lived requirements, architecture, technical design, contracts, policy, and runbooks;
+`specs/` owns delivery-scoped feature artifacts and verification evidence; `.specify/` owns Spec
+Kit runtime files, templates, extensions, and workflows. Delivered work MUST refresh affected
+traceability and long-lived artifacts before it is considered complete. Rationale: this
+repository uses Spec Kit as its delivery governance engine, so unsourced or unsynchronized work
+creates drift across code, contracts, and docs.
 
-### II. RAG Never Stores Opinions
-Retrieval-Augmented Generation (RAG) indices contain **sourced documents only**: SEC filings,
-news articles, macro data, and retrieved snippets. Interpretations and opinions remain in LLM
-output and MUST be tied to cited evidence.
+### II. Layered Boundaries and Explicit Ownership
+Implementation MUST respect ownership boundaries across frontend, backend, agent, data,
+operations, and IaC surfaces. Backend request flow MUST remain `routes -> services ->
+repositories -> database`; cross-cutting dependencies MUST be injected via factories,
+protocols, or immutable context objects; cross-domain behavior MUST be implemented in the owning
+surface rather than through ad-hoc reach-through. Rationale: the current codebase already
+depends on blueprint, service, repository, and factory patterns, and preserving those seams
+keeps change reviewable and testable.
 
-### III. Fine-Tuning Never Stores Knowledge
-Fine-tuning enforces **structure and tone**, not factual content. Training data MUST be
-human-verified and explicitly exclude invented numbers, forecasts, or market predictions.
+### III. Evidence-Grounded Financial Intelligence
+Financial outputs MUST be grounded in approved external sources, governed internal data stores,
+retrieved documents with provenance, or deterministic tool output. The assistant MUST NOT invent
+prices, metrics, forecasts, or investment certainty, and all outputs MUST remain informational
+rather than manipulative. Rationale: in this finance domain, unsourced or hype-driven output is
+a safety failure.
 
-### IV. Prompting Controls Behavior, Not Data
-Prompts encode **rules, safety constraints, and output schema**. Data used for answers is
-injected at runtime from LTM/STM/RAG/tools. Prompts define "how to reason," not "what to say."
+### IV. Prompts, Memory, and Fine-Tuning Control Behavior, Not Truth
+Prompt assets, memory, and fine-tuning MAY shape behavior, structure, routing, and
+personalization, but they MUST NOT become hidden fact stores. Memory retains preferences and
+session context only; retrieval retains sourced documents; fine-tuning reinforces format or tone
+rather than factual content. Rationale: the repository's current prompt-system and memory work
+assumes this separation, and governance must keep it explicit.
 
-### V. Tools Compute Numbers, LLM Reasons About Them
-Deterministic tools fetch and calculate metrics; the LLM explains implications. This separation
-keeps **computations auditable** and prevents fabricated figures.
+### V. Deterministic Tools and Contracted Interfaces
+Deterministic tools MUST fetch or compute facts; the model interprets them. Public interfaces
+such as REST endpoints, streaming responses, WebSocket events, and machine-readable contracts
+MUST remain explicit, version-aware, and synchronized with implementation. Rationale: the
+project relies on OpenAPI, route registration, streaming surfaces, and auditable tool results;
+opaque interface drift is operational risk.
 
-### VI. Investment Data Sources Are External
-Stock-related data is fetched from **pre-listed external websites, approved data sources, and the
-in-system database**. The agent may request tools to collect, normalize, and organize data—but
-MUST never invent it.
+### VI. Testability and Observability Are First-Class
+Every material behavior MUST be verifiable and diagnosable. Focused tests, health endpoints,
+structured logging, prompt or request trace metadata, and explicit degraded-mode outcomes MUST
+make failures explainable across API, agent, data, frontend, and deployment surfaces.
+Rationale: hidden state and silent failure block safe delivery in a multi-surface system.
 
-### VII. Market Manipulation Safeguards Are Enforced
-No intent to influence markets, prices, or trading behavior. All outputs are **informational
-only** and MUST be grounded in verifiable sources.
+### VII. Secure, Simple, Reversible Change
+Changes MUST default to least privilege, minimal scope, backward-compatible evolution, and clear
+rollback or migration paths. Complexity MUST be justified against a simpler modular or additive
+alternative. Rationale: the current project spans microservice-style deployment, persistent data,
+and evolving AI behavior, so irreversible or over-broad changes multiply risk.
 
 ---
 
-## Development Standards
+## Project Operating Standards
 
 ### Golden Development Rules
 
-These nine rules govern all development practices. Violations MUST be corrected before merge.
+These nine rules govern all day-to-day project development. Violations MUST be corrected before
+merge.
 
-#### 1. Security First
-No secrets in code, logs, or version control. API keys, passwords, and credentials MUST never
-appear in source files, error messages, or stack traces exposed to users.
+#### 1. Start From Governing Artifacts
+For every non-trivial task, identify the controlling SRS, architecture or technical design, ADR,
+contract, runbook, or feature spec before changing code, docs, or IaC.
 
-#### 2. Test Before Merge
-All changes MUST have passing tests. New behavior requires test coverage; changed behavior
-requires updated tests. The test suite MUST pass locally before pushing.
+#### 2. Respect Artifact Lifecycles and Locations
+`docs/` is the long-lived baseline, `specs/` is the governed delivery evidence area, and
+`.specify/` is runtime and tooling support. Stable knowledge is promoted from `specs/` to `docs/`
+only after verification.
 
-#### 3. Logging Over Print
-Use structured logging with appropriate levels (DEBUG, INFO, WARNING, ERROR). No `print()`
-statements in production code. Include context (request ID, user ID, resource name) in log
-messages.
+#### 3. Keep Contracts and Sync Artifacts Current
+When stable behavior changes, update `docs/openapi.yaml`, `specs/spec-traceability.yaml`,
+`specs/spec-sync-status.md`, affected reverse-trace documents, and impacted technical design or
+runbook artifacts in the same delivery cycle when relevant.
 
-#### 4. Document Intent
-Explain "why" in code comments, commit messages, and PRs. Self-documenting code is preferred;
-comments explain rationale, not mechanics.
+#### 4. Protect Secrets and Privileged Access
+Secrets MUST NOT appear in source, logs, docs, or test fixtures. Use environment variables,
+approved secret stores, and least-privilege credentials for local and production access.
 
-#### 5. Backward Compatibility
-Consider migration paths when changing APIs or schemas. Use deprecation warnings and versioning;
-do not break existing integrations without notice and migration guidance.
+#### 5. Validate With Executable Evidence First
+Prefer focused tests, diagnostics, type or lint checks, schema validation, or health checks over
+manual inspection. Docs-only work MUST at least pass the file diagnostics available in the
+environment.
 
-#### 6. Fail Fast
-Validate early; provide clear, actionable error messages; log failures with context. Every error
-path MUST be logged and surfaced appropriately. No silent failures.
+#### 6. Log and Expose Safe Operational State
+Use structured logging, safe user-visible errors, health probes, and machine-detectable degraded
+states. Silent failures and raw internal errors on public surfaces are prohibited.
 
-#### 7. Keep It Simple
-Prefer simple, maintainable solutions over complex abstractions. YAGNI—do not build features
-until they are needed. Complexity MUST be justified against simplicity.
+#### 7. Preserve Architecture Seams
+Routes handle transport concerns, services own business logic, repositories own persistence, and
+factories or immutable context objects own dependency wiring. Do not bypass those seams with
+ad-hoc shortcuts.
 
-#### 8. Follow Domain Standards
-Adhere to language-specific guidelines: PEP 8 for Python, Airbnb/Standard for TypeScript.
-Reference domain instruction files in `.github/instructions/` for runtime development guidance.
+#### 8. Prefer Additive Migration and Backward-Compatible Rollout
+Use aliases, migration scripts, versioning, fallback lineages, or staged rollout when public,
+persisted, or prompt-governed behavior changes.
 
-#### 9. Public API Contract Must Stay in Sync
-For any spec-kit feature that adds, removes, deprecates, or changes REST API behavior, the
-project-scoped REST API document at `docs/openapi.yaml` MUST be part of the workflow. Planning,
-task generation, implementation, and review MUST explicitly account for OpenAPI updates and
-verification against the actual registered public routes. A spec-kit phase involving REST API
-changes is not complete if `docs/openapi.yaml` is stale, feature-incomplete, or inconsistent with
-the implemented public API surface.
+#### 9. Keep Changes Small, Focused, and Reviewable
+Each change set MUST stay scoped to one logical outcome, include its required doc or contract or
+test updates, and justify any unavoidable complexity against a simpler alternative.
 
-### Memory Architecture Boundaries
+### Artifact and Documentation Boundaries
 
-These boundaries govern the FR-3.1 Memory System implementation, ensuring clean separation
-between personalization and factual data.
+- `docs/` is authoritative for long-lived requirements, architecture, technical design, ADRs,
+  policy, runbooks, and executable contracts.
+- `specs/` is authoritative for governed feature delivery artifacts, review evidence, and sync
+  status.
+- `.specify/` is the project-local Spec Kit runtime and configuration area and MUST NOT be used
+  as the canonical store for governed feature delivery evidence.
+- If code, specs, contracts, and long-lived docs disagree, fix the authoritative artifact first,
+  then reconcile dependent references.
+
+### Document Referencing in Spec-Kit Workflows
+
+Cross-references between spec-kit artifacts (in `specs/`) and long-lived documents (in `docs/`)
+MUST be precise and durable. Vague or unanchored references reduce traceability and break
+agentic workflow context.
+
+#### Cross-Reference Precision Rules
+
+1. **Use section-level anchors, not document-level paths alone.** Every reference to a `docs/`
+   document from a spec, plan, task, or review artifact MUST include an anchor pointing to the
+   specific section, requirement ID, or heading that contains the governing content. For example,
+   `docs/domains/agent/TECHNICAL_DESIGN.md#35-prompt-realization-and-guardrails` is valid;
+   `docs/domains/agent/TECHNICAL_DESIGN.md` alone is not sufficient for non-trivial references.
+2. **Anchor precision applies to all spec-kit phases.** `speckit.specify`, `speckit.plan`,
+   `speckit.tasks`, implementation, verification, and sync artifacts MUST all use anchor-level
+   references when linking to long-lived documents. Generic document-level references are
+   permitted only when the entire document is the authority for the referenced concern.
+3. **Repository-relative paths.** Use paths relative to the repository root (e.g.,
+   `docs/domains/agent/TECHNICAL_DESIGN.md`) rather than absolute or ambiguous labels, so
+   references remain valid across branches and agent sessions.
+4. **Anchor validity is a sync responsibility.** When a section heading, requirement ID, or
+   anchor label changes in a `docs/` document, every inbound cross-reference from `specs/`,
+   other `docs/` files, and customization files MUST be updated in the same change set or in an
+   immediately following maintenance change.
+
+#### Lifecycle Obligations by Spec-Kit Phase
+
+| Spec-Kit phase | Document-referencing obligation |
+|----------------|--------------------------------|
+| `speckit.specify` | The `## Governance Context` section MUST identify governing `docs/` documents with section-level anchors for every referenced authority. |
+| `speckit.plan` | The Constitution Check MUST list which `docs/` documents are affected and whether their section anchors or requirement IDs will need updates. |
+| `speckit.tasks` | Task descriptions MUST include explicit cross-reference validation or anchor-checking steps when feature work references or changes `docs/` documents. |
+| `speckit.implement` | Code or documentation changes that modify section headings, requirement IDs, or anchor labels in `docs/` MUST be paired with updates to all inbound references. |
+| `speckit.verify.run` | Verification MUST check that cross-references between `specs/` artifacts and `docs/` documents resolve to valid, non-broken anchors. |
+| Steps 15-17 (sync) | The traceability-refresh and documentation-sync steps MUST validate all cross-references and flag any stale or broken anchors for correction. |
+
+#### Agentic Workflow Guidance
+
+- When contributing to a spec-kit artifact that references a `docs/` document, always read the
+  target section first to confirm the reference is accurate and the anchor resolves to the
+  intended content.
+- When renaming a section heading in a `docs/` document, use grep or equivalent search to find
+  all inbound references across `specs/`, other `docs/` files, and `.github/` customization
+  files before committing the rename.
+- Placeholder or template-style references such as `[link to relevant design doc]` MUST NOT
+  survive into a published spec, plan, or task artifact. Every reference MUST be resolved to a
+  concrete file path and section anchor before the artifact leaves draft status.
+
+### Memory and AI Runtime Boundaries
+
+These boundaries govern prompt-system, memory, and agent-runtime work so personalization,
+control-plane logic, and factual data remain separated.
 
 #### Long-Term Memory (LTM) — Allowed
-- User risk profile (conservative, moderate, aggressive)
-- Investment style (value, growth, dividend, momentum)
-- Investment goals (income, capital appreciation, wealth preservation)
-- Time horizon preferences
-- Experience level and sector preferences
-- Output verbosity and language preferences
+- User risk profile and investment preferences
+- Investment goals, time horizon, and sector interests
+- Output style, language, and verbosity preferences
+- Stable workspace or personalization defaults
 
 #### Short-Term Memory (STM) — Allowed
-- Current session context and assumptions
-- Active conversation state
-- Temporary routing hints
-- In-progress analysis context
+- Current conversation context and approved assumptions
+- Active routing or tool-selection state
+- In-progress analysis state that is bounded to the request or conversation
+- Temporary session continuity metadata
 
 #### Explicitly Prohibited in Memory
-These items **MUST** live in RAG/Tools layer, never in LTM/STM:
+These items MUST stay in retrieval, tools, or governed data stores rather than LTM or STM:
 - Real-time or historical prices
-- Financial ratios and calculated metrics
-- Valuation assessments or price targets
-- Forecasts or forward-looking statements
-- News content or filing text
-- Analytical conclusions or recommendations
+- Financial ratios, valuations, and calculated metrics
+- Raw filings, news bodies, or sourced document text used as evidence
+- Forecasts, price targets, or analytical conclusions
+- Investment recommendations presented as durable stored truth
 
-### Import & Code Style Standards
+#### Retrieval, Prompts, and Fine-Tuning
+- Retrieval stores sourced documents with provenance and reviewable origin.
+- Prompt assets encode policy, role behavior, output contracts, and guardrails rather than facts.
+- Fine-tuning or reusable prompt assets MAY reinforce structure and tone but MUST NOT become a
+  hidden knowledge base.
+- Deterministic tools fetch and compute facts; the model interprets, frames, and cites them.
 
-#### Import Conventions
-- **Absolute imports only**: Always use `from <module>` for application code
-- **No relative imports**: They break pytest discovery and packaging
-- **Import order**: stdlib → third-party → local project modules (alphabetically sorted within groups)
-- **Avoid circular dependencies**: Refactor using dependency injection or protocol abstraction
+### Architecture and Design Constraints
 
-#### Python Standards
-- **Version**: Python 3.8+ required
-- **Style**: PEP 8 compliance mandatory
-- **Type hints**: Required for function signatures and public APIs
-- **Docstrings**: Google or NumPy style for modules, classes, and public functions
+- Use `ModelClientFactory`, `RepositoryFactory`, `ServiceFactory`, and immutable route or socket
+  context objects for dependency wiring rather than manual global coupling.
+- All database access MUST flow through `src/data/repositories/`; routes and presentation layers
+  MUST NOT issue ad-hoc persistence queries.
+- Cross-service dependencies MUST prefer protocols and composition over inheritance except for
+  established base classes.
+- Application code MUST use absolute imports and preserve tool-friendly import structure.
+- Health endpoints, streaming surfaces, and deployment probes MUST stay aligned across code and
+  IaC.
 
-#### TypeScript Standards
-- **Strict mode**: TypeScript strict mode enabled
-- **Interfaces**: Define TypeScript interfaces for all component props and API contracts
-- **No `any`**: Avoid `any` type; use proper typing or `unknown`
+#### SOLID Constraints
+
+- **Single Responsibility**: one concern per layer or module.
+- **Open/Closed**: extend behavior with new modules or registrations instead of unrelated edits.
+- **Liskov Substitution**: implementations MUST honor their published contracts.
+- **Interface Segregation**: use lean interfaces and protocols instead of broad shared surfaces.
+- **Dependency Inversion**: depend on abstractions and injected collaborators, not hard-coded
+  concrete implementations.
 
 ---
 
-## Architecture & Quality
+## Workflow and Quality Gates
 
-### Design Patterns
+### Spec Kit Lifecycle Obligations
 
-These patterns govern the codebase structure. New code MUST follow established patterns;
-deviations require explicit justification.
+- Non-trivial work MUST follow the repository's Spec-Driven Development chain: governed
+  requirements and design inputs, `speckit.constitution`, `speckit.specify`, clarification and
+  checklist steps when needed, `speckit.plan`, `speckit.tasks`, implementation, verification,
+  and delivery synchronization.
+- Plans MUST identify governing artifacts, affected domains, sync targets, validation strategy,
+  architecture impact, and rollback or migration implications.
+- Tasks MUST include tests, contract updates, traceability refresh, and long-lived doc sync work
+  whenever those surfaces are affected.
+- All references to `docs/` documents in spec-kit artifacts MUST use section-level anchors, not
+  document-level paths alone. The lifecycle table under Document Referencing in Spec-Kit
+  Workflows defines the responsibility per phase.
+- Documentation-first work MAY start from documentation-focused agents or workflows, but it MUST
+  obey the same artifact boundaries and sync duties.
 
-#### Factory Pattern
-- **ModelClientFactory**: Creates provider-specific AI model clients with caching
-- **RepositoryFactory**: Centralizes repository creation with singleton instances
-- **ServiceFactory**: Wires repositories into services with dependency injection
+### Verification and Delivery Gates
 
-#### Repository Pattern
-- All database access MUST go through `src/data/repositories/` extending `MongoGenericRepository`
-- No ad-hoc database queries in routes, services, or presentation layers
-- Repositories implement `health_check() -> Tuple[bool, Dict]` contract
+- REST API changes MUST update `docs/openapi.yaml` and be checked against the actual registered
+  public route surface.
+- Prompt or agent behavior changes MUST preserve prompt identity, fallback or degradation
+  metadata, and finance-safety guardrail expectations where those surfaces exist.
+- Data schema, migration, or cache behavior changes MUST include migration or initialization
+  evidence and compatibility checks.
+- Frontend, backend, agent, and IaC changes MUST validate the affected user or operator journey
+  with the narrowest executable evidence available.
+- Docs-only changes MUST pass diagnostics on the touched files and keep anchors or links current.
+- Cross-references between `specs/` artifacts and `docs/` documents MUST be validated for anchor
+  correctness during verification. Stale or broken section-level references are a verification
+  failure, not optional cleanup.
 
-#### Blueprint Architecture
-- Flask routes organized by domain in `src/web/routes/<domain>.py`
-- Each blueprint receives dependencies via immutable `APIRouteContext` (frozen dataclass)
-- Registration through app factory in `api_server.py`
+### Pre-Merge Checklist
 
-#### Protocol-Based Dependencies
-- Cross-service dependencies use protocols (structural typing) from `src/services/protocols.py`
-- Avoids circular imports; enables easy testing with duck-typed mocks
-- Services depend on abstractions, not concrete implementations
+- [ ] Governing artifacts and affected domains are identified.
+- [ ] Focused executable validation or diagnostics have been run.
+- [ ] Required contracts, long-lived docs, and sync artifacts are updated.
+- [ ] Cross-references in spec-kit artifacts use section-level anchors and resolve to valid targets.
+- [ ] No secrets or unsafe internal details are exposed.
+- [ ] Any migration, fallback, rollout, or breaking-change path is documented.
+- [ ] The change remains one logical slice or explicitly justifies broader scope.
 
-#### Layered Architecture
-The system follows strict layer separation:
-```
-Routes (API Layer) → Services (Business Logic) → Repositories (Data Access) → Database
-```
-- Routes handle HTTP/WebSocket concerns only
-- Services contain business logic and orchestration
-- Repositories handle data persistence
-- Each layer depends only on the layer below
+### Delivery Sync Gates
 
-### SOLID Principles
-
-All code MUST adhere to SOLID principles. These are non-negotiable design constraints.
-
-**Single Responsibility**: One concern per layer; routes handle HTTP, services handle business
-logic, repositories handle data access. Each class/module has one reason to change.
-
-**Open/Closed**: Extend via new modules (blueprints, services, providers) registered in
-factories. Avoid editing unrelated modules to add functionality.
-
-**Liskov Substitution**: Implementations MUST honor interface contracts (types, errors,
-invariants). No consumer-specific branches or special cases that violate expected behavior.
-
-**Interface Segregation**: Keep interfaces lean; split large surfaces. Give consumers only what
-they need (read vs write, query vs command).
-
-**Dependency Inversion**: Depend on protocols/interfaces (e.g., `WorkspaceProvider`,
-`UserProvider`), not concrete implementations. Inject dependencies via factories/config.
-
-**Additional**: Favor composition over inheritance except for established bases (`BaseService`,
-`MongoGenericRepository`, `CacheBackend`). Add new components as modules registered in factories
-rather than modifying existing code.
-
-### Testing Standards
-
-#### Test Philosophy
-- **Test behavior, not implementation**: Focus on user-facing functionality and API contracts
-- **Fast feedback**: Unit tests MUST complete in seconds; integration tests in minutes
-- **Isolation**: Tests MUST NOT depend on external services, network, or shared state
-- **Repeatability**: Tests MUST produce consistent results regardless of execution order
-
-#### Test Pyramid
-```
-       /\
-      /E2E\         ← 5-10% of tests
-     /------\       User workflows, UI → API → DB
-    /  INT   \      ← 20-30% of tests
-   /----------\     API routes, service integration
-  /   UNIT     \    ← 60-75% of tests
- /--------------\   Pure functions, business logic
-```
-
-#### Coverage Requirements
-- **Overall**: 80%+ line coverage minimum
-- **Critical paths**: 90%+ for financial data accuracy, model fallback logic, user authentication
-- **Edge cases**: Error handling, boundary conditions, null/empty inputs MUST be tested
-
-#### Mocking Requirements
-- Mock ALL external dependencies (APIs, databases, network)
-- Tests MUST run offline without real connections
-- Use `MagicMock` for protocol-based dependencies
-- Never use real API keys in tests
-
-### Quality Gates
-
-#### Pre-Commit Checklist
-- [ ] Code compiles/imports without errors
-- [ ] Test suite passes locally with 100% pass rate
-- [ ] No secrets or credentials in code/logs
-- [ ] No `print()` statements—use logging
-- [ ] Type hints present on public APIs
-
-#### Pull Request Requirements
-- [ ] Descriptive title explaining what and why
-- [ ] Tests added/updated for all changes
-- [ ] Documentation updated (README, OpenAPI, inline docs)
-- [ ] Breaking changes explicitly noted with migration path
-- [ ] PR addresses one logical change (split large changes)
-
-#### Spec-Kit REST API Gate
-- Any spec-kit feature affecting REST endpoints MUST include `docs/openapi.yaml` in planning and task artifacts.
-- Task generation MUST include explicit OpenAPI update and verification work items.
-- Reviews MUST compare `docs/openapi.yaml` against the current registered public API surface, not only against the new feature endpoints.
-
-#### CI/CD Pipeline
-- **Build**: Clean compilation with no errors or warnings
-- **Lint**: PEP 8 for Python, ESLint for TypeScript—zero violations
-- **Type Check**: mypy for Python, tsc for TypeScript—must pass
-- **Tests**: All automated tests pass with >80% meaningful coverage
-- **Security**: No high/critical vulnerabilities in dependencies
+- `docs/openapi.yaml` MUST be synchronized when REST API behavior changes.
+- `specs/spec-traceability.yaml` and `specs/spec-sync-status.md` MUST be synchronized when
+  requirement coverage or feature verification status changes.
+- Domain reverse-trace documents, such as `docs/domains/agent/SRS_SPEC_TRACEABILITY.md`, MUST be
+  updated when their requirement mappings change.
+- Affected technical design, architecture, or runbook documents MUST be synchronized when stable
+  behavior becomes part of the long-lived baseline.
 
 ---
 
 ## Governance
 
 ### Supremacy
-This constitution supersedes all other practices. When conflicts arise, constitutional
-principles take precedence.
+This constitution supersedes project-local defaults, templates, and prompt guidance. When
+conflicts arise, constitutional principles take precedence, and the authoritative source for the
+specific concern MUST then be reconciled across dependent artifacts.
 
 ### Amendment Process
-1. Propose amendment with rationale and impact analysis
-2. Document affected components and migration plan
-3. Require explicit approval before implementation
-4. Update version number and amendment date
+1. Propose the amendment with rationale, affected principles, and semantic-version bump
+  reasoning.
+2. Validate the proposal against current repository context, templates, runtime guidance, and any
+  affected long-lived docs or contracts.
+3. Update the constitution, dependent templates, and any required sync references in the same
+  change.
+4. Record the amendment date and any deferred follow-up items in the Sync Impact Report.
 
 ### Compliance Verification
-- All PRs/reviews MUST verify constitutional compliance
-- Complexity MUST be justified against simplicity principle
-- Use `.github/instructions/` for runtime development guidance
-- Automated checks enforce linting, testing, and type checking
+- `/speckit.plan` MUST pass the Constitution Check before research or design is treated as ready.
+- `/speckit.tasks`, implementation, review, and post-implementation verification MUST confirm
+  that required tests, contracts, traceability, and long-lived doc sync tasks are present when
+  relevant.
+- Any approved deviation MUST be written as an explicit justification in the affected plan,
+  review, ADR, or equivalent governing artifact.
 
 ### Version Control
 - **MAJOR**: Breaking changes to core principles or backward-incompatible governance changes
 - **MINOR**: New articles, principles, or materially expanded guidance
 - **PATCH**: Clarifications, typo fixes, non-semantic refinements
 
-**Version**: 1.3.0 | **Ratified**: 2026-01-27 | **Last Amended**: 2026-03-23
+**Version**: 2.1.0 | **Ratified**: 2026-01-27 | **Last Amended**: 2026-06-02

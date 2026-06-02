@@ -8,6 +8,16 @@
 
 **Input**: User description: "$ARGUMENTS"
 
+## Governance Context *(mandatory)*
+
+- **Source Authorities**: [List governing SRS IDs, architecture or technical design sections,
+  ADRs, contracts, runbooks, or other long-lived authority documents]
+- **Affected Domains**: [e.g., frontend, backend, agent, data, operations, IaC]
+- **Expected Sync Targets**: [e.g., `docs/openapi.yaml`, `specs/spec-traceability.yaml`,
+  `specs/spec-sync-status.md`, domain reverse trace, technical design docs, runbooks]
+- **Out-of-Scope / No-Sync Notes**: [Explain why no long-lived docs, contracts, or traceability
+  artifacts require updates if that is the case]
+
 ## User Scenarios & Testing *(mandatory)*
 
 <!--
