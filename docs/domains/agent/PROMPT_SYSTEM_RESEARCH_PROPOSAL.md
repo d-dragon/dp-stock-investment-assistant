@@ -73,12 +73,12 @@ Source: [LangChain Multi-Agent](https://docs.langchain.com/oss/python/langchain/
 
 | Capability | Status | Evidence |
 |---|---|---|
-| ReAct agent uses external prompt files | ❌ Not implemented | `src/core/stock_assistant_agent.py` still uses `REACT_SYSTEM_PROMPT` |
-| Prompt file loader exists | ⚠️ Partial | `src/core/langchain_adapter.py` has `PromptBuilder`, but only for fallback-style prompt building |
-| Prompt version config exists | ❌ Not implemented | `config/config.yaml` has no `prompts.*` section |
+| ReAct agent uses external prompt files | ✅ Implemented in M1 | `src/prompts/system/react_analyst.md` — versioned, frontmatter-annotated asset resolved through `PromptAssetLoader` |
+| Prompt file loader exists | ✅ Implemented in M1 | `src/core/prompt_asset_loader.py` — `PromptAssetLoader` with 8-field selection tuple, manifest scanning, caching, and baseline fallback |
+| Prompt version config exists | ✅ Implemented in M1 | `config/config.yaml` has `prompts.*` namespace with two-layer validation |
 | Prompt variants and weighted selection | ❌ Not implemented | Roadmap only |
 | LangSmith tracing baseline exists | ⚠️ Partial | `config/config.yaml`, `LANGSMITH_STUDIO_GUIDE.md`, `langsmith` dependency present |
-| Prompt-version metadata in traces | ❌ Not implemented | No prompt-version tagging or experiment metadata path exists |
+| Prompt-version metadata in traces | ✅ Implemented in M1 | `prompt_version`, `prompt_variant`, `prompt_selection_mode`, `model_provider`, `model_name` emitted in response metadata and LangSmith trace tags |
 | Dataset-backed prompt comparison | ❌ Not implemented | No evaluation harness for prompt variants exists |
 | Multi-agent prompt families | ❌ Not implemented | No orchestrator, RAG specialist, or agent-family registry exists |
 | Retrieval-grounded specialist prompt | ❌ Not implemented | No RAG-specific prompt contract or retrieval prompt path is wired |
@@ -127,23 +127,25 @@ This refinement adds **multi-agent prompt-system design** to scope, but not a fu
 
 ## Current State Assessment
 
-### Runtime Reality
+### Runtime Reality (M1 Delivery — Prompt Runtime Parity)
 
-The roadmap target in [PHASE_2_AGENT_ENHANCEMENT_ROADMAP.md](./PHASE_2_AGENT_ENHANCEMENT_ROADMAP.md) is materially ahead of the live implementation.
+The roadmap target in [PHASE_2_AGENT_ENHANCEMENT_ROADMAP.md](./PHASE_2_AGENT_ENHANCEMENT_ROADMAP.md) was materially ahead of the live implementation at time of research. Milestone M1 has since closed that gap for the prompt compiler path.
 
-The live runtime is still a **single-agent ReAct design**. The near-term target in this refinement is therefore the governed prompt compiler path and Skills-pattern baseline, while orchestrator or RAG specialist paths remain later architectural guidance rather than current runtime claims.
+The live runtime is a **single-agent ReAct design** with the prompt compiler path's first component (``PromptAssetLoader``) implemented. The near-term target remains the governed compiler path and M2 Skills-pattern baseline; orchestrator or RAG specialist paths remain later architectural guidance.
 
-#### Current Prompt Path
+#### Current Prompt Path (Post-M1)
 
-The primary ReAct path is still hardcoded in `StockAssistantAgent`:
+The primary ReAct path now loads from an externalized asset:
 
-- `src/core/stock_assistant_agent.py`
-  - `REACT_SYSTEM_PROMPT` is declared inline.
-  - `_build_agent_executor()` passes that string directly into `create_agent(..., system_prompt=...)`.
+- `src/prompts/system/react_analyst.md` — versioned prompt asset with frontmatter metadata (ADR taxonomy: version in frontmatter, not directory path).
+- `src/core/prompt_asset_loader.py` — ``PromptAssetLoader`` with 8-field selection tuple, manifest scanning, caching, and baseline fallback.
+- `src/core/stock_assistant_agent.py` — ``REACT_SYSTEM_PROMPT`` retained as deprecated alias during M1 observation window; ``_build_agent_executor()`` uses ``self._prompt_content`` resolved through ``PromptAssetLoader``.
+- `config/config.yaml` — ``prompts.*`` namespace with two-layer validation.
+- Response metadata includes ``prompt_version``, ``prompt_variant``, ``prompt_selection_mode``, ``model_provider``, ``model_name`` on every invocation.
 
 #### Existing Prompt Utilities
 
-The repository already contains:
+The repository also contains:
 
 - `src/core/langchain_adapter.py`
   - `_load_prompt_file()` with basic file caching
@@ -163,21 +165,19 @@ The current repo does not yet expose any of the following as first-class runtime
 - a handoff or synthesis schema between agents; or
 - thread-level evaluation criteria for multi-agent trajectories.
 
-#### Current Configuration Surface
+#### Current Configuration Surface (Post-M1)
 
 `config/config.yaml` includes:
 
 - `langchain.tools.*`
 - `langchain.memory.*`
 - `langchain.tracing.*`
+- `prompts.*` — added in M1: ``registry.directory``, ``registry.refresh_window_seconds``, ``system.active_role``, ``system.active_version``, ``system.variants``, ``selection_mode``, ``default_locale``, ``experiments.enabled``, ``experiments.active_id``
 
-It does **not** include:
+It does **not** yet include:
 
-- `prompts.active_version`
-- `prompts.directory`
-- `prompts.variants`
-- `prompts.selection_mode`
-- experiment weights or evaluation settings scoped to prompt variants
+- Route-specific prompt context config (deferred to M2)
+- Experiment weights or weighted selection (deferred to M4)
 
 #### Current LangSmith Surface
 

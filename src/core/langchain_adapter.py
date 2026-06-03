@@ -36,6 +36,14 @@ def _load_prompt_file(name: str) -> str:
 
 
 class PromptBuilder:
+    """
+    DEPRECATED — non-authoritative for prompt composition.
+
+    The canonical prompt composition path is ``PromptAssetLoader`` +
+    future ``PromptAssembler`` (``src/core/prompt_asset_loader.py``).
+    This legacy builder predates the prompt compiler path and should not
+    be extended for new prompt-assembly use cases.
+    """
     """Wrapper around LangChain PromptTemplate with fallback and external system prompt."""
 
     def __init__(self, system_filename: str = "system_stock_assistant-vn.txt"):

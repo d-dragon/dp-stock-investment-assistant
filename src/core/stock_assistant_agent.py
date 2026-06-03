@@ -15,9 +15,12 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import pathlib
 import re
 import time
 from typing import Any, Dict, Generator, List, Mapping, Optional
+
+import yaml
 
 try:
     from langchain.agents import create_agent  # type: ignore
@@ -52,6 +55,8 @@ from langchain_openai import ChatOpenAI
 from .data_manager import DataManager
 from .langchain_adapter import build_prompt
 from .model_factory import ModelClientFactory
+from .prompt_asset_loader import PromptAssetLoader
+from .prompt_types import PromptSelection, SelectionTuple
 from .tools.registry import ToolRegistry, get_tool_registry
 from .types import AgentResponse, ResponseStatus, TokenUsage, ToolCall
 
@@ -85,6 +90,9 @@ class StockAssistantAgent:
     """
     
     # System prompt for the ReAct agent
+    # DEPRECATED: retained as fallback alias during M1 observation window;
+    # remove after PS-04 verification when PromptAssetLoader is the
+    # authoritative prompt source.
     REACT_SYSTEM_PROMPT = """You are a professional stock investment assistant.
 You help users with stock analysis, price lookups, technical analysis, and investment research.
 
@@ -109,6 +117,7 @@ If you don't have a tool for a specific request, provide helpful general guidanc
         tool_registry: Optional[ToolRegistry] = None,
         checkpointer: Optional[Any] = None,
         logger: Optional[logging.Logger] = None,
+        prompt_asset_loader: Optional[PromptAssetLoader] = None,
     ) -> None:
         """Initialize StockAssistantAgent.
         
@@ -118,19 +127,19 @@ If you don't have a tool for a specific request, provide helpful general guidanc
             tool_registry: Optional ToolRegistry (defaults to singleton)
             checkpointer: Optional LangGraph checkpointer for session memory (e.g., MongoDBSaver)
             logger: Optional logger instance
+            prompt_asset_loader: Optional PromptAssetLoader for resolved prompt assets.
+                When provided, the agent uses it as the authoritative prompt source (PS-04).
+                When ``None``, falls back to ``_load_system_prompt()`` (pre-PS-04 transition).
         """
         self.config = config
         self.data_manager = data_manager
         self.logger = logger or logging.getLogger(__name__)
         self._checkpointer = checkpointer  # Store checkpointer for session-aware queries
+        self._prompt_asset_loader = prompt_asset_loader
         
         # Initialize cache backend
         from utils.cache import CacheBackend
         self.cache = CacheBackend.from_config(config, logger=self.logger)
-        
-        # Don't override config with cached values - let OpenAIModelClient load fresh from .env
-        # The cache should only be used INSIDE OpenAIModelClient for runtime optimization, 
-        # not for initial config loading
         
         # Initialize tool registry
         self._tool_registry = tool_registry or get_tool_registry(logger=self.logger)
@@ -141,9 +150,216 @@ If you don't have a tool for a specific request, provide helpful general guidanc
         # Preload default client (for model info)
         self._client = ModelClientFactory.get_client(self.config)
         
+        # Load the system prompt
+        if self._prompt_asset_loader is not None:
+            # PS-04 path: use PromptAssetLoader as authoritative prompt source
+            self._current_prompt = self._prompt_asset_loader.resolve(
+                SelectionTuple(
+                    agent_role="react_analyst",
+                    selection_mode="fixed",
+                    requested_version="1.0.0",
+                )
+            )
+            self._prompt_content = (
+                # Read the resolved asset content from disk
+                pathlib.Path(__file__).parent.parent
+                / "prompts"
+                / self._current_prompt.selected_assets[0]
+            ).read_text(encoding="utf-8")
+            self.logger.info(
+                "PromptAssetLoader resolved: %s v%s (%s) — fallback=%s",
+                self._current_prompt.selected_assets[0],
+                self._current_prompt.prompt_version,
+                self._current_prompt.prompt_variant,
+                self._current_prompt.fallback_used,
+            )
+        else:
+            # Pre-PS-04 transition path: direct file read with inline fallback
+            self._current_prompt, self._prompt_content = self._load_system_prompt()
+        
         # Build the ReAct agent
         self._agent_executor = self._build_agent_executor()
-    
+
+    def _load_system_prompt(self) -> tuple[PromptSelection, str]:
+        """Load the system prompt from the externalized prompt asset.
+
+        Reads ``src/prompts/system/react_analyst.md``, parses frontmatter,
+        and returns a ``(PromptSelection, content)`` tuple. Falls back to the
+        hardcoded ``REACT_SYSTEM_PROMPT`` constant when the file is missing
+        (pre-PS-04 safety net).
+
+        Note:
+            This is an intermediate step. Phase 4 (T019) replaces this
+            method with ``PromptAssetLoader.resolve()``.
+        """
+        prompt_path = pathlib.Path(__file__).parent.parent / "prompts" / "system" / "react_analyst.md"
+        try:
+            text = prompt_path.read_text(encoding="utf-8")
+        except FileNotFoundError:
+            self.logger.warning(
+                "Prompt asset not found at %s. Falling back to inline REACT_SYSTEM_PROMPT.",
+                prompt_path,
+            )
+            self.logger.warning(
+                "REACT_SYSTEM_PROMPT is DEPRECATED — remove after PS-04 verification "
+                "(PromptAssetLoader is the authoritative prompt source)."
+            )
+            return (
+                PromptSelection(
+                    selected_assets=["<inline>"],
+                    prompt_version="0.0.0",
+                    prompt_variant="inline_fallback",
+                    selection_mode="fixed",
+                    fallback_used=True,
+                    degraded_reason=f"Prompt asset {prompt_path} not found",
+                    trace_metadata={},
+                ),
+                self.REACT_SYSTEM_PROMPT,
+            )
+
+        # Split frontmatter from content
+        if text.startswith("---"):
+            parts = text.split("---", 2)
+            if len(parts) < 3:
+                self.logger.warning(
+                    "Malformed frontmatter in %s (missing closing ---). Falling back.",
+                    prompt_path,
+                )
+                return (
+                    PromptSelection(
+                        selected_assets=["<inline>"],
+                        prompt_version="0.0.0",
+                        prompt_variant="inline_fallback",
+                        selection_mode="fixed",
+                        fallback_used=True,
+                        degraded_reason=f"Malformed frontmatter in {prompt_path}",
+                        trace_metadata={},
+                    ),
+                    self.REACT_SYSTEM_PROMPT,
+                )
+            raw_frontmatter = parts[1].strip()
+            content = parts[2].strip()
+        else:
+            self.logger.warning(
+                "No frontmatter delimiters in %s. Falling back.", prompt_path,
+            )
+            return (
+                PromptSelection(
+                    selected_assets=["<inline>"],
+                    prompt_version="0.0.0",
+                    prompt_variant="inline_fallback",
+                    selection_mode="fixed",
+                    fallback_used=True,
+                    degraded_reason=f"No frontmatter in {prompt_path}",
+                    trace_metadata={},
+                ),
+                self.REACT_SYSTEM_PROMPT,
+            )
+
+        # Parse YAML frontmatter
+        try:
+            frontmatter = yaml.safe_load(raw_frontmatter)
+        except yaml.YAMLError as exc:
+            self.logger.warning(
+                "Failed to parse frontmatter in %s: %s. Falling back.", prompt_path, exc,
+            )
+            return (
+                PromptSelection(
+                    selected_assets=["<inline>"],
+                    prompt_version="0.0.0",
+                    prompt_variant="inline_fallback",
+                    selection_mode="fixed",
+                    fallback_used=True,
+                    degraded_reason=f"Frontmatter parse error in {prompt_path}: {exc}",
+                    trace_metadata={},
+                ),
+                self.REACT_SYSTEM_PROMPT,
+            )
+
+        if not isinstance(frontmatter, dict):
+            self.logger.warning(
+                "Frontmatter in %s is not a mapping. Falling back.", prompt_path,
+            )
+            return (
+                PromptSelection(
+                    selected_assets=["<inline>"],
+                    prompt_version="0.0.0",
+                    prompt_variant="inline_fallback",
+                    selection_mode="fixed",
+                    fallback_used=True,
+                    degraded_reason=f"Invalid frontmatter type in {prompt_path}",
+                    trace_metadata={},
+                ),
+                self.REACT_SYSTEM_PROMPT,
+            )
+
+        version = frontmatter.get("version", "0.0.0")
+        variant = frontmatter.get("variant", "unknown")
+        agent_role = frontmatter.get("agent_role", "unknown")
+
+        self.logger.info(
+            "Loaded prompt asset: %s v%s (%s) — role=%s",
+            prompt_path.name, version, variant, agent_role,
+        )
+
+        trace_meta = {
+            "prompt_version": version,
+            "prompt_variant": variant,
+            "prompt_selection_mode": "fixed",
+            "agent_role": agent_role,
+        }
+
+        return (
+            PromptSelection(
+                selected_assets=["system/react_analyst.md"],
+                prompt_version=version,
+                prompt_variant=variant,
+                selection_mode="fixed",
+                fallback_used=False,
+                degraded_reason=None,
+                trace_metadata=trace_meta,
+            ),
+            content,
+        )
+
+    def _inject_prompt_metadata(self) -> Dict[str, Any]:
+        """Build metadata dict from the resolved prompt selection.
+
+        Returns a dict containing prompt identity fields suitable for
+        inclusion in response metadata and LangSmith trace tags.
+
+        Always populated regardless of LangSmith connectivity (M1-NFR-004).
+        """
+        meta = dict(self._current_prompt.trace_metadata) if self._current_prompt.trace_metadata else {}
+        meta["prompt_version"] = self._current_prompt.prompt_version
+        meta["prompt_variant"] = self._current_prompt.prompt_variant
+        meta["prompt_selection_mode"] = self._current_prompt.selection_mode
+        meta["fallback_used"] = self._current_prompt.fallback_used
+        if self._current_prompt.fallback_used and self._current_prompt.degraded_reason:
+            meta["degraded_reason"] = self._current_prompt.degraded_reason
+
+        # Add model provider/name from the current client
+        try:
+            client = self._client
+            if hasattr(client, "_provider"):
+                meta["model_provider"] = client._provider
+            elif hasattr(client, "provider"):
+                meta["model_provider"] = client.provider
+            else:
+                meta["model_provider"] = self.config.get("model_provider", "openai")
+
+            if hasattr(client, "_model_name"):
+                meta["model_name"] = client._model_name
+            elif hasattr(client, "model_name"):
+                meta["model_name"] = client.model_name
+            else:
+                meta["model_name"] = self.config.get("openai", {}).get("model", "gpt-4")
+        except Exception:
+            meta["model_provider"] = self.config.get("model_provider", "openai")
+            meta["model_name"] = self.config.get("openai", {}).get("model", "gpt-4")
+
+        return meta
+
     def _initialize_tools(self) -> None:
         """Initialize and register tools into the ToolRegistry.
         
@@ -235,10 +451,17 @@ If you don't have a tool for a specific request, provide helpful general guidanc
             # Create ReAct agent using langchain.agents.create_agent
             # Migrated from deprecated langgraph.prebuilt.create_react_agent (LangGraph v1.0)
             # Pass checkpointer if available for session-aware memory
+            # Prompt source: externalized asset via self._current_prompt (M1 PS-04)
+            system_prompt_text = self._prompt_content
+            if self._current_prompt.fallback_used:
+                self.logger.warning(
+                    "Using inline fallback prompt — asset resolution failed: %s",
+                    self._current_prompt.degraded_reason,
+                )
             agent = create_agent(
                 model=llm,
                 tools=enabled_tools,
-                system_prompt=self.REACT_SYSTEM_PROMPT,
+                system_prompt=system_prompt_text,
                 checkpointer=self._checkpointer,  # None if not configured
                 name="stock_assistant",
             )
@@ -468,6 +691,26 @@ If you don't have a tool for a specific request, provide helpful general guidanc
             if conversation_id and self._checkpointer:
                 invoke_config = {"configurable": {"thread_id": conversation_id}}
                 self.logger.debug(f"Conversation-aware query with thread_id: {conversation_id}")
+            
+            # Inject prompt metadata into LangSmith trace tags (M1-FR-011)
+            # Wrap in try/except so LangSmith failures degrade silently (M1-NFR-004)
+            try:
+                prompt_meta = self._inject_prompt_metadata()
+                trace_tags = {
+                    "prompt_version": prompt_meta.get("prompt_version", ""),
+                    "prompt_variant": prompt_meta.get("prompt_variant", ""),
+                    "prompt_selection_mode": prompt_meta.get("prompt_selection_mode", ""),
+                    "agent_role": "react_analyst",
+                    "model_provider": prompt_meta.get("model_provider", ""),
+                    "model_name": prompt_meta.get("model_name", ""),
+                }
+                if invoke_config is None:
+                    invoke_config = {"configurable": {"tags": trace_tags}}
+                else:
+                    invoke_config.setdefault("configurable", {})["tags"] = trace_tags
+            except Exception:
+                # LangSmith unavailable — degrade silently (M1-NFR-004)
+                self.logger.debug("Failed to inject LangSmith trace tags (non-critical)")
             
             # LangGraph agent uses messages format
             result = self._agent_executor.invoke(

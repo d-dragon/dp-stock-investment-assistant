@@ -62,7 +62,7 @@ langchain:
   # LangSmith Tracing Configuration
   # Enables trace visualization in LangSmith Studio
   tracing:
-    enabled: false            # Enable for local Studio development
+    enabled: true             # Enable for local Studio development
     project: "dp-stock-assistant"  # Project name in LangSmith UI
     api_key: ""               # Set via LANGSMITH_API_KEY env var
     endpoint: "https://api.smith.langchain.com"  # LangSmith API endpoint
@@ -80,7 +80,12 @@ app:
   log_level: "INFO"
   cache_enabled: true
   max_history: 100
-
+logging:
+  level: DEBUG
+  loggers:
+    langgraph.checkpoint: DEBUG
+    services.conversation_service: DEBUG
+    
 # Analysis Settings
 analysis:
   default_period: "1y"
@@ -96,12 +101,13 @@ export:
   default_format: "pdf"
   output_directory: "reports"
   include_charts: true
+# config/config.yaml
 
 database:
   # MongoDB Configuration
   mongodb:
     enabled: true
-    connection_string: "mongodb://username:password@hostname:port/stock_assistant?retryWrites=true&w=majority"
+    connection_string: "mongodb://stockadmin:stockpassword@localhost:27017/stock_assistant?retryWrites=true&w=majority"
     database_name: "stock_assistant"
   
   # Redis Configuration
@@ -110,14 +116,14 @@ database:
     host: "localhost"
     port: 6379
     db: 0
-    password: ""  # Optional
+    password: "your_redis_password"  # Optional
     ssl: false
     ttl:
-      price_data: 60
-      historical_data: 3600
-      fundamental_data: 86400
-      technical_data: 900
-      reports: 43200
+      price_data: 60  # seconds
+      historical_data: 3600  # 1 hour
+      fundamental_data: 86400  # 24 hours
+      technical_data: 900  # 15 minutes
+      reports: 43200  # 12 hours
 
 # Prompt System Configuration (M1 — Prompt Runtime Parity)
 # Controls prompt asset resolution, selection mode, and version management.

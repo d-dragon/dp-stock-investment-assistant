@@ -114,6 +114,14 @@ def create_chat_blueprint(context: "APIRouteContext") -> Blueprint:
             if conversation_id:
                 result['conversation_id'] = conversation_id
 
+            # Inject prompt metadata (M1 — PS-05)
+            # Always populated regardless of LangSmith connectivity (M1-NFR-004)
+            try:
+                prompt_meta = agent._inject_prompt_metadata()
+                result['metadata'] = prompt_meta
+            except Exception:
+                logger.debug("Failed to inject prompt metadata (non-critical)")
+
             return jsonify(result), 200
         except ArchivedConversationError as exc:
             logger.warning(f"Rejected message to archived conversation: {exc.conversation_id}")

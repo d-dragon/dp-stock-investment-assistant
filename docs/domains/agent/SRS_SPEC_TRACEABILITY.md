@@ -30,6 +30,7 @@ For prompt-system entries that do not yet have a dedicated `specs/*` artifact, t
 | `1.5` | `2026-04-13` | Added prompt-system trace entries and updated the governing SRS baseline to v2.3. |
 | `1.6` | `2026-05-21` | Updated the governing SRS baseline to v2.6 and added prompt-governance trace entries for FR-1.4.10–1.4.16, FR-1.5.6, NFR-5.2.8–5.2.11, and AC-8.5–8.11. |
 | `1.7` | `2026-05-22` | Repointed prompt-system reverse-trace entries from the missing prompt-governance spec reference to existing design-governance artifacts in the proposal, roadmap, benchmark review, and ADR set. |
+| `1.8` | `2026-06-03` | Updated M1-mapped prompt-system entries (FR-1.4.5, FR-1.4.6, FR-1.4.8, FR-1.4.16, NFR-5.2.5–5.2.9, NFR-6.2.3, AC-8.1, AC-8.2) from `clarified`/`unmapped` to `implemented` with SRS v2.7 baseline. Pointed linked spec references to `specs/prompt-system-milestone1/spec.md`.
 
 ## Family Index
 
@@ -70,10 +71,10 @@ Mapped: `17/37`. Unmapped: `20`.
 | [FR-1.4.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L171) | [PROMPT_SYSTEM_RESEARCH_PROPOSAL.md](PROMPT_SYSTEM_RESEARCH_PROPOSAL.md) | `clarified` | `current` |
 | [FR-1.4.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L172) | [PROMPT_SYSTEM_RESEARCH_PROPOSAL.md](PROMPT_SYSTEM_RESEARCH_PROPOSAL.md) | `clarified` | `current` |
 | [FR-1.4.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L173) | [PROMPT_SYSTEM_RESEARCH_PROPOSAL.md](PROMPT_SYSTEM_RESEARCH_PROPOSAL.md) | `clarified` | `current` |
-| [FR-1.4.5](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L174) | [ADR-AGENT-003-EXTERNALIZE-VERSION-PROMPT-ASSETS.md](DECISIONS/ADR-AGENT-003-EXTERNALIZE-VERSION-PROMPT-ASSETS.md) | `clarified` | `current` |
-| [FR-1.4.6](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L175) | [ADR-AGENT-003-EXTERNALIZE-VERSION-PROMPT-ASSETS.md](DECISIONS/ADR-AGENT-003-EXTERNALIZE-VERSION-PROMPT-ASSETS.md) | `clarified` | `current` |
+| [FR-1.4.5](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L174) | [prompt-system-milestone1 spec.md](../../../specs/prompt-system-milestone1/spec.md) | `implemented` | `2.7` |
+| [FR-1.4.6](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L175) | [prompt-system-milestone1 spec.md](../../../specs/prompt-system-milestone1/spec.md) | `implemented` | `2.7` |
 | [FR-1.4.7](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L176) | [ADR-AGENT-002-SKILLS-PATTERN-PROMPT-COMPOSITION.md](DECISIONS/ADR-AGENT-002-SKILLS-PATTERN-PROMPT-COMPOSITION.md) | `clarified` | `current` |
-| [FR-1.4.8](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L177) | [PROMPT_SYSTEM_RESEARCH_PROPOSAL.md](PROMPT_SYSTEM_RESEARCH_PROPOSAL.md) | `clarified` | `current` |
+| [FR-1.4.8](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L177) | [prompt-system-milestone1 spec.md](../../../specs/prompt-system-milestone1/spec.md) | `implemented` | `2.7` |
 | [FR-1.4.9](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L178) | [PHASE_2_AGENT_ENHANCEMENT_ROADMAP.md](PHASE_2_AGENT_ENHANCEMENT_ROADMAP.md) | `clarified` | `current` |
 | [FR-1.4.10](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L179) | [PROMPT_SYSTEM_RESEARCH_PROPOSAL.md](PROMPT_SYSTEM_RESEARCH_PROPOSAL.md) | `clarified` | `current` |
 | [FR-1.4.11](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L180) | [PROMPT_SYSTEM_RESEARCH_PROPOSAL.md](PROMPT_SYSTEM_RESEARCH_PROPOSAL.md) | `clarified` | `current` |
@@ -81,7 +82,7 @@ Mapped: `17/37`. Unmapped: `20`.
 | [FR-1.4.13](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L182) | [PROMPT_SYSTEM_RESEARCH_PROPOSAL.md](PROMPT_SYSTEM_RESEARCH_PROPOSAL.md) | `clarified` | `current` |
 | [FR-1.4.14](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L183) | [PROMPT_SYSTEM_RESEARCH_PROPOSAL.md](PROMPT_SYSTEM_RESEARCH_PROPOSAL.md) | `clarified` | `current` |
 | [FR-1.4.15](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L184) | [PROMPT_SYSTEM_RESEARCH_PROPOSAL.md](PROMPT_SYSTEM_RESEARCH_PROPOSAL.md) | `clarified` | `current` |
-| [FR-1.4.16](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L185) | [PROMPT_SYSTEM_RESEARCH_PROPOSAL.md](PROMPT_SYSTEM_RESEARCH_PROPOSAL.md) | `clarified` | `current` |
+| [FR-1.4.16](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L185) | [prompt-system-milestone1 spec.md](../../../specs/prompt-system-milestone1/spec.md) | `implemented` | `2.7` |
 | [FR-1.5.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L196) | `-` | `unmapped` | `unmapped` |
 | [FR-1.5.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L197) | `-` | `unmapped` | `unmapped` |
 | [FR-1.5.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L198) | `-` | `unmapped` | `unmapped` |
@@ -370,11 +371,11 @@ Mapped: `4/22`. Unmapped: `18`.
 | [NFR-5.2.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L689) | `-` | `unmapped` | `unmapped` |
 | [NFR-5.2.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L690) | `-` | `unmapped` | `unmapped` |
 | [NFR-5.2.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L691) | `-` | `unmapped` | `unmapped` |
-| [NFR-5.2.5](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L692) | `-` | `unmapped` | `unmapped` |
-| [NFR-5.2.6](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L693) | `-` | `unmapped` | `unmapped` |
-| [NFR-5.2.7](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L694) | `-` | `unmapped` | `unmapped` |
-| [NFR-5.2.8](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L695) | [PROMPT_SYSTEM_RESEARCH_PROPOSAL.md](PROMPT_SYSTEM_RESEARCH_PROPOSAL.md) | `clarified` | `current` |
-| [NFR-5.2.9](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L696) | [PROMPT_SYSTEM_RESEARCH_PROPOSAL.md](PROMPT_SYSTEM_RESEARCH_PROPOSAL.md) | `clarified` | `current` |
+| [NFR-5.2.5](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L692) | [prompt-system-milestone1 spec.md](../../../specs/prompt-system-milestone1/spec.md) | `implemented` | `2.7` |
+| [NFR-5.2.6](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L693) | [prompt-system-milestone1 spec.md](../../../specs/prompt-system-milestone1/spec.md) | `implemented` | `2.7` |
+| [NFR-5.2.7](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L694) | [prompt-system-milestone1 spec.md](../../../specs/prompt-system-milestone1/spec.md) | `implemented` | `2.7` |
+| [NFR-5.2.8](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L695) | [prompt-system-milestone1 spec.md](../../../specs/prompt-system-milestone1/spec.md) | `implemented` | `2.7` |
+| [NFR-5.2.9](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L696) | [prompt-system-milestone1 spec.md](../../../specs/prompt-system-milestone1/spec.md) | `implemented` | `2.7` |
 | [NFR-5.2.10](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L697) | [PROMPT_SYSTEM_RESEARCH_PROPOSAL.md](PROMPT_SYSTEM_RESEARCH_PROPOSAL.md) | `clarified` | `current` |
 | [NFR-5.2.11](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L698) | [PROMPT_SYSTEM_RESEARCH_PROPOSAL.md](PROMPT_SYSTEM_RESEARCH_PROPOSAL.md) | `clarified` | `current` |
 | [NFR-5.3.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L705) | `-` | `unmapped` | `unmapped` |
@@ -397,7 +398,7 @@ Mapped: `1/13`. Unmapped: `12`.
 | [NFR-6.1.5](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L725) | `-` | `unmapped` | `unmapped` |
 | [NFR-6.2.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L732) | `-` | `unmapped` | `unmapped` |
 | [NFR-6.2.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L733) | `-` | `unmapped` | `unmapped` |
-| [NFR-6.2.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L734) | `-` | `unmapped` | `unmapped` |
+| [NFR-6.2.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L734) | [prompt-system-milestone1 spec.md](../../../specs/prompt-system-milestone1/spec.md) | `implemented` | `2.7` |
 | [NFR-6.2.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L735) | `-` | `unmapped` | `unmapped` |
 | [NFR-6.3.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L742) | `-` | `unmapped` | `unmapped` |
 | [NFR-6.3.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L743) | `-` | `unmapped` | `unmapped` |
@@ -513,8 +514,8 @@ Mapped: `7/11`. Unmapped: `4`.
 
 | SRS Item | Linked Spec | Current Status | Sync Status |
 |----------|-------------|----------------|-------------|
-| [AC-8.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L836) | `-` | `unmapped` | `unmapped` |
-| [AC-8.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L837) | `-` | `unmapped` | `unmapped` |
+| [AC-8.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L836) | [prompt-system-milestone1 spec.md](../../../specs/prompt-system-milestone1/spec.md) | `implemented` | `2.7` |
+| [AC-8.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L837) | [prompt-system-milestone1 spec.md](../../../specs/prompt-system-milestone1/spec.md) | `implemented` | `2.7` |
 | [AC-8.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L838) | `-` | `unmapped` | `unmapped` |
 | [AC-8.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L839) | `-` | `unmapped` | `unmapped` |
 | [AC-8.5](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L840) | [PROMPT_SYSTEM_BENCHMARK_REVIEW.md](PROMPT_SYSTEM_BENCHMARK_REVIEW.md) | `clarified` | `current` |
