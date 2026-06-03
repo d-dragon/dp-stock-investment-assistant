@@ -198,8 +198,11 @@ The workflow is intentionally iterative rather than waterfall. A governed change
 
 ### 3.1 SDLC Loop Overview
 
+The following diagram illustrates the iterative Spec-Driven Development (SDD) lifecycle loop, highlighting the transitions between phases, quality gates, and synchronization checkpoints.
+
 ```mermaid
 flowchart LR
+  %% Main Flow
   RQ([Requirements and Architecture]) -->|Scoped| SP[Spec Authoring and Planning]
   SP -->|Decision-ready| GT{{Readiness and Review}}
   GT -->|Approved| DV[Delivery and Verification]
@@ -219,17 +222,28 @@ flowchart LR
   DV --- DVN
   SY --- SYN
 
-  classDef neutral fill:#F8FAFC,stroke:#64748B,stroke-width:1px,color:#0F172A;
-  classDef core fill:#E8F1FF,stroke:#2563EB,stroke-width:1px,color:#0F172A;
-  classDef gate fill:#FFF7E6,stroke:#D97706,stroke-width:1px,color:#0F172A;
-  classDef sync fill:#ECFDF3,stroke:#15803D,stroke-width:1px,color:#0F172A;
-  classDef note fill:#FFFFFF,stroke:#94A3B8,stroke-width:1px,stroke-dasharray: 4 4,color:#0F172A;
+  %% Legend Subgraph
+  subgraph Legend ["Visual Legend"]
+    direction TB
+    L_Neutral([📍 Loop Boundary State Node])
+    L_Core[⚙️ Main Delivery Phase Node]
+    L_Gate{{🔍 Quality or Review Gate Node}}
+    L_Sync[(🔗 Sync & Maintenance Node)]
+    L_Note[📄 Phase Inputs/Outputs Node]
+  end
 
-  class RQ,FB neutral;
-  class SP,DV core;
-  class GT gate;
-  class SY sync;
-  class RQN,SPN,GTN,DVN,SYN note;
+  %% Styling Definitions
+  classDef neutral fill:#F1F5F9,stroke:#64748B,stroke-width:2px,color:#0F172A;
+  classDef core fill:#EFF6FF,stroke:#3B82F6,stroke-width:2px,color:#1E3A8A;
+  classDef gate fill:#FFFBEB,stroke:#F59E0B,stroke-width:2px,color:#78350F;
+  classDef sync fill:#ECFDF5,stroke:#10B981,stroke-width:2px,color:#064E3B;
+  classDef note fill:#FFFFFF,stroke:#94A3B8,stroke-width:1px,stroke-dasharray: 4 4,color:#475569;
+
+  class RQ,FB,L_Neutral neutral;
+  class SP,DV,L_Core core;
+  class GT,L_Gate gate;
+  class SY,L_Sync sync;
+  class RQN,SPN,GTN,DVN,SYN,L_Note note;
 ```
 
 Verification and synchronization are not terminal stages in this repository. They close the loop by refreshing the governed baseline, so the next clarification, plan revision, defect fix, or feature cycle starts from current specs, current contracts, current QA evidence, and current traceability.
@@ -252,21 +266,21 @@ Testing and QA are woven into the loop rather than deferred to the end. Steps `1
 
 | Loop phase | QA intent | Repository evidence |
 |------------|-----------|---------------------|
-| Requirements and Architecture | Define acceptance boundaries, testability expectations, affected non-functional constraints, and delivery impacts | [../../docs/testing/VERIFICATION_AND_TRACEABILITY_STRATEGY.md](../../docs/testing/VERIFICATION_AND_TRACEABILITY_STRATEGY.md)<br/>requirements and architecture inputs used by the feature |
-| Spec Authoring and Planning | Turn requirements into verifiable acceptance criteria, planned test coverage, and expected infrastructure or deployment impact | [../../docs/testing/API_TEST_TOOL_COMPARISON_REPORT.md](../../docs/testing/API_TEST_TOOL_COMPARISON_REPORT.md)<br/>`specs/feature/spec.md`<br/>`specs/feature/plan.md` |
+| Requirements and Architecture | Define acceptance boundaries, testability expectations, affected non-functional constraints, and delivery impacts | [VERIFICATION_AND_TRACEABILITY_STRATEGY.md](../testing/VERIFICATION_AND_TRACEABILITY_STRATEGY.md)<br/>requirements and architecture inputs used by the feature |
+| Spec Authoring and Planning | Turn requirements into verifiable acceptance criteria, planned test coverage, and expected infrastructure or deployment impact | [API_TEST_TOOL_COMPARISON_REPORT.md](../testing/API_TEST_TOOL_COMPARISON_REPORT.md)<br/>`specs/feature/spec.md`<br/>`specs/feature/plan.md` |
 | Readiness and Review | Check that planned tasks, traceability, review criteria, and QA scope are strong enough before implementation begins | `specs/feature/tasks.md`<br/>`specs/feature/analysis.md`<br/>readiness and review findings |
-| Delivery and Verification | Execute and record regression, runtime, performance, and security results against the approved plan | `tests/test_*.py`<br/>[../../tests/api/](../../tests/api/)<br/>[../../tests/integration/](../../tests/integration/)<br/>[../../tests/performance/](../../tests/performance/)<br/>[../../tests/security/](../../tests/security/)<br/>[../../tests/API tests.md](../../tests/API%20tests.md)<br/>[../../docs/testing/backend-api-service/HOWTO_PYTEST_RUNTIME_API_INTEGRATION.md](../../docs/testing/backend-api-service/HOWTO_PYTEST_RUNTIME_API_INTEGRATION.md)<br/>`specs/feature/review.md` |
-| Synchronization and Maintenance | Preserve QA outcomes as governed evidence and sync all affected contracts, trace links, and maintenance state | [../../specs/spec-traceability.yaml](../../specs/spec-traceability.yaml)<br/>[../../specs/spec-sync-status.md](../../specs/spec-sync-status.md)<br/>[../../docs/domains/agent/SRS_SPEC_TRACEABILITY.md](../../docs/domains/agent/SRS_SPEC_TRACEABILITY.md)<br/>[../../docs/openapi.yaml](../../docs/openapi.yaml) |
+| Delivery and Verification | Execute and record regression, runtime, performance, and security results against the approved plan | `tests/test_*.py`<br/>[api/](../../tests/api/)<br/>[integration/](../../tests/integration/)<br/>[performance/](../../tests/performance/)<br/>[security/](../../tests/security/)<br/>[API tests.md](../../tests/API%20tests.md)<br/>[HOWTO_PYTEST_RUNTIME_API_INTEGRATION.md](../testing/backend-api-service/HOWTO_PYTEST_RUNTIME_API_INTEGRATION.md)<br/>`specs/feature/review.md` |
+| Synchronization and Maintenance | Preserve QA outcomes as governed evidence and sync all affected contracts, trace links, and maintenance state | [spec-traceability.yaml](../../specs/spec-traceability.yaml)<br/>[spec-sync-status.md](../../specs/spec-sync-status.md)<br/>[SRS_SPEC_TRACEABILITY.md](../domains/agent/SRS_SPEC_TRACEABILITY.md)<br/>[openapi.yaml](../openapi.yaml) |
 
 ### 3.2 Artifact-by-Phase Map
 
 | SDLC Phase | Steps | Main Inputs | Main Outputs and Sync Targets |
 |------------|-------|-------------|-------------------------------|
-| Requirements and Architecture | `0-1` | [../../docs/domains/agent/SOFTWARE_REQUIREMENTS_SPECIFICATION.md](../../docs/domains/agent/SOFTWARE_REQUIREMENTS_SPECIFICATION.md)<br/>[../../docs/system/SYSTEM_REQUIREMENTS_SPECIFICATION.md](../../docs/system/SYSTEM_REQUIREMENTS_SPECIFICATION.md)<br/>[../../docs/system/REQUIREMENTS_METHOD_AND_GOVERNANCE.md](../../docs/system/REQUIREMENTS_METHOD_AND_GOVERNANCE.md)<br/>[../../docs/architecture/SYSTEM_OVERVIEW_AND_BOUNDARIES.md](../../docs/architecture/SYSTEM_OVERVIEW_AND_BOUNDARIES.md)<br/>domain technical design docs under `docs/domains/` | Scoped requirement set, affected architecture boundaries, initial acceptance and testability expectations, and expected delivery or operational impact |
-| Spec Authoring and Planning | `2-5` | requirements baseline, architecture references, [../../specs/spec-traceability.yaml](../../specs/spec-traceability.yaml) | `specs/feature/spec.md`<br/>`specs/feature/plan.md`<br/>updated feature-to-SRS mapping, draft QA intent, and expected application or IaC change scope |
+| Requirements and Architecture | `0-1` | [SOFTWARE_REQUIREMENTS_SPECIFICATION.md](../domains/agent/SOFTWARE_REQUIREMENTS_SPECIFICATION.md)<br/>[SYSTEM_REQUIREMENTS_SPECIFICATION.md](../system/SYSTEM_REQUIREMENTS_SPECIFICATION.md)<br/>[REQUIREMENTS_METHOD_AND_GOVERNANCE.md](../system/REQUIREMENTS_METHOD_AND_GOVERNANCE.md)<br/>[SYSTEM_OVERVIEW_AND_BOUNDARIES.md](../architecture/SYSTEM_OVERVIEW_AND_BOUNDARIES.md)<br/>domain technical design docs under [domains/](../domains/) | Scoped requirement set, affected architecture boundaries, initial acceptance and testability expectations, and expected delivery or operational impact |
+| Spec Authoring and Planning | `2-5` | requirements baseline, architecture references, [spec-traceability.yaml](../../specs/spec-traceability.yaml) | `specs/feature/spec.md`<br/>`specs/feature/plan.md`<br/>updated feature-to-SRS mapping, draft QA intent, and expected application or IaC change scope |
 | Readiness and Review | `6-11` | governed spec and plan artifacts, planned test intent, review criteria | `specs/feature/tasks.md`<br/>`specs/feature/analysis.md`<br/>review findings, readiness verdict, QA scope, and expected test coverage |
-| Delivery and Verification | `12-14` | tasks, review findings, [../../docs/testing/VERIFICATION_AND_TRACEABILITY_STRATEGY.md](../../docs/testing/VERIFICATION_AND_TRACEABILITY_STRATEGY.md)<br/>[../../docs/testing/backend-api-service/HOWTO_PYTEST_RUNTIME_API_INTEGRATION.md](../../docs/testing/backend-api-service/HOWTO_PYTEST_RUNTIME_API_INTEGRATION.md) | implemented application changes in `src/` and `frontend/`<br/>IaC artifacts in `IaC/Dockerfile.api`, `IaC/Dockerfile.agent`, `IaC/helm/dp-stock/`, `IaC/infra/terraform/`, and `IaC/ci-cd/`<br/>QA and testing results in `tests/` and `specs/feature/review.md` |
-| Synchronization and Maintenance | `15-17` | delivered code, IaC outputs, QA evidence, review evidence, operational policy, and API contract references | [../../specs/spec-traceability.yaml](../../specs/spec-traceability.yaml)<br/>[../../specs/spec-sync-status.md](../../specs/spec-sync-status.md)<br/>[../../docs/domains/agent/SRS_SPEC_TRACEABILITY.md](../../docs/domains/agent/SRS_SPEC_TRACEABILITY.md)<br/>[../../docs/openapi.yaml](../../docs/openapi.yaml)<br/>updated technical design, release, and maintenance notes<br/>for prompt-system changes: [../../docs/domains/agent/TECHNICAL_DESIGN.md#35-prompt-realization-and-guardrails](../../docs/domains/agent/TECHNICAL_DESIGN.md#35-prompt-realization-and-guardrails), [../../docs/domains/agent/ARCHITECTURE_DESIGN.md](../../docs/domains/agent/ARCHITECTURE_DESIGN.md), [../../docs/domains/agent/PROMPT_SYSTEM_RESEARCH_PROPOSAL.md](../../docs/domains/agent/PROMPT_SYSTEM_RESEARCH_PROPOSAL.md), [../../docs/domains/agent/PHASE_2_AGENT_ENHANCEMENT_ROADMAP.md](../../docs/domains/agent/PHASE_2_AGENT_ENHANCEMENT_ROADMAP.md), and [../../docs/domains/agent/PROMPT_SYSTEM_BENCHMARK_REVIEW.md](../../docs/domains/agent/PROMPT_SYSTEM_BENCHMARK_REVIEW.md) |
+| Delivery and Verification | `12-14` | tasks, review findings, [VERIFICATION_AND_TRACEABILITY_STRATEGY.md](../testing/VERIFICATION_AND_TRACEABILITY_STRATEGY.md)<br/>[HOWTO_PYTEST_RUNTIME_API_INTEGRATION.md](../testing/backend-api-service/HOWTO_PYTEST_RUNTIME_API_INTEGRATION.md) | implemented application changes in `src/` and `frontend/`<br/>IaC artifacts in `IaC/Dockerfile.api`, `IaC/Dockerfile.agent`, `IaC/helm/dp-stock/`, `IaC/infra/terraform/`, and `IaC/ci-cd/`<br/>QA and testing results in `tests/` and `specs/feature/review.md` |
+| Synchronization and Maintenance | `15-17` | delivered code, IaC outputs, QA evidence, review evidence, operational policy, and API contract references | [spec-traceability.yaml](../../specs/spec-traceability.yaml)<br/>[spec-sync-status.md](../../specs/spec-sync-status.md)<br/>[SRS_SPEC_TRACEABILITY.md](../domains/agent/SRS_SPEC_TRACEABILITY.md)<br/>[openapi.yaml](../openapi.yaml)<br/>updated technical design, release, and maintenance notes<br/>for prompt-system changes: [TECHNICAL_DESIGN.md#35-prompt-realization-and-guardrails](../domains/agent/TECHNICAL_DESIGN.md#35-prompt-realization-and-guardrails), [ARCHITECTURE_DESIGN.md](../domains/agent/ARCHITECTURE_DESIGN.md), [PROMPT_SYSTEM_RESEARCH_PROPOSAL.md](../domains/agent/PROMPT_SYSTEM_RESEARCH_PROPOSAL.md), [PHASE_2_AGENT_ENHANCEMENT_ROADMAP.md](../domains/agent/PHASE_2_AGENT_ENHANCEMENT_ROADMAP.md), and [PROMPT_SYSTEM_BENCHMARK_REVIEW.md](../domains/agent/PROMPT_SYSTEM_BENCHMARK_REVIEW.md) |
 
 ### 3.3 18-Step Lifecycle Aligned to the Loop
 
@@ -275,35 +289,138 @@ The 18-step lifecycle below is the detailed execution model inside the SDLC loop
 #### 3.3.1 Requirements and Architecture Foundation
 
 0. **Requirements Baseline**: Define functional and non-functional requirements as traceable SRS items with stable identifiers, measurable behavior, and explicit scope boundaries.
+   - **Mapped Long-Lived Documents**:
+     - [SYSTEM_REQUIREMENTS_SPECIFICATION.md](../system/SYSTEM_REQUIREMENTS_SPECIFICATION.md) (Cross-domain system baseline)
+     - [REQUIREMENTS_METHOD_AND_GOVERNANCE.md](../system/REQUIREMENTS_METHOD_AND_GOVERNANCE.md) (Requirements standards and governance)
+     - [SOFTWARE_REQUIREMENTS_SPECIFICATION.md](../domains/agent/SOFTWARE_REQUIREMENTS_SPECIFICATION.md) (Agent domain specialization)
+   - **Cross-Reference Prompt Hint**:
+     > *Prompt Hint*: "Refer to [SYSTEM_REQUIREMENTS_SPECIFICATION.md](../system/SYSTEM_REQUIREMENTS_SPECIFICATION.md) to locate the exact requirement IDs (e.g., `SR-1.2`) relevant to this change set. Ensure the prompt reads from the upstream baseline, using: 'Based on requirements defined in [SYSTEM_REQUIREMENTS_SPECIFICATION.md](../system/SYSTEM_REQUIREMENTS_SPECIFICATION.md)...'"
+
 1. **Architecture and Operational Design**: Define architectural, technical, and operational specifications that satisfy the requirements and align with repository principles.
+   - **Mapped Long-Lived Documents**:
+     - [SYSTEM_OVERVIEW_AND_BOUNDARIES.md](../architecture/SYSTEM_OVERVIEW_AND_BOUNDARIES.md) (System context and layers)
+     - [RUNTIME_AND_INTEGRATION_FLOWS.md](../architecture/RUNTIME_AND_INTEGRATION_FLOWS.md) (Cross-domain runtime flows)
+     - System architecture decisions in [DECISIONS/](../architecture/DECISIONS/)
+     - [OPERATIONS_AND_RELEASE_POLICY.md](../operations/OPERATIONS_AND_RELEASE_POLICY.md) (Operational limits and policies)
+   - **Cross-Reference Prompt Hint**:
+     > *Prompt Hint*: "Constrain design changes against system boundaries: 'Check [SYSTEM_OVERVIEW_AND_BOUNDARIES.md](../architecture/SYSTEM_OVERVIEW_AND_BOUNDARIES.md) and related ADRs in [DECISIONS/](../architecture/DECISIONS/) to ensure the proposed architectural changes do not violate existing container boundaries or deployment rules.'"
 
 #### 3.3.2 Spec Authoring and Planning
 
 2. **`speckit.constitution`**: Establish or refine the project and feature governance rules that constrain all downstream artifacts and implementation choices.
-3. **`speckit.specify`**: Produce the feature specification, map it back to SRS scope, and publish governed artifacts under [../../specs/](../../specs/).
+   - **Mapped Long-Lived Documents**:
+     - [constitution.md](../../.specify/memory/constitution.md) (Core rules, memory architecture, SOLID rules)
+   - **Cross-Reference Prompt Hint**:
+     > *Prompt Hint*: "Validate rules early: 'Read [constitution.md](../../.specify/memory/constitution.md) and confirm that the proposed feature design respects all 9 Golden Development Rules (especially Rule 1: Security First and Rule 9: API Contract Sync).'"
+
+3. **`speckit.specify`**: Produce the feature specification, map it back to SRS scope, and publish governed artifacts under [specs/](../../specs/).
+   - **Mapped Long-Lived Documents**:
+     - [SYSTEM_REQUIREMENTS_SPECIFICATION.md](../system/SYSTEM_REQUIREMENTS_SPECIFICATION.md)
+     - [spec-traceability.yaml](../../specs/spec-traceability.yaml) (Bidirectional traceability manifest)
+   - **Cross-Reference Prompt Hint**:
+     > *Prompt Hint*: "Bind specs to requirements: 'Link the user stories and scenarios in this specification to the appropriate requirement IDs in [SYSTEM_REQUIREMENTS_SPECIFICATION.md](../system/SYSTEM_REQUIREMENTS_SPECIFICATION.md). Register this coverage mapping in [spec-traceability.yaml](../../specs/spec-traceability.yaml) under the feature entry.'"
+
 4. **`speckit.clarify`**: Resolve ambiguity, missing constraints, open questions, and weak acceptance criteria before the workflow advances.
+   - **Mapped Long-Lived Documents**:
+     - [SYSTEM_REQUIREMENTS_SPECIFICATION.md](../system/SYSTEM_REQUIREMENTS_SPECIFICATION.md)
+     - [constitution.md](../../.specify/memory/constitution.md)
+   - **Cross-Reference Prompt Hint**:
+     > *Prompt Hint*: "Identify gaps: 'Cross-analyze the draft specification against the constraints in [SYSTEM_REQUIREMENTS_SPECIFICATION.md](../system/SYSTEM_REQUIREMENTS_SPECIFICATION.md) and [constitution.md](../../.specify/memory/constitution.md) to detect any missing boundary scenarios. Output a list of clarifying questions to resolve before proceeding.'"
+
 5. **`speckit.plan`**: Generate the technical implementation plan and update SRS-to-spec traceability when scope changes or new coverage is introduced.
+   - **Mapped Long-Lived Documents**:
+     - [SYSTEM_OVERVIEW_AND_BOUNDARIES.md](../architecture/SYSTEM_OVERVIEW_AND_BOUNDARIES.md) (System context and layers)
+     - [RUNTIME_AND_INTEGRATION_FLOWS.md](../architecture/RUNTIME_AND_INTEGRATION_FLOWS.md) (Cross-domain runtime flows)
+     - [TECHNICAL_DESIGN.md](../domains/backend/TECHNICAL_DESIGN.md) (Backend realization rules)
+     - [TECHNICAL_DESIGN.md](../domains/frontend/TECHNICAL_DESIGN.md) (Frontend realization rules)
+     - [TECHNICAL_DESIGN.md](../domains/agent/TECHNICAL_DESIGN.md) (Agent reasoning design)
+     - [openapi.yaml](../openapi.yaml) (Executable REST interface schema)
+   - **Cross-Reference Prompt Hint**:
+     > *Prompt Hint*: "Structure the implementation: 'Generate the plan (`plan.md`) utilizing the architecture constraints in [SYSTEM_OVERVIEW_AND_BOUNDARIES.md](../architecture/SYSTEM_OVERVIEW_AND_BOUNDARIES.md), [RUNTIME_AND_INTEGRATION_FLOWS.md](../architecture/RUNTIME_AND_INTEGRATION_FLOWS.md), domain realization guidelines in [backend/TECHNICAL_DESIGN.md](../domains/backend/TECHNICAL_DESIGN.md), and contract payload schemas in [openapi.yaml](../openapi.yaml) to ensure design conformance.'"
 
 #### 3.3.3 Readiness and Review
 
 6. **`speckit.doctor`**: Validate project health, command surfaces, templates, and repository readiness before deeper execution.
+   - **Mapped Long-Lived Documents**:
+     - Spec Kit configuration assets under [.specify/](../../.specify/) (e.g., [integration.json](../../.specify/integration.json), [extensions.yml](../../.specify/extensions.yml))
+   - **Cross-Reference Prompt Hint**:
+     > *Prompt Hint*: "Verify workspace sanity: 'Confirm that the project's Spec Kit runtime files match [integration.json](../../.specify/integration.json) and verify template files are clean of uncommitted boilerplate.'"
+
 7. **`speckit.checklist`**: Pressure-test specification quality, completeness, and ambiguity using a structured requirements checklist.
+   - **Mapped Long-Lived Documents**:
+     - [REQUIREMENTS_METHOD_AND_GOVERNANCE.md](../system/REQUIREMENTS_METHOD_AND_GOVERNANCE.md) (Quality gate definitions)
+   - **Cross-Reference Prompt Hint**:
+     > *Prompt Hint*: "Perform requirements check: 'Compare this specification (`spec.md`) with the quality gate criteria defined in Section 8 of [REQUIREMENTS_METHOD_AND_GOVERNANCE.md](../system/REQUIREMENTS_METHOD_AND_GOVERNANCE.md) to generate a custom quality checklist.'"
+
 8. **`speckit.tasks`**: Break the approved plan into actionable, dependency-aware implementation tasks.
+   - **Mapped Long-Lived Documents**:
+     - [VERIFICATION_AND_TRACEABILITY_STRATEGY.md](../testing/VERIFICATION_AND_TRACEABILITY_STRATEGY.md) (Test execution expectations)
+   - **Cross-Reference Prompt Hint**:
+     > *Prompt Hint*: "Inject QA tasks: 'Based on testing expectations in [VERIFICATION_AND_TRACEABILITY_STRATEGY.md](../testing/VERIFICATION_AND_TRACEABILITY_STRATEGY.md), generate corresponding testing tasks for Pytest runtime integration and manual REST suite validation.'"
+
 9. **`speckit.validate`**: Validate traceability, artifact completeness, and workflow readiness before implementation begins.
+   - **Mapped Long-Lived Documents**:
+     - [spec-traceability.yaml](../../specs/spec-traceability.yaml)
+   - **Cross-Reference Prompt Hint**:
+     > *Prompt Hint*: "Validate task mappings: 'Check that every task in `tasks.md` maps directly back to a specification requirement and matches the active status gates in [spec-traceability.yaml](../../specs/spec-traceability.yaml).'"
+
 10. **`speckit.analyze`**: Run cross-artifact consistency analysis across the specification, plan, and task set.
+    - **Mapped Long-Lived Documents**:
+      - [constitution.md](../../.specify/memory/constitution.md)
+    - **Cross-Reference Prompt Hint**:
+      > *Prompt Hint*: "Cross-analyze inconsistencies: 'Run cross-artifact analysis against [constitution.md](../../.specify/memory/constitution.md) guidelines to surface any code layout or paradigm contradictions between `spec.md`, `plan.md`, and `tasks.md`.'"
+
 11. **Review Gate**: Conduct structured pre-implementation review. Historical notes may call this `speckit.review`, but the current repository review path is typically `speckit.fleet.review` or an equivalent governed review step.
+    - **Mapped Long-Lived Documents**:
+      - [REQUIREMENTS_METHOD_AND_GOVERNANCE.md](../system/REQUIREMENTS_METHOD_AND_GOVERNANCE.md)
+    - **Cross-Reference Prompt Hint**:
+      > *Prompt Hint*: "Simulate fleet review: 'Execute pre-implementation review criteria in Section 11 of [REQUIREMENTS_METHOD_AND_GOVERNANCE.md](../system/REQUIREMENTS_METHOD_AND_GOVERNANCE.md) to verify that tasks are dependency-aware and ready for coding.'"
 
 #### 3.3.4 Delivery and Verification
 
 12. **`speckit.implement`**: Execute the approved implementation plan against the governed artifact set across application code and any required delivery or infrastructure artifacts, including `src/`, `frontend/`, and `IaC/`.
+    - **Mapped Long-Lived Documents**:
+      - [openapi.yaml](../openapi.yaml)
+      - Domain designs under [domains/](../domains/)
+    - **Cross-Reference Prompt Hint**:
+      > *Prompt Hint*: "Drive implementation: 'Code the feature following the generated plan. Strictly conform to interface constraints in [openapi.yaml](../openapi.yaml) and design conventions in [backend/TECHNICAL_DESIGN.md](../domains/backend/TECHNICAL_DESIGN.md).'"
+
 13. **`speckit.verify-tasks`**: Detect phantom completions and verify that tasks marked complete correspond to actual implemented work.
+    - **Mapped Long-Lived Documents**:
+      - Feature tasks in `tasks.md`
+    - **Cross-Reference Prompt Hint**:
+      > *Prompt Hint*: "Detect phantom completions: 'Inspect files updated during implementation to ensure that every task checked off in `tasks.md` has physical, non-stubbed code realization in the codebase.'"
+
 14. **`speckit.verify.run`**: Validate implementation against the specification, plan, tasks, and constitution. This stage should leave governed QA and testing results that can be carried into `review.md`, traceability, and downstream maintenance sync.
+    - **Mapped Long-Lived Documents**:
+      - [constitution.md](../../.specify/memory/constitution.md)
+      - [VERIFICATION_AND_TRACEABILITY_STRATEGY.md](../testing/VERIFICATION_AND_TRACEABILITY_STRATEGY.md)
+    - **Cross-Reference Prompt Hint**:
+      > *Prompt Hint*: "Run verification: 'Verify implementation compliance with [constitution.md](../../.specify/memory/constitution.md) principles and confirm test results conform to evidence policies in [VERIFICATION_AND_TRACEABILITY_STRATEGY.md](../testing/VERIFICATION_AND_TRACEABILITY_STRATEGY.md).'"
 
 #### 3.3.5 Synchronization and Maintenance
 
-15. **Test and Traceability Refresh**: Run project test suites and update [../../specs/spec-traceability.yaml](../../specs/spec-traceability.yaml) whenever delivered scope changes.
+15. **Test and Traceability Refresh**: Run project test suites and update [spec-traceability.yaml](../../specs/spec-traceability.yaml) whenever delivered scope changes.
+    - **Mapped Long-Lived Documents**:
+      - [spec-traceability.yaml](../../specs/spec-traceability.yaml)
+      - [spec-sync-status.md](../../specs/spec-sync-status.md)
+      - [SRS_SPEC_TRACEABILITY.md](../domains/agent/SRS_SPEC_TRACEABILITY.md)
+    - **Cross-Reference Prompt Hint**:
+      > *Prompt Hint*: "Refresh traceability manifests: 'Execute the project's test suite and compile evidence links. Update [spec-traceability.yaml](../../specs/spec-traceability.yaml) status to `verified` and update [spec-sync-status.md](../../specs/spec-sync-status.md) coverage metrics.'"
+
 16. **Maintenance Update**: Keep governed feature artifacts current after delivery, including plan, review, status, and operational notes when behavior evolves.
-17. **Implementation, Specs, and Technical Documentation Synchronization**: Keep code, governed specs, technical documentation, and external contracts such as [../../docs/openapi.yaml](../../docs/openapi.yaml) synchronized over time.
+    - **Mapped Long-Lived Documents**:
+      - Feature spec artifacts (e.g. `specs/<feature>/spec.md`, `specs/<feature>/plan.md`)
+    - **Cross-Reference Prompt Hint**:
+      > *Prompt Hint*: "Synchronize specifications: 'Review code commits since the last deployment. Update specifications under [specs/](../../specs/) so that current behavior and acceptance criteria reflect the exact state of the production codebase.'"
+
+17. **Implementation, Specs, and Technical Documentation Synchronization**: Keep code, governed specs, technical documentation, and external contracts such as [openapi.yaml](../openapi.yaml) synchronized over time.
+    - **Mapped Long-Lived Documents**:
+      - [openapi.yaml](../openapi.yaml)
+      - [SYSTEM_REQUIREMENTS_SPECIFICATION.md](../system/SYSTEM_REQUIREMENTS_SPECIFICATION.md)
+      - Domain designs under [domains/](../domains/)
+    - **Cross-Reference Prompt Hint**:
+      > *Prompt Hint*: "Promote spec learnings to long-lived docs: 'Review the verified specification and implementation learnings. Synchronize any API contract updates in [openapi.yaml](../openapi.yaml) and update realization prose in [backend/TECHNICAL_DESIGN.md](../domains/backend/TECHNICAL_DESIGN.md) or [SYSTEM_REQUIREMENTS_SPECIFICATION.md](../system/SYSTEM_REQUIREMENTS_SPECIFICATION.md).'"
 
 ### 3.4 Workflow Visuals
 
@@ -311,26 +428,34 @@ The diagrams below answer three different workflow questions: where the 18 steps
 
 #### 3.4.1 18-Step Placement in the SDLC Loop
 
+The diagram below displays the sequential mapping of the 18 SDD steps grouped within their corresponding SDLC phases.
+
 ```mermaid
 flowchart TB
-  subgraph F0[Requirements and Architecture]
-    S0[0 Requirements Baseline] --> S1[1 Architecture and Operational Design]
+  %% 18-Step placement in SDLC Loop
+  subgraph F0["📍 Requirements and Architecture"]
+    S0["0 · Requirements Baseline"] --> S1["1 · Architecture and Operational Design"]
   end
 
-  subgraph F1[Spec Authoring and Planning]
-    S2[2 speckit.constitution] --> S3[3 speckit.specify] --> S4[4 speckit.clarify] --> S5[5 speckit.plan]
+  subgraph F1["⚙️ Spec Authoring and Planning"]
+    S2["2 · speckit.constitution"] --> S3["3 · speckit.specify"]
+    S3 --> S4["4 · speckit.clarify"] --> S5["5 · speckit.plan"]
   end
 
-  subgraph F2[Readiness and Review]
-    S6[6 speckit.doctor] --> S7[7 speckit.checklist] --> S8[8 speckit.tasks] --> S9[9 speckit.validate] --> S10[10 speckit.analyze] --> S11[11 review gate]
+  subgraph F2["🔍 Readiness and Review"]
+    S6["6 · speckit.doctor"] --> S7["7 · speckit.checklist"]
+    S7 --> S8["8 · speckit.tasks"] --> S9["9 · speckit.validate"]
+    S9 --> S10["10 · speckit.analyze"] --> S11["11 · review gate"]
   end
 
-  subgraph F3[Delivery, IaC, and Verification]
-    S12[12 speckit.implement] --> S13[13 speckit.verify-tasks] --> S14[14 speckit.verify.run]
+  subgraph F3["⚙️ Delivery and Verification"]
+    S12["12 · speckit.implement"] --> S13["13 · speckit.verify-tasks"]
+    S13 --> S14["14 · speckit.verify.run"]
   end
 
-  subgraph F4[Synchronization and Maintenance]
-    S15[15 tests and traceability refresh] --> S16[16 maintenance update] --> S17[17 docs and contract sync]
+  subgraph F4["🔗 Synchronization and Maintenance"]
+    S15["15 · tests and traceability refresh"] --> S16["16 · maintenance update"]
+    S16 --> S17["17 · docs and contract sync"]
   end
 
   S1 --> S2
@@ -339,60 +464,118 @@ flowchart TB
   S14 --> S15
   S17 --> S0
 
-  classDef core fill:#E8F1FF,stroke:#2563EB,stroke-width:1px,color:#0F172A;
-  classDef gate fill:#FFF7E6,stroke:#D97706,stroke-width:1px,color:#0F172A;
-  classDef sync fill:#ECFDF3,stroke:#15803D,stroke-width:1px,color:#0F172A;
+  %% Legend Subgraph
+  subgraph Legend ["Visual Legend"]
+    direction LR
+    L_F0["📍 Requirements / Architecture"] ~~~ L_F1["⚙️ Core Spec / Plan / Delivery"]
+    L_F1 ~~~ L_F2["🔍 Gate / Review Checkpoint"] ~~~ L_F4["🔗 Sync / Maintenance"]
+  end
 
-  class S2,S3,S4,S5,S8,S12 core;
-  class S6,S7,S9,S10,S11,S13,S14 gate;
-  class S15,S16,S17 sync;
+  %% Styling Definitions
+  classDef neutral fill:#F1F5F9,stroke:#64748B,stroke-width:2px,color:#0F172A;
+  classDef core fill:#EFF6FF,stroke:#3B82F6,stroke-width:2px,color:#1E3A8A;
+  classDef gate fill:#FFFBEB,stroke:#F59E0B,stroke-width:2px,color:#78350F;
+  classDef sync fill:#ECFDF5,stroke:#10B981,stroke-width:2px,color:#064E3B;
+
+  class S0,S1,L_F0 neutral;
+  class S2,S3,S4,S5,S8,S12,L_F1 core;
+  class S6,S7,S9,S10,S11,S13,S14,L_F2 gate;
+  class S15,S16,S17,L_F4 sync;
 ```
 
 #### 3.4.2 Hook and Review Overlay
 
+The diagram below illustrates where custom pre- and post-automation hooks integrate with the core Spec Kit execution commands.
+
 ```mermaid
 flowchart TB
-  BS[Before specify] --> SP[speckit.specify]
-  SP --> AS[After specify]
-  AS --> BP[Before plan]
-  BP --> PL[speckit.plan]
-  PL --> AP[After plan]
-  AP --> BT[Before tasks]
-  BT --> TK[speckit.tasks]
-  TK --> AT[After tasks]
-  AT --> BI[Before implement]
-  BI --> IM[speckit.implement]
-  IM --> AI[After implement]
+  %% Main command chain with hook overlay
+  BS(["📍 Before specify Hook"]) --> SP["⚙️ speckit.specify"]
+  SP --> AS(["📍 After specify Hook"])
+  AS --> BP(["📍 Before plan Hook"])
+  BP --> PL["⚙️ speckit.plan"]
+  PL --> AP(["📍 After plan Hook"])
+  AP --> BT(["📍 Before tasks Hook"])
+  BT --> TK["⚙️ speckit.tasks"]
+  TK --> AT(["📍 After tasks Hook"])
+  AT --> BI(["📍 Before implement Hook"])
+  BI --> IM["⚙️ speckit.implement"]
+  IM --> AI(["📍 After implement Hook"])
 
-  classDef core fill:#E8F1FF,stroke:#2563EB,stroke-width:1px,color:#0F172A;
-  classDef gate fill:#FFF7E6,stroke:#D97706,stroke-width:1px,color:#0F172A;
+  %% Legend
+  subgraph Legend ["Visual Legend"]
+    direction LR
+    L_CMD["⚙️ Core SDD Command"] ~~~ L_Hook(["📍 Automation Hook"])
+  end
 
-  class SP,PL,TK,IM core;
-  class BS,AS,BP,AP,BT,AT,BI,AI gate;
+  %% Styling
+  classDef cmd fill:#EFF6FF,stroke:#3B82F6,stroke-width:2px,color:#1E3A8A;
+  classDef hook fill:#FFF7ED,stroke:#F97316,stroke-width:2px,color:#7C2D12;
+
+  class SP,PL,TK,IM,L_CMD cmd;
+  class BS,AS,BP,AP,BT,AT,BI,AI,L_Hook hook;
 ```
 
 In this repository, the hook sequence usually covers branch setup, memory loading, `doctor`, `validate`, fleet review, verification, and architecture review around the core `specify`, `plan`, `tasks`, and `implement` commands.
 
 #### 3.4.3 Artifact Flow and Synchronization
 
+The diagram below outlines the dependency relationships and generation flow between upstream requirements, working feature specifications, code realization, and final synchronization targets.
+
 ```mermaid
 flowchart TB
-  RQ[Requirements] --> GS[spec.md]
-  DS[Design] --> GS
-  GS --> GP[plan.md]
-  GP --> GT[tasks.md, analysis.md, QA scope]
-  GT --> CODE[Application changes]
-  GT --> IAC[IaC artifacts]
-  CODE --> QA[QA results and review evidence]
-  IAC --> QA
-  GS --> SYNC[Traceability and contract sync]
+  %% Inputs
+  subgraph Inputs ["📍 Upstream Inputs"]
+    RQ["📄 Requirements Baseline"]
+    DS["📄 Technical Design"]
+  end
+
+  %% Working Artifacts
+  subgraph WorkingArea ["⚙️ Downstream Work and Verification"]
+    GS["spec.md"] --> GP["plan.md"]
+    GP --> GT["tasks.md and analysis.md"]
+    GT --> CODE["Application Source Code"]
+    GT --> IAC["IaC Infrastructure Code"]
+    CODE --> QA["🔍 QA Results and Evidence"]
+    IAC --> QA
+  end
+
+  %% Mapping
+  RQ --> GS
+  DS --> GS
+
+  %% Synchronization
+  subgraph SyncArea ["🔗 Traceability and Synchronization"]
+    SYNC["🔗 Traceability and Contract Sync"]
+    SYN1[("🔗 Sync Targets: yaml · OpenAPI · status.md")]
+  end
+
+  GS --> SYNC
   CODE --> SYNC
   IAC --> SYNC
   QA --> SYNC
-  SYNC --> SYN1[Sync targets]
+  SYNC --> SYN1
+
+  %% Legend
+  subgraph Legend ["Visual Legend"]
+    direction LR
+    L_Input["📍 Upstream Input"] ~~~ L_Work["⚙️ Working / Delivery"]
+    L_Work ~~~ L_QA["🔍 QA and Verification"] ~~~ L_Sync[("🔗 Sync Target")]
+  end
+
+  %% Styling
+  classDef input fill:#F8FAFC,stroke:#64748B,stroke-width:2px,color:#0F172A;
+  classDef work fill:#EFF6FF,stroke:#3B82F6,stroke-width:2px,color:#1E3A8A;
+  classDef gate fill:#FFFBEB,stroke:#F59E0B,stroke-width:2px,color:#78350F;
+  classDef sync fill:#ECFDF5,stroke:#10B981,stroke-width:2px,color:#064E3B;
+
+  class RQ,DS,L_Input input;
+  class GS,GP,GT,CODE,IAC,L_Work work;
+  class QA,L_QA gate;
+  class SYNC,SYN1,L_Sync sync;
 ```
 
-The main synchronization targets behind the final node are [../../specs/spec-traceability.yaml](../../specs/spec-traceability.yaml), [../../specs/spec-sync-status.md](../../specs/spec-sync-status.md), [../../docs/domains/agent/SRS_SPEC_TRACEABILITY.md](../../docs/domains/agent/SRS_SPEC_TRACEABILITY.md), and [../../docs/openapi.yaml](../../docs/openapi.yaml). In this repository, the IaC outputs in [../../IaC/](../../IaC/) and the QA results captured in `tests/` plus `specs/feature/review.md` are also part of the governed evidence chain.
+The main synchronization targets behind the final node are [spec-traceability.yaml](../../specs/spec-traceability.yaml), [spec-sync-status.md](../../specs/spec-sync-status.md), [SRS_SPEC_TRACEABILITY.md](../domains/agent/SRS_SPEC_TRACEABILITY.md), and [openapi.yaml](../openapi.yaml). In this repository, the IaC outputs in [IaC/](../../IaC/) and the QA results captured in `tests/` plus `specs/feature/review.md` are also part of the governed evidence chain.
 
 ### 3.5 Command Normalization Notes
 

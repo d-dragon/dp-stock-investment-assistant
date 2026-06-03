@@ -516,9 +516,15 @@ For technical design purposes, the key transition is:
 - from broad prompt changes to bounded route-aware prompt context via the Skills pattern; and
 - from opaque prompt behavior to attributable prompt metadata and guardrail outcomes.
 
-#### 3.5.2 Planned Prompt Compiler Path
+#### 3.5.2 Prompt Compiler Path
 
-The planned prompt compiler path remains `PromptAssetLoader -> PromptAssembler -> ResponseGuardrailMiddleware`. The following views explain the interfaces, call flow, and request-scoped data movement for that path.
+The prompt compiler path is `PromptAssetLoader -> PromptAssembler -> ResponseGuardrailMiddleware`.
+
+**M1 status**: ``PromptAssetLoader`` is **implemented** (``src/core/prompt_asset_loader.py``) with the full
+8-field selection tuple (see §3.5.2.2). ``PromptAssembler`` and ``ResponseGuardrailMiddleware``
+remain planned for M2+.
+
+The following views explain the interfaces, call flow, and request-scoped data movement for that path.
 
 ##### 3.5.2.1 Component Boundaries and Interfaces
 

@@ -429,5 +429,11 @@ This guide is living documentation—update it when you add patterns, services, 
 
 <!-- SPECKIT START -->
 For additional context about technologies to be used, project structure,
-shell commands, and other important information, read the current plan
+shell commands, and other important information, read the current plan.
+
+**Active feature**: `prompt-system-milestone1` (Milestone M1 — Prompt Runtime Parity)
+Plan: `specs/prompt-system-milestone1/plan.md`
+Spec: `specs/prompt-system-milestone1/spec.md`
+Backlog: PS-01 through PS-06
+SRS scope: FR-1.4.5, FR-1.4.6, FR-1.4.8, FR-1.4.16, NFR-5.2.5–5.2.9, NFR-6.2.3, AC-8.1, AC-8.2
 <!-- SPECKIT END -->

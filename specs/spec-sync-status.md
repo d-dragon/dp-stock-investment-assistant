@@ -19,12 +19,14 @@
 | [stm-phase-cde](stm-phase-cde/spec.md#requirements-mandatory) | `mapped` | `partial` | `clarified` | `current` | `n/a` |
 | [001-stm-domain-service-refactor](001-stm-domain-service-refactor/plan.md) | `unmapped` | `n/a` | `unmapped` | `unmapped` | `n/a` |
 | [spec-driven-development-pilot](spec-driven-development-pilot/plan.md#summary) | `mapped` | `partial` | `implemented` | `current` | `42/42` |
+| [prompt-system-milestone1](prompt-system-milestone1/spec.md#requirements-mandatory) | `mapped` | `partial` | `implemented` | `current` | `42/42` |
 
 ## Revision History
 
 | Version | Date | Summary |
 |---------|------|---------|
 | `1.0` | `2026-03-19` | Added embedded report metadata and anchor-aware evidence links for forward spec sync reporting. |
+| `1.1` | `2026-06-03` | Added prompt-system-milestone1 (M1) delivery entry — implementation tasks complete (42/42), 29/29 tests passing, core components delivered, all test and doc sync tasks complete. SRS baseline updated to v2.7. |
 
 ## agent-session-with-stm-wiring
 
@@ -96,6 +98,25 @@
   - [STM quickstart](spec-driven-development-pilot/quickstart.md)
   - [STM data model](spec-driven-development-pilot/data-model.md)
   - [API contract](spec-driven-development-pilot/contracts/api-contract.yaml)
+
+## prompt-system-milestone1
+
+- Title: Prompt Compiler Path — Milestone M1 (Prompt Runtime Parity)
+- Path: [specs/prompt-system-milestone1](prompt-system-milestone1/spec.md#requirements-mandatory)
+- Mapping status: `mapped`
+- Coverage status: `partial`
+- Derived status: `implemented`
+- Sync status: `current`
+- Sync gate enforced: `yes`
+- spec.md status field: `Draft`
+- Task completion: `42/42`
+- Linked SRS items: `FR-1.4.5, FR-1.4.6, FR-1.4.8, FR-1.4.16, NFR-5.2.5, NFR-5.2.6, NFR-5.2.7, NFR-5.2.8, NFR-5.2.9, NFR-6.2.3, AC-8.1, AC-8.2`
+- Evidence:
+  - [Feature specification](prompt-system-milestone1/spec.md#user-scenarios--testing-mandatory)
+  - [Implementation plan](prompt-system-milestone1/plan.md)
+  - [Task checklist](prompt-system-milestone1/tasks.md)
+  - [Quality gate checklist](prompt-system-milestone1/checklists/spec-plan-quality.md)
+  - [Post-implementation verification](prompt-system-milestone1/verify-tasks-report.md)
 
 ## Status Semantics
 

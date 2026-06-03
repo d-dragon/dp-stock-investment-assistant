@@ -19,6 +19,7 @@ from flask_socketio import SocketIO
 # Add the src directory to Python path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
+from core.prompt_asset_loader import PromptAssetLoader, InvalidPromptsConfigError, validate_prompts_config
 from core.stock_assistant_agent import StockAssistantAgent
 from core.data_manager import DataManager
 from core.langgraph_bootstrap import create_checkpointer
@@ -96,6 +97,26 @@ class APIServer:
         self.config = config or ConfigLoader.load_config()
         self.data_manager = data_manager or DataManager(self.config)
         
+        # Validate prompts.* configuration (structural validation — M1-FR-009a)
+        # Blocks startup on invalid config keys or unsupported values.
+        try:
+            validate_prompts_config(self.config)
+        except InvalidPromptsConfigError as exc:
+            self.logger.error("Configuration validation failed: %s", exc)
+            raise RuntimeError(f"Invalid prompts configuration: {exc}") from exc
+
+        # Initialize PromptAssetLoader from config (content resolution — M1-FR-009b)
+        from pathlib import Path
+        prompts_registry = self.config.get("prompts", {}).get("registry", {})
+        prompt_root = Path(prompts_registry.get("directory", "src/prompts"))
+        if not prompt_root.is_absolute():
+            prompt_root = Path(__file__).parent.parent.parent / prompt_root
+        self.prompt_asset_loader = PromptAssetLoader(
+            prompt_root=prompt_root,
+            config=self.config,
+            logger=self.logger.getChild("prompt_loader"),
+        )
+        
         # Initialize checkpointer for Short-Term Memory (FR-3.1)
         # Only created when langchain.memory.enabled=true in config
         checkpointer = create_checkpointer(self.config)
@@ -105,7 +126,9 @@ class APIServer:
             self.logger.info("Agent memory: disabled")
         
         self.agent = agent or StockAssistantAgent(
-            self.config, self.data_manager, checkpointer=checkpointer
+            self.config, self.data_manager,
+            checkpointer=checkpointer,
+            prompt_asset_loader=self.prompt_asset_loader,
         )
         self.repository_factory = RepositoryFactory(self.config)
         self.cache_repository = self.repository_factory.get_cache_repository() or RepositoryFactory.create_cache_repository(self.config)
@@ -152,6 +175,7 @@ class APIServer:
             model_registry=self.model_registry,
             set_active_model=self._set_active_model,
             service_factory=self.service_factory,
+            prompt_asset_loader=self.prompt_asset_loader,
         )
 
         for factory in self.http_route_factories:

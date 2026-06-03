@@ -40,3 +40,5 @@ class APIRouteContext:
     set_active_model: Optional[Callable[[str, str], Dict[str, Any]]] = None
     service_factory: Optional["ServiceFactory"] = None
     user_service: Optional["UserService"] = None
+    # Prompt system (M1 — PS-03/PS-04)
+    prompt_asset_loader: Optional["PromptAssetLoader"] = None

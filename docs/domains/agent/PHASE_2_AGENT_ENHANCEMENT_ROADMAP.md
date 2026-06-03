@@ -142,14 +142,19 @@ def process_query(self, query: str, *, conversation_id: str | None = None) -> Ag
 
 **Objective**: Externalize prompt assets, establish the planned prompt compiler path (`PromptAssetLoader -> PromptAssembler -> ResponseGuardrailMiddleware`), and support controlled evaluation and rollout of prompt changes.
 
-> **Status (2026-05-22):** Design authority and sequencing are refreshed. The governing target design and dependency-ordered backlog now live in [PROMPT_SYSTEM_RESEARCH_PROPOSAL.md v1.8](./PROMPT_SYSTEM_RESEARCH_PROPOSAL.md). This roadmap section mirrors the same backlog IDs, milestone gates, and near-term delivery ordering for Phase 2 planning. Release-gate thresholds remain formalized in SRS v2.7 (FR-1.4.12–1.4.16, FR-1.5.6, NFR-5.2.8–5.2.11, AC-8.5–8.11). Planned prompt-compiler decisions remain governed by proposed [ADR-002 (Skills Pattern)](./decisions/AGENT_ARCHITECTURE_DECISION_RECORDS.md) and [ADR-003 (Externalized Prompts)](./decisions/AGENT_ARCHITECTURE_DECISION_RECORDS.md). This roadmap mirrors sequencing only and does not redefine the target-design thresholds.  
-> **Next step:** Start Milestone M1 with `PS-01` to `PS-03` to establish the baseline asset, prompt loader, and config validation surface.
+> **Status (2026-06-03):** Milestone M1 (Prompt Runtime Parity) is **implemented and verified**. PS-01 through PS-06 are complete. See [specs/prompt-system-milestone1/review.md](../../../specs/prompt-system-milestone1/review.md) for the verification report.  
+> **Milestone M1 delivery:** `PromptAssetLoader` implemented with full 8-field selection tuple; prompt asset externalized to `src/prompts/system/react_analyst.md` (per ADR taxonomy, version in frontmatter); `prompts.*` config surface with two-layer validation; response metadata emitted on all invocations; 42/42 tasks complete, 29/29 tests passing.  
+> **Next step:** Plan Milestone M2 (Route-Aware Skills — PS-07 to PS-08) for route-specific prompt context using the semantic router.
+> **Design authority:** [PROMPT_SYSTEM_RESEARCH_PROPOSAL.md v1.8](./PROMPT_SYSTEM_RESEARCH_PROPOSAL.md). Release-gate thresholds formalized in SRS v2.7.
 
-#### Current Baseline
+#### Current Baseline (M1 Delivery — Prompt Runtime Parity)
 
-- `REACT_SYSTEM_PROMPT` hardcoded in `stock_assistant_agent.py` (lines 56-70)
-- No mechanism to test prompt variants
-- `langchain_adapter.py` has `PromptBuilder` pattern but used only for legacy fallback
+- ReAct prompt externalized to `src/prompts/system/react_analyst.md` with frontmatter metadata (per ADR taxonomy — version in frontmatter, not directory path)
+- `PromptAssetLoader` implemented in `src/core/prompt_asset_loader.py` with 8-field selection tuple, manifest caching, and baseline fallback
+- `prompts.*` config surface with two-layer validation (structural errors block startup; content-resolution errors fall back with WARN)
+- Prompt identity injected into response metadata (`prompt_version`, `prompt_variant`, `selection_mode`, `model_provider`, `model_name`) and LangSmith trace tags
+- `REACT_SYSTEM_PROMPT` retained as deprecated alias during M1 observation window (will be removed after PS-04 verification)
+- `langchain_adapter.py` has `PromptBuilder` pattern — marked as deprecated; `PromptAssetLoader` is the canonical prompt source
 
 #### Target Compiler Path
 
@@ -165,7 +170,7 @@ def process_query(self, query: str, *, conversation_id: str | None = None) -> Ag
 
 | Order | Backlog ID | Priority | SRS Alignment | Depends On | Roadmap Outcome |
 |---|---|---|---|---|---|
-| 1 | `PS-01` | P0 | FR-1.4.5, FR-1.4.8, NFR-6.2.3 | None | Extract the current ReAct prompt into `src/prompts/system/react_analyst/v1.md` and preserve it as the canonical baseline asset |
+| 1 | `PS-01` | P0 | FR-1.4.5, FR-1.4.8, NFR-6.2.3 | None | Extract the current ReAct prompt into `src/prompts/system/react_analyst.md` (per ADR taxonomy, version in frontmatter, not directory path) and preserve it as the canonical baseline asset |
 | 2 | `PS-02` | P0 | FR-1.4.5, FR-1.4.8, FR-1.4.16 | `PS-01` | Implement `PromptAssetLoader` / loader-facade behavior with metadata parsing, caching, validation, and baseline fallback conventions |
 | 3 | `PS-03` | P0 | FR-1.4.5, FR-1.4.8, NFR-6.2.3 | `PS-01`, `PS-02` | Add `prompts.*` config surface and fail-closed validation rules so only valid prompt assets can activate |
 | 4 | `PS-04` | P0 | FR-1.4.5, FR-1.4.6 | `PS-02`, `PS-03` | Replace `REACT_SYSTEM_PROMPT` as the primary source of truth for `StockAssistantAgent` |
@@ -190,36 +195,46 @@ def process_query(self, query: str, *, conversation_id: str | None = None) -> Ag
 
 These milestone gates mirror the target design in [PROMPT_SYSTEM_RESEARCH_PROPOSAL.md](./PROMPT_SYSTEM_RESEARCH_PROPOSAL.md) and the authoritative thresholds in [SOFTWARE_REQUIREMENTS_SPECIFICATION.md](./SOFTWARE_REQUIREMENTS_SPECIFICATION.md); later implementation plans should inherit them unchanged.
 
-#### Immediate Delivery Slice
+#### Immediate Delivery Slice (M1 Complete)
 
-- `PS-01`: Externalize the current ReAct prompt as the reviewed baseline asset.
-- `PS-02`: Implement prompt loading, metadata parsing, and validation.
-- `PS-03`: Add prompt config surface and fail-closed activation rules.
-- `PS-04`: Replace the hardcoded prompt path only after `PS-01` to `PS-03` are complete.
+- `PS-01`: ✅ Externalized to `src/prompts/system/react_analyst.md` with frontmatter metadata (ADR taxonomy).
+- `PS-02`: ✅ `PromptAssetLoader` with 8-field tuple, manifest cache, frontmatter parsing, baseline fallback.
+- `PS-03`: ✅ `prompts.*` config surface with two-layer validation (structural + content resolution).
+- `PS-04`: ✅ `StockAssistantAgent` uses `PromptAssetLoader` as primary prompt source; `REACT_SYSTEM_PROMPT` deprecated.
+- `PS-05`: ✅ Prompt identity in response metadata and LangSmith trace tags.
+- `PS-06`: ✅ Baseline fallback safety with WARN logging and fault-injection coverage.
+- **M1 verified**: [specs/prompt-system-milestone1/review.md](../../../specs/prompt-system-milestone1/review.md) — 42/42 tasks, 29/29 tests.
 
 #### Near-Term Implementation Pattern
 
 ```python
-# src/prompts/system/react_analyst/v1.md
+# src/prompts/system/react_analyst.md (ADR taxonomy — version in frontmatter, not path)
 ---
 name: react_analyst_v1
 version: 1.0.0
 agent_role: react_analyst
 status: active
+variant: baseline
+locale: en
 ---
 
 You are a professional stock investment assistant...
 
 # src/core/stock_assistant_agent.py
 from core.prompt_asset_loader import PromptAssetLoader
+from core.prompt_types import SelectionTuple
 
 class StockAssistantAgent:
-    def _load_system_prompt(self) -> str:
-        selection = self._prompt_asset_loader.resolve(
-            agent_role="react_analyst",
-            version=self.config["prompts"]["system"]["active_version"],
-        )
-        return selection.system_prompt
+    def __init__(self, config, data_manager, *, prompt_asset_loader=None):
+        if prompt_asset_loader:
+            self._current_prompt = prompt_asset_loader.resolve(
+                SelectionTuple(
+                    agent_role="react_analyst",
+                    selection_mode="fixed",
+                    requested_version=config["prompts"]["system"]["active_version"],
+                )
+            )
+            self._prompt_content = (...)  # read resolved asset from disk
 ```
 
 #### Dependencies
@@ -850,17 +865,18 @@ langchain:
     specialist_model: gpt-3.5-turbo
 
 prompts:
-    directory: "src/prompts"
+    registry:
+        directory: "src/prompts"
+        refresh_window_seconds: 300
     selection_mode: "fixed"  # fixed | weighted | forced | shadow
-    default_locale: "vi"
+    default_locale: "en"
     system:
         active_role: "react_analyst"
-        active_version: "v1"
+        active_version: "1.0.0"
         variants:
             - name: "baseline"
-              version: "v1"
-              file: "system/react_analyst/v1.md"
-              weight: 1.0
+              version: "1.0.0"
+              file: "system/react_analyst.md"
               status: "active"
     route_contexts:
         enabled: true
