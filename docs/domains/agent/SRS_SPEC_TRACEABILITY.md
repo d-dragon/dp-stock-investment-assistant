@@ -73,11 +73,11 @@ Mapped: `17/37`. Unmapped: `20`.
 | [FR-1.4.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L173) | [PROMPT_SYSTEM_RESEARCH_PROPOSAL.md](PROMPT_SYSTEM_RESEARCH_PROPOSAL.md) | `clarified` | `current` |
 | [FR-1.4.5](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L174) | [prompt-system-milestone1 spec.md](../../../specs/prompt-system-milestone1/spec.md) | `implemented` | `2.7` |
 | [FR-1.4.6](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L175) | [prompt-system-milestone1 spec.md](../../../specs/prompt-system-milestone1/spec.md) | `implemented` | `2.7` |
-| [FR-1.4.7](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L176) | [ADR-AGENT-002-SKILLS-PATTERN-PROMPT-COMPOSITION.md](DECISIONS/ADR-AGENT-002-SKILLS-PATTERN-PROMPT-COMPOSITION.md) | `clarified` | `current` |
+| [FR-1.4.7](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L176) | [prompt-system-milestone2 spec.md](../../../specs/prompt-system-milestone2/spec.md) | `implemented` | `2.7` |
 | [FR-1.4.8](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L177) | [prompt-system-milestone1 spec.md](../../../specs/prompt-system-milestone1/spec.md) | `implemented` | `2.7` |
 | [FR-1.4.9](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L178) | [PHASE_2_AGENT_ENHANCEMENT_ROADMAP.md](PHASE_2_AGENT_ENHANCEMENT_ROADMAP.md) | `clarified` | `current` |
 | [FR-1.4.10](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L179) | [PROMPT_SYSTEM_RESEARCH_PROPOSAL.md](PROMPT_SYSTEM_RESEARCH_PROPOSAL.md) | `clarified` | `current` |
-| [FR-1.4.11](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L180) | [PROMPT_SYSTEM_RESEARCH_PROPOSAL.md](PROMPT_SYSTEM_RESEARCH_PROPOSAL.md) | `clarified` | `current` |
+| [FR-1.4.11](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L180) | [prompt-system-milestone2 spec.md](../../../specs/prompt-system-milestone2/spec.md) | `implemented` | `2.7` |
 | [FR-1.4.12](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L181) | [PROMPT_SYSTEM_RESEARCH_PROPOSAL.md](PROMPT_SYSTEM_RESEARCH_PROPOSAL.md) | `clarified` | `current` |
 | [FR-1.4.13](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L182) | [PROMPT_SYSTEM_RESEARCH_PROPOSAL.md](PROMPT_SYSTEM_RESEARCH_PROPOSAL.md) | `clarified` | `current` |
 | [FR-1.4.14](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L183) | [PROMPT_SYSTEM_RESEARCH_PROPOSAL.md](PROMPT_SYSTEM_RESEARCH_PROPOSAL.md) | `clarified` | `current` |
@@ -516,15 +516,15 @@ Mapped: `7/11`. Unmapped: `4`.
 |----------|-------------|----------------|-------------|
 | [AC-8.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L836) | [prompt-system-milestone1 spec.md](../../../specs/prompt-system-milestone1/spec.md) | `implemented` | `2.7` |
 | [AC-8.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L837) | [prompt-system-milestone1 spec.md](../../../specs/prompt-system-milestone1/spec.md) | `implemented` | `2.7` |
-| [AC-8.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L838) | `-` | `unmapped` | `unmapped` |
-| [AC-8.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L839) | `-` | `unmapped` | `unmapped` |
-| [AC-8.5](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L840) | [PROMPT_SYSTEM_BENCHMARK_REVIEW.md](PROMPT_SYSTEM_BENCHMARK_REVIEW.md) | `clarified` | `current` |
+| [AC-8.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L838) | `-` | `unmapped` | `unmapped` (M2 does not address tool-sourced attribution — that is FR-1.5.1/FR-1.5.5 scope) |
+| [AC-8.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L839) | `-` | `unmapped` | `unmapped` (M2 does not address anti-hype — that is FR-1.5.3 scope) |
+| [AC-8.5](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L840) | [prompt-system-milestone2 spec.md](../../../specs/prompt-system-milestone2/spec.md) | `implemented` | `2.7` |
 | [AC-8.6](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L841) | [PROMPT_SYSTEM_BENCHMARK_REVIEW.md](PROMPT_SYSTEM_BENCHMARK_REVIEW.md) | `clarified` | `current` |
 | [AC-8.7](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L842) | [PROMPT_SYSTEM_BENCHMARK_REVIEW.md](PROMPT_SYSTEM_BENCHMARK_REVIEW.md) | `clarified` | `current` |
-| [AC-8.8](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L843) | [PROMPT_SYSTEM_BENCHMARK_REVIEW.md](PROMPT_SYSTEM_BENCHMARK_REVIEW.md) | `clarified` | `current` |
+| [AC-8.8](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L843) | [prompt-system-milestone2 spec.md](../../../specs/prompt-system-milestone2/spec.md) | `implemented` | `2.7` |
 | [AC-8.9](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L844) | [PROMPT_SYSTEM_BENCHMARK_REVIEW.md](PROMPT_SYSTEM_BENCHMARK_REVIEW.md) | `clarified` | `current` |
 | [AC-8.10](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L845) | [PROMPT_SYSTEM_BENCHMARK_REVIEW.md](PROMPT_SYSTEM_BENCHMARK_REVIEW.md) | `clarified` | `current` |
-| [AC-8.11](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L846) | [PROMPT_SYSTEM_BENCHMARK_REVIEW.md](PROMPT_SYSTEM_BENCHMARK_REVIEW.md) | `clarified` | `current` |
+| [AC-8.11](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L846) | [prompt-system-milestone2 spec.md](../../../specs/prompt-system-milestone2/spec.md) | `implemented` | `2.7` |
 
 ### IR-1
 

@@ -5,13 +5,21 @@ Defines the core data contracts for the prompt compiler path:
 - PromptAsset: A versioned, frontmatter-annotated markdown prompt file
 - PromptSelection: The output contract from PromptAssetLoader
 - SelectionTuple: The 8-field selection tuple per TECHNICAL_DESIGN.md §3.5.2.2
+- SegmentType, SegmentEntry, CompiledPrompt: M2 route-aware composition types
+  per TECHNICAL_DESIGN.md §3.5.2.3
 """
 
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from enum import Enum
 from pathlib import Path
 from typing import Any, Dict, List, Optional
+
+
+# ---------------------------------------------------------------------------
+# M1 types
+# ---------------------------------------------------------------------------
 
 
 @dataclass(frozen=True)
@@ -89,3 +97,58 @@ class SelectionTuple:
     prompt_experiment_id: Optional[str] = None
     workspace_mode: str = "default"
     env: str = "production"
+
+
+# ---------------------------------------------------------------------------
+# M2 types — Route-aware composition
+# ---------------------------------------------------------------------------
+
+
+class SegmentType(Enum):
+    """Segment classification per TECHNICAL_DESIGN.md §3.5.2.3 assembly order.
+
+    Each value corresponds to one layer in the deterministic composition stack.
+    Lower-number authority levels are higher priority (1 = strongest).
+    """
+    SHARED_POLICY = "shared_policy"           # Authority 1: Highest
+    ROLE_PROMPT = "role_prompt"               # Authority 2
+    ROUTE_SKILL = "route_skill"               # Authority 3
+    MEMORY_CONTEXT = "memory_context"         # Authority 4
+    EVIDENCE = "evidence"                     # Authority 5
+    TASK_FRAMING = "task_framing"             # Authority 6
+    OUTPUT_CONTRACT = "output_contract"       # Authority 7: Lowest
+
+
+# Authority level lookup — higher means weaker precedence.
+SEGMENT_AUTHORITY: dict[SegmentType, int] = {
+    SegmentType.SHARED_POLICY: 1,
+    SegmentType.ROLE_PROMPT: 2,
+    SegmentType.ROUTE_SKILL: 3,
+    SegmentType.MEMORY_CONTEXT: 4,
+    SegmentType.EVIDENCE: 5,
+    SegmentType.TASK_FRAMING: 6,
+    SegmentType.OUTPUT_CONTRACT: 7,
+}
+
+
+@dataclass(frozen=True)
+class SegmentEntry:
+    """A single segment within ``CompiledPrompt.segment_manifest``."""
+    type: SegmentType
+    source_path: str
+    authority_level: int
+
+
+@dataclass(frozen=True)
+class CompiledPrompt:
+    """Output contract from ``PromptAssembler.compile()``.
+
+    Contains the fully assembled prompt string, a segment manifest showing
+    which assets compose it, prompt identity metadata, and trace metadata
+    for observability.
+    """
+    compiled_text: str
+    segment_manifest: list[SegmentEntry]
+    prompt_version: str
+    prompt_variant: str
+    trace_metadata: dict[str, Any]

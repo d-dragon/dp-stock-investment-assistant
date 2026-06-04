@@ -1016,15 +1016,16 @@ This baseline establishes three constraints that the evolved prompt architecture
 #### 4.8.2 Planned Prompt Architecture
 
 > **Status:** PromptAssetLoader implemented in M1 (``src/core/prompt_asset_loader.py``).
-> PromptAssembler and ResponseGuardrailMiddleware remain **proposed** for M2+.
+> PromptAssembler implemented in M2 (``src/core/prompt_assembler.py``). ResponseGuardrailMiddleware remains **proposed** for M3.
 > **Research Authority:** [PROMPT_SYSTEM_RESEARCH_PROPOSAL.md](./PROMPT_SYSTEM_RESEARCH_PROPOSAL.md)
 > **Governing ADRs:** [ADR-AGENT-002-SKILLS-PATTERN-PROMPT-COMPOSITION.md](./decisions/ADR-AGENT-002-SKILLS-PATTERN-PROMPT-COMPOSITION.md), [ADR-AGENT-003-EXTERNALIZE-VERSION-PROMPT-ASSETS.md](./decisions/ADR-AGENT-003-EXTERNALIZE-VERSION-PROMPT-ASSETS.md)
 > **M1 delivery:** ``specs/prompt-system-milestone1/spec.md``
+> **M2 delivery:** ``specs/prompt-system-milestone2/spec.md``
 
 | Architectural Concern | M1 Boundary | Purpose |
 |-----------------------|-------------|---------|
 | Prompt policy source | Versioned prompt assets under the ADR-governed taxonomy | Implemented in M1 — `src/prompts/system/react_analyst.md` with frontmatter metadata |
-| Prompt composition | Prompt compiler path: `PromptAssetLoader -> PromptAssembler -> ResponseGuardrailMiddleware` | `PromptAssetLoader` implemented in M1; `PromptAssembler` and `ResponseGuardrailMiddleware` remain planned for M2+ |
+| Prompt composition | Prompt compiler path: `PromptAssetLoader -> PromptAssembler -> ResponseGuardrailMiddleware` | `PromptAssetLoader` implemented in M1; `PromptAssembler` implemented in M2; `ResponseGuardrailMiddleware` planned for M3 |
 | Route-aware behavior | Skills-pattern composition using route-specific prompt context | Lets behavior narrow by request category without immediately requiring a multi-agent runtime |
 | Prompt observability | Prompt identity, selection, fallback, and guardrail outcomes as runtime metadata | Makes prompt behavior traceable without turning prompt metadata into business-state persistence |
 | Role-specific prompt contracts | Shared policy plus bounded analyst, orchestrator, and retrieval-specialist contracts | Centralizes common safety rules while allowing narrower role responsibilities over time |

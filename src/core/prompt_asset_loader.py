@@ -18,6 +18,7 @@ from typing import Any, Dict, List, Optional, Tuple
 import yaml
 
 from core.prompt_types import PromptAsset, PromptSelection, SelectionTuple
+from core.routes import StockQueryRoute
 
 
 class PromptAssetLoader:
@@ -162,13 +163,13 @@ class PromptAssetLoader:
     def _build_manifest(self) -> Dict[str, List[PromptAsset]]:
         """Scan the prompt directory and build a manifest of all assets.
 
-        Scans ``system/``, ``skills/``, and ``experiments/`` subdirectories
-        for ``.md`` files with YAML frontmatter. Missing subdirectories
-        (``skills/``, ``experiments/`` at M1 scope) are silently skipped.
+        Scans ``system/``, ``skills/``, ``skills/routes/``, and
+        ``experiments/`` subdirectories for ``.md`` files with YAML
+        frontmatter. Missing subdirectories are silently skipped.
         """
         manifest: Dict[str, List[PromptAsset]] = {}
 
-        for subdir in ("system", "skills", "experiments"):
+        for subdir in ("system", "skills", "skills/routes", "experiments"):
             dir_path = self._prompt_root / subdir
             if not dir_path.is_dir():
                 # Silently skip missing subdirectories
@@ -226,6 +227,26 @@ class PromptAssetLoader:
                 path,
             )
             return None
+
+        # Route-scope validation (M2): files in skills/routes/ must declare
+        # route_scope as a list of valid StockQueryRoute member names.
+        route_scope_raw = frontmatter.get("route_scope")
+        if route_scope_raw is not None:
+            if not isinstance(route_scope_raw, list):
+                self._logger.warning(
+                    "Prompt file %s has non-list route_scope (%s) — skipping.",
+                    path, type(route_scope_raw).__name__,
+                )
+                return None
+            valid_routes = set(StockQueryRoute.__members__)
+            for r in route_scope_raw:
+                if not isinstance(r, str) or r not in valid_routes:
+                    self._logger.warning(
+                        "Prompt file %s declares unknown route_scope value "
+                        "'%s' — skipping.",
+                        path, r,
+                    )
+                    return None
 
         return PromptAsset(
             name=frontmatter.get("name", path.stem),
