@@ -335,6 +335,7 @@ The 18-step lifecycle below is the detailed execution model inside the SDLC loop
      - [TECHNICAL_DESIGN.md](../domains/frontend/TECHNICAL_DESIGN.md) (Frontend realization rules)
      - [TECHNICAL_DESIGN.md](../domains/agent/TECHNICAL_DESIGN.md) (Agent reasoning design)
      - [openapi.yaml](../openapi.yaml) (Executable REST interface schema)
+     - [ARCHITECTURE_DESIGN.md](../domains/agent/ARCHITECTURE_DESIGN.md) (Agent architecture design)
    - **Cross-Reference Prompt Hint**:
      > *Prompt Hint*: "Structure the implementation: 'Generate the plan (`plan.md`) utilizing the architecture constraints in [SYSTEM_OVERVIEW_AND_BOUNDARIES.md](../architecture/SYSTEM_OVERVIEW_AND_BOUNDARIES.md), [RUNTIME_AND_INTEGRATION_FLOWS.md](../architecture/RUNTIME_AND_INTEGRATION_FLOWS.md), domain realization guidelines in [backend/TECHNICAL_DESIGN.md](../domains/backend/TECHNICAL_DESIGN.md), and contract payload schemas in [openapi.yaml](../openapi.yaml) to ensure design conformance.'"
 

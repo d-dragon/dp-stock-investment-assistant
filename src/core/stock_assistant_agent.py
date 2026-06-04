@@ -56,7 +56,9 @@ from .data_manager import DataManager
 from .langchain_adapter import build_prompt
 from .model_factory import ModelClientFactory
 from .prompt_asset_loader import PromptAssetLoader
+from .prompt_assembler import PromptAssembler
 from .prompt_types import PromptSelection, SelectionTuple
+from .routes import StockQueryRoute
 from .tools.registry import ToolRegistry, get_tool_registry
 from .types import AgentResponse, ResponseStatus, TokenUsage, ToolCall
 
@@ -118,6 +120,7 @@ If you don't have a tool for a specific request, provide helpful general guidanc
         checkpointer: Optional[Any] = None,
         logger: Optional[logging.Logger] = None,
         prompt_asset_loader: Optional[PromptAssetLoader] = None,
+        prompt_assembler: Optional[PromptAssembler] = None,
     ) -> None:
         """Initialize StockAssistantAgent.
         
@@ -130,12 +133,17 @@ If you don't have a tool for a specific request, provide helpful general guidanc
             prompt_asset_loader: Optional PromptAssetLoader for resolved prompt assets.
                 When provided, the agent uses it as the authoritative prompt source (PS-04).
                 When ``None``, falls back to ``_load_system_prompt()`` (pre-PS-04 transition).
+            prompt_assembler: Optional PromptAssembler for route-aware prompt composition (M2 PS-08).
+                When provided and ``route_contexts.enabled`` is ``True`` in config, the agent
+                composes the system prompt through ``PromptAssembler.compile()`` instead of using
+                the raw ``PromptSelection`` content.
         """
         self.config = config
         self.data_manager = data_manager
         self.logger = logger or logging.getLogger(__name__)
         self._checkpointer = checkpointer  # Store checkpointer for session-aware queries
         self._prompt_asset_loader = prompt_asset_loader
+        self._prompt_assembler = prompt_assembler
         
         # Initialize cache backend
         from utils.cache import CacheBackend
@@ -173,9 +181,36 @@ If you don't have a tool for a specific request, provide helpful general guidanc
                 self._current_prompt.prompt_variant,
                 self._current_prompt.fallback_used,
             )
+
+            # M2 PS-08: Compose route-aware prompt via PromptAssembler
+            self._current_route = StockQueryRoute.GENERAL_CHAT  # default until per-query
+            self._compiled_prompt = None
+            if self._prompt_assembler is not None:
+                prompts_cfg = self.config.get("prompts", {})
+                rc_cfg = prompts_cfg.get("route_contexts", {})
+                if rc_cfg.get("enabled", False):
+                    self._compiled_prompt = self._prompt_assembler.compile(
+                        selection=self._current_prompt,
+                        route=self._current_route,
+                    )
+                    self._prompt_content = self._compiled_prompt.compiled_text
+                    self.logger.info(
+                        "PromptAssembler compiled route-aware prompt: "
+                        "route=%s, route_skill_used=%s",
+                        self._current_route.value,
+                        self._compiled_prompt.trace_metadata.get(
+                            "route_skill_used", False
+                        ),
+                    )
+                else:
+                    self.logger.debug(
+                        "PromptAssembler available but route_contexts not enabled"
+                    )
         else:
             # Pre-PS-04 transition path: direct file read with inline fallback
             self._current_prompt, self._prompt_content = self._load_system_prompt()
+            self._current_route = StockQueryRoute.GENERAL_CHAT
+            self._compiled_prompt = None
         
         # Build the ReAct agent
         self._agent_executor = self._build_agent_executor()
@@ -329,6 +364,8 @@ If you don't have a tool for a specific request, provide helpful general guidanc
         inclusion in response metadata and LangSmith trace tags.
 
         Always populated regardless of LangSmith connectivity (M1-NFR-004).
+        At M2 scope, also includes route context metadata when a
+        ``CompiledPrompt`` is available.
         """
         meta = dict(self._current_prompt.trace_metadata) if self._current_prompt.trace_metadata else {}
         meta["prompt_version"] = self._current_prompt.prompt_version
@@ -337,6 +374,15 @@ If you don't have a tool for a specific request, provide helpful general guidanc
         meta["fallback_used"] = self._current_prompt.fallback_used
         if self._current_prompt.fallback_used and self._current_prompt.degraded_reason:
             meta["degraded_reason"] = self._current_prompt.degraded_reason
+
+        # M2 PS-08: Add route context metadata when CompiledPrompt is available
+        if self._compiled_prompt is not None:
+            tm = self._compiled_prompt.trace_metadata
+            meta["route"] = tm.get("route", "")
+            meta["route_skill_used"] = tm.get("route_skill_used", False)
+            meta["selected_skills"] = tm.get("selected_skills", [])
+            if "missing_route_skills" in tm:
+                meta["missing_route_skills"] = tm["missing_route_skills"]
 
         # Add model provider/name from the current client
         try:

@@ -1,9 +1,9 @@
 # Phase 2: LangChain Agent Enhancement Roadmap
 
-> **Document Version**: 1.4  
+> **Document Version**: 1.5  
 > **Created**: January 15, 2026  
-> **Last Updated**: May 22, 2026  
-> **Status**: Planning  
+> **Last Updated**: June 4, 2026  
+> **Status**: Planning (M2 Implemented)  
 > **Branch**: `enhance-agent-prompt-system-followup`
 
 ## Executive Summary
@@ -142,9 +142,11 @@ def process_query(self, query: str, *, conversation_id: str | None = None) -> Ag
 
 **Objective**: Externalize prompt assets, establish the planned prompt compiler path (`PromptAssetLoader -> PromptAssembler -> ResponseGuardrailMiddleware`), and support controlled evaluation and rollout of prompt changes.
 
-> **Status (2026-06-03):** Milestone M1 (Prompt Runtime Parity) is **implemented and verified**. PS-01 through PS-06 are complete. See [specs/prompt-system-milestone1/review.md](../../../specs/prompt-system-milestone1/review.md) for the verification report.  
-> **Milestone M1 delivery:** `PromptAssetLoader` implemented with full 8-field selection tuple; prompt asset externalized to `src/prompts/system/react_analyst.md` (per ADR taxonomy, version in frontmatter); `prompts.*` config surface with two-layer validation; response metadata emitted on all invocations; 42/42 tasks complete, 29/29 tests passing.  
-> **Next step:** Plan Milestone M2 (Route-Aware Skills — PS-07 to PS-08) for route-specific prompt context using the semantic router.
+> **Status (2026-06-04):** Milestones M1 (Prompt Runtime Parity) and **M2 (Route-Aware Skills) are implemented and verified**. PS-01 through PS-08 are complete.  
+> - **M1 delivery:** `PromptAssetLoader` implemented with full 8-field selection tuple; prompt asset externalized to `src/prompts/system/react_analyst.md` (per ADR taxonomy, version in frontmatter); `prompts.*` config surface with two-layer validation; response metadata emitted on all invocations; 42/42 tasks complete, 29/29 tests passing.  
+> - **M2 delivery:** `SegmentType`/`SegmentEntry`/`CompiledPrompt` data types, extended manifest scanning for `skills/routes/`, 8 route-skill assets created, `PromptAssembler` with deterministic 7-segment assembly order, missing-skill graceful degradation, dynamic controls allowlist validation, agent wiring with route-context metadata emission; 45/45 tasks complete, 41/41 tests passing (~71µs average assembly performance).  
+> - **Verification:** [M1 review](../../../specs/prompt-system-milestone1/review.md) | [M2 review](../../../specs/prompt-system-milestone2/review.md)  
+> **Next step:** Plan Milestone M3 (Evaluation and Safety Gates — PS-09 to PS-10) for offline evaluation harness and finance-domain guardrail verification.
 > **Design authority:** [PROMPT_SYSTEM_RESEARCH_PROPOSAL.md v1.8](./PROMPT_SYSTEM_RESEARCH_PROPOSAL.md). Release-gate thresholds formalized in SRS v2.7.
 
 #### Current Baseline (M1 Delivery — Prompt Runtime Parity)
@@ -176,8 +178,8 @@ def process_query(self, query: str, *, conversation_id: str | None = None) -> Ag
 | 4 | `PS-04` | P0 | FR-1.4.5, FR-1.4.6 | `PS-02`, `PS-03` | Replace `REACT_SYSTEM_PROMPT` as the primary source of truth for `StockAssistantAgent` |
 | 5 | `PS-05` | P0 | FR-1.4.6, NFR-5.2.5–5.2.9 | `PS-04` | Inject prompt identity into response metadata and trace metadata for top-level runs |
 | 6 | `PS-06` | P0 | FR-1.4.8, FR-1.4.13, AC-8.2, AC-8.7 | `PS-02`, `PS-04`, `PS-05` | Add rollback safety, WARN logging, and fault-injection coverage for invalid prompt activation |
-| 7 | `PS-07` | P1 | FR-1.4.7 | `PS-04` | Create route-context prompt assets for all 8 `StockQueryRouter` categories |
-| 8 | `PS-08` | P1 | FR-1.4.7, FR-1.4.11, FR-1.4.16, NFR-5.2.8 | `PS-05`, `PS-07` | Compose route-aware prompt behavior with `PromptAssembler` and `@dynamic_prompt` middleware |
+| 7 | `PS-07` | P1 | FR-1.4.7 | `PS-04` | ✅ Create route-context prompt assets for all 8 `StockQueryRouter` categories — implemented M2 |
+| 8 | `PS-08` | P1 | FR-1.4.7, FR-1.4.11, FR-1.4.16, NFR-5.2.8 | `PS-05`, `PS-07` | ✅ Compose route-aware prompt behavior with `PromptAssembler` and `@dynamic_prompt` middleware — implemented M2 |
 | 9 | `PS-09` | P1 | FR-1.4.12, AC-8.6 | `PS-05`, `PS-08` | Build the offline evaluation harness and baseline prompt comparison datasets |
 | 10 | `PS-10` | P1 | FR-1.4.12, FR-1.5.6, AC-8.5–8.8 | `PS-06`, `PS-09` | Enforce finance-domain guardrail verification before prompt promotion |
 | 11 | `PS-11` | P2 | FR-1.4.9, FR-1.4.12, FR-1.4.13, AC-8.6–8.8 | `PS-09`, `PS-10` | Add controlled experiment and rollout modes (`fixed`, `forced`, `shadow`, optional `weighted`) |
@@ -188,15 +190,16 @@ def process_query(self, query: str, *, conversation_id: str | None = None) -> Ag
 | Milestone | Backlog IDs | Outcome | Gate |
 |---|---|---|---|
 | `M1` - Prompt Runtime Parity | `PS-01` to `PS-06` | Externalized, versioned, observable, rollback-safe ReAct prompt runtime | Do not begin route-context composition until the hardcoded prompt is fully removed from the primary ReAct path |
-| `M2` - Route-Aware Skills | `PS-07` to `PS-08` | Deterministic route-specific prompt context using the existing semantic router | Do not enable experiment modes until route-aware composition is stable and traceable |
+| `M2` - Route-Aware Skills | `PS-07` to `PS-08` | ✅ **Implemented and verified** — `PromptAssembler` with 7-segment deterministic assembly, 8 route-skill assets, missing-skill graceful degradation, dynamic controls allowlist, agent wiring with route-context metadata; 45/45 tasks, 41/41 tests passing | [M2 review](../../../specs/prompt-system-milestone2/review.md) — gate satisfied |
 | `M3` - Evaluation and Safety Gates | `PS-09` to `PS-10` | Offline comparison and finance-safety regression coverage for prompt changes | Do not enter `shadow`, `weighted`, or `active` until finance-safety blockers pass at 100%, missing-data handling passes at >=98%, applicable route or tool datasets pass at >=95%, and mandatory metadata keys are present on 100% of relevant runs |
 | `M4` - Controlled Rollout | `PS-11` | Safe candidate comparison in `forced` or `shadow` mode, with weighted exposure explicitly optional | Keep production on `fixed` unless the approved baseline fallback, rollback target, and FR-1.4.13 live rollback triggers remain active for any live candidate path |
 | `M5` - Multi-Agent Prompt Foundation | `PS-12` | Specialist prompt families and handoff contracts ready for future orchestration | Do not start multi-agent runtime work until Skills-pattern evidence shows a real limitation |
 
 These milestone gates mirror the target design in [PROMPT_SYSTEM_RESEARCH_PROPOSAL.md](./PROMPT_SYSTEM_RESEARCH_PROPOSAL.md) and the authoritative thresholds in [SOFTWARE_REQUIREMENTS_SPECIFICATION.md](./SOFTWARE_REQUIREMENTS_SPECIFICATION.md); later implementation plans should inherit them unchanged.
 
-#### Immediate Delivery Slice (M1 Complete)
+#### Immediate Delivery Slice (M1 & M2 Complete)
 
+##### M1 — Prompt Runtime Parity (PS-01 to PS-06)
 - `PS-01`: ✅ Externalized to `src/prompts/system/react_analyst.md` with frontmatter metadata (ADR taxonomy).
 - `PS-02`: ✅ `PromptAssetLoader` with 8-field tuple, manifest cache, frontmatter parsing, baseline fallback.
 - `PS-03`: ✅ `prompts.*` config surface with two-layer validation (structural + content resolution).
@@ -204,6 +207,18 @@ These milestone gates mirror the target design in [PROMPT_SYSTEM_RESEARCH_PROPOS
 - `PS-05`: ✅ Prompt identity in response metadata and LangSmith trace tags.
 - `PS-06`: ✅ Baseline fallback safety with WARN logging and fault-injection coverage.
 - **M1 verified**: [specs/prompt-system-milestone1/review.md](../../../specs/prompt-system-milestone1/review.md) — 42/42 tasks, 29/29 tests.
+
+##### M2 — Route-Aware Skills (PS-07 to PS-08)
+- `PS-07`: ✅ Created 8 route-skill assets under `src/prompts/skills/routes/` — one per `StockQueryRouter` category (`price_check`, `news_analysis`, `portfolio`, `technical_analysis`, `fundamentals`, `ideas`, `market_watch`, `general_chat`).
+- `PS-08`: ✅ Implemented `PromptAssembler` (`src/core/prompt_assembler.py`) with:
+  - `SegmentType` enum (7 segments: SHARED_POLICY, ROLE_PROMPT, ROUTE_SKILL, MEMORY_CONTEXT, EVIDENCE, TASK_FRAMING, OUTPUT_CONTRACT) with authority-level stratification
+  - `compile(selection, route, runtime_context)` → `CompiledPrompt` with deterministic 7-segment assembly order
+  - Missing-skill graceful degradation — logs WARN, records gap in `trace_metadata.missing_route_skills`
+  - Dynamic controls allowlist validation — drops unrecognized fields, records in `trace_metadata.dropped_dynamic_fields`
+  - Extended `_build_manifest()` in `PromptAssetLoader` to scan `skills/routes/` with `route_scope` validation
+  - Wired into `StockAssistantAgent.__init__()` and `_inject_prompt_metadata()` when `route_contexts.enabled: true`
+  - M1 backward compatibility preserved when `route_contexts.enabled: false`
+- **M2 verified**: [specs/prompt-system-milestone2/review.md](../../../specs/prompt-system-milestone2/review.md) — 45/45 tasks, 41/41 tests.
 
 #### Near-Term Implementation Pattern
 
@@ -249,11 +264,11 @@ class StockAssistantAgent:
 
 #### Success Criteria
 
-- ReAct path loads the prompt from a versioned asset instead of the hardcoded `REACT_SYSTEM_PROMPT`
-- Prompt version and variant are visible in relevant response metadata and trace metadata
-- All 8 semantic routes can resolve explicit route-context assets before non-fixed rollout modes are considered
-- Offline evaluation blocks finance-safety regressions before any live prompt experimentation is enabled
-- Proposal and roadmap remain aligned on backlog IDs, milestone gates, and the next delivery slice
+- ✅ ReAct path loads the prompt from a versioned asset instead of the hardcoded `REACT_SYSTEM_PROMPT`
+- ✅ Prompt version and variant are visible in relevant response metadata and trace metadata
+- ✅ All 8 semantic routes can resolve explicit route-context assets before non-fixed rollout modes are considered
+- ⬜ Offline evaluation blocks finance-safety regressions before any live prompt experimentation is enabled (M3)
+- ✅ Proposal and roadmap remain aligned on backlog IDs, milestone gates, and the next delivery slice
 
 ---
 

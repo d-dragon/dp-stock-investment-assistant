@@ -429,11 +429,13 @@ This guide is living documentation—update it when you add patterns, services, 
 
 <!-- SPECKIT START -->
 For additional context about technologies to be used, project structure,
-shell commands, and other important information, read the current plan.
+shell commands, and other important information, read the current spec.
 
-**Active feature**: `prompt-system-milestone1` (Milestone M1 — Prompt Runtime Parity)
-Plan: `specs/prompt-system-milestone1/plan.md`
-Spec: `specs/prompt-system-milestone1/spec.md`
-Backlog: PS-01 through PS-06
-SRS scope: FR-1.4.5, FR-1.4.6, FR-1.4.8, FR-1.4.16, NFR-5.2.5–5.2.9, NFR-6.2.3, AC-8.1, AC-8.2
+**Active feature**: `prompt-system-milestone2` (Milestone M2 — Route-Aware Skills)
+Spec: `specs/prompt-system-milestone2/spec.md`
+Plan: `specs/prompt-system-milestone2/plan.md`
+Backlog: PS-07, PS-08
+SRS scope: FR-1.4.7, FR-1.4.11, FR-1.4.16, NFR-5.2.8, AC-8.5, AC-8.8, AC-8.11
+Depends on: M1 complete (PromptAssetLoader, selection tuple, prompt config)
+Gate: Do not enable experiment modes until route-aware composition is stable and traceable
 <!-- SPECKIT END -->

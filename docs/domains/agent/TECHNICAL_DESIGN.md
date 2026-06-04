@@ -181,7 +181,7 @@ The current realization of those canonical interfaces is:
 | Conversation lifecycle interface | Service-layer logic checks archive status, ensures conversation existence, resolves parent session context, and records message metadata outside the agent runtime; this boundary is fully realized on the REST path and remains a known parity gap on Socket.IO | `ConversationProvider`, `SessionProvider`, `_validate_conversation_active()`, `_ensure_conversation_exists()`, `_record_message_metadata()`, `_load_conversation_context()` |
 | Metadata persistence interface | Conversation-management metadata is persisted through service and repository paths rather than through the LangGraph checkpoint store | `ConversationService`, `ConversationRepository`, service-factory wiring |
 | Intent classification interface | The runtime consults `stock_query_router` as the query classification boundary, keeping intent selection separate from provider binding and tool execution | `src/core/stock_query_router.py`, runtime routing flow |
-| Behavioral policy interface | The active runtime passes a built-in system prompt into agent construction; the explicit `PromptAssetLoader -> PromptAssembler -> ResponseGuardrailMiddleware` boundary remains planned | `StockAssistantAgent.REACT_SYSTEM_PROMPT`, `create_agent(... system_prompt=...)`, planned prompt components in section 3.5 |
+| Behavioral policy interface | PromptAssetLoader (M1) resolves versioned assets; PromptAssembler (M2) composes route-aware prompts; ResponseGuardrailMiddleware remains planned for M3 | `StockAssistantAgent.REACT_SYSTEM_PROMPT` (legacy), `PromptAssetLoader` + `PromptAssembler` in section 3.5 |
 | Provider selection interface | The runtime uses `ModelClientFactory` to resolve provider/model clients and fallback ordering without embedding provider construction logic into route or service code | `ModelClientFactory.get_client()`, `ModelClientFactory.get_fallback_sequence()`, `StockAssistantAgent._select_client()` |
 | Tool invocation interface | The runtime materializes enabled tools from `ToolRegistry`, then passes that governed tool surface into the LangGraph ReAct agent | `get_tool_registry()`, `ToolRegistry.get_enabled_tools()`, `StockAssistantAgent._initialize_tools()`, `_build_agent_executor()` |
 | Conversational state interface | `APIServer` injects the LangGraph checkpointer, and the runtime binds `conversation_id` into `configurable.thread_id` during invoke so checkpoints stay conversation-scoped | `create_checkpointer()`, `APIServer.__init__()`, `process_query_structured()`, `_process_with_react()` / streaming invoke path |
@@ -521,8 +521,12 @@ For technical design purposes, the key transition is:
 The prompt compiler path is `PromptAssetLoader -> PromptAssembler -> ResponseGuardrailMiddleware`.
 
 **M1 status**: ``PromptAssetLoader`` is **implemented** (``src/core/prompt_asset_loader.py``) with the full
-8-field selection tuple (see §3.5.2.2). ``PromptAssembler`` and ``ResponseGuardrailMiddleware``
-remain planned for M2+.
+8-field selection tuple (see §3.5.2.2).
+
+**M2 status**: ``PromptAssembler`` is **implemented** (``src/core/prompt_assembler.py``) with the full
+deterministic assembly order, route-skill resolution, missing-skill degradation, and dynamic controls
+allowlist (see `specs/prompt-system-milestone2/spec.md`). ``ResponseGuardrailMiddleware``
+remains planned for M3.
 
 The following views explain the interfaces, call flow, and request-scoped data movement for that path.
 
@@ -1102,7 +1106,7 @@ The ADR decisions are realized in phases so memory, retrieval, prompt policy, an
 | **Immutable Config** | `MemoryConfig` | Frozen dataclass with fail-fast validation |
 | **Repository** | `ConversationRepository` | Data access for conversations collection |
 | **Asset Loader** | `PromptAssetLoader` | Discover, validate, and cache versioned prompt files (planned) |
-| **Composer** | `PromptAssembler` | Compose skills + base prompt by route classification (planned) |
+| **Composer** | `PromptAssembler` | Compose skills + base prompt by route classification (M2 — implemented in `src/core/prompt_assembler.py`) |
 | **Middleware** | `ResponseGuardrailMiddleware` | Post-process agent output for behavioral compliance (planned) |
 
 ### 5.2 Software Stack

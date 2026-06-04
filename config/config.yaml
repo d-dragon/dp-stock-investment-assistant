@@ -145,3 +145,22 @@ prompts:
   experiments:
     enabled: false
     active_id: null
+
+  # Route-Aware Skills Configuration (M2 — Route-Aware Skills)
+  # Controls route-specific prompt composition via PromptAssembler.
+  # See specs/prompt-system-milestone2/spec.md for full specification.
+  route_contexts:
+    enabled: false
+    directory: "skills/routes"
+    supported_routes:
+      - PRICE_CHECK
+      - NEWS_ANALYSIS
+      - PORTFOLIO
+      - TECHNICAL_ANALYSIS
+      - FUNDAMENTALS
+      - IDEAS
+      - MARKET_WATCH
+      - GENERAL_CHAT
+  dynamic_controls:
+    allowed_fields: []
+    reject_unknown_fields: true

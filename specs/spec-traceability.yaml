@@ -15,6 +15,12 @@ reports:
       - version: "1.2"
         date: 2026-06-03
         summary: Updated prompt-system-milestone1 mapping_status to implemented, added tasks.md/checklists/verify-tasks-report.md/review.md to evidence paths. Task completion 42/42, tests 29/29.
+      - version: "1.3"
+        date: 2026-06-04
+        summary: Added prompt-system-milestone2 (M2) feature entry — mapping_status planned, spec.md and quality checklist as evidence paths. SRS v2.7 baseline reused.
+      - version: "1.4"
+        date: 2026-06-04
+        summary: Updated prompt-system-milestone2 (M2) feature entry — mapping_status implemented, all design and delivery artifacts added to evidence paths. PromptAssembler, route-skill assets, and agent wiring delivered.
   srs_spec_traceability:
     version: "1.5"
     status: Active
@@ -656,3 +662,55 @@ features:
           label: Post-implementation verification report
         - path: specs/prompt-system-milestone1/review.md
           label: Verification review
+
+  - feature_id: prompt-system-milestone2
+    feature_title: Prompt Compiler Path — Milestone M2 (Route-Aware Skills)
+    feature_path: specs/prompt-system-milestone2
+    reference_document: specs/prompt-system-milestone2/spec.md
+    reference_anchor: governance-context-mandatory
+    mapping_status: implemented
+    feature_kind: implementation-feature
+    status_sync:
+      source_of_truth: derived
+      gate_enforced: true
+      synchronized_documents:
+        - specs/prompt-system-milestone2/spec.md
+        - specs/prompt-system-milestone2/plan.md
+        - specs/prompt-system-milestone2/tasks.md
+        - specs/prompt-system-milestone2/checklists/requirements.md
+        - specs/prompt-system-milestone2/research.md
+        - specs/prompt-system-milestone2/data-model.md
+        - specs/prompt-system-milestone2/quickstart.md
+        - specs/prompt-system-milestone2/contracts/prompt-assembler-interface.md
+        - specs/prompt-system-milestone2/contracts/route-skill-asset-schema.md
+    srs_mapping:
+      baseline_version: "2.7"
+      coverage_status: partial
+      mapped_srs_items:
+        - FR-1.4.7
+        - FR-1.4.11
+        - FR-1.4.16
+        - NFR-5.2.8
+        - AC-8.5
+        - AC-8.8
+        - AC-8.11
+      mapped_functional_groups:
+        - group: FR-1.4
+          coverage: partial
+          includes:
+            - FR-1.4.7
+            - FR-1.4.11
+            - FR-1.4.16
+      mapped_non_functional:
+        - NFR-5.2.8
+      mapped_acceptance_criteria:
+        - AC-8.5
+        - AC-8.8
+        - AC-8.11
+    speckit_mapping:
+      evidence_paths:
+        - path: specs/prompt-system-milestone2/spec.md
+          label: Feature specification
+          anchor: governance-context-mandatory
+        - path: specs/prompt-system-milestone2/checklists/requirements.md
+          label: Quality gate checklist
