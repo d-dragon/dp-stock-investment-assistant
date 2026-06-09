@@ -125,6 +125,17 @@ docker-compose down
 - **`.specify/` is runtime and governance state**: Use it for Spec Kit templates, extensions, presets, scripts, and governance artifacts such as the Constitution. It is not the repo-governed feature evidence area.
 - **Sync authoritative artifacts together**: When verified feature work changes stable behavior, update the smallest owning long-lived document, relevant delivery-scoped artifacts, and `specs/spec-traceability.yaml` together when practical.
 
+### Spec-Kit Phase Compaction Guardrail
+- When running any Spec Kit phase (`/speckit.specify`, `/speckit.plan`, `/speckit.tasks`, `/speckit.implement`, `/speckit.verify.run`), start with `/compact` if the current chat already has more than 8 turns or has been running for a long session.
+- After each major phase transition (for example: specify → plan, plan → tasks, tasks → implement, implement → verify), compact the session before continuing to the next phase.
+- Treat compaction as part of the workflow, not an optional cleanup step; it prevents context bloat during long Spec Kit runs.
+- In non-Spec-Kit sessions, suggest `/compact` when a session exceeds 15 turns to keep context fresh.
+
+### Spec-Kit Quality Gate Cycle
+- The standard quality gate cycle is: (1) run consistency check → (2) fix findings prioritized by severity → (3) verify fixes → (4) sync long-lived documents.
+- After each fix cycle, prompt the user to `/compact` before the next iteration to avoid context bloat.
+- Automatically run this cycle after spec-to-plan and plan-to-tasks transitions.
+
 ### Import & Module Organization
 - **Absolute imports**: Always use `from ` for application code; relative imports break tooling and tests
 - **Import order**: stdlib → third-party → local project modules, alphabetically sorted within groups
@@ -214,6 +225,7 @@ docker-compose down
   - `.github/agents/*` – custom agent profiles for Spec Kit and documentation workflows.
   - `.github/chatmodes/*` – custom Copilot chat modes for IDE workflows.
   - `.github/skills/*` – Copilot CLI skills for project-specific agent development.
+  - `.agents/skills/*` – Installed Copilot skills (e.g. `commit-message-storyteller`, `suggest-awesome-github-copilot-skills`).
 
 ## Setup and run (Windows PowerShell examples)
 - Python en v
@@ -369,6 +381,9 @@ See linked instruction files for comprehensive guidelines:
 - **Auth source**: Always specify `authSource` in connection string (e.g., `?authSource=stock_assistant`)
 - **Connection string format**: Ensure proper URL encoding for passwords with special characters
 
+### Skill Discovery
+- This repository stores custom Copilot skills under `.agents/skills/` (not `.github/skills/`). Always check `.agents/skills/` when looking for installed skills.
+
 ### Import & Dependency Issues
 - **Relative imports**: Break pytest discovery and packaging; always use absolute `from .*` imports
 - **PYTHONPATH**: Ensure `src` is on PYTHONPATH for tests outside VS Code: `$env:PYTHONPATH = "$PWD\src"` (PowerShell)
@@ -378,6 +393,13 @@ See linked instruction files for comprehensive guidelines:
 - **Real API keys**: Tests should mock external services; if keys are needed, inject via fixtures or use test-only keys
 - **Network dependencies**: Tests must run offline; mock all HTTP calls, database connections, and external APIs
 - **Test data pollution**: Use transaction rollbacks, separate test databases, or cleanup fixtures to avoid state leakage
+
+### Commit Message Generation
+- When asked for a commit message, always call `get_changed_files()` or run `git diff --staged` first to get the actual current staged state. Do not reuse diff context seen in earlier turns — the staged set may have changed.
+- If the staged set is empty, tell the user and suggest staging changes first.
+
+### GitHub Session References
+- When the user references a GitHub issue, PR, or commit number, record it as a session reference so future sessions can cross-reference the context.
 
 ### Model Factory Caching
 - **Cache key format**: Clients cached as `{provider}:{model_name}` (e.g., `openai:gpt-4`)
