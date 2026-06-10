@@ -382,7 +382,7 @@ See linked instruction files for comprehensive guidelines:
 - **Connection string format**: Ensure proper URL encoding for passwords with special characters
 
 ### Skill Discovery
-- This repository stores custom Copilot skills under `.agents/skills/` (not `.github/skills/`). Always check `.agents/skills/` when looking for installed skills.
+- This repository keeps project-owned skills under `.github/skills/` and installed skills under `.agents/skills/`. Check both locations when discovering available skills.
 
 ### Import & Dependency Issues
 - **Relative imports**: Break pytest discovery and packaging; always use absolute `from .*` imports
