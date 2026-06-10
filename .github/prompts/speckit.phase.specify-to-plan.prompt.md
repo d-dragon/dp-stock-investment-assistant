@@ -8,7 +8,7 @@ Use this prompt when the feature specification is ready and the next step is to 
 
 Repository-specific planning rules:
 
-- Treat [docs/spec-driven development (SDD)/spec-kit HOW-TO.md](../../docs/spec-driven development (SDD)/spec-kit HOW-TO.md) as the operational guide for this repository's Spec Kit lifecycle, especially the sections covering:
+- Treat [docs/spec-driven development (SDD)/spec-kit HOW-TO.md](../../docs/spec-driven%20development%20%28SDD%29/spec-kit%20HOW-TO.md) as the operational guide for this repository's Spec Kit lifecycle, especially the sections covering:
   - governed artifacts under `specs/`
   - the `specify -> clarify -> plan -> tasks -> implement -> verify` flow
   - synchronization targets after delivery
