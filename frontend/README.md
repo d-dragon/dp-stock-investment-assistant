@@ -70,8 +70,117 @@ frontend/
 ├── package.json                    # Dependencies and build scripts
 ├── tsconfig.json                   # TypeScript configuration
 ├── .env                           # Environment configuration
-├── FRONTEND_ANALYSIS.md           # Analysis and refinement plan (NEW)
-├── UI_IMPROVEMENTS.md             # Improvements documentation (NEW)
+├── ../docs/domains/frontend/FRONTEND_ANALYSIS.md   # Analysis and refinement plan (moved)
+├── ../docs/domains/frontend/UI_IMPROVEMENTS.md     # Improvements documentation (moved)
+└── node_modules/                   # NPM dependencies (git-ignored)
+```
+
+### **Application Purpose**
+
+#### **Primary Function**
+- **AI-Powered Investment Assistant**: Real-time chat interface for stock analysis, investment strategies, and market insights
+- **Backend Integration**: Communicates with Flask API server on `localhost:5000`
+- **User Experience**: Conversational interface for financial advice and analysis
+
+#### **Key Features**
+1. **Real-time Chat Interface**
+   - Message exchange with AI assistant
+   - Loading states with animated indicators
+   - Message history persistence during session
+
+2. **Connection Management**
+   - Health check monitoring (`/api/health` endpoint)
+   - Connection status indicator (🟢/🔴)
+   - Automatic retry and refresh capabilities
+
+3. **Responsive Design**
+   - Mobile-first approach with breakpoints
+   - Gradient background theme (`#667eea` to `#764ba2`)
+   - Glassmorphism UI effects with backdrop blur
+
+### **Software Stack**
+
+#### **Frontend Technologies**
+- **React 18.3.1**: Modern hooks-based component architecture
+- **TypeScript**: Full type safety with strict mode enabled
+- **React DOM 18.3.1**: Virtual DOM rendering with `createRoot`
+- **React Scripts 5.0.1**: Build tooling, development server, and bundling
+- **Socket.IO Client 4.8.1**: Real-time WebSocket communication
+- **CSS3**: Advanced styling with gradients, animations, and responsive design
+- **Fetch API**: HTTP client for backend communication# Stock Investment Assistant Frontend
+
+This is the React frontend for the DP Stock Investment Assistant.
+
+## Getting Started
+
+1. Install dependencies:
+   ```
+   npm install
+   ```
+
+2. Start the development server:
+   ```
+   npm start
+   ```
+
+3. Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+
+## Features
+
+- Real-time chat interface with the investment assistant
+- **OpenAI model selection and management** (NEW)
+  - View all available OpenAI models
+  - Switch models in real-time
+  - Refresh model catalog from OpenAI API
+  - See current model selection
+  - Cache status indicator
+- Connection status monitoring
+- Streaming chat responses
+- Provider selection (OpenAI, Grok stub)
+- Message history with metadata (provider, model, fallback status)
+- Responsive design
+- Modern UI with TypeScript and strict type checking
+
+## Backend Requirements
+
+Make sure the Flask backend is running on `http://localhost:5000` for the frontend to work properly.
+
+## Application Design
+
+### **Core Architecture**
+The frontend is a **React 18.3.1 single-page application (SPA)** built with Create React App (`react-scripts 5.0.1`). It follows a modern component-based architecture designed for real-time interaction with an AI-powered stock investment assistant.
+
+### **Directory Structure**
+```
+frontend/
+├── public/                          # Static assets served directly
+│   ├── index.html                  # Main HTML template with React mount point
+│   └── manifest.json               # PWA configuration
+├── src/                            # Source code
+│   ├── components/                 # React components
+│   │   ├── models/                 # Model management components
+│   │   │   └── ModelSelector.tsx   # OpenAI model selector (NEW)
+│   │   ├── WebSocketTest.tsx       # WebSocket testing component
+│   │   └── ...                     # Other components
+│   ├── services/                   # API services
+│   │   ├── modelsApi.ts           # Model management API (NEW)
+│   │   ├── restApiClient.js       # REST API client with streaming
+│   │   ├── apiService.ts          # TypeScript API service
+│   │   └── webSocketService.ts    # Socket.IO service
+│   ├── types/                      # TypeScript type definitions
+│   │   └── models.ts              # Model-related types (NEW)
+│   ├── utils/                      # Utility functions
+│   │   └── uuid.ts                # UUID generation
+│   ├── App.tsx                    # Main React component (chat interface)
+│   ├── App.css                    # Component styling
+│   ├── index.tsx                  # React application entry point
+│   ├── index.css                  # Global styles and base layout
+│   └── config.ts                  # Configuration constants
+├── package.json                    # Dependencies and build scripts
+├── tsconfig.json                   # TypeScript configuration
+├── .env                           # Environment configuration
+├── ../docs/domains/frontend/FRONTEND_ANALYSIS.md   # Analysis and refinement plan (moved)
+├── ../docs/domains/frontend/UI_IMPROVEMENTS.md     # Improvements documentation (moved)
 └── node_modules/                   # NPM dependencies (git-ignored)
 ```
 
