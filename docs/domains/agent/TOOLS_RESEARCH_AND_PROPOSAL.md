@@ -1,17 +1,31 @@
 # Tool System Architecture and Design
 
-> **Document Version**: 1.4
-> **Last Updated**: June 12, 2026
-> **Phase**: 2B - Vietnam-Market Tool Integration
-> **Status**: Research consolidated and standalone proposal
-> **Scope**: Agent tool architecture, Vietnam-market data providers, Tool Gateway, provider adapters, generic web evidence, TradingView visualization
-> **Primary Source Requirement**: Official vendor, framework, provider, and security documentation where available
-> **Governing Architecture Principle**: Tools fetch and compute; the LLM reasons; memory does not store market facts
+## 0. Document Control and Navigation
+
+### 0.1 Document Control
+
+| Field | Value |
+|-------|-------|
+| Project | DP Stock Investment Assistant |
+| Domain | Agent |
+| Document Type | Research and technical design proposal |
+| Document Version | 1.6 |
+| Last Updated | June 15, 2026 |
+| Phase | 2B - Vietnam-Market Tool Integration |
+| Status | Research consolidated; standalone proposal; non-authoritative input for architecture, technical design, SRS, and ADR refinement |
+| Standards Stance | Practice-based research/proposal aligned to the project documentation methodology |
+| Audience | Engineering, architecture, agent maintainers, reviewers, and requirement custodians |
+| Scope | Agent tool architecture, Vietnam-market data providers, Tool Gateway, provider adapters, generic web evidence, TradingView visualization |
+| Authority Boundary | This document informs future updates. It does not override the SRS, ADRs, architecture description, technical design, executable contracts, or verified feature specs. |
+| Promotion Targets | `ARCHITECTURE_DESIGN.md`, `TECHNICAL_DESIGN.md`, `SOFTWARE_REQUIREMENTS_SPECIFICATION.md`, ADRs, and delivery-scoped specs when implementation work begins |
+| Primary Source Requirement | Official vendor, framework, provider, and security documentation where available |
+| Governing Architecture Principle | Tools fetch and compute; the LLM reasons; memory does not store market facts |
 
 ---
 
-## 0. Table of Contents
+### 0.2 Table of Contents
 
+0. [0. Document Control and Navigation](#0-document-control-and-navigation)
 1. [1. Executive Summary](#1-executive-summary)
 2. [2. Scope and Project Boundaries](#2-scope-and-project-boundaries)
 3. [3. Current State Assessment](#3-current-state-assessment)
@@ -20,25 +34,27 @@
 6. [6. Layered Architecture Alignment](#6-layered-architecture-alignment)
 7. [7. Target Tool System Architecture](#7-target-tool-system-architecture)
 8. [8. Technical Design Proposal](#8-technical-design-proposal)
-9. [9. Evidence, Provider, and Visualization Strategy](#9-evidence-provider-and-visualization-strategy)
-   - [9.1 Vietnam-Market Provider Strategy](#91-vietnam-market-provider-strategy)
-   - [9.2 TradingView Visualization Strategy](#92-tradingview-visualization-strategy)
-   - [9.3 Generic Web Evidence Trust Model](#93-generic-web-evidence-trust-model)
-10. [10. Target Contracts](#10-target-contracts)
-11. [11. Implementation Roadmap](#11-implementation-roadmap)
-   - [11.1 Phase 1: AgentTool Baseline and Descriptor Inventory](#111-phase-1-agenttool-baseline-and-descriptor-inventory)
-   - [11.2 Phase 2: Route-Filtered Tool Surface and Thin Gateway](#112-phase-2-route-filtered-tool-surface-and-thin-gateway)
-   - [11.3 Phase 3: Evolved `StockSymbolTool` over Internal Symbol Store](#113-phase-3-evolved-stocksymboltool-over-internal-symbol-store)
-   - [11.4 Phase 4: Provider Policy and Normalized Output Backbone](#114-phase-4-provider-policy-and-normalized-output-backbone)
-   - [11.5 Phase 5: Concrete Market Data and Visualization Tools](#115-phase-5-concrete-market-data-and-visualization-tools)
-   - [11.6 Phase 6: Reporting from Evidence Context Packs](#116-phase-6-reporting-from-evidence-context-packs)
-   - [11.7 Phase 7: Generic Web Evidence Pipeline](#117-phase-7-generic-web-evidence-pipeline)
-   - [11.8 Phase 8: Optional Remote MCP-Style Tool Admission](#118-phase-8-optional-remote-mcp-style-tool-admission)
-   - [11.9 Roadmap Anti-Goals](#119-roadmap-anti-goals)
-12. [12. Verification Strategy](#12-verification-strategy)
-13. [13. Research Log and Decision Log](#13-research-log-and-decision-log)
-14. [14. Document Update Log](#14-document-update-log)
-15. [15. Reference Index](#15-reference-index)
+9. [9. Tool Data Architecture and Integrity Design](#9-tool-data-architecture-and-integrity-design)
+10. [10. Evidence, Provider, and Visualization Strategy](#10-evidence-provider-and-visualization-strategy)
+   - [10.1 Vietnam-Market Provider Strategy](#101-vietnam-market-provider-strategy)
+   - [10.2 TradingView Visualization Strategy](#102-tradingview-visualization-strategy)
+   - [10.3 Generic Web Evidence Trust Model](#103-generic-web-evidence-trust-model)
+11. [11. Target Contracts](#11-target-contracts)
+12. [12. Implementation Roadmap](#12-implementation-roadmap)
+   - [12.1 Promotion Gates](#121-promotion-gates)
+   - [12.2 Phase 1: AgentTool Baseline and Descriptor Inventory](#122-phase-1-agenttool-baseline-and-descriptor-inventory)
+   - [12.3 Phase 2: Route-Filtered Tool Surface and Thin Gateway](#123-phase-2-route-filtered-tool-surface-and-thin-gateway)
+   - [12.4 Phase 3: Evolved `StockSymbolTool` over Internal Symbol Store](#124-phase-3-evolved-stocksymboltool-over-internal-symbol-store)
+   - [12.5 Phase 4: Provider Policy and Normalized Output Backbone](#125-phase-4-provider-policy-and-normalized-output-backbone)
+   - [12.6 Phase 5: Concrete Market Data and Visualization Tools](#126-phase-5-concrete-market-data-and-visualization-tools)
+   - [12.7 Phase 6: Reporting from Tool Context Packs](#127-phase-6-reporting-from-tool-context-packs)
+   - [12.8 Phase 7: Generic Web Evidence Pipeline](#128-phase-7-generic-web-evidence-pipeline)
+   - [12.9 Phase 8: Optional Remote MCP-Style Tool Admission](#129-phase-8-optional-remote-mcp-style-tool-admission)
+   - [12.10 Roadmap Anti-Goals](#1210-roadmap-anti-goals)
+13. [13. Verification Strategy](#13-verification-strategy)
+14. [14. Research Log and Decision Log](#14-research-log-and-decision-log)
+15. [15. Revision History](#15-revision-history)
+16. [16. Reference Index](#16-reference-index)
 
 ---
 
@@ -90,7 +106,7 @@ Generic web fetch should be useful but conservative. It should be disabled by de
 - Tool Gateway pattern and responsibility boundaries.
 - Generic web fetch and public-web evidence trust model.
 - TradingView chart/widget/deep-link strategy.
-- Target contracts for tool capability, execution envelope, provider adapters, context packs, and web fetch policy.
+- Target contracts for tool capability, execution envelope, provider adapters, `ToolContextPack`, and web fetch policy.
 - Verification strategy for tool exposure, evidence integrity, degraded states, and finance-safety behavior.
 
 ### 2.2 Out of Scope
@@ -111,7 +127,7 @@ Generic web fetch should be useful but conservative. It should be disabled by de
 | ToolRegistry / AgentTool | Owns inventory, enablement, and cache-aware execution |
 | Provider adapters | Own source-specific fetch, credential/scope use, health, and field mapping |
 | Evidence normalizer | Owns schema validation, citations, freshness, warnings, and degraded-state packaging |
-| Prompt assembly | Consumes normalized evidence as data-only context; does not accept raw web/provider payloads as instructions |
+| Prompt assembly | Consumes normalized tool context as data-only context; does not accept raw web/provider payloads as instructions |
 | Memory | Stores conversation context only; never stores mutable market facts as truth |
 
 ---
@@ -154,6 +170,57 @@ Target implication: remove Yahoo/YahooFinance ownership from `StockSymbolTool`. 
 | Generic web fetch lacks a trust model | Web content can introduce stale data, prompt injection, or unsupported claims |
 | TradingView authority boundary needs to stay explicit | Visualization widgets can be mistaken for canonical data sources |
 | Provider-specific parsing can leak into orchestration | The gateway can become overcentralized if responsibilities are not partitioned |
+| Quality and accuracy benchmarks are not yet codified | Tool architecture can look complete without measurable citation, freshness, route, and safety gates |
+
+### 3.4 Current Runtime vs Target Proposal Fit
+
+| Current Runtime Element | Target Proposal Position | Compatibility Rule |
+|-------------------------|--------------------------|--------------------|
+| LangChain/LangGraph ReAct-style path | Preserve as the primary orchestration route | Do not introduce a second runtime in the early phases |
+| `ToolRegistry` | Keep as tool inventory and enablement source | Gateway wraps registry-backed execution instead of replacing it |
+| `AgentTool` target abstraction | Use as the repo-owned name for cache-aware tool execution | Preserve current cache behavior while adding descriptors and envelopes |
+| Static semantic route taxonomy | Use as the first `ToolSurfaceBuilder` input | Avoid dynamic route discovery until the static route-to-tool map is verified |
+| `StockSymbolTool` | Evolve into the in-system symbol data tool | Remove Yahoo/DataManager ownership and route live market data to market-data tools |
+| `TradingViewTool` | Keep as visualization and symbol-validation capability | Return `VisualizationProvenance`, not canonical financial evidence |
+| `ReportingTool` | Keep as a composition tool | Consume `ToolContextPack` inputs and generated artifacts instead of scraping providers |
+
+### 3.5 Companion Document Update Targets
+
+This standalone proposal is intended to feed later controlled updates, not to bypass existing authority. Candidate follow-up updates are:
+
+| Target Document | Proposed Promotion Content |
+|-----------------|----------------------------|
+| Architecture design | Thin Tool Gateway boundary, ToolSurfaceBuilder, ProviderSelectionPolicy, ToolContextPack, and TradingView visualization authority |
+| Technical design | Candidate module placement, runtime flow, descriptor validation, adapter contracts, and trace fields |
+| SRS | Tool exposure, admission, source attribution, degraded states, workflow mutation gating, and verification acceptance criteria |
+| ADR set | Thin gateway decision, generic web trust model, and mutation/HITL policy when implementation scope is approved |
+| Delivery specs | Phase-specific contracts, fixtures, provider allowlists, and measurable quality gates |
+
+### 3.6 Promotion Guidance
+
+This proposal is intentionally broader than any one long-lived document. Future propagation should extract only the authority slice each target document owns:
+
+| Target Artifact | Content to Promote | Content to Avoid |
+|-----------------|--------------------|------------------|
+| Architecture design | Tool-system boundaries, system-context relationships, data authority boundaries, and high-level diagrams | Implementation module names, field-level schemas, rollout tasks |
+| Technical design | Runtime flow, module placement, schemas/contracts, cache behavior, adapter interfaces, artifact metadata, and trace fields | Business priority language or normative requirement numbering |
+| SRS | Functional requirements, constraints, acceptance criteria, data-integrity requirements, source-attribution rules, and degraded-state behavior | Architecture rationale, provider research notes, implementation class layout |
+| ADRs | Irreversible or hard-to-reverse decisions such as thin gateway boundary, generic web trust model, ToolContextPack retention posture, and mutation approval policy | Detailed rollout tasks or provider catalog commentary |
+| Roadmap/delivery specs | Runnable increments, gates, fixtures, implementation sequence, and provider onboarding steps | Full research synthesis or broad benchmark discussion |
+
+Propagation rule: do not copy this proposal wholesale into long-lived documents. Translate each section into the receiving document's responsibility model so architecture, technical design, SRS, ADRs, and roadmap remain distinct.
+
+### 3.7 Current vs Target Terminology
+
+| Current / Legacy Term | Target Term | Promotion Rule |
+|-----------------------|-------------|----------------|
+| `CachingTool` | `AgentTool` | Use `AgentTool` for target architecture while preserving cache-aware behavior as an implementation capability |
+| `DataManager` / Yahoo-first stock lookup | Market-data adapter path | Keep Yahoo/DataManager as migration context only; live quote/history/fundamental data moves to dedicated market-data tools |
+| Tool output dictionary | `ToolExecutionEnvelope` plus `NormalizedOutput` | Describe raw dictionaries as current implementation detail, not target contract |
+| Evidence-only context pack | `ToolContextPack` | Use `ToolContextPack` because the pack may carry evidence, system records, mutation receipts, visualization provenance, generated artifacts, warnings, and degraded states |
+| Provider-specific model-visible tools | Coarse model-visible tools plus internal adapters | Keep providers behind `ProviderSelectionPolicy`; expose capabilities, not provider internals |
+| Raw report content | `GeneratedArtifact` from `ToolContextPack` inputs | Reports are generated from normalized context and retained with source lineage where persisted |
+| Ticker-only identity | symbol + exchange + currency | Durable market facts and symbol normalization should not rely on ticker alone |
 
 ---
 
@@ -299,6 +366,8 @@ The target design treats the gateway as a four-phase policy boundary, not as a t
 
 The corrected control flow is important: pre-model exposure happens **before** the ReAct agent receives its tool surface. A `ToolSurfaceBuilder` should construct the compact model-visible tool list from route context, descriptors, feature flags, and risk policy. After the model selects a tool, the same gateway boundary performs pre-execution admission, invokes the registry-backed tool path, validates normalized output, and passes only typed context into prompt assembly.
 
+The data architecture behind this flow is intentionally narrow: `ToolContextPack` stays request-scoped by default, cache entries accelerate validated tool/provider results without becoming authoritative, and durable storage is reserved for existing domain records, sourced artifacts, generated reports, mutation receipts, audit metadata, and explicitly retained source lineage. This keeps the tool design consistent with the layered rule that memory does not store market facts.
+
 The diagram below is a **logical responsibility view**. It is not a recommendation to create separate services, network calls, or serialization boundaries for every box. In Phase 2B, these responsibilities should be fused into one in-process gateway execution path around the existing `ToolRegistry` and `AgentTool` model.
 
 ```mermaid
@@ -328,7 +397,7 @@ flowchart TD
   Compute --> Normalizer
   TradingView --> Visuals["Visualization Payload\nsymbol validation / widget / deep link"]
 
-  Normalizer --> Pack["EvidenceContextPack"]
+  Normalizer --> Pack["ToolContextPack"]
   Visuals --> Pack
   Pack --> Kinds["NormalizedOutputKind\nfacts / snippets / documents\nsystem records / mutation receipts\nvisuals / artifacts / degraded states"]
   Kinds --> Prompt["Prompt Assembly\ndata-only runtime evidence"]
@@ -378,7 +447,7 @@ flowchart LR
   Providers --> Normalize
 
   Normalize --> Kind["NormalizedOutputKind"]
-  Kind --> Pack["EvidenceContextPack"]
+  Kind --> Pack["ToolContextPack"]
   Pack --> Prompt["Prompt Assembler"]
   Prompt --> LLM["LLM Final Reasoning"]
 ```
@@ -419,7 +488,7 @@ Separate gateway services or remote/MCP-style providers should be deferred until
 | `ProviderSelectionPolicy` | Internal provider ordering, fallback eligibility, license posture, freshness expectations, market-session rules, and timeout budgets | Model-visible tool naming, provider-specific parsing, prompt synthesis |
 | `ProviderAdapter` | Provider-specific fetch, credential/scope use, provider health, source field mapping | Tool exposure policy, prompt authority, memory persistence |
 | `EvidenceNormalizer` | Output schema validation, citations, source URL checks, freshness labels, warnings, degraded-state packaging | Provider access, model reasoning, durable memory |
-| `PromptAssembler` | Consumption of normalized context packs as runtime data-only context | Raw provider payload parsing, tool admission, market fact persistence |
+| `PromptAssembler` | Consumption of `ToolContextPack` instances as runtime data-only context | Raw provider payload parsing, tool admission, market fact persistence |
 
 ### 7.5 Tool and Adapter Taxonomy
 
@@ -436,7 +505,7 @@ This separation prevents the agent-facing tool list from growing into a provider
 |--------------------------|------------|---------|
 | Descriptor layer | Tools | Splits model-visible name/description/schema from internal risk, license, credential, freshness, and output-policy metadata |
 | Tool family | Tools | Groups model-visible capabilities such as market data, disclosure evidence, visualization, reporting, or computation |
-| Tool risk class | Tools | Controls admission as `read_only_evidence`, `bounded_transformation`, gated `internal_state_mutation`, future `workflow_mutation`, or prohibited `external_side_effect` |
+| Tool risk class | Tools | Controls admission as `read_only_evidence`, `bounded_transformation`, `workflow_mutation` with an `internal_state_mutation` subtype for repo-owned symbol-store writes, or prohibited `external_side_effect` |
 | Route exposure | Tools | Limits model-visible tools by route, locale, user/session state, feature flag, and provider approval |
 | Runtime visibility | Tools | Distinguishes model-visible tools, gated tools, internal diagnostics, and provider adapters that are never directly exposed |
 | Output kind | Tools and normalizers | Distinguishes market facts, evidence snippets, system records, mutation receipts, generated reports, visualization provenance, warnings, and degraded states |
@@ -451,7 +520,7 @@ This separation prevents the agent-facing tool list from growing into a provider
 |------|--------------------|--------|-------------|----------------|-------------------|
 | `StockSymbolTool` | Model-visible by route; write actions gated | Existing baseline / target evolution | In-system symbol lookup, normalization, persistent metadata, coverage/status/tags, aliases, identifiers, and controlled symbol-record manipulation | `InternalSymbolStoreAdapter`, `SymbolRepository`, optional `InternalStockSnapshotAdapter` for persisted snapshots |
 | `TradingViewTool` | Model-visible for visualization routes | Existing / needs expansion | Chart URLs, widget payloads, deep links, symbol validation, visualization provenance | `TradingViewAdapter` |
-| `ReportingTool` | Model-visible for report routes with constrained inputs | Existing / needs expansion | Markdown/HTML report sections generated from normalized context | Evidence context packs, visualization provenance, generated artifacts |
+| `ReportingTool` | Model-visible for report routes with constrained inputs | Existing / needs expansion | Markdown/HTML report sections generated from normalized context | `ToolContextPack` inputs, visualization provenance, generated artifacts |
 | `VietnamMarketDataTool` | Model-visible by Vietnam market routes | Potential | Quotes, OHLCV history, profile, fundamentals, indices, exchange metadata | `VnstockAdapter`, `FiinGroupAdapter`, `VietstockAdapter`, `CafeFAdapter`, `HoseHnxAdapter`, `VSDCAdapter` |
 | `VietnamDisclosureTool` | Model-visible by evidence routes | Potential | News, disclosures, shareholder documents, event summaries | `VietstockAdapter`, `CafeFAdapter`, `HoseHnxAdapter`, `VSDCAdapter` |
 | `CorporateActionTool` | Model-visible by corporate-action routes | Potential | Dividends, rights, splits, listing changes, effective dates | `VSDCAdapter`, `HoseHnxAdapter`, `VietstockAdapter`, `CafeFAdapter` |
@@ -487,7 +556,7 @@ The gateway should classify tools and adapters separately:
 3. `ProviderAdapterDescriptor` classifies the source connector: provider class, license mode, credential/scope owner, supported markets, freshness policy, parser limits, production eligibility, and source-attribution requirements.
 4. `ToolExecutionEnvelope` records the selected tool, selected adapter, descriptor versions or hashes, admission decisions, warnings, degraded-state reason, and normalized result reference.
 5. `NormalizedOutputKind` classifies the result as `EvidenceFact`, `EvidenceSnippet`, `EvidenceDocument`, `SystemRecord`, `MutationReceipt`, `VisualizationProvenance`, `GeneratedArtifact`, or `DegradedState`.
-6. `EvidenceContextPack` carries only normalized facts, snippets, documents, system records, mutation receipts, report sections, visualization provenance, generated artifacts, warnings, citations, and freshness metadata to prompt assembly.
+6. `ToolContextPack` carries only normalized facts, snippets, documents, system records, mutation receipts, report sections, visualization provenance, generated artifacts, warnings, citations, and freshness metadata to prompt assembly.
 
 This mechanism lets the model reason over a compact tool capability list while the application retains detailed provider policy and failover control. It also keeps sensitive policy details, credential ownership, license posture, and provider fallback logic out of model-visible descriptions.
 
@@ -506,7 +575,7 @@ Descriptor integrity should follow a progressive trust model:
 | Pre-model exposure | Which tools may the model see for this turn? | route, locale, enabled state, user/session state, model-visible capability descriptors, feature flags | compact tool list with names, descriptions, and schemas |
 | Pre-execution admission | Is the selected tool call allowed now? | tool arguments, internal policy descriptor, provider health, risk class, license posture, credentials, timeout budget, freshness policy | execution approval or degraded-state denial |
 | Post-execution validation | Is the result usable as evidence or visualization? | raw tool result, adapter descriptor, output schema, required metadata, source URL, timestamps, warnings | normalized facts, snippets, visual provenance, or validation failure |
-| Response assembly | What context may reach the prompt? | evidence context pack, finance-safety checks, citation coverage, stale-data warnings | data-only prompt context with no raw web instructions |
+| Response assembly | What context may reach the prompt? | `ToolContextPack`, finance-safety checks, citation coverage, stale-data warnings | data-only prompt context with no raw web instructions |
 
 ### 7.10 Gateway Decision Phases
 
@@ -533,7 +602,7 @@ flowchart LR
 9. Use freshness policy instead of TTL-only cache rules.
 10. Keep remote/MCP-style tool admission behind descriptor-integrity and operations gates.
 11. Keep Phase 2 route exposure tied to the current static route taxonomy; dynamic route discovery is a later evaluated capability.
-12. Keep reporting downstream of normalized evidence context packs, visualization provenance, and generated artifacts rather than direct provider scraping.
+12. Keep reporting downstream of `ToolContextPack` inputs, visualization provenance, and generated artifacts rather than direct provider scraping.
 13. Remove legacy Yahoo-specific data access from the evolved `StockSymbolTool`; route live external market data through market-data tools and explicit provider adapters.
 14. Treat `StockSymbolTool` write operations as controlled in-system mutations with route, authorization, audit, and confirmation policy before enabling them.
 
@@ -541,7 +610,7 @@ flowchart LR
 
 ## 8. Technical Design Proposal
 
-This section turns the [Target Tool System Architecture](#7-target-tool-system-architecture) into an implementation-oriented proposal. It should be read together with the [Target Contracts](#10-target-contracts), [Evidence, Provider, and Visualization Strategy](#9-evidence-provider-and-visualization-strategy), [Implementation Roadmap](#11-implementation-roadmap), and [Verification Strategy](#12-verification-strategy). The proposal remains documentation-level: it defines the target stack, component boundaries, and migration path without claiming the code already implements them.
+This section turns the [Target Tool System Architecture](#7-target-tool-system-architecture) into an implementation-oriented proposal. It should be read together with the [Tool Data Architecture and Integrity Design](#9-tool-data-architecture-and-integrity-design), [Evidence, Provider, and Visualization Strategy](#10-evidence-provider-and-visualization-strategy), [Target Contracts](#11-target-contracts), [Implementation Roadmap](#12-implementation-roadmap), and [Verification Strategy](#13-verification-strategy). The proposal remains documentation-level: it defines the target stack, component boundaries, and migration path without claiming the code already implements them.
 
 ### 8.1 Design Objective
 
@@ -585,7 +654,7 @@ Migration rule: existing cache-aware behavior should be preserved when introduci
 | Cache | Existing cache backend, with Redis-compatible behavior where configured | Cache normalized or validated provider results with freshness metadata |
 | Persistence | Existing conversation/checkpoint storage plus sourced artifact storage where needed | Persist conversation context and sourced artifacts; do not persist unsourced market facts as memory |
 | Web extraction | Controlled allowlisted HTTP/render/extraction pipeline using HTML/table/PDF parsers such as BeautifulSoup/lxml, pandas table extraction, or PDF extraction libraries where adopted | Fetch public evidence only when policy allows; never inject raw page instructions into prompt context |
-| Report composition | Existing reporting direction, updated to consume `EvidenceContextPack` | Generate reports from normalized evidence, visualization provenance, and generated artifacts |
+| Report composition | Existing reporting direction, updated to consume `ToolContextPack` | Generate reports from normalized evidence, visualization provenance, and generated artifacts |
 | Observability | Structured application logs first; LangSmith/OpenTelemetry-compatible tracing later | Trace route, exposed tools, selected tool, provider, cache status, freshness, latency, warning, and degraded-state reason |
 | Remote tools | MCP-compatible descriptor admission later | Future extension point after local descriptor integrity and operational controls are proven |
 
@@ -600,9 +669,9 @@ Migration rule: existing cache-aware behavior should be preserved when introduci
 | `ProviderSelectionPolicy` | `src/core/providers/selection.py` | Select provider adapter order and fallback rules below a selected tool |
 | `ProviderAdapter` | `src/core/providers/adapters/` | Encapsulate internal symbol-store, internal snapshot, Yahoo, Vietnam-native, official, licensed, public-web, TradingView, and generic-web source integrations |
 | `EvidenceNormalizer` | `src/core/evidence/normalizer.py` | Convert adapter outputs into `EvidenceFact`, `EvidenceSnippet`, `EvidenceDocument`, `SystemRecord`, `MutationReceipt`, `VisualizationProvenance`, `GeneratedArtifact`, or `DegradedState` |
-| `EvidenceContextPack` | `src/core/evidence/context_pack.py` | Carry request-scoped normalized evidence into prompt assembly |
+| `ToolContextPack` | `src/core/tools/context_pack.py` | Carry request-scoped normalized evidence, system records, mutation receipts, visualization provenance, generated artifacts, warnings, and degraded states into prompt assembly |
 | `PromptAssembler` | prompt/runtime integration layer | Insert only normalized, data-only evidence into LLM context |
-| `ReportingTool` | existing reporting module | Compose reports from evidence context packs and generated artifacts, not raw provider payloads |
+| `ReportingTool` | existing reporting module | Compose reports from `ToolContextPack` inputs and generated artifacts, not raw provider payloads |
 
 These candidate module areas are intentionally conservative. They extend the current tool package shape instead of creating a separate tool platform or second agent runtime.
 
@@ -621,7 +690,7 @@ The recommended runtime sequence is:
 9. Fetch through one or more `ProviderAdapter` instances.
 10. Normalize output through `EvidenceNormalizer`.
 11. Return a `ToolExecutionEnvelope` with normalized output, warnings, source metadata, cache status, and degraded-state reason.
-12. Pass only an `EvidenceContextPack` into prompt assembly.
+12. Pass only a `ToolContextPack` into prompt assembly.
 
 ### 8.6 Stack Fit Analysis
 
@@ -642,7 +711,7 @@ The recommended runtime sequence is:
 |-------------------|-------------------------|-----------------------|
 | `StockSymbolTool` | Convert to or wrap as `AgentTool` with capability and policy descriptors for lookup, normalization, and controlled symbol-store mutations | `InternalSymbolStoreAdapter` over `SymbolRepository`, optional `InternalStockSnapshotAdapter` for persisted snapshots |
 | `TradingViewTool` | Convert to or wrap as `AgentTool` for visualization routes | `TradingViewAdapter` producing `VisualizationProvenance` |
-| `ReportingTool` | Convert to or wrap as `AgentTool` for report routes with constrained inputs | Consumes `EvidenceContextPack`, visualization provenance, and generated artifacts |
+| `ReportingTool` | Convert to or wrap as `AgentTool` for report routes with constrained inputs | Consumes `ToolContextPack`, visualization provenance, and generated artifacts |
 | `VietnamMarketDataTool` | Add after gateway and provider policy exist | `VnstockAdapter`, licensed provider adapter, Vietstock/CafeF adapters, official exchange adapters |
 | `GenericWebFetchTool` | Add only after allowlist and parser controls exist | `GenericWebAdapter` producing snippets/documents/degraded states only |
 
@@ -666,21 +735,187 @@ This design maps directly to the roadmap phases:
 - Phase 1 establishes `AgentTool` naming and descriptors for existing tools.
 - Phase 2 adds route-filtered tool exposure and the thin in-process gateway.
 - Phase 3 evolves `StockSymbolTool` onto the internal symbol store.
-- Phase 4 adds provider selection and normalized evidence contracts.
+- Phase 4 adds provider selection, normalized evidence contracts, and the data-integrity backbone for source lineage, cache freshness, request-scoped context, and retained artifact metadata.
 - Phase 5 delivers concrete market-data and visualization tools.
-- Phase 6 makes reporting consume evidence context packs.
+- Phase 6 makes reporting consume `ToolContextPack` inputs.
 - Phase 7 enables generic web evidence with deny-by-default controls.
 - Phase 8 optionally admits MCP-style remote tools after descriptor integrity, tracing, and operational controls are mature.
 
+The data architecture in [section 9](#9-tool-data-architecture-and-integrity-design) should be treated as a cross-phase constraint rather than a standalone deliverable. Each phase should preserve request-scoped tool context, source-attributed facts, explicit cache freshness, and narrow durable retention.
+
 ---
 
-## 9. Evidence, Provider, and Visualization Strategy
+## 9. Tool Data Architecture and Integrity Design
+
+This section defines the logical data design behind the target tool system. It is intentionally **logical + target-contract level**: it identifies data domains, storage tiers, ownership, lineage, and integrity rules without requiring immediate MongoDB schema migrations or claiming runtime implementation already exists.
+
+### 9.1 Data Design Position
+
+The tool data architecture should preserve the project boundary that market facts come from tools, providers, or verified in-system records, while memory remains conversation-scoped and non-authoritative for market facts.
+
+Core posture:
+
+- `ToolContextPack` is request-scoped and in-memory by default.
+- Durable storage is used only for existing domain records, sourced artifacts, generated reports, mutation receipts, audit metadata, and explicitly retained sourced evidence.
+- Cache is a performance layer, not an authority layer.
+- Raw provider payloads, raw HTML, raw PDFs, and page instructions do not enter prompt context.
+- Existing MongoDB schemas remain current-state references; this proposal does not define implementation-ready migrations.
+
+### 9.2 Data Tier Map
+
+| Data Tier | Target Contents | Location / Mechanism | Retention and Authority |
+|-----------|-----------------|----------------------|-------------------------|
+| Request-scoped in-memory data | `ToolContextPack`, `ToolExecutionEnvelope`, route context, selected tool call, normalized outputs for the current turn | Agent process memory during one request or stream | Ephemeral; data-only prompt context; not long-term memory |
+| Redis or in-memory cache | Short-lived tool/provider results, provider health snapshots, freshness-aware cache entries, cache-stampede markers | Existing `CacheBackend`, `RedisCacheRepository`, Redis when configured, in-memory fallback when not configured | TTL-bound performance cache; must include source timestamp and freshness category where market data is cached |
+| MongoDB persistent domain records | `symbols`, `market_data`, `market_snapshots`, `reports`, `investment_reports`, conversations, LangGraph checkpoints, and retained artifact metadata | Existing repository and schema surfaces such as `SymbolRepository`, stock-data services, report repositories, conversation repositories, and MongoDBSaver-managed checkpoints | Durable records with collection-specific ownership; not all normalized tool outputs are persisted |
+| URI-backed artifacts | Report exports, extracted source documents, chart snapshots, large evidence files, generated files | MongoDB metadata record plus URI reference to later-selected storage such as filesystem, object storage, GridFS, or managed artifact storage | Durable only when explicitly retained; metadata must preserve source lineage and checksum/hash where available |
+| Reviewed code/config data | Tool capability descriptors, policy descriptors, adapter descriptors, provider allowlists, parser limits, schema definitions | Repository-managed code/config files reviewed through normal change control | Controlled configuration authority; version or hash should appear in traces |
+| External provider data | Official exchange/depository data, licensed data, public web evidence, wrapper/provider outputs, TradingView visualization payloads | Provider adapters and controlled web fetch paths | External source authority until normalized, attributed, and optionally persisted with lineage |
+
+### 9.3 Logical Data Models
+
+#### 9.3.1 `ToolContextPack`
+
+| Field Group | Target Fields | Storage Posture |
+|-------------|---------------|-----------------|
+| Request identity | request ID, conversation ID where available, route, locale, timestamp, user/session references where allowed | Request-scoped in memory |
+| Tool execution set | tool run IDs, selected tool, selected adapter, descriptor versions/hashes, cache status, latency, warnings | Request-scoped; trace metadata may be retained separately |
+| Normalized outputs | `EvidenceFact`, `EvidenceSnippet`, `EvidenceDocument`, `SystemRecord`, `MutationReceipt`, `VisualizationProvenance`, `GeneratedArtifact`, `DegradedState` | Request-scoped; selected outputs may be persisted only through domain/artifact/report paths |
+| Attribution | provider/source metadata, citations, source URLs/references, retrieved/published/effective timestamps, freshness labels | Required for market facts and retained artifacts |
+| Safety and degradation | stale-data warnings, parser warnings, blocked license state, provider outage, validation failure, finance-safety warnings | Request-scoped; important degraded states may be traced |
+| Retention policy | `request_only`, `trace_metadata`, `artifact_metadata`, `report_record`, `mutation_audit` | Controls whether anything derived from the pack is durably retained |
+
+The `ToolContextPack` itself should not be persisted wholesale by default. Persisting the whole pack would mix prompt context, provider evidence, artifacts, and trace data into one durable object and weaken the memory boundary.
+
+#### 9.3.2 `NormalizedOutput`
+
+| Output Kind | Target Shape | Persistence Rule |
+|-------------|--------------|------------------|
+| `EvidenceFact` | Structured fact with value, unit/currency, exchange, symbol identity, provider/source, timestamp, freshness, license mode | Persist only through approved market-data, snapshot, report, or artifact paths |
+| `EvidenceSnippet` | Cited excerpt with source URL/reference, retrieval timestamp, published timestamp where available, extraction metadata | Request-scoped unless retained as sourced artifact metadata |
+| `EvidenceDocument` | Normalized document/table/PDF extraction with parser metadata, section list, citations, warnings | Store as URI-backed artifact metadata when retained; do not inject raw file content into prompt context |
+| `SystemRecord` | In-system record such as symbol profile, alias map, listing context, coverage state, tags, or stored snapshot | Read from or persisted through owning repository only |
+| `MutationReceipt` | Auditable receipt for approved in-system write actions | Durable audit metadata when mutation is executed |
+| `VisualizationProvenance` | TradingView chart/widget/deep-link payload with symbol, interval, validation status, generated timestamp | Store as report/chart metadata only; not canonical market evidence |
+| `GeneratedArtifact` | Report section, generated table, export metadata, or formatted output generated from normalized inputs | Persist through report/artifact metadata when retained |
+| `DegradedState` | Blocked, stale, missing-field, provider-down, license-unclear, parser-limited, or validation-failed state | Request-scoped by default; trace if it affects user-visible output |
+
+#### 9.3.3 Provider and Source Metadata
+
+Every provider-backed output should carry a source metadata block:
+
+| Field | Purpose |
+|-------|---------|
+| provider | Human-readable provider/source name |
+| provider class | official, licensed commercial, public web, wrapper/prototype, visualization, international fallback, or in-system |
+| source URL/reference | URL, provider reference, document reference, or in-system record ID |
+| retrieved timestamp | When the tool or adapter obtained the data |
+| published/effective timestamp | When the provider says the fact, document, or corporate action became available or effective, where available |
+| symbol identity | canonical symbol plus exchange and currency, not ticker alone |
+| freshness | fresh, stale, delayed, historical, unknown, or blocked by policy |
+| license mode | production-approved, research/prototype, terms-review-required, blocked, or unknown |
+| parser/data quality | parser mode, extraction confidence, missing fields, provider warnings, quality label |
+
+#### 9.3.4 Artifact Metadata
+
+Artifacts should be represented by metadata and URI, not by assuming one storage backend now.
+
+| Field | Purpose |
+|-------|---------|
+| artifact ID | Stable internal identifier |
+| artifact type | report export, source document, extracted table, chart snapshot, generated section, or other retained evidence |
+| URI | Pointer to filesystem, object storage, GridFS, or future artifact storage |
+| source lineage | Links back to provider metadata, normalized output IDs, report ID, or mutation receipt |
+| generated by | agent, user, system, provider adapter, or report pipeline |
+| created timestamp | Durable creation timestamp |
+| checksum/hash | Integrity check where available |
+| retention class | temporary, report-bound, audit-bound, workspace-bound, or review-required |
+
+#### 9.3.5 Mutation Receipt
+
+`MutationReceipt` is required for enabled `workflow_mutation` actions, including the `internal_state_mutation` subtype for symbol-store updates.
+
+| Field | Purpose |
+|-------|---------|
+| mutation ID | Stable identifier for the write action |
+| target record | Collection and record identifier, such as `symbols` plus record ID or canonical symbol |
+| action | upsert, alias merge, coverage update, tag update, retirement marker, or other admitted action |
+| before/after summary | Bounded change summary, not necessarily full record payload |
+| actor and route | User/session or system actor plus route/tool context |
+| approval status | not required, required, approved, denied, expired, or disabled |
+| audit metadata | policy descriptor version/hash, gateway admission result, timestamp, warnings |
+| result | applied, rejected, degraded, blocked, or failed |
+
+### 9.4 Storage Ownership Matrix
+
+| Data Domain | Owner Boundary | Storage Location | Integrity Rule |
+|-------------|----------------|------------------|----------------|
+| Symbol identity and coverage | `StockSymbolTool` through `InternalSymbolStoreAdapter` and `SymbolRepository` | MongoDB `symbols` collection | Canonical identity uses symbol + exchange + currency; live market data does not belong to `StockSymbolTool` |
+| Live quote/history/fundamentals | Market-data tools through provider adapters/services | Provider result, cache, and approved `market_data` or `market_snapshots` persistence paths | Every fact carries provider/source, timestamp, freshness, exchange, currency, and license posture |
+| Market overview and breadth | Market-data/breadth tools through provider adapters | Cache, `market_snapshots`, report records, or artifact metadata where retained | Snapshot timestamp and provider coverage must be explicit |
+| Public web evidence | `GenericWebFetchTool` and `GenericWebAdapter` | Request-scoped normalized snippets/documents; retained artifact metadata only when approved | Raw HTML/PDF content stays out of prompt context; citations and parser warnings are required |
+| TradingView visuals | `TradingViewTool` and `TradingViewAdapter` | Request-scoped `VisualizationProvenance`; report/chart metadata when retained | Visualization is not canonical evidence unless a future policy explicitly admits it |
+| Reports and generated outputs | `ReportingTool` | `reports`, `investment_reports`, and URI-backed artifact metadata where retained | Reports consume `ToolContextPack`; source lineage and degraded states remain visible |
+| Conversation state | Service/runtime memory boundary | Conversations collection and LangGraph MongoDBSaver checkpoints | Checkpoints store runtime state, not durable market truth |
+| Tool descriptors and provider policy | Reviewed code/config | Repository-managed code/config | Descriptor changes are versioned or hashed and traceable |
+
+### 9.5 Cache and Freshness Design
+
+Cache entries for tool outputs should include more than a TTL. Market-data cache payloads should carry:
+
+- cache key and tool name;
+- selected adapter/provider;
+- source timestamp;
+- retrieved timestamp;
+- freshness category;
+- TTL and expiry timestamp;
+- source URL/reference where available;
+- normalized output kind;
+- warnings and degraded-state reason where applicable.
+
+Cache is allowed to accelerate repeat calls, but it must not hide stale or license-blocked data. A cached result with expired or unknown freshness should return a `DegradedState` or force a provider refresh according to `ProviderSelectionPolicy`.
+
+### 9.6 Data Integrity Rules
+
+1. Use symbol + exchange + currency as the minimum canonical market identity. Ticker-only identity is insufficient for Vietnam and cross-market workflows.
+2. Every market fact must carry provider/source, source URL or reference, retrieved timestamp, freshness, and license posture.
+3. Cache freshness must be data-aware. TTL alone is not enough for quotes, disclosures, corporate actions, financial statements, or reports.
+4. Durable report and artifact records must preserve lineage back to normalized outputs and provider/source metadata.
+5. `ToolContextPack` is not long-term memory and should not be persisted wholesale by default.
+6. `MutationReceipt` is required for any enabled `workflow_mutation`, including `internal_state_mutation` symbol-store writes.
+7. Stale, missing, parser-limited, provider-down, blocked, or license-unclear data produces `DegradedState` instead of silent fallback.
+8. Existing MongoDB schemas are current-state references. Target data contracts in this document should be promoted through technical design, SRS, and migration specs before implementation.
+
+### 9.7 Data Flow Summary
+
+```mermaid
+flowchart LR
+  Query["User Query"] --> Route["Route Context"]
+  Route --> Surface["ToolSurfaceBuilder"]
+  Surface --> Gateway["ToolGateway"]
+  Gateway --> Tool["AgentTool"]
+  Tool --> Cache{"Fresh Cache?"}
+  Cache -- "hit" --> Normalized["NormalizedOutput"]
+  Cache -- "miss" --> Adapter["ProviderAdapter"]
+  Adapter --> External["External Provider / In-System Repository"]
+  External --> Normalizer["EvidenceNormalizer"]
+  Normalizer --> Normalized
+  Normalized --> Pack["ToolContextPack\nrequest-scoped"]
+  Pack --> Prompt["Prompt Assembly"]
+  Pack -->|"selected retained outputs only"| Durable["Reports / Artifacts / Mutation Receipts\nMongoDB metadata + URI references"]
+```
+
+The request-scoped path is the default. Durable retention is explicit and narrow: report records, artifact metadata, mutation receipts, existing domain records, and trace metadata where configured.
+
+---
+
+## 10. Evidence, Provider, and Visualization Strategy
 
 This section groups the lower-level source, visualization, and public-web trust strategies that sit behind agent-visible tools. The parent boundary is intentionally provider-facing rather than model-facing: providers and adapters are selected by tool policy, not exposed as a flat list of model-callable tools.
 
-### 9.1 Vietnam-Market Provider Strategy
+### 10.1 Vietnam-Market Provider Strategy
 
-#### 9.1.1 Provider Classes
+#### 10.1.1 Provider Classes
 
 | Provider Class | Candidate Sources | Best Use | Production Caveat |
 |----------------|------------------|----------|-------------------|
@@ -691,7 +926,7 @@ This section groups the lower-level source, visualization, and public-web trust 
 | Visualization providers | [TradingView Vietnam Market](https://www.tradingview.com/markets/stocks-vietnam/) | Charts, widgets, screeners, heatmaps, ticker tape, deep links | Visualization provenance only unless explicitly admitted as a data source |
 | International fallback | Yahoo Finance, Alpha Vantage | Non-Vietnam symbols, FX, commodities, cross-market comparison | Not primary for Vietnam-market coverage |
 
-#### 9.1.2 Vietnam-Market Capability Targets
+#### 10.1.2 Vietnam-Market Capability Targets
 
 | Capability | Target Coverage |
 |------------|-----------------|
@@ -704,17 +939,17 @@ This section groups the lower-level source, visualization, and public-web trust 
 | Corporate actions | Dividends, rights, splits, listing changes, shareholder documents, official notices |
 | Reports | Symbol, market, sector, portfolio, and event reports with source-attributed sections |
 
-#### 9.1.3 Recommended Provider Posture
+#### 10.1.3 Recommended Provider Posture
 
 Use `vnstock` and public web sources for prototype and research where terms allow. Prefer licensed providers for production-grade market data. Use official sources for reference data, notices, and corporate actions where available. Use Yahoo and Alpha Vantage as international fallback and comparison sources, not as the primary Vietnam-market strategy.
 
-### 9.2 TradingView Visualization Strategy
+### 10.2 TradingView Visualization Strategy
 
-#### 9.2.1 Role
+#### 10.2.1 Role
 
 TradingView should enrich the user experience with visualization payloads and links. It should not become the canonical source of financial truth by default.
 
-#### 9.2.2 Target Capabilities
+#### 10.2.2 Target Capabilities
 
 | Capability | Intended Use |
 |------------|--------------|
@@ -726,7 +961,7 @@ TradingView should enrich the user experience with visualization payloads and li
 | Deep links | Direct links to TradingView Supercharts or symbol pages |
 | Symbol validation | Confirm whether `HOSE:`, `HNX:`, or Vietnam-market symbols render before returning a payload |
 
-#### 9.2.3 Authority Boundary
+#### 10.2.3 Authority Boundary
 
 TradingView outputs should enter the agent context as `visualization_provenance`:
 
@@ -746,13 +981,13 @@ Sources:
 - [TradingView Advanced Chart Widget](https://www.tradingview.com/widget-docs/widgets/charts/advanced-chart/)
 - [TradingView Technical Analysis Widget](https://www.tradingview.com/widget-docs/widgets/symbol-details/technical-analysis/)
 
-### 9.3 Generic Web Evidence Trust Model
+### 10.3 Generic Web Evidence Trust Model
 
-#### 9.3.1 Trust Position
+#### 10.3.1 Trust Position
 
 Generic web fetch is useful for public reports, news, disclosures, tables, and filings-like pages, but it is a low-trust input channel. It must be deny-by-default and limited to `read_only_evidence`.
 
-#### 9.3.2 Required Controls
+#### 10.3.2 Required Controls
 
 | Control | Requirement |
 |---------|-------------|
@@ -766,9 +1001,9 @@ Generic web fetch is useful for public reports, news, disclosures, tables, and f
 | Prompt-injection quarantine | Instructions embedded in pages, hidden content, scripts, and document text are treated as untrusted data |
 | Degraded states | Blocked, stale, parser-limited, license-unclear, or source-incomplete paths return warnings instead of unsourced content |
 
-#### 9.3.3 Normalized Evidence Only
+#### 10.3.3 Normalized Evidence Only
 
-Raw HTML, raw PDF bytes, scripts, hidden text, and unvalidated provider payloads should never be passed directly into LLM context. The prompt should receive only normalized evidence context:
+Raw HTML, raw PDF bytes, scripts, hidden text, and unvalidated provider payloads should never be passed directly into LLM context. The prompt should receive only normalized tool context:
 
 - facts;
 - snippets;
@@ -783,9 +1018,28 @@ Raw HTML, raw PDF bytes, scripts, hidden text, and unvalidated provider payloads
 
 ---
 
-## 10. Target Contracts
+## 11. Target Contracts
 
-### 10.1 `AgentTool`
+### 11.1 Minimum Contract Set
+
+The following contracts are the minimum set that should be promoted before implementation planning. They can be represented as Pydantic models, dataclasses, JSON Schema-compatible objects, or typed protocol contracts during implementation, but their responsibilities should remain separate.
+
+| Contract | Minimum Purpose | Promotion Target |
+|----------|-----------------|------------------|
+| `ToolCapabilityDescriptor` | Model-visible tool name, description, input schema, output kind, route coverage, locale coverage, examples, descriptor version | SRS and technical design |
+| `ToolPolicyDescriptor` | Internal risk class, license mode, freshness policy, cache policy, timeout budget, credential/scope owner, mutation policy, required metadata, descriptor hash | Technical design and ADRs |
+| `ProviderAdapterDescriptor` | Provider class, supported markets, data categories, license posture, credentials, freshness, parser limits, source-attribution requirements | Technical design and provider onboarding specs |
+| `ProviderSelectionPolicy` | Provider order, fallback, fail-closed conditions, market/session rules, freshness expectations, degraded-state mapping | Technical design and roadmap gates |
+| `ToolExecutionEnvelope` | Runtime result wrapper with route, tool, adapter, descriptor versions, admission outcomes, cache status, warnings, degraded-state reason, trace metadata | Technical design and observability requirements |
+| `NormalizedOutput` | Typed output wrapper for facts, snippets, documents, records, mutation receipts, visualization provenance, generated artifacts, and degraded states | Technical design and SRS acceptance criteria |
+| `ToolContextPack` | Request-scoped context bundle consumed by prompt assembly; not persisted wholesale by default | Architecture, technical design, and SRS constraints |
+| `GenericWebFetchPolicy` | Allowlist, rate limits, render/extraction mode, parser limits, freshness, license posture, and prompt-injection quarantine | SRS constraints and delivery specs |
+| `MutationReceipt` | Auditable record for approved `workflow_mutation` actions, including target record, action, approval status, actor/route, timestamp, and result | SRS, technical design, and ADRs |
+| `ArtifactMetadata` | URI-backed retained artifact metadata with type, URI, source lineage, generated-by, timestamp, checksum/hash where available, and retention class | Technical design and report/artifact specs |
+
+Minimum-contract rule: implementation work should not begin by adding provider-specific integrations first. It should first establish enough of these contracts to preserve tool-vs-adapter separation, data lineage, cache freshness, degraded states, and finance-safety behavior.
+
+### 11.2 `AgentTool`
 
 Purpose: define the repo-owned base abstraction for agent-callable tool execution. `AgentTool` should preserve current cache-aware behavior while expanding the abstraction to support descriptors, normalized output kinds, health metadata, and gateway-compatible execution envelopes.
 
@@ -807,7 +1061,7 @@ Must not:
 - inject raw provider or web payloads into prompt context;
 - persist mutable market facts as memory.
 
-### 10.2 `ToolCapabilityDescriptor`
+### 11.3 `ToolCapabilityDescriptor`
 
 Purpose: declare the compact model-visible tool capability. This descriptor should be safe to expose to the LLM and should not contain sensitive policy, credential, license, provider fallback, or internal admission details.
 
@@ -823,7 +1077,7 @@ Recommended fields:
 - model-visible examples;
 - descriptor source and version.
 
-### 10.3 `ToolSurfaceBuilder`
+### 11.4 `ToolSurfaceBuilder`
 
 Purpose: produce the route-filtered model-visible tool list before the ReAct agent receives its tool surface.
 
@@ -835,7 +1089,7 @@ Recommended responsibilities:
 - hide unrelated, disabled, internal-only, and allowlist-blocked tools;
 - preserve trace metadata for exposed tool names, descriptor versions, and filtering reasons.
 
-### 10.4 `ToolPolicyDescriptor`
+### 11.5 `ToolPolicyDescriptor`
 
 Purpose: declare internal gateway policy for an agent-visible tool. This descriptor is evaluated by application code before execution and during post-execution validation.
 
@@ -858,7 +1112,7 @@ Recommended fields:
 - descriptor source and version;
 - descriptor hash or integrity marker.
 
-### 10.5 `ProviderAdapterDescriptor`
+### 11.6 `ProviderAdapterDescriptor`
 
 Purpose: declare policy and trust metadata for a source-specific adapter behind one or more tools.
 
@@ -877,7 +1131,7 @@ Recommended fields:
 - production eligibility;
 - descriptor source, version, and integrity marker.
 
-### 10.6 `ProviderSelectionPolicy`
+### 11.7 `ProviderSelectionPolicy`
 
 Purpose: choose the adapter path behind a model-selected tool without exposing provider details to the LLM.
 
@@ -892,7 +1146,7 @@ Recommended fields:
 - market-session and currency rules;
 - degraded-state mapping for provider outage, stale data, blocked license posture, and missing fields.
 
-### 10.7 `ToolExecutionEnvelope`
+### 11.8 `ToolExecutionEnvelope`
 
 Purpose: wrap the runtime result of a tool call.
 
@@ -913,9 +1167,16 @@ Recommended fields:
 - source-attribution status;
 - trace metadata.
 
-### 10.8 `NormalizedOutputKind`
+Storage and retention notes:
 
-Purpose: classify the authority and prompt-treatment of every tool result before it enters an evidence context pack.
+- the envelope is request-scoped by default;
+- trace systems may retain selected envelope metadata, not necessarily full normalized payloads;
+- retained reports, artifacts, or mutation receipts should reference envelope/tool-run identifiers where available;
+- cache status must include source freshness context, not only hit/miss.
+
+### 11.9 `NormalizedOutputKind`
+
+Purpose: classify the authority and prompt-treatment of every tool result before it enters a `ToolContextPack`.
 
 Recommended kinds:
 
@@ -928,7 +1189,14 @@ Recommended kinds:
 - `GeneratedArtifact`: report section, table, or formatted output generated from already-normalized inputs;
 - `DegradedState`: blocked, stale, parser-limited, license-unclear, missing-field, provider-down, or validation-failed result.
 
-### 10.9 `ProviderAdapter`
+Storage and retention notes:
+
+- normalized outputs remain inside `ToolContextPack` unless a tool explicitly writes through an owning repository, report path, artifact metadata path, or mutation audit path;
+- `EvidenceFact` can be persisted only through approved market-data, snapshot, report, or artifact retention flows;
+- `VisualizationProvenance` may be retained as chart/report metadata, but does not become market evidence;
+- `DegradedState` should be retained in traces or reports when it materially affects a user-visible answer.
+
+### 11.10 `ProviderAdapter`
 
 Purpose: isolate provider-specific fetch, credential use, health, and mapping.
 
@@ -942,9 +1210,17 @@ Recommended responsibilities:
 - classify freshness and completeness;
 - emit provider-specific warnings without leaking provider logic into the gateway.
 
-### 10.10 `EvidenceContextPack`
+Storage and retention notes:
 
-Purpose: pass request-scoped normalized data to prompt assembly.
+- adapters fetch and map provider data, but do not own durable persistence policy;
+- writes to `symbols`, `market_data`, `market_snapshots`, reports, or artifact metadata must go through the owning tool/service/repository boundary;
+- adapter outputs must include source metadata needed by cache, normalization, trace, and optional retention paths.
+
+### 11.11 `ToolContextPack`
+
+Purpose: pass request-scoped normalized tool output to prompt assembly.
+
+`ToolContextPack` is intentionally broader than an evidence-only context container. Evidence remains a major content type, but the target tool system also needs to carry in-system records, mutation receipts, visualization provenance, generated artifacts, warnings, degraded states, and trace references. The broader name avoids implying that every normalized tool output is evidence with the same authority.
 
 Recommended contents:
 
@@ -962,7 +1238,14 @@ Recommended contents:
 - warnings;
 - degraded-state reason.
 
-### 10.11 `GenericWebFetchPolicy`
+Storage and retention notes:
+
+- the pack is request-scoped and in-memory by default;
+- the pack should not be persisted wholesale as conversation memory or market truth;
+- selected outputs may be retained only through explicit paths such as report records, artifact metadata, mutation receipts, existing domain records, or trace metadata;
+- persisted derivatives must retain source lineage back to normalized outputs and provider/source metadata.
+
+### 11.12 `GenericWebFetchPolicy`
 
 Purpose: define when and how public-web evidence may be fetched.
 
@@ -980,11 +1263,26 @@ Recommended fields:
 
 ---
 
-## 11. Implementation Roadmap
+## 12. Implementation Roadmap
 
 The roadmap is organized as **runnable phases**. Each phase should leave the agent in a usable state and should be independently testable. A phase can add internal abstractions, but it must also deliver a working increment through existing or newly exposed tools.
 
-### 11.1 Phase 1: AgentTool Baseline and Descriptor Inventory
+### 12.1 Promotion Gates
+
+These gates should be satisfied before the related capability is propagated into long-lived documents or implementation tasks:
+
+| Gate | Required Before | Pass Condition |
+|------|-----------------|----------------|
+| Contract gate | Provider expansion and reporting persistence | Minimum contracts in section 11 have owner, required fields, retention posture, and degraded-state behavior |
+| Tool exposure gate | Adding new model-visible tools | Route-to-tool exposure map exists and unrelated tools are hidden from representative route fixtures |
+| Provider gate | Production use of Vietnam-native or public-web providers | License/ToS posture, provider class, freshness policy, source attribution, and fail-closed behavior are documented |
+| Generic web gate | Enabling `GenericWebFetchTool` | Allowlist, parser limits, prompt-injection quarantine, citation extraction, and malicious-content fixtures exist |
+| Mutation gate | Enabling symbol-store writes | `workflow_mutation` policy, authorization, confirmation, audit metadata, and `MutationReceipt` are defined |
+| Report persistence gate | Persisting generated reports or artifacts | `ToolContextPack` inputs, source lineage, degraded-state visibility, artifact metadata, and URI retention are defined |
+| TradingView authority gate | Using TradingView values as evidence | Explicit policy admits the data category; otherwise TradingView remains `VisualizationProvenance` only |
+| Data integrity gate | Persisting market facts | Symbol + exchange + currency identity, provider/source metadata, timestamp, freshness, license mode, and cache policy are present |
+
+### 12.2 Phase 1: AgentTool Baseline and Descriptor Inventory
 
 Goal: rename and describe the existing tool execution baseline without changing user-facing behavior.
 
@@ -1004,7 +1302,7 @@ Acceptance checks:
 - current tool calls remain backward-compatible except for added metadata;
 - no provider-specific fallback policy is exposed in model-visible descriptors.
 
-### 11.2 Phase 2: Route-Filtered Tool Surface and Thin Gateway
+### 12.3 Phase 2: Route-Filtered Tool Surface and Thin Gateway
 
 Goal: introduce pre-model tool exposure and execution admission while keeping a fused in-process runtime.
 
@@ -1025,7 +1323,7 @@ Acceptance checks:
 - disallowed tool calls return degraded-state metadata instead of executing;
 - the LangChain/LangGraph ReAct execution path is preserved.
 
-### 11.3 Phase 3: Evolved `StockSymbolTool` over Internal Symbol Store
+### 12.4 Phase 3: Evolved `StockSymbolTool` over Internal Symbol Store
 
 Goal: turn `StockSymbolTool` into the in-system persistent symbol lookup, normalization, and controlled manipulation tool.
 
@@ -1037,7 +1335,7 @@ Deliverables:
 - `StockSymbolTool` actions for lookup, search, normalize, list by exchange, list by sector, list tracked symbols, and tag/coverage reads;
 - optional `InternalStockSnapshotAdapter` for persisted price and fundamentals snapshots only;
 - `SystemRecord` output for symbol profiles, aliases, identifiers, listing, coverage, classification, tags, and stored snapshots;
-- gated `internal_state_mutation` policy for future symbol upsert, alias merge, tag update, coverage update, and retirement marker actions;
+- gated `workflow_mutation` policy with an `internal_state_mutation` subtype for future symbol upsert, alias merge, tag update, coverage update, and retirement marker actions;
 - mutation actions disabled by default until authorization, confirmation, and audit behavior exist.
 
 Acceptance checks:
@@ -1047,7 +1345,7 @@ Acceptance checks:
 - live quote/history/fundamental requests route to market-data tools, not `StockSymbolTool`;
 - write-like actions require policy admission and otherwise return a degraded or blocked state.
 
-### 11.4 Phase 4: Provider Policy and Normalized Output Backbone
+### 12.5 Phase 4: Provider Policy and Normalized Output Backbone
 
 Goal: make provider-backed tools deterministic and source-attributed before adding more providers.
 
@@ -1059,15 +1357,15 @@ Deliverables:
 - `ProviderSelectionPolicy` for provider order, fallback, licensing, freshness, market session rules, timeout, and degraded-state mapping;
 - `NormalizedOutputKind` handling for `EvidenceFact`, `EvidenceSnippet`, `EvidenceDocument`, `SystemRecord`, `MutationReceipt`, `VisualizationProvenance`, `GeneratedArtifact`, and `DegradedState`;
 - `EvidenceNormalizer` for source URL, timestamp, currency, exchange, freshness, warnings, citations, and degraded-state reason;
-- `EvidenceContextPack` passed into prompt assembly instead of raw provider payloads.
+- `ToolContextPack` passed into prompt assembly instead of raw provider payloads.
 
 Acceptance checks:
 
 - provider choice is not visible to the model;
 - stale, missing, or license-blocked provider results produce explicit degraded states;
-- prompt assembly receives only normalized context packs.
+- prompt assembly receives only normalized `ToolContextPack` instances.
 
-### 11.5 Phase 5: Concrete Market Data and Visualization Tools
+### 12.6 Phase 5: Concrete Market Data and Visualization Tools
 
 Goal: deliver functional user-facing market and visualization capabilities before enabling generic web fetch.
 
@@ -1088,11 +1386,11 @@ Acceptance checks:
 - TradingView output is treated as visualization provenance, not canonical evidence;
 - quote/history/fundamental outputs include source metadata and stale-data warnings where applicable.
 
-### 11.6 Phase 6: Reporting from Evidence Context Packs
+### 12.7 Phase 6: Reporting from Tool Context Packs
 
 Goal: make reports a composition layer over normalized evidence, not a provider-scraping shortcut.
 
-Runnable increment: symbol, market, and portfolio report routes generate reports from `EvidenceContextPack`, `VisualizationProvenance`, and `GeneratedArtifact` inputs.
+Runnable increment: symbol, market, and portfolio report routes generate reports from `ToolContextPack`, `VisualizationProvenance`, and `GeneratedArtifact` inputs.
 
 Deliverables:
 
@@ -1107,11 +1405,11 @@ Acceptance checks:
 - generated reports surface missing evidence and stale data instead of inventing claims;
 - report output remains useful when one provider path is degraded.
 
-### 11.7 Phase 7: Generic Web Evidence Pipeline
+### 12.8 Phase 7: Generic Web Evidence Pipeline
 
 Goal: add generic web fetch only after the concrete local tool system, provider policy, normalization, and reporting flow are functional.
 
-Runnable increment: allowlisted public pages can be fetched as `read_only_evidence`, normalized, cited, and passed into context packs without raw page instructions.
+Runnable increment: allowlisted public pages can be fetched as `read_only_evidence`, normalized, cited, and passed into `ToolContextPack` instances without raw page instructions.
 
 Deliverables:
 
@@ -1129,7 +1427,7 @@ Acceptance checks:
 - approved web content becomes snippets/documents with citations, not raw HTML;
 - prompt-injection text in fetched content cannot alter tool behavior or prompt policy.
 
-### 11.8 Phase 8: Optional Remote MCP-Style Tool Admission
+### 12.9 Phase 8: Optional Remote MCP-Style Tool Admission
 
 Goal: admit remote or MCP-style tools only if local tools and provider adapters are insufficient.
 
@@ -1148,9 +1446,9 @@ Acceptance checks:
 
 - remote descriptors are untrusted until locally admitted;
 - descriptor drift blocks or degrades execution;
-- remote tool results still normalize into the same output kinds and context packs.
+- remote tool results still normalize into the same output kinds and `ToolContextPack` structure.
 
-### 11.9 Roadmap Anti-Goals
+### 12.10 Roadmap Anti-Goals
 
 - Do not create a separate gateway service before operational need exists.
 - Do not replace `ToolRegistry` in the first runnable phases.
@@ -1161,9 +1459,9 @@ Acceptance checks:
 
 ---
 
-## 12. Verification Strategy
+## 13. Verification Strategy
 
-### 12.1 Acceptance Scenarios
+### 13.1 Acceptance Scenarios
 
 | Scenario | Expected Result |
 |----------|-----------------|
@@ -1184,11 +1482,17 @@ Acceptance checks:
 | Stale data | Answers surface freshness, category-specific staleness, and avoid overstating currentness |
 | Generic web prompt injection | Page instructions remain untrusted data and cannot alter tool behavior or prompt policy |
 | TradingView non-evidence handling | Widget/deep-link payloads are returned as visualization provenance only |
-| Reporting source discipline | Generated reports are composed from evidence context packs, visualization provenance, and generated artifacts rather than raw provider payloads |
+| Reporting source discipline | Generated reports are composed from `ToolContextPack` inputs, visualization provenance, and generated artifacts rather than raw provider payloads |
+| Request-scoped tool context | `ToolContextPack` is assembled for a response without durable persistence by default |
+| Source lineage retention | Persisted reports, artifacts, and mutation receipts retain source lineage back to normalized outputs and provider/source metadata |
+| Cache freshness integrity | Cached market-data results include source timestamp, retrieved timestamp, freshness category, provider/source, and warnings where applicable |
+| Artifact URI metadata | Generated reports, extracted documents, and chart snapshots are represented by metadata plus URI reference when retained |
+| Mutation receipt integrity | Enabled symbol-store writes emit `MutationReceipt` with target record, action, approval status, audit metadata, and timestamp |
+| No durable unsourced facts | Unsourced market facts are not stored as memory, reports, artifacts, snapshots, or symbol records |
 | Vietnamese and mixed-language routes | Queries such as `khoi ngoai mua rong FPT`, `bao cao tai chinh VNM`, and `show HOSE:FPT chart` route to the intended tool family |
 | Finance-safety response | Unsourced recommendations, guaranteed-return claims, and hype language are blocked or rewritten conservatively |
 
-### 12.2 Compatibility and Migration Checks
+### 13.2 Compatibility and Migration Checks
 
 | Verification Area | Required Check | Pass Criteria |
 |-------------------|----------------|---------------|
@@ -1200,10 +1504,13 @@ Acceptance checks:
 | DataManager migration | Compare current Yahoo-backed `get_info` fields with target internal-store and market-data-tool responsibilities during transition | Symbol identity, aliases, exchange, currency, sector, industry, coverage, tags, and stored snapshots remain in `StockSymbolTool`; live quote/history/fundamental fields are routed to market-data tools |
 | Tool-vs-adapter separation | Inspect model-visible tool descriptors for provider leakage | The model sees coarse capabilities such as `StockSymbolTool` or `VietnamMarketDataTool`, not provider-specific adapters such as `InternalSymbolStoreAdapter`, `VnstockAdapter`, `FiinGroupAdapter`, `YahooFinanceAdapter`, or `TradingViewAdapter` |
 | Tool-vs-adapter separation | Verify provider choice happens only inside `ProviderSelectionPolicy` and adapter execution | Provider order, fallback, credentials, license mode, freshness rules, and parser limits never appear in model-visible tool descriptions |
-| Reporting source discipline | Generate a report from market data, disclosure evidence, visualization provenance, and generated artifacts | `ReportingTool` consumes `EvidenceContextPack` inputs and does not perform direct provider scraping |
+| Reporting source discipline | Generate a report from market data, disclosure evidence, visualization provenance, and generated artifacts | `ReportingTool` consumes `ToolContextPack` inputs and does not perform direct provider scraping |
 | Reporting source discipline | Remove or degrade one upstream evidence source during report generation | The report surfaces missing evidence, stale data, and degraded-state warnings instead of inventing or silently omitting source-dependent claims |
+| Data-tier preservation | Inspect persisted outputs after normal tool execution | Request-scoped `ToolContextPack` is not persisted wholesale; only approved reports, artifacts, mutation receipts, trace metadata, or domain records are retained |
+| Persistent identity integrity | Normalize symbols across `FPT`, `HOSE:FPT`, `HNX:SHS`, and `UPCOM:BSR` | Canonical identity includes symbol, exchange, and currency; ticker-only identity is not used as the durable key for market facts |
+| Artifact metadata integrity | Persist a generated report export or extracted source document | MongoDB-side metadata contains artifact type, URI, source lineage, generated-by, timestamp, retention class, and checksum/hash where available |
 
-### 12.3 Evaluation Dataset Families
+### 13.3 Evaluation Dataset Families
 
 - Vietnam symbol normalization.
 - Vietnam price/history retrieval.
@@ -1219,11 +1526,63 @@ Acceptance checks:
 - External market-data fallback migration to dedicated market-data adapters.
 - Tool-vs-adapter descriptor separation.
 - Reporting source-discipline and degraded report generation.
+- Tool data-tier preservation and no wholesale `ToolContextPack` persistence.
+- Source lineage across reports, artifacts, mutation receipts, and normalized outputs.
+- Cache freshness metadata and stale-cache degraded behavior.
+- Artifact URI metadata and retention-class behavior.
+- Symbol identity integrity using symbol + exchange + currency.
 - Vietnamese and English route utterances.
+
+### 13.4 Quality, Reliability, and Accuracy Benchmarks
+
+These targets are proposal-level gates. They should be converted into executable eval datasets before implementation promotion.
+
+| Benchmark Area | Initial Target | Measurement Method |
+|----------------|----------------|--------------------|
+| Source attribution coverage | At least 95% of market-data answers include provider, source URL or provider reference, retrieval timestamp, exchange, currency, freshness, and warnings where applicable | Route-level answer evals over Vietnam price, fundamentals, disclosure, flow, breadth, and report prompts |
+| Route-tool exposure precision | At least 0.90 precision for exposing only relevant tool families | Static route fixtures comparing expected and exposed tool names |
+| Route-tool exposure recall | At least 0.90 recall for exposing required tool families | Static route fixtures for price, chart, disclosure, fundamentals, breadth, flow, and report routes |
+| Vietnamese and mixed-language routing | At least 0.85 initial accuracy, with 0.90 as the promotion target | Curated Vietnamese/English query set for `FPT hôm nay thế nào?`, `HOSE:FPT chart`, `khoi ngoai mua rong`, and disclosure/fundamental requests |
+| Freshness and stale-data correctness | At least 95% of stale or missing data cases produce explicit freshness/degraded-state messaging | Provider fixture tests with stale timestamps, market-session edge cases, and missing fields |
+| Generic web prompt-injection resistance | Zero critical escapes from allowlisted adversarial pages | Malicious HTML/PDF/table fixtures with instruction-shaped content, hidden text, and override attempts |
+| TradingView authority boundary | 100% of TradingView outputs classified as `VisualizationProvenance` unless explicitly approved as evidence | Tool-output classification tests |
+| Workflow mutation safety | 100% of unauthorized or unconfirmed `workflow_mutation` calls blocked or returned as degraded states | Symbol-store write fixtures for upsert, alias merge, coverage update, tag update, and retirement marker |
+| Reporting source discipline | 100% of generated reports use `ToolContextPack` inputs and surface missing/stale evidence | Report-generation fixtures with provider outage and missing evidence |
+| Trace completeness | At least 95% of tool runs include route, exposed tools, selected tool, provider, descriptor version/hash, cache status, freshness, latency, warning, and degraded-state reason | Structured log or LangSmith/OpenTelemetry-compatible trace inspection |
+| Data-retention discipline | 100% of request-only tool contexts are not durably persisted wholesale | Persistence inspection after representative tool, report, generic web, and degraded-state flows |
+| Source-lineage integrity | 100% of retained reports/artifacts/mutation receipts include source lineage or explicit no-source degraded reason | Artifact/report/mutation fixtures with provider metadata checks |
+
+### 13.5 Source Verification Metadata
+
+Provider and evidence quality should be verified through metadata, not implicit trust. The target system should maintain this posture before any provider becomes production-enabled.
+
+| Source Category | Example Sources | Authority Level | Required Metadata | Verification Posture |
+|-----------------|-----------------|-----------------|-------------------|----------------------|
+| Official exchange/depository | HOSE, HNX, VSDC | Highest for listings, notices, registrations, and corporate actions | Source URL, exchange/source, retrieved timestamp, published/effective timestamp where available, event type, parser warning | Prefer for authoritative events; verify parser stability and completeness |
+| Licensed commercial data | FiinGroup, FiinTrade, FiinQuant | High when licensed and contractually allowed | Provider, licensed product, retrieval timestamp, data category, exchange, currency, freshness, credential scope | Production candidate after contract, credential, and redistribution review |
+| Public web evidence | Vietstock, VietstockFinance, CafeF | Medium for public evidence, subject to ToS and parser reliability | URL, retrieved timestamp, published timestamp where available, parser mode, citation, license posture, warnings | Allowlisted only after terms review and adversarial parser tests |
+| Wrapper/prototype providers | `vnstock` | Useful for research/prototype, not production authority by default | Package/source version, provider lineage where known, retrieval timestamp, source URL if available, license posture | Prototype only until license, source lineage, and reliability are reviewed |
+| Visualization providers | TradingView | Visualization support, not canonical evidence by default | Widget type, symbol, interval, locale/theme, validation status, deep link, generated timestamp | Classify as `VisualizationProvenance`; do not use numeric values as facts unless explicitly admitted |
+| International fallback | Yahoo Finance, Alpha Vantage | Fallback/cross-market context | Provider, symbol, market, currency, retrieval timestamp, source/reference URL where available, freshness | Not primary for Vietnam-market coverage |
+| In-system persistent data | `SymbolRepository`, symbol store, stored snapshots | High for repo-owned symbol identity and coverage records | Record ID, updated timestamp, source lineage, mutation receipt where applicable, audit metadata | Use for symbol identity and stored snapshots; do not treat as live market feed without snapshot freshness |
+
+### 13.6 Data Integrity Acceptance Checks
+
+| Check | Pass Criteria |
+|-------|---------------|
+| Request-scoped context | `ToolContextPack` exists only for the current request unless selected derivatives are explicitly retained |
+| Durable retention path | Persisted outputs are limited to existing domain records, report records, artifact metadata, mutation receipts, audit metadata, and trace metadata |
+| Source lineage | Retained reports and artifacts can trace claims back to normalized outputs and provider/source metadata |
+| Cache metadata | Cached market facts include provider/source, source timestamp, retrieved timestamp, freshness category, and degraded-state warnings where applicable |
+| Symbol identity | Durable market facts use symbol + exchange + currency, not ticker alone |
+| Raw content quarantine | Raw HTML, raw PDF bytes, scripts, hidden page text, and provider payloads do not enter prompt context |
+| TradingView authority | TradingView payloads remain `VisualizationProvenance` unless explicitly approved by future policy |
+| Mutation audit | `workflow_mutation` actions emit `MutationReceipt`; unauthorized or unconfirmed mutations are blocked or degraded |
+| Schema posture | Proposed logical contracts are not treated as implemented MongoDB migrations until promoted through technical design and migration specs |
 
 ---
 
-## 13. Research Log and Decision Log
+## 14. Research Log and Decision Log
 
 | Topic | Finding | Proposal Impact |
 |-------|---------|-----------------|
@@ -1235,21 +1594,25 @@ Acceptance checks:
 | Provider adapters | Provider-specific logic must stay outside gateway | Use adapters for fetch, health, credentials, and field mapping |
 | Stock symbol ownership | `StockSymbolTool` is a better fit for persistent symbol data than live Yahoo-backed market data | Use `InternalSymbolStoreAdapter` for symbol lookup, normalization, metadata, coverage, tags, aliases, and controlled symbol-record manipulation |
 | Yahoo fallback | Target architecture should use an adapter rather than legacy Yahoo-specific data access | Use `YahooFinanceAdapter` only for external market-data fallback tools, not for `StockSymbolTool` |
-| Evidence normalization | Raw outputs should not enter prompt context | Normalize into request-scoped context packs |
+| Evidence normalization | Raw outputs should not enter prompt context | Normalize into request-scoped `ToolContextPack` inputs |
+| Tool data architecture | Tool data needs storage-tier discipline to avoid turning prompt context into durable market truth | Keep `ToolContextPack` request-scoped by default; persist only sourced artifacts, generated reports, mutation receipts, audit metadata, and existing domain records where needed |
+| Artifact persistence | Large generated or extracted evidence artifacts should not force a single storage backend decision now | Store artifact metadata and source lineage in MongoDB while referencing file/object storage by URI |
 | Output authority | Facts, snippets, documents, system records, mutation receipts, visual payloads, generated artifacts, and degraded states have different prompt authority | Add `NormalizedOutputKind` before prompt assembly |
 | Generic web fetch | Useful but high-risk | Deny-by-default, allowlist, parser limits, injection quarantine |
 | TradingView | Strong visualization provider | Treat as visualization provenance, not canonical facts |
 | Route evolution | Dynamic route discovery is future work | Use current static route taxonomy for Phase 2 tool exposure |
-| Reporting | Reports can bypass evidence policy if they fetch raw provider data directly | Compose reports from normalized context packs and generated artifacts |
+| Reporting | Reports can bypass evidence policy if they fetch raw provider data directly | Compose reports from `ToolContextPack` inputs and generated artifacts |
 | Remote/MCP tools | Powerful but expands trust surface | Defer until descriptor integrity and operational controls mature |
 | Vietnam providers | Native and official sources matter | Make Vietnam-market provider classes first-class |
 
 ---
 
-## 14. Document Update Log
+## 15. Revision History
 
 | Version | Date | Author | Changes |
 |---------|------|--------|---------|
+| 1.6 | 2026-06-15 | Codex | Added tool-system data architecture and integrity design covering storage tiers, logical data models, source lineage, artifact metadata, cache freshness, mutation receipts, and data-integrity verification |
+| 1.5 | 2026-06-15 | Codex | Added project-standard document control, current-runtime compatibility framing, companion document update targets, `ToolContextPack` terminology, `workflow_mutation` subtype treatment for in-system writes, and explicit quality/source-verification benchmarks |
 | 1.4 | 2026-06-12 | Codex | Reworked the implementation roadmap into runnable phases with finer-grained deliverables and added numbered headings throughout the document |
 | 1.3 | 2026-06-12 | Codex | Repositioned the evolved `StockSymbolTool` as the in-system persistent symbol lookup/manipulation tool, replaced its target Yahoo path with `InternalSymbolStoreAdapter`, and moved Yahoo fallback ownership to external market-data tools |
 | 1.2 | 2026-06-12 | Codex | Added the Technical Design Proposal section with technology stack, component design, runtime flow, implementation constraints, rollout fit, and renamed the target cache-aware tool abstraction from `CachingTool` to `AgentTool` with rationale |
@@ -1258,9 +1621,9 @@ Acceptance checks:
 
 ---
 
-## 15. Reference Index
+## 16. Reference Index
 
-### 15.1 Project References
+### 16.1 Project References
 
 - [Prompt System Architecture and Design](./PROMPT_SYSTEM_RESEARCH_PROPOSAL.md)
 - [Agent Domain Architecture Description](./ARCHITECTURE_DESIGN.md)
@@ -1270,15 +1633,29 @@ Acceptance checks:
 - [ADR-001 - Layered LLM Architecture](./DECISIONS/ADR-AGENT-001-LAYERED-LLM-ARCHITECTURE.md)
 - [Project Documentation and Specification Methodology](../../study-hub/project-documentation-and-specification-methodology.md)
 
-### 15.2 Vendor and Framework References
+### 16.2 Vendor and Framework References
 
 - [OpenAI Function Calling](https://developers.openai.com/api/docs/guides/function-calling)
 - [OpenAI Tools Guide](https://developers.openai.com/api/docs/guides/tools)
+- [OpenAI Guardrails and Human Review](https://developers.openai.com/api/docs/guides/agents/guardrails-approvals)
+- [OpenAI Agent Orchestration](https://developers.openai.com/api/docs/guides/agents/orchestration)
+- [OpenAI Agent Evals](https://developers.openai.com/api/docs/guides/agent-evals)
 - [OpenAI Latency Optimization](https://developers.openai.com/api/docs/guides/latency-optimization)
 - [Anthropic Tool Use Overview](https://platform.claude.com/docs/en/agents-and-tools/tool-use/overview)
+- [Anthropic Building Effective Agents](https://www.anthropic.com/engineering/building-effective-agents)
 - [LangChain Tools](https://docs.langchain.com/oss/python/langchain/tools)
 - [LangChain Middleware](https://docs.langchain.com/oss/python/langchain/middleware)
+- [LangChain Guardrails](https://docs.langchain.com/oss/python/langchain/guardrails)
 - [LangChain Multi-Agent](https://docs.langchain.com/oss/python/langchain/multi-agent)
+- [LangGraph Overview](https://docs.langchain.com/oss/python/langgraph/overview)
+- [LangGraph Persistence](https://docs.langchain.com/oss/python/langgraph/persistence)
+- [LangGraph Fault Tolerance](https://docs.langchain.com/oss/python/langgraph/fault-tolerance)
+- [LangSmith Observability Concepts](https://docs.langchain.com/langsmith/observability-concepts)
+- [LangSmith Metadata and Tags](https://docs.langchain.com/langsmith/add-metadata-tags)
+- [LangSmith Threads](https://docs.langchain.com/langsmith/threads)
+- [LangSmith Evaluation Concepts](https://docs.langchain.com/langsmith/evaluation-concepts)
+- [Google Gemini Agents](https://ai.google.dev/gemini-api/docs/agents)
+- [Google Gemini Function Calling](https://ai.google.dev/gemini-api/docs/function-calling)
 - [Model Context Protocol Tools Specification](https://modelcontextprotocol.io/specification/2025-06-18/server/tools)
 - [GitHub Copilot MCP](https://docs.github.com/en/copilot/how-tos/provide-context/use-mcp-in-your-ide/extend-copilot-chat-with-mcp)
 - [Hugging Face Transformers Tool Use](https://huggingface.co/docs/transformers/en/chat_extras)
@@ -1286,7 +1663,7 @@ Acceptance checks:
 - [Hugging Face smolagents Agent Types](https://huggingface.co/docs/smolagents/en/guided_tour)
 - [OWASP LLM01 Prompt Injection](https://genai.owasp.org/llmrisk/llm01-prompt-injection/)
 
-### 15.3 Vietnam Market and Visualization References
+### 16.3 Vietnam Market and Visualization References
 
 - [`vnstock` PyPI](https://pypi.org/project/vnstock/)
 - [Vietstock](https://vietstock.vn/)
