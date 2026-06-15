@@ -136,7 +136,7 @@ Key relationships:
 
 ### Schema Changes
 
-Reference: [AGENT_MEMORY_TECHNICAL_DESIGN.md §Data Model Design](../../docs/langchain-agent/AGENT_MEMORY_TECHNICAL_DESIGN.md)
+Reference: [AGENT_MEMORY_TECHNICAL_DESIGN.md §Data Model Design](../../docs/domains/agent/AGENT_MEMORY_TECHNICAL_DESIGN.md)
 
 #### 1. `workspaces` Collection — Type Normalization
 
@@ -192,7 +192,7 @@ Reference: [AGENT_MEMORY_TECHNICAL_DESIGN.md §Data Model Design](../../docs/lan
 
 ### Component Interaction — Chat Flow (Target State)
 
-Reference: [LANGCHAIN_AGENT_ARCHITECTURE_AND_DESIGN.md §STM via LangGraph Checkpointer](../../docs/langchain-agent/LANGCHAIN_AGENT_ARCHITECTURE_AND_DESIGN.md)
+Reference: [ARCHITECTURE_DESIGN.md §STM via LangGraph Checkpointer](../../docs/domains/agent/ARCHITECTURE_DESIGN.md)
 
 ```
 ┌──────────┐    POST /api/chat          ┌──────────────┐
@@ -246,7 +246,7 @@ Reference: [LANGCHAIN_AGENT_ARCHITECTURE_AND_DESIGN.md §STM via LangGraph Check
 
 ### Service Layer Dependency Graph
 
-Reference: [AGENT_MEMORY_TECHNICAL_DESIGN.md §Architectural Decisions](../../docs/langchain-agent/AGENT_MEMORY_TECHNICAL_DESIGN.md)
+Reference: [AGENT_MEMORY_TECHNICAL_DESIGN.md §Architectural Decisions](../../docs/domains/agent/AGENT_MEMORY_TECHNICAL_DESIGN.md)
 
 ```
 ServiceFactory
@@ -421,14 +421,14 @@ Implementation follows **Schema first, then services** ordering per Decision §1
 
 ### Why conversation_id == thread_id (not a derived value)
 
-Per [AGENT_MEMORY_TECHNICAL_DESIGN.md §Decision 3](../../docs/langchain-agent/AGENT_MEMORY_TECHNICAL_DESIGN.md):
+Per [AGENT_MEMORY_TECHNICAL_DESIGN.md §Decision 3](../../docs/domains/agent/AGENT_MEMORY_TECHNICAL_DESIGN.md):
 - 1:1 mapping simplifies debugging and tracing
 - No translation layer between application and LangGraph
 - `conversation_id` is generated via `uuid.uuid4()` which is safe for MongoDB index and LangGraph thread_id
 
 ### Why session context lives on session, not conversation
 
-Per [AGENT_MEMORY_TECHNICAL_DESIGN.md §Decision 1](../../docs/langchain-agent/AGENT_MEMORY_TECHNICAL_DESIGN.md):
+Per [AGENT_MEMORY_TECHNICAL_DESIGN.md §Decision 1](../../docs/domains/agent/AGENT_MEMORY_TECHNICAL_DESIGN.md):
 - Session stores reusable assumptions, intent, and symbol focus across conversations
 - Conversations inherit session context but can apply thread-local overrides
 - This prevents duplication and ensures siblings share the same analytical starting point
@@ -463,7 +463,7 @@ No constitution violations to justify. All changes align with existing patterns 
 ## References
 
 - [Feature Specification](./spec.md)
-- [AGENT_MEMORY_TECHNICAL_DESIGN.md](../../docs/langchain-agent/AGENT_MEMORY_TECHNICAL_DESIGN.md) — Data model, sequence diagrams, API contracts, configuration
-- [LANGCHAIN_AGENT_ARCHITECTURE_AND_DESIGN.md](../../docs/langchain-agent/LANGCHAIN_AGENT_ARCHITECTURE_AND_DESIGN.md) — Agent architecture, STM wiring, ReAct pattern
+- [AGENT_MEMORY_TECHNICAL_DESIGN.md](../../docs/domains/agent/AGENT_MEMORY_TECHNICAL_DESIGN.md) — Data model, sequence diagrams, API contracts, configuration
+- [ARCHITECTURE_DESIGN.md](../../docs/domains/agent/ARCHITECTURE_DESIGN.md) — Agent architecture, STM wiring, ReAct pattern
 - [AGENTIC_APP_WITH_STM_INTEGRATION_ROADMAP.md](../../docs/High-level%20Design/AGENTIC_APP_WITH_STM_INTEGRATION_ROADMAP.md) — Research report defining Phase A–E delivery phasing and risk analysis
 - [Constitution](../../.specify/memory/constitution.md) — Governing principles (ADR-001)

@@ -292,12 +292,12 @@ Use the traceability manifest and sync generator whenever SRS scope, feature spe
 
 Quick links:
 - [Forward feature-to-SRS sync report](specs/spec-sync-status.md)
-- [Reverse SRS-to-spec trace report](docs/langchain-agent/SRS_SPEC_TRACEABILITY.md)
+- [Reverse SRS-to-spec trace report](docs/domains/agent/SRS_SPEC_TRACEABILITY.md)
 
 Core artifacts:
 - `specs/spec-traceability.yaml` - Source manifest for SRS-to-spec mappings, report metadata, anchors, and gate behavior
 - `specs/spec-sync-status.md` - Forward sync report from feature specs to SRS coverage/status
-- `docs/langchain-agent/SRS_SPEC_TRACEABILITY.md` - Reverse trace from SRS items to mapped feature specs
+- `docs/domains/agent/SRS_SPEC_TRACEABILITY.md` - Reverse trace from SRS items to mapped feature specs
 - `scripts/sync_spec_status.py` - Generator and sync gate script
 
 Recommended workflow:

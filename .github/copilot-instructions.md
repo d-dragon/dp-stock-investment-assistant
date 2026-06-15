@@ -1,15 +1,11 @@
 | 'g:\00_Work\Projects\dp-stock-investment-assistant\.github\instructions\infrastructure-deployment.instructions.md' | IaC/** | Infrastructure, deployment, and IaC conventions for Docker, Kubernetes, Terraform, and CI/CD |
 | 'g:\00_Work\Projects\dp-stock-investment-assistant\.github\instructions\testing.instructions.md' | tests/** | Comprehensive testing strategy across all levels - unit, integration, E2E, performance, security |
+| 'g:\00_Work\Projects\dp-stock-investment-assistant\.github\instructions\documentation-and-specification.instructions.md' | docs/**,specs/**,.github/instructions/*.md,.github/copilot-instructions.md | Documentation, specification, markdown, and diagram conventions for repo docs and instruction files |
 # Copilot Instructions for dp-stock-investment-assistant
 
 **Purpose**: Make AI coding agents productive and safe in this repository by encoding our conventions, workflows, and gotchas. Favor precise, minimal edits with tests green before done.
 
-> **Domain-Specific Instructions**: For detailed guidance, see:
-> - [Architecture & System Design](instructions/architecture.instructions.md)
-> - [Backend Python API](instructions/backend-python.instructions.md)
-> - [Frontend React](instructions/frontend-react.instructions.md)
-> - [Infrastructure & Deployment](instructions/infrastructure-deployment.instructions.md)
-> - [Testing](instructions/testing.instructions.md)
+> **Priority Order**: Use the matching instruction file in `instructions/` first, then use the workflow commands in this file for setup and verification, and treat the remaining repository-wide and project-specific rules as fallback defaults when no narrower rule applies.
 
 > **Project Summary**: AI-powered stock investment assistant with Flask API, React UI, MongoDB/Redis persistence, and multi-model AI support (OpenAI + fallback providers via ModelClientFactory). Architecture uses service/repository factories for DI, health checks on all components, and layered separation (routes → services → repositories → DB).
 
@@ -123,6 +119,23 @@ docker-compose down
 
 ## Project-Specific Guidelines
 
+### Documentation and Spec-Driven Artifacts
+- **`docs/` is long-lived**: Use it for stable requirements, architecture, technical design, ADRs, policy, and runbooks.
+- **`specs/` is delivery-scoped**: Use it for Spec Kit feature artifacts such as `spec.md`, `plan.md`, `tasks.md`, `review.md`, evidence, and temporary design exploration. Promote content into `docs/` only after implementation is verified and the knowledge is stable enough to become reusable.
+- **`.specify/` is runtime and governance state**: Use it for Spec Kit templates, extensions, presets, scripts, and governance artifacts such as the Constitution. It is not the repo-governed feature evidence area.
+- **Sync authoritative artifacts together**: When verified feature work changes stable behavior, update the smallest owning long-lived document, relevant delivery-scoped artifacts, and `specs/spec-traceability.yaml` together when practical.
+
+### Spec-Kit Phase Compaction Guardrail
+- When running any Spec Kit phase (`/speckit.specify`, `/speckit.plan`, `/speckit.tasks`, `/speckit.implement`, `/speckit.verify.run`), start with `/compact` if the current chat already has more than 8 turns or has been running for a long session.
+- After each major phase transition (for example: specify → plan, plan → tasks, tasks → implement, implement → verify), compact the session before continuing to the next phase.
+- Treat compaction as part of the workflow, not an optional cleanup step; it prevents context bloat during long Spec Kit runs.
+- In non-Spec-Kit sessions, suggest `/compact` when a session exceeds 15 turns to keep context fresh.
+
+### Spec-Kit Quality Gate Cycle
+- The standard quality gate cycle is: (1) run consistency check → (2) fix findings prioritized by severity → (3) verify fixes → (4) sync long-lived documents.
+- After each fix cycle, prompt the user to `/compact` before the next iteration to avoid context bloat.
+- Automatically run this cycle after spec-to-plan and plan-to-tasks transitions.
+
 ### Import & Module Organization
 - **Absolute imports**: Always use `from ` for application code; relative imports break tooling and tests
 - **Import order**: stdlib → third-party → local project modules, alphabetically sorted within groups
@@ -203,10 +216,16 @@ docker-compose down
   - `docker-compose.yml` (+ `.override.yml` for local tweaks) – local dev with MongoDB, Redis, API, Agent, Frontend.
   - `IaC/` – Dockerfiles (Dockerfile.api, Dockerfile.agent), Helm chart, Terraform.
 - Docs
+  - `docs/` – long-lived requirements, architecture, technical design, policy, and operations baselines.
+  - `specs/` – delivery-scoped Spec Kit feature artifacts, verification evidence, and sync metadata.
+  - `.specify/` – Spec Kit runtime area for constitution, templates, extensions, presets, and scripts.
   - `README.md` – setup, testing, DB migration, API architecture.
-  - `.github/MODEL_ROUTING.md` – multi-model routing and fallback strategy.
   - `.github/instructions/*.instructions.md` – domain-specific detailed conventions.
-  - `.github/chatmodes/*` – custom Copilot chat modes (docs; model routing not enforced by Copilot yet).
+  - `.github/prompts/*` – reusable prompt files for common tasks.
+  - `.github/agents/*` – custom agent profiles for Spec Kit and documentation workflows.
+  - `.github/chatmodes/*` – custom Copilot chat modes for IDE workflows.
+  - `.github/skills/*` – Copilot CLI skills for project-specific agent development.
+  - `.agents/skills/*` – Installed Copilot skills (e.g. `commit-message-storyteller`, `suggest-awesome-github-copilot-skills`).
 
 ## Setup and run (Windows PowerShell examples)
 - Python en v
@@ -285,7 +304,7 @@ docker-compose down
 - Fallback behavior
   - Configure `model.allow_fallback` and `model.fallback_order` in config.
   - Agent automatically retries with fallback models on primary failure.
-  - See `.github/MODEL_ROUTING.md` for detailed fallback strategy.
+  - Treat model routing docs/config under `.github/` as external-orchestration artifacts only if they are explicitly restored.
 
 ## Testing Patterns
 
@@ -333,10 +352,19 @@ See domain-specific instruction files for step-by-step guides:
 - Deploy to AKS Production
 - Configure CI/CD Pipeline
 
+**Documentation & Specification Tasks** - See [documentation-and-specification.instructions.md](instructions/documentation-and-specification.instructions.md):
+- Add or update ADRs
+- Write or refine technical design and methodology docs
+- Promote stable content out of `specs/` into `docs/` only after verification
+- Keep `docs/`, `specs/`, and `.specify/` responsibilities distinct
+- Keep notation choices and document boundaries consistent
+- Keep diagrams readable with explicit scope/state labeling and split dense visuals when needed
+
 ## Domain-Specific Conventions Summary
 See linked instruction files for comprehensive guidelines:
 - **Architecture**: Design patterns, deployment strategies, IaC conventions
 - **Backend (Python)**: Flask blueprints, model factory, pytest patterns, ConfigLoader usage
+- **Documentation & Specification**: Notation policy, diagram visualization quality, Markdown structure, document boundaries, and sync discipline for `docs/`, `specs/`, `.specify/`, and instruction files
 - **Frontend (React)**: Component architecture, hooks, Socket.IO, Jest + RTL testing
 - **Infrastructure & Deployment**: Docker, Kubernetes/Helm, Terraform, CI/CD pipelines, monitoring
 - **Testing**: Unit, integration, E2E, performance, security testing across all stacks
@@ -353,6 +381,9 @@ See linked instruction files for comprehensive guidelines:
 - **Auth source**: Always specify `authSource` in connection string (e.g., `?authSource=stock_assistant`)
 - **Connection string format**: Ensure proper URL encoding for passwords with special characters
 
+### Skill Discovery
+- This repository keeps project-owned skills under `.github/skills/` and installed skills under `.agents/skills/`. Check both locations when discovering available skills.
+
 ### Import & Dependency Issues
 - **Relative imports**: Break pytest discovery and packaging; always use absolute `from .*` imports
 - **PYTHONPATH**: Ensure `src` is on PYTHONPATH for tests outside VS Code: `$env:PYTHONPATH = "$PWD\src"` (PowerShell)
@@ -362,6 +393,13 @@ See linked instruction files for comprehensive guidelines:
 - **Real API keys**: Tests should mock external services; if keys are needed, inject via fixtures or use test-only keys
 - **Network dependencies**: Tests must run offline; mock all HTTP calls, database connections, and external APIs
 - **Test data pollution**: Use transaction rollbacks, separate test databases, or cleanup fixtures to avoid state leakage
+
+### Commit Message Generation
+- When asked for a commit message, always call `get_changed_files()` or run `git diff --staged` first to get the actual current staged state. Do not reuse diff context seen in earlier turns — the staged set may have changed.
+- If the staged set is empty, tell the user and suggest staging changes first.
+
+### GitHub Session References
+- When the user references a GitHub issue, PR, or commit number, record it as a session reference so future sessions can cross-reference the context.
 
 ### Model Factory Caching
 - **Cache key format**: Clients cached as `{provider}:{model_name}` (e.g., `openai:gpt-4`)
@@ -394,7 +432,7 @@ See linked instruction files for comprehensive guidelines:
 
 ## References
 - API surface: `docs/openapi.yaml`
-- Model routing: `.github/MODEL_ROUTING.md`, `.github/copilot-model-config.yaml`, `src/utils/model_router.py`
+- Model provider fallback: `config/config.yaml`, `src/core/model_factory.py`
 - DB setup: README “DB setup and migration” section
 - IaC/K8s: `IaC/helm/dp-stock`, `IaC/infra/terraform`
 
@@ -410,3 +448,16 @@ See linked instruction files for comprehensive guidelines:
 - Health check (once app runs): `GET /api/health` → `{ "status": "healthy" }`
 
 This guide is living documentation—update it when you add patterns, services, or workflows the assistant should follow.
+
+<!-- SPECKIT START -->
+For additional context about technologies to be used, project structure,
+shell commands, and other important information, read the current spec.
+
+**Active feature**: `prompt-system-milestone2` (Milestone M2 — Route-Aware Skills)
+Spec: `specs/prompt-system-milestone2/spec.md`
+Plan: `specs/prompt-system-milestone2/plan.md`
+Backlog: PS-07, PS-08
+SRS scope: FR-1.4.7, FR-1.4.11, FR-1.4.16, NFR-5.2.8, AC-8.5, AC-8.8, AC-8.11
+Depends on: M1 complete (PromptAssetLoader, selection tuple, prompt config)
+Gate: Do not enable experiment modes until route-aware composition is stable and traceable
+<!-- SPECKIT END -->

@@ -113,7 +113,8 @@ dmypy.json
 *.swo
 
 # Project specific
-config/config.yaml
+config/config.production.yaml
+config/config.staging.yaml
 reports/*.pdf
 reports/*.csv
 reports/*.html
@@ -148,3 +149,6 @@ docs/postman/specs/Stock Investment Assistant API/openapi.yaml
 docs/langchain-agent/LANGCHAIN_AGENT_ARCHITECTURE_AND_DESIGN.md
 
 nul
+tmp/check_refs.py
+tmp/git-diff-staged.txt
+tmp/split_adr.py

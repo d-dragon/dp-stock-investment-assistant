@@ -107,7 +107,7 @@ Based on the current codebase, team topology, and product constraints, the evide
 - [ADR-Frontend-001: Adopt a Modular Application Frontend](./adr-frontend-001-modular-application.md)
 - [ADR-Frontend-002: Modernize the Frontend Foundation with a Contract-First Modular Stack](./adr-frontend-002-modernize-frontend-foundation.md)
 - [Frontend Architecture Evolution Report](./frontend-architecture-evolution-report.md)
-- [Frontend ARCHITECTURE.md](../domains/frontend/ARCHITECTURE.md)
+- [Frontend ARCHITECTURE.md](../../frontend/ARCHITECTURE.md)
 - [Architecture Review](../architecture-review.md)
 - [Agentic Application With STM Integration Roadmap](../High-level%20Design/AGENTIC_APP_WITH_STM_INTEGRATION_ROADMAP.md)
 
@@ -892,7 +892,7 @@ Most importantly, it follows the project's own architectural direction rather th
 - [ADR-Frontend-001: Adopt a Modular Application Frontend](./adr-frontend-001-modular-application.md)
 - [ADR-Frontend-002: Modernize the Frontend Foundation with a Contract-First Modular Stack](./adr-frontend-002-modernize-frontend-foundation.md)
 - [Frontend Architecture Evolution Report](./frontend-architecture-evolution-report.md)
-- [Frontend ARCHITECTURE.md](../domains/frontend/ARCHITECTURE.md)
+- [Frontend ARCHITECTURE.md](../../frontend/ARCHITECTURE.md)
 - [Architecture Review](../architecture-review.md)
 - [Agentic Application With STM Integration Roadmap](../High-level%20Design/AGENTIC_APP_WITH_STM_INTEGRATION_ROADMAP.md)
 

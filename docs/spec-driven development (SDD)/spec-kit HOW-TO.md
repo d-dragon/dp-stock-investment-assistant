@@ -1,169 +1,706 @@
 
 
-# Spec-Kit HOW-TO
+# SDD with Spec-Kit - HOW-TO
 
-This guide describes how to apply the Spec-Kit methodology for Spec-Driven Development (SDD) in the `dp-stock-investment-assistant` project, following best practices from the [Spec-Kit official documentation](https://github.com/github/spec-kit/blob/main/README.md) and [spec-driven development guide](https://github.com/github/spec-kit/blob/main/spec-driven.md).
+This guide defines how `dp-stock-investment-assistant` uses Spec Kit for Spec-Driven Development (SDD). It combines the official Spec Kit lifecycle with this repository's governance, traceability, and review conventions.
+
+The most important rule in this repository is simple: governed feature work lives under [../../specs/](../../specs/). The `.specify/` directory supports Spec Kit runtime behavior, templates, integrations, extensions, and workflows, but it is not the canonical home for governed feature delivery artifacts in this project.
 
 ---
 
 ## Table of Contents
 
 - [Spec-Kit HOW-TO](#spec-kit-how-to)
-  - [Table of Contents](#table-of-contents)
-  - [Overview](#overview)
-  - [Prerequisites](#prerequisites)
-  - [SDLC with Spec-Kit Workflow](#sdlc-with-spec-kit-workflow)
-    - [Step 1: Author a Specification](#step-1-author-a-specification)
-    - [Step 2: Review and Approve](#step-2-review-and-approve)
-    - [Step 3: Implement to Spec](#step-3-implement-to-spec)
-    - [Step 4: Validate and Test](#step-4-validate-and-test)
-    - [Step 5: Maintain and Evolve](#step-5-maintain-and-evolve)
-  - [Extensions Guideline](#extensions-guideline)
-    - [Installing Extensions](#installing-extensions)
-    - [Using Extensions in This Project](#using-extensions-in-this-project)
-    - [Best Practices for Extensions](#best-practices-for-extensions)
-  - [Best Practices](#best-practices)
-  - [Troubleshooting](#troubleshooting)
-  - [References](#references)
-  - [Additional Resources](#additional-resources)
+  - [1. Overview](#1-overview)
+  - [2. Quick Start in This Repo](#2-quick-start-in-this-repo)
+  - [3. Workflow and SDLC Loop](#3-workflow-and-sdlc-loop)
+  - [4. Repository Artifact Authority](#4-repository-artifact-authority)
+  - [5. Extensions and Automation](#5-extensions-and-automation)
+  - [6. Best Practices](#6-best-practices)
+  - [7. Troubleshooting](#7-troubleshooting)
+  - [8. References](#8-references)
 
 ---
 
-## Overview
+## 1. Overview
 
-Spec-Kit enables a spec-first workflow, ensuring that features, APIs, and components are defined, reviewed, and versioned before implementation. This approach increases clarity, reduces ambiguity, and aligns code, tests, and documentation.
+Spec Kit is the working method this repository uses to apply Spec-Driven Development (SDD) to AI-assisted software delivery. In this project, that method is intentionally expanded beyond the core Spec Kit command chain into a broader SDLC practice that also covers requirements engineering, architecture and technical design, QA and testing, deployment, operations, and maintenance. Its general purpose is to move work from vague requests and ad-hoc prompts into a governed sequence of artifacts that define intent, reduce ambiguity, guide implementation, and preserve evidence after code is written. In SDD, the specification is not throwaway documentation. It is a durable working asset that defines the `what` and `why` before the repository commits to the `how`.
 
-## Prerequisites
+This matters especially in AI agentic workflows. Spec Kit gives a coding agent structured Markdown context instead of relying only on transient chat history or one-shot prompts. The spec, plan, tasks, analysis, review evidence, and synchronization artifacts make the workflow more auditable, more reviewable, and less dependent on a single model turn. In practice, humans still own scope, business intent, architectural constraints, and approval decisions; the agent accelerates clarification, planning, implementation, and verification inside those boundaries. In this repository, those governed artifacts are also tied back to SRS baselines, design documentation, QA evidence, operational expectations, and post-delivery maintenance synchronization.
+
+### 1.1 Purpose and Philosophy
+
+The core philosophy behind SDD with Spec Kit is simple: define what should be built before asking an agent to build it, and refine that intent through explicit quality gates rather than jumping straight from prompt to code.
+
+- intent before implementation: specifications define expected behavior, scope, and value before technical execution begins
+- multi-step refinement over one-shot generation: `specify`, `clarify`, `checklist`, `plan`, `tasks`, `analyze`, and `implement` are meant to progressively reduce ambiguity
+- structured context for AI agents: each artifact feeds the next stage so the agent works from governed inputs instead of improvising from incomplete instructions
+- iterative SDLC, not waterfall theater: the workflow loops from requirements through synchronization and back into the next governed change
+- technology-independent process: Spec Kit is a delivery method, not a framework lock-in; this repository applies it within its own architecture, standards, and governance rules
+
+### 1.2 Audience and Participants
+
+This HOW-TO is for everyone who contributes to a governed change, not only the person writing code.
+
+- product owners, analysts, and domain experts who define business intent, scope, and acceptance expectations
+- architects and technical leads who shape solution boundaries, standards, and integration constraints
+- implementation engineers and AI coding agents who turn approved artifacts into working changes
+- reviewers and QA participants who check requirement quality, artifact consistency, test evidence, and implementation correctness
+- maintainers, release owners, and API or documentation owners who must keep contracts, traceability, and operational guidance synchronized after delivery
+
+### 1.3 What This Repository Adds
+
+This repository does not use Spec Kit as a generic demo flow. It extends core Spec Kit into a broader SDLC practice with project-specific governance, artifact authority, and synchronization disciplines.
+
+- requirements engineering is part of the governed method: SRS artifacts, scoped requirements, and traceability are treated as first-class delivery inputs and outputs
+- architecture and technical design are explicit lifecycle concerns: solution boundaries, design constraints, and technical documentation are reviewed and synchronized alongside specifications and code
+- QA, testing, deployment, operations, and maintenance are included in the loop: verification evidence, operational readiness, contract updates, and maintenance synchronization are governed responsibilities rather than afterthoughts
+- root [../../specs/](../../specs/) is the source of truth for governed feature artifacts
+- `.specify/` supports runtime behavior, templates, integrations, extensions, and workflows, but it is not the canonical store for governed delivery evidence
+- SRS traceability must remain synchronized in [../../specs/spec-traceability.yaml](../../specs/spec-traceability.yaml)
+- sync reporting must stay current in [../../specs/spec-sync-status.md](../../specs/spec-sync-status.md)
+- REST API changes must keep [../../docs/openapi.yaml](../../docs/openapi.yaml) aligned with implementation
+- repository-specific review and verification extensions act as quality gates around the core Spec Kit flow
+
+### 1.4 Constraints, Limits, and Pitfalls
+
+SDD with Spec Kit improves AI-assisted delivery, but it does not remove engineering responsibility. The main constraints and pitfalls to watch in this repository are below.
+
+- Spec Kit is not a substitute for domain knowledge, architecture judgment, security review, or testing discipline
+- skipping clarification or checklist quality gates usually pushes ambiguity downstream into weak plans, fragile tasks, and low-confidence code generation
+- one-shot prompting is still possible, but it works poorly for meaningful or ambiguous changes and increases rework risk
+- large features should be phased so the agent does not lose context and reviewers can validate progress incrementally
+- specifications should stay focused on behavior, constraints, and intent; forcing low-level implementation details too early can reduce better design options later
+- artifact drift is a real risk: specs, plans, tasks, code, tests, traceability, and API contracts can diverge if synchronization is skipped after implementation
+- generated artifacts are only useful if they remain current; stale specs or stale traceability can create false confidence in the delivery state
+- repository governance still wins over generic Spec Kit defaults: when project rules and generated output differ, this repository's canonical artifacts and review gates take precedence
+
+## 2. Quick Start in This Repo
+
+This repository is already initialized for Spec Kit with GitHub Copilot and PowerShell-oriented scripts. In most cases, contributors inspect and use the existing setup rather than initialize the project again.
+
+### 2.1 Prerequisites
 
 - Access to this repository and its documentation
-- Familiarity with markdown and the project's [spec format](../../.specify/templates/spec-template.md)
-- [Spec-Kit CLI](https://github.com/github/spec-kit#cli) installed (optional but recommended)
+- Git, Python 3.11+, and either `uv` or `pipx`
+- GitHub Copilot available in VS Code
+- Familiarity with Markdown and the local [../../.specify/templates/spec-template.md](../../.specify/templates/spec-template.md)
 
-## SDLC with Spec-Kit Workflow
-Applied fleet, speckit-utils, verify,etc. extensions to expand the official Spec-Kit SDD workflow, tailored for this project. The workflow consists of multiphases that guide the process from spec authoring to implementation and maintenance. Each phase is iterated with feedback loops to ensure alignment and quality.
-0. Define the functional and non-functional requirements as standard SRS (FR/NFR), ensuring they are clear, testable, and traceable.
-1. Design architectural, technical, and operational specifications that satisfy the requirements and align with the project’s architectural principles.
-2. speckit.constitution
-3. speckit.specify (reference to SRS documentation and mapping)
-4. speckit.clarify
-5. speckit.plan (+ spec - SRS traceability update)
-6. speckit.doctor
-7. speckit.checklist
-8. speckit.tasks
-9. speckit.validate
-10. speckit.analyze
-11. speckit.review
-12. speckit.implement
-13. speckit.verify-tasks
-14. speckit.verify + 
-15. speckit.tests + spec traceability update
-16. speckit.maintain
-17. Implementation-Specs-TechnicalDocumentation Synchronization and ongoing maintenance.
+### 2.2 Core Local Checks
 
-### Step 1: Author a Specification
+Use these commands to confirm your local Spec Kit toolchain and project metadata are available:
 
-- Create a new spec file under `docs/spec-driven development (SDD)/specs/` using the [spec template](../specs/spec-template.md).
-- Clearly define the feature, API, or component, including purpose, requirements, and acceptance criteria.
-- Use markdown for structure and clarity.
+```powershell
+specify version
+specify check
+specify integration list
+specify extension list
+specify workflow list
+```
 
-### Step 2: Review and Approve
+For documentation-first work in Copilot, contributors can start with the [Documentation Spec Maintainer Agent](../../.github/agents/documentation.spec-maintainer.agent.md). It is the fastest entry point for maintaining long-lived docs, delivery-scoped specs, traceability, and Copilot customization files while staying inside the same SDD lifecycle described in this HOW-TO. When feature-scoped artifacts are needed, the agent can hand off to `speckit.specify`, `speckit.plan`, and `speckit.verify.run`.
 
-- Submit the spec as a pull request.
-- Request feedback from stakeholders, technical leads, and reviewers.
-- Iterate on the spec until it is clear, complete, and approved.
-- Optionally, use the Spec-Kit CLI to lint and validate the spec for completeness.
+### 2.3 Install or Recreate Local CLI Access
 
-### Step 3: Implement to Spec
+Persistent installation:
 
-- Treat the approved spec as the single source of truth.
-- Reference the spec in code comments and PR descriptions.
-- Ensure all implementation work directly maps to the requirements and acceptance criteria in the spec.
+```powershell
+uv tool install specify-cli --from git+https://github.com/github/spec-kit.git@vX.Y.Z
+specify version
+```
 
-### Step 4: Validate and Test
+One-time execution without installing:
 
-- Write tests that directly correspond to the spec's requirements.
-- Use automated tools (including Spec-Kit CLI, if available) to check for compliance.
-- Review the implementation against the spec before merging.
+```powershell
+uvx --from git+https://github.com/github/spec-kit.git specify version
+```
 
-### Step 5: Maintain and Evolve
+If you must recreate Spec Kit metadata in a clean working copy, use the repository's current integration style:
 
-- Update specs as requirements change, following versioning best practices.
-- Document changes in the spec file and keep code/tests in sync.
-- Regularly review and refactor specs to reflect the current state of the system.
+```powershell
+specify init --here --integration copilot --script ps
+```
 
+Only re-run initialization when you intentionally need to restore or recreate `.specify/` and related managed assets.
 
-## Extensions Guideline
+### 2.4 Upgrade an Existing Spec Kit Setup
 
-Spec-Kit supports extensions to enhance spec authoring, validation, and integration with other tools. Extensions can automate checks, add custom linting rules, or enable advanced workflows tailored to the `dp-stock-investment-assistant` project.
+When upgrading Spec Kit in this repository, treat the CLI tool and the project files as separate layers. Upgrade the CLI to get new features and bug fixes, then refresh the repository's installed Spec Kit assets so prompts, templates, scripts, and shared memory stay aligned with the version you are actually running.
 
-### Installing Extensions
+#### Check Current State First
 
-- Review available extensions in the [Spec-Kit Extensions documentation](https://github.com/github/spec-kit/blob/main/extensions/README.md).
-- See also the [Spec-Kit CLI Extensions User guide](https://github.com/github/spec-kit/blob/main/extensions/EXTENSION-USER-GUIDE.md) for installation and usage details.
-- Install extensions globally or in your project environment using the Spec-Kit CLI. For example:
-    ```sh
-    spec-kit extension install <extension-name>
-    ```
-- List installed extensions with:
-    ```sh
-    spec-kit extension list
-    ```
+Use the following commands before upgrading:
 
-### Using Extensions in This Project
+```powershell
+specify self check
+specify version
+specify check
+```
 
-- Extensions can be configured in a `.spec-kitrc` or `spec-kit.config.js` file at the project root.
-- Recommended extensions for this project may include:
-    - **spec-kit-lint**: Enforces spec formatting and style.
-    - **spec-kit-validate-links**: Checks for broken links in specs and documentation.
-    - **spec-kit-schema**: Validates specs against custom schemas (useful for API or data model specs).
-- To enable an extension, add it to your config file and follow any project-specific setup instructions.
+- `specify self check` looks for newer released CLI versions.
+- `specify version` confirms which persistent `specify` is on your `PATH`.
+- `specify check` validates the local installation and environment.
 
-### Best Practices for Extensions
+#### Upgrade the CLI Tool
 
-- Use extensions to automate repetitive checks and maintain spec quality.
-- Document any required or recommended extensions in the project README or this guide.
-- Keep extensions up to date to benefit from improvements and security updates.
-- Refer to the [official extensions guide](https://github.com/github/spec-kit/blob/main/extensions/README.md) and [CLI Extensions Guide](https://github.com/github/spec-kit/blob/main/docs/extensions.md) for advanced usage and troubleshooting.
+If you installed `specify` with `uv tool install`, upgrade it with:
 
----
+```powershell
+uv tool install specify-cli --force --from git+https://github.com/github/spec-kit.git@vX.Y.Z
+```
 
-**Related updates:**  
-- Add any required extensions to your local setup and document them in the project’s onboarding or README.
-- When introducing new extensions, communicate their purpose and usage to the team.
+If you installed it with `pipx`, use:
 
-    - **spec-kit-lint**: Enforces spec formatting and style.
-    - **spec-kit-validate-links**: Checks for broken links in specs and documentation.
-    - **spec-kit-schema**: Validates specs against custom schemas (useful for API or data model specs).
-- To enable an extension, add it to your config file and follow any project-specific setup instructions.
+```powershell
+pipx install --force git+https://github.com/github/spec-kit.git@vX.Y.Z
+```
 
+If you rely on one-shot `uvx` commands, remember that `uvx` does not upgrade a persistent CLI installation. It only runs a temporary copy for that command.
 
-## Best Practices
+#### Back Up Repository Customizations Before Refreshing Project Files
 
-- Keep specs concise, unambiguous, and versioned.
-- Link related specs, code, and documentation.
-- Use diagrams, tables, or examples for complex logic.
-- Regularly audit code and tests for alignment with specs.
-- Use the Spec-Kit CLI for validation and linting where possible.
+The official upgrade path warns that `specify init --here --force` can overwrite customized files under `.specify/`, especially `.specify/memory/constitution.md`, `.specify/templates/`, and `.specify/scripts/`. In this repository, back up those files before refreshing project assets.
 
-## Troubleshooting
+```powershell
+Copy-Item .specify\memory\constitution.md .specify\memory\constitution.backup.md
+Copy-Item .specify\templates .specify\templates-backup -Recurse
+Copy-Item .specify\scripts .specify\scripts-backup -Recurse
+```
 
-- **Spec drift**: Periodically compare code/tests to specs and resolve discrepancies.
-- **Ambiguity**: Clarify unclear requirements with stakeholders before implementation.
-- **Outdated specs**: Promptly update and version specs as requirements evolve.
+If the repository is clean in Git, you can also restore customized files afterward with `git restore` instead of manual copies.
 
-## References
+#### Refresh Project Files for This Repository
 
-- [Spec Template](../specs/spec-template.md)
-- [Project Architecture](../../.github/instructions/architecture.instructions.md)
-- [Testing Guidelines](../../.github/instructions/testing.instructions.md)
-- [Spec-Kit README](https://github.com/github/spec-kit/blob/main/README.md)
-- [Spec-Driven Development Guide](https://github.com/github/spec-kit/blob/main/spec-driven.md)
-- [Spec-Kit Extensions](https://github.com/github/spec-kit/blob/main/extensions/README.md)
+After upgrading the CLI and backing up customizations, refresh the repository's Spec Kit assets with the same integration style this project uses:
 
-## Additional Resources
+```powershell
+specify init --here --force --integration copilot --script ps
+```
 
-- [Spec-Kit Official Repository](https://github.com/github/spec-kit)
-- [Spec-Kit CLI Usage](https://github.com/github/spec-kit#cli)
-- [Spec-Kit Documentation](https://github.com/github/spec-kit#readme)
+This updates the repository's installed Spec Kit infrastructure such as command files, templates, scripts, and shared memory content. It does **not** overwrite your governed feature work under [../../specs/](../../specs/), your source code, or your Git history.
 
-For advanced usage, configuration, and community support, refer to the [Spec-Kit official documentation](https://github.com/github/spec-kit/blob/main/README.md) and [spec-driven development guide](https://github.com/github/spec-kit/blob/main/spec-driven.md).
+#### After the Upgrade
+
+After refreshing project files:
+
+- restore or manually merge customized `.specify` files if needed
+- restart VS Code completely if new or updated slash commands do not appear immediately
+- verify that the expected command files still exist under [../../.github/prompts/](../../.github/prompts/)
+- keep CLI and project files in sync, especially for major-version upgrades
+
+For this repository, treat upgrades as governed maintenance work: preserve local customizations, validate command availability, and avoid assuming that `--force` is safe for customized `.specify` assets unless you have a backup or a clean Git restore path.
+
+## 3. Workflow and SDLC Loop
+
+This section describes the repository's full Spec-Driven Development operating model across the SDLC, not only the core Spec Kit command chain. In this project, the loop starts with requirements engineering, architecture, and technical design; uses Spec Kit to govern specification, clarification, planning, task generation, implementation, and review; and then closes through QA and testing evidence, traceability refresh, operational alignment, and maintenance synchronization.
+
+The workflow is intentionally iterative rather than waterfall. A governed change begins with requirements and design inputs, produces specifications and plans, delivers application and infrastructure changes, records QA and testing results as review evidence, and then synchronizes traceability, contracts, technical documentation, and maintenance state so the next cycle starts from an accurate governed baseline.
+
+### 3.1 SDLC Loop Overview
+
+The following diagram illustrates the iterative Spec-Driven Development (SDD) lifecycle loop, highlighting the transitions between phases, quality gates, and synchronization checkpoints.
+
+```mermaid
+flowchart LR
+  %% Main Flow
+  RQ([Requirements and Architecture]) -->|Scoped| SP[Spec Authoring and Planning]
+  SP -->|Decision-ready| GT{{Readiness and Review}}
+  GT -->|Approved| DV[Delivery and Verification]
+  DV -->|Verified| SY[(Synchronization and Maintenance)]
+  SY -->|Aligned| FB([Feedback and Next Change])
+  FB -->|Triggered| RQ
+
+  RQN[Inputs: SRS, design, quality constraints]
+  SPN[Outputs: spec.md, plan.md, QA intent]
+  GTN[Evidence: tasks, analysis, readiness, QA scope]
+  DVN[Outputs: app code, IaC, QA results, review.md]
+  SYN[Sync: traceability, tech docs, API, ops state]
+
+  RQ --- RQN
+  SP --- SPN
+  GT --- GTN
+  DV --- DVN
+  SY --- SYN
+
+  %% Legend Subgraph
+  subgraph Legend ["Visual Legend"]
+    direction TB
+    L_Neutral([📍 Loop Boundary State Node])
+    L_Core[⚙️ Main Delivery Phase Node]
+    L_Gate{{🔍 Quality or Review Gate Node}}
+    L_Sync[(🔗 Sync & Maintenance Node)]
+    L_Note[📄 Phase Inputs/Outputs Node]
+  end
+
+  %% Styling Definitions
+  classDef neutral fill:#F1F5F9,stroke:#64748B,stroke-width:2px,color:#0F172A;
+  classDef core fill:#EFF6FF,stroke:#3B82F6,stroke-width:2px,color:#1E3A8A;
+  classDef gate fill:#FFFBEB,stroke:#F59E0B,stroke-width:2px,color:#78350F;
+  classDef sync fill:#ECFDF5,stroke:#10B981,stroke-width:2px,color:#064E3B;
+  classDef note fill:#FFFFFF,stroke:#94A3B8,stroke-width:1px,stroke-dasharray: 4 4,color:#475569;
+
+  class RQ,FB,L_Neutral neutral;
+  class SP,DV,L_Core core;
+  class GT,L_Gate gate;
+  class SY,L_Sync sync;
+  class RQN,SPN,GTN,DVN,SYN,L_Note note;
+```
+
+Verification and synchronization are not terminal stages in this repository. They close the loop by refreshing the governed baseline, so the next clarification, plan revision, defect fix, or feature cycle starts from current specs, current contracts, current QA evidence, and current traceability.
+
+QA is embedded through the full loop in this repository: requirements define testability, plans define intended verification, readiness gates check coverage and consistency, delivery produces QA results, and synchronization preserves those results as governed evidence.
+
+#### 3.1.1 How to Read the Loop
+
+| Symbol | What it means in this repository | Examples in the loop |
+|--------|----------------------------------|----------------------|
+| ⚪ | Gray state node: loop boundary state that either starts or restarts governed work | requirements intake, feedback into the next change |
+| 🟦 | Blue phase node: main delivery phase that creates or changes governed artifacts | specification and planning, delivery and verification |
+| 🟧 | Orange gate node: review checkpoint that decides whether work can advance | readiness, review approval |
+| 🟩 | Green sync node: post-delivery alignment work that makes implementation and documentation agree | traceability refresh, technical documentation sync, API contract sync |
+| ⬜ | Dashed note node: short annotation showing the dominant inputs, outputs, or evidence for a nearby phase | SRS and design inputs, plan outputs, QA evidence |
+
+#### 3.1.2 QA Through the Loop
+
+Testing and QA are woven into the loop rather than deferred to the end. Steps `15-17` formalize the refresh cycle, but the evidence needed for those steps is designed during specification, pressure-tested during readiness, executed during delivery, and synchronized during maintenance.
+
+| Loop phase | QA intent | Repository evidence |
+|------------|-----------|---------------------|
+| Requirements and Architecture | Define acceptance boundaries, testability expectations, affected non-functional constraints, and delivery impacts | [VERIFICATION_AND_TRACEABILITY_STRATEGY.md](../testing/VERIFICATION_AND_TRACEABILITY_STRATEGY.md)<br/>requirements and architecture inputs used by the feature |
+| Spec Authoring and Planning | Turn requirements into verifiable acceptance criteria, planned test coverage, and expected infrastructure or deployment impact | [API_TEST_TOOL_COMPARISON_REPORT.md](../testing/API_TEST_TOOL_COMPARISON_REPORT.md)<br/>`specs/feature/spec.md`<br/>`specs/feature/plan.md` |
+| Readiness and Review | Check that planned tasks, traceability, review criteria, and QA scope are strong enough before implementation begins | `specs/feature/tasks.md`<br/>`specs/feature/analysis.md`<br/>readiness and review findings |
+| Delivery and Verification | Execute and record regression, runtime, performance, and security results against the approved plan | `tests/test_*.py`<br/>[api/](../../tests/api/)<br/>[integration/](../../tests/integration/)<br/>[performance/](../../tests/performance/)<br/>[security/](../../tests/security/)<br/>[API tests.md](../../tests/API%20tests.md)<br/>[HOWTO_PYTEST_RUNTIME_API_INTEGRATION.md](../testing/backend-api-service/HOWTO_PYTEST_RUNTIME_API_INTEGRATION.md)<br/>`specs/feature/review.md` |
+| Synchronization and Maintenance | Preserve QA outcomes as governed evidence and sync all affected contracts, trace links, and maintenance state | [spec-traceability.yaml](../../specs/spec-traceability.yaml)<br/>[spec-sync-status.md](../../specs/spec-sync-status.md)<br/>[SRS_SPEC_TRACEABILITY.md](../domains/agent/SRS_SPEC_TRACEABILITY.md)<br/>[openapi.yaml](../openapi.yaml) |
+
+### 3.2 Artifact-by-Phase Map
+
+| SDLC Phase | Steps | Main Inputs | Main Outputs and Sync Targets |
+|------------|-------|-------------|-------------------------------|
+| Requirements and Architecture | `0-1` | [SOFTWARE_REQUIREMENTS_SPECIFICATION.md](../domains/agent/SOFTWARE_REQUIREMENTS_SPECIFICATION.md)<br/>[SYSTEM_REQUIREMENTS_SPECIFICATION.md](../system/SYSTEM_REQUIREMENTS_SPECIFICATION.md)<br/>[REQUIREMENTS_METHOD_AND_GOVERNANCE.md](../system/REQUIREMENTS_METHOD_AND_GOVERNANCE.md)<br/>[SYSTEM_OVERVIEW_AND_BOUNDARIES.md](../architecture/SYSTEM_OVERVIEW_AND_BOUNDARIES.md)<br/>domain technical design docs under [domains/](../domains/) | Scoped requirement set, affected architecture boundaries, initial acceptance and testability expectations, and expected delivery or operational impact |
+| Spec Authoring and Planning | `2-5` | requirements baseline, architecture references, [spec-traceability.yaml](../../specs/spec-traceability.yaml) | `specs/feature/spec.md`<br/>`specs/feature/plan.md`<br/>updated feature-to-SRS mapping, draft QA intent, and expected application or IaC change scope |
+| Readiness and Review | `6-11` | governed spec and plan artifacts, planned test intent, review criteria | `specs/feature/tasks.md`<br/>`specs/feature/analysis.md`<br/>review findings, readiness verdict, QA scope, and expected test coverage |
+| Delivery and Verification | `12-14` | tasks, review findings, [VERIFICATION_AND_TRACEABILITY_STRATEGY.md](../testing/VERIFICATION_AND_TRACEABILITY_STRATEGY.md)<br/>[HOWTO_PYTEST_RUNTIME_API_INTEGRATION.md](../testing/backend-api-service/HOWTO_PYTEST_RUNTIME_API_INTEGRATION.md) | implemented application changes in `src/` and `frontend/`<br/>IaC artifacts in `IaC/Dockerfile.api`, `IaC/Dockerfile.agent`, `IaC/helm/dp-stock/`, `IaC/infra/terraform/`, and `IaC/ci-cd/`<br/>QA and testing results in `tests/` and `specs/feature/review.md` |
+| Synchronization and Maintenance | `15-17` | delivered code, IaC outputs, QA evidence, review evidence, operational policy, and API contract references | [spec-traceability.yaml](../../specs/spec-traceability.yaml)<br/>[spec-sync-status.md](../../specs/spec-sync-status.md)<br/>[SRS_SPEC_TRACEABILITY.md](../domains/agent/SRS_SPEC_TRACEABILITY.md)<br/>[openapi.yaml](../openapi.yaml)<br/>updated technical design, release, and maintenance notes<br/>for prompt-system changes: [TECHNICAL_DESIGN.md#35-prompt-realization-and-guardrails](../domains/agent/TECHNICAL_DESIGN.md#35-prompt-realization-and-guardrails), [ARCHITECTURE_DESIGN.md](../domains/agent/ARCHITECTURE_DESIGN.md), [PROMPT_SYSTEM_RESEARCH_PROPOSAL.md](../domains/agent/PROMPT_SYSTEM_RESEARCH_PROPOSAL.md), [PHASE_2_AGENT_ENHANCEMENT_ROADMAP.md](../domains/agent/PHASE_2_AGENT_ENHANCEMENT_ROADMAP.md), and [PROMPT_SYSTEM_BENCHMARK_REVIEW.md](../domains/agent/PROMPT_SYSTEM_BENCHMARK_REVIEW.md) |
+
+### 3.3 18-Step Lifecycle Aligned to the Loop
+
+The 18-step lifecycle below is the detailed execution model inside the SDLC loop. The steps are grouped by SDLC phase so they complement the loop rather than compete with it.
+
+#### 3.3.1 Requirements and Architecture Foundation
+
+0. **Requirements Baseline**: Define functional and non-functional requirements as traceable SRS items with stable identifiers, measurable behavior, and explicit scope boundaries.
+   - **Mapped Long-Lived Documents**:
+     - [SYSTEM_REQUIREMENTS_SPECIFICATION.md](../system/SYSTEM_REQUIREMENTS_SPECIFICATION.md) (Cross-domain system baseline)
+     - [REQUIREMENTS_METHOD_AND_GOVERNANCE.md](../system/REQUIREMENTS_METHOD_AND_GOVERNANCE.md) (Requirements standards and governance)
+     - [SOFTWARE_REQUIREMENTS_SPECIFICATION.md](../domains/agent/SOFTWARE_REQUIREMENTS_SPECIFICATION.md) (Agent domain specialization)
+   - **Cross-Reference Prompt Hint**:
+     > *Prompt Hint*: "Refer to [SYSTEM_REQUIREMENTS_SPECIFICATION.md](../system/SYSTEM_REQUIREMENTS_SPECIFICATION.md) to locate the exact requirement IDs (e.g., `SR-1.2`) relevant to this change set. Ensure the prompt reads from the upstream baseline, using: 'Based on requirements defined in [SYSTEM_REQUIREMENTS_SPECIFICATION.md](../system/SYSTEM_REQUIREMENTS_SPECIFICATION.md)...'"
+
+1. **Architecture and Operational Design**: Define architectural, technical, and operational specifications that satisfy the requirements and align with repository principles.
+   - **Mapped Long-Lived Documents**:
+     - [SYSTEM_OVERVIEW_AND_BOUNDARIES.md](../architecture/SYSTEM_OVERVIEW_AND_BOUNDARIES.md) (System context and layers)
+     - [RUNTIME_AND_INTEGRATION_FLOWS.md](../architecture/RUNTIME_AND_INTEGRATION_FLOWS.md) (Cross-domain runtime flows)
+     - System architecture decisions in [DECISIONS/](../architecture/DECISIONS/)
+     - [OPERATIONS_AND_RELEASE_POLICY.md](../operations/OPERATIONS_AND_RELEASE_POLICY.md) (Operational limits and policies)
+   - **Cross-Reference Prompt Hint**:
+     > *Prompt Hint*: "Constrain design changes against system boundaries: 'Check [SYSTEM_OVERVIEW_AND_BOUNDARIES.md](../architecture/SYSTEM_OVERVIEW_AND_BOUNDARIES.md) and related ADRs in [DECISIONS/](../architecture/DECISIONS/) to ensure the proposed architectural changes do not violate existing container boundaries or deployment rules.'"
+
+#### 3.3.2 Spec Authoring and Planning
+
+2. **`speckit.constitution`**: Establish or refine the project and feature governance rules that constrain all downstream artifacts and implementation choices.
+   - **Mapped Long-Lived Documents**:
+     - [constitution.md](../../.specify/memory/constitution.md) (Core rules, memory architecture, SOLID rules)
+   - **Cross-Reference Prompt Hint**:
+     > *Prompt Hint*: "Validate rules early: 'Read [constitution.md](../../.specify/memory/constitution.md) and confirm that the proposed feature design respects all 9 Golden Development Rules (especially Rule 1: Security First and Rule 9: API Contract Sync).'"
+
+3. **`speckit.specify`**: Produce the feature specification, map it back to SRS scope, and publish governed artifacts under [specs/](../../specs/).
+   - **Mapped Long-Lived Documents**:
+     - [SYSTEM_REQUIREMENTS_SPECIFICATION.md](../system/SYSTEM_REQUIREMENTS_SPECIFICATION.md)
+     - [spec-traceability.yaml](../../specs/spec-traceability.yaml) (Bidirectional traceability manifest)
+   - **Cross-Reference Prompt Hint**:
+     > *Prompt Hint*: "Bind specs to requirements: 'Link the user stories and scenarios in this specification to the appropriate requirement IDs in [SYSTEM_REQUIREMENTS_SPECIFICATION.md](../system/SYSTEM_REQUIREMENTS_SPECIFICATION.md). Register this coverage mapping in [spec-traceability.yaml](../../specs/spec-traceability.yaml) under the feature entry.'"
+
+4. **`speckit.clarify`**: Resolve ambiguity, missing constraints, open questions, and weak acceptance criteria before the workflow advances.
+   - **Mapped Long-Lived Documents**:
+     - [SYSTEM_REQUIREMENTS_SPECIFICATION.md](../system/SYSTEM_REQUIREMENTS_SPECIFICATION.md)
+     - [constitution.md](../../.specify/memory/constitution.md)
+   - **Cross-Reference Prompt Hint**:
+     > *Prompt Hint*: "Identify gaps: 'Cross-analyze the draft specification against the constraints in [SYSTEM_REQUIREMENTS_SPECIFICATION.md](../system/SYSTEM_REQUIREMENTS_SPECIFICATION.md) and [constitution.md](../../.specify/memory/constitution.md) to detect any missing boundary scenarios. Output a list of clarifying questions to resolve before proceeding.'"
+
+5. **`speckit.plan`**: Generate the technical implementation plan and update SRS-to-spec traceability when scope changes or new coverage is introduced.
+   - **Mapped Long-Lived Documents**:
+     - [SYSTEM_OVERVIEW_AND_BOUNDARIES.md](../architecture/SYSTEM_OVERVIEW_AND_BOUNDARIES.md) (System context and layers)
+     - [RUNTIME_AND_INTEGRATION_FLOWS.md](../architecture/RUNTIME_AND_INTEGRATION_FLOWS.md) (Cross-domain runtime flows)
+     - [TECHNICAL_DESIGN.md](../domains/backend/TECHNICAL_DESIGN.md) (Backend realization rules)
+     - [TECHNICAL_DESIGN.md](../domains/frontend/TECHNICAL_DESIGN.md) (Frontend realization rules)
+     - [TECHNICAL_DESIGN.md](../domains/agent/TECHNICAL_DESIGN.md) (Agent reasoning design)
+     - [openapi.yaml](../openapi.yaml) (Executable REST interface schema)
+     - [ARCHITECTURE_DESIGN.md](../domains/agent/ARCHITECTURE_DESIGN.md) (Agent architecture design)
+   - **Cross-Reference Prompt Hint**:
+     > *Prompt Hint*: "Structure the implementation: 'Generate the plan (`plan.md`) utilizing the architecture constraints in [SYSTEM_OVERVIEW_AND_BOUNDARIES.md](../architecture/SYSTEM_OVERVIEW_AND_BOUNDARIES.md), [RUNTIME_AND_INTEGRATION_FLOWS.md](../architecture/RUNTIME_AND_INTEGRATION_FLOWS.md), domain realization guidelines in [backend/TECHNICAL_DESIGN.md](../domains/backend/TECHNICAL_DESIGN.md), and contract payload schemas in [openapi.yaml](../openapi.yaml) to ensure design conformance.'"
+
+#### 3.3.3 Readiness and Review
+
+6. **`speckit.doctor`**: Validate project health, command surfaces, templates, and repository readiness before deeper execution.
+   - **Mapped Long-Lived Documents**:
+     - Spec Kit configuration assets under [.specify/](../../.specify/) (e.g., [integration.json](../../.specify/integration.json), [extensions.yml](../../.specify/extensions.yml))
+   - **Cross-Reference Prompt Hint**:
+     > *Prompt Hint*: "Verify workspace sanity: 'Confirm that the project's Spec Kit runtime files match [integration.json](../../.specify/integration.json) and verify template files are clean of uncommitted boilerplate.'"
+
+7. **`speckit.checklist`**: Pressure-test specification quality, completeness, and ambiguity using a structured requirements checklist.
+   - **Mapped Long-Lived Documents**:
+     - [REQUIREMENTS_METHOD_AND_GOVERNANCE.md](../system/REQUIREMENTS_METHOD_AND_GOVERNANCE.md) (Quality gate definitions)
+   - **Cross-Reference Prompt Hint**:
+     > *Prompt Hint*: "Perform requirements check: 'Compare this specification (`spec.md`) with the quality gate criteria defined in Section 8 of [REQUIREMENTS_METHOD_AND_GOVERNANCE.md](../system/REQUIREMENTS_METHOD_AND_GOVERNANCE.md) to generate a custom quality checklist.'"
+
+8. **`speckit.tasks`**: Break the approved plan into actionable, dependency-aware implementation tasks.
+   - **Mapped Long-Lived Documents**:
+     - [VERIFICATION_AND_TRACEABILITY_STRATEGY.md](../testing/VERIFICATION_AND_TRACEABILITY_STRATEGY.md) (Test execution expectations)
+   - **Cross-Reference Prompt Hint**:
+     > *Prompt Hint*: "Inject QA tasks: 'Based on testing expectations in [VERIFICATION_AND_TRACEABILITY_STRATEGY.md](../testing/VERIFICATION_AND_TRACEABILITY_STRATEGY.md), generate corresponding testing tasks for Pytest runtime integration and manual REST suite validation.'"
+
+9. **`speckit.validate`**: Validate traceability, artifact completeness, and workflow readiness before implementation begins.
+   - **Mapped Long-Lived Documents**:
+     - [spec-traceability.yaml](../../specs/spec-traceability.yaml)
+   - **Cross-Reference Prompt Hint**:
+     > *Prompt Hint*: "Validate task mappings: 'Check that every task in `tasks.md` maps directly back to a specification requirement and matches the active status gates in [spec-traceability.yaml](../../specs/spec-traceability.yaml).'"
+
+10. **`speckit.analyze`**: Run cross-artifact consistency analysis across the specification, plan, and task set.
+    - **Mapped Long-Lived Documents**:
+      - [constitution.md](../../.specify/memory/constitution.md)
+    - **Cross-Reference Prompt Hint**:
+      > *Prompt Hint*: "Cross-analyze inconsistencies: 'Run cross-artifact analysis against [constitution.md](../../.specify/memory/constitution.md) guidelines to surface any code layout or paradigm contradictions between `spec.md`, `plan.md`, and `tasks.md`.'"
+
+11. **Review Gate**: Conduct structured pre-implementation review. Historical notes may call this `speckit.review`, but the current repository review path is typically `speckit.fleet.review` or an equivalent governed review step.
+    - **Mapped Long-Lived Documents**:
+      - [REQUIREMENTS_METHOD_AND_GOVERNANCE.md](../system/REQUIREMENTS_METHOD_AND_GOVERNANCE.md)
+    - **Cross-Reference Prompt Hint**:
+      > *Prompt Hint*: "Simulate fleet review: 'Execute pre-implementation review criteria in Section 11 of [REQUIREMENTS_METHOD_AND_GOVERNANCE.md](../system/REQUIREMENTS_METHOD_AND_GOVERNANCE.md) to verify that tasks are dependency-aware and ready for coding.'"
+
+#### 3.3.4 Delivery and Verification
+
+12. **`speckit.implement`**: Execute the approved implementation plan against the governed artifact set across application code and any required delivery or infrastructure artifacts, including `src/`, `frontend/`, and `IaC/`.
+    - **Mapped Long-Lived Documents**:
+      - [openapi.yaml](../openapi.yaml)
+      - Domain designs under [domains/](../domains/)
+    - **Cross-Reference Prompt Hint**:
+      > *Prompt Hint*: "Drive implementation: 'Code the feature following the generated plan. Strictly conform to interface constraints in [openapi.yaml](../openapi.yaml) and design conventions in [backend/TECHNICAL_DESIGN.md](../domains/backend/TECHNICAL_DESIGN.md).'"
+
+13. **`speckit.verify-tasks`**: Detect phantom completions and verify that tasks marked complete correspond to actual implemented work.
+    - **Mapped Long-Lived Documents**:
+      - Feature tasks in `tasks.md`
+    - **Cross-Reference Prompt Hint**:
+      > *Prompt Hint*: "Detect phantom completions: 'Inspect files updated during implementation to ensure that every task checked off in `tasks.md` has physical, non-stubbed code realization in the codebase.'"
+
+14. **`speckit.verify.run`**: Validate implementation against the specification, plan, tasks, and constitution. This stage should leave governed QA and testing results that can be carried into `review.md`, traceability, and downstream maintenance sync.
+    - **Mapped Long-Lived Documents**:
+      - [constitution.md](../../.specify/memory/constitution.md)
+      - [VERIFICATION_AND_TRACEABILITY_STRATEGY.md](../testing/VERIFICATION_AND_TRACEABILITY_STRATEGY.md)
+    - **Cross-Reference Prompt Hint**:
+      > *Prompt Hint*: "Run verification: 'Verify implementation compliance with [constitution.md](../../.specify/memory/constitution.md) principles and confirm test results conform to evidence policies in [VERIFICATION_AND_TRACEABILITY_STRATEGY.md](../testing/VERIFICATION_AND_TRACEABILITY_STRATEGY.md).'"
+
+#### 3.3.5 Synchronization and Maintenance
+
+15. **Test and Traceability Refresh**: Run project test suites and update [spec-traceability.yaml](../../specs/spec-traceability.yaml) whenever delivered scope changes.
+    - **Mapped Long-Lived Documents**:
+      - [spec-traceability.yaml](../../specs/spec-traceability.yaml)
+      - [spec-sync-status.md](../../specs/spec-sync-status.md)
+      - [SRS_SPEC_TRACEABILITY.md](../domains/agent/SRS_SPEC_TRACEABILITY.md)
+    - **Cross-Reference Prompt Hint**:
+      > *Prompt Hint*: "Refresh traceability manifests: 'Execute the project's test suite and compile evidence links. Update [spec-traceability.yaml](../../specs/spec-traceability.yaml) status to `verified` and update [spec-sync-status.md](../../specs/spec-sync-status.md) coverage metrics.'"
+
+16. **Maintenance Update**: Keep governed feature artifacts current after delivery, including plan, review, status, and operational notes when behavior evolves.
+    - **Mapped Long-Lived Documents**:
+      - Feature spec artifacts (e.g. `specs/<feature>/spec.md`, `specs/<feature>/plan.md`)
+    - **Cross-Reference Prompt Hint**:
+      > *Prompt Hint*: "Synchronize specifications: 'Review code commits since the last deployment. Update specifications under [specs/](../../specs/) so that current behavior and acceptance criteria reflect the exact state of the production codebase.'"
+
+17. **Implementation, Specs, and Technical Documentation Synchronization**: Keep code, governed specs, technical documentation, and external contracts such as [openapi.yaml](../openapi.yaml) synchronized over time.
+    - **Mapped Long-Lived Documents**:
+      - [openapi.yaml](../openapi.yaml)
+      - [SYSTEM_REQUIREMENTS_SPECIFICATION.md](../system/SYSTEM_REQUIREMENTS_SPECIFICATION.md)
+      - Domain designs under [domains/](../domains/)
+    - **Cross-Reference Prompt Hint**:
+      > *Prompt Hint*: "Promote spec learnings to long-lived docs: 'Review the verified specification and implementation learnings. Synchronize any API contract updates in [openapi.yaml](../openapi.yaml) and update realization prose in [backend/TECHNICAL_DESIGN.md](../domains/backend/TECHNICAL_DESIGN.md) or [SYSTEM_REQUIREMENTS_SPECIFICATION.md](../system/SYSTEM_REQUIREMENTS_SPECIFICATION.md).'"
+
+### 3.4 Workflow Visuals
+
+The diagrams below answer three different workflow questions: where the 18 steps sit inside the SDLC loop, where repository hooks and gates attach, and which project artifacts move through the governed delivery flow.
+
+#### 3.4.1 18-Step Placement in the SDLC Loop
+
+The diagram below displays the sequential mapping of the 18 SDD steps grouped within their corresponding SDLC phases.
+
+```mermaid
+flowchart TB
+  %% 18-Step placement in SDLC Loop
+  subgraph F0["📍 Requirements and Architecture"]
+    S0["0 · Requirements Baseline"] --> S1["1 · Architecture and Operational Design"]
+  end
+
+  subgraph F1["⚙️ Spec Authoring and Planning"]
+    S2["2 · speckit.constitution"] --> S3["3 · speckit.specify"]
+    S3 --> S4["4 · speckit.clarify"] --> S5["5 · speckit.plan"]
+  end
+
+  subgraph F2["🔍 Readiness and Review"]
+    S6["6 · speckit.doctor"] --> S7["7 · speckit.checklist"]
+    S7 --> S8["8 · speckit.tasks"] --> S9["9 · speckit.validate"]
+    S9 --> S10["10 · speckit.analyze"] --> S11["11 · review gate"]
+  end
+
+  subgraph F3["⚙️ Delivery and Verification"]
+    S12["12 · speckit.implement"] --> S13["13 · speckit.verify-tasks"]
+    S13 --> S14["14 · speckit.verify.run"]
+  end
+
+  subgraph F4["🔗 Synchronization and Maintenance"]
+    S15["15 · tests and traceability refresh"] --> S16["16 · maintenance update"]
+    S16 --> S17["17 · docs and contract sync"]
+  end
+
+  S1 --> S2
+  S5 --> S6
+  S11 --> S12
+  S14 --> S15
+  S17 --> S0
+
+  %% Legend Subgraph
+  subgraph Legend ["Visual Legend"]
+    direction LR
+    L_F0["📍 Requirements / Architecture"] ~~~ L_F1["⚙️ Core Spec / Plan / Delivery"]
+    L_F1 ~~~ L_F2["🔍 Gate / Review Checkpoint"] ~~~ L_F4["🔗 Sync / Maintenance"]
+  end
+
+  %% Styling Definitions
+  classDef neutral fill:#F1F5F9,stroke:#64748B,stroke-width:2px,color:#0F172A;
+  classDef core fill:#EFF6FF,stroke:#3B82F6,stroke-width:2px,color:#1E3A8A;
+  classDef gate fill:#FFFBEB,stroke:#F59E0B,stroke-width:2px,color:#78350F;
+  classDef sync fill:#ECFDF5,stroke:#10B981,stroke-width:2px,color:#064E3B;
+
+  class S0,S1,L_F0 neutral;
+  class S2,S3,S4,S5,S8,S12,L_F1 core;
+  class S6,S7,S9,S10,S11,S13,S14,L_F2 gate;
+  class S15,S16,S17,L_F4 sync;
+```
+
+#### 3.4.2 Hook and Review Overlay
+
+The diagram below illustrates where custom pre- and post-automation hooks integrate with the core Spec Kit execution commands.
+
+```mermaid
+flowchart TB
+  %% Main command chain with hook overlay
+  BS(["📍 Before specify Hook"]) --> SP["⚙️ speckit.specify"]
+  SP --> AS(["📍 After specify Hook"])
+  AS --> BP(["📍 Before plan Hook"])
+  BP --> PL["⚙️ speckit.plan"]
+  PL --> AP(["📍 After plan Hook"])
+  AP --> BT(["📍 Before tasks Hook"])
+  BT --> TK["⚙️ speckit.tasks"]
+  TK --> AT(["📍 After tasks Hook"])
+  AT --> BI(["📍 Before implement Hook"])
+  BI --> IM["⚙️ speckit.implement"]
+  IM --> AI(["📍 After implement Hook"])
+
+  %% Legend
+  subgraph Legend ["Visual Legend"]
+    direction LR
+    L_CMD["⚙️ Core SDD Command"] ~~~ L_Hook(["📍 Automation Hook"])
+  end
+
+  %% Styling
+  classDef cmd fill:#EFF6FF,stroke:#3B82F6,stroke-width:2px,color:#1E3A8A;
+  classDef hook fill:#FFF7ED,stroke:#F97316,stroke-width:2px,color:#7C2D12;
+
+  class SP,PL,TK,IM,L_CMD cmd;
+  class BS,AS,BP,AP,BT,AT,BI,AI,L_Hook hook;
+```
+
+In this repository, the hook sequence usually covers branch setup, memory loading, `doctor`, `validate`, fleet review, verification, and architecture review around the core `specify`, `plan`, `tasks`, and `implement` commands.
+
+#### 3.4.3 Artifact Flow and Synchronization
+
+The diagram below outlines the dependency relationships and generation flow between upstream requirements, working feature specifications, code realization, and final synchronization targets.
+
+```mermaid
+flowchart TB
+  %% Inputs
+  subgraph Inputs ["📍 Upstream Inputs"]
+    RQ["📄 Requirements Baseline"]
+    DS["📄 Technical Design"]
+  end
+
+  %% Working Artifacts
+  subgraph WorkingArea ["⚙️ Downstream Work and Verification"]
+    GS["spec.md"] --> GP["plan.md"]
+    GP --> GT["tasks.md and analysis.md"]
+    GT --> CODE["Application Source Code"]
+    GT --> IAC["IaC Infrastructure Code"]
+    CODE --> QA["🔍 QA Results and Evidence"]
+    IAC --> QA
+  end
+
+  %% Mapping
+  RQ --> GS
+  DS --> GS
+
+  %% Synchronization
+  subgraph SyncArea ["🔗 Traceability and Synchronization"]
+    SYNC["🔗 Traceability and Contract Sync"]
+    SYN1[("🔗 Sync Targets: yaml · OpenAPI · status.md")]
+  end
+
+  GS --> SYNC
+  CODE --> SYNC
+  IAC --> SYNC
+  QA --> SYNC
+  SYNC --> SYN1
+
+  %% Legend
+  subgraph Legend ["Visual Legend"]
+    direction LR
+    L_Input["📍 Upstream Input"] ~~~ L_Work["⚙️ Working / Delivery"]
+    L_Work ~~~ L_QA["🔍 QA and Verification"] ~~~ L_Sync[("🔗 Sync Target")]
+  end
+
+  %% Styling
+  classDef input fill:#F8FAFC,stroke:#64748B,stroke-width:2px,color:#0F172A;
+  classDef work fill:#EFF6FF,stroke:#3B82F6,stroke-width:2px,color:#1E3A8A;
+  classDef gate fill:#FFFBEB,stroke:#F59E0B,stroke-width:2px,color:#78350F;
+  classDef sync fill:#ECFDF5,stroke:#10B981,stroke-width:2px,color:#064E3B;
+
+  class RQ,DS,L_Input input;
+  class GS,GP,GT,CODE,IAC,L_Work work;
+  class QA,L_QA gate;
+  class SYNC,SYN1,L_Sync sync;
+```
+
+The main synchronization targets behind the final node are [spec-traceability.yaml](../../specs/spec-traceability.yaml), [spec-sync-status.md](../../specs/spec-sync-status.md), [SRS_SPEC_TRACEABILITY.md](../domains/agent/SRS_SPEC_TRACEABILITY.md), and [openapi.yaml](../openapi.yaml). In this repository, the IaC outputs in [IaC/](../../IaC/) and the QA results captured in `tests/` plus `specs/feature/review.md` are also part of the governed evidence chain.
+
+### 3.5 Command Normalization Notes
+
+The repository still contains older lifecycle terminology in some places. Use the current command surfaces below when updating documentation or executing the workflow:
+
+| Historical Label | Current Repository Surface |
+|------------------|----------------------------|
+| `speckit.doctor` | `speckit.doctor` alias for `speckit.speckit-utils.doctor` |
+| `speckit.validate` | `speckit.validate` alias for `speckit.speckit-utils.validate` |
+| `speckit.review` | typically handled as `speckit.fleet.review` in this repository |
+| `speckit.verify` | `speckit.verify.run` |
+| `speckit.tests` | repository test execution plus traceability refresh, not a single core Spec Kit command |
+| `speckit.maintain` | maintenance stage name, not a single installed core command |
+
+## 4. Repository Artifact Authority
+
+| Location | Role | Authority Level | Notes |
+|----------|------|-----------------|-------|
+| [../../specs/](../../specs/) | Governed feature work | Canonical | Create and maintain approved feature specs, plans, tasks, review evidence, and sync artifacts here. |
+| [../../specs/spec-traceability.yaml](../../specs/spec-traceability.yaml) | SRS to feature traceability | Canonical | Update when a feature gains, removes, or changes SRS scope. |
+| [../../specs/spec-sync-status.md](../../specs/spec-sync-status.md) | Feature sync reporting | Canonical | Reflects current coverage, derived status, and evidence links. |
+| [../../.specify/](../../.specify/) | Runtime and automation area | Supporting | Stores templates, workflows, integration metadata, extension catalogs, scripts, and local command assets. |
+| [../../.specify/templates/](../../.specify/templates/) | Spec Kit templates | Supporting | Use as references when shaping governed artifacts, but publish governed outputs in root `specs/`. |
+| [../../docs/spec-driven development (SDD)/](../../docs/spec-driven%20development%20(SDD)/) | Process guidance | Supporting | Method guidance lives here, not governed feature delivery artifacts. |
+| [../../docs/openapi.yaml](../../docs/openapi.yaml) | Public REST contract | Canonical when API changes | Required synchronization target whenever REST API behavior changes. |
+
+## 5. Extensions and Automation
+
+Spec Kit extensions are managed through the `specify` CLI and repository configuration under [../../.specify/](../../.specify/). Use current command names and current file locations when working on this repository.
+
+### 5.1 Current Configuration Surfaces
+
+| Path | Purpose |
+|------|---------|
+| [../../.specify/integration.json](../../.specify/integration.json) | Declares the default integration and script style. This repository is set up for GitHub Copilot with PowerShell-oriented scripts. |
+| [../../.specify/extensions.yml](../../.specify/extensions.yml) | Defines extension hooks before and after key lifecycle commands. |
+| [../../.specify/extension-catalogs.yml](../../.specify/extension-catalogs.yml) | Lists the official and community extension catalogs. |
+| [../../.specify/extensions/](../../.specify/extensions/) | Stores extension packages, prompts, configs, and command assets used by the repository. |
+| [../../.specify/workflows/](../../.specify/workflows/) | Stores workflow definitions such as the local `speckit` workflow. |
+
+### 5.2 Current CLI Patterns
+
+Inspect the current project setup with:
+
+```powershell
+specify integration list
+specify extension list
+specify workflow list
+specify workflow info speckit
+```
+
+Use the current extension commands, not older `spec-kit` CLI forms:
+
+```powershell
+specify extension search <query>
+specify extension add <name>
+specify extension list
+specify extension info <name>
+specify extension update
+```
+
+### 5.3 Repository Hook Expectations
+
+The repository's configured extension hooks form an operating overlay around the core Spec Kit lifecycle:
+
+| Trigger | Typical Actions | Purpose |
+|---------|-----------------|---------|
+| Before `specify` | feature branch creation, memory loading | Prepare a clean feature context |
+| After `specify` | doctor, optional commit | Check project health and preserve generated state |
+| Before `plan` | optional commit, memory loading | Carry forward clean context into planning |
+| After `plan` | validate, architecture scan | Check traceability and detect drift early |
+| Before `tasks` | optional commit, memory loading | Keep task generation grounded in current state |
+| After `tasks` | requirements validation, fleet review, architecture follow-up | Strengthen readiness before implementation |
+| Before `implement` | optional commit, memory loading | Reduce context loss before code generation |
+| After `implement` | verify-tasks, verify.run, architecture review | Confirm real delivery and post-implementation compliance |
+
+When documenting or adjusting this automation, prefer what is actually configured in [../../.specify/extensions.yml](../../.specify/extensions.yml) over generic examples from older Spec Kit material.
+
+## 6. Best Practices
+
+- Create and maintain governed feature artifacts under [../../specs/](../../specs/), not under `docs/` and not as the primary record in `.specify/specs/`.
+- Keep [../../specs/spec-traceability.yaml](../../specs/spec-traceability.yaml) synchronized whenever SRS scope changes.
+- Keep [../../specs/spec-sync-status.md](../../specs/spec-sync-status.md) aligned with actual feature status and evidence.
+- Treat the project constitution in [../../.specify/memory/constitution.md](../../.specify/memory/constitution.md) as binding when reviewing or implementing work.
+- Use [../../docs/openapi.yaml](../../docs/openapi.yaml) as a mandatory synchronization target for REST API changes.
+- Prefer current official documentation links from `https://github.github.io/spec-kit/` over older repository blob links.
+- Keep diagrams, tables, command names, and prose synchronized so the workflow description does not drift.
+- Use `speckit.clarify` aggressively when requirements remain ambiguous before implementation.
+
+## 7. Troubleshooting
+
+- **`specify` is not available**: install the CLI with `uv tool install` or use one-shot execution with `uvx --from git+https://github.com/github/spec-kit.git specify ...`.
+- **A command does not appear in the agent**: run `specify extension list`, confirm the related extension is available locally, and review [../../.specify/extensions.yml](../../.specify/extensions.yml).
+- **The integration looks wrong**: run `specify integration list`; this repository expects GitHub Copilot with PowerShell-oriented scripts.
+- **Unsure where to place new feature artifacts**: publish governed work in [../../specs/](../../specs/). Treat `.specify/` as supporting automation and template infrastructure.
+- **Traceability is stale**: update [../../specs/spec-traceability.yaml](../../specs/spec-traceability.yaml), refresh task and review evidence, then bring [../../specs/spec-sync-status.md](../../specs/spec-sync-status.md) back in line.
+- **REST behavior changed but documentation did not**: update [../../docs/openapi.yaml](../../docs/openapi.yaml) as part of the same delivery cycle.
+- **Mermaid does not render cleanly**: keep diagrams in fenced `mermaid` blocks and use short labels with simple punctuation.
+
+## 8. References
+
+### 8.1 Repository References
+
+- [../../.github/agents/documentation.spec-maintainer.agent.md](../../.github/agents/documentation.spec-maintainer.agent.md)
+- [../../.specify/templates/spec-template.md](../../.specify/templates/spec-template.md)
+- [../../.specify/extensions.yml](../../.specify/extensions.yml)
+- [../../.specify/extension-catalogs.yml](../../.specify/extension-catalogs.yml)
+- [../../.specify/integration.json](../../.specify/integration.json)
+- [../../.specify/workflows/speckit/workflow.yml](../../.specify/workflows/speckit/workflow.yml)
+- [../../.specify/memory/constitution.md](../../.specify/memory/constitution.md)
+- [../../specs/spec-traceability.yaml](../../specs/spec-traceability.yaml)
+- [../../specs/spec-sync-status.md](../../specs/spec-sync-status.md)
+- [../../.github/instructions/architecture.instructions.md](../../.github/instructions/architecture.instructions.md)
+- [../../.github/instructions/testing.instructions.md](../../.github/instructions/testing.instructions.md)
+- [../../docs/openapi.yaml](../../docs/openapi.yaml)
+
+### 8.2 Official Spec Kit Documentation
+
+- [Spec Kit Home](https://github.github.io/spec-kit/index.html)
+- [Installation Guide](https://github.github.io/spec-kit/installation.html)
+- [Quick Start Guide](https://github.github.io/spec-kit/quickstart.html)
+- [What is Spec-Driven Development?](https://github.github.io/spec-kit/concepts/sdd.html)
+- [CLI Reference](https://github.github.io/spec-kit/reference/overview.html)
+- [Core Commands Reference](https://github.github.io/spec-kit/reference/core.html)
+- [Integrations Reference](https://github.github.io/spec-kit/reference/integrations.html)
+- [Extensions Reference](https://github.github.io/spec-kit/reference/extensions.html)
+- [Workflows Reference](https://github.github.io/spec-kit/reference/workflows.html)

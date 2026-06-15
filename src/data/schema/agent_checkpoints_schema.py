@@ -7,7 +7,7 @@ This collection is managed by langgraph-checkpoint-mongodb, not by our applicati
 IMPORTANT: This schema is for documentation purposes only.
 The actual collection is created and managed by MongoDBSaver.
 
-Reference: docs/langchain-agent/AGENT_MEMORY_TECHNICAL_DESIGN.md
+Reference: docs/domains/agent/AGENT_MEMORY_TECHNICAL_DESIGN.md
 
 Author: dp-stock-investment-assistant
 Created: 2025-01-21

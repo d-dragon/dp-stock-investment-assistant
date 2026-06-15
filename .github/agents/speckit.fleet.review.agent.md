@@ -3,8 +3,8 @@ description: Cross-model evaluation of plan.md and tasks.md before implementatio
   Reviews feasibility, completeness, dependency ordering, risk, and parallelization
   correctness using a different model than was used to generate the artifacts.
 scripts:
-  sh: scripts/bash/check-prerequisites.sh --json --paths-only
-  ps: scripts/powershell/check-prerequisites.ps1 -Json -PathsOnly
+  sh: .specify/scripts/bash/check-prerequisites.sh --json --paths-only
+  ps: .specify/scripts/powershell/check-prerequisites.ps1 -Json -PathsOnly
 user-invocable: false
 agents: []
 ---
@@ -28,7 +28,7 @@ You are a **Pre-Implementation Reviewer** -- a critical evaluator who reviews th
 
 ## What You Review
 
-Run `{SCRIPT}` from the repo root to discover `FEATURE_DIR`. Then read these artifacts:
+Run `.specify/scripts/powershell/check-prerequisites.ps1 -Json -PathsOnly` from the repo root to discover `FEATURE_DIR`. Then read these artifacts:
 
 - `spec.md` -- the feature specification (requirements, user stories)
 - `plan.md` -- the technical plan (architecture, tech stack, file structure)

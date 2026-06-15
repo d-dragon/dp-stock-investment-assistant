@@ -1,0 +1,166 @@
+# Configuration Example for DP Stock-Investment Assistant
+
+# OpenAI API Configuration
+openai:
+  api_key: "your-openai-api-key-here"
+  model: "gpt-5-nano"
+  max_tokens: 2000
+  temperature: 0.7
+
+# Grok (xAI) API Configuration
+# Reference: https://docs.x.ai/docs/guides/migration
+grok:
+  api_key: "your-xai-api-key-here"  # Also accepts XAI_API_KEY env var
+  base_url: "https://api.x.ai/v1"
+  model: "grok-4-1-fast-reasoning"  # Options: grok-4, grok-4-1-fast-reasoning, grok-3, grok-3-mini
+  max_tokens: 2000
+  temperature: 0.7
+  timeout: 3600  # xAI recommends 3600s for reasoning models
+
+# Semantic Router Configuration
+# Uses semantic-router library for query classification
+semantic_router:
+  encoder:
+    primary: openai           # Primary encoder: openai or huggingface
+    fallback: huggingface     # Fallback if primary fails
+    openai_model: "text-embedding-3-small"
+    huggingface_model: "sentence-transformers/all-MiniLM-L6-v2"
+  threshold: 0.7              # Minimum confidence for route matching
+  cache_embeddings: true      # Cache embeddings for performance
+
+# LangChain Tools Configuration
+# Cache TTL values for tool result caching (in seconds)
+langchain:
+  tools:
+    enabled: true             # Master switch for tool functionality
+    cache_ttl:
+      stock_symbol: 60        # Stock info cache (1 minute)
+      reporting: 600          # Report cache (10 minutes)
+      tradingview: 300        # TradingView cache (5 minutes)
+      default: 120            # Default TTL for unlisted tools
+  
+  # Memory Configuration (FR-3.1: Short-Term Memory)
+  # Controls conversation persistence and session-aware memory for multi-turn interactions
+  memory:
+    enabled: true                           # Enable conversation memory (FR-3.1.1)
+    
+    # Summarization Settings (FR-3.1.6)
+    summarize_threshold: 4000               # Token count to trigger summarization (valid: 1000-10000)
+    max_messages: 50                        # Max messages per conversation before pruning (valid: 10-200)
+    messages_to_keep: 10                    # Messages to preserve when pruning (valid: 5-50, must be < max_messages)
+    max_content_size: 32768                 # Max bytes for single message content (valid: 1024-65536)
+    summary_max_length: 500                 # Max tokens for summary (valid: 100-2000)
+    
+    # Performance Settings (FR-3.1.9)
+    context_load_timeout_ms: 500            # Max time to load context (valid: 100-5000)
+    state_save_timeout_ms: 50               # Max time to persist state (valid: 10-500)
+    
+    # MongoDB Collections (FR-3.1.2)
+    checkpoint_collection: "agent_checkpoints"    # LangGraph-managed checkpoints
+    conversations_collection: "conversations"     # Application-managed metadata
+  
+  # LangSmith Tracing Configuration
+  # Enables trace visualization in LangSmith Studio
+  tracing:
+    enabled: true             # Enable for local Studio development
+    project: "dp-stock-assistant"  # Project name in LangSmith UI
+    api_key: ""               # Set via LANGSMITH_API_KEY env var
+    endpoint: "https://api.smith.langchain.com"  # LangSmith API endpoint
+
+# Financial Data APIs
+financial_apis:
+  yahoo_finance:
+    enabled: true
+  alpha_vantage:
+    api_key: "your-alpha-vantage-api-key-here"
+    enabled: false
+
+# Application Settings
+app:
+  log_level: "INFO"
+  cache_enabled: true
+  max_history: 100
+logging:
+  level: DEBUG
+  loggers:
+    langgraph.checkpoint: DEBUG
+    services.conversation_service: DEBUG
+    
+# Analysis Settings
+analysis:
+  default_period: "1y"
+  default_interval: "1d"
+  sectors_to_track:
+    - "Technology"
+    - "Healthcare"
+    - "Financial"
+    - "Energy"
+
+# Export Settings
+export:
+  default_format: "pdf"
+  output_directory: "reports"
+  include_charts: true
+# config/config.yaml
+
+database:
+  # MongoDB Configuration
+  mongodb:
+    enabled: true
+    connection_string: "mongodb://stockadmin:stockpassword@localhost:27017/stock_assistant?retryWrites=true&w=majority"
+    database_name: "stock_assistant"
+  
+  # Redis Configuration
+  redis:
+    enabled: true
+    host: "localhost"
+    port: 6379
+    db: 0
+    password: "your_redis_password"  # Optional
+    ssl: false
+    ttl:
+      price_data: 60  # seconds
+      historical_data: 3600  # 1 hour
+      fundamental_data: 86400  # 24 hours
+      technical_data: 900  # 15 minutes
+      reports: 43200  # 12 hours
+
+# Prompt System Configuration (M1 — Prompt Runtime Parity)
+# Controls prompt asset resolution, selection mode, and version management.
+# See specs/prompt-system-milestone1/spec.md for full specification.
+prompts:
+  registry:
+    directory: "src/prompts"
+    refresh_window_seconds: 300
+  system:
+    active_role: "react_analyst"
+    active_version: "1.0.0"
+    variants:
+      - name: "baseline"
+        version: "1.0.0"
+        file: "system/react_analyst.md"
+        status: "active"
+  selection_mode: "fixed"
+  default_locale: "en"
+  experiments:
+    enabled: false
+    active_id: null
+
+  # Route-Aware Skills Configuration (M2 — Route-Aware Skills)
+  # Controls route-specific prompt composition via PromptAssembler.
+  # See specs/prompt-system-milestone2/spec.md for full specification.
+  route_contexts:
+    enabled: false
+    directory: "skills/routes"
+    supported_routes:
+      - PRICE_CHECK
+      - NEWS_ANALYSIS
+      - PORTFOLIO
+      - TECHNICAL_ANALYSIS
+      - FUNDAMENTALS
+      - IDEAS
+      - MARKET_WATCH
+      - GENERAL_CHAT
+  dynamic_controls:
+    allowed_fields: []
+    reject_unknown_fields: true

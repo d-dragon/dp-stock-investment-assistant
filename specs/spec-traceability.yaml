@@ -12,8 +12,17 @@ reports:
       - version: "1.1"
         date: 2026-03-31
         summary: Synchronized stm-phase-cde from clarified planning state to verified implementation state and expanded evidence links.
+      - version: "1.2"
+        date: 2026-06-03
+        summary: Updated prompt-system-milestone1 mapping_status to implemented, added tasks.md/checklists/verify-tasks-report.md/review.md to evidence paths. Task completion 42/42, tests 29/29.
+      - version: "1.3"
+        date: 2026-06-04
+        summary: Added prompt-system-milestone2 (M2) feature entry — mapping_status planned, spec.md and quality checklist as evidence paths. SRS v2.7 baseline reused.
+      - version: "1.4"
+        date: 2026-06-04
+        summary: Updated prompt-system-milestone2 (M2) feature entry — mapping_status implemented, all design and delivery artifacts added to evidence paths. PromptAssembler, route-skill assets, and agent wiring delivered.
   srs_spec_traceability:
-    version: "1.4"
+    version: "1.5"
     status: Active
     revision_history:
       - version: "1.0"
@@ -31,11 +40,14 @@ reports:
       - version: "1.4"
         date: 2026-03-31
         summary: Updated stm-phase-cde reverse-trace statuses from clarified to verified after implementation and verification completion.
+      - version: "1.5"
+        date: 2026-04-13
+        summary: Added prompt-system trace entries and updated the governing SRS baseline to v2.3.
 
 srs:
-  path: docs/langchain-agent/SOFTWARE_REQUIREMENTS_SPECIFICATION.md
-  version: "2.2"
-  last_updated: 2026-03-19
+  path: docs/domains/agent/SOFTWARE_REQUIREMENTS_SPECIFICATION.md
+  version: "2.7"
+  last_updated: 2026-06-03
 
 status_rules:
   analyzed:
@@ -575,10 +587,130 @@ features:
           anchor: phase-9-stm-runtime-integration--agent-migration-critical--5-6-sp
         - path: specs/spec-driven-development-pilot/quickstart.md
           label: STM quickstart
-        - path: specs/spec-driven-development-pilot/data-model.md
-          label: STM data model
-        - path: specs/spec-driven-development-pilot/contracts/api-contract.yaml
-          label: API contract
-    sync_notes:
-      - Pilot artifact set now traces only the STM requirements that remain behaviorally identical to the current SRS.
-      - Identity-model differences remain out of scope for this exact mapping.
+
+  - feature_id: prompt-system-milestone1
+    feature_title: Prompt Compiler Path — Milestone M1 (Prompt Runtime Parity)
+    feature_path: specs/prompt-system-milestone1
+    reference_document: specs/prompt-system-milestone1/spec.md
+    reference_anchor: user-scenarios--testing-mandatory
+    mapping_status: implemented
+    feature_kind: implementation-feature
+    status_sync:
+      source_of_truth: derived
+      gate_enforced: true
+      synchronized_documents:
+        - specs/prompt-system-milestone1/spec.md
+        - specs/prompt-system-milestone1/plan.md
+        - specs/prompt-system-milestone1/tasks.md
+        - specs/prompt-system-milestone1/checklists/spec-plan-quality.md
+        - specs/prompt-system-milestone1/verify-tasks-report.md
+        - specs/prompt-system-milestone1/review.md
+    srs_mapping:
+      baseline_version: "2.7"
+      coverage_status: partial
+      mapped_srs_items:
+        - FR-1.4.5
+        - FR-1.4.6
+        - FR-1.4.8
+        - FR-1.4.16
+        - NFR-5.2.5
+        - NFR-5.2.6
+        - NFR-5.2.7
+        - NFR-5.2.8
+        - NFR-5.2.9
+        - NFR-6.2.3
+        - AC-8.1
+        - AC-8.2
+      mapped_functional_groups:
+        - group: FR-1.4
+          coverage: partial
+          includes:
+            - FR-1.4.5
+            - FR-1.4.6
+            - FR-1.4.8
+            - FR-1.4.16
+        - group: NFR-5.2
+          coverage: partial
+          includes:
+            - NFR-5.2.5
+            - NFR-5.2.6
+            - NFR-5.2.7
+            - NFR-5.2.8
+            - NFR-5.2.9
+      mapped_non_functional:
+        - NFR-5.2.5
+        - NFR-5.2.6
+        - NFR-5.2.7
+        - NFR-5.2.8
+        - NFR-5.2.9
+        - NFR-6.2.3
+      mapped_acceptance_criteria:
+        - AC-8.1
+        - AC-8.2
+    speckit_mapping:
+      evidence_paths:
+        - path: specs/prompt-system-milestone1/spec.md
+          label: Feature specification
+          anchor: user-scenarios--testing-mandatory
+        - path: specs/prompt-system-milestone1/plan.md
+          label: Implementation plan
+        - path: specs/prompt-system-milestone1/tasks.md
+          label: Task checklist
+        - path: specs/prompt-system-milestone1/checklists/spec-plan-quality.md
+          label: Quality gate checklist
+        - path: specs/prompt-system-milestone1/verify-tasks-report.md
+          label: Post-implementation verification report
+        - path: specs/prompt-system-milestone1/review.md
+          label: Verification review
+
+  - feature_id: prompt-system-milestone2
+    feature_title: Prompt Compiler Path — Milestone M2 (Route-Aware Skills)
+    feature_path: specs/prompt-system-milestone2
+    reference_document: specs/prompt-system-milestone2/spec.md
+    reference_anchor: governance-context-mandatory
+    mapping_status: implemented
+    feature_kind: implementation-feature
+    status_sync:
+      source_of_truth: derived
+      gate_enforced: true
+      synchronized_documents:
+        - specs/prompt-system-milestone2/spec.md
+        - specs/prompt-system-milestone2/plan.md
+        - specs/prompt-system-milestone2/tasks.md
+        - specs/prompt-system-milestone2/checklists/requirements.md
+        - specs/prompt-system-milestone2/research.md
+        - specs/prompt-system-milestone2/data-model.md
+        - specs/prompt-system-milestone2/quickstart.md
+        - specs/prompt-system-milestone2/contracts/prompt-assembler-interface.md
+        - specs/prompt-system-milestone2/contracts/route-skill-asset-schema.md
+    srs_mapping:
+      baseline_version: "2.7"
+      coverage_status: partial
+      mapped_srs_items:
+        - FR-1.4.7
+        - FR-1.4.11
+        - FR-1.4.16
+        - NFR-5.2.8
+        - AC-8.5
+        - AC-8.8
+        - AC-8.11
+      mapped_functional_groups:
+        - group: FR-1.4
+          coverage: partial
+          includes:
+            - FR-1.4.7
+            - FR-1.4.11
+            - FR-1.4.16
+      mapped_non_functional:
+        - NFR-5.2.8
+      mapped_acceptance_criteria:
+        - AC-8.5
+        - AC-8.8
+        - AC-8.11
+    speckit_mapping:
+      evidence_paths:
+        - path: specs/prompt-system-milestone2/spec.md
+          label: Feature specification
+          anchor: governance-context-mandatory
+        - path: specs/prompt-system-milestone2/checklists/requirements.md
+          label: Quality gate checklist

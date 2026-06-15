@@ -478,6 +478,6 @@ data:
 
 ## References
 
-- [AGENT_MEMORY_TECHNICAL_DESIGN.md](../../../docs/langchain-agent/AGENT_MEMORY_TECHNICAL_DESIGN.md) — MEM-2 API requirements
+- [AGENT_MEMORY_TECHNICAL_DESIGN.md](../../../docs/domains/agent/AGENT_MEMORY_TECHNICAL_DESIGN.md) — MEM-2 API requirements
 - [backend-python.instructions.md](../../../.github/instructions/backend-python.instructions.md) — API patterns
 - [openapi.yaml](../../../docs/openapi.yaml) — Existing API spec

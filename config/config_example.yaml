@@ -118,3 +118,24 @@ database:
       fundamental_data: 86400
       technical_data: 900
       reports: 43200
+
+# Prompt System Configuration (M1 — Prompt Runtime Parity)
+# Controls prompt asset resolution, selection mode, and version management.
+# See specs/prompt-system-milestone1/spec.md for full specification.
+prompts:
+  registry:
+    directory: "src/prompts"
+    refresh_window_seconds: 300
+  system:
+    active_role: "react_analyst"
+    active_version: "1.0.0"
+    variants:
+      - name: "baseline"
+        version: "1.0.0"
+        file: "system/react_analyst.md"
+        status: "active"
+  selection_mode: "fixed"
+  default_locale: "en"
+  experiments:
+    enabled: false
+    active_id: null

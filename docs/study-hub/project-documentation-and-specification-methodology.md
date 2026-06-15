@@ -20,7 +20,7 @@ The project is already a multi-layer, multi-domain system with distinct frontend
 The current recommendation is:
 
 - adopt **Spec-Driven Development as the central methodology** for how requirements flow from stable system-level definitions through feature delivery to verified implementation
-- adopt a **hybrid, domain-oriented documentation model** with one master system SRS as the upstream requirement pool, whole-system architecture documents, and domain-owned realization documents under `docs/domains/`
+- adopt a **hybrid, domain-oriented documentation model** with one master system SRS as the upstream requirement pool, whole-system architecture documents, and domain-owned realization documents under `docs/stacks/`
 - retain the **Constitution** (`.specify/memory/constitution.md`) as the non-negotiable governance layer that all feature specs, plans, and implementations must satisfy
 - keep **ADRs** as decision records rather than requirement documents
 - keep **OpenAPI** and other contract artifacts as executable interface sources of truth rather than duplicating them in prose
@@ -69,12 +69,13 @@ This proposal is based on and aligned with the current project documents below.
 | Document | Purpose in Current Repository | Role in This Proposal |
 |----------|-------------------------------|-----------------------|
 | [Architecture Review](../architecture-review.md) | Cross-domain and cross-layer architecture assessment of frontend, backend, agent, data, and infrastructure | Provides the system-wide framing and writing style for cross-domain and cross-layer documentation |
-| [Stock Investment Assistant Agent — Software Requirements Specification](../langchain-agent/SOFTWARE_REQUIREMENTS_SPECIFICATION.md) | Detailed domain SRS for the agent system | Reference model for requirement structure, numbering, and wording |
-| [SRS Spec Traceability](../langchain-agent/SRS_SPEC_TRACEABILITY.md) | Reverse trace from SRS items to feature specs | Reference model for requirement-to-delivery traceability |
+| [Stock Investment Assistant Agent — Software Requirements Specification](../domains/agent/SOFTWARE_REQUIREMENTS_SPECIFICATION.md) | Detailed domain SRS for the agent system | Reference model for requirement structure, numbering, and wording |
+| [SRS Spec Traceability](../domains/agent/SRS_SPEC_TRACEABILITY.md) | Reverse trace from SRS items to feature specs | Reference model for requirement-to-delivery traceability |
 | [Frontend Architecture Evolution Report](../frontend/frontend-architecture-evolution-report.md) | Research report for frontend architectural evolution | Reference model for analysis-oriented study documents |
 | [ADR-Frontend-001](../frontend/adr-frontend-001-modular-application.md) | Frontend architectural direction | Reference model for ADR boundary and decision phrasing |
 | [ADR-Frontend-002](../frontend/adr-frontend-002-modernize-frontend-foundation.md) | Frontend modernization stack and delivery direction | Reference model for implementation-oriented architecture decisions |
 | [Spec-Kit HOW-TO](../spec-driven%20development%20(SDD)/spec-kit%20HOW-TO.md) | Repository-specific SDD workflow guidance with the 18-step SDD lifecycle | Defines the canonical SDD phase chain that this proposal integrates with system-level documentation |
+| [Documentation Spec Maintainer Agent](../../.github/agents/documentation.spec-maintainer.agent.md) | Documentation-focused Copilot custom agent for long-lived docs, delivery-scoped specs, traceability, and customization files | Provides a fast entry point for contributors who need to apply the same SDD promotion, reconciliation, and traceability rules described in this methodology |
 | [Project Constitution](../../.specify/memory/constitution.md) | Non-negotiable governance layer: 7 core principles, 9 golden rules, memory boundaries, SOLID constraints, quality gates | Defines the governance authority that all system-level and feature-level documentation must satisfy |
 | [Spec Traceability Registry](../../specs/spec-traceability.yaml) | Machine-readable traceability manifest linking SRS items to feature specs with status gates | Defines the automated traceability model that system-level documentation must integrate with |
 | [OpenAPI Specification](../openapi.yaml) | Executable API contract for the backend | Canonical contract artifact in the proposed documentation model |
@@ -88,7 +89,7 @@ The recommended target state is a **hybrid, domain-oriented documentation model 
 This means:
 
 - one master system SRS as the **upstream requirement pool** that feature specs draw from
-- domain-owned documentation grouped under `docs/domains/` for frontend, backend, agent, and data realization
+- domain-owned documentation grouped under `docs/stacks/` for frontend, backend, agent, and data realization
 - subordinate requirement specifications only where a domain (bounded context) is sufficiently specialized or already mature
 - the **Constitution** as the non-negotiable governance layer that all specs, plans, and implementations must satisfy
 - the **SDD lifecycle** (specify → clarify → plan → tasks → implement → verify) as the primary mechanism through which requirements become delivered, tested, and documented code
@@ -98,7 +99,7 @@ This means:
 - feature specs that remain delivery-scoped and traceable to stable requirement IDs
 - **automated traceability** (spec-traceability.yaml, sync_spec_status.py, speckit.sync) as the mechanism that keeps documentation and code aligned
 
-Throughout this proposal, the units grouped under `docs/domains/` are better understood as **bounded contexts or delivery domains**, not technology stacks. The repository path is retained for brevity, but terms such as frontend, backend, agent, and data should be read as ownership domains or layers rather than as references to React, Flask, LangGraph, or similar implementation stacks.
+Throughout this proposal, the units grouped under `docs/stacks/` are better understood as **bounded contexts or delivery domains**, not technology stacks. The repository path is retained for brevity, but terms such as frontend, backend, agent, and data should be read as ownership domains or layers rather than as references to React, Flask, LangGraph, or similar implementation stacks.
 
 This model is the best fit for the current repository because it preserves existing documentation strengths and the proven SDD practice while avoiding two failure modes:
 
@@ -160,6 +161,7 @@ This proposal uses three standards stances so the project can be disciplined wit
 | **ISO/IEC/IEEE 42010** | Use as the framing model for architecture descriptions and viewpoint separation |
 | **OpenAPI 3.1** | Use as the authoritative HTTP API contract standard |
 | **WCAG 2.2 AA** | Use as the baseline accessibility standard for UI and UX design specifications |
+| **Mermaid with selective C4, UML, and BPMN usage** | Use as the repository-default text-based diagram approach; apply document-type-specific notation limits through Section 9.3 |
 | **ADR / Nygard-style decision records** | Use as the practice model for architecture-significant decision capture |
 | **Spec-Kit / Spec-Driven Development** | Use as the **primary delivery and governance methodology** for feature planning, implementation, verification, and documentation maintenance |
 
@@ -183,7 +185,7 @@ The terms in this glossary are the canonical vocabulary for this repository. Con
 | **Domain SRS** | A subordinate SRS for one domain when justified by complexity | Domain-local specialization that does not contradict master SRS | Replacing master SRS authority |
 | **Executable Contract** | Machine-readable interface source of truth (e.g., OpenAPI schema) | Payload/schema definitions and compatibility checks | Narrative rationale and decision tradeoffs |
 
-**Repository path note**: The folder name `docs/domains/` is retained for backward compatibility and continuity, but its contents are interpreted normatively as domains/bounded contexts in this documentation model.
+**Repository path note**: The folder name `docs/stacks/` is retained for backward compatibility and continuity, but its contents are interpreted normatively as domains/bounded contexts in this documentation model.
 
 ## 7. SDD Lifecycle Integration
 
@@ -349,7 +351,7 @@ The target structure should remain intentionally lean. It should organize docume
 1. **System** — canonical cross-domain requirements and governance
 2. **Architecture** — whole-system structure, runtime flows, and architectural decisions
 3. **Domains (Bounded Contexts)** — domain-owned realization, domain-specific constraints, and owned contracts
-4. **Specs (SDD spec-kit)** — delivery-scoped feature artifacts created and maintained through the SDD lifecycle
+4. **Specs (`specs/`)** — delivery-scoped feature artifacts created and maintained through the SDD lifecycle
 
 ```text
 docs/
@@ -360,14 +362,14 @@ docs/
   architecture/
     SYSTEM_OVERVIEW_AND_BOUNDARIES.md
     RUNTIME_AND_INTEGRATION_FLOWS.md
-    decisions/
+    DECISIONS/
       ADR-0001-...
       ADR-0002-...
 
   domains/
     frontend/
       TECHNICAL_DESIGN.md
-      decisions/
+      DECISIONS/
         adr-frontend-001-modular-application.md
         adr-frontend-002-modernize-frontend-foundation.md
 
@@ -379,7 +381,7 @@ docs/
     agent/
       SOFTWARE_REQUIREMENTS_SPECIFICATION.md
       TECHNICAL_DESIGN.md
-      decisions/
+      DECISIONS/
 
     data/
       TECHNICAL_DESIGN.md
@@ -416,22 +418,49 @@ This is the recommended compact domain model for this repository. The important 
 
 ### 9.2 Purpose and Standards Stance by Document Type
 
+Each document type has both a standards stance and a notation policy. The standards stance describes how the artifact relates to external standards; Section 9.3 defines the diagram and notation rules that keep visuals consistent across the documentation set.
+
 | Document Type | Target Files | Purpose | Standards Stance |
 |---------------|--------------|---------|------------------|
 | **Master System SRS** | `docs/system/SYSTEM_REQUIREMENTS_SPECIFICATION.md` | Authoritative source for cross-domain functional, non-functional, interface, lifecycle, and maintenance requirements | **Aligned** to ISO/IEC/IEEE 29148 |
 | **Requirements Governance Guide** | `docs/system/REQUIREMENTS_METHOD_AND_GOVERNANCE.md` | Defines how requirements are authored, approved, changed, traced, and retired | **Aligned** to 29148 traceability and change-discipline principles |
 | **System Architecture Documents** | `docs/architecture/*.md` | Describe the system as a whole: boundaries, major building blocks, runtime flows, and cross-domain interactions | **Aligned** to ISO/IEC/IEEE 42010 |
-| **ADRs** | `docs/architecture/decisions/` and `docs/domains/*/decisions/` | Capture architecturally significant decisions and tradeoffs at system or domain scope | **Practice-Based** ADR discipline |
-| **Domain Technical Design** | `docs/domains/*/TECHNICAL_DESIGN.md` | Explains how each domain realizes the requirements allocated to it and records domain-specific constraints that do not belong in the system-level architecture documents | **Aligned** design practice |
+| **ADRs** | `docs/architecture/DECISIONS/` and `docs/stacks/*/DECISIONS/` | Capture architecturally significant decisions and tradeoffs at system or domain scope | **Practice-Based** ADR discipline |
+| **Domain Technical Design** | `docs/stacks/*/TECHNICAL_DESIGN.md` | Explains how each domain realizes the requirements allocated to it and records domain-specific constraints that do not belong in the system-level architecture documents | **Aligned** design practice |
 | **Domain-Specific Requirement Documents** | only where justified, for example `docs/domains/agent/SOFTWARE_REQUIREMENTS_SPECIFICATION.md` | Holds subordinate requirement sets only when a bounded context is independently complex, specialized, or already mature enough to need its own requirement baseline | **Aligned** subordinate SRS practice |
-| **Executable Contracts** | domain-owned artifacts such as `docs/domains/backend/api/openapi.yaml` | Defines request/response schemas, event contracts, and integration payloads without duplicating them in prose | **Conformant** to schema or contract standards |
+| **Executable Contracts** | domain-owned artifacts such as `docs/stacks/backend/api/openapi.yaml` | Defines request/response schemas, event contracts, and integration payloads without duplicating them in prose | **Conformant** to schema or contract standards |
 | **Operations Policy and Runbooks** | `docs/operations/OPERATIONS_AND_RELEASE_POLICY.md`, `docs/operations/RUNBOOKS/` | Defines supportability, release readiness, migration, reconciliation, rollback, and incident handling expectations | **Aligned** for policy; **Practice-Based** for runbooks |
 | **Verification and Traceability Strategy** | `docs/testing/VERIFICATION_AND_TRACEABILITY_STRATEGY.md` | Defines test levels, evidence expectations, and how requirements are proven through specs and tests | **Aligned** internal verification standard |
 | **Study and Analysis Documents** | `docs/study-hub/` | Holds research, comparison studies, and planning proposals that inform decisions but are not themselves long-lived authority documents | **Practice-Based** study format |
 | **Feature Specs** | `specs/<feature-id>/...` | Delivery-scoped realization documents for approved requirements | **Practice-Based** Spec-Kit workflow |
 | **Traceability Registry and Reports** | `specs/spec-traceability.yaml`, `specs/spec-sync-status.md` | Maintains bidirectional requirement-to-delivery traceability | **Practice-Based** RTM-style governance |
 
-### 9.3 Functional and Non-Functional Requirements in the Domain Model
+### 9.3 Diagram and Notation Standards by Document Type
+
+Consistent notation reduces ambiguity, keeps Markdown-native reviews readable, and makes long-lived documents easier to compare over time. The policy below formalizes the repository's existing bias toward text-based, diffable diagrams while still allowing more specialized notations where they materially improve clarity.
+
+| Document Type | Allowed Diagram Styles | Preferred Authoring Format | Best-Fit Use Cases | Notes / Constraints |
+|---------------|------------------------|----------------------------|--------------------|---------------------|
+| **System Architecture Documents** | C4-style context, container, component, deployment, flow, sequence, and state views | **Mermaid** with C4-style structure where applicable | System boundaries, major building blocks, runtime flows, and cross-domain interactions | Prefer C4 abstractions for static architecture views; use UML-style behavior diagrams only when interaction or state semantics matter |
+| **ADRs** | Decision context sketches, option comparison visuals, and simple impact flowcharts | Markdown tables first; Mermaid only when it adds clarity | Tradeoffs, consequence summaries, and decision impact scope | Keep visuals minimal; do not move architecture description or detailed technical realization into ADRs |
+| **Domain Technical Design** | Flowcharts, sequence, state, class, ER, and interface diagrams | **Mermaid** | Domain internals, internal interfaces, persistence mapping, and realization flows | UML-style precision is acceptable when behavior, lifecycle, or interface semantics need tighter expression |
+| **Requirements and Specification Baselines** | Scope/context diagrams, lifecycle flows, allocation views, and traceability visuals | Markdown tables first; Mermaid when a visual materially improves comprehension | Requirement scope, allocation, traceability flow, and governance lifecycle | Do not duplicate executable contract schemas in prose diagrams; use visuals to explain boundaries and relationships |
+| **Feature Specs** | Lightweight flowcharts, sequence diagrams, state sketches, and local data models | **Mermaid** | Delivery-scoped scenarios, rollout paths, verification flow, and implementation coordination | When promoted into `docs/`, normalize diagrams to the target document type's notation rules |
+| **Operations Policy and Runbooks** | Flowcharts, swimlane-style flows, sequence diagrams, and BPMN process models | Mermaid by default; BPMN selectively | Release, rollback, migration, reconciliation, incident response, and approval-heavy workflows | Use BPMN only when human handoffs, approvals, or recovery paths are central to the process |
+| **Executable Contracts and Traceability Reports** | Minimal context visuals only; schema-first artifacts remain primary | OpenAPI, JSON Schema, and tables; Mermaid only for supporting context visuals | API/event contracts, payload compatibility, and mapping evidence | Machine-readable contracts remain the source of truth for structure; diagrams must not override schema definitions |
+
+Mermaid is the repository default because it is text-based, diffable, and already established across architecture and technical design documents. BPMN and stricter UML usage are selective tools, not the default notation for all artifacts.
+
+Regardless of document type, diagram visualization should follow these quality rules:
+
+1. Precede each non-trivial diagram with a short sentence that states its scope and why the visual is needed.
+2. Label diagrams explicitly as current-state, target-state, planned-state, or transition-state when implementation status is not obvious.
+3. Prefer direct labels and consistent naming for actors, systems, boundaries, and data stores; add a legend only when repeated symbols or line styles would otherwise be ambiguous.
+4. Keep reading direction predictable and split dense visuals into multiple diagrams when crossings, node count, or mixed concerns reduce readability.
+5. Do not rely on color alone to carry meaning; essential distinctions must remain visible in labels, grouping, or captions for plain Markdown renderers and accessibility.
+6. When a single diagram cannot stay simple, pair it with a compact table or short interpretation notes instead of forcing all meaning into the visual.
+
+### 9.4 Functional and Non-Functional Requirements in the Domain Model
 
 Under the domain model, **functional requirements and non-functional requirements remain canonical at the system level first**, then are allocated to domains as ownership metadata.
 
@@ -445,7 +474,7 @@ The recommended rules are:
 
 In short: the master SRS remains the source of truth for SR and SNR requirements, domain documents explain realization and specialization, and feature specs provide delivery detail and verification evidence.
 
-### 9.4 Promotion Rules for New Long-Lived Documents
+### 9.5 Promotion Rules for New Long-Lived Documents
 
 Before creating a new long-lived document under `docs/`, the project should answer yes to at least one of these questions:
 
@@ -471,7 +500,7 @@ In the SDD-integrated model, it should define:
 - the lifecycle obligations that span development, release, support, maintenance, and evolution
 - the boundaries between system-level requirements, domain-owned realization documents, and any justified subordinate requirement sets
 
-It should not try to become a contract file, a domain technical design specification, a feature backlog, or a delivery artifact. Feature delivery detail belongs in `specs/` under the SDD lifecycle, while domain realization belongs in `docs/domains/*/TECHNICAL_DESIGN.md`.
+It should not try to become a contract file, a domain technical design specification, a feature backlog, or a delivery artifact. Feature delivery detail belongs in `specs/` under the SDD lifecycle, while domain realization belongs in `docs/stacks/*/TECHNICAL_DESIGN.md`.
 
 ### 10.2 Recommended Outline
 
@@ -570,7 +599,7 @@ The examples below show how domain allocation should work in practice.
 | Priority | P0 |
 | Primary Owning Domain | backend |
 | Contributing Domains | frontend, agent |
-| Linked Domain Documents / Contracts | `docs/domains/backend/TECHNICAL_DESIGN.md`, `docs/domains/frontend/TECHNICAL_DESIGN.md`, `docs/domains/backend/api/openapi.yaml` |
+| Linked Domain Documents / Contracts | `docs/stacks/backend/TECHNICAL_DESIGN.md`, `docs/stacks/frontend/TECHNICAL_DESIGN.md`, `docs/stacks/backend/api/openapi.yaml` |
 | Spec Coverage Status | mapped via feature spec(s) in `specs/` |
 
 **Example Non-Functional Requirement**
@@ -584,7 +613,7 @@ The examples below show how domain allocation should work in practice.
 | Priority | P1 |
 | Primary Owning Domain | backend |
 | Contributing Domains | agent, data, operations |
-| Linked Domain Documents / Contracts | `docs/domains/backend/TECHNICAL_DESIGN.md`, `docs/domains/data/POLICY_AND_CONSTRAINTS.md`, `docs/operations/OPERATIONS_AND_RELEASE_POLICY.md` |
+| Linked Domain Documents / Contracts | `docs/stacks/backend/TECHNICAL_DESIGN.md`, `docs/stacks/data/POLICY_AND_CONSTRAINTS.md`, `docs/operations/OPERATIONS_AND_RELEASE_POLICY.md` |
 | Spec Coverage Status | mapped via feature spec(s) in `specs/` |
 
 ## 11. Subordinate Document Boundaries
@@ -627,19 +656,19 @@ The documentation set should use explicit precedence rules so the master system 
 
 #### 11.4.1 Agent Domain
 
-The current [Stock Investment Assistant Agent — Software Requirements Specification](../langchain-agent/SOFTWARE_REQUIREMENTS_SPECIFICATION.md) should remain the primary specialized requirement document for the agent domain, but it should be repositioned conceptually as the future `docs/domains/agent/SOFTWARE_REQUIREMENTS_SPECIFICATION.md` under the domain-oriented model.
+The current [Stock Investment Assistant Agent — Software Requirements Specification](../domains/agent/SOFTWARE_REQUIREMENTS_SPECIFICATION.md) should remain the primary specialized requirement document for the agent domain, but it should be repositioned conceptually as the future `docs/domains/agent/SOFTWARE_REQUIREMENTS_SPECIFICATION.md` under the domain-oriented model.
 
 It should stop carrying implied full-system responsibility and instead function as a subordinate domain SRS under the master system SRS.
 
 #### 11.4.2 Frontend Domain
 
-The current frontend ADRs should remain authoritative decision records for frontend architectural evolution and modernization and should map into the future `docs/domains/frontend/decisions/` folder.
+The current frontend ADRs should remain authoritative decision records for frontend architectural evolution and modernization and should map into the future `docs/stacks/frontend/DECISIONS/` folder.
 
 The frontend domain should gain a `TECHNICAL_DESIGN.md` before it gains a subordinate requirements specification. A separate frontend requirements document is justified only when user-visible obligations become large and persistent enough that the master system SRS plus the frontend technical design are no longer sufficient.
 
 #### 11.4.3 Backend Domain
 
-The backend domain should own both its internal realization and its external API contracts. Under the target model, the current [OpenAPI Specification](../openapi.yaml) maps conceptually to `docs/domains/backend/api/openapi.yaml`.
+The backend domain should own both its internal realization and its external API contracts. Under the target model, the current [OpenAPI Specification](../openapi.yaml) maps conceptually to `docs/stacks/backend/api/openapi.yaml`.
 
 The backend domain technical design should explain route, service, and integration layering. It should not duplicate API contract schemas that already live in OpenAPI.
 
@@ -669,7 +698,7 @@ Generate or stabilize only the documents that the rest of the SDD workflow depen
 2. `docs/system/SYSTEM_REQUIREMENTS_SPECIFICATION.md` — The upstream requirement pool for cross-domain requirements.
 3. `docs/architecture/SYSTEM_OVERVIEW_AND_BOUNDARIES.md` — Whole-system static view and domain boundaries.
 4. `docs/architecture/RUNTIME_AND_INTEGRATION_FLOWS.md` — Whole-system runtime flows across frontend, backend, agent, data, and operations concerns.
-5. `docs/domains/backend/api/openapi.yaml` — The executable backend API contract, initially sourced from the current `docs/openapi.yaml`.
+5. `docs/stacks/backend/api/openapi.yaml` — The executable backend API contract, initially sourced from the current `docs/openapi.yaml`.
 
 **SDD integration**: Extend `spec-traceability.yaml` to support system-level requirement IDs (SR-x, SNR-x) alongside the existing domain-level IDs (FR-x, NFR-x).
 
@@ -678,8 +707,8 @@ Generate or stabilize only the documents that the rest of the SDD workflow depen
 Do not generate parallel replacements for documents the repository already maintains well. Instead:
 
 1. Reclassify the current `docs/langchain-agent/` material into the future `docs/domains/agent/` ownership model.
-2. Reclassify the current frontend ADRs into the future `docs/domains/frontend/decisions/` ownership model.
-3. Reclassify the current `docs/openapi.yaml` into the future `docs/domains/backend/api/openapi.yaml` ownership model.
+2. Reclassify the current frontend ADRs into the future `docs/stacks/frontend/DECISIONS/` ownership model.
+3. Reclassify the current `docs/openapi.yaml` into the future `docs/stacks/backend/api/openapi.yaml` ownership model.
 
 This phase is mostly classification, not content generation.
 
@@ -687,9 +716,9 @@ This phase is mostly classification, not content generation.
 
 Only after the core exists and reuse pressure is visible should the project add more long-lived documents. The likely order for this repository is:
 
-1. `docs/domains/backend/TECHNICAL_DESIGN.md` — to explain route, service, repository, and integration layering.
-2. `docs/domains/frontend/TECHNICAL_DESIGN.md` — to explain platform, modules, routing, and UI-state realization.
-3. `docs/domains/data/TECHNICAL_DESIGN.md` — to explain persistence, schema, and cache realization.
+1. `docs/stacks/backend/TECHNICAL_DESIGN.md` — to explain route, service, repository, and integration layering.
+2. `docs/stacks/frontend/TECHNICAL_DESIGN.md` — to explain platform, modules, routing, and UI-state realization.
+3. `docs/stacks/data/TECHNICAL_DESIGN.md` — to explain persistence, schema, and cache realization.
 4. `docs/operations/OPERATIONS_AND_RELEASE_POLICY.md` and `docs/testing/VERIFICATION_AND_TRACEABILITY_STRATEGY.md` — when operational and evidence expectations need stable long-lived homes.
 5. Domain-specific subordinate requirement documents only if the master SRS plus domain technical design no longer provide enough clarity on their own.
 
@@ -701,8 +730,9 @@ As features are delivered, promote only stable, repeated knowledge from `specs/`
 
 1. stable requirements into the master or subordinate SRS
 2. stable decisions into ADRs
-3. stable contracts into domain-owned executable artifacts such as `docs/domains/backend/api/openapi.yaml`
+3. stable contracts into domain-owned executable artifacts such as `docs/stacks/backend/api/openapi.yaml`
 4. stable operating procedures into runbooks
+5. stable diagrams into the target long-lived document only after they have been normalized to the notation policy for that document type
 
 This keeps `docs/` lean and keeps `specs/` as the place where most delivery complexity lives.
 
@@ -712,6 +742,7 @@ On an ongoing basis, every documentation change should answer two questions:
 
 1. Does this belong in a stable source under `docs/`, or is it really delivery detail that should remain in `specs/`?
 2. If it belongs in `docs/`, which existing document should absorb it so the structure stays small?
+3. If it includes diagrams, do those diagrams follow the notation policy for the target document type in Section 9.3?
 
 ## 13. Summary Recommendation
 
@@ -746,6 +777,8 @@ The practical recommendation is to keep `docs/` small, keep `specs/` rich, and p
 | 0.2 | 2026-04-01 | GitHub Copilot | Refined to center SDD as core methodology: added SDD lifecycle integration (Section 7), constitution and quality gate model (Section 8), reframed SRS as upstream requirement pool, lighter requirement entry template, SDD-aligned generation strategy |
 | 0.3 | 2026-04-02 | GitHub Copilot | Simplified the target documentation structure to a minimum viable long-lived set; added practical SDD operating rules, promotion criteria, and explicit pitfalls/tradeoffs for repo-scale adoption |
 | 0.4 | 2026-04-03 | GitHub Copilot | Disambiguated system-level NFR namespace (SNR-x) from agent-level (NFR-x); softened SRS immutability to allow controlled iterative refinements during delivery; corrected constitution governance wording to reflect convention-based enforcement via spec-kit tooling; scoped promote-after-verification rule to SRS and requirement baselines only, relaxing for technical design docs and ADRs which serve as coordination tools for concurrent work |
-| 0.5 | 2026-04-03 | GitHub Copilot | Added an explicit SRS versioning and change-control mechanism; defined precedence and conflict-resolution rules between the master system SRS and subordinate domain SRS documents; reduced conceptual overuse of “stack” in prose by reframing the model around domains and layers while retaining `docs/domains/` as the repository path; added a Mermaid visualization of the SRS lifecycle during delivery and documentation sync |
+| 0.5 | 2026-04-03 | GitHub Copilot | Added an explicit SRS versioning and change-control mechanism; defined precedence and conflict-resolution rules between the master system SRS and subordinate domain SRS documents; reduced conceptual overuse of “stack” in prose by reframing the model around domains and layers while retaining `docs/stacks/` as the repository path; added a Mermaid visualization of the SRS lifecycle during delivery and documentation sync |
 | 0.6 | 2026-04-03 | GitHub Copilot | Added a normative canonical glossary section to lock taxonomy usage across contributors, including explicit definitions for domain, bounded context, layer, technology stack, domain ownership terms, SRS hierarchy terms, and executable contracts |
 | 0.7 | 2026-04-03 | GitHub Copilot | Resolved remaining glossary drift by aligning the target file tree back to `docs/domains/`, correcting lifecycle wording to the 18-step SDD lifecycle consistently, and adding an explicit API Boundary / API Contract glossary entry to clarify that API is a backend domain boundary rather than a separate ownership domain |
+| 0.8 | 2026-05-27 | GitHub Copilot | Added a document-type notation policy and explicit diagram visualization quality rules covering diagram scope statements, state labeling, readable flow direction, legend discipline, accessibility of meaning without color, and when to split visuals or pair them with tables |
+| 0.9 | 2026-05-28 | GitHub Copilot | Added a discoverability pointer to the documentation-focused custom agent and aligned related-document guidance with the repository's Spec Kit HOW-TO and documentation maintenance workflow |

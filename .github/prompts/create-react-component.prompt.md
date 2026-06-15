@@ -1,9 +1,10 @@
+---
 name: create-react-component
 description: Generate a React + TypeScript component that follows this repository's frontend conventions, with requirements analysis and tests.
 argument-hint: componentName=StockChart feature="brief purpose" props="prop1:type, prop2:type" apis="/api/stock/:symbol"
-agent: agent
-model: gpt-5.1-codex
+mode: agent
 tools: ['runCommands', 'runTasks', 'edit', 'runNotebooks', 'search', 'new', 'extensions', 'usages', 'vscodeAPI', 'problems', 'changes', 'testFailure', 'openSimpleBrowser', 'fetch', 'githubRepo', 'todos', 'runTests']
+---
 
 You are a senior React + TypeScript engineer working in this repository. Generate a complete, production-quality component that adheres to our conventions.
 
