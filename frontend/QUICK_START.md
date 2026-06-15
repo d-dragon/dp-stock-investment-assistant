@@ -286,9 +286,9 @@ console.log(await modelsApi.listModels());
 ## Support
 
 ### Documentation
-- **FRONTEND_ANALYSIS.md** - Detailed analysis
-- **UI_IMPROVEMENTS.md** - All improvements explained
-- **REFINEMENT_SUMMARY.md** - Executive summary
+- **../docs/domains/frontend/FRONTEND_ANALYSIS.md** - Detailed analysis
+- **../docs/domains/frontend/UI_IMPROVEMENTS.md** - All improvements explained
+- **../docs/domains/frontend/REFINEMENT_SUMMARY.md** - Executive summary
 - **README.md** - Full documentation
 
 ### Logs
@@ -317,6 +317,6 @@ Check terminal where backend is running
 **Happy Coding!** 🚀
 
 For issues or questions, refer to the comprehensive documentation in:
-- FRONTEND_ANALYSIS.md
-- UI_IMPROVEMENTS.md  
-- REFINEMENT_SUMMARY.md
+- ../docs/domains/frontend/FRONTEND_ANALYSIS.md
+- ../docs/domains/frontend/UI_IMPROVEMENTS.md  
+- ../docs/domains/frontend/REFINEMENT_SUMMARY.md
