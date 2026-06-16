@@ -451,13 +451,5 @@ This guide is living documentation—update it when you add patterns, services, 
 
 <!-- SPECKIT START -->
 For additional context about technologies to be used, project structure,
-shell commands, and other important information, read the current spec.
-
-**Active feature**: `prompt-system-milestone2` (Milestone M2 — Route-Aware Skills)
-Spec: `specs/prompt-system-milestone2/spec.md`
-Plan: `specs/prompt-system-milestone2/plan.md`
-Backlog: PS-07, PS-08
-SRS scope: FR-1.4.7, FR-1.4.11, FR-1.4.16, NFR-5.2.8, AC-8.5, AC-8.8, AC-8.11
-Depends on: M1 complete (PromptAssetLoader, selection tuple, prompt config)
-Gate: Do not enable experiment modes until route-aware composition is stable and traceable
+shell commands, and other important information, read the current plan
 <!-- SPECKIT END -->
