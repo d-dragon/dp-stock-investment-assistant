@@ -190,6 +190,74 @@ After refreshing project files:
 
 For this repository, treat upgrades as governed maintenance work: preserve local customizations, validate command availability, and avoid assuming that `--force` is safe for customized `.specify` assets unless you have a backup or a clean Git restore path.
 
+### 2.5 Multiple Integrations in the Same Project
+
+This repository may use more than one Spec Kit AI coding-agent integration so contributors can work with GitHub Copilot in VS Code and Codex in the Codex app, Codex CLI, or Codex IDE extension. Treat this as a portability setup, not as permission to mix agents casually inside one feature workflow.
+
+The current project state is tracked in [../../.specify/integration.json](../../.specify/integration.json). That file records all installed integrations, the default integration, and per-integration invocation settings. The official Spec Kit [multiple integrations FAQ](https://github.github.io/spec-kit/reference/integrations.html#can-i-install-multiple-integrations-in-the-same-project) explains the same model: Spec Kit tracks one default integration, all installed integrations, and each integration's runtime settings.
+
+#### Confirm the Installed Integrations
+
+Before changing integration state, inspect it without modifying files:
+
+```powershell
+specify integration status
+specify integration list
+```
+
+`specify integration status` reports the default integration, installed integrations, missing managed files, modified managed files, and shared template health. The command behavior is documented in Spec Kit's [Report Integration Status](https://github.github.io/spec-kit/reference/integrations.html#report-integration-status) reference.
+
+#### Install Codex Beside GitHub Copilot
+
+If this repository needs to be recreated from a Copilot-only setup, install Codex as an additional integration from the repository root:
+
+```powershell
+specify integration install codex --script ps --force
+specify integration status
+```
+
+Use `--force` only when you intentionally want multiple agent-specific integrations in the same project. Spec Kit installs an additional integration automatically only when all involved integrations are declared multi-install safe; otherwise, `--force` is the explicit opt-in. The official [Install an Integration](https://github.github.io/spec-kit/reference/integrations.html#install-an-integration) reference documents `--force`, rollback behavior, and the rule that installing an additional integration does not change the default integration.
+
+Codex is listed by Spec Kit as a skills-based integration that installs skills into `.agents/skills` and invokes them as `$speckit-<command>` in the official [Supported AI Coding Agents](https://github.github.io/spec-kit/reference/integrations.html#supported-ai-coding-agents) table. Spec Kit also declares `codex` multi-install safe because it uses isolated `.agents/skills` files and `AGENTS.md`; see [Which integrations are multi-install safe?](https://github.github.io/spec-kit/reference/integrations.html#which-integrations-are-multi-install-safe).
+
+#### Choose the Active Default Integration
+
+After both integrations are installed, use `use` for normal default changes:
+
+```powershell
+# Make Codex the default integration
+specify integration use codex
+
+# Make GitHub Copilot the default integration
+specify integration use copilot
+
+# Confirm the active default
+specify integration status
+```
+
+Prefer `specify integration use <key>` when the target integration is already installed. It changes the default integration without uninstalling the other integration and refreshes shared templates so command references match the active default integration. See Spec Kit's [Use an Installed Integration](https://github.github.io/spec-kit/reference/integrations.html#use-an-installed-integration) reference.
+
+Use `specify integration switch <key>` only when replacing the current default integration or when you want Spec Kit to uninstall/install as a single operation. If the target is already installed, `switch` behaves like `use`; this is documented in [Switch to a Different Integration](https://github.github.io/spec-kit/reference/integrations.html#switch-to-a-different-integration).
+
+#### Invocation Style by Agent
+
+Use the command style that belongs to the agent you are working in:
+
+| Tool | Spec Kit invocation style |
+| --- | --- |
+| GitHub Copilot | `/speckit.constitution`, `/speckit.specify`, `/speckit.plan`, `/speckit.tasks`, `/speckit.implement` |
+| Codex | `$speckit-constitution`, `$speckit-specify`, `$speckit-plan`, `$speckit-tasks`, `$speckit-implement` |
+
+The core Spec Kit lifecycle commands are described in the official Spec Kit README under [Available Slash Commands](https://github.com/github/spec-kit#available-slash-commands). The naming differs because Codex uses Spec Kit skills mode while Copilot uses slash-command prompts.
+
+#### Best Practices
+
+- Keep one default integration active for a complete governed feature workflow from specification through implementation.
+- Run `specify integration status` before and after every `install`, `use`, `switch`, or `upgrade`.
+- Review `git diff` after integration changes, especially when `--force` is used.
+- Commit shared Spec Kit artifacts such as `.specify/`, `specs/`, `.specify/integration.json`, `AGENTS.md`, `.agents/skills/`, and relevant Copilot prompt files so teammates receive the same workflow.
+- Do not manually edit generated integration files unless repository governance requires it. Prefer `specify integration upgrade <key>` after upgrading the CLI; the official [Upgrade an Integration](https://github.github.io/spec-kit/reference/integrations.html#upgrade-an-integration) reference documents the supported refresh path.
+
 ## 3. Workflow and SDLC Loop
 
 This section describes the repository's full Spec-Driven Development operating model across the SDLC, not only the core Spec Kit command chain. In this project, the loop starts with requirements engineering, architecture, and technical design; uses Spec Kit to govern specification, clarification, planning, task generation, implementation, and review; and then closes through QA and testing evidence, traceability refresh, operational alignment, and maintenance synchronization.
