@@ -2,7 +2,9 @@ installed:
 - agent-context
 - arch
 - architecture-guard
+- harness
 - memory-loader
+- security-review
 settings:
   auto_execute_hooks: true
 hooks:
@@ -28,10 +30,20 @@ hooks:
     prompt: Run cross-model review to evaluate plan and tasks before implementation?
     description: Pre-implementation review gate
     condition: null
+  - extension: security-review
+    command: speckit.security-review.tasks
+    enabled: true
+    optional: true
+    priority: 10
+    prompt: Would you like to verify that security boundaries are represented in the
+      tasks?
+    description: ''
+    condition: null
   - extension: architecture-guard
     command: speckit.architecture-guard.refactor-generator
     enabled: true
     optional: true
+    priority: 10
     prompt: Would you like to generate architectural refactor tasks before implementation?
     description: ''
     condition: null
@@ -57,10 +69,19 @@ hooks:
     prompt: Run verify to validate implementation against specification?
     description: Post-implementation verification gate
     condition: null
+  - extension: security-review
+    command: speckit.security-review.branch
+    enabled: true
+    optional: true
+    priority: 10
+    prompt: Would you like to scan the new implementation for security vulnerabilities?
+    description: ''
+    condition: null
   - extension: architecture-guard
     command: speckit.architecture-guard.architecture-review
     enabled: true
     optional: true
+    priority: 10
     prompt: Would you like to run a post-implementation architecture review?
     description: ''
     condition: null
@@ -86,6 +107,14 @@ hooks:
     prompt: Execute speckit.agent-context.update?
     description: Refresh agent context after specification
     condition: null
+  - extension: harness
+    command: speckit.harness.init
+    enabled: true
+    optional: true
+    priority: 10
+    prompt: Set up a state-externalized research harness for this feature?
+    description: Initialize harness state after specification
+    condition: null
   after_plan:
   - extension: speckit-utils
     command: speckit.speckit-utils.validate
@@ -101,20 +130,38 @@ hooks:
     prompt: Commit plan changes?
     description: Auto-commit after implementation planning
     condition: null
-  - extension: architecture-guard
-    command: speckit.architecture-guard.violation-detection
-    enabled: true
-    optional: true
-    prompt: Would you like to scan the technical plan for architectural drift and
-      Constitution violations?
-    description: ''
-    condition: null
   - extension: agent-context
     command: speckit.agent-context.update
     enabled: true
     optional: true
     prompt: Execute speckit.agent-context.update?
     description: Refresh agent context after planning
+    condition: null
+  - extension: harness
+    command: speckit.harness.verify
+    enabled: true
+    optional: true
+    priority: 10
+    prompt: Verify plan claims against primary sources and the harness evidence base?
+    description: Run claim verification after planning
+    condition: null
+  - extension: security-review
+    command: speckit.security-review.plan
+    enabled: true
+    optional: true
+    priority: 10
+    prompt: Would you like to perform a security review on the proposed technical
+      plan?
+    description: ''
+    condition: null
+  - extension: architecture-guard
+    command: speckit.architecture-guard.violation-detection
+    enabled: true
+    optional: true
+    priority: 10
+    prompt: Would you like to scan the technical plan for architectural drift and
+      Constitution violations?
+    description: ''
     condition: null
   before_constitution:
   - extension: git
