@@ -2,8 +2,8 @@
 description: Perform a framework-agnostic architecture review validating implementation
   against spec.md, plan.md, tasks.md, and the governance and architecture constitutions.
 scripts:
-  sh: .specify/scripts/bash/detect-changed-files.sh
-  ps: .specify/scripts/powershell/detect-changed-files.ps1
+  sh: ../scripts/bash/detect-changed-files.sh
+  ps: ../scripts/powershell/detect-changed-files.ps1
 ---
 
 
@@ -12,6 +12,37 @@ scripts:
 # Architecture Review Command
 
 You are running `architecture-guard`, a framework-agnostic architecture review extension designed for high-integrity governance.
+
+## Flash-Mem-First Architecture Context Retrieval
+
+Try Flash-Mem first: query summary and metadata context before performing architecture analysis.
+
+1. Search Flash-Mem for relevant architecture context:
+   - architecture decisions
+   - ADRs
+   - design constraints
+   - coding conventions
+   - prior guard findings
+   - approved exceptions
+   - architectural patterns
+2. Prefer summary-first retrieval:
+   - use summaries
+   - use metadata
+   - use confidence
+   - use tags
+   - use related files
+3. Load full memory content only when summaries are insufficient.
+4. Reuse approved architectural decisions whenever possible.
+5. Flag conflicts between proposed changes and existing architectural decisions.
+6. After analysis, store durable architecture knowledge back into Flash-Mem:
+   - new architecture decisions
+   - approved exceptions
+   - recurring violations
+   - architectural constraints
+   - project conventions
+   - validated design patterns
+
+If Flash-Mem is unavailable or the retrieved summaries are insufficient, continue with the repository artifacts and constitution files available in the workspace.
 
 ## Operating Constraints
 
@@ -39,7 +70,7 @@ When you see this marker in a step:
 - LLM override: Explicit `--inline` or `--delegate` flags override auto-detection
 
 **Sub-agents available when provided by the host environment or project:**
-- `/speckit.memory-md.plan-with-memory` — Memory synthesis and filtering
+- Memory synthesis sub-agent; the markdown-only fallback alias is only relevant when `flash-mem` is unavailable
 - Custom project commands such as `/analyze-sonar-violations` for SonarLint scanning
 
 This pattern enables flexibility: fast execution for typical PRs, powerful execution for large refactors.
@@ -73,7 +104,7 @@ This pattern enables flexibility: fast execution for typical PRs, powerful execu
 1. **Normalize Arguments**: Parse "$ARGUMENTS" to identify the `mode` (`architecture` or `performance`) and `focus` aspects (`general`, `db`, `api`, or `async`).
 2. **Identify Changed Files**:
    - If the user provided a file list or explicit instructions, follow them.
-   - Otherwise, you **MUST** execute the `.specify/scripts/powershell/detect-changed-files.ps1` with `--json` to detect changed files since the merge-base or in the working directory.
+   - Otherwise, you **MUST** execute the `../scripts/powershell/detect-changed-files.ps1` with `--json` to detect changed files since the merge-base or in the working directory.
    - Use the `changed_files` list as the primary review set.
 
 ## Input & Context Loading
@@ -87,24 +118,11 @@ Review any available artifacts from these common locations. **IMPORTANT**: You M
 2. **Architecture Constitution**:
     - `.specify/memory/architecture_constitution.md`
 
-3. **Memory Hub Optimizer (Recommended)**:
+3. **Flash-Mem Context Retrieval**:
 
-    #### Optimizer-Aware Flow
-    When `.specify/extensions/memory-md/config.yml` has `optimizer.enabled: true`:
+   Try Flash-Mem first. If the context is incomplete, read the repository constitution files with file-reading tools rather than workspace search alone.
 
-    1. **Prepare Context**: Execute `/speckit.memory-md.prepare-context --feature specs/<feature> --query "architecture constraints boundaries dependencies coupling abstractions"`.
-    2. **Read Synthesis**: Read `specs/<feature>/memory-synthesis.md` to identify the "Why" behind the current design.
-
-    #### Markdown-Only Flow
-    When the optimizer is disabled or unavailable, you **MUST** read these files explicitly using your file-reading tools (absolute or relative paths). Do not rely solely on workspace search or semantic indexers, as these files are often in `.gitignore`:
-
-    - `docs/memory/INDEX.md` (Read this first to identify relevant source sections)
-    - `docs/memory/` for durable repository memory (Read only the sections identified in the index)
-    - `.specify/memory/` for project-wide architecture rules and standards
-    - `specs/<feature>/memory.md` for active feature memory
-    - `specs/<feature>/memory-synthesis.md` for the concise working summary
-    - `specs/<feature>/security-constraints.md` for security boundaries
-    - `.github/copilot-instructions.md` for repo-scoped Copilot guidance
+   If Flash-Mem is unavailable or the context is insufficient, continue with the repository artifacts and constitution files available in the workspace.
 
 4. **Implementation Context**:
     - `spec.md`, `plan.md`, `tasks.md`, `data-model.md`
@@ -141,14 +159,15 @@ Detect violations such as:
 
 ## Review Procedure
 
-1. **Identify Scope**: Run `.specify/scripts/powershell/detect-changed-files.ps1` or use user-provided files.
+1. **Identify Scope**: Run `../scripts/powershell/detect-changed-files.ps1` or use user-provided files.
 2. **Model Context**: Load artifacts and build the Semantic Models for the identified scope.
 3. **Verify Evidence**: Check if task-referenced files exist and contain expected implementation logic.
 4. **Analyze Alignment**: Compare `spec.md` intent vs. `plan.md` architecture vs. implementation behavior.
 5. **Scan Principles**: Apply Review Principles across the implemented boundaries.
-6. **Security & Governance Cross-Check**: 
-   - If `security-constraints.md` or `security_constitution.md` is breached, log it as a critical violation.
-   - Cross-reference architecture decisions with security trust boundaries.
+6. **Security & Governance Cross-Check**:
+  - If `security-constraints.md` or `security_constitution.md` is breached, log it as a critical violation.
+  - If a finding is primarily security-related and Security Review is available, route it to `/speckit.security-review.branch` instead of duplicating it here.
+  - Cross-reference architecture decisions with security trust boundaries.
 7. **Performance Scan (if mode=performance)**: Skip violations; focus on optimizations.
 7b. **Code Quality Scan (SonarLint)**: If `mode=architecture`, optionally scan for coupling/complexity violations.
 8. **Generate Refactors**: Produce structured tasks for each confirmed violation.
@@ -303,8 +322,8 @@ Findings that correlate with architecture concerns:
 1. **Critical Fixes**: Address Constitution and Security violations first.
 2. **Architecture Alignment**: Resolve boundary erosion and contract mismatches.
 3. **Code Quality**: Address SonarLint findings that map to architectural concerns (if any).
-4. **Durable Memory Preservation (Mandatory Check)**: If new architectural patterns, decisions, or repeatable lessons were identified, you **MUST** execute `/speckit.memory-md.capture` after providing the report. Use the formal capture flow to propose entries and wait for user approval.
-5. **Next Step**: [e.g. Run /speckit.architecture-guard.architecture-apply]
+4. **Durable Memory Preservation (Mandatory Check)**: If new architectural patterns, decisions, or repeatable lessons were identified, you **MUST automatically execute** the durable-memory capture flow immediately after providing the report. Do not just recommend it; let the formal capture flow propose entries and request user approval.
+5. **Next Step**: [e.g. Run `/speckit.security-review.branch` for security-first findings, or `/speckit.architecture-guard.architecture-apply` for architecture fixes]
 6. **Remediation**: [Concrete remediation direction for the top issues, or "None needed"]
 
 ## Framework Preset Guidance

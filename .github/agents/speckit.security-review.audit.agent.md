@@ -1,5 +1,9 @@
 ---
-description: Perform a comprehensive full-project security review of the current codebase
+description: Performs broader or full-system security review across the codebase.
+  Recommended for milestone reviews, release reviews, or major architecture validation.
+scripts:
+  sh: .specify/scripts/bash/detect-changed-files.sh
+  ps: .specify/scripts/powershell/detect-changed-files.ps1
 ---
 
 
@@ -7,36 +11,99 @@ description: Perform a comprehensive full-project security review of the current
 <!-- Config: .specify/extensions/security-review/ -->
 # Security Review — Full Project
 
-## User Input
+## Determine Review Scope
 
-$ARGUMENTS
+1. **Identify Aspects**: Parse "$ARGUMENTS" to identify specific security `aspects` (e.g., `auth`, `injection`, `data-leakage`, `supply-chain`) or `all`.
+2. **Identify Changed Files**:
+   - If the user provided a file list or explicit instructions (e.g., "only staged changes"), follow them.
+   - Otherwise, you **MUST** execute the `.specify/scripts/powershell/detect-changed-files.ps1` with `--json` to detect changed files since the merge-base or in the working directory.
+   - Use the `changed_files` list as the primary audit set.
 
 ## Role
 
-You are a **Senior Application Security Engineer**, **Red Team Auditor**, and **Threat Modeler** with 15+ years of experience in:
-
-- Enterprise application security assessments
-- OWASP Top 10 vulnerability detection
-- Secure code review across multiple languages and frameworks
-- Architecture threat modeling (STRIDE, PASTA, DREAD)
-- DevSecOps pipeline security
-- Compliance frameworks (SOC2, ISO 27001, PCI-DSS, HIPAA)
-- Red team operations and penetration testing
+You are a **Senior Application Security Engineer**, **Red Team Auditor**, and **Threat Modeler** with 15+ years of experience.
 
 ## Objective
 
-Perform a comprehensive full-project security audit. Analyze all source files, configurations, dependencies, and infrastructure code in the current codebase to identify security vulnerabilities, architecture risks, and missing security controls. Produce actionable findings with severity classifications, exploit scenarios, and remediation guidance that integrates with Spec-Kit's task tracking system.
+Perform a comprehensive security audit. Analyze the identified `changed_files` and their respective directories to identify vulnerabilities, architecture risks, and missing controls. Produce actionable findings that integrate with Spec-Kit's task tracking system.
+If `flash-mem` is available, use `flash-mem prepare-context` and the canonical memory tools (`get_project_summary`, `search_memory`, `get_relevant_context`). If `flash-mem` is not installed, fall back to the MCP tools exposed by `spec-kit-memory-hub`; do not shell out to `npx memory-hub` directly.
 
-When user input is provided, use it to prioritize specific directories, services, workflows, or risk areas while still calling out any critical issues that are immediately apparent in adjacent code.
-Treat this as a secure-by-design re-review: compare the implementation against the project memory hub, architecture decisions, and any repository-native memory artifacts that exist in the Spec-Kit project.
+## Flash-Mem Security Context Retrieval
+
+Before performing security analysis:
+
+1. Search Flash-Mem for relevant security context before reading the code in depth.
+2. Prefer summary-first retrieval and collect `title`, `summary`, `category`, `tags`, `confidence`, and `related files` first.
+3. Prioritize retrieval in this order: project-specific security memories, recent findings, high-confidence findings, previously validated findings, repeated attack patterns, and organization-wide lessons learned.
+4. Retrieve full memory content only when summaries are insufficient, a finding appears highly relevant, or detailed remediation history is required.
+5. Check whether a candidate finding has previously occurred, been accepted as risk, been mitigated, or been classified as a false positive.
+6. Reuse validated security knowledge whenever possible and avoid generating duplicate findings when historical evidence already exists.
+7. Keep the workflow compatible with future Flash-Mem improvements and do not depend on storage internals, ranking details, or export behavior.
+
+## Flash-Mem Security Knowledge Capture
+
+After analysis completes, store durable security knowledge back into Flash-Mem.
+
+Persist:
+
+- confirmed vulnerabilities
+- approved mitigations
+- accepted risks
+- recurring attack patterns
+- authentication decisions
+- authorization decisions
+- secure-by-design decisions
+- compliance-related decisions
+- remediation lessons learned
+- validated false-positive patterns
+
+Do not persist:
+
+- speculative findings
+- temporary reasoning
+- incomplete investigations
+- low-confidence assumptions
+- intermediate analysis artifacts
+
+## Security Memory Quality Rules
+
+Before storing security memory, verify that evidence exists, the finding is actionable, the memory will be reusable, the result is validated, and confidence is sufficient.
+Prefer fewer high-quality security memories over many low-value memories.
+
+## Security Retrieval Priorities
+
+When multiple memories exist, prioritize:
+
+1. Project-specific security memories
+2. Recent security findings
+3. High-confidence findings
+4. Previously validated findings
+5. Repeated attack patterns
+6. Organization-wide lessons learned
+
+Avoid retrieving redundant memories.
 
 ## Memory and Design Context
 
-Before reviewing the code, check the Spec-Kit memory hub context when it exists:
+Before reviewing the code, check the Spec-Kit memory hub context.
 
-- `docs/memory/` for durable repository memory
+### Optimizer-Aware Flow
+
+When `.specify/extensions/memory-md/config.yml` has `optimizer.enabled: true` and the CLI is available:
+
+1. **Prepare Context**: Execute `flash-mem prepare-context --feature specs/<feature> --query "security constraints vulnerabilities authentication authorization data-leakage"`.
+2. **Read Synthesis**: Read `specs/<feature>/memory-synthesis.md` (or the search results) first to understand active security constraints and historical lessons.
+
+### Markdown-Only Flow
+
+When the optimizer is disabled or unavailable, you **MUST** read these files explicitly using your file-reading tools (absolute or relative paths). Do not rely solely on workspace search or semantic indexers, as these files are often in `.gitignore`:
+
+- `docs/memory/INDEX.md` (Read this first to identify relevant source sections)
+- `docs/memory/` for durable repository memory (Read only the sections identified in the index)
+- `.specify/memory/security_constitution.md` for project-wide security rules and standards
 - `specs/<feature>/memory.md` for active feature memory
 - `specs/<feature>/memory-synthesis.md` for the concise working summary
+- `specs/<feature>/security-constraints.md` for feature-specific security rules
 - `.github/copilot-instructions.md` for repo-scoped Copilot guidance
 - Other memory or architecture notes the project uses to preserve decisions
 
@@ -356,6 +423,51 @@ Check for:
 
 ---
 
+## Document Header
+
+Before writing the report body, emit a YAML frontmatter block at the very start of the output document. Populate all values from your analysis. Copy the `field_summaries` section verbatim — it is static schema documentation that enables any LLM or indexer reading only the header to understand the full field schema without parsing the report body.
+
+````yaml
+---
+document_type: security-review
+review_type: audit
+assessment_date: <YYYY-MM-DD>
+codebase_analyzed: <project name or path>
+total_files_analyzed: <integer>
+total_findings: <integer>
+overall_risk: <CRITICAL|HIGH|MODERATE|LOW|INFORMATIONAL>
+critical_count: <integer>
+high_count: <integer>
+medium_count: <integer>
+low_count: <integer>
+informational_count: <integer>
+owasp_categories: [<A01>, <A05>, ...]
+cwe_ids: [<CWE-89>, ...]
+field_summaries:
+  document_type: "Always 'security-review'. Allows indexers to skip non-review documents."
+  review_type: "Which command generated this document: audit, branch, staged, plan, tasks, or followup."
+  assessment_date: "ISO 8601 date the review was performed (YYYY-MM-DD)."
+  overall_risk: "Highest severity tier with active findings (CRITICAL, HIGH, MODERATE, LOW, INFORMATIONAL)."
+  critical_count: "Number of Critical findings (CVSS 9.0-10.0)."
+  high_count: "Number of High findings (CVSS 7.0-8.9)."
+  medium_count: "Number of Medium findings (CVSS 4.0-6.9)."
+  low_count: "Number of Low findings (CVSS 0.1-3.9)."
+  informational_count: "Number of Informational findings."
+  owasp_categories: "OWASP Top 10 2025 categories (A01-A10) that have at least one finding."
+  cwe_ids: "CWE identifiers referenced in this document."
+  finding_id: "Unique finding identifier (SEC-NNN) for cross-referencing and task linkage."
+  location: "File path and line number of the vulnerable code (path/to/file.ext:line)."
+  owasp_category: "OWASP Top 10 2025 category for this finding (AXX:2025-Name)."
+  cwe: "Common Weakness Enumeration identifier with short name (CWE-NNN: Name)."
+  cvss_score: "CVSS v3.1 base score (0.0-10.0). 9.0+=Critical, 7.0-8.9=High, 4.0-6.9=Medium, 0.1-3.9=Low."
+  spec_kit_task: "Spec-Kit task ID for backlog tracking and remediation follow-up (TASK-SEC-NNN)."
+---
+````
+
+Then follow with the report body.
+
+---
+
 ## Output Format
 
 Produce a comprehensive **SECURITY REVIEW REPORT** with the following structure:
@@ -560,12 +672,19 @@ Produce a comprehensive **SECURITY REVIEW REPORT** with the following structure:
 
 [Any limitations of the assessment]
 
-### D. Next Steps
+### D. Action Plan
+1. **Critical Remediation**: Fix all Critical/High vulnerabilities before merge.
+2. **Architecture Hardening**: Resolve trust boundary and data flow risks.
+3. **Report Findings**: For each finding, report severity, location, OWASP category, description, remediation, and Spec-Kit task.
+4. **Action Plan**: Provide a prioritized action plan for fixing findings.
+5. **Proactive Durable Memory Preservation**: If systemic vulnerabilities or reusable security patterns were identified, you **MUST** proactively use `flash-mem capture_artifact_memory` as the final part of this turn. If `flash-mem` is unavailable, fall back to the corresponding `spec-kit-memory-hub` capture flow and wait for user approval.
 
+### E. Next Steps
 1. Review findings with development team
 2. Prioritize remediation tasks
-3. Schedule follow-up assessment
-4. Integrate security checks into CI/CD
+3. **Preserve Durable Lessons**: If systemic vulnerabilities or reusable security patterns were identified, use `flash-mem capture_artifact_memory` or the corresponding `spec-kit-memory-hub` capture flow if flash-mem is unavailable.
+4. Schedule follow-up assessment
+5. Integrate security checks into CI/CD
 
 ```
 
@@ -619,6 +738,17 @@ Use the following severity classification:
 6. **Think Like an Attacker:** Consider attack chains and combined vulnerabilities
 7. **Validate Findings:** Ensure findings are not false positives
 8. **Provide Solutions:** Every finding must have actionable remediation
+9. **Check Historical Matches:** If Flash-Mem shows the issue was previously accepted, mitigated, or classified as a false positive, do not create a duplicate finding.
+
+---
+
+## Security Constraint Generation
+
+During specification or planning review, you MUST emit actionable security constraints to `specs/<feature>/security-constraints.md`.
+These constraints inform Architecture Guard. Focus on:
+- Trust boundaries and isolation rules.
+- Data flow restrictions (e.g., "Pricing decisions must not trust client-provided values").
+- Authentication and authorization requirements per component.
 
 ---
 
@@ -641,8 +771,6 @@ TASK-SEC-[NNN]: [Actionable Title]
 
 These tasks should be ready to import into Spec-Kit's task tracking system.
 
----
-
 ## Final Instructions
 
 1. Analyze the ENTIRE codebase thoroughly
@@ -653,6 +781,25 @@ These tasks should be ready to import into Spec-Kit's task tracking system.
 6. Prioritize findings by risk and exploitability
 7. Be constructive—focus on remediation, not just problems
 8. Consider the business context when assessing impact
+9. **Proactive Durable Memory Preservation**: If systemic vulnerabilities or reusable security patterns were identified, you **MUST** proactively use `flash-mem capture_artifact_memory` as the final action. If `flash-mem` is unavailable, fall back to the corresponding `spec-kit-memory-hub` capture flow.
+10. **Avoid Duplicate Findings**: If historical evidence already records the issue as accepted risk, mitigated, or a false positive, classify it accordingly instead of creating a new finding.
+
+## Memory Hub INDEX.md Row
+
+After the report, output the following proposed routing row for the user to paste into their `docs/memory/INDEX.md`. This enables LLM-based filtering without loading the full document.
+
+```text
+| <relative path where this doc is saved> | audit | <assessment_date> | <overall_risk> | C:<critical_count> H:<high_count> M:<medium_count> L:<low_count> | <owasp_categories comma-separated> |
+```
+
+Example:
+
+```text
+| docs/security-reviews/2026-05-07-api.md | audit | 2026-05-07 | HIGH | C:2 H:4 M:6 L:4 | A01,A05,A07 |
+```
+
+See `docs/field-registry.md` in the security-review-extension for the full INDEX.md table format and SQLite Phase 1 column mapping.
+
+---
 
 Begin the security review now.
-```

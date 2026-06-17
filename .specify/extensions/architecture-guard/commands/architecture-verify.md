@@ -1,13 +1,44 @@
 ---
 description: Perform an architecture-aware verification gate validating implementation against spec.md, plan.md, tasks.md, and the Architecture Constitution.
 scripts:
-  sh: ../../scripts/bash/check-prerequisites.sh --json --paths-only
-  ps: ../../scripts/powershell/check-prerequisites.ps1 -Json -PathsOnly
+  sh: ../scripts/bash/check-prerequisites.sh --json --paths-only
+  ps: ../scripts/powershell/check-prerequisites.ps1 -Json -PathsOnly
 ---
 
 # Architecture Verification
 
 Validate that the implementation fulfills all tasks in `tasks.md` while adhering to the defined architecture boundaries and the **Architecture Constitution**. This command acts as a post-implementation gate.
+
+## Flash-Mem-First Architecture Context Retrieval
+
+When Flash-Mem is available, query it first for summary and metadata context before performing architecture analysis:
+
+1. Search Flash-Mem for relevant architecture context:
+   - architecture decisions
+   - ADRs
+   - design constraints
+   - coding conventions
+   - prior guard findings
+   - approved exceptions
+   - architectural patterns
+2. Prefer summary-first retrieval:
+   - use summaries
+   - use metadata
+   - use confidence
+   - use tags
+   - use related files
+3. Load full memory content only when summaries are insufficient.
+4. Reuse approved architectural decisions whenever possible.
+5. Flag conflicts between proposed changes and existing architectural decisions.
+6. After analysis, store durable architecture knowledge back into Flash-Mem:
+   - new architecture decisions
+   - approved exceptions
+   - recurring violations
+   - architectural constraints
+   - project conventions
+   - validated design patterns
+
+If Flash-Mem is unavailable or the retrieved summaries are insufficient, continue with the repository artifacts and constitution files available in the workspace.
 
 ## User Input
 
@@ -55,6 +86,10 @@ Build internal representations:
 - **Rule Check**: Does the implementation violate any "MUST" rules in the `architecture_constitution.md`?
 - **Pattern Match**: Does the code follow the mandated architectural patterns (e.g., DTOs, Repositories, Events)?
 
+#### D. Security Review on Implementation
+- If `spec-kit-security-review` is available, run `/speckit.security-review.branch` against the verified implementation.
+- If security findings are architecture-relevant, classify them as `Security-Architecture Conflict`.
+
 ### 4. Severity Assignment
 
 - **CRITICAL**: Task marked done but implementation is missing; Constitution "MUST" violation; Boundary bypass (e.g., direct DB access from UI).
@@ -84,6 +119,6 @@ For each task in `tasks.md`:
 ### Action Plan
 1. **Critical Gaps**: Address missing implementation for tasks [IDs] immediately.
 2. **Architecture Alignment**: Resolve boundary violations in [Files] using suggested refactor tasks.
-3. **Completion**: If all CRITICAL/HIGH are resolved, run `/speckit.memory-md.capture` to preserve lessons.
+3. **Completion**: If all CRITICAL/HIGH are resolved, you **MUST automatically execute** the durable-memory capture flow to preserve lessons. Do not just recommend it; let the formal capture flow propose entries and request user approval.
 
 **Next Step**: [e.g. "Run `/speckit.architecture-guard.architecture-apply` to fix V2"]
