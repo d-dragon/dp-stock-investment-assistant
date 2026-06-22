@@ -236,7 +236,7 @@ This proposal consolidates the tool-domain knowledge developed during the curren
 6. Generic web fetch is necessary for public disclosures, reports, and news, but it must be deny-by-default and normalized before reaching the LLM.
 7. Remote/MCP-style tools should be future-facing only until descriptor integrity, approval, credentials, observability, and operational controls are mature.
 
-The internal documentation delta reviewed for this synthesis changed architecture, roadmap, requirements, and decision-record direction around the same themes: Vietnam-first providers, thin gateway policy, generic web trust, descriptor integrity, and evidence normalization. This document intentionally captures the durable knowledge without depending on temporary edits, draft ADR numbers, or changed document versions.
+The internal documentation delta reviewed for this synthesis changed architecture, roadmap, requirements, and decision-record direction around the same themes: Vietnam-focused providers, thin gateway policy, generic web trust, descriptor integrity, and evidence normalization. This document intentionally captures the durable knowledge without depending on temporary edits, draft ADR numbers, or changed document versions.
 
 ---
 
