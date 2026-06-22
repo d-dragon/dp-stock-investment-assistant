@@ -11,7 +11,7 @@ This specification builds upon and references several architectural and design d
 
 | Document | Purpose | Reference |
 |----------|---------|-----------|
-| [AGENT_ARCHITECTURE_DECISION_RECORDS.md](./decisions/AGENT_ARCHITECTURE_DECISION_RECORDS.md) | Architectural decisions for LTM/STM, RAG, fine-tuning strategy, and memory separation | Design foundations for FR-3 (Memory System) |
+| [AGENT_ARCHITECTURE_DECISION_RECORDS.md](./DECISIONS/AGENT_ARCHITECTURE_DECISION_RECORDS.md) | Architectural decisions for LTM/STM, RAG, fine-tuning strategy, and memory separation | Design foundations for FR-3 (Memory System) |
 | [ARCHITECTURE_DESIGN.md](./ARCHITECTURE_DESIGN.md) | Comprehensive agent architecture overview, component deep dive, data flow, and Phase 2 improvements | Implementation guidance for FR-1, FR-2, FR-4 |
 | [LANGCHAIN_AGENT_HOWTO.md](./LANGCHAIN_AGENT_HOWTO.md) | Complete guide to ReAct pattern, semantic routing, tool system, and operations | Operational reference for agent deployment and usage |
 | [PHASE_2_AGENT_ENHANCEMENT_ROADMAP.md](./PHASE_2_AGENT_ENHANCEMENT_ROADMAP.md) | Future enhancement roadmap including conversation-scoped STM evolution, future LTM personalization, prompt-system rollout, and observability | Planning and sequencing for P2 requirements beyond current release; does not redefine SRS thresholds |
@@ -335,7 +335,7 @@ Priority levels:
 ### FR-3: Conversation Memory
 
 > **Design Reference**: For implementation details, see [AGENT_MEMORY_TECHNICAL_DESIGN.md](./AGENT_MEMORY_TECHNICAL_DESIGN.md)  
-> **Architecture Context**: [ADR-001 — Layered LLM Architecture](./decisions/AGENT_ARCHITECTURE_DECISION_RECORDS.md)
+> **Architecture Context**: [ADR-001 — Layered LLM Architecture](./DECISIONS/AGENT_ARCHITECTURE_DECISION_RECORDS.md)
 
 FR-3 distinguishes four separate requirement surfaces: service-owned session context, conversation-scoped STM, future LTM personalization, and evidence or computation surfaces such as RAG and tools. Requirements in this section SHALL NOT be interpreted as permitting those boundaries to collapse into one persistence layer.
 
