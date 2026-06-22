@@ -344,7 +344,7 @@ Testing and QA are woven into the loop rather than deferred to the end. Steps `1
 
 | SDLC Phase | Steps | Main Inputs | Main Outputs and Sync Targets |
 |------------|-------|-------------|-------------------------------|
-| Requirements and Architecture | `0-1` | [SOFTWARE_REQUIREMENTS_SPECIFICATION.md](../domains/agent/SOFTWARE_REQUIREMENTS_SPECIFICATION.md)<br/>[SYSTEM_REQUIREMENTS_SPECIFICATION.md](../system/SYSTEM_REQUIREMENTS_SPECIFICATION.md)<br/>[REQUIREMENTS_METHOD_AND_GOVERNANCE.md](../system/REQUIREMENTS_METHOD_AND_GOVERNANCE.md)<br/>[SYSTEM_OVERVIEW_AND_BOUNDARIES.md](../architecture/SYSTEM_OVERVIEW_AND_BOUNDARIES.md)<br/>domain technical design docs under [domains/](../domains/) | Scoped requirement set, affected architecture boundaries, initial acceptance and testability expectations, and expected delivery or operational impact |
+| Requirements and Architecture | `0-1` | [SOFTWARE_REQUIREMENTS_SPECIFICATION.md](../domains/agent/SOFTWARE_REQUIREMENTS_SPECIFICATION.md)<br/>[SYSTEM_REQUIREMENTS_SPECIFICATION.md](../system/SYSTEM_REQUIREMENTS_SPECIFICATION.md)<br/>[REQUIREMENTS_METHOD_AND_GOVERNANCE.md](../system/REQUIREMENTS_METHOD_AND_GOVERNANCE.md)<br/>[SYSTEM_OVERVIEW_AND_BOUNDARIES.md](../architecture/SYSTEM_OVERVIEW_AND_BOUNDARIES.md)<br/>domain technical design docs under [domains/](../domains/)<br/>research/proposal documents and benchmark review reports as non-authoritative inputs | Scoped requirement set, affected architecture boundaries, long-lived document impact map, planned propagation targets, requirements/design increments, initial acceptance and testability expectations, and expected delivery or operational impact |
 | Spec Authoring and Planning | `2-5` | requirements baseline, architecture references, [spec-traceability.yaml](../../specs/spec-traceability.yaml) | `specs/feature/spec.md`<br/>`specs/feature/plan.md`<br/>updated feature-to-SRS mapping, draft QA intent, and expected application or IaC change scope |
 | Readiness and Review | `6-11` | governed spec and plan artifacts, planned test intent, review criteria | `specs/feature/tasks.md`<br/>`specs/feature/analysis.md`<br/>review findings, readiness verdict, QA scope, and expected test coverage |
 | Delivery and Verification | `12-14` | tasks, review findings, [VERIFICATION_AND_TRACEABILITY_STRATEGY.md](../testing/VERIFICATION_AND_TRACEABILITY_STRATEGY.md)<br/>[HOWTO_PYTEST_RUNTIME_API_INTEGRATION.md](../testing/backend-api-service/HOWTO_PYTEST_RUNTIME_API_INTEGRATION.md) | implemented application changes in `src/` and `frontend/`<br/>IaC artifacts in `IaC/Dockerfile.api`, `IaC/Dockerfile.agent`, `IaC/helm/dp-stock/`, `IaC/infra/terraform/`, and `IaC/ci-cd/`<br/>QA and testing results in `tests/` and `specs/feature/review.md` |
@@ -364,6 +364,52 @@ The 18-step lifecycle below is the detailed execution model inside the SDLC loop
    - **Cross-Reference Prompt Hint**:
      > *Prompt Hint*: "Refer to [SYSTEM_REQUIREMENTS_SPECIFICATION.md](../system/SYSTEM_REQUIREMENTS_SPECIFICATION.md) to locate the exact requirement IDs (e.g., `SR-1.2`) relevant to this change set. Ensure the prompt reads from the upstream baseline, using: 'Based on requirements defined in [SYSTEM_REQUIREMENTS_SPECIFICATION.md](../system/SYSTEM_REQUIREMENTS_SPECIFICATION.md)...'"
 
+0a. **Research and Proposal Intake**: Collect research reports, proposal documents, benchmark reviews, side-chat findings, and external-source studies that may justify a requirements or design increment.
+   - **Mapped Supporting Documents**:
+     - Study or proposal documents under [docs/domains/](../domains/) or [docs/study-hub/](../study-hub/) when they summarize reusable domain knowledge
+     - Benchmark or review reports when they compare a proposal against external guidance, internal constraints, or current implementation facts
+     - [project-documentation-and-specification-methodology.md](../study-hub/project-documentation-and-specification-methodology.md) for document authority, standards stance, and promotion rules
+   - **Authority Boundary**:
+     - Research and proposal documents are inputs, not authority. They may recommend changes, but the stable baseline is established only after the content is translated into the owning SRS, architecture, technical design, ADR, roadmap, executable contract, or runbook.
+   - **Cross-Reference Prompt Hint**:
+     > *Prompt Hint*: "Treat the research report as non-authoritative input. Extract only stable, reusable decisions or requirements and map each item to the smallest long-lived document that should own it."
+
+0b. **Long-Lived Document Impact Mapping**: Identify which authoritative or long-lived documents must absorb the proposed increment before delivery work starts.
+   - **Document Responsibility Map**:
+     - **SRS**: WHAT-level requirements, constraints, acceptance criteria, interfaces, traceability, and stable quality obligations
+     - **Architecture**: boundaries, system context, major components, integration relationships, runtime views, and deployment-impacting structure
+     - **Technical Design**: realization details, internal components, data flow, schemas, persistence, module responsibilities, and implementation constraints
+     - **Roadmap**: sequencing, runnable increments, backlog mirrors, dependencies, gates, and delivery order
+     - **ADRs**: irreversible or architecture-significant decisions, decision drivers, alternatives, consequences, and ownership
+     - **Benchmark Reports**: external alignment, gap evidence, quality comparison, and follow-up recommendations
+     - **Executable Contracts**: schema and payload truth, including OpenAPI or JSON Schema where applicable
+   - **Impact Map Template**:
+
+     | Proposal Point | Target Document | Target Section or Artifact | Authority Type | Action |
+     |----------------|-----------------|----------------------------|----------------|--------|
+     | Stable requirement or constraint | SRS | FR/NFR/CON/AC/IR section | Requirement authority | Promote as SHALL/MUST language |
+     | Boundary, component, or runtime relationship | Architecture design | Context, container, component, runtime, or data view | Architecture authority | Promote as viewpoint-level design |
+     | Module, data flow, schema, persistence, or integration detail | Technical design | Realization, data, interface, or runtime section | Realization authority | Promote as HOW-level design |
+     | Irreversible or architecture-significant choice | ADR | New or existing ADR | Decision authority | Record decision, alternatives, consequences |
+     | Sequencing, dependency, gate, or runnable increment | Roadmap | Phase, milestone, backlog mirror | Planning authority | Promote as traceable delivery sequence |
+     | Payload or wire format | Executable contract | OpenAPI, JSON Schema, or owned contract artifact | Schema authority | Promote to machine-readable contract |
+     | Research rationale or external comparison | Proposal or benchmark report | Research log, benchmark matrix, reference index | Evidence input | Keep as supporting evidence |
+   - **Cross-Reference Prompt Hint**:
+     > *Prompt Hint*: "Create an impact map before editing: for every proposed point, identify whether it belongs in SRS, architecture, technical design, roadmap, ADR, benchmark review, or executable contract. Do not duplicate the same authority in multiple places."
+
+0c. **Requirements Increment Planning**: Convert stable proposal content into SRS-ready increments without copying research prose into requirements.
+   - **Expected Outputs**:
+     - New or revised requirement IDs
+     - Constraint and NFR updates
+     - Acceptance criteria additions
+     - Interface requirement obligations
+     - Traceability rows or reverse-trace updates where stable
+   - **Quality Rules**:
+     - Requirements must state observable behavior and measurable obligations.
+     - Requirements must not encode detailed implementation module placement, transient rollout history, or decision rationale that belongs in ADRs or technical design.
+   - **Cross-Reference Prompt Hint**:
+     > *Prompt Hint*: "Rewrite proposal claims as SRS language: SHALL/MUST behavior, acceptance checks, constraints, and traceability. Keep rationale in the proposal or ADR, not in the requirement row."
+
 1. **Architecture and Operational Design**: Define architectural, technical, and operational specifications that satisfy the requirements and align with repository principles.
    - **Mapped Long-Lived Documents**:
      - [SYSTEM_OVERVIEW_AND_BOUNDARIES.md](../architecture/SYSTEM_OVERVIEW_AND_BOUNDARIES.md) (System context and layers)
@@ -372,6 +418,86 @@ The 18-step lifecycle below is the detailed execution model inside the SDLC loop
      - [OPERATIONS_AND_RELEASE_POLICY.md](../operations/OPERATIONS_AND_RELEASE_POLICY.md) (Operational limits and policies)
    - **Cross-Reference Prompt Hint**:
      > *Prompt Hint*: "Constrain design changes against system boundaries: 'Check [SYSTEM_OVERVIEW_AND_BOUNDARIES.md](../architecture/SYSTEM_OVERVIEW_AND_BOUNDARIES.md) and related ADRs in [DECISIONS/](../architecture/DECISIONS/) to ensure the proposed architectural changes do not violate existing container boundaries or deployment rules.'"
+
+1a. **Architecture and Technical Design Increment Planning**: Translate approved requirements increments into architecture and technical-design increments with explicit current-state, target-state, and migration boundaries.
+   - **Expected Outputs**:
+     - Architecture boundary updates and diagrams where the system context or major component relationships change
+     - Technical design updates for realization details, data design, schemas, module responsibilities, runtime flows, and persistence behavior
+     - ADR candidates for decisions that change long-term structure, ownership, or operational posture
+   - **Architecture and ADR Promotion Rules**:
+     - Promote proposal content into architecture only when it changes durable boundaries, major building blocks, system context, runtime relationships, data-store relationships, provider or integration boundaries, or operationally relevant constraints.
+     - Promote proposal content into ADRs only when the project is choosing a durable direction among meaningful alternatives, accepting explicit consequences, or constraining future implementation choices.
+     - Do not copy broad research sections into architecture or ADRs. Extract stable claims, rewrite them for the target document's authority, and cite the proposal or benchmark report only as supporting evidence.
+     - ADRs should link to the relevant architecture section, SRS requirement IDs, roadmap milestone, or benchmark report when that trace helps future readers understand why the decision exists.
+     - Architecture updates should label current state, target state, and transition state when a proposal includes both implemented and planned behavior.
+   - **Quality Rules**:
+     - Architecture documents describe boundaries and relationships, not detailed payload schemas.
+     - Technical design documents describe realization, not requirement authority.
+     - Planned, mixed-state, or future-state diagrams must be labeled explicitly.
+   - **Cross-Reference Prompt Hint**:
+     > *Prompt Hint*: "Convert proposal architecture into target-document form: architecture gets boundaries and viewpoints; technical design gets components, data flow, persistence, and implementation constraints; ADRs get durable decisions."
+
+   - **Reusable Propagation Prompt Pattern**:
+
+     ```text
+     Review the research/proposal inputs listed below as non-authoritative sources.
+     Inspect the current SRS, architecture design, technical design, roadmap, ADR index, executable contracts, and traceability files before editing.
+
+     Produce an impact map first:
+     - proposal point
+     - target document
+     - target section or artifact
+     - authority type
+     - action: promote, defer, ADR, SRS, technical design, roadmap, contract, or do not promote
+
+     Then update only the agreed target documents:
+     - architecture gets boundaries, viewpoints, major components, runtime/data flows, and current-vs-target labels
+     - ADRs get decision, status, context, options, consequences, and traceability
+     - technical design gets realization details, modules, data flow, schemas, and persistence
+     - SRS gets WHAT-level requirements, constraints, acceptance criteria, interfaces, and traceability
+     - roadmap gets runnable increments, gates, dependencies, and backlog mirrors
+
+     Do not copy proposal prose wholesale. Translate each stable claim into the target document's responsibility.
+     After edits, run a consistency review for stale terminology, duplicate authority, broken links, missing traceability, and current-vs-target drift.
+     ```
+
+1b. **Roadmap and Backlog Mirror Planning**: Convert approved increments into runnable roadmap slices and backlog mirrors that remain traceable to SRS IDs and acceptance criteria.
+   - **Expected Outputs**:
+     - Runnable roadmap increments or phases
+     - Backlog mirror IDs linked to SRS requirement IDs, acceptance criteria, dependencies, outcomes, and detailed roadmap sections
+     - Promotion gates for items that must not start until contracts, provider policy, authorization, testability, or evidence rules exist
+   - **Cross-Reference Prompt Hint**:
+     > *Prompt Hint*: "When a proposal creates a multi-step capability, add a roadmap backlog mirror with concrete backlog IDs, SRS mappings, dependencies, outcomes, and links to detailed sections before implementation tasks are generated."
+
+1c. **Foundation Consistency Review**: Review the proposed long-lived document increments before implementation planning to catch drift, missing requirements, stale terminology, and authority-boundary mistakes.
+   - **Review Checks**:
+     - Every roadmap increment maps to SRS requirements or explicitly identified future requirements.
+     - SRS acceptance criteria cover the behavior promised by the roadmap.
+     - Architecture and technical design do not contradict current system boundaries or planned migration posture.
+     - Research and benchmark documents remain cited as inputs, not as overriding authority.
+     - Backlog mirrors and traceability rows use stable requirement IDs and section links.
+   - **Accuracy and Consistency Controls**:
+     - Check that each promoted claim has one owning authority. For example, requirements live in SRS, decisions live in ADRs, realization details live in technical design, and schema shape lives in executable contracts.
+     - Check that terminology is consistent across proposal, roadmap, SRS, architecture, technical design, and ADRs. Record intentional renames in a current-vs-target terminology table when needed.
+     - Check current-state, target-state, and future-state wording. Do not document planned behavior as implemented behavior.
+     - Check that every benchmark or research source is used as evidence, not as a replacement for repository authority.
+     - Check that architecture and ADR updates link back to governing SRS IDs or roadmap increments when those links materially improve traceability.
+     - Check that new ADRs do not duplicate architecture explanation; architecture should hold sustained design description, while ADRs hold decision rationale and consequences.
+     - Run `git diff --check` on changed documents and inspect `git diff --name-only` to confirm scope.
+   - **Practical Example - Tool-System Research Propagation**:
+     - [TOOLS_RESEARCH_AND_PROPOSAL.md](../domains/agent/TOOLS_RESEARCH_AND_PROPOSAL.md) acted as research/design input for the tool-system direction.
+     - [TOOLS_ARCHITECTURE_BENCHMARK_REVIEW.md](../domains/agent/TOOLS_ARCHITECTURE_BENCHMARK_REVIEW.md) captured external benchmark evidence.
+     - [PHASE_2_AGENT_ENHANCEMENT_ROADMAP.md](../domains/agent/PHASE_2_AGENT_ENHANCEMENT_ROADMAP.md) absorbed runnable increments and backlog mirror entries.
+     - [SOFTWARE_REQUIREMENTS_SPECIFICATION.md](../domains/agent/SOFTWARE_REQUIREMENTS_SPECIFICATION.md) absorbed stable WHAT-level requirements, acceptance criteria, interfaces, and traceability.
+     - A staged consistency review checked for stale provider assumptions, runtime-preservation gaps, fragile anchors, and traceability drift before implementation planning.
+   - **Practical Example - Prompt-System Research Propagation**:
+     - [PROMPT_SYSTEM_RESEARCH_PROPOSAL.md](../domains/agent/PROMPT_SYSTEM_RESEARCH_PROPOSAL.md) should remain the research/design input for prompt compiler, prompt asset, prompt versioning, and evaluation strategy.
+     - Architecture updates should promote only stable prompt-system boundaries, such as prompt asset ownership, compiler path, route-aware prompt context, and observability/evaluation boundaries.
+     - ADRs should capture durable decisions such as adopting a governed prompt asset/compiler model or delaying multi-agent prompt-family evolution until measurable limits justify it.
+     - Technical design should own implementation realization such as loader behavior, prompt metadata, experiment selection, trace tags, and persistence or configuration mechanics.
+     - SRS and roadmap updates should cover stable behavior, acceptance criteria, rollout gates, and traceability rather than restating research rationale.
+   - **Cross-Reference Prompt Hint**:
+     > *Prompt Hint*: "Run a consistency review across the staged long-lived document changes: list missing, incorrect, stale, or misaligned points before creating implementation specs or tasks."
 
 #### 3.3.2 Spec Authoring and Planning
 
