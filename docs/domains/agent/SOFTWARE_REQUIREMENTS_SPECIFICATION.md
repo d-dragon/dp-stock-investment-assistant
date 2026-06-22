@@ -1,8 +1,8 @@
 # Stock Investment Assistant Agent — Software Requirements Specification
 
-> **Document Version**: 2.7  
+> **Document Version**: 2.8
 > **Created**: January 22, 2026  
-> **Last Updated**: May 22, 2026  
+> **Last Updated**: June 18, 2026
 > **Status**: Active  
 > **Scope**: LangChain-based AI Agent for Stock Investment Assistant  
 ## Related Documents
@@ -20,6 +20,7 @@ This specification builds upon and references several architectural and design d
 | [SRS_SPEC_TRACEABILITY.md](./SRS_SPEC_TRACEABILITY.md) | Bidirectional trace between SRS items and spec-kit feature artifacts | Companion delivery trace for implementation coverage and sync status |
 | [PROMPT_SYSTEM_RESEARCH_PROPOSAL.md](./PROMPT_SYSTEM_RESEARCH_PROPOSAL.md) | Prompt system research, design patterns, release gates, and implementation roadmap | Research foundation and target-design authority for FR-1.4.5–1.4.16, FR-1.5, NFR-5.2.5–5.2.11, NFR-6.2.3 |
 | [PROMPT_SYSTEM_BENCHMARK_REVIEW.md](./PROMPT_SYSTEM_BENCHMARK_REVIEW.md) | External benchmark review of prompt-governance design against vendor and framework guidance | External validation reference for FR-1.4.10–1.4.16, FR-1.5.6, AC-8.5–8.11 |
+| [TOOLS_RESEARCH_AND_PROPOSAL.md](./TOOLS_RESEARCH_AND_PROPOSAL.md) | Tool-system research and proposal covering Tool Gateway, Vietnam-market providers, provider adapters, normalized tool context, TradingView visualization, and generic web evidence | Research/design input for FR-2 and AC-9; does not override SRS requirements |
 
 
 
@@ -101,6 +102,18 @@ This specification follows **spec-driven development** principles, enabling AI-a
 | **LTM** | A planned future cross-conversation personalization layer for stable user preferences and symbol-tracking context only |
 | **RAG** | A separate sourced-evidence retrieval layer; not an authority for conversation state or stable personalization |
 | **Tool** | A capability the agent can invoke to retrieve data or perform actions |
+| **AgentTool** | The target repo-owned abstraction for agent-callable tool execution, preserving cache-aware behavior while supporting descriptors, policy metadata, normalized outputs, and degraded-state handling |
+| **ToolGateway** | A thin in-process policy and validation boundary that controls tool exposure, execution admission, result validation, degraded states, and trace metadata without owning provider parsing or LLM reasoning |
+| **ToolSurfaceBuilder** | The component that constructs the route-filtered model-visible tool list before agent invocation |
+| **ProviderAdapter** | A lower-level source connector used by tools to fetch, validate, or enrich data from an internal store, official source, licensed provider, public web source, wrapper, visualization provider, or fallback provider |
+| **ProviderSelectionPolicy** | Deterministic policy that chooses provider order, fallback behavior, licensing posture, freshness expectations, timeout budgets, and degraded-state mapping below the model-visible tool layer |
+| **ToolContextPack** | Request-scoped normalized tool context passed into prompt assembly; may contain evidence, system records, mutation receipts, visualization provenance, generated artifacts, warnings, and degraded states |
+| **ToolExecutionEnvelope** | Runtime wrapper for a tool call result, including selected route, tool, adapter, descriptor versions, admission outcomes, cache/freshness status, warnings, degraded-state reason, and trace metadata |
+| **NormalizedOutputKind** | Classification for normalized tool outputs, including `EvidenceFact`, `EvidenceSnippet`, `EvidenceDocument`, `SystemRecord`, `MutationReceipt`, `VisualizationProvenance`, `GeneratedArtifact`, and `DegradedState` |
+| **VisualizationProvenance** | A non-authoritative chart, widget, heatmap, screener, or deep-link payload that supports visual inspection but is not canonical market evidence unless explicitly approved by policy |
+| **DegradedState** | A machine-detectable result state for blocked, stale, missing-field, provider-down, license-unclear, parser-limited, or validation-failed tool outcomes |
+| **MutationReceipt** | An auditable record emitted for approved state-changing tool actions, including target record, action, approval state, actor/route, timestamp, policy metadata, and result |
+| **GeneratedArtifact** | A report section, table, export, chart snapshot, or formatted output generated from normalized inputs and optionally retained with source lineage |
 | **Streaming** | Incremental delivery of response content as it's generated |
 | **Summarization** | Condensing a conversation thread's prior exchanges to manage context size while preserving recent continuity |
 | **TTL** | Time To Live (duration before data expires) |
@@ -197,7 +210,7 @@ Priority levels:
 | FR-1.5.2 | **Uncertainty Disclosure** | Agent SHALL explicitly disclose when it lacks sufficient data or confidence to answer a financial question | Insufficient or stale data for queried topic | Response includes an explicit uncertainty qualifier (e.g., "I don't have enough data to…", "This may be outdated…") | P0 |
 | FR-1.5.3 | **Anti-Hype and Anti-Manipulation** | Agent SHALL NOT generate language that could constitute market hype, price manipulation, or guaranteed-return claims | Any financial query | Response avoids superlatives, guarantees, and urgency language; verified by keyword/phrase blocklist | P0 |
 | FR-1.5.4 | **Fact-Assumption-Inference Separation** | Agent SHALL clearly label which parts of a response are factual data, which are assumptions, and which are inferences or opinions | Response mixes data and analysis | Response uses explicit markers or structure to distinguish data vs. assumption vs. inference | P1 |
-| FR-1.5.5 | **Source Attribution** | Agent SHALL attribute financial data to the originating tool or data source | Tools returned data used in response | Response includes attribution (e.g., "According to Yahoo Finance…", "Based on the latest SEC filing…") | P1 |
+| FR-1.5.5 | **Source Attribution** | Agent SHALL attribute financial data to the originating tool or data source | Tools returned data used in response | Response includes attribution to the cited provider, source URL/reference, filing, disclosure, or approved data source | P1 |
 | FR-1.5.6 | **Boundary-Aware Guardrail Enforcement** | Agent SHALL apply guardrail checks at input, tool, output, and approval boundaries rather than relying only on prompt wording | Request exercises a guarded input path, tool call, output check, or future approval-gated action | Unsafe input is blocked or narrowed, tool usage is validated, unsafe output is intercepted, and high-impact actions are paused for human review when such actions are available | P1 |
 
 ---
@@ -231,11 +244,91 @@ Priority levels:
 
 | ID | Title | Description | Precondition | Expected Output | Priority |
 |----|-------|-------------|--------------|-----------------|----------|
-| FR-2.3.1 | **Stock Price Lookup** | User can request current price for any stock symbol | Valid stock symbol | Current price returned with timestamp (data ≤15 minutes old) | P0 |
-| FR-2.3.2 | **Symbol Search** | User can search for stock symbols by company name | Search query provided | Matching symbols returned with company names (≥1 result for valid queries) | P0 |
-| FR-2.3.3 | **Company Information** | User can retrieve company details for a symbol | Valid stock symbol | Company profile returned: name, sector, market cap, description | P0 |
-| FR-2.3.4 | **Technical Chart Generation** | User can request technical analysis charts | Valid symbol and timeframe | Chart URL or image returned showing price with indicators | P1 |
-| FR-2.3.5 | **Investment Report Generation** | User can generate formatted investment reports | Analysis data available | PDF/HTML report generated with executive summary and data | P2 |
+| FR-2.3.1 | **Approved Stock Price Lookup** | User can request current or latest available price for approved stock symbols through approved market-data tools; Vietnam-market behavior follows FR-2.6 and FR-2.7 | Approved symbol and admitted provider path | Price returned with timestamp, provider/source attribution, exchange, currency, freshness status, and degraded-state reason when target freshness is unavailable | P0 |
+| FR-2.3.2 | **Symbol Search** | User can search the approved symbol universe by symbol, company name, alias, exchange, or supported market metadata | Search query provided | Matching symbols returned with canonical identity, company names, exchange, currency where applicable, and source/store attribution | P0 |
+| FR-2.3.3 | **Company Information** | User can retrieve company profile or symbol metadata from approved in-system or provider-backed sources | Approved symbol | Company profile or metadata returned with source attribution and missing-field warnings where applicable | P0 |
+| FR-2.3.4 | **Technical Chart Generation** | User can request technical analysis charts through approved visualization or evidence-backed chart tools | Approved symbol and timeframe | Chart, widget, or deep-link payload returned with visualization provenance; numeric market facts remain sourced from approved evidence or computation tools | P1 |
+| FR-2.3.5 | **Investment Report Generation** | User can generate formatted investment reports from normalized tool context and generated-artifact metadata | `ToolContextPack` or approved analysis inputs available | PDF/HTML or structured report generated with executive summary, source attribution, warnings, and degraded-state disclosures | P2 |
+
+#### FR-2.4 Tool Gateway and Tool Exposure
+
+| ID | Title | Description | Precondition | Expected Output | Priority |
+|----|-------|-------------|--------------|-----------------|----------|
+| FR-2.4.1 | **AgentTool Baseline** | The tool system SHALL expose agent-callable capabilities through the target `AgentTool` abstraction while preserving existing cache-aware tool behavior | Existing tool registered | Tool executes through the registry path with descriptor metadata and backward-compatible user-facing behavior | P1 |
+| FR-2.4.2 | **Tool Capability Descriptors** | Each model-visible tool SHALL declare a model-safe capability descriptor containing name, purpose, input schema, route coverage, output kind, and descriptor version | Tool registered | Tool descriptor is available for route-filtered exposure without exposing credentials, provider fallback, license policy, or parser limits | P1 |
+| FR-2.4.3 | **Route-Filtered Tool Surface** | The system SHALL construct the model-visible tool list before agent invocation based on route, locale, enabled state, feature flags, user/session context, and admitted risk class | Query classified | Agent receives only route-eligible tool capabilities | P1 |
+| FR-2.4.4 | **Execution-Time Admission** | Tool execution SHALL validate selected tool, route-tool match, arguments, risk class, license posture, freshness expectation, provider state, and timeout budget before running the tool | Model selects tool call | Disallowed calls are blocked or returned as `DegradedState`; allowed calls execute through the registry path | P1 |
+| FR-2.4.5 | **Descriptor Integrity** | Tool and adapter descriptor changes SHALL be reviewable and traceable by version, hash, or equivalent integrity marker | Descriptor used in a tool run | Trace metadata identifies the descriptor version or integrity marker used for exposure and execution | P1 |
+| FR-2.4.6 | **Current Runtime Preservation** | Tool gateway behavior SHALL preserve the current LangChain/LangGraph ReAct execution path and SHALL NOT require a second agent runtime | Gateway enabled | Agent still receives a compact tool surface and selected calls execute through registry-backed tools | P0 |
+
+#### FR-2.5 Tool Output Normalization and ToolContextPack
+
+| ID | Title | Description | Precondition | Expected Output | Priority |
+|----|-------|-------------|--------------|-----------------|----------|
+| FR-2.5.1 | **Tool Execution Envelope** | Every governed tool call SHALL return or be wrapped in a `ToolExecutionEnvelope` with route, selected tool, selected adapter where applicable, admission outcome, cache/freshness status, warnings, degraded-state reason, and trace metadata | Tool call completes | Runtime can inspect execution outcome without parsing raw provider payloads | P1 |
+| FR-2.5.2 | **Normalized Output Classification** | Tool results SHALL be classified before prompt assembly as `EvidenceFact`, `EvidenceSnippet`, `EvidenceDocument`, `SystemRecord`, `MutationReceipt`, `VisualizationProvenance`, `GeneratedArtifact`, or `DegradedState` | Tool result produced | Prompt assembly receives typed normalized outputs with authority-specific handling | P1 |
+| FR-2.5.3 | **ToolContextPack Assembly** | The system SHALL pass request-scoped normalized tool outputs to prompt assembly through `ToolContextPack` rather than raw provider, web, or tool payloads | One or more tools invoked | Prompt receives data-only normalized context with citations, source metadata, freshness, warnings, and degraded states | P0 |
+| FR-2.5.4 | **No Raw External Instructions** | Raw HTML, raw PDF bytes, scripts, hidden page text, untrusted page instructions, and unvalidated provider payloads SHALL NOT be injected into LLM context | External or web data fetched | Only normalized snippets, facts, documents, warnings, and citations can reach prompt assembly | P0 |
+| FR-2.5.5 | **Degraded-State Reporting** | Stale, missing, parser-limited, provider-down, blocked, license-unclear, or validation-failed results SHALL produce a machine-detectable `DegradedState` instead of silent fallback | Tool cannot provide fully valid data | User-visible response can disclose the limitation and avoid unsupported claims | P0 |
+
+#### FR-2.6 Vietnam-Market Tool Coverage
+
+| ID | Title | Description | Precondition | Expected Output | Priority |
+|----|-------|-------------|--------------|-----------------|----------|
+| FR-2.6.1 | **Vietnam Symbol Normalization** | The tool system SHALL normalize Vietnam symbols and indices including `FPT`, `HOSE:FPT`, `HNX:SHS`, `UPCOM:BSR`, VNINDEX, VN30, HNXINDEX, and UPINDEX | User provides Vietnam-market symbol or index prompt | Canonical identity includes symbol, exchange, and currency where applicable | P1 |
+| FR-2.6.2 | **Vietnam Quote and History** | The tool system SHALL support Vietnam-market quote and historical price retrieval through approved market-data tools separate from `StockSymbolTool` | Approved provider path available | Output includes price/OHLCV fields, exchange, currency `VND`, provider/source, timestamp, freshness, and warnings | P1 |
+| FR-2.6.3 | **Vietnam Fundamentals** | The tool system SHALL support Vietnam-market fundamentals and financial statement evidence where approved sources are available | User asks for fundamentals or statements | Output includes period, source, provider, source URL/reference, freshness, missing-field warnings, and license posture | P1 |
+| FR-2.6.4 | **Vietnam Market Breadth and Flow** | The tool system SHOULD support market breadth, index movement, sector performance, liquidity, foreign flow, and proprietary trading evidence where approved sources are available | User asks for market overview, breadth, or flow | Output includes time window, exchange/market, provider/source, freshness, and degraded-state warnings where applicable | P2 |
+| FR-2.6.5 | **Vietnam Disclosures and Corporate Actions** | The tool system SHOULD support disclosures, official notices, dividends, rights, splits, listing changes, and shareholder documents through official, licensed, or allowlisted sources | User asks for disclosure or corporate action evidence | Output includes event type, source URL/reference, published/effective timestamp where available, provider class, and parser warnings | P2 |
+| FR-2.6.6 | **Vietnamese and Mixed-Language Queries** | The agent SHALL route Vietnamese and mixed Vietnamese/English market prompts to the intended tool family | User asks in Vietnamese, English, or mixed language | Queries for price, chart, fundamentals, disclosures, breadth, and flow expose the correct route-filtered tool surface | P1 |
+
+#### FR-2.7 Provider Selection and Source Attribution
+
+| ID | Title | Description | Precondition | Expected Output | Priority |
+|----|-------|-------------|--------------|-----------------|----------|
+| FR-2.7.1 | **Provider Classes** | Provider adapters SHALL be classified as in-system, official, licensed commercial, public web, wrapper/prototype, visualization, or international fallback | Provider adapter configured | Provider class is available to gateway policy, source attribution, and trace metadata | P1 |
+| FR-2.7.2 | **Provider Selection Policy** | Provider order, fallback eligibility, license posture, freshness expectations, timeout budgets, and degraded-state mapping SHALL be decided below the model-visible tool layer | Provider-backed tool executes | LLM sees the capability, while provider choice remains deterministic application behavior | P1 |
+| FR-2.7.3 | **Vietnam Provider Priority** | Vietnam-market data SHALL prefer Vietnam-native, official, or licensed sources where available; Yahoo and Alpha Vantage SHALL be international fallback or cross-market comparison sources rather than primary Vietnam-market sources | Vietnam-market query routed | Provider selection reflects Vietnam-first posture and returns degraded state when approved local coverage is unavailable | P1 |
+| FR-2.7.4 | **Market Fact Attribution** | Every market fact SHALL include provider/source, source URL or provider reference, retrieved timestamp, published/effective timestamp where available, exchange, currency, freshness, and license posture | Tool returns market fact | Response and trace metadata can identify the origin and freshness of each fact | P0 |
+| FR-2.7.5 | **Cache Freshness Metadata** | Cached market-data results SHALL include provider/source, source timestamp where available, retrieved timestamp, freshness category, TTL/expiry, warnings, and degraded-state reason where applicable | Cacheable market data is stored or read | Cache hit does not hide stale, blocked, or license-unclear data | P1 |
+
+#### FR-2.8 TradingView Visualization
+
+| ID | Title | Description | Precondition | Expected Output | Priority |
+|----|-------|-------------|--------------|-----------------|----------|
+| FR-2.8.1 | **TradingView Visualization Provenance** | TradingView outputs SHALL be classified as `VisualizationProvenance` unless a future policy explicitly admits a data category as evidence | TradingView output generated | Chart/widget/deep-link payload includes symbol, interval, widget type, validation status, generated timestamp, and provenance classification | P1 |
+| FR-2.8.2 | **TradingView Chart and Widget Payloads** | The tool system SHOULD generate TradingView advanced chart links, widget payloads, symbol overview, ticker tape, heatmap/screener payloads where supported, and deep links | User asks for chart or visualization | Valid visualization payload or degraded-state reason is returned | P2 |
+| FR-2.8.3 | **TradingView Symbol Validation** | TradingView payload generation SHOULD validate whether the requested symbol/exchange can render before returning the payload | User requests TradingView chart/widget | Payload contains validation status or a degraded-state reason for unsupported symbols | P2 |
+| FR-2.8.4 | **Non-Evidence Boundary** | Numeric facts in final answers SHALL come from approved evidence or computation tools, not TradingView visualization payloads by default | Answer includes numeric market fact and TradingView payload | Market fact source differs from visualization provenance unless future policy explicitly admits TradingView data | P0 |
+
+#### FR-2.9 Generic Web Evidence
+
+| ID | Title | Description | Precondition | Expected Output | Priority |
+|----|-------|-------------|--------------|-----------------|----------|
+| FR-2.9.1 | **Deny-by-Default Web Fetch** | Generic web fetching SHALL be disabled for unapproved domains and SHALL operate only as `read_only_evidence` when explicitly allowed | Generic web fetch requested | Unapproved source returns `DegradedState`; approved source returns normalized evidence only | P1 |
+| FR-2.9.2 | **Generic Web Fetch Policy** | Generic web fetching SHALL enforce allowlist, rate limits, render mode, extraction mode, parser limits, maximum content size, freshness policy, and ToS/licensing posture | Approved web source configured | Fetch behavior follows policy and emits warnings/degraded state for policy gaps | P1 |
+| FR-2.9.3 | **Web Evidence Normalization** | HTML text, tables, PDFs, news pages, disclosures, and public data pages SHALL be normalized into `EvidenceSnippet` or `EvidenceDocument` with citations and parser metadata | Allowed web fetch succeeds | LLM context receives normalized evidence, not raw web content | P1 |
+| FR-2.9.4 | **Prompt-Injection Quarantine** | Instructions embedded in fetched pages, hidden text, scripts, comments, tables, or documents SHALL be treated only as untrusted content and SHALL NOT alter tool behavior or prompt policy | Fetched content contains instruction-shaped text | Agent behavior remains governed by system policy and tool admission controls | P0 |
+
+#### FR-2.10 Reporting and Generated Artifacts
+
+| ID | Title | Description | Precondition | Expected Output | Priority |
+|----|-------|-------------|--------------|-----------------|----------|
+| FR-2.10.1 | **Report Source Discipline** | `ReportingTool` SHALL compose reports from `ToolContextPack` inputs, `VisualizationProvenance`, and `GeneratedArtifact` metadata rather than directly fetching or scraping providers | Report requested | Report generation uses normalized inputs and preserves source lineage | P1 |
+| FR-2.10.2 | **Report Source Attribution** | Generated reports SHALL surface provider/source, freshness, warnings, and degraded-state information for source-dependent sections | Report includes market facts or evidence | Report reader can distinguish sourced facts, generated analysis, missing data, and stale data | P1 |
+| FR-2.10.3 | **Generated Artifact Metadata** | Persisted generated reports, exports, extracted documents, and chart snapshots SHALL retain artifact metadata with URI/reference, artifact type, generated-by, timestamp, retention class, checksum/hash where available, and source lineage | Artifact retained | Artifact can be audited without storing unsourced market facts as memory | P1 |
+| FR-2.10.4 | **Report Finance Safety** | Reports SHALL block or conservatively rewrite unsourced recommendations, guaranteed-return language, hype language, and unsupported certainty | Report content generated | Report output satisfies finance-domain guardrails and cites source limitations | P0 |
+
+#### FR-2.11 Tool Data Integrity and Mutation Receipts
+
+| ID | Title | Description | Precondition | Expected Output | Priority |
+|----|-------|-------------|--------------|-----------------|----------|
+| FR-2.11.1 | **StockSymbolTool Internal Store Boundary** | `StockSymbolTool` SHALL target in-system symbol lookup, normalization, symbol metadata, coverage, aliases, identifiers, tags, and controlled symbol-record manipulation; live quote/history/fundamental retrieval SHALL belong to market-data tools | Symbol-related request processed | Symbol identity comes from the internal symbol store; live market facts route through market-data tools | P1 |
+| FR-2.11.2 | **No Yahoo/DataManager Ownership for StockSymbolTool** | Yahoo/YahooFinance/DataManager-style live market-data access SHALL NOT be the target adapter path for the evolved `StockSymbolTool` | `StockSymbolTool` target design or implementation updated | Yahoo and Alpha Vantage remain fallback providers only for external market-data tools where approved | P1 |
+| FR-2.11.3 | **Symbol Identity Integrity** | Durable market facts and symbol records SHALL use symbol + exchange + currency rather than ticker alone | Market fact or symbol record persisted | Ambiguous ticker-only identity is rejected or normalized before retention | P0 |
+| FR-2.11.4 | **Request-Scoped ToolContextPack Retention** | `ToolContextPack` SHALL remain request-scoped and SHALL NOT be persisted wholesale as conversation memory or durable market truth by default | Tool context assembled | Only approved derivatives such as reports, artifacts, mutation receipts, audit metadata, trace metadata, or domain records may be retained | P0 |
+| FR-2.11.5 | **Symbol-Store Mutation Classification** | Symbol-store write actions SHALL be classified as `workflow_mutation` with an `internal_state_mutation` subtype and SHALL require route admission, authorization/confirmation policy, and audit metadata before execution | Write-like symbol action requested | Unauthorized or unconfirmed mutation is blocked or degraded; approved mutation emits `MutationReceipt` | P0 |
+| FR-2.11.6 | **Mutation Receipt Emission** | Approved in-system mutations SHALL emit `MutationReceipt` with mutation ID, target record, action, before/after summary, actor/route, approval status, audit metadata, timestamp, and result | Approved mutation executes | Mutation can be audited without relying on conversational memory | P1 |
 
 ---
 
@@ -577,6 +670,7 @@ Future LTM requirements in this section complement session context and STM. They
 | NFR-2.2.3 | The agent SHALL continue operating when cache is unavailable |
 | NFR-2.2.4 | The agent SHALL continue operating when checkpointer is unavailable (stateless mode) |
 | NFR-2.2.5 | Failed tool calls SHALL NOT crash the agent execution |
+| NFR-2.2.6 | Provider outages, stale data, blocked licenses, parser limits, and missing fields SHALL produce explicit degraded-state behavior rather than silent success |
 
 #### NFR-2.3 Data Integrity
 **Priority**: P0
@@ -586,6 +680,8 @@ Future LTM requirements in this section complement session context and STM. They
 | NFR-2.3.1 | Conversation checkpoints SHALL be atomically persisted |
 | NFR-2.3.2 | Conversation metadata SHALL be eventually consistent within 5 seconds |
 | NFR-2.3.3 | Token counts SHALL be accurate within 5% of actual usage |
+| NFR-2.3.4 | Retained market facts, reports, artifacts, and mutation receipts SHALL preserve source lineage back to provider/source metadata or carry an explicit no-source degraded-state reason |
+| NFR-2.3.5 | Cached market-data entries SHALL preserve source timestamp where available, retrieved timestamp, freshness category, provider/source, and degraded-state warnings where applicable |
 
 #### NFR-2.4 Data Migration Reliability
 **Priority**: P1
@@ -664,6 +760,7 @@ Future LTM requirements in this section complement session context and STM. They
 | NFR-4.3.2 | Maximum query length SHALL be enforced (configurable, default 10,000 chars) |
 | NFR-4.3.3 | Tool inputs SHALL be validated against expected schemas |
 | NFR-4.3.4 | Injection attempts SHALL be detected and rejected |
+| NFR-4.3.5 | Generic web evidence SHALL quarantine prompt-injection content from fetched pages, tables, PDFs, scripts, comments, and hidden text so it cannot change tool behavior, prompt policy, or response guardrails |
 
 ---
 
@@ -696,6 +793,10 @@ Future LTM requirements in this section complement session context and STM. They
 | NFR-5.2.9 | Evaluation and live-observation runs used for prompt promotion or rollback decisions SHALL contain complete prompt-governance metadata: `prompt_version`, `prompt_variant`, `prompt_selection_mode`, `agent_role`, `model_provider`, `model_name`, and, when applicable, `prompt_experiment_id`, `routing_decision`, and `conversation_id` |
 | NFR-5.2.10 | Locale-governed prompt runs SHALL include `prompt_locale` and `parity_group` metadata on all evaluation or live-observation runs used for locale promotion or rollback decisions |
 | NFR-5.2.11 | Guarded tool runs SHALL include `tool_risk_class` and, when applicable, approval-state metadata on traces used for prompt-governed tool review |
+| NFR-5.2.12 | Tool gateway traces SHALL include route, exposed tools, selected tool, selected adapter where applicable, descriptor version/hash, admission outcome, cache status, freshness, latency, warning, and degraded-state reason |
+| NFR-5.2.13 | Provider-backed tool traces SHALL include provider class, license mode, source URL/reference where available, retrieved timestamp, and source/published/effective timestamp where available |
+| NFR-5.2.14 | Generic web fetch traces SHALL include allowlist decision, render/extraction mode, parser limits applied, prompt-injection quarantine outcome, and source citation coverage |
+| NFR-5.2.15 | Mutation traces SHALL include mutation ID, target record, route, actor, approval status, descriptor version/hash, and mutation result |
 
 #### NFR-5.3 Metrics
 **Priority**: P1
@@ -708,6 +809,8 @@ Future LTM requirements in this section complement session context and STM. They
 | NFR-5.3.4 | System SHALL track cache hit/miss ratio |
 | NFR-5.3.5 | System SHALL track tool invocation frequency |
 | NFR-5.3.6 | System SHALL track error rate by type |
+| NFR-5.3.7 | System SHOULD track degraded-state frequency by tool, provider, route, and reason |
+| NFR-5.3.8 | System SHOULD track source-attribution coverage for market-data answers and generated reports |
 
 ---
 
@@ -733,6 +836,8 @@ Future LTM requirements in this section complement session context and STM. They
 | NFR-6.2.2 | New routes SHALL be addable without modifying router core |
 | NFR-6.2.3 | System prompts SHALL be loaded from versioned file assets and SHALL be configurable without code deployment; prompt changes SHALL take effect via configuration reload or service restart without a new code release |
 | NFR-6.2.4 | Model providers SHALL be pluggable via factory pattern |
+| NFR-6.2.5 | Provider adapters SHALL be addable behind existing model-visible tools without exposing provider-specific tools directly to the model |
+| NFR-6.2.6 | Tool capability descriptors, tool policy descriptors, provider adapter descriptors, and provider selection policies SHALL be reviewable configuration or code artifacts with traceable versions or integrity markers |
 
 #### NFR-6.3 Configuration
 **Priority**: P0
@@ -755,6 +860,11 @@ Future LTM requirements in this section complement session context and STM. They
 | CON-3 | A persistent conversation state store SHALL be available for stateful conversations and conversation-thread recovery | Required for FR-3 persistence behavior |
 | CON-4 | A caching backend SHALL be available for tool result caching | Required to meet FR-2.1 performance/cost goals |
 | CON-5 | A tracing/observability backend SHOULD be available | Enables NFR-5 observability targets |
+| CON-6 | Production use of non-official, public-web, wrapper/prototype, or commercial market-data providers SHALL require licensing, terms-of-use, credential-scope, and redistribution review before enablement | Prevents provider integration from creating legal, compliance, or source-authority risk |
+| CON-7 | TradingView SHALL be treated as visualization provenance, not canonical financial evidence, unless a future approved policy explicitly admits a specific data category | Prevents chart/widget payloads from being mistaken for audited market facts |
+| CON-8 | Generic web fetching SHALL be deny-by-default and SHALL only produce normalized evidence from allowlisted sources | Reduces prompt-injection, stale-data, and unsupported-source risk |
+| CON-9 | Market facts in answers, retained reports, artifacts, snapshots, or mutation audit records SHALL be source-attributed with freshness and license posture | Preserves auditability and finance-domain evidence discipline |
+| CON-10 | `ToolContextPack` SHALL remain request-scoped and SHALL NOT be persisted wholesale as memory or market truth by default | Preserves the architecture boundary between tools, memory, RAG evidence, and durable records |
 
 ---
 
@@ -845,6 +955,28 @@ Future LTM requirements in this section complement session context and STM. They
 | AC-8.10 | Non-default locale variants cannot enter `shadow`, `weighted`, or `active` selection until paired parity evidence exists and locale-governed runs include `prompt_locale` and `parity_group` metadata | Governance integration test + trace audit |
 | AC-8.11 | Prompt assembly keeps static policy, dynamic control, and runtime evidence in distinct segment classes; request-scoped evidence is not reused as policy across requests | Integration test + security regression test |
 
+### AC-9: Tool System Architecture and Vietnam Market Integration
+
+| ID | Criterion | Verification |
+|----|-----------|--------------|
+| AC-9.1 | Existing `StockSymbolTool`, `TradingViewTool`, and `ReportingTool` have model-visible capability descriptors and internal policy descriptors without changing current user-facing behavior or replacing the current LangChain/LangGraph ReAct runtime | Unit test + compatibility regression |
+| AC-9.2 | `ToolSurfaceBuilder` exposes only route-eligible, enabled, policy-admitted tools before ReAct tool selection | Route fixture test |
+| AC-9.3 | Tool gateway admission blocks invalid arguments, disallowed route/tool combinations, blocked risk classes, license-unclear sources, and unsupported provider states with `DegradedState` rather than silent execution | Integration + fault-injection test |
+| AC-9.4 | Descriptor tampering, unapproved remote descriptors, or descriptor drift are not exposed or executed without local admission and descriptor version/hash traceability | Security regression + trace audit |
+| AC-9.5 | `StockSymbolTool` target behavior uses in-system symbol data through an internal symbol-store boundary, while live quote/history/fundamental requests route to market-data tools | Integration test |
+| AC-9.6 | Vietnam symbols and indices such as `FPT`, `HOSE:FPT`, `HNX:SHS`, `UPCOM:BSR`, VNINDEX, VN30, HNXINDEX, and UPINDEX normalize with symbol, exchange, and currency where applicable | Unit + integration test |
+| AC-9.7 | Provider selection remains below the model-visible tool layer; provider adapters such as Vietnam-native, official, licensed, public web, TradingView, Yahoo, and Alpha Vantage are not exposed as a flat model-visible tool list | Descriptor inspection + integration test |
+| AC-9.8 | Market-data answers include provider/source, source URL or reference, retrieved timestamp, exchange, currency, freshness, license posture, and warnings/degraded states where applicable | Response regression + trace audit |
+| AC-9.9 | Provider outage, stale data, missing fields, blocked license posture, and stale cache entries produce fallback or explicit degraded-state messaging | Fault-injection test |
+| AC-9.10 | Tool results are classified as `EvidenceFact`, `EvidenceSnippet`, `EvidenceDocument`, `SystemRecord`, `MutationReceipt`, `VisualizationProvenance`, `GeneratedArtifact`, or `DegradedState` before prompt assembly | Schema validation test |
+| AC-9.11 | TradingView chart/widget/deep-link payloads are classified as `VisualizationProvenance` and are not used as canonical market evidence by default | Tool-output classification test |
+| AC-9.12 | Generic web fetch blocks unapproved domains and converts approved pages into cited snippets/documents without injecting raw HTML, PDF bytes, scripts, hidden text, or page instructions into LLM context | Security regression + parser fixture test |
+| AC-9.13 | `ReportingTool` composes reports from `ToolContextPack`, visualization provenance, and generated artifacts rather than direct provider scraping | Integration test |
+| AC-9.14 | Request-scoped `ToolContextPack` is not persisted wholesale; retained reports, artifacts, mutation receipts, snapshots, and trace metadata preserve source lineage | Persistence inspection |
+| AC-9.15 | Approved symbol-store write actions are classified as `workflow_mutation` with `internal_state_mutation` subtype and emit `MutationReceipt`; unauthorized or unconfirmed mutations are blocked or degraded | Mutation policy test |
+| AC-9.16 | Vietnamese and mixed-language prompts for price, chart, fundamentals, disclosures, market breadth, foreign flow, and reports route to expected tool families | Route evaluation dataset |
+| AC-9.17 | Tool-backed answers and reports block or conservatively rewrite unsourced recommendations, guaranteed-return language, hype language, and unsupported certainty | Finance-safety regression test |
+
 ---
 
 ## 6. Traceability Matrix
@@ -899,6 +1031,23 @@ This section maps acceptance criteria (AC-*) to the functional and non-functiona
 | AC-8.9 | FR-1.4.14, NFR-5.2.11 |
 | AC-8.10 | FR-1.4.15, NFR-5.2.10 |
 | AC-8.11 | FR-1.4.16 |
+| AC-9.1 | FR-2.4.1, FR-2.4.2, FR-2.4.6, NFR-6.2.6 |
+| AC-9.2 | FR-2.4.3, FR-4.2.1, NFR-5.2.12 |
+| AC-9.3 | FR-2.4.4, FR-2.5.5, NFR-2.2.6 |
+| AC-9.4 | FR-2.4.5, NFR-5.2.12, NFR-6.2.6 |
+| AC-9.5 | FR-2.11.1, FR-2.11.2 |
+| AC-9.6 | FR-2.6.1, FR-2.11.3 |
+| AC-9.7 | FR-2.7.1, FR-2.7.2, NFR-6.2.5 |
+| AC-9.8 | FR-2.7.4, NFR-5.2.13, CON-9 |
+| AC-9.9 | FR-2.5.5, FR-2.7.5, NFR-2.2.6, NFR-2.3.5 |
+| AC-9.10 | FR-2.5.1, FR-2.5.2, FR-2.5.3 |
+| AC-9.11 | FR-2.8.1, FR-2.8.4, CON-7 |
+| AC-9.12 | FR-2.9.1, FR-2.9.2, FR-2.9.3, FR-2.9.4, NFR-4.3.5, CON-8 |
+| AC-9.13 | FR-2.10.1, FR-2.10.2 |
+| AC-9.14 | FR-2.11.4, FR-2.10.3, NFR-2.3.4, CON-10 |
+| AC-9.15 | FR-2.11.5, FR-2.11.6, NFR-5.2.15 |
+| AC-9.16 | FR-2.6.6, FR-4.1.3 |
+| AC-9.17 | FR-1.5.1, FR-1.5.3, FR-2.10.4 |
 
 ---
 
@@ -931,6 +1080,21 @@ This section maps acceptance criteria (AC-*) to the functional and non-functiona
 | IR-2.3 | WebSocket requests SHOULD support a `conversation_id` field for stateful conversation behavior |
 | IR-2.4 | WebSocket responses SHALL include a response payload and sufficient metadata to correlate to the initiating request |
 | IR-2.5 | When session-scoped context is required for conversation creation or restoration, interfaces SHOULD support supplying or resolving the parent `session_id` separately from `conversation_id` |
+
+### IR-3 Tool System Contracts
+
+| ID | Requirement |
+|----|-------------|
+| IR-3.1 | `ToolCapabilityDescriptor` SHALL define model-visible tool name, description, input schema, output kind, route coverage, locale coverage where applicable, examples, and descriptor version |
+| IR-3.2 | `ToolPolicyDescriptor` SHALL define internal risk class, license mode, freshness policy, cache policy, timeout budget, credential/scope owner, mutation policy where applicable, required metadata, enabled environments, and descriptor integrity marker |
+| IR-3.3 | `ProviderAdapterDescriptor` SHALL define provider class, supported markets, supported data categories, license posture, credential/scope owner, freshness policy, parser limits, source-attribution requirements, production eligibility, and integrity marker |
+| IR-3.4 | `ProviderSelectionPolicy` SHALL define provider order, fallback eligibility, fail-closed conditions, market-session rules, freshness expectations, timeout/retry budget, and degraded-state mapping |
+| IR-3.5 | `ToolExecutionEnvelope` SHALL include selected route, selected tool, selected adapter where applicable, descriptor versions or hashes, admission outcomes, normalized output reference, cache status, warnings, degraded-state reason, and trace metadata |
+| IR-3.6 | `NormalizedOutput` SHALL classify every tool result as an admitted output kind before prompt assembly and SHALL include required source, freshness, warning, and authority metadata for that kind |
+| IR-3.7 | `ToolContextPack` SHALL be a request-scoped context bundle for normalized tool outputs and SHALL support facts, snippets, documents, system records, mutation receipts, visualization provenance, generated artifacts, warnings, citations, and degraded states |
+| IR-3.8 | `GenericWebFetchPolicy` SHALL include domain allowlist, rate limits, render mode, extraction mode, parser limits, maximum content size, freshness policy, license posture, and prompt-injection quarantine behavior |
+| IR-3.9 | `MutationReceipt` SHALL include mutation ID, target record, action, before/after summary, actor/route, approval status, audit metadata, timestamp, and result |
+| IR-3.10 | `ArtifactMetadata` SHALL include artifact ID, artifact type, URI/reference, source lineage, generated-by, created timestamp, checksum/hash where available, and retention class |
 
 ---
 
@@ -970,6 +1134,9 @@ This section maps acceptance criteria (AC-*) to the functional and non-functiona
 | PRIV-1.1 | The system SHALL minimize stored conversation content to what is required to satisfy FR-3 behavior |
 | PRIV-1.2 | The system SHALL NOT persist raw tool outputs in conversation storage (see FR-3.1.8) |
 | PRIV-1.3 | The system SHALL NOT persist computed financial metrics in conversation storage (see FR-3.1.7) |
+| PRIV-1.4 | The system SHALL NOT inject raw provider payloads, raw HTML, raw PDF bytes, scripts, hidden text, or untrusted page instructions directly into LLM context |
+| PRIV-1.5 | The system SHALL NOT persist `ToolContextPack` wholesale as conversation memory or durable market truth by default |
+| PRIV-1.6 | The system SHALL persist only approved derivatives of tool context, such as report records, artifact metadata, mutation receipts, audit metadata, trace metadata, existing domain records, or approved market snapshots |
 
 ### PRIV-2 Retention, Archival, and Deletion
 
@@ -986,6 +1153,7 @@ This section maps acceptance criteria (AC-*) to the functional and non-functiona
 | PRIV-3.1 | The system SHALL treat conversation content as potentially sensitive and SHALL apply redaction policies to logs and traces |
 | PRIV-3.2 | The system SHALL ensure that secrets (API keys, tokens, passwords) are never logged or traced |
 | PRIV-3.3 | The system SHALL provide an auditable record of access to conversation data (who/what accessed it and when) |
+| PRIV-3.4 | Retained reports, artifacts, mutation receipts, and market snapshots SHALL preserve source lineage to provider/source metadata or include an explicit degraded-state reason when source lineage is unavailable |
 
 ---
 
@@ -1011,6 +1179,8 @@ This section maps acceptance criteria (AC-*) to the functional and non-functiona
 | OI-7 | Define reconciliation schedule and alerting thresholds for orphan/misalignment detection (FR-7.2) | Required to operationalize reconciliation — determines frequency, severity tiers, and notification targets |
 | OI-8 | Define pagination defaults (page size, max page size, sort order) for management API list endpoints (FR-5.6.1) | Required for consistent client behavior and to prevent unbound result sets |
 | OI-9 | Define prompt asset directory structure, naming convention, and version-tagging scheme for externalized prompt files (FR-1.4.6, NFR-6.2.3) | Required before prompt versioning and experiment assignment can be implemented |
+| OI-10 | Define production licensing, terms-of-use, credential-scope, and redistribution posture for Vietnam-native, public-web, wrapper/prototype, and commercial data providers | Required before production provider enablement under CON-6 |
+| OI-11 | Define executable schema realization for tool descriptors, provider descriptors, execution envelopes, normalized outputs, `ToolContextPack`, mutation receipts, and artifact metadata | Required before implementation specs can convert IR-3 into code-level contracts |
 
 ---
 
@@ -1029,6 +1199,7 @@ This section maps acceptance criteria (AC-*) to the functional and non-functiona
 | 2.5 | 2026-05-19 | System | Formalized prompt-governance follow-ups from the benchmark review. Added FR-1.4.10–1.4.13 (instruction authority separation, prompt authority precedence, release gate enforcement, rollback triggering), FR-1.5.6 (boundary-aware guardrail enforcement), NFR-5.2.8–5.2.9 (guardrail outcome and metadata-completeness tracing), and AC-8.5–8.8 (instruction-authority, release-gate, rollback, and trace-audit verification). Added PROMPT_SYSTEM_BENCHMARK_REVIEW.md as a related governance reference. |
 | 2.6 | 2026-05-21 | System | Formalized prompt-governance P1 follow-ups from the benchmark review. Added FR-1.4.14–1.4.16 (tool-risk envelope enforcement, locale-parity promotion control, prompt-segment classification and reuse), NFR-5.2.10–5.2.11 (locale and tool-risk trace metadata), and AC-8.9–8.11 (tool-risk, locale-parity, and segment-class verification). |
 | 2.7 | 2026-05-22 | System | Synchronized prompt-governance document authority across the proposal, benchmark review, roadmap, and reverse trace. Clarified that AC-8 release-gate thresholds remain normative in the SRS while the roadmap carries sequencing only. |
+| 2.8 | 2026-06-18 | System | Propagated tool-system proposal into SRS requirements. Added Tool Gateway, AgentTool, route-filtered tool exposure, Vietnam-market coverage, provider selection, normalized outputs, ToolContextPack, TradingView visualization provenance, generic web evidence controls, report source discipline, tool data integrity, mutation receipts, AC-9, IR-3, provider constraints, and source-lineage requirements. |
 ---
 
 *End of Requirements Document*
