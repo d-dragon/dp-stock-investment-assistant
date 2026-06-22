@@ -3,7 +3,7 @@
 > **Status**: Active working draft
 > **Standards Stance**: Aligned to ISO/IEC/IEEE 42010
 > **Technology Stack**: LangGraph 0.2.62+, LangChain, OpenAI SDK, semantic-router, MongoDB, Redis
-> **Companion Documents**: [TECHNICAL_DESIGN.md](./TECHNICAL_DESIGN.md), [AGENT_MEMORY_TECHNICAL_DESIGN.md](./AGENT_MEMORY_TECHNICAL_DESIGN.md), [PROMPT_SYSTEM_RESEARCH_PROPOSAL.md](./PROMPT_SYSTEM_RESEARCH_PROPOSAL.md), [AGENT_ARCHITECTURE_DECISION_RECORDS.md](./decisions/AGENT_ARCHITECTURE_DECISION_RECORDS.md)
+> **Companion Documents**: [TECHNICAL_DESIGN.md](./TECHNICAL_DESIGN.md), [AGENT_MEMORY_TECHNICAL_DESIGN.md](./AGENT_MEMORY_TECHNICAL_DESIGN.md), [PROMPT_SYSTEM_RESEARCH_PROPOSAL.md](./PROMPT_SYSTEM_RESEARCH_PROPOSAL.md), [AGENT_ARCHITECTURE_DECISION_RECORDS.md](./DECISIONS/AGENT_ARCHITECTURE_DECISION_RECORDS.md)
 
 ## Document Control
 
@@ -12,7 +12,7 @@
 | Project | DP Stock Investment Assistant |
 | Domain | Agent |
 | Focus | Architecture description of the agent domain, including boundaries, views, concerns, rationale, and evolution |
-| Date | 2026-05-21 |
+| Date | 2026-06-22 |
 | Status | Active |
 | Audience | Engineering, architecture, maintainers, and reviewers |
 
@@ -55,7 +55,7 @@ The agent domain operates within a wider application and infrastructure environm
 - MongoDB collections for conversation metadata and LangGraph checkpoints, with future LTM personalization remaining a separate planned authority boundary;
 - Redis-backed caching and in-memory fallback cache paths;
 - external model providers such as OpenAI and Grok;
-- external financial data sources such as Yahoo Finance;
+- external financial data sources, including the current Yahoo Finance path and the target Vietnam-first provider ecosystem;
 - future prompt asset, evaluation, and observability flows governed by prompt-version and runtime metadata.
 
 ### 1.4 Scope and Boundaries
@@ -72,7 +72,7 @@ This architecture description does not replace:
 
 - [TECHNICAL_DESIGN.md](./TECHNICAL_DESIGN.md) for implementation-oriented realization detail;
 - [AGENT_MEMORY_TECHNICAL_DESIGN.md](./AGENT_MEMORY_TECHNICAL_DESIGN.md) for STM and checkpoint subsystem detail;
-- [AGENT_ARCHITECTURE_DECISION_RECORDS.md](./decisions/AGENT_ARCHITECTURE_DECISION_RECORDS.md) and the individual ADRs for decision authority;
+- [AGENT_ARCHITECTURE_DECISION_RECORDS.md](./DECISIONS/AGENT_ARCHITECTURE_DECISION_RECORDS.md) and the individual ADRs for decision authority;
 - SRS or spec artifacts for requirement authority and delivery traceability.
 
 ### 1.5 Key Characteristics
@@ -82,7 +82,7 @@ This architecture description does not replace:
 | Architecture | ReAct pattern with tool orchestration |
 | AI Framework | LangChain >=1.0.0 with `langchain_core` and `langchain_openai` |
 | Model Providers | OpenAI (GPT-5-nano), Grok (grok-4-1-fast-reasoning) with automatic fallback |
-| Tool System | Registry-based with caching support |
+| Tool System | Current registry-based cache-aware tools; target thin in-process Tool Gateway, route-filtered tool surface, provider adapters, and normalized tool context |
 | Memory | Service-owned session context and lifecycle metadata, LangGraph `MongoDBSaver` for conversation-scoped STM, and a planned future LTM personalization boundary |
 | Semantic Router | `semantic-router` library with OpenAI/HuggingFace encoders |
 | Response Types | Structured (`AgentResponse`) with immutable dataclasses |
@@ -95,9 +95,10 @@ This architecture description does not replace:
 | [ARCHITECTURE_DESIGN.md](./ARCHITECTURE_DESIGN.md) | Viewpoint-governed architecture description for the agent domain |
 | [TECHNICAL_DESIGN.md](./TECHNICAL_DESIGN.md) | Technical realization, component behavior, configuration, and extension details |
 | [AGENT_MEMORY_TECHNICAL_DESIGN.md](./AGENT_MEMORY_TECHNICAL_DESIGN.md) | Detailed memory subsystem design, data model, sequence diagrams, and API impacts |
-| [ADR-AGENT-001-LAYERED-LLM-ARCHITECTURE.md](./decisions/ADR-AGENT-001-LAYERED-LLM-ARCHITECTURE.md) | Governing layered architecture and memory boundaries |
-| [ADR-AGENT-002-SKILLS-PATTERN-PROMPT-COMPOSITION.md](./decisions/ADR-AGENT-002-SKILLS-PATTERN-PROMPT-COMPOSITION.md) | Prompt skills composition decision |
-| [ADR-AGENT-003-EXTERNALIZE-VERSION-PROMPT-ASSETS.md](./decisions/ADR-AGENT-003-EXTERNALIZE-VERSION-PROMPT-ASSETS.md) | Externalized prompt asset decision |
+| [ADR-AGENT-001-LAYERED-LLM-ARCHITECTURE.md](./DECISIONS/ADR-AGENT-001-LAYERED-LLM-ARCHITECTURE.md) | Governing layered architecture and memory boundaries |
+| [ADR-AGENT-002-SKILLS-PATTERN-PROMPT-COMPOSITION.md](./DECISIONS/ADR-AGENT-002-SKILLS-PATTERN-PROMPT-COMPOSITION.md) | Prompt skills composition decision |
+| [ADR-AGENT-003-EXTERNALIZE-VERSION-PROMPT-ASSETS.md](./DECISIONS/ADR-AGENT-003-EXTERNALIZE-VERSION-PROMPT-ASSETS.md) | Externalized prompt asset decision |
+| [ADR-AGENT-004-THIN-TOOL-GATEWAY-AND-NORMALIZED-TOOL-CONTEXT.md](./DECISIONS/ADR-AGENT-004-THIN-TOOL-GATEWAY-AND-NORMALIZED-TOOL-CONTEXT.md) | Proposed tool gateway, provider policy, and normalized tool context decision |
 
 ---
 
@@ -182,7 +183,8 @@ The primary context relationships are:
 - service-layer components govern ownership, archival checks, session-context resolution, and metadata synchronization around conversations;
 - LangGraph checkpointer infrastructure stores conversation-scoped execution state only;
 - future LTM personalization is a planned cross-conversation boundary and is not a synonym for session context, checkpoints, or retrieval;
-- tool implementations gather external or repository-backed data;
+- current tool implementations gather external or repository-backed data through `ToolRegistry` and cache-aware tool classes;
+- target Phase 2B tooling inserts a thin in-process gateway and provider-adapter boundary so tool exposure, provider policy, normalization, and source attribution are explicit;
 - prompt policy is governed inside the system boundary through the current runtime baseline and the planned prompt compiler path;
 - prompt assets and prompt composition logic govern model behavior, not factual storage.
 
@@ -190,7 +192,7 @@ This boundary is consistent with the repository methodology's rule that architec
 
 #### 4.1.1 System Context
 
-The system context view clarifies the trust and control boundaries between client applications, service orchestration, session-context resolution, conversation lifecycle governance, conversation-scoped checkpoint persistence, planned future LTM personalization, prompt-system assets, external LLM providers, and external market data providers. This boundary is operationally important because security, archive governance, reusable parent context, runtime-state persistence, and evidence acquisition are owned by different internal layers.
+The system context view clarifies the trust and control boundaries between client applications, service orchestration, session-context resolution, conversation lifecycle governance, conversation-scoped checkpoint persistence, planned future LTM personalization, prompt-system assets, external LLM providers, and external market data providers. This boundary is operationally important because security, archive governance, reusable parent context, runtime-state persistence, tool exposure, provider policy, and evidence acquisition are owned by different internal layers.
 
 ```mermaid
 flowchart TD
@@ -206,7 +208,9 @@ flowchart TD
     Agent["StockAssistantAgent"]
     Checkpoint["STM Persistence Boundary\nLangGraph MongoDBSaver / conversation checkpoints only"]
     FutureLTM["Future LTM Personalization Boundary\nPlanned cross-conversation preferences"]
-    ToolLayer["Tool Layer"]
+    ToolSurface["Tool Surface Boundary\nCurrent: enabled registry tools\nTarget: route-filtered ToolSurfaceBuilder"]
+    ToolGateway["Tool Execution Boundary\nCurrent: ToolRegistry + CachingTool\nTarget: thin ToolGateway + AgentTool"]
+    ProviderPolicy["Provider and Normalization Boundary\nTarget: ProviderSelectionPolicy + adapters + normalizer"]
     Redis["Tool Cache\nRedis / CacheBackend"]
     PromptSystem["Prompt Policy Boundary\nCurrent baseline + planned compiler path"]
     PromptAssets["Prompt Assets\nCurrent src/prompts + planned shallow ADR taxonomy"]
@@ -214,7 +218,7 @@ flowchart TD
   end
 
   LLM["LLM Providers\nOpenAI / Grok"]
-  Market["Market Data Providers\nYahoo Finance / others"]
+  Market["Market Data Providers\nCurrent: Yahoo Finance\nTarget: Vietnam-first official / licensed / public / fallback sources"]
 
   Client -->|"HTTPS / WebSocket"| Entry
   Entry --> Service --> Agent
@@ -222,13 +226,15 @@ flowchart TD
   Service --> SessionContext
   Agent --> Checkpoint
   Agent -->|"planned personalization lookup"| FutureLTM
-  Agent --> ToolLayer
-  ToolLayer --> Redis
+  Agent --> ToolSurface
+  ToolSurface --> ToolGateway
+  ToolGateway --> Redis
+  ToolGateway --> ProviderPolicy
   Agent --> PromptSystem
   PromptSystem --> PromptAssets
   Agent --> ModelFactory
   ModelFactory -->|"External model calls"| LLM
-  ToolLayer -->|"External market-data calls"| Market
+  ProviderPolicy -->|"External market-data and evidence calls"| Market
 ```
 
 ```text
@@ -240,13 +246,16 @@ Conversation lifecycle : Internal business-state and archive-governance boundary
 Session context        : Internal reusable-parent-context boundary
 Checkpoint persistence : Internal recoverable runtime-state boundary
 Future LTM (planned)   : Internal cross-conversation personalization boundary
+Tool surface           : Internal model-visible tool exposure boundary
+Tool execution         : Internal policy and validation boundary
+Provider normalization : Internal source-selection and evidence-normalization boundary (target)
 Prompt system assets   : Internal behavioral policy boundary (ADR-governed taxonomy)
 LLM providers          : External AI processing boundary
 Market data providers  : External evidence and pricing boundary
 Redis cache            : Internal cache acceleration boundary
 ```
 
-The architecture intentionally routes external reasoning and evidence flows through distinct internal control points rather than allowing client applications to call providers or state stores directly. Service orchestration owns request validation, session-context resolution, and conversation lifecycle governance, the agent runtime binds conversation-scoped checkpoints, any future LTM layer remains a distinct optional personalization boundary, the tool layer mediates cache and market-data access, and prompt behavior is mediated internally through ADR taxonomy assets and guardrail middleware before provider calls. The current REST chat path enforces the lifecycle boundary directly through `ChatService`, while Socket.IO parity remains a documented follow-up in companion technical-design material.
+The architecture intentionally routes external reasoning and evidence flows through distinct internal control points rather than allowing client applications to call providers or state stores directly. Service orchestration owns request validation, session-context resolution, and conversation lifecycle governance, the agent runtime binds conversation-scoped checkpoints, any future LTM layer remains a distinct optional personalization boundary, the current tool layer mediates cache and market-data access, and the target tool boundary adds route-filtered exposure, admission, provider policy, normalization, and degraded-state handling around registry-backed execution. Prompt behavior is mediated internally through ADR taxonomy assets and guardrail middleware before provider calls. The current REST chat path enforces the lifecycle boundary directly through `ChatService`, while Socket.IO parity remains a documented follow-up in companion technical-design material.
 
 | Boundary | Primary Responsibility | Security / Compliance / Operations Significance |
 |----------|------------------------|-------------------------------------------------|
@@ -257,17 +266,20 @@ The architecture intentionally routes external reasoning and evidence flows thro
 | Agent Runtime -> Future LTM Personalization Boundary (planned) | Optional cross-conversation personalization and symbol-tracking context | Keeps planned personalization separate from lifecycle metadata, checkpoint state, and sourced evidence |
 | Agent Runtime -> Prompt System Assets | Prompt policy composition and behavioral guardrail enforcement | Keeps behavioral policy versioned, auditable, and governed within the internal control boundary |
 | Agent Runtime / Model Factory -> LLM Providers | Prompted reasoning and generated responses | External AI providers must be treated as non-authoritative processors; prompts and outputs require policy and logging controls |
-| Tool Layer -> Market Data Providers | Evidence and pricing retrieval through tools | Keeps factual market-data sourcing explicit and separable from model reasoning |
-| Tool Layer -> Redis Cache | Execution acceleration for tool paths | Preserves cache separation from authoritative business or conversational state |
+| Tool Surface and Execution Boundary -> Model-Visible Tools | Current enabled registry tools; target route-filtered `ToolSurfaceBuilder` and thin `ToolGateway` around registry-backed execution | Prevents unrelated tools, disallowed risk classes, and policy details from leaking into model-visible tool selection |
+| Tool Execution Boundary -> Provider and Normalization Boundary | Current direct tool-provider calls; target provider selection, adapter access, normalization, and `ToolContextPack` assembly | Keeps tools distinct from provider adapters and keeps provider policy below model-visible tool capabilities |
+| Provider and Normalization Boundary -> Market Data Providers | Current Yahoo Finance path; target Vietnam-first official, licensed, public-web, wrapper/prototype, visualization, and international-fallback source classes | Keeps factual market-data sourcing explicit, attributed, license-aware, and separable from model reasoning |
+| Tool Execution Boundary -> Redis Cache | Execution acceleration for tool paths | Preserves cache separation from authoritative business, evidence, or conversational state |
 
-From a compliance and operational perspective, this context establishes six hard boundaries:
+From a compliance and operational perspective, this context establishes seven hard boundaries:
 
 1. Client applications are consumers of the system, not participants in internal orchestration.
 2. Conversation lifecycle governance, application metadata, and reusable session context remain in the service layer and do not collapse into the checkpoint store.
 3. Conversation-scoped checkpoints retain reasoning state for a thread but do not become the source of truth for archive policy, ownership, reusable parent context, or business metadata.
 4. Future LTM personalization, when realized, remains an optional cross-conversation personalization boundary rather than a replacement for session context, STM, or retrieval.
 5. LLM providers are external reasoning services and do not become the source of truth for market facts or conversation ownership.
-6. Market data providers are external evidence sources and are accessed only through controlled internal tool paths.
+6. Market data providers are external evidence sources and are accessed only through controlled internal tool and provider-adapter paths.
+7. The target tool gateway is an in-process policy boundary, not a second agent runtime, separate gateway service, or provider parser.
 
 This system context complements the deployment and operations views by showing who is inside the controlled system boundary and which dependencies remain external.
 
@@ -280,7 +292,7 @@ flowchart LR
   subgraph External["External Actors and Providers"]
     Client["Client Apps\n(Web, Browser, API Consumers)"]
     LLM["LLM Providers\n(OpenAI, Grok)"]
-    Market["Market Data Providers\n(Yahoo Finance, Others)"]
+    Market["Market and Evidence Providers\nCurrent Yahoo Finance; target Vietnam-first providers, TradingView, allowlisted web"]
   end
 
   subgraph Internal["Internal Service Boundary"]
@@ -288,7 +300,8 @@ flowchart LR
     Svc["Chat and Conversation Services\nChatService + ConversationService"]
     Agent["Agent Runtime\nStockAssistantAgent"]
     Prompt["Prompt Policy Boundary\nCurrent runtime prompt; planned Loader + Assembler + Guardrail"]
-    Tools["Tool Registry and Tools\nToolRegistry + enabled tools"]
+    Tools["Tool Boundary\nCurrent ToolRegistry + CachingTool\nTarget ToolSurfaceBuilder + ToolGateway + AgentTool"]
+    ProviderBoundary["Provider Adapter and Normalization Boundary\nTarget ProviderSelectionPolicy + ProviderAdapters + ToolContextPack"]
     Factory["Model Client Factory"]
     Meta["Conversation Lifecycle and Metadata Authority\nConversationProvider + ConversationService"]
     SessionCtx["Session Context Boundary\nSessionProvider + reusable parent context"]
@@ -308,8 +321,9 @@ flowchart LR
   Agent -->|"conversational state interface"| Checkpoint
   Agent -->|"planned personalization interface"| FutureLTM
   Tools -->|"cache interaction interface"| Cache
+  Tools -->|"tool-provider policy interface"| ProviderBoundary
   Factory -->|"model inference interface"| LLM
-  Tools -->|"market data integration interface"| Market
+  ProviderBoundary -->|"market evidence integration interface"| Market
 ```
 
 The architecture-relevant interfaces expressed in this view are:
@@ -323,16 +337,17 @@ The architecture-relevant interfaces expressed in this view are:
 | Service orchestration -> session context boundary | Session-context resolution interface | Resolves reusable parent business context independently from checkpoint state and from any future LTM personalization |
 | Agent runtime -> prompt policy boundary | Behavioral policy interface | Separates behavior shaping and guardrail policy from state management and evidence acquisition |
 | Agent runtime -> tool boundary | Tool invocation interface | Delegates evidence gathering and deterministic computation to governed tool surfaces rather than embedding external access into the runtime core |
-| Agent runtime -> model factory | Provider selection interface | Isolates provider choice, model binding, and fallback policy from the reasoning workflow itself |
+| Agent runtime -> model factory | Model provider selection interface | Isolates model-provider choice, model binding, and fallback policy from the reasoning workflow itself |
 | Agent runtime -> STM checkpointer | Conversational state interface | Binds checkpoint-managed conversational runtime state to a dedicated persistence boundary without collapsing lifecycle metadata or session context into runtime memory |
 | Agent runtime -> future LTM personalization boundary | Planned personalization interface | Reserves a distinct future boundary for cross-conversation personalization so it does not blur with session context, STM, or evidence retrieval |
 | Tool boundary -> cache boundary | Cache interaction interface | Keeps execution acceleration separate from authoritative business or evidence state |
 | Model factory -> external LLMs | Model inference interface | Carries outbound reasoning requests to external providers while preserving internal control over policy and provider selection |
-| Tool boundary -> market data providers | Market data integration interface | Constrains factual evidence acquisition to explicit internal mediation points |
+| Tool boundary -> provider adapter and normalization boundary | Tool-provider policy interface | Keeps provider order, fallback, licensing, freshness, source normalization, and degraded-state mapping below the model-visible tool layer |
+| Provider adapter and normalization boundary -> market and evidence providers | Market evidence integration interface | Constrains factual evidence acquisition to explicit internal mediation points and keeps TradingView, generic web, and Vietnam-market providers in the correct authority class |
 
 Detailed realization anchors for this vocabulary are intentionally deferred to [TECHNICAL_DESIGN.md](./TECHNICAL_DESIGN.md), where the same interface names are bound to routes, protocols, factories, and concrete methods.
 
-This interface view makes two architectural boundaries explicit that are easy to miss in a simpler adjacency diagram. First, conversation lifecycle and archive-integrity responsibilities are exercised in the service layer before and after agent execution rather than inside the reasoning core. Second, conversation memory, metadata persistence, provider selection, prompt policy, tool execution, and cache use are separate integration boundaries with distinct owners and evolution paths even though they contribute to one end-user interaction.
+This interface view makes three architectural boundaries explicit that are easy to miss in a simpler adjacency diagram. First, conversation lifecycle and archive-integrity responsibilities are exercised in the service layer before and after agent execution rather than inside the reasoning core. Second, conversation memory, metadata persistence, model-provider selection, prompt policy, tool execution, and cache use are separate integration boundaries with distinct owners and evolution paths even though they contribute to one end-user interaction. Third, the target tool architecture separates agent-callable tools from provider adapters, so the model sees compact capabilities while application policy owns provider order, freshness, licensing, source attribution, and normalization.
 
 ### 4.2 Logical View
 
@@ -344,13 +359,14 @@ This interface view makes two architectural boundaries explicit that are easy to
 | `[Implemented]` [langgraph_bootstrap.py](../../../src/core/langgraph_bootstrap.py) | STM infrastructure boundary, including checkpointer creation and conversation-scoped checkpoint wiring |
 | `[Implemented]` [stock_query_router.py](../../../src/core/stock_query_router.py) | Semantic route classification |
 | `[Implemented]` [model_factory.py](../../../src/core/model_factory.py) and provider clients | Provider and model selection with cached client construction |
-| `[Implemented]` [src/core/tools/](../../../src/core/tools/) | Tool registration, caching, and domain data access |
+| `[Implemented]` [src/core/tools/](../../../src/core/tools/) | Current tool registration, cache-aware execution, and domain data access through `ToolRegistry`, `CachingTool`, `StockSymbolTool`, `TradingViewTool` placeholder, and `ReportingTool` scaffold |
+| `[Target]` Tool Gateway and normalized tool-context boundary | Thin in-process gateway around the existing registry path for route-filtered tool exposure, execution admission, provider policy, normalized output classification, and request-scoped `ToolContextPack` assembly |
 | `[Implemented]` [conversation_repository.py](../../../src/data/repositories/conversation_repository.py) | Conversation metadata persistence, archive status, and session linkage outside checkpoint state |
 | `[Implemented]` [chat_service.py](../../../src/services/chat_service.py) and [conversation_service.py](../../../src/services/conversation_service.py) | Service orchestration, archive guards, session-context resolution, lifecycle governance, and metadata helpers |
 | `[Planned]` Future LTM personalization boundary | Optional cross-conversation personalization and symbol-tracking context outside the current runtime baseline |
 | `[Implemented]` [src/prompts/](../../../src/prompts/) | Current runtime prompt templates and text assets; planned externalized prompt asset model remains `[Proposed]` under ADR-002 and ADR-003 as a shallow metadata-driven `system` / `skills` / `experiments` taxonomy |
 
-These building blocks are separated so that reasoning orchestration, session context, STM persistence, metadata ownership, provider integration, and future personalization can evolve independently. The agent runtime owns reasoning and tool orchestration, service-layer components own reusable parent context and business lifecycle enforcement, checkpoints own recoverable conversation-scoped runtime state only, repositories own metadata persistence, and prompt assets govern behavior rather than domain data.
+These building blocks are separated so that reasoning orchestration, session context, STM persistence, metadata ownership, tool policy, provider integration, and future personalization can evolve independently. The agent runtime owns reasoning and tool orchestration, service-layer components own reusable parent context and business lifecycle enforcement, checkpoints own recoverable conversation-scoped runtime state only, repositories own metadata persistence, tools fetch or compute through governed boundaries, and prompt assets govern behavior rather than domain data.
 
 #### 4.2.2 Responsibility and Dependency Boundaries
 
@@ -360,12 +376,15 @@ These building blocks are separated so that reasoning orchestration, session con
 | STM persistence infrastructure | `[Implemented]` [langgraph_bootstrap.py](../../../src/core/langgraph_bootstrap.py) plus LangGraph checkpointer boundary | Preserves recoverable thread-local runtime state only; not a source of truth for archive policy, ownership, or metadata |
 | Semantic route classification | `[Implemented]` [stock_query_router.py](../../../src/core/stock_query_router.py) | Classifies requests but does not execute tools or persist state |
 | Provider and model selection | `[Implemented]` [ModelClientFactory](../../../src/core/model_factory.py) and provider clients | Isolates provider-specific concerns from routes and services |
+| Tool inventory and cache-aware execution | `[Implemented]` [ToolRegistry](../../../src/core/tools/registry.py) and [CachingTool](../../../src/core/tools/base.py) | Owns current tool listing, enablement, health, cache-aware execution, and LangChain tool bridging; does not own route policy, provider licensing, prompt assembly, or durable market truth |
+| Tool exposure and execution policy | `[Target]` `ToolSurfaceBuilder` plus thin in-process `ToolGateway` | Filters model-visible tools before ReAct invocation and validates selected calls before execution while preserving the current LangChain/LangGraph runtime |
+| Provider adapter policy and normalization | `[Target]` `ProviderSelectionPolicy`, provider adapters, normalizer, and `ToolContextPack` | Keeps source selection, fallback, licensing, freshness, attribution, normalized output kind, and degraded-state handling below the model-visible tool layer |
 | Session context resolution and conversation lifecycle | `[Implemented]` [ChatService](../../../src/services/chat_service.py), [ConversationService](../../../src/services/conversation_service.py) | Owns reusable parent context, archive guards, and metadata synchronization outside the agent core; REST path currently enforces this boundary directly |
 | Conversation metadata persistence | `[Implemented]` [ConversationRepository](../../../src/data/repositories/conversation_repository.py) | Persists application metadata and session linkage, separate from LangGraph checkpoint state |
 | Future cross-conversation personalization | `[Planned]` Future LTM boundary | Optional personalization only; not factual store or required orchestration state |
 | Prompt behavior and guardrails | `[Implemented]` Current runtime prompt baseline plus `[Planned]` prompt compiler path (`PromptAssetLoader -> PromptAssembler -> ResponseGuardrailMiddleware`) | Controls behavioral policy, not business state or financial facts |
 
-This logical separation is the primary extensibility mechanism for the domain. New providers, tools, prompt assets, or conversation-management behaviors should be added by extending the relevant building block rather than by collapsing responsibilities into the agent runtime.
+This logical separation is the primary extensibility mechanism for the domain. New providers, tools, prompt assets, or conversation-management behaviors should be added by extending the relevant building block rather than by collapsing responsibilities into the agent runtime. In the tool system specifically, the model-visible artifact is a tool capability, not a provider adapter; provider-specific fetch, health, licensing, and parsing remain below the gateway boundary.
 
 Current transport parity remains intentionally visible as a caveat rather than hidden as a design assumption: the REST path enforces lifecycle and metadata guards through `ChatService`, while Socket.IO parity for those same service-owned controls remains a documented follow-up.
 
@@ -384,7 +403,8 @@ flowchart LR
     PromptComp["Prompt Policy Boundary\nCurrent prompt baseline + planned compiler path"]
     Router["Intent Routing\nstock_query_router"]
     ModelSel["Provider Selection\nModelClientFactory"]
-    ToolReg["Tooling Boundary\nToolRegistry + Tools"]
+    ToolReg["Tooling Boundary\nCurrent ToolRegistry + CachingTool\nTarget ToolSurfaceBuilder + ToolGateway + AgentTool"]
+    ProviderNorm["Provider Policy + Normalization\nTarget ProviderSelectionPolicy + adapters + ToolContextPack"]
     Repo["Metadata Persistence\nConversationRepository"]
     CheckpointStore["STM Persistence Boundary\nLangGraph MongoDBSaver"]
     FutureLTM["Future LTM Personalization\nPlanned cross-conversation store"]
@@ -403,6 +423,7 @@ flowchart LR
   Runtime -->|"conversational state interface"| CheckpointStore
   Runtime -->|"planned personalization interface"| FutureLTM
   ToolReg -->|"cache interaction interface"| CacheStore
+  ToolReg -->|"tool-provider policy interface"| ProviderNorm
 ```
 
 The logical architectural interfaces are interpreted as follows:
@@ -415,14 +436,15 @@ The logical architectural interfaces are interpreted as follows:
 | Service orchestration -> session context boundary | Session-context resolution interface | Resolves reusable parent business context separately from checkpoints and any future personalization store |
 | Reasoning runtime -> intent routing | Intent classification interface | Lets classification evolve independently from tool execution and provider binding |
 | Reasoning runtime -> prompt composition boundary | Behavioral policy interface | Keeps response behavior and guardrails as a distinct policy concern |
-| Reasoning runtime -> provider selection | Provider selection interface | Prevents provider mechanics from leaking into service or transport layers |
+| Reasoning runtime -> model provider selection | Model provider selection interface | Prevents model-provider mechanics from leaking into service or transport layers |
 | Reasoning runtime -> tooling boundary | Tool invocation interface | Contains external evidence access and deterministic computation behind a governed surface |
+| Tooling boundary -> provider policy and normalization | Tool-provider policy interface | Keeps provider adapters, source authority, licensing, freshness, normalized outputs, and degraded states out of the model-visible tool surface |
 | Service orchestration -> metadata persistence | Metadata persistence interface | Separates business metadata ownership from checkpoint-managed conversational state |
 | Reasoning runtime -> conversational state store | Conversational state interface | Isolates checkpoint-managed conversational runtime state from broader application lifecycle metadata and parent-context authority |
 | Reasoning runtime -> future LTM personalization | Planned personalization interface | Preserves a future cross-conversation personalization boundary without making it a current runtime dependency |
 | Tooling boundary -> tool cache | Cache interaction interface | Limits execution acceleration to the tooling boundary rather than the broader reasoning model |
 
-Taken together, these boundaries show that the logical decomposition is not only a grouping of components but also a partitioning of authority. Orchestration owns business governance and session-context resolution, the runtime owns reasoning and checkpoint binding, routing classifies, prompt composition governs behavior, provider selection mediates model access, tooling mediates evidence access, STM persistence remains separate from lifecycle metadata, and future LTM stays a planned personalization boundary rather than an implied current store.
+Taken together, these boundaries show that the logical decomposition is not only a grouping of components but also a partitioning of authority. Orchestration owns business governance and session-context resolution, the runtime owns reasoning and checkpoint binding, routing classifies, prompt composition governs behavior, model-provider selection mediates LLM access, tooling mediates evidence access, provider policy normalizes source-specific data below tools, STM persistence remains separate from lifecycle metadata, and future LTM stays a planned personalization boundary rather than an implied current store.
 
 #### 4.2.3 Layered Architecture Boundaries
 
@@ -492,6 +514,10 @@ The process view describes the runtime interactions that turn a user request int
 
 #### 4.3.1 Primary Query Processing Flow
 
+The current process flow is the implemented LangChain/LangGraph ReAct path. It uses enabled registry tools and cache-aware execution directly. The Phase 2B target keeps this runtime path but inserts a thin in-process tool gateway before and around tool execution so exposure, admission, provider policy, normalization, and response-assembly checks are explicit.
+
+Current-state flow:
+
 ```mermaid
 flowchart TD
   Query["User Query"] --> ReAct
@@ -499,7 +525,7 @@ flowchart TD
   subgraph StockAssistantAgent["StockAssistantAgent"]
     ReAct["ReAct Agent\n(LangChain)"]
     ToolSelection["Tool Selection\n(LLM Decision)"]
-    ToolExecution["Tool Execution\n(CachingTool)"]
+    ToolExecution["Tool Execution\nCurrent CachingTool"]
     ToolOutput["Tool Output\n(Cached/Fresh)"]
     LLMResponse["LLM Response\nGeneration"]
 
@@ -511,6 +537,28 @@ flowchart TD
 
   LLMResponse --> Response["AgentResponse\n(content, provider, model, tool_calls, token_usage)"]
 ```
+
+Target-state tool governance flow:
+
+```mermaid
+flowchart TD
+  Query["User Query"] --> Route["Route Classification"]
+  Route --> Surface["ToolSurfaceBuilder\npre-model route-filtered exposure"]
+  Surface --> ReAct["StockAssistantAgent\nLangChain/LangGraph ReAct"]
+  ReAct -->|"selected tool call"| Gateway["ToolGateway\nin-process policy boundary"]
+  Gateway --> Admission["Pre-execution admission\nroute / args / risk / license / freshness / timeout"]
+  Admission --> Registry["ToolRegistry\ncurrent inventory boundary"]
+  Registry --> Tool["Current CachingTool / Target AgentTool"]
+  Tool --> ProviderPolicy["ProviderSelectionPolicy\nprovider order / fallback / market session"]
+  ProviderPolicy --> Adapter["ProviderAdapter\nsource-specific fetch + health"]
+  Adapter --> Normalize["Normalizer\nsource metadata / output kind / warnings"]
+  Normalize --> Pack["ToolContextPack\nrequest-scoped normalized context"]
+  Pack --> ResponseAssembly["Response assembly checks\ncitations / degraded states / authority"]
+  ResponseAssembly --> ReAct
+  ReAct --> Response["AgentResponse"]
+```
+
+The target flow is a logical policy path, not a mandate to create separate services or additional remote calls. `ToolSurfaceBuilder` and `ToolGateway` are target in-process responsibilities around the current registry-backed execution model. Provider adapters remain below tools, and the LLM receives normalized context rather than raw provider, web, or page-instruction payloads.
 
 ##### End-to-End Request/Response & Streaming Sequence (UML Notation)
 
@@ -532,9 +580,9 @@ sequenceDiagram
     Service->>Agent: invoke(messages, thread_id)
     activate Agent
     Agent->>Agent: route_classification(semantic-router)
-    
+
     rect rgb(240, 248, 255)
-        note right of Agent: ReAct Reasoning Loop (LLM decides tool execution)
+        note right of Agent: ReAct Reasoning Loop (LLM decides from exposed tool surface)
         Agent->>LLM: decide_action(messages)
         LLM-->>Agent: Action (call tool) / or final message
         alt Tool Execution Required
@@ -542,7 +590,7 @@ sequenceDiagram
             alt Cache Hit
                 Cache-->>Agent: Return cached result
             else Cache Miss
-                Agent->>Agent: execute_tool()
+                Agent->>Agent: execute_tool() / target gateway admission
                 Agent->>Cache: set_cache(tool_params, result)
             end
         end
@@ -553,17 +601,17 @@ sequenceDiagram
     Service->>Service: sync_metadata_and_tokens()
     Service-->>Transport: message_turn_completed
     deactivate Service
-    
+
     loop Streaming Output (Tokens)
         Agent->>Transport: stream_chunk(token)
         Transport->>Client: socket.emit("token", token)
     end
-    
+
     Transport-->>Client: HTTP response / stream_close
     deactivate Transport
 ```
 
-Service-layer orchestration remains on the outer edge of this process. Archive safety, ownership validation, and metadata synchronization are intentionally handled outside the core reasoning loop so the process path can stay focused on classification, tool use, and generation.
+Service-layer orchestration remains on the outer edge of this process. Archive safety, ownership validation, and metadata synchronization are intentionally handled outside the core reasoning loop so the process path can stay focused on classification, tool use, and generation. Tool gateway admission similarly remains inside the tool boundary; it must not absorb service-owned lifecycle authority, provider-specific parsing, or prompt-policy authorship.
 
 #### 4.3.2 Route Classification View
 
@@ -580,7 +628,7 @@ The runtime uses `semantic-router` with OpenAI embeddings and HuggingFace fallba
 | `MARKET_WATCH` | Index updates, sector performance | "How is VN-Index doing?" |
 | `GENERAL_CHAT` | Fallback for unmatched queries | "Hello, how are you?" |
 
-#### 4.3.3 Provider Selection and Fallback View
+#### 4.3.3 Model Provider Selection and Fallback View
 
 The provider and model path is mediated by `ModelClientFactory`, which caches provider-model client instances. Runtime fallback behavior preserves a graceful-degradation path if the primary provider fails or if the ReAct executor is unavailable.
 
@@ -608,7 +656,49 @@ flowchart TD
   Loop --> Failed["All failed: Return All providers failed. Last error: {e}"]
 ```
 
-These process flows express the domain's latency and fault-tolerance posture: semantic routing limits unnecessary tool exploration, provider fallback preserves degraded operation, and service-layer lifecycle checks keep archived or invalid conversation states out of the reasoning path.
+These process flows express the domain's latency and fault-tolerance posture: semantic routing limits unnecessary tool exploration, model-provider fallback preserves degraded operation, and service-layer lifecycle checks keep archived or invalid conversation states out of the reasoning path.
+
+#### 4.3.4 Tool Provider Selection and Fallback View
+
+The target tool provider path is distinct from model-provider fallback. The model sees a route-filtered tool capability, while application policy chooses the provider adapter behind that tool. This prevents the model-visible tool list from becoming a provider list and keeps licensing, freshness, timeout, and fallback rules deterministic.
+
+```mermaid
+flowchart TD
+  ToolCall["Admitted tool call"] --> Policy["ProviderSelectionPolicy"]
+  Policy --> Classify["Provider class and license posture"]
+  Classify --> Official["Official exchange / depository source"]
+  Classify --> Licensed["Licensed commercial source"]
+  Classify --> NativeWeb["Vietnam-native public web source"]
+  Classify --> Wrapper["Wrapper / prototype source"]
+  Classify --> Viz["Visualization provider"]
+  Classify --> Intl["International fallback"]
+
+  Official --> Normalize["Normalize with source metadata"]
+  Licensed --> Normalize
+  NativeWeb --> Normalize
+  Wrapper --> Normalize
+  Intl --> Normalize
+  Viz --> Visual["VisualizationProvenance"]
+
+  Normalize --> Pack["ToolContextPack"]
+  Visual --> Pack
+  Policy -->|"blocked, stale, license unclear, provider down"| Degraded["DegradedState"]
+  Degraded --> Pack
+```
+
+The provider classes carry different authority levels:
+
+| Provider Class | Architectural Role | Target Use |
+|----------------|--------------------|------------|
+| In-system persistent data | Repo-owned records such as symbol identity, aliases, coverage, tags, and retained snapshots | Canonical symbol and internal system-record lookups through the evolved `StockSymbolTool` |
+| Official exchange / depository | Highest-authority external records where available | Disclosures, corporate actions, listing/reference data, and official notices |
+| Licensed commercial | Production-grade market data and fundamentals when terms allow | Quotes, history, fundamentals, breadth, flow, and report evidence |
+| Vietnam-native public web | Candidate evidence sources subject to terms and parser controls | News, statements, market overview, flow, and disclosure pages |
+| Wrapper / prototype | Research or prototyping connectors subject to license review | Early Vietnam-market coverage before production provider approval |
+| Visualization provider | Non-authoritative chart or widget payloads | TradingView advanced charts, widgets, deep links, ticker tape, and screeners as `VisualizationProvenance` |
+| International fallback | Cross-market comparison or non-Vietnam fallback | Yahoo Finance and Alpha Vantage when local provider coverage is unavailable or explicitly requested |
+
+Tool provider fallback must fail closed when license posture, source attribution, or freshness is not acceptable. The target response surface should expose degraded-state metadata and user-facing caveats rather than silently replacing a Vietnam-native provider with a less appropriate fallback.
 
 ### 4.4 Information and State View
 
@@ -665,6 +755,10 @@ The state model is intentionally split so user context, conversation state, retr
 | Conversation lifecycle, archive status, and per-turn metadata | Service layer plus `conversations` metadata boundary | Checkpoint-managed agent state as the source of truth for ownership or archive policy |
 | Sourced market and filing evidence | RAG indices and external data sources | User preferences, model-authored interpretations, long-lived conversation state |
 | Deterministic metrics and fetched numbers | Tool execution and approved data providers | Prompt state, LTM/STM persistence, model-only inferred facts |
+| Request-scoped normalized tool context | Target `ToolContextPack` assembled from normalized output kinds | Wholesale conversation-memory persistence, raw provider payloads, raw web/PDF content, hidden page instructions |
+| In-system symbol records | `symbols` collection and symbol repository/service boundary | Live provider quote/history/fundamental ownership unless explicitly retained as approved snapshots |
+| Generated reports, artifacts, and mutation receipts | Report/artifact metadata and audit paths with source lineage | Unsourced durable market facts or untraceable generated conclusions |
+| Visualization provenance | Tool-generated visualization metadata and report/chart references | Canonical market evidence unless explicitly admitted by future policy |
 | Output behavior, disclosure, and tone | Prompt and guardrail policy | Persistent domain data and financial truth |
 
 This allocation is what allows the domain to enforce the ADR-001 hard rules in architecture terms: memory personalizes and contextualizes, RAG informs, tools compute, and prompts govern behavior without becoming a shadow data layer.
@@ -677,11 +771,13 @@ This allocation is what allows the domain to enforce the ADR-001 hard rules in a
 | Current lifecycle control | `active` and `archived` are current-state control boundaries in the service-governance path |
 | Planned / partial lifecycle capability | `summarized` and automated summarization remain schema-supported but not yet universal runtime control flow |
 | Future personalization surface | LTM remains a planned cross-conversation store for stable preferences and symbol-tracking context only |
-| Scope boundary | Conversation text and state only; no prices, ratios, or tool outputs in memory |
+| Scope boundary | Conversation text and state only; no prices, ratios, raw tool outputs, or wholesale `ToolContextPack` instances in memory |
 
 The runtime contract is now `conversation_id` across agent methods, REST chat, management APIs, repositories, reconciliation, and migration tooling. The REST `POST /api/chat` route still accepts a deprecated `session_id` alias and normalizes it into `conversation_id`; the Socket.IO handler accepts `conversation_id` only.
 
 The information boundary is deliberate: LangGraph checkpoints retain recoverable agent execution state for a conversation, while the `conversations` collection and service layer retain application metadata and lifecycle control. This keeps behavioral state and business metadata aligned without making the checkpointer the source of truth for application ownership or archival rules. Session context is resolved in service helpers as reusable parent business context, but prompt-level injection of that merged context is not yet a universally realized runtime behavior. The target-state architecture allows LTM-backed personalization to complement that session context, but not replace the service-owned parent context boundary.
+
+For the target tool system, normalized outputs are treated by authority class before prompt assembly. `EvidenceFact`, `EvidenceSnippet`, and `EvidenceDocument` carry source attribution and freshness; `SystemRecord` carries in-system record authority; `VisualizationProvenance` carries chart or widget metadata without becoming financial truth; `GeneratedArtifact` carries derived report or export metadata; `MutationReceipt` carries an approved state-change audit result; and `DegradedState` carries blocked, stale, missing, license-unclear, parser-limited, or provider-down outcomes. Only approved derivatives such as report records, artifact metadata, mutation receipts, retained snapshots, or trace metadata may persist beyond the request, and retained derivatives must preserve lineage back to source/provider metadata or an explicit degraded-state reason.
 
 ##### Conversation & STM Lifecycle State Machine (UML Notation)
 
@@ -689,25 +785,25 @@ The information boundary is deliberate: LangGraph checkpoints retain recoverable
 stateDiagram-v2
     [*] --> Created : Client Request / init_conversation()
     Created --> Active : Ensure metadata & checkpoints / [valid_session]
-    
+
     state Active {
         [*] --> Idle
         Idle --> Processing : User turn / handle_query()
         Processing --> Idle : Response streaming complete / [success]
         Processing --> Degraded : Checkpoint failure / [database_offline]
     }
-    
+
     Active --> Summarized : Auto-compaction trigger / run_compaction()
     Summarized --> Active : User turn / resume()
-    
+
     Active --> Archived : Archive window elapsed or Admin action / archive()
     Summarized --> Archived : Admin action / archive()
-    
+
     state Archived {
         [*] --> ReadOnly
         ReadOnly --> RejectTurn : User turn / [always_false]
     }
-    
+
     Archived --> [*] : Conversation purge / delete()
 ```
 
@@ -1018,7 +1114,7 @@ This baseline establishes three constraints that the evolved prompt architecture
 > **Status:** PromptAssetLoader implemented in M1 (``src/core/prompt_asset_loader.py``).
 > PromptAssembler implemented in M2 (``src/core/prompt_assembler.py``). ResponseGuardrailMiddleware remains **proposed** for M3.
 > **Research Authority:** [PROMPT_SYSTEM_RESEARCH_PROPOSAL.md](./PROMPT_SYSTEM_RESEARCH_PROPOSAL.md)
-> **Governing ADRs:** [ADR-AGENT-002-SKILLS-PATTERN-PROMPT-COMPOSITION.md](./decisions/ADR-AGENT-002-SKILLS-PATTERN-PROMPT-COMPOSITION.md), [ADR-AGENT-003-EXTERNALIZE-VERSION-PROMPT-ASSETS.md](./decisions/ADR-AGENT-003-EXTERNALIZE-VERSION-PROMPT-ASSETS.md)
+> **Governing ADRs:** [ADR-AGENT-002-SKILLS-PATTERN-PROMPT-COMPOSITION.md](./DECISIONS/ADR-AGENT-002-SKILLS-PATTERN-PROMPT-COMPOSITION.md), [ADR-AGENT-003-EXTERNALIZE-VERSION-PROMPT-ASSETS.md](./DECISIONS/ADR-AGENT-003-EXTERNALIZE-VERSION-PROMPT-ASSETS.md)
 > **M1 delivery:** ``specs/prompt-system-milestone1/spec.md``
 > **M2 delivery:** ``specs/prompt-system-milestone2/spec.md``
 
@@ -1079,18 +1175,18 @@ flowchart TD
         L3["3. Route-Specific Prompts\n(Specific template chosen by Router)"]
         L1 --> L2 --> L3
     end
-    
+
     subgraph DataSpace["Data & Context Space (Dynamic Inputs)"]
         direction TB
         L4["4. Bounded Memory Context\n(STM checkpoints & messages)"]
-        L5["5. Sourced Evidence & Tool Metrics\n(Redis Cache / Yahoo Finance facts)"]
+        L5["5. Sourced Evidence & Tool Context\n(Normalized tool outputs + freshness metadata)"]
         L6["6. Request-Specific Framing & Outputs\n(Formatting constraints, schemas)"]
         L4 --> L5 --> L6
     end
-    
+
     InstructionSpace -->|"Merged & Compiled by\nPromptAssembler"| Assembler["PromptAssembler"]
     DataSpace -->|"Injected at runtime"| Assembler
-    
+
     Assembler -->|"Completed Prompt String"| LLM["LLM Reasoner"]
     LLM -->|"Generated Raw Response"| Guardrail["ResponseGuardrailMiddleware\n(Enforce compliance & structure)"]
     Guardrail -->|"Parsed AgentResponse"| Client["Client Surface"]
@@ -1133,7 +1229,7 @@ The architecture does not treat all tool paths as equivalent. Tool classes are a
 |-----------------|-----------------------|-------------------|----------------------|
 | `read_only_evidence` | Retrieves internal or external evidence without mutating durable state | Admitted in the current baseline | Tool guardrail boundary validates eligibility, arguments, provenance, and result handling; no approval boundary is required |
 | `bounded_transformation` | Produces deterministic calculations or reformatted outputs from governed inputs without mutating durable state | Admitted in the current baseline | Tool guardrail boundary validates input and output contracts and keeps results inside the data-only evidence boundary |
-| `workflow_mutation` | Creates, updates, archives, or otherwise changes repo-owned or user-owned durable state | Future only | Requires service-owned authorization plus an approval-capable boundary before execution |
+| `workflow_mutation` | Creates, updates, archives, or otherwise changes repo-owned or user-owned durable state; symbol-store writes use the `internal_state_mutation` subtype | Future only | Requires service-owned authorization plus an approval-capable boundary before execution |
 | `external_side_effect` | Triggers actions outside repo-owned state, such as brokerage actions, messaging, or third-party writes | Prohibited in the current baseline | Requires the strongest approval boundary, explicit allowlisting, and fail-closed runtime defaults |
 
 Architectural rules:
@@ -1141,6 +1237,34 @@ Architectural rules:
 1. The tool registry or equivalent runtime control surface owns the authoritative class of each tool.
 2. Prompt policy may narrow tool exposure but must never downgrade a tool's architectural risk class.
 3. The current analyst-facing architecture should remain bounded to `read_only_evidence` and `bounded_transformation` tools until stronger approval flows are explicitly designed.
+4. The target gateway may block, degrade, or require approval for a tool call, but it must not silently reinterpret a higher-risk action as a lower-risk action.
+
+##### 4.8.5a Tool Gateway and Evidence Admission Boundary
+
+The target tool gateway is a thin policy boundary around the existing registry-backed execution model. It is not a second agent runtime, provider parser, prompt authoring surface, or business lifecycle owner. Its architectural role is to make model-visible tool exposure, execution admission, result validation, and response-assembly checks explicit before tool outputs can influence the LLM or user-visible answer.
+
+```mermaid
+flowchart TD
+  Route["Route + locale + request context"] --> Exposure["Pre-model exposure\nToolSurfaceBuilder"]
+  Exposure --> Model["ReAct model receives compact tool surface"]
+  Model -->|"selected tool call"| Admission["Pre-execution admission\nroute / args / risk / license / freshness / timeout"]
+  Admission --> Execution["Registry-backed execution\nCurrent CachingTool / target AgentTool"]
+  Execution --> Validation["Post-execution validation\nsource metadata / output kind / warnings"]
+  Validation --> Assembly["Response assembly checks\ncitations / authority / degraded states"]
+  Assembly --> Surface["User-visible answer"]
+```
+
+| Gateway Concern | Architecture Rule |
+|-----------------|-------------------|
+| Tool surface | `ToolSurfaceBuilder` filters model-visible tools by route, locale, feature flags, enabled state, admitted risk class, and session/user context before ReAct invocation |
+| Descriptor integrity | Reviewed code descriptors and reviewed config manifests are trusted only after local review; remote or MCP-style descriptors are untrusted until admitted, versioned, and traceable |
+| Provider policy | Provider order, fallback, license posture, freshness, credentials, and parser limits remain internal policy and are not exposed as separate model-visible tools |
+| Generic web fetch | Deny by default; allowlisted public web content can produce normalized snippets/documents only, never raw HTML, raw PDF bytes, scripts, hidden text, or page instructions as prompt authority |
+| TradingView | Produces `VisualizationProvenance` for charts, widgets, heatmaps, screeners, and deep links; it is not canonical market evidence unless a future policy explicitly admits a data category |
+| Degraded state | Blocked, stale, missing-field, parser-limited, provider-down, license-unclear, or validation-failed outcomes return machine-detectable degraded states rather than silent fallback |
+| Mutations | Future symbol-store writes are `workflow_mutation` with `internal_state_mutation` subtype and require route admission, authorization, confirmation, audit metadata, and `MutationReceipt` output |
+
+These rules keep tool outputs in the data-only runtime context class defined by the prompt segment model. The prompt may reason over normalized facts, snippets, system records, visualization provenance, generated artifacts, mutation receipts, and degraded-state warnings, but it must not treat provider pages, tool descriptors, chart widgets, or retrieved document instructions as policy.
 
 #### 4.8.6 Prompt Segment and Locale Governance
 
@@ -1181,24 +1305,27 @@ Prompt observability is an architectural requirement because prompt behavior is 
 
 | Architecture View | Primary Companion Documents |
 |-------------------|-----------------------------|
-| Context and Boundary View | [TECHNICAL_DESIGN.md](./TECHNICAL_DESIGN.md), [SOFTWARE_REQUIREMENTS_SPECIFICATION.md](./SOFTWARE_REQUIREMENTS_SPECIFICATION.md) |
-| Logical View | [TECHNICAL_DESIGN.md](./TECHNICAL_DESIGN.md), [ADR-AGENT-001-LAYERED-LLM-ARCHITECTURE.md](./decisions/ADR-AGENT-001-LAYERED-LLM-ARCHITECTURE.md) |
-| Process View | [TECHNICAL_DESIGN.md](./TECHNICAL_DESIGN.md), [AGENT_MEMORY_TECHNICAL_DESIGN.md](./AGENT_MEMORY_TECHNICAL_DESIGN.md) |
-| Information and State View | [AGENT_MEMORY_TECHNICAL_DESIGN.md](./AGENT_MEMORY_TECHNICAL_DESIGN.md), [ADR-AGENT-001-LAYERED-LLM-ARCHITECTURE.md](./decisions/ADR-AGENT-001-LAYERED-LLM-ARCHITECTURE.md) |
+| Context and Boundary View | [TECHNICAL_DESIGN.md](./TECHNICAL_DESIGN.md), [SOFTWARE_REQUIREMENTS_SPECIFICATION.md](./SOFTWARE_REQUIREMENTS_SPECIFICATION.md), [ADR-AGENT-004-THIN-TOOL-GATEWAY-AND-NORMALIZED-TOOL-CONTEXT.md](./DECISIONS/ADR-AGENT-004-THIN-TOOL-GATEWAY-AND-NORMALIZED-TOOL-CONTEXT.md) |
+| Logical View | [TECHNICAL_DESIGN.md](./TECHNICAL_DESIGN.md), [ADR-AGENT-001-LAYERED-LLM-ARCHITECTURE.md](./DECISIONS/ADR-AGENT-001-LAYERED-LLM-ARCHITECTURE.md), [ADR-AGENT-004-THIN-TOOL-GATEWAY-AND-NORMALIZED-TOOL-CONTEXT.md](./DECISIONS/ADR-AGENT-004-THIN-TOOL-GATEWAY-AND-NORMALIZED-TOOL-CONTEXT.md) |
+| Process View | [TECHNICAL_DESIGN.md](./TECHNICAL_DESIGN.md), [AGENT_MEMORY_TECHNICAL_DESIGN.md](./AGENT_MEMORY_TECHNICAL_DESIGN.md), [ADR-AGENT-004-THIN-TOOL-GATEWAY-AND-NORMALIZED-TOOL-CONTEXT.md](./DECISIONS/ADR-AGENT-004-THIN-TOOL-GATEWAY-AND-NORMALIZED-TOOL-CONTEXT.md) |
+| Information and State View | [AGENT_MEMORY_TECHNICAL_DESIGN.md](./AGENT_MEMORY_TECHNICAL_DESIGN.md), [ADR-AGENT-001-LAYERED-LLM-ARCHITECTURE.md](./DECISIONS/ADR-AGENT-001-LAYERED-LLM-ARCHITECTURE.md), [ADR-AGENT-004-THIN-TOOL-GATEWAY-AND-NORMALIZED-TOOL-CONTEXT.md](./DECISIONS/ADR-AGENT-004-THIN-TOOL-GATEWAY-AND-NORMALIZED-TOOL-CONTEXT.md) |
 | Development View | [TECHNICAL_DESIGN.md](./TECHNICAL_DESIGN.md), [README.md](../../../README.md) |
 | Deployment View | [IaC/README.md](../../../IaC/README.md), [TECHNICAL_DESIGN.md](./TECHNICAL_DESIGN.md) |
-| Operations and Maintenance View | [TECHNICAL_DESIGN.md](./TECHNICAL_DESIGN.md), [IaC/README.md](../../../IaC/README.md) |
-| Prompt and Behavior View | [PROMPT_SYSTEM_RESEARCH_PROPOSAL.md](./PROMPT_SYSTEM_RESEARCH_PROPOSAL.md), [TECHNICAL_DESIGN.md §3.5](./TECHNICAL_DESIGN.md#35-prompt-realization-and-guardrails), [ADR-AGENT-002-SKILLS-PATTERN-PROMPT-COMPOSITION.md](./decisions/ADR-AGENT-002-SKILLS-PATTERN-PROMPT-COMPOSITION.md), [ADR-AGENT-003-EXTERNALIZE-VERSION-PROMPT-ASSETS.md](./decisions/ADR-AGENT-003-EXTERNALIZE-VERSION-PROMPT-ASSETS.md) |
+| Operations and Maintenance View | [TECHNICAL_DESIGN.md](./TECHNICAL_DESIGN.md), [IaC/README.md](../../../IaC/README.md), [ADR-AGENT-004-THIN-TOOL-GATEWAY-AND-NORMALIZED-TOOL-CONTEXT.md](./DECISIONS/ADR-AGENT-004-THIN-TOOL-GATEWAY-AND-NORMALIZED-TOOL-CONTEXT.md) |
+| Prompt and Behavior View | [PROMPT_SYSTEM_RESEARCH_PROPOSAL.md](./PROMPT_SYSTEM_RESEARCH_PROPOSAL.md), [TECHNICAL_DESIGN.md §3.5](./TECHNICAL_DESIGN.md#35-prompt-realization-and-guardrails), [ADR-AGENT-002-SKILLS-PATTERN-PROMPT-COMPOSITION.md](./DECISIONS/ADR-AGENT-002-SKILLS-PATTERN-PROMPT-COMPOSITION.md), [ADR-AGENT-003-EXTERNALIZE-VERSION-PROMPT-ASSETS.md](./DECISIONS/ADR-AGENT-003-EXTERNALIZE-VERSION-PROMPT-ASSETS.md), [ADR-AGENT-004-THIN-TOOL-GATEWAY-AND-NORMALIZED-TOOL-CONTEXT.md](./DECISIONS/ADR-AGENT-004-THIN-TOOL-GATEWAY-AND-NORMALIZED-TOOL-CONTEXT.md) |
 
 ### 5.2 Concern-to-Decision Correspondence
 
 | Concern | Governing Decision / Artifact |
 |---------|-------------------------------|
-| Layered LLM boundaries and memory scope | [ADR-AGENT-001-LAYERED-LLM-ARCHITECTURE.md](./decisions/ADR-AGENT-001-LAYERED-LLM-ARCHITECTURE.md) |
-| Prompt skills composition | [ADR-AGENT-002-SKILLS-PATTERN-PROMPT-COMPOSITION.md](./decisions/ADR-AGENT-002-SKILLS-PATTERN-PROMPT-COMPOSITION.md) |
-| Externalized prompt assets and prompt versioning | [ADR-AGENT-003-EXTERNALIZE-VERSION-PROMPT-ASSETS.md](./decisions/ADR-AGENT-003-EXTERNALIZE-VERSION-PROMPT-ASSETS.md) |
+| Layered LLM boundaries and memory scope | [ADR-AGENT-001-LAYERED-LLM-ARCHITECTURE.md](./DECISIONS/ADR-AGENT-001-LAYERED-LLM-ARCHITECTURE.md) |
+| Prompt skills composition | [ADR-AGENT-002-SKILLS-PATTERN-PROMPT-COMPOSITION.md](./DECISIONS/ADR-AGENT-002-SKILLS-PATTERN-PROMPT-COMPOSITION.md) |
+| Externalized prompt assets and prompt versioning | [ADR-AGENT-003-EXTERNALIZE-VERSION-PROMPT-ASSETS.md](./DECISIONS/ADR-AGENT-003-EXTERNALIZE-VERSION-PROMPT-ASSETS.md) |
+| Tool gateway, provider policy, and normalized tool context | [ADR-AGENT-004-THIN-TOOL-GATEWAY-AND-NORMALIZED-TOOL-CONTEXT.md](./DECISIONS/ADR-AGENT-004-THIN-TOOL-GATEWAY-AND-NORMALIZED-TOOL-CONTEXT.md) |
 | Conversation hierarchy, checkpoints, and runtime reconciliation | [AGENT_MEMORY_TECHNICAL_DESIGN.md](./AGENT_MEMORY_TECHNICAL_DESIGN.md) |
 | Prompt-system design research and rollout path | [PROMPT_SYSTEM_RESEARCH_PROPOSAL.md](./PROMPT_SYSTEM_RESEARCH_PROPOSAL.md) |
+
+Tool-system requirements remain governed by [SOFTWARE_REQUIREMENTS_SPECIFICATION.md](./SOFTWARE_REQUIREMENTS_SPECIFICATION.md), especially `FR-2.4` through `FR-2.11`, `AC-9`, `IR-3`, and the related constraints for provider licensing, TradingView authority, generic web fetching, market-fact attribution, and `ToolContextPack` persistence. This architecture document names the boundary and authority relationships; it does not redefine the requirement tables or executable contracts.
 
 ### 5.3 Terminology and Concept Evolution
 
@@ -1208,6 +1335,10 @@ Prompt observability is an architectural requirement because prompt behavior is 
 | PromptRegistry (implementation-discussion alias) | Loader-facade naming for prompt asset resolution | When this name is used in proposal or implementation discussion, it should be understood as a technical facade within the PromptAssetLoader boundary rather than a separate architectural concept. |
 | Prompt asset taxonomy | ADR taxonomy (`src/prompts/system|skills|experiments`) with a shallow metadata-driven file layout | ADR taxonomy is canonical for architecture and decision authority; version, locale, and baseline semantics belong in metadata and loader rules rather than deeper directory nesting. |
 | Intent-based routing | `StockQueryRoute` enum with 8 canonical routes | Originally described with 7 working-name intents; refined to 8 routes during implementation. |
+| `CachingTool` | Current implementation base class; target architecture name is `AgentTool` | `CachingTool` remains a current code fact. `AgentTool` is the target architectural name for cache-aware, descriptor-backed, policy-aware agent-callable tools. |
+| Direct registry tool exposure | Target `ToolSurfaceBuilder` plus thin `ToolGateway` around `ToolRegistry` | `ToolRegistry` remains the inventory and enablement boundary; route-filtered exposure and execution admission are target gateway responsibilities. |
+| Provider-specific tools | Agent-callable tools with internal provider adapters | Provider adapters such as Vietnam-native, official, licensed, public-web, visualization, and international-fallback connectors stay below the model-visible tool surface. |
+| Evidence-only context pack | `ToolContextPack` | The target context pack is broader than evidence: it can carry evidence, system records, visualization provenance, generated artifacts, mutation receipts, warnings, and degraded states. |
 
 ### 5.4 Content Preservation Correspondence
 
@@ -1217,7 +1348,7 @@ The pre-rewrite architecture document mixed architecture description, technical 
 - implementation-heavy component, configuration, pattern, and extension detail is preserved in [TECHNICAL_DESIGN.md](./TECHNICAL_DESIGN.md);
 - memory-specific subsystem detail is preserved in [AGENT_MEMORY_TECHNICAL_DESIGN.md](./AGENT_MEMORY_TECHNICAL_DESIGN.md);
 - prompt-system research, detailed rollout logic, and evaluation design are preserved in [PROMPT_SYSTEM_RESEARCH_PROPOSAL.md](./PROMPT_SYSTEM_RESEARCH_PROPOSAL.md);
-- decision authority remains with the ADR set in [decisions](./decisions).
+- decision authority remains with the ADR set in [DECISIONS](./DECISIONS).
 
 ### 5.5 Correspondence Rules and Consistency Checks
 
@@ -1244,6 +1375,9 @@ Reviewer checklist:
 - [ ] STM transport caveats remain synchronized across architecture, technical design, and memory technical design documents.
 - [ ] Concept evolution terms such as `Prompt Compiler`, `PromptAssembler`, and `PromptAssetLoader` are used consistently with section 5.3.
 - [ ] ADR taxonomy references are stated consistently where prompt asset directories are referenced.
+- [ ] Tool-system sections label `CachingTool`, `ToolRegistry`, Yahoo-backed `DataManager`, `TradingViewTool` placeholder, and `ReportingTool` scaffold as current-state facts.
+- [ ] Tool-system sections label `AgentTool`, `ToolSurfaceBuilder`, `ToolGateway`, provider adapters, normalized output kinds, and `ToolContextPack` as target-state Phase 2B boundaries until implementation artifacts prove otherwise.
+- [ ] TradingView, generic web fetch, and remote/MCP-style tool descriptors are not described as canonical evidence or trusted prompt authority by default.
 
 ---
 
@@ -1253,9 +1387,10 @@ Reviewer checklist:
 
 | ADR | Status | Architectural Effect on This Description |
 |-----|--------|------------------------------------------|
-| [ADR-AGENT-001-LAYERED-LLM-ARCHITECTURE.md](./decisions/ADR-AGENT-001-LAYERED-LLM-ARCHITECTURE.md) | **Accepted** | Governs memory boundaries, evidence separation, and layered LLM responsibilities |
-| [ADR-AGENT-002-SKILLS-PATTERN-PROMPT-COMPOSITION.md](./decisions/ADR-AGENT-002-SKILLS-PATTERN-PROMPT-COMPOSITION.md) | **Proposed** | Governs the composable skills model used in the prompt architecture view |
-| [ADR-AGENT-003-EXTERNALIZE-VERSION-PROMPT-ASSETS.md](./decisions/ADR-AGENT-003-EXTERNALIZE-VERSION-PROMPT-ASSETS.md) | **Proposed** | Governs the move from hardcoded prompts to versioned external assets |
+| [ADR-AGENT-001-LAYERED-LLM-ARCHITECTURE.md](./DECISIONS/ADR-AGENT-001-LAYERED-LLM-ARCHITECTURE.md) | **Accepted** | Governs memory boundaries, evidence separation, and layered LLM responsibilities |
+| [ADR-AGENT-002-SKILLS-PATTERN-PROMPT-COMPOSITION.md](./DECISIONS/ADR-AGENT-002-SKILLS-PATTERN-PROMPT-COMPOSITION.md) | **Proposed** | Governs the composable skills model used in the prompt architecture view |
+| [ADR-AGENT-003-EXTERNALIZE-VERSION-PROMPT-ASSETS.md](./DECISIONS/ADR-AGENT-003-EXTERNALIZE-VERSION-PROMPT-ASSETS.md) | **Proposed** | Governs the move from hardcoded prompts to versioned external assets |
+| [ADR-AGENT-004-THIN-TOOL-GATEWAY-AND-NORMALIZED-TOOL-CONTEXT.md](./DECISIONS/ADR-AGENT-004-THIN-TOOL-GATEWAY-AND-NORMALIZED-TOOL-CONTEXT.md) | **Proposed** | Governs the thin gateway, provider policy, normalized context, generic web trust, and tool data-retention boundary |
 
 #### 6.1.1 Architectural Hard Rules (from ADR-001 Hard Rules)
 
@@ -1292,9 +1427,10 @@ This section retains the major evolution themes from the previous architecture d
 
 | Area | Current State | Planned Direction |
 |------|---------------|------------------|
-| Stock symbol data | Yahoo Finance plus repository fallback | Multi-source data providers and richer domain actions |
-| TradingView integration | Placeholder only | Full chart, widget, and analysis integration |
-| Reporting | Basic report generation | Template-driven HTML/PDF capable reporting |
+| Stock symbol data | `StockSymbolTool` currently uses DataManager/Yahoo plus repository fallback | Evolve to internal symbol-store lookup and normalization; live quote/history/fundamental requests move to provider-backed market-data tools |
+| Market data providers | Yahoo Finance is the current primary external market-data path | Vietnam-first provider posture with official, licensed, Vietnam-native public-web, wrapper/prototype, visualization, and international-fallback classes |
+| TradingView integration | Placeholder only | Visualization provenance for charts, widgets, deep links, ticker tape, heatmaps, and screeners; not canonical evidence by default |
+| Reporting | Basic scaffold report generation | Report composition from `ToolContextPack`, generated artifacts, visualization provenance, degraded states, and source lineage |
 
 ### 7.2 Agent Runtime Evolution
 
@@ -1343,4 +1479,5 @@ The detailed extension catalog, example snippets, configuration candidates, and 
 | 0.9 | 2026-05-19 | GitHub Copilot | Updated the Source Layout View to show the prompt-subsystem transition in place: canonical shallow prompt assets under `src/prompts/system|skills|experiments` plus the still-current legacy prompt files retained until prompt compiler cutover |
 | 1.0 | 2026-05-19 | GitHub Copilot | Added an explicit guardrail boundary model to the Prompt and Behavior View so input, prompt-assembly, tool, output, and approval controls are represented as separate architectural boundaries rather than as response-only behavior shaping |
 | 1.1 | 2026-05-21 | GitHub Copilot | Added architectural tool-risk classes plus prompt-segment and locale-governance boundaries so approval posture, static-versus-dynamic segment treatment, and locale parity remain explicit as the prompt system evolves |
+| 1.2 | 2026-06-22 | Codex | Promoted Phase 2B tool-system boundaries into architecture views: thin in-process Tool Gateway, route-filtered tool surface, provider-adapter policy, normalized tool context, Vietnam-first provider posture, TradingView visualization provenance, generic web trust controls, and current-versus-target tool terminology |
 
