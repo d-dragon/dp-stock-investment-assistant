@@ -1,14 +1,14 @@
 # SRS To Spec Traceability
 
-> **Document Version**: 1.7  
-> **Generated**: 2026-05-22 (manual reconciliation)  
+> **Document Version**: 1.9
+> **Generated**: 2026-06-22 (manual reconciliation)
 > **Status**: Active  
 > **Traceability Manifest Version**: 1  
 
 ## Baseline
 
 - SRS: [docs/domains/agent/SOFTWARE_REQUIREMENTS_SPECIFICATION.md](SOFTWARE_REQUIREMENTS_SPECIFICATION.md)
-- SRS version: `2.6`
+- SRS version: `2.8`
 
 ## Summary
 
@@ -31,6 +31,7 @@ For prompt-system entries that do not yet have a dedicated `specs/*` artifact, t
 | `1.6` | `2026-05-21` | Updated the governing SRS baseline to v2.6 and added prompt-governance trace entries for FR-1.4.10–1.4.16, FR-1.5.6, NFR-5.2.8–5.2.11, and AC-8.5–8.11. |
 | `1.7` | `2026-05-22` | Repointed prompt-system reverse-trace entries from the missing prompt-governance spec reference to existing design-governance artifacts in the proposal, roadmap, benchmark review, and ADR set. |
 | `1.8` | `2026-06-03` | Updated M1-mapped prompt-system entries (FR-1.4.5, FR-1.4.6, FR-1.4.8, FR-1.4.16, NFR-5.2.5–5.2.9, NFR-6.2.3, AC-8.1, AC-8.2) from `clarified`/`unmapped` to `implemented` with SRS v2.7 baseline. Pointed linked spec references to `specs/prompt-system-milestone1/spec.md`.
+| `1.9` | `2026-06-22` | Updated the governing SRS baseline to v2.8 and added manual Phase 2B tool-system trace entries for FR-2.4–FR-2.11, CON-6–CON-10, AC-9.1–AC-9.17, IR-3.1–IR-3.10, and related privacy/source-lineage requirements. |
 
 ## Family Index
 
@@ -38,8 +39,8 @@ For prompt-system entries that do not yet have a dedicated `specs/*` artifact, t
 |------|----------|
 | `FR` | [FR-1](#fr-1), [FR-2](#fr-2), [FR-3](#fr-3), [FR-4](#fr-4), [FR-5](#fr-5), [FR-6](#fr-6), [FR-7](#fr-7) |
 | `NFR` | [NFR-1](#nfr-1), [NFR-2](#nfr-2), [NFR-3](#nfr-3), [NFR-4](#nfr-4), [NFR-5](#nfr-5), [NFR-6](#nfr-6) |
-| `AC` | [AC-1](#ac-1), [AC-2](#ac-2), [AC-3](#ac-3), [AC-4](#ac-4), [AC-5](#ac-5), [AC-6](#ac-6), [AC-7](#ac-7), [AC-8](#ac-8) |
-| `IR` | [IR-1](#ir-1), [IR-2](#ir-2) |
+| `AC` | [AC-1](#ac-1), [AC-2](#ac-2), [AC-3](#ac-3), [AC-4](#ac-4), [AC-5](#ac-5), [AC-6](#ac-6), [AC-7](#ac-7), [AC-8](#ac-8), [AC-9](#ac-9) |
+| `IR` | [IR-1](#ir-1), [IR-2](#ir-2), [IR-3](#ir-3) |
 | `CON` | [CON](#con) |
 | `ERR` | [ERR](#err) |
 | `PRIV` | [PRIV](#priv) |
@@ -92,27 +93,21 @@ Mapped: `17/37`. Unmapped: `20`.
 
 ### FR-2
 
-Mapped: `0/17`. Unmapped: `17`.
+Mapped: `8/25` requirement groups manually reconciled for SRS v2.8. Legacy FR-2.1–FR-2.3 item-level rows remain implementation-unmapped until a delivery spec is created.
 
 | SRS Item | Linked Spec | Current Status | Sync Status |
 |----------|-------------|----------------|-------------|
-| [FR-2.1.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L212) | `-` | `unmapped` | `unmapped` |
-| [FR-2.1.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L213) | `-` | `unmapped` | `unmapped` |
-| [FR-2.1.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L214) | `-` | `unmapped` | `unmapped` |
-| [FR-2.1.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L215) | `-` | `unmapped` | `unmapped` |
-| [FR-2.1.5](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L216) | `-` | `unmapped` | `unmapped` |
-| [FR-2.1.6](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L217) | `-` | `unmapped` | `unmapped` |
-| [FR-2.2.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L223) | `-` | `unmapped` | `unmapped` |
-| [FR-2.2.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L224) | `-` | `unmapped` | `unmapped` |
-| [FR-2.2.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L225) | `-` | `unmapped` | `unmapped` |
-| [FR-2.2.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L226) | `-` | `unmapped` | `unmapped` |
-| [FR-2.2.5](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L227) | `-` | `unmapped` | `unmapped` |
-| [FR-2.2.6](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L228) | `-` | `unmapped` | `unmapped` |
-| [FR-2.3.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L234) | `-` | `unmapped` | `unmapped` |
-| [FR-2.3.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L235) | `-` | `unmapped` | `unmapped` |
-| [FR-2.3.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L236) | `-` | `unmapped` | `unmapped` |
-| [FR-2.3.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L237) | `-` | `unmapped` | `unmapped` |
-| [FR-2.3.5](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L238) | `-` | `unmapped` | `unmapped` |
+| [FR-2.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#fr-21-tool-result-caching) | `-` | `unmapped` | `unmapped` |
+| [FR-2.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#fr-22-tool-registry) | `-` | `unmapped` | `unmapped` |
+| [FR-2.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#fr-23-stock-investment-tools) | `-` | `unmapped` | `unmapped` |
+| [FR-2.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#fr-24-tool-gateway-and-tool-exposure) | [ADR-004](DECISIONS/ADR-AGENT-004-THIN-TOOL-GATEWAY-AND-NORMALIZED-TOOL-CONTEXT.md), [Phase 2B roadmap](PHASE_2_AGENT_ENHANCEMENT_ROADMAP.md#2b2-route-filtered-tool-surface-and-thin-gateway), [tool proposal](TOOLS_RESEARCH_AND_PROPOSAL.md#123-phase-2-route-filtered-tool-surface-and-thin-gateway) | `clarified` | `2.8` |
+| [FR-2.5](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#fr-25-tool-output-normalization-and-toolcontextpack) | [ADR-004](DECISIONS/ADR-AGENT-004-THIN-TOOL-GATEWAY-AND-NORMALIZED-TOOL-CONTEXT.md), [Phase 2B roadmap](PHASE_2_AGENT_ENHANCEMENT_ROADMAP.md#2b4-provider-policy-and-normalized-output-backbone), [tool proposal](TOOLS_RESEARCH_AND_PROPOSAL.md#125-phase-4-provider-policy-and-normalized-output-backbone) | `clarified` | `2.8` |
+| [FR-2.6](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#fr-26-vietnam-market-tool-coverage) | [Phase 2B roadmap](PHASE_2_AGENT_ENHANCEMENT_ROADMAP.md#2b5-concrete-market-data-and-visualization-tools), [tool proposal](TOOLS_RESEARCH_AND_PROPOSAL.md#101-vietnam-market-provider-strategy) | `clarified` | `2.8` |
+| [FR-2.7](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#fr-27-provider-selection-and-source-attribution) | [ADR-004](DECISIONS/ADR-AGENT-004-THIN-TOOL-GATEWAY-AND-NORMALIZED-TOOL-CONTEXT.md), [Architecture provider view](ARCHITECTURE_DESIGN.md#434-tool-provider-selection-and-fallback-view), [tool proposal](TOOLS_RESEARCH_AND_PROPOSAL.md#117-providerselectionpolicy) | `clarified` | `2.8` |
+| [FR-2.8](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#fr-28-tradingview-visualization) | [ADR-004](DECISIONS/ADR-AGENT-004-THIN-TOOL-GATEWAY-AND-NORMALIZED-TOOL-CONTEXT.md), [Phase 2B roadmap](PHASE_2_AGENT_ENHANCEMENT_ROADMAP.md#2b5-concrete-market-data-and-visualization-tools), [tool proposal](TOOLS_RESEARCH_AND_PROPOSAL.md#102-tradingview-visualization-strategy) | `clarified` | `2.8` |
+| [FR-2.9](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#fr-29-generic-web-evidence) | [ADR-004](DECISIONS/ADR-AGENT-004-THIN-TOOL-GATEWAY-AND-NORMALIZED-TOOL-CONTEXT.md), [Phase 2B roadmap](PHASE_2_AGENT_ENHANCEMENT_ROADMAP.md#2b7-generic-web-evidence-pipeline), [tool proposal](TOOLS_RESEARCH_AND_PROPOSAL.md#103-generic-web-evidence-trust-model) | `clarified` | `2.8` |
+| [FR-2.10](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#fr-210-reporting-and-generated-artifacts) | [Phase 2B roadmap](PHASE_2_AGENT_ENHANCEMENT_ROADMAP.md#2b6-reporting-from-toolcontextpack), [tool proposal](TOOLS_RESEARCH_AND_PROPOSAL.md#127-phase-6-reporting-from-tool-context-packs) | `clarified` | `2.8` |
+| [FR-2.11](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#fr-211-tool-data-integrity-and-mutation-receipts) | [ADR-004](DECISIONS/ADR-AGENT-004-THIN-TOOL-GATEWAY-AND-NORMALIZED-TOOL-CONTEXT.md), [tool proposal](TOOLS_RESEARCH_AND_PROPOSAL.md#9-tool-data-architecture-and-integrity-design), [Phase 2B roadmap](PHASE_2_AGENT_ENHANCEMENT_ROADMAP.md#2b3-evolved-stocksymboltool-over-internal-symbol-store) | `clarified` | `2.8` |
 
 ### FR-3
 
@@ -407,7 +402,7 @@ Mapped: `1/13`. Unmapped: `12`.
 
 ### CON
 
-Mapped: `0/5`. Unmapped: `5`.
+Mapped: `5/10` manually reconciled for SRS v2.8. CON-1–CON-5 remain implementation-unmapped.
 
 | SRS Item | Linked Spec | Current Status | Sync Status |
 |----------|-------------|----------------|-------------|
@@ -416,6 +411,11 @@ Mapped: `0/5`. Unmapped: `5`.
 | [CON-3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L755) | `-` | `unmapped` | `unmapped` |
 | [CON-4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L756) | `-` | `unmapped` | `unmapped` |
 | [CON-5](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L757) | `-` | `unmapped` | `unmapped` |
+| [CON-6](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#4-constraints) | [ADR-004](DECISIONS/ADR-AGENT-004-THIN-TOOL-GATEWAY-AND-NORMALIZED-TOOL-CONTEXT.md), [tool proposal](TOOLS_RESEARCH_AND_PROPOSAL.md#101-vietnam-market-provider-strategy) | `clarified` | `2.8` |
+| [CON-7](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#4-constraints) | [ADR-004](DECISIONS/ADR-AGENT-004-THIN-TOOL-GATEWAY-AND-NORMALIZED-TOOL-CONTEXT.md), [Architecture tool risk view](ARCHITECTURE_DESIGN.md#485-tool-risk-and-approval-envelope) | `clarified` | `2.8` |
+| [CON-8](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#4-constraints) | [ADR-004](DECISIONS/ADR-AGENT-004-THIN-TOOL-GATEWAY-AND-NORMALIZED-TOOL-CONTEXT.md), [tool proposal](TOOLS_RESEARCH_AND_PROPOSAL.md#103-generic-web-evidence-trust-model) | `clarified` | `2.8` |
+| [CON-9](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#4-constraints) | [ADR-004](DECISIONS/ADR-AGENT-004-THIN-TOOL-GATEWAY-AND-NORMALIZED-TOOL-CONTEXT.md), [tool proposal](TOOLS_RESEARCH_AND_PROPOSAL.md#95-cache-and-freshness-design) | `clarified` | `2.8` |
+| [CON-10](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#4-constraints) | [ADR-004](DECISIONS/ADR-AGENT-004-THIN-TOOL-GATEWAY-AND-NORMALIZED-TOOL-CONTEXT.md), [tool proposal](TOOLS_RESEARCH_AND_PROPOSAL.md#93-logical-data-models) | `clarified` | `2.8` |
 
 ### AC-1
 
@@ -526,6 +526,30 @@ Mapped: `7/11`. Unmapped: `4`.
 | [AC-8.10](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L845) | [PROMPT_SYSTEM_BENCHMARK_REVIEW.md](PROMPT_SYSTEM_BENCHMARK_REVIEW.md) | `clarified` | `current` |
 | [AC-8.11](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L846) | [prompt-system-milestone2 spec.md](../../../specs/prompt-system-milestone2/spec.md) | `implemented` | `2.7` |
 
+### AC-9
+
+Mapped: `17/17` manually reconciled for SRS v2.8. These are design-governance mappings until a Phase 2B implementation spec exists.
+
+| SRS Item | Linked Spec | Current Status | Sync Status |
+|----------|-------------|----------------|-------------|
+| [AC-9.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#ac-9-tool-system-architecture-and-vietnam-market-integration) | [Phase 2B roadmap](PHASE_2_AGENT_ENHANCEMENT_ROADMAP.md#2b1-agenttool-baseline-and-descriptor-inventory), [ADR-004](DECISIONS/ADR-AGENT-004-THIN-TOOL-GATEWAY-AND-NORMALIZED-TOOL-CONTEXT.md) | `clarified` | `2.8` |
+| [AC-9.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#ac-9-tool-system-architecture-and-vietnam-market-integration) | [Phase 2B roadmap](PHASE_2_AGENT_ENHANCEMENT_ROADMAP.md#2b2-route-filtered-tool-surface-and-thin-gateway), [ADR-004](DECISIONS/ADR-AGENT-004-THIN-TOOL-GATEWAY-AND-NORMALIZED-TOOL-CONTEXT.md) | `clarified` | `2.8` |
+| [AC-9.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#ac-9-tool-system-architecture-and-vietnam-market-integration) | [Phase 2B roadmap](PHASE_2_AGENT_ENHANCEMENT_ROADMAP.md#2b2-route-filtered-tool-surface-and-thin-gateway), [ADR-004](DECISIONS/ADR-AGENT-004-THIN-TOOL-GATEWAY-AND-NORMALIZED-TOOL-CONTEXT.md) | `clarified` | `2.8` |
+| [AC-9.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#ac-9-tool-system-architecture-and-vietnam-market-integration) | [ADR-004](DECISIONS/ADR-AGENT-004-THIN-TOOL-GATEWAY-AND-NORMALIZED-TOOL-CONTEXT.md), [Phase 2B roadmap](PHASE_2_AGENT_ENHANCEMENT_ROADMAP.md#2b8-optional-remote-mcp-style-tool-admission) | `clarified` | `2.8` |
+| [AC-9.5](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#ac-9-tool-system-architecture-and-vietnam-market-integration) | [Phase 2B roadmap](PHASE_2_AGENT_ENHANCEMENT_ROADMAP.md#2b3-evolved-stocksymboltool-over-internal-symbol-store), [tool proposal](TOOLS_RESEARCH_AND_PROPOSAL.md#124-phase-3-evolved-stocksymboltool-over-internal-symbol-store) | `clarified` | `2.8` |
+| [AC-9.6](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#ac-9-tool-system-architecture-and-vietnam-market-integration) | [Phase 2B roadmap](PHASE_2_AGENT_ENHANCEMENT_ROADMAP.md#2b3-evolved-stocksymboltool-over-internal-symbol-store), [tool proposal](TOOLS_RESEARCH_AND_PROPOSAL.md#101-vietnam-market-provider-strategy) | `clarified` | `2.8` |
+| [AC-9.7](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#ac-9-tool-system-architecture-and-vietnam-market-integration) | [Architecture provider view](ARCHITECTURE_DESIGN.md#434-tool-provider-selection-and-fallback-view), [ADR-004](DECISIONS/ADR-AGENT-004-THIN-TOOL-GATEWAY-AND-NORMALIZED-TOOL-CONTEXT.md) | `clarified` | `2.8` |
+| [AC-9.8](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#ac-9-tool-system-architecture-and-vietnam-market-integration) | [Phase 2B roadmap](PHASE_2_AGENT_ENHANCEMENT_ROADMAP.md#2b5-concrete-market-data-and-visualization-tools), [tool proposal](TOOLS_RESEARCH_AND_PROPOSAL.md#135-source-verification-metadata) | `clarified` | `2.8` |
+| [AC-9.9](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#ac-9-tool-system-architecture-and-vietnam-market-integration) | [Phase 2B roadmap](PHASE_2_AGENT_ENHANCEMENT_ROADMAP.md#2b9-verification-and-quality-gates), [tool proposal](TOOLS_RESEARCH_AND_PROPOSAL.md#136-data-integrity-acceptance-checks) | `clarified` | `2.8` |
+| [AC-9.10](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#ac-9-tool-system-architecture-and-vietnam-market-integration) | [Phase 2B roadmap](PHASE_2_AGENT_ENHANCEMENT_ROADMAP.md#2b4-provider-policy-and-normalized-output-backbone), [tool proposal](TOOLS_RESEARCH_AND_PROPOSAL.md#119-normalizedoutputkind) | `clarified` | `2.8` |
+| [AC-9.11](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#ac-9-tool-system-architecture-and-vietnam-market-integration) | [ADR-004](DECISIONS/ADR-AGENT-004-THIN-TOOL-GATEWAY-AND-NORMALIZED-TOOL-CONTEXT.md), [tool proposal](TOOLS_RESEARCH_AND_PROPOSAL.md#102-tradingview-visualization-strategy) | `clarified` | `2.8` |
+| [AC-9.12](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#ac-9-tool-system-architecture-and-vietnam-market-integration) | [ADR-004](DECISIONS/ADR-AGENT-004-THIN-TOOL-GATEWAY-AND-NORMALIZED-TOOL-CONTEXT.md), [tool proposal](TOOLS_RESEARCH_AND_PROPOSAL.md#103-generic-web-evidence-trust-model) | `clarified` | `2.8` |
+| [AC-9.13](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#ac-9-tool-system-architecture-and-vietnam-market-integration) | [Phase 2B roadmap](PHASE_2_AGENT_ENHANCEMENT_ROADMAP.md#2b6-reporting-from-toolcontextpack), [tool proposal](TOOLS_RESEARCH_AND_PROPOSAL.md#127-phase-6-reporting-from-tool-context-packs) | `clarified` | `2.8` |
+| [AC-9.14](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#ac-9-tool-system-architecture-and-vietnam-market-integration) | [ADR-004](DECISIONS/ADR-AGENT-004-THIN-TOOL-GATEWAY-AND-NORMALIZED-TOOL-CONTEXT.md), [tool proposal](TOOLS_RESEARCH_AND_PROPOSAL.md#9-tool-data-architecture-and-integrity-design) | `clarified` | `2.8` |
+| [AC-9.15](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#ac-9-tool-system-architecture-and-vietnam-market-integration) | [ADR-004](DECISIONS/ADR-AGENT-004-THIN-TOOL-GATEWAY-AND-NORMALIZED-TOOL-CONTEXT.md), [tool proposal](TOOLS_RESEARCH_AND_PROPOSAL.md#935-mutation-receipt) | `clarified` | `2.8` |
+| [AC-9.16](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#ac-9-tool-system-architecture-and-vietnam-market-integration) | [Phase 2B roadmap](PHASE_2_AGENT_ENHANCEMENT_ROADMAP.md#2b9-verification-and-quality-gates), [tool proposal](TOOLS_RESEARCH_AND_PROPOSAL.md#133-evaluation-dataset-families) | `clarified` | `2.8` |
+| [AC-9.17](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#ac-9-tool-system-architecture-and-vietnam-market-integration) | [Phase 2B roadmap](PHASE_2_AGENT_ENHANCEMENT_ROADMAP.md#2b6-reporting-from-toolcontextpack), [tool proposal](TOOLS_RESEARCH_AND_PROPOSAL.md#134-quality-reliability-and-accuracy-benchmarks) | `clarified` | `2.8` |
+
 ### IR-1
 
 Mapped: `9/13`. Unmapped: `4`.
@@ -558,6 +582,23 @@ Mapped: `0/5`. Unmapped: `5`.
 | [IR-2.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L932) | `-` | `unmapped` | `unmapped` |
 | [IR-2.5](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L933) | `-` | `unmapped` | `unmapped` |
 
+### IR-3
+
+Mapped: `10/10` manually reconciled for SRS v2.8. These are contract-design mappings until executable schema artifacts exist.
+
+| SRS Item | Linked Spec | Current Status | Sync Status |
+|----------|-------------|----------------|-------------|
+| [IR-3.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#ir-3-tool-system-contracts) | [tool proposal](TOOLS_RESEARCH_AND_PROPOSAL.md#113-toolcapabilitydescriptor), [ADR-004](DECISIONS/ADR-AGENT-004-THIN-TOOL-GATEWAY-AND-NORMALIZED-TOOL-CONTEXT.md) | `clarified` | `2.8` |
+| [IR-3.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#ir-3-tool-system-contracts) | [tool proposal](TOOLS_RESEARCH_AND_PROPOSAL.md#115-toolpolicydescriptor), [ADR-004](DECISIONS/ADR-AGENT-004-THIN-TOOL-GATEWAY-AND-NORMALIZED-TOOL-CONTEXT.md) | `clarified` | `2.8` |
+| [IR-3.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#ir-3-tool-system-contracts) | [tool proposal](TOOLS_RESEARCH_AND_PROPOSAL.md#116-provideradapterdescriptor), [ADR-004](DECISIONS/ADR-AGENT-004-THIN-TOOL-GATEWAY-AND-NORMALIZED-TOOL-CONTEXT.md) | `clarified` | `2.8` |
+| [IR-3.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#ir-3-tool-system-contracts) | [tool proposal](TOOLS_RESEARCH_AND_PROPOSAL.md#117-providerselectionpolicy), [ADR-004](DECISIONS/ADR-AGENT-004-THIN-TOOL-GATEWAY-AND-NORMALIZED-TOOL-CONTEXT.md) | `clarified` | `2.8` |
+| [IR-3.5](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#ir-3-tool-system-contracts) | [tool proposal](TOOLS_RESEARCH_AND_PROPOSAL.md#118-toolexecutionenvelope), [ADR-004](DECISIONS/ADR-AGENT-004-THIN-TOOL-GATEWAY-AND-NORMALIZED-TOOL-CONTEXT.md) | `clarified` | `2.8` |
+| [IR-3.6](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#ir-3-tool-system-contracts) | [tool proposal](TOOLS_RESEARCH_AND_PROPOSAL.md#119-normalizedoutputkind), [ADR-004](DECISIONS/ADR-AGENT-004-THIN-TOOL-GATEWAY-AND-NORMALIZED-TOOL-CONTEXT.md) | `clarified` | `2.8` |
+| [IR-3.7](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#ir-3-tool-system-contracts) | [tool proposal](TOOLS_RESEARCH_AND_PROPOSAL.md#1111-toolcontextpack), [ADR-004](DECISIONS/ADR-AGENT-004-THIN-TOOL-GATEWAY-AND-NORMALIZED-TOOL-CONTEXT.md) | `clarified` | `2.8` |
+| [IR-3.8](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#ir-3-tool-system-contracts) | [tool proposal](TOOLS_RESEARCH_AND_PROPOSAL.md#1112-genericwebfetchpolicy), [ADR-004](DECISIONS/ADR-AGENT-004-THIN-TOOL-GATEWAY-AND-NORMALIZED-TOOL-CONTEXT.md) | `clarified` | `2.8` |
+| [IR-3.9](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#ir-3-tool-system-contracts) | [tool proposal](TOOLS_RESEARCH_AND_PROPOSAL.md#935-mutation-receipt), [ADR-004](DECISIONS/ADR-AGENT-004-THIN-TOOL-GATEWAY-AND-NORMALIZED-TOOL-CONTEXT.md) | `clarified` | `2.8` |
+| [IR-3.10](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#ir-3-tool-system-contracts) | [tool proposal](TOOLS_RESEARCH_AND_PROPOSAL.md#934-artifact-metadata), [Phase 2B roadmap](PHASE_2_AGENT_ENHANCEMENT_ROADMAP.md#2b6-reporting-from-toolcontextpack) | `clarified` | `2.8` |
+
 ### ERR
 
 Mapped: `0/8`. Unmapped: `8`.
@@ -575,19 +616,23 @@ Mapped: `0/8`. Unmapped: `8`.
 
 ### PRIV
 
-Mapped: `0/9`. Unmapped: `9`.
+Mapped: `4/13` manually reconciled for SRS v2.8. Existing non-tool privacy rows remain implementation-unmapped.
 
 | SRS Item | Linked Spec | Current Status | Sync Status |
 |----------|-------------|----------------|-------------|
 | [PRIV-1.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L970) | `-` | `unmapped` | `unmapped` |
 | [PRIV-1.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L971) | `-` | `unmapped` | `unmapped` |
 | [PRIV-1.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L972) | `-` | `unmapped` | `unmapped` |
+| [PRIV-1.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#priv-1-data-minimization-and-classification) | [ADR-004](DECISIONS/ADR-AGENT-004-THIN-TOOL-GATEWAY-AND-NORMALIZED-TOOL-CONTEXT.md), [tool proposal](TOOLS_RESEARCH_AND_PROPOSAL.md#103-generic-web-evidence-trust-model) | `clarified` | `2.8` |
+| [PRIV-1.5](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#priv-1-data-minimization-and-classification) | [ADR-004](DECISIONS/ADR-AGENT-004-THIN-TOOL-GATEWAY-AND-NORMALIZED-TOOL-CONTEXT.md), [tool proposal](TOOLS_RESEARCH_AND_PROPOSAL.md#93-logical-data-models) | `clarified` | `2.8` |
+| [PRIV-1.6](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#priv-1-data-minimization-and-classification) | [tool proposal](TOOLS_RESEARCH_AND_PROPOSAL.md#94-storage-ownership-matrix), [Phase 2B roadmap](PHASE_2_AGENT_ENHANCEMENT_ROADMAP.md#2b6-reporting-from-toolcontextpack) | `clarified` | `2.8` |
 | [PRIV-2.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L978) | `-` | `unmapped` | `unmapped` |
 | [PRIV-2.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L979) | `-` | `unmapped` | `unmapped` |
 | [PRIV-2.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L980) | `-` | `unmapped` | `unmapped` |
 | [PRIV-3.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L986) | `-` | `unmapped` | `unmapped` |
 | [PRIV-3.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L987) | `-` | `unmapped` | `unmapped` |
 | [PRIV-3.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L988) | `-` | `unmapped` | `unmapped` |
+| [PRIV-3.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#priv-3-pii-handling-and-redaction) | [tool proposal](TOOLS_RESEARCH_AND_PROPOSAL.md#96-data-integrity-rules), [ADR-004](DECISIONS/ADR-AGENT-004-THIN-TOOL-GATEWAY-AND-NORMALIZED-TOOL-CONTEXT.md) | `clarified` | `2.8` |
 
 ## Gate Rule
 
