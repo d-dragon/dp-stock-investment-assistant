@@ -1,21 +1,21 @@
 # Phase 2: LangChain Agent Enhancement Roadmap
 
-> **Document Version**: 1.5  
+> **Document Version**: 1.6
 > **Created**: January 15, 2026  
-> **Last Updated**: June 4, 2026  
+> **Last Updated**: June 18, 2026
 > **Status**: Planning (M2 Implemented)  
 > **Branch**: `enhance-agent-prompt-system-followup`
 
 ## Executive Summary
 
-This roadmap outlines the Phase 2 enhancements for the Stock Investment Assistant's LangChain agent. Building on the Phase 1 foundation (ReAct agent, CachingTool pattern, ToolRegistry, semantic routing), Phase 2 focuses on **conversation-scoped STM and context-boundary hardening**, **prompt-system evolution**, **production-ready tools**, **structured outputs**, and **multi-agent orchestration**.
+This roadmap outlines the Phase 2 enhancements for the Stock Investment Assistant's LangChain agent. Building on the Phase 1 foundation (ReAct agent, cache-aware tool execution, ToolRegistry, semantic routing), Phase 2 focuses on **conversation-scoped STM and context-boundary hardening**, **prompt-system evolution**, **production-ready tools**, **structured outputs**, and **multi-agent orchestration**.
 
 ### Phase Overview
 
 | Phase | Focus Area | Key Deliverables |
 |-------|------------|------------------|
 | **2A** | Foundation | STM foundation, future LTM design, prompt management, structured outputs |
-| **2B** | Features | TradingView integration, enhanced semantic routing, multi-source data, reporting |
+| **2B** | Features | Enhanced tool system with Tool Gateway, provider adapters, normalized tool context, TradingView visualization, reporting |
 | **2C** | Advanced | Multi-agent orchestration, technical refinements |
 
 ---
@@ -344,325 +344,317 @@ structured_model = self.model.with_structured_output(StockAnalysisResponse)
 
 ---
 
-## Phase 2B: Feature Implementations
+## Phase 2B: Enhanced Tool System Feature Implementations
 
-### 2B.1 TradingView Tool Integration
+Phase 2B replaces the earlier generic TradingView and multi-source-data plan with a enhanced tool-system roadmap. The roadmap keeps the current LangChain/LangGraph ReAct runtime, preserves `ToolRegistry` as the inventory boundary, and evolves the tool layer through runnable increments.
 
-**Objective**: Implement fully functional TradingView integration for chart generation, technical analysis widgets, and market indicators.
+### 2B.0 Tool-System Goals, Boundaries, and Gates
 
-#### Current State
+**Objective**: Establish the tool-system direction before adding provider-specific integrations.
 
-- `TradingViewTool` exists at `src/core/tools/tradingview.py` (151 lines)
-- All methods raise `NotImplementedError` with "Phase 2 feature" message
-- Actions defined: `get_chart_url`, `get_widget`, `get_technical_analysis`
+#### Target Direction
 
-#### Target State
+- Introduce a thin in-process `ToolGateway` as a policy, validation, and trace boundary around registry-backed tool execution.
+- Make Vietnam-market data a first-class tool domain.
+- Separate agent-visible tools from lower-level provider adapters.
+- Treat TradingView output as visualization provenance, not canonical financial evidence.
+- Delay generic web fetching until concrete market-data, symbol, visualization, and reporting tools are functional.
+- Preserve the layered architecture rule: tools fetch and compute, the LLM reasons, and memory does not store market facts.
 
-- Full TradingView widget URL generation
-- Technical analysis data fetching
-- Chart embedding support for web frontend
-- Caching with configurable TTL
+#### Promotion Gates
 
-#### Work Items
-
-1. **Implement Chart URL Generation**
-   - Generate TradingView Advanced Chart URLs
-   - Support customizable timeframes, indicators, chart types
-   - Validate symbol against supported exchanges
-
-2. **Implement Widget Generation**
-   - Mini chart widgets for embedding
-   - Technical analysis widget
-   - Market overview widget
-
-3. **Implement Technical Analysis Fetching**
-   - Oscillators summary (RSI, MACD, Stochastic)
-   - Moving averages summary
-   - Buy/Sell/Neutral recommendation parsing
-
-4. **Add Caching Layer**
-   - Use `CachingTool` base class pattern
-   - Configure TTL in `config.yaml` (existing: 300s)
-
-5. **Frontend Integration**
-   - Create chart component consuming TradingView URLs
-   - Add widget embedding support
-
-#### Implementation Pattern
-
-```python
-class TradingViewTool(CachingTool):
-    """TradingView integration for charts and analysis."""
-    
-    TRADINGVIEW_BASE_URL = "https://www.tradingview.com"
-    
-    def _execute(self, action: str, parameters: Dict[str, Any]) -> str:
-        if action == "get_chart_url":
-            return self._get_chart_url(parameters)
-        elif action == "get_technical_analysis":
-            return self._get_technical_analysis(parameters)
-        # ...
-    
-    def _get_chart_url(self, params: Dict[str, Any]) -> str:
-        symbol = params["symbol"]
-        interval = params.get("interval", "D")
-        return f"{self.TRADINGVIEW_BASE_URL}/chart/?symbol={symbol}&interval={interval}"
-    
-    def _get_technical_analysis(self, params: Dict[str, Any]) -> str:
-        # Use tradingview-ta library or web scraping
-        from tradingview_ta import TA_Handler
-        handler = TA_Handler(symbol=params["symbol"], exchange=params["exchange"])
-        analysis = handler.get_analysis()
-        return json.dumps(analysis.summary)
-```
-
-#### Dependencies
-
-- `tradingview-ta` package (for technical analysis data)
-- TradingView public widget URLs (no API key required)
-- Frontend chart component
+| Gate | Required Before | Pass Condition |
+|------|-----------------|----------------|
+| Contract gate | Provider expansion and report persistence | Minimum contracts for tool descriptors, execution envelopes, normalized outputs, `ToolContextPack`, provider policy, mutation receipts, and artifacts are defined |
+| Tool exposure gate | Adding new model-visible tools | Route-to-tool exposure map exists and unrelated tools are hidden from representative route fixtures |
+| Provider gate | Production provider use | License/ToS posture, provider class, freshness policy, attribution, and fail-closed behavior are documented |
+| Generic web gate | Enabling `GenericWebFetchTool` | Allowlist, parser limits, prompt-injection quarantine, citation extraction, and malicious-content fixtures exist |
+| Mutation gate | Enabling symbol-store writes | `workflow_mutation` policy, `internal_state_mutation` subtype, authorization, confirmation, audit metadata, and `MutationReceipt` behavior are defined |
+| Report persistence gate | Persisting generated reports or artifacts | `ToolContextPack` inputs, source lineage, degraded-state visibility, artifact metadata, and URI retention are defined |
+| TradingView authority gate | Using TradingView values as evidence | Explicit policy admits the data category; otherwise TradingView remains `VisualizationProvenance` only |
+| Data integrity gate | Persisting market facts | Symbol + exchange + currency identity, provider/source metadata, timestamp, freshness, license mode, and cache policy are present |
 
 #### Success Criteria
 
-- Agent can generate valid TradingView chart URLs
-- Technical analysis data returned for major exchanges
-- Response latency <2s for cached requests
-- Frontend displays embedded charts correctly
+- Phase 2B planning distinguishes tools, adapters, normalized outputs, request-scoped context, and durable records.
+- Implementation plans can start with existing tools and evolve without a second runtime or separate gateway service.
+- Vietnam-provider production use remains blocked until licensing and source-attribution gates are satisfied.
+
+#### Execution Backlog Mirror (Synced to Tool Proposal v1.6)
+
+> Detailed research context remains in [TOOLS_RESEARCH_AND_PROPOSAL.md](./TOOLS_RESEARCH_AND_PROPOSAL.md). This roadmap mirrors the execution backlog and milestone gates so Phase 2B planning stays traceable to [SOFTWARE_REQUIREMENTS_SPECIFICATION.md](./SOFTWARE_REQUIREMENTS_SPECIFICATION.md) v2.8. The SRS remains the normative requirement source; this table carries sequencing and delivery intent only.
+
+| Order | Backlog ID | Priority | SRS Alignment | Detailed Section | Depends On | Roadmap Outcome |
+|---|---|---|---|---|---|---|
+| 1 | `TS-01` | P1 | FR-2.4.1, FR-2.4.2, NFR-6.2.6, IR-3.1, IR-3.2, AC-9.1 | [2B.1 AgentTool Baseline and Descriptor Inventory](#2b1-agenttool-baseline-and-descriptor-inventory) | None | Introduce `AgentTool` target terminology and descriptors for `StockSymbolTool`, `TradingViewTool`, and `ReportingTool` while preserving current registry execution |
+| 2 | `TS-02` | P1 | FR-2.4.3, FR-2.4.4, FR-2.4.5, FR-2.4.6, NFR-5.2.12, AC-9.2, AC-9.3, AC-9.4 | [2B.2 Route-Filtered Tool Surface and Thin Gateway](#2b2-route-filtered-tool-surface-and-thin-gateway) | `TS-01` | Add route-filtered `ToolSurfaceBuilder` and thin in-process `ToolGateway` admission around registry-backed tools |
+| 3 | `TS-03` | P1 | FR-2.6.1, FR-2.11.1, FR-2.11.2, FR-2.11.3, AC-9.5, AC-9.6 | [2B.3 Evolved StockSymbolTool over Internal Symbol Store](#2b3-evolved-stocksymboltool-over-internal-symbol-store) | `TS-01`, `TS-02` | Evolve `StockSymbolTool` into the internal symbol-store lookup, normalization, coverage, aliases, identifiers, tags, and stored-snapshot boundary |
+| 4 | `TS-04` | P1 | FR-2.7.1, FR-2.7.2, NFR-6.2.5, CON-6, IR-3.3, IR-3.4, AC-9.7 | [2B.4 Provider Policy and Normalized Output Backbone](#2b4-provider-policy-and-normalized-output-backbone) | `TS-02` | Define provider classes, adapter descriptors, provider selection policy, fallback posture, license posture, and provider-hidden model-visible tools |
+| 5 | `TS-05` | P1 | FR-2.5.1-FR-2.5.5, NFR-2.2.6, IR-3.5-IR-3.7, AC-9.10 | [2B.4 Provider Policy and Normalized Output Backbone](#2b4-provider-policy-and-normalized-output-backbone) | `TS-02`, `TS-04` | Normalize tool outputs into execution envelopes, output kinds, degraded states, and request-scoped `ToolContextPack` inputs |
+| 6 | `TS-06` | P1 | FR-2.6.2, FR-2.6.3, FR-2.7.3-FR-2.7.5, NFR-2.3.5, NFR-5.2.13, CON-9, AC-9.8, AC-9.9 | [2B.5 Concrete Market Data and Visualization Tools](#2b5-concrete-market-data-and-visualization-tools) | `TS-03`, `TS-04`, `TS-05` | Deliver approved Vietnam quote, history, fundamentals, provider attribution, freshness, stale-data, and cache-freshness behavior |
+| 7 | `TS-07` | P2 | FR-2.6.4, FR-2.6.5, FR-2.6.6, AC-9.16 | [2B.5 Concrete Market Data and Visualization Tools](#2b5-concrete-market-data-and-visualization-tools) | `TS-06` | Extend Vietnam coverage to breadth, flow, disclosures, corporate actions, and Vietnamese/mixed-language route fixtures |
+| 8 | `TS-08` | P2 | FR-2.8.1-FR-2.8.4, CON-7, AC-9.11 | [2B.5 Concrete Market Data and Visualization Tools](#2b5-concrete-market-data-and-visualization-tools) | `TS-02`, `TS-05` | Expand `TradingViewTool` for charts, widgets, deep links, symbol validation, ticker tape, heatmaps/screeners where supported, and visualization-only authority |
+| 9 | `TS-09` | P2 | FR-2.10.1-FR-2.10.4, FR-1.5.1, FR-1.5.3, IR-3.10, AC-9.13, AC-9.17 | [2B.6 Reporting from ToolContextPack](#2b6-reporting-from-toolcontextpack) | `TS-05`, `TS-06`, `TS-08` | Make `ReportingTool` compose reports from `ToolContextPack`, visualization provenance, generated artifacts, source attribution, and finance-safety checks |
+| 10 | `TS-10` | P2 | FR-2.9.1-FR-2.9.4, NFR-4.3.5, NFR-5.2.14, CON-8, IR-3.8, AC-9.12 | [2B.7 Generic Web Evidence Pipeline](#2b7-generic-web-evidence-pipeline) | `TS-05`, `TS-06`, `TS-09` | Add deny-by-default generic web evidence pipeline with allowlist, parser limits, ToS/licensing posture, citations, and prompt-injection quarantine |
+| 11 | `TS-11` | P1 | FR-2.11.4-FR-2.11.6, NFR-2.3.4, NFR-5.2.15, CON-10, IR-3.9, AC-9.14, AC-9.15 | [2B.3 Evolved StockSymbolTool over Internal Symbol Store](#2b3-evolved-stocksymboltool-over-internal-symbol-store), [2B.4 Provider Policy and Normalized Output Backbone](#2b4-provider-policy-and-normalized-output-backbone) | `TS-03`, `TS-05` | Add tool data-integrity controls for request-scoped context, retained source lineage, gated internal symbol mutations, and `MutationReceipt` audit records |
+| 12 | `TS-12` | P1 | FR-2.6.6, FR-4.1.3, NFR-5.3.8, AC-9.16 | [2B.9 Verification and Quality Gates](#2b9-verification-and-quality-gates) | `TS-02`, `TS-06` | Build Vietnamese and mixed-language eval sets for price, chart, fundamentals, disclosures, breadth, flow, and report routing |
+| 13 | `TS-13` | P2 | NFR-5.2.12-NFR-5.2.15, NFR-5.3.7, NFR-5.3.8 | [2B.9 Verification and Quality Gates](#2b9-verification-and-quality-gates) | `TS-02`, `TS-05` | Add observability and quality dashboards for exposed tools, selected tools, provider classes, freshness, degraded states, attribution coverage, and mutation audit |
+| 14 | `TS-14` | P3 | FR-2.4.5, NFR-6.2.6, IR-3.1-IR-3.5, AC-9.4 | [2B.8 Optional Remote MCP-Style Tool Admission](#2b8-optional-remote-mcp-style-tool-admission) | `TS-01`, `TS-02`, `TS-05`, `TS-13` | Keep remote or MCP-style tool admission optional until local descriptor integrity, policy admission, credentials, traceability, and operational need exist |
+
+#### Milestone Gates
+
+| Milestone | Backlog IDs | Outcome | Gate |
+|---|---|---|---|
+| `M2B.1` - Tool Contract and Gateway Baseline | `TS-01` to `TS-02` | Existing tools have descriptors, route-filtered exposure, and gateway admission without changing the current ReAct runtime | Do not add new provider-backed model-visible tools until descriptor integrity, route filtering, and degraded-state admission are testable |
+| `M2B.2` - Internal Symbol and Normalization Backbone | `TS-03` to `TS-05`, `TS-11` | `StockSymbolTool` uses the internal symbol-store boundary and tool outputs normalize into envelopes, output kinds, source metadata, and request-scoped context | Do not enable symbol-store writes until `workflow_mutation`, `internal_state_mutation`, authorization/confirmation, and `MutationReceipt` behavior are defined |
+| `M2B.3` - Vietnam Market and Visualization Coverage | `TS-06` to `TS-08`, `TS-12` | Vietnam quote/history/fundamental coverage, route fixtures, and TradingView visualization provenance are available through approved adapters | Do not treat TradingView values as evidence; do not promote Vietnam providers to production without license/ToS posture, source attribution, and freshness checks |
+| `M2B.4` - Reports and Generic Web Evidence | `TS-09` to `TS-10` | Reports are generated from `ToolContextPack`; generic web fetch is allowlisted, parser-limited, cited, and prompt-injection quarantined | Do not enable generic web fetch before concrete market-data, symbol, visualization, and reporting flows are functional and tested |
+| `M2B.5` - Observability and Optional Remote Tool Admission | `TS-13` to `TS-14` | Tool traces, degraded-state metrics, attribution coverage, and optional remote/MCP-style descriptor admission are ready for evaluated future use | Do not admit remote descriptors without local descriptor integrity, policy admission, credentials, timeout/rate-limit controls, and traceability |
+
+#### Immediate Delivery Slice
+
+The first delivery slice should cover `TS-01` to `TS-05` plus the non-mutating parts of `TS-11`. This creates the minimum executable tool-system foundation: existing tool descriptors, route-filtered exposure, in-process gateway admission, internal symbol-store direction, provider policy, normalized outputs, and request-scoped `ToolContextPack` behavior. Vietnam provider expansion, reporting persistence, generic web fetch, and remote/MCP-style admission remain follow-up slices behind their gates.
 
 ---
 
-### 2B.2 Semantic Router Enhancements
+### 2B.1 AgentTool Baseline and Descriptor Inventory
 
-**Objective**: Improve query routing accuracy, add new route categories, and implement confidence-based fallback strategies.
+**Objective**: Rename and describe the current tool execution baseline without changing user-facing behavior.
 
-#### Current State
+#### Runnable Increment
 
-- 8 route categories defined in `src/core/routes.py`
-- Threshold-based routing (0.7) in `config.yaml`
-- HuggingFace encoder fallback when OpenAI unavailable
-- `cache_embeddings: true` for performance
-
-#### Target State
-
-- Additional route categories for new tools
-- Dynamic threshold adjustment based on confidence distribution
-- Route disambiguation for ambiguous queries
-- Route analytics and monitoring
+`StockSymbolTool`, `TradingViewTool`, and `ReportingTool` continue through the current registry path, but each declares model-visible and internal descriptors.
 
 #### Work Items
 
-1. **Add New Route Categories**
-   - `tradingview` route for chart/widget requests
-   - `multi_step` route for complex analysis requiring multiple tools
-   - `clarification` route for ambiguous queries
-
-2. **Implement Confidence-Based Routing**
-   - Track confidence distribution per route
-   - Implement soft routing for borderline confidence scores
-   - Add "unknown" route with clarification response
-
-3. **Route Disambiguation**
-   - When multiple routes have similar confidence, prompt for clarification
-   - Implement route suggestion in responses
-
-4. **Analytics Integration**
-   - Log route decisions to LangSmith
-   - Track route accuracy over time
-   - Alert on routing degradation
-
-#### Implementation Pattern
-
-```python
-# src/core/routes.py - New routes
-tradingview_route = Route(
-    name="tradingview",
-    utterances=[
-        "show me a chart for AAPL",
-        "technical analysis chart",
-        "TradingView widget for Tesla",
-        "display the candlestick chart",
-    ]
-)
-
-clarification_route = Route(
-    name="clarification",
-    utterances=[
-        "what do you mean",
-        "can you explain that",
-        "I don't understand",
-    ]
-)
-
-# Confidence-based routing
-def route_query(self, query: str) -> Tuple[str, float]:
-    result = self.router(query)
-    if result.confidence < 0.5:
-        return "clarification", result.confidence
-    return result.name, result.confidence
-```
-
-#### Dependencies
-
-- Existing semantic router infrastructure
-- LangSmith tracing (existing)
-- Route utterance expansion (manual curation)
+1. Introduce `AgentTool` as the target architectural name replacing the narrower `CachingTool` terminology while preserving cache-aware behavior.
+2. Add `ToolCapabilityDescriptor` entries for existing `StockSymbolTool`, `TradingViewTool`, and `ReportingTool`.
+3. Add `ToolPolicyDescriptor` entries with route family, risk class, cache policy, timeout budget, required metadata, and output kind.
+4. Record descriptor version or hash in local trace metadata.
+5. Add compatibility fixtures proving existing tool calls still work.
 
 #### Success Criteria
 
-- New routes achieve >85% accuracy on test set
-- Ambiguous queries trigger clarification response
-- Route confidence logged in every trace
-- No regression in existing route accuracy
+- Current enabled tools can still be listed through `ToolRegistry`.
+- Current tool calls remain backward-compatible except for added metadata, warnings, or degraded-state fields.
+- Model-visible descriptors do not expose provider fallback rules, credentials, parser limits, or license policy.
 
 ---
 
-### 2B.3 StockSymbolTool Multi-Source Enhancement
+### 2B.2 Route-Filtered Tool Surface and Thin Gateway
 
-**Objective**: Extend StockSymbolTool with multiple data sources for improved reliability, coverage, and data quality.
+**Objective**: Add pre-model tool exposure and execution admission while keeping a fused in-process runtime.
 
-#### Current State
+#### Runnable Increment
 
-- Single data source: Yahoo Finance (`yfinance` package)
-- Actions: `get_price`, `get_history`, `get_info`, `search`
-- Caching via `CachingTool` base class (60s TTL)
-
-#### Target State
-
-- Multiple data sources: Yahoo Finance, Alpha Vantage, Polygon.io
-- Source failover for reliability
-- Data source selection based on query type
-- Unified response format across sources
+The agent receives a compact route-filtered tool list, and selected tool calls execute through `ToolGateway.execute(route, tool_name, args)`.
 
 #### Work Items
 
-1. **Add Alpha Vantage Integration**
-   - Implement Alpha Vantage API client
-   - Map to existing action interface
-   - Add API key configuration (existing placeholder in config)
-
-2. **Add Polygon.io Integration (Optional)**
-   - Real-time data source option
-   - WebSocket support for live quotes
-
-3. **Implement Source Router**
-   - Select optimal source based on data type
-   - Implement failover chain
-   - Configure source priority in `config.yaml`
-
-4. **Unify Response Format**
-   - Normalize data across sources
-   - Handle source-specific fields
-   - Add source attribution in responses
-
-#### Implementation Pattern
-
-```python
-class StockSymbolTool(CachingTool):
-    """Multi-source stock data tool."""
-    
-    SOURCE_PRIORITY = ["yahoo", "alpha_vantage", "polygon"]
-    
-    def _execute(self, action: str, parameters: Dict[str, Any]) -> str:
-        source = parameters.get("source", "auto")
-        
-        if source == "auto":
-            return self._execute_with_failover(action, parameters)
-        return self._execute_from_source(source, action, parameters)
-    
-    def _execute_with_failover(self, action: str, params: Dict) -> str:
-        for source in self.SOURCE_PRIORITY:
-            try:
-                return self._execute_from_source(source, action, params)
-            except DataSourceError:
-                continue
-        raise AllSourcesFailedError("All data sources unavailable")
-```
-
-#### Current State
-
-- `ReportingTool` exists at `src/core/tools/reporting.py` (273 lines)
-- Scaffold implementation with placeholder markdown output
-- Report types defined: `symbol`, `portfolio`, `market`
-
-#### Target State
-
-- Full report generation with Jinja2 templates
-- PDF export capability
-- Portfolio analytics calculations
-- Chart embedding in reports
-
-#### Work Items
-
-1. **Implement Symbol Reports**
-   - Company overview section
-   - Financial metrics table
-   - Technical analysis summary
-   - Price chart embedding
-
-2. **Implement Portfolio Reports**
-   - Holdings summary with allocation
-   - Performance metrics (returns, Sharpe ratio)
-   - Risk analysis (beta, volatility)
-   - Comparison to benchmarks
-
-3. **Implement Market Reports**
-   - Market overview (indices, sectors)
-   - Top movers
-   - Sentiment summary
-   - Economic indicators
-
-4. **Add Export Capabilities**
-   - Markdown output (existing)
-   - HTML with styling
-   - PDF generation (using WeasyPrint or similar)
-
-5. **Template System**
-   - Create Jinja2 templates in `src/prompts/reports/`
-   - Support custom branding/styling
-
-#### Implementation Pattern
-
-```python
-from jinja2 import Environment, FileSystemLoader
-
-class ReportingTool(CachingTool):
-    """Report generation with Jinja2 templates."""
-    
-    def __init__(self, config: Dict[str, Any]):
-        super().__init__(config)
-        self.template_env = Environment(
-            loader=FileSystemLoader("src/prompts/reports")
-        )
-    
-    def _generate_symbol_report(self, symbol: str) -> str:
-        template = self.template_env.get_template("symbol_report.md.j2")
-        
-        # Gather data from other tools
-        price_data = self._get_price_data(symbol)
-        fundamentals = self._get_fundamentals(symbol)
-        technicals = self._get_technicals(symbol)
-        
-        return template.render(
-            symbol=symbol,
-            price=price_data,
-            fundamentals=fundamentals,
-            technicals=technicals,
-            generated_at=datetime.now()
-        )
-```
-
-#### Dependencies
-
-- Jinja2 (existing)
-- WeasyPrint for PDF (new dependency)
-- Chart generation library (matplotlib or plotly)
+1. Add `ToolSurfaceBuilder` for route-filtered model-visible tool exposure.
+2. Build a static route-to-tool exposure map from the current route taxonomy.
+3. Add an in-process `ToolGateway` facade around `ToolRegistry` and `AgentTool`.
+4. Enforce pre-execution argument validation, route-tool matching, risk-class admission, timeout handling, and degraded-state denial.
+5. Emit trace metadata for pre-model exposure, pre-execution admission, execution, validation, and response assembly.
+6. Document anti-goals in implementation notes: no separate gateway service, no provider parsing inside the gateway, and no dynamic route discovery in this phase.
 
 #### Success Criteria
 
-- Reports include all specified sections
-- PDF exports render correctly
-- Report generation <5s for single symbol
-- Templates customizable without code changes
+- Price, chart, report, disclosure, and market-breadth route fixtures expose only expected tool families.
+- Disallowed tool calls return degraded-state metadata instead of executing.
+- The LangChain/LangGraph ReAct execution path remains the primary runtime.
+
+---
+
+### 2B.3 Evolved `StockSymbolTool` over Internal Symbol Store
+
+**Objective**: Reposition `StockSymbolTool` as the in-system persistent symbol lookup, normalization, and controlled manipulation tool.
+
+#### Runnable Increment
+
+Symbol lookup and search routes use `InternalSymbolStoreAdapter` over `SymbolRepository`. Live Yahoo-backed lookup is no longer the target path for this tool.
+
+#### Work Items
+
+1. Add `InternalSymbolStoreAdapter` over the MongoDB `symbols` collection.
+2. Evolve `StockSymbolTool` actions for lookup, search, normalize, list by exchange, list by sector, list tracked symbols, and tag/coverage reads.
+3. Optionally add `InternalStockSnapshotAdapter` for persisted price and fundamentals snapshots only.
+4. Return `SystemRecord` output for symbol profiles, aliases, identifiers, listing, coverage, classification, tags, and stored snapshots.
+5. Define gated `workflow_mutation` policy with an `internal_state_mutation` subtype for future symbol upsert, alias merge, tag update, coverage update, and retirement marker actions.
+6. Keep mutation actions disabled by default until authorization, confirmation, and audit behavior exist.
+
+#### Success Criteria
+
+- `StockSymbolTool` no longer names Yahoo or DataManager as its target adapter path.
+- Symbol identity fields come from the persistent symbol store.
+- Live quote, history, and fundamental requests route to market-data tools, not `StockSymbolTool`.
+- Write-like actions require policy admission and otherwise return a degraded or blocked state.
+
+---
+
+### 2B.4 Provider Policy and Normalized Output Backbone
+
+**Objective**: Make provider-backed tools deterministic and source-attributed before adding more providers.
+
+#### Runnable Increment
+
+A provider-backed tool can select an adapter through policy, normalize output, and return a `ToolExecutionEnvelope`.
+
+#### Work Items
+
+1. Add `ProviderAdapterDescriptor` for in-system, official, licensed, public-web, wrapper/prototype, visualization, and international-fallback provider classes.
+2. Add `ProviderSelectionPolicy` for provider order, fallback, licensing, freshness, market-session rules, timeout, and degraded-state mapping.
+3. Add `NormalizedOutputKind` handling for `EvidenceFact`, `EvidenceSnippet`, `EvidenceDocument`, `SystemRecord`, `MutationReceipt`, `VisualizationProvenance`, `GeneratedArtifact`, and `DegradedState`.
+4. Add normalization for source URL/reference, timestamp, currency, exchange, freshness, warnings, citations, and degraded-state reason.
+5. Pass `ToolContextPack` into prompt assembly instead of raw provider payloads.
+
+#### Success Criteria
+
+- Provider choice is not visible to the model.
+- Stale, missing, or license-blocked provider results produce explicit degraded states.
+- Prompt assembly receives only normalized `ToolContextPack` instances.
+
+---
+
+### 2B.5 Concrete Market Data and Visualization Tools
+
+**Objective**: Deliver functional stock, market, and visualization capabilities before enabling generic web fetch.
+
+#### Runnable Increment
+
+The agent can answer supported Vietnam stock, market, and chart queries through concrete tools using approved adapters and normalized outputs.
+
+#### Work Items
+
+1. Add external market-data tools separate from `StockSymbolTool`.
+2. Use Vietnam-native and official sources first: `vnstock`, Vietstock, CafeF, FiinGroup/FiinTrade/FiinQuant, VSDC, HOSE, and HNX where terms and licensing allow.
+3. Keep Yahoo and Alpha Vantage as international fallback or cross-market comparison sources, not primary Vietnam-market data.
+4. Expand `TradingViewTool` to return `VisualizationProvenance` for advanced charts, widgets, deep links, symbol validation, ticker tape, and supported heatmap/screener views.
+5. Add deterministic technical indicator calculation over approved price-history inputs.
+6. Require source-attribution fields on market answers: provider, source URL/reference, timestamp, exchange, currency, freshness, and warnings.
+
+#### Success Criteria
+
+- `FPT`, `HOSE:FPT`, `HNX:SHS`, and `UPCOM:BSR` route to the correct symbol and market workflows.
+- TradingView output is treated as visualization provenance, not canonical evidence.
+- Quote, history, and fundamental outputs include source metadata and stale-data warnings where applicable.
+
+---
+
+### 2B.6 Reporting from `ToolContextPack`
+
+**Objective**: Make reporting a composition layer over normalized evidence rather than a provider-scraping shortcut.
+
+#### Runnable Increment
+
+Symbol, market, and portfolio report routes generate reports from `ToolContextPack`, `VisualizationProvenance`, and `GeneratedArtifact` inputs.
+
+#### Work Items
+
+1. Define report input requirements for normalized facts, snippets, documents, system records, visualization provenance, generated artifacts, warnings, and degraded-state reasons.
+2. Add report sections with source attribution and freshness labels.
+3. Add degraded report behavior when one or more upstream evidence sources are unavailable.
+4. Add finance-safety checks for unsourced recommendations, guaranteed-return language, and unsupported certainty.
+5. Persist generated reports and artifacts only through approved report/artifact metadata paths with source lineage.
+
+#### Success Criteria
+
+- `ReportingTool` does not call provider adapters directly.
+- Generated reports surface missing evidence and stale data instead of inventing claims.
+- Report output remains useful when one provider path is degraded.
+
+---
+
+### 2B.7 Generic Web Evidence Pipeline
+
+**Objective**: Add generic web fetch only after the concrete local tool system, provider policy, normalization, and reporting flow are functional.
+
+#### Runnable Increment
+
+Allowlisted public pages can be fetched as `read_only_evidence`, normalized, cited, and passed into `ToolContextPack` instances without raw page instructions.
+
+#### Work Items
+
+1. Add deny-by-default `GenericWebFetchPolicy`.
+2. Configure domain allowlist, rate limits, render mode, extraction mode, parser limits, maximum content size, and freshness policy.
+3. Capture ToS/licensing posture before production enablement.
+4. Extract approved HTML text, tables, PDFs, news pages, disclosures, and public data pages into normalized snippets/documents.
+5. Quarantine prompt-injection content in page instructions, hidden text, scripts, and malicious documents.
+6. Return degraded states for blocked, stale, parser-limited, license-unclear, or source-incomplete pages.
+
+#### Success Criteria
+
+- An unapproved domain is blocked with a degraded-state reason.
+- Approved web content becomes snippets/documents with citations, not raw HTML.
+- Prompt-injection text in fetched content cannot alter tool behavior or prompt policy.
+
+---
+
+### 2B.8 Optional Remote MCP-Style Tool Admission
+
+**Objective**: Admit remote or MCP-style tools only if local tools and provider adapters are insufficient.
+
+#### Runnable Increment
+
+A locally admitted remote descriptor can be exposed behind the same gateway policy, descriptor integrity, and execution-envelope controls.
+
+#### Prerequisites
+
+- Descriptor integrity and version/hash tracing.
+- Local policy admission.
+- Credential/scope ownership.
+- Audit metadata.
+- Timeout and rate-limit controls.
+- Operational need that cannot be served by local adapters.
+
+#### Success Criteria
+
+- Remote descriptors are untrusted until locally admitted.
+- Descriptor drift blocks or degrades execution.
+- Remote tool results normalize into the same output kinds and `ToolContextPack` structure.
+
+---
+
+### 2B.9 Verification and Quality Gates
+
+**Objective**: Make Phase 2B quality measurable before provider and tool expansion.
+
+#### Verification Areas
+
+- Existing-tool descriptor coverage for `StockSymbolTool`, `TradingViewTool`, and `ReportingTool`.
+- Current-runtime compatibility with the LangChain/LangGraph ReAct path.
+- Route-filtered tool visibility and static route preservation.
+- Descriptor tampering and remote descriptor quarantine.
+- `StockSymbolTool` migration from Yahoo/DataManager to `InternalSymbolStoreAdapter`.
+- Tool-vs-adapter separation and provider fallback hiding.
+- Provider failover, stale-data handling, source attribution, and cache freshness.
+- Normalized output classification before prompt assembly.
+- TradingView non-evidence handling.
+- Generic web prompt-injection resistance.
+- Reporting source discipline and degraded report behavior.
+- Request-scoped `ToolContextPack` data retention.
+- Mutation receipt integrity for future in-system symbol writes.
+- Vietnamese and mixed-language route utterances for price, chart, fundamentals, disclosures, breadth, and flow.
+- Finance-safety checks for unsourced recommendations, guaranteed-return language, and hype language.
+
+#### Success Criteria
+
+- Route-tool exposure precision and recall targets are defined before adding new model-visible tools.
+- At least 95% of market-data answers include provider/source, timestamp, exchange, currency, freshness, and warnings where applicable.
+- TradingView outputs are classified as `VisualizationProvenance` in 100% of tests unless a future policy explicitly admits them as evidence.
+- Generic web adversarial fixtures produce zero critical prompt-injection escapes.
+
+---
+
+### 2B.10 Anti-Goals
+
+- Do not create a second agent runtime for Phase 2B.
+- Do not create a separate gateway service before operational need exists.
+- Do not replace `ToolRegistry` in the first runnable phases.
+- Do not put provider-specific parsing in `ToolGateway`.
+- Do not expose provider adapters as a flat list of model-visible tools.
+- Do not enable generic web fetch before concrete stock, symbol, provider, visualization, and report tools are functional.
+- Do not enable symbol-store mutations without route admission, authorization, confirmation, and audit metadata.
 
 ---
 
@@ -866,13 +858,29 @@ langchain:
 
   tools:
     stock_symbol:
-      sources: [yahoo, alpha_vantage]
-      failover_enabled: true
+      target_adapter: internal_symbol_store
+      mutations_enabled: false
+    tool_gateway:
+      enabled: false
+      mode: in_process
+      route_filtered_surface: true
+      generic_web_fetch_enabled: false
+    providers:
+      vietnam_priority:
+        - official_exchange_depository
+        - licensed_commercial
+        - vietnam_native_public_web
+        - wrapper_prototype
+      international_fallback:
+        - yahoo_finance
+        - alpha_vantage
     tradingview:
       cache_ttl: 300
+      authority: visualization_provenance
     reporting:
       pdf_enabled: true
       template_dir: src/prompts/reports
+      source_mode: tool_context_pack
 
   multi_agent:
     enabled: false
@@ -928,9 +936,19 @@ langsmith:
 
 ---
 
+## Revision History
+
+| Version | Date | Author | Changes |
+|---------|------|--------|---------|
+| 1.6 | 2026-06-18 | System | Replaced generic Phase 2B plan with enhanced tool-system roadmap covering AgentTool descriptors, ToolGateway, ToolSurfaceBuilder, internal symbol-store evolution, provider policy, normalized outputs, TradingView visualization provenance, reporting from ToolContextPack, generic web evidence, and verification gates. |
+| 1.5 | 2026-06-04 | System | Existing roadmap baseline before Phase 2B tool-system propagation. |
+
+---
+
 ## Related Documents
 
 - [LANGCHAIN_AGENT_HOWTO.md](./LANGCHAIN_AGENT_HOWTO.md) - Comprehensive development guide
+- [TOOLS_RESEARCH_AND_PROPOSAL.md](./TOOLS_RESEARCH_AND_PROPOSAL.md) - Tool-system research and proposal for Phase 2B propagation
 - [PHASE2_ROADMAP.md](./PHASE2_ROADMAP.md) - Original Phase 2 outline
 - [SKILL.md](../../../.github/skills/langchain-agent-development/SKILL.md) - Development skill reference
 - [Architecture Instructions](../../../.github/instructions/architecture.instructions.md) - System design conventions
@@ -944,10 +962,14 @@ langsmith:
 | 2A.1 Conversation Memory Foundation | High | Medium | P0 |
 | 2A.2 Prompt Refinement | Medium | Low | P1 |
 | 2A.3 Structured Outputs | High | Low | P0 |
-| 2B.1 TradingView Tool | Medium | Medium | P1 |
-| 2B.2 Semantic Router | Low | Low | P2 |
-| 2B.3 Multi-Source Data | Medium | Medium | P1 |
-| 2B.4 Reporting Tool | Medium | High | P2 |
+| 2B.1 AgentTool Baseline and Descriptor Inventory | High | Low | P1 |
+| 2B.2 Route-Filtered Tool Surface and Thin Gateway | High | Medium | P1 |
+| 2B.3 Evolved StockSymbolTool over Internal Symbol Store | High | Medium | P1 |
+| 2B.4 Provider Policy and Normalized Output Backbone | High | Medium | P1 |
+| 2B.5 Concrete Market Data and Visualization Tools | High | High | P1 |
+| 2B.6 Reporting from ToolContextPack | Medium | Medium | P2 |
+| 2B.7 Generic Web Evidence Pipeline | Medium | High | P2 |
+| 2B.8 Optional Remote MCP-Style Tool Admission | Low | High | P3 |
 | 2C.1 Multi-Agent | High | High | P2 |
 | 2C.2 Technical Refinements | Medium | Medium | P1 |
 
