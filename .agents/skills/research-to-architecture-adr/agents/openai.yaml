@@ -1,0 +1,4 @@
+interface:
+  display_name: "Research to Architecture ADR"
+  short_description: "Promote research into architecture and ADRs."
+  default_prompt: "Use $research-to-architecture-adr. Inputs: <proposal/research files>. Targets: <architecture file>, <ADR directory/index>. Produce an impact map first, then promote stable claims only into the listed targets."
