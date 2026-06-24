@@ -250,6 +250,15 @@ Use the command style that belongs to the agent you are working in:
 
 The core Spec Kit lifecycle commands are described in the official Spec Kit README under [Available Slash Commands](https://github.com/github/spec-kit#available-slash-commands). The naming differs because Codex uses Spec Kit skills mode while Copilot uses slash-command prompts.
 
+#### Project-Local Documentation Skills
+
+In addition to generated Spec Kit skills, this repository includes project-local documentation skills for long-lived design maintenance. Use them when the task is documentation propagation or synchronization rather than normal feature specification.
+
+| Skill | Use Case | Default Inputs | Default Targets | Default Edit Scope | Output Expectations |
+|-------|----------|----------------|-----------------|--------------------|---------------------|
+| [`$research-to-architecture-adr`](../../.agents/skills/research-to-architecture-adr/SKILL.md) | Promote non-authoritative research, proposal, benchmark, or side-chat findings into architecture updates and ADR candidates | Research/proposal inputs, SRS, architecture design, technical design, roadmap, ADR index, executable contracts, traceability files | Architecture design and ADRs | Architecture and ADRs only unless the user explicitly expands targets | Impact map, ADR candidate analysis, architecture updates, ADR index updates, consistency review |
+| [`$technical-design-manager`](../../.agents/skills/technical-design-manager/SKILL.md) | Maintain domain technical design from governing docs, verified specs, executable contracts, and `src/` evidence | SRS, architecture design, ADRs, roadmap, verified or planned `specs/`, executable contracts, source files under `src/` | Domain `TECHNICAL_DESIGN.md` sections or modules | Technical design only by default; `src/` and `specs/` are evidence unless explicitly targeted | Technical-design impact map, focused realization updates, implementation/spec sync assessment, follow-up list |
+
 #### Best Practices
 
 - Keep one default integration active for a complete governed feature workflow from specification through implementation.
@@ -371,6 +380,10 @@ The 18-step lifecycle below is the detailed execution model inside the SDLC loop
      - [project-documentation-and-specification-methodology.md](../study-hub/project-documentation-and-specification-methodology.md) for document authority, standards stance, and promotion rules
    - **Authority Boundary**:
      - Research and proposal documents are inputs, not authority. They may recommend changes, but the stable baseline is established only after the content is translated into the owning SRS, architecture, technical design, ADR, roadmap, executable contract, or runbook.
+   - **Skill Usage**:
+     - Use [`$research-to-architecture-adr`](../../.agents/skills/research-to-architecture-adr/SKILL.md) when research or proposal content may change architecture boundaries, runtime views, integration ownership, or ADR decisions.
+     - Use [`$technical-design-manager`](../../.agents/skills/technical-design-manager/SKILL.md) when research or proposal content needs to become technical realization detail in a domain `TECHNICAL_DESIGN.md`.
+     - Keep research and proposal documents as evidence inputs for both skills; neither skill makes the proposal itself authoritative.
    - **Cross-Reference Prompt Hint**:
      > *Prompt Hint*: "Treat the research report as non-authoritative input. Extract only stable, reusable decisions or requirements and map each item to the smallest long-lived document that should own it."
 
@@ -396,6 +409,10 @@ The 18-step lifecycle below is the detailed execution model inside the SDLC loop
      | Research rationale or external comparison | Proposal or benchmark report | Research log, benchmark matrix, reference index | Evidence input | Keep as supporting evidence |
    - **Cross-Reference Prompt Hint**:
      > *Prompt Hint*: "Create an impact map before editing: for every proposed point, identify whether it belongs in SRS, architecture, technical design, roadmap, ADR, benchmark review, or executable contract. Do not duplicate the same authority in multiple places."
+   - **Skill-Assisted Impact Mapping**:
+     - Use `$research-to-architecture-adr` for architecture and ADR impact maps, ADR boundary questions, and architecture consistency review.
+     - Use `$technical-design-manager` for technical-design impact maps, implementation/spec synchronization checks, and module/component realization updates.
+     - When both skills are relevant, run the architecture/ADR impact map first so technical design can realize the approved boundaries and decisions rather than inventing them.
 
 0c. **Requirements Increment Planning**: Convert stable proposal content into SRS-ready increments without copying research prose into requirements.
    - **Expected Outputs**:
@@ -430,6 +447,10 @@ The 18-step lifecycle below is the detailed execution model inside the SDLC loop
      - Do not copy broad research sections into architecture or ADRs. Extract stable claims, rewrite them for the target document's authority, and cite the proposal or benchmark report only as supporting evidence.
      - ADRs should link to the relevant architecture section, SRS requirement IDs, roadmap milestone, or benchmark report when that trace helps future readers understand why the decision exists.
      - Architecture updates should label current state, target state, and transition state when a proposal includes both implemented and planned behavior.
+   - **Skill Usage**:
+     - Use `$research-to-architecture-adr` for architecture and ADR work. It should inspect SRS, architecture, technical design, roadmap, ADR index, executable contracts, and traceability before promoting stable claims.
+     - Use `$technical-design-manager` for realization work. It should inspect governing docs plus relevant `src/` and `specs/` evidence, then update only the requested technical design scope by default.
+     - Use both skills with explicit current-state, target-state, transition-state, and future-state labels when a change mixes implemented behavior with planned design.
    - **Quality Rules**:
      - Architecture documents describe boundaries and relationships, not detailed payload schemas.
      - Technical design documents describe realization, not requirement authority.
@@ -442,6 +463,9 @@ The 18-step lifecycle below is the detailed execution model inside the SDLC loop
      ```text
      Review the research/proposal inputs listed below as non-authoritative sources.
      Inspect the current SRS, architecture design, technical design, roadmap, ADR index, executable contracts, and traceability files before editing.
+
+     Use $research-to-architecture-adr for architecture and ADR propagation.
+     Use $technical-design-manager for TECHNICAL_DESIGN.md realization updates and implementation/spec sync.
 
      Produce an impact map first:
      - proposal point
@@ -459,6 +483,16 @@ The 18-step lifecycle below is the detailed execution model inside the SDLC loop
 
      Do not copy proposal prose wholesale. Translate each stable claim into the target document's responsibility.
      After edits, run a consistency review for stale terminology, duplicate authority, broken links, missing traceability, and current-vs-target drift.
+     ```
+
+   - **Focused Skill Prompt Examples**:
+
+     ```text
+     Use $research-to-architecture-adr. Inputs: <proposal/research files>. Targets: <architecture file>, <ADR directory/index>. Produce an impact map first, then promote stable claims only into architecture and ADRs.
+     ```
+
+     ```text
+     Use $technical-design-manager. Inputs: <SRS/architecture/ADR/spec/proposal/source files>. Target: <TECHNICAL_DESIGN.md section/module>. Produce an impact map first, then update only the agreed technical design scope.
      ```
 
 1b. **Roadmap and Backlog Mirror Planning**: Convert approved increments into runnable roadmap slices and backlog mirrors that remain traceable to SRS IDs and acceptance criteria.
@@ -614,8 +648,14 @@ The 18-step lifecycle below is the detailed execution model inside the SDLC loop
       - [openapi.yaml](../openapi.yaml)
       - [SYSTEM_REQUIREMENTS_SPECIFICATION.md](../system/SYSTEM_REQUIREMENTS_SPECIFICATION.md)
       - Domain designs under [domains/](../domains/)
+    - **Skill Usage**:
+      - Use [`$technical-design-manager`](../../.agents/skills/technical-design-manager/SKILL.md) as the preferred skill for synchronizing verified `specs/`, current `src/` behavior, executable contracts, and implementation learnings into domain `TECHNICAL_DESIGN.md`.
+      - By default, `$technical-design-manager` treats `src/` and `specs/` as evidence sources and reports code/spec follow-ups instead of editing them. Expand the edit scope only when the user explicitly includes those targets.
+      - Use [`$research-to-architecture-adr`](../../.agents/skills/research-to-architecture-adr/SKILL.md) during synchronization only when the delivered work reveals an architecture boundary change or a durable decision that should be captured in architecture or ADRs.
     - **Cross-Reference Prompt Hint**:
       > *Prompt Hint*: "Promote spec learnings to long-lived docs: 'Review the verified specification and implementation learnings. Synchronize any API contract updates in [openapi.yaml](../openapi.yaml) and update realization prose in [backend/TECHNICAL_DESIGN.md](../domains/backend/TECHNICAL_DESIGN.md) or [SYSTEM_REQUIREMENTS_SPECIFICATION.md](../system/SYSTEM_REQUIREMENTS_SPECIFICATION.md).'"
+    - **Drift Review Prompt Hint**:
+      > *Prompt Hint*: "Use `$technical-design-manager` to compare verified `specs/`, current `src/` behavior, executable contracts, and the target domain `TECHNICAL_DESIGN.md`. Produce an impact map, update only the agreed technical-design section, and report any required `src/`, `specs/`, SRS, architecture, ADR, roadmap, contract, or traceability follow-ups."
 
 ### 3.4 Workflow Visuals
 
@@ -771,6 +811,8 @@ flowchart TB
 ```
 
 The main synchronization targets behind the final node are [spec-traceability.yaml](../../specs/spec-traceability.yaml), [spec-sync-status.md](../../specs/spec-sync-status.md), [SRS_SPEC_TRACEABILITY.md](../domains/agent/SRS_SPEC_TRACEABILITY.md), and [openapi.yaml](../openapi.yaml). In this repository, the IaC outputs in [IaC/](../../IaC/) and the QA results captured in `tests/` plus `specs/feature/review.md` are also part of the governed evidence chain.
+
+For skill-assisted synchronization, use [`$technical-design-manager`](../../.agents/skills/technical-design-manager/SKILL.md) to check design-to-implementation and implementation-to-design drift between `TECHNICAL_DESIGN.md`, verified `specs/`, executable contracts, and `src/`. Use [`$research-to-architecture-adr`](../../.agents/skills/research-to-architecture-adr/SKILL.md) when synchronization reveals proposal-to-architecture promotion needs, ADR candidates, or durable architecture boundary changes. These skills complement the diagram by preserving authority boundaries: technical design owns realization, architecture owns boundaries and viewpoints, ADRs own decisions, specs own delivery evidence, and contracts own schema truth.
 
 ### 3.5 Command Normalization Notes
 
