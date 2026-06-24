@@ -1,0 +1,4 @@
+interface:
+  display_name: "Technical Design Manager"
+  short_description: "Maintain technical design from governing docs."
+  default_prompt: "Use $technical-design-manager. Inputs: <SRS/architecture/ADR/spec/proposal/source files>. Target: <TECHNICAL_DESIGN.md section/module>. Produce an impact map first, then update only the agreed technical design scope."
