@@ -3,7 +3,7 @@
 > **Status**: Scaffolded from current agent architecture material and ready for iterative refinement.
 > **Standards Stance**: Aligned design practice
 > **Technology Stack**: LangGraph 0.2.62+, LangChain, OpenAI SDK, semantic-router, MongoDB, Redis
-> **Companion Documents**: [ARCHITECTURE_DESIGN.md](./ARCHITECTURE_DESIGN.md), [AGENT_MEMORY_TECHNICAL_DESIGN.md](./AGENT_MEMORY_TECHNICAL_DESIGN.md), [PROMPT_SYSTEM_RESEARCH_PROPOSAL.md](./PROMPT_SYSTEM_RESEARCH_PROPOSAL.md), [ADR-AGENT-001-LAYERED-LLM-ARCHITECTURE.md](./decisions/ADR-AGENT-001-LAYERED-LLM-ARCHITECTURE.md), [ADR-AGENT-002-SKILLS-PATTERN-PROMPT-COMPOSITION.md](./decisions/ADR-AGENT-002-SKILLS-PATTERN-PROMPT-COMPOSITION.md), [ADR-AGENT-003-EXTERNALIZE-VERSION-PROMPT-ASSETS.md](./decisions/ADR-AGENT-003-EXTERNALIZE-VERSION-PROMPT-ASSETS.md)
+> **Companion Documents**: [ARCHITECTURE_DESIGN.md](./ARCHITECTURE_DESIGN.md), [SOFTWARE_REQUIREMENTS_SPECIFICATION.md](./SOFTWARE_REQUIREMENTS_SPECIFICATION.md), [SRS_SPEC_TRACEABILITY.md](./SRS_SPEC_TRACEABILITY.md), [AGENT_MEMORY_TECHNICAL_DESIGN.md](./AGENT_MEMORY_TECHNICAL_DESIGN.md), [PROMPT_SYSTEM_RESEARCH_PROPOSAL.md](./PROMPT_SYSTEM_RESEARCH_PROPOSAL.md), [TOOLS_RESEARCH_AND_PROPOSAL.md](./TOOLS_RESEARCH_AND_PROPOSAL.md), [spec-sync-status.md](../../../specs/spec-sync-status.md), [ADR-AGENT-001-LAYERED-LLM-ARCHITECTURE.md](./DECISIONS/ADR-AGENT-001-LAYERED-LLM-ARCHITECTURE.md), [ADR-AGENT-002-SKILLS-PATTERN-PROMPT-COMPOSITION.md](./DECISIONS/ADR-AGENT-002-SKILLS-PATTERN-PROMPT-COMPOSITION.md), [ADR-AGENT-003-EXTERNALIZE-VERSION-PROMPT-ASSETS.md](./DECISIONS/ADR-AGENT-003-EXTERNALIZE-VERSION-PROMPT-ASSETS.md), [ADR-AGENT-004-THIN-TOOL-GATEWAY-AND-NORMALIZED-TOOL-CONTEXT.md](./DECISIONS/ADR-AGENT-004-THIN-TOOL-GATEWAY-AND-NORMALIZED-TOOL-CONTEXT.md)
 
 ## Document Control
 
@@ -21,6 +21,20 @@
 Explains how the agent domain realizes allocated requirements and architecture decisions. This document preserves implementation-oriented material extracted from the current architecture description so that the architecture document can focus on viewpoint-governed views while this document holds realization detail.
 
 The corresponding architecture views for context and boundary, logical structure, process flow, information and state, development, deployment, operations and maintenance, and prompt behavior are defined in [ARCHITECTURE_DESIGN.md](./ARCHITECTURE_DESIGN.md). This document complements those views by describing how the codebase realizes them, rather than restating the architecture-level framing.
+
+### Reference and Authority Map
+
+This document uses compact references to preserve authority boundaries. Requirements, decisions, delivery status, schema truth, and implementation evidence remain owned by their source artifacts.
+
+| Evidence or Authority | Owning Artifact | Technical Design Use |
+|-----------------------|-----------------|----------------------|
+| Agent requirements and acceptance criteria | [SOFTWARE_REQUIREMENTS_SPECIFICATION.md](./SOFTWARE_REQUIREMENTS_SPECIFICATION.md), [SRS_SPEC_TRACEABILITY.md](./SRS_SPEC_TRACEABILITY.md) | Cite FR/AC/NFR identifiers that drive realization constraints |
+| Architecture boundaries and viewpoints | [ARCHITECTURE_DESIGN.md](./ARCHITECTURE_DESIGN.md) | Translate architecture views into code-level components, stores, flows, and caveats |
+| Durable decisions | [ADR index](./DECISIONS/AGENT_ARCHITECTURE_DECISION_RECORDS.md), ADR-001 through ADR-004 | Record how accepted or proposed decisions are realized without duplicating rationale |
+| Verified and implemented delivery evidence | [spec-sync-status.md](../../../specs/spec-sync-status.md), `specs/prompt-system-milestone1`, `specs/prompt-system-milestone2`, `specs/agent-session-with-stm-wiring`, `specs/stm-phase-cde` | Promote stable implementation evidence and label planned or gated behavior explicitly |
+| Runtime source evidence | `src/core`, `src/services`, `src/web`, `src/data`, `src/utils` | Anchor current-state implementation claims to the narrowest useful module |
+| Verification evidence | `tests/test_*`, `tests/integration`, `tests/api`, `tests/security`, `tests/performance` | Link design verification surfaces without prescribing the test harness |
+
 
 ## 1. Domain Scope and Boundaries
 
@@ -48,6 +62,26 @@ This document does not replace:
 
 The StockAssistantAgent is a LangChain-based ReAct agent designed for stock investment assistance. It orchestrates AI model providers and specialized tools to answer user queries about stock prices, technical analysis, and investment research.
 
+```mermaid
+flowchart LR
+	SRS["SRS FR / AC / NFR\nrequirement authority"]
+	Architecture["Architecture views\nboundary authority"]
+	ADRs["ADR set\ndecision authority"]
+	Specs["Spec Kit artifacts\nverified delivery evidence"]
+	Source["src modules\ncurrent implementation evidence"]
+	Tests["tests\nverification evidence"]
+	TechDesign["TECHNICAL_DESIGN.md\nrealization authority"]
+
+	SRS --> TechDesign
+	Architecture --> TechDesign
+	ADRs --> TechDesign
+	Specs --> TechDesign
+	Source --> TechDesign
+	Tests --> TechDesign
+```
+
+Refs: [SOFTWARE_REQUIREMENTS_SPECIFICATION.md](./SOFTWARE_REQUIREMENTS_SPECIFICATION.md); [ARCHITECTURE_DESIGN.md](./ARCHITECTURE_DESIGN.md); [ADR index](./DECISIONS/AGENT_ARCHITECTURE_DECISION_RECORDS.md); [spec-sync-status.md](../../../specs/spec-sync-status.md); `src/`; `tests/`.
+
 ### 2.1 Key Characteristics
 
 | Aspect | Description |
@@ -59,6 +93,8 @@ The StockAssistantAgent is a LangChain-based ReAct agent designed for stock inve
 | Memory | Service-owned session context and lifecycle metadata, LangGraph `MongoDBSaver` for conversation-scoped STM, and a planned future LTM personalization boundary |
 | Semantic Router | `semantic-router` library with OpenAI/HuggingFace encoders |
 | Response Types | Structured (`AgentResponse`) with immutable dataclasses |
+
+Refs: SRS FR-1, FR-2, FR-3, FR-4, FR-5, FR-6; [ARCHITECTURE_DESIGN.md section 4](./ARCHITECTURE_DESIGN.md#4-architecture-views); ADR-001 through ADR-004.
 
 ### 2.2 Source Layout
 
@@ -99,16 +135,24 @@ src/prompts/
 └── system_stock_assistant.txt
 ```
 
+Current prompt-system implementation also includes the M1/M2 prompt compiler modules under `src/core/`: `prompt_types.py`, `prompt_asset_loader.py`, and `prompt_assembler.py`. The implemented prompt asset layout includes `src/prompts/system/react_analyst.md` and route-skill assets under `src/prompts/skills/routes/*.md`; legacy template/text assets remain present during the transition window.
+
+Refs: `src/core`; `src/services`; `src/web`; `src/data`; `src/utils`; `src/prompts`; [ARCHITECTURE_DESIGN.md section 4.5.1](./ARCHITECTURE_DESIGN.md#451-source-layout-view).
+
 ### 2.3 Prompt Asset Mapping (Current vs Planned)
 
 | View | Prompt Asset Model | Status |
 |------|--------------------|--------|
-| Current runtime layout | Template/text assets under `src/prompts/` | Implemented |
-| ADR taxonomy target (canonical) | Shallow metadata-driven layout under `src/prompts/system/`, `src/prompts/skills/`, and `src/prompts/experiments/` with files such as `system/react_analyst.md`, `system/react_analyst.vi.md`, `skills/routes/price_check.md`, and `experiments/react_analyst.evidence_strict.md` | Proposed |
+| Legacy runtime layout | Template/text assets under `src/prompts/` | Implemented and retained during transition |
+| M1 prompt asset layout | Shallow metadata-driven `src/prompts/system/react_analyst.md` with version, role, status, locale, parity group, and variant in frontmatter | Implemented and verified by `specs/prompt-system-milestone1/review.md` |
+| M2 route-skill layout | Route-scoped markdown assets under `src/prompts/skills/routes/*.md` for the canonical `StockQueryRoute` set | Implemented as assets and assembler inputs; runtime activation is gated by assembler injection and `prompts.route_contexts.enabled` |
+| Future prompt asset layout | Additional locale variants, always-active skills, shared policy assets, and experiment variants under the ADR taxonomy | Planned / future state |
 
 The technical design treats ADR taxonomy as canonical for prompt assets. Planning-artifact path aliases are non-authoritative and must map back to ADR taxonomy paths.
 
-The planned structure stays intentionally shallow. Asset class is conveyed by directory, while version, locale, variant, activation mode, and baseline fallback semantics are resolved through metadata and loader policy rather than deeper directory nesting.
+The structure stays intentionally shallow. Asset class is conveyed by directory, while version, locale, variant, activation mode, and baseline fallback semantics are resolved through metadata and loader policy rather than deeper directory nesting.
+
+Refs: [ADR-002](./DECISIONS/ADR-AGENT-002-SKILLS-PATTERN-PROMPT-COMPOSITION.md); [ADR-003](./DECISIONS/ADR-AGENT-003-EXTERNALIZE-VERSION-PROMPT-ASSETS.md); [prompt-system-milestone1 review](../../../specs/prompt-system-milestone1/review.md); [prompt-system-milestone2 review](../../../specs/prompt-system-milestone2/review.md); `src/core/prompt_asset_loader.py`; `src/core/prompt_assembler.py`; `src/prompts`.
 
 ## 3. Core Realization
 
@@ -150,6 +194,8 @@ The constructor accepts an optional `checkpointer` parameter injected by `APISer
 - Workspace/session/conversation ownership and lifecycle validation live in the management APIs and services, not inside `StockAssistantAgent` itself.
 - Session-context resolution helpers exist in `ChatService` and `ConversationService`; merged context is resolved at query time in service helpers, but prompt-level injection of that merged context is still follow-up work.
 
+Refs: SRS FR-1.1, FR-1.2, FR-3.1, FR-3.2, FR-5.1, FR-5.2; [ARCHITECTURE_DESIGN.md section 4.3.1](./ARCHITECTURE_DESIGN.md#431-primary-query-processing-flow); `src/core/stock_assistant_agent.py`; `src/web/api_server.py`; `src/services/chat_service.py`; `src/web/routes/ai_chat_routes.py`; `src/web/sockets/chat_events.py`; `tests/test_agent.py`; `tests/test_chat_service.py`; `tests/test_chat_routes.py`.
+
 #### 3.1.1 Mirror — Component Interface Diagram
 
 This realization-oriented mirror corresponds to the architecture-level interface diagrams in [ARCHITECTURE_DESIGN.md](./ARCHITECTURE_DESIGN.md) section 4.1.1a and section 4.2.2a. It deliberately reuses the same canonical interface vocabulary, then ties each architectural interface to the concrete routes, protocols, factories, registries, and state adapters that realize it in the current codebase.
@@ -162,7 +208,7 @@ flowchart LR
 	Orchestration -->|"conversation lifecycle interface"| StateSvc["ConversationProvider + SessionProvider"]
 	Orchestration -->|"metadata persistence interface"| Repo["ConversationRepository"]
 	Agent -->|"intent classification interface"| Router["stock_query_router"]
-	Agent -->|"behavioral policy interface"| Prompt["Current system prompt / planned prompt compiler"]
+	Agent -->|"behavioral policy interface"| Prompt["PromptAssetLoader current\nPromptAssembler gated\nGuardrail planned"]
 	Agent -->|"provider selection interface"| Factory["ModelClientFactory"]
 	Agent -->|"tool invocation interface"| Tools["ToolRegistry + Tools"]
 	Agent -->|"conversational state interface"| Checkpoint["MongoDBSaver"]
@@ -181,7 +227,7 @@ The current realization of those canonical interfaces is:
 | Conversation lifecycle interface | Service-layer logic checks archive status, ensures conversation existence, resolves parent session context, and records message metadata outside the agent runtime; this boundary is fully realized on the REST path and remains a known parity gap on Socket.IO | `ConversationProvider`, `SessionProvider`, `_validate_conversation_active()`, `_ensure_conversation_exists()`, `_record_message_metadata()`, `_load_conversation_context()` |
 | Metadata persistence interface | Conversation-management metadata is persisted through service and repository paths rather than through the LangGraph checkpoint store | `ConversationService`, `ConversationRepository`, service-factory wiring |
 | Intent classification interface | The runtime consults `stock_query_router` as the query classification boundary, keeping intent selection separate from provider binding and tool execution | `src/core/stock_query_router.py`, runtime routing flow |
-| Behavioral policy interface | PromptAssetLoader (M1) resolves versioned assets; PromptAssembler (M2) composes route-aware prompts; ResponseGuardrailMiddleware remains planned for M3 | `StockAssistantAgent.REACT_SYSTEM_PROMPT` (legacy), `PromptAssetLoader` + `PromptAssembler` in section 3.5 |
+| Behavioral policy interface | `PromptAssetLoader` (M1) resolves versioned assets in the current runtime; `PromptAssembler` (M2) is implemented and tested but requires explicit runtime injection plus `prompts.route_contexts.enabled=true`; `ResponseGuardrailMiddleware` remains planned | `StockAssistantAgent.REACT_SYSTEM_PROMPT` (legacy fallback), `PromptAssetLoader`, `PromptAssembler`, section 3.5 |
 | Provider selection interface | The runtime uses `ModelClientFactory` to resolve provider/model clients and fallback ordering without embedding provider construction logic into route or service code | `ModelClientFactory.get_client()`, `ModelClientFactory.get_fallback_sequence()`, `StockAssistantAgent._select_client()` |
 | Tool invocation interface | The runtime materializes enabled tools from `ToolRegistry`, then passes that governed tool surface into the LangGraph ReAct agent | `get_tool_registry()`, `ToolRegistry.get_enabled_tools()`, `StockAssistantAgent._initialize_tools()`, `_build_agent_executor()` |
 | Conversational state interface | `APIServer` injects the LangGraph checkpointer, and the runtime binds `conversation_id` into `configurable.thread_id` during invoke so checkpoints stay conversation-scoped | `create_checkpointer()`, `APIServer.__init__()`, `process_query_structured()`, `_process_with_react()` / streaming invoke path |
@@ -193,7 +239,31 @@ Current transport note: the REST path fully realizes the request-orchestration a
 
 This split keeps the architecture package disciplined. The architecture description names the architectural boundaries and their ownership, while this technical view records the concrete adapters, protocol contracts, and call sites that currently realize those interfaces.
 
+Refs: [ARCHITECTURE_DESIGN.md section 4.1.1a](./ARCHITECTURE_DESIGN.md#411a-external-and-internal-interface-diagram-architecture-level); [ARCHITECTURE_DESIGN.md section 4.2.2a](./ARCHITECTURE_DESIGN.md#422a-logical-component-interface-view); `src/services/protocols.py`; `src/services/factory.py`; `src/data/repositories/conversation_repository.py`.
+
 ### 3.2 Tool Registry and Tool Execution
+
+Tool invocation stays behind the registry boundary. Cache-aware tools decide whether a request can be served from Redis-backed cache before executing their data-access path, and market-data retrieval remains a tool-owned outbound concern rather than an agent memory concern.
+
+```mermaid
+flowchart LR
+	Agent["StockAssistantAgent"]
+	Registry["ToolRegistry\nget_enabled_tools()"]
+	Tool["CachingTool subclass\nStockSymbol / Reporting / TradingView"]
+	Cache{"Cache hit?"}
+	Redis["CacheBackend / Redis"]
+	Data["DataManager / repositories"]
+	External["External market data\nYahoo Finance today"]
+	Result["Tool result\nreturned to agent loop"]
+
+	Agent --> Registry --> Tool --> Cache
+	Cache -->|"lookup / write-through"| Redis
+	Cache -->|"hit"| Result
+	Cache -->|"miss"| Data --> External --> Data --> Redis
+	Data --> Result --> Agent
+```
+
+Refs: SRS FR-2.1, FR-2.2, FR-2.3; [ADR-004](./DECISIONS/ADR-AGENT-004-THIN-TOOL-GATEWAY-AND-NORMALIZED-TOOL-CONTEXT.md); [ARCHITECTURE_DESIGN.md section 4.3.4](./ARCHITECTURE_DESIGN.md#434-tool-provider-selection-and-fallback-view); `src/core/tools/base.py`; `src/core/tools/registry.py`; `src/core/tools/stock_symbol.py`; `src/core/tools/reporting.py`; `src/core/tools/tradingview.py`; `src/core/data_manager.py`; `src/utils/cache.py`; `tests/test_tools.py`.
 
 #### CachingTool Base Class
 
@@ -275,6 +345,8 @@ Runtime rules:
 2. Prompt-facing tool policy may narrow exposure but must not reclassify a tool below the registry-declared risk class.
 3. Any runtime path that exercises a class above `bounded_transformation` must emit approval-state and `tool_risk_class` metadata for tracing and audit.
 
+Refs: [ADR-004](./DECISIONS/ADR-AGENT-004-THIN-TOOL-GATEWAY-AND-NORMALIZED-TOOL-CONTEXT.md); [TOOLS_RESEARCH_AND_PROPOSAL.md](./TOOLS_RESEARCH_AND_PROPOSAL.md); [TOOLS_ARCHITECTURE_BENCHMARK_REVIEW.md](./TOOLS_ARCHITECTURE_BENCHMARK_REVIEW.md); SRS FR-1.4.14 and FR-1.5.6; `tests/security/test_operator_tooling_boundaries.py`.
+
 ### 3.3 Memory Architecture and Lifecycle
 
 #### Short-Term Memory (STM) via LangGraph Checkpointer
@@ -346,7 +418,41 @@ flowchart TD
 
 **Detailed Design**: [AGENT_MEMORY_TECHNICAL_DESIGN.md](./AGENT_MEMORY_TECHNICAL_DESIGN.md)
 
+Refs: SRS FR-3.1, FR-3.2, FR-3.3, FR-3.4; [ARCHITECTURE_DESIGN.md section 4.4](./ARCHITECTURE_DESIGN.md#44-information-and-state-view); [AGENT_MEMORY_TECHNICAL_DESIGN.md](./AGENT_MEMORY_TECHNICAL_DESIGN.md); [agent-session-with-stm-wiring review](../../../specs/agent-session-with-stm-wiring/review.md); [stm-phase-cde review](../../../specs/stm-phase-cde/review.md); `src/core/langgraph_bootstrap.py`; `src/utils/memory_config.py`; `src/services/conversation_service.py`; `tests/test_agent_memory.py`; `tests/integration/test_stm_runtime_wiring.py`; `tests/integration/test_memory_persistence.py`.
+
 ### 3.4 Model Selection, Routing, and Fallback
+
+Model selection and route classification are separate runtime concerns. Routing determines intent and prompt/tool context; provider selection determines which model client executes the request and how fallback metadata is reported.
+
+```mermaid
+sequenceDiagram
+	autonumber
+	participant User as Request surface
+	participant Router as stock_query_router
+	participant Agent as StockAssistantAgent
+	participant Factory as ModelClientFactory
+	participant Primary as Primary provider
+	participant Fallback as Fallback provider
+	participant Response as AgentResponse
+
+	User->>Router: classify query intent
+	Router-->>Agent: RouteResult + confidence
+	Agent->>Factory: resolve provider/model
+	Factory-->>Agent: BaseModelClient
+	Agent->>Primary: generate with selected model
+	alt primary succeeds
+		Primary-->>Response: content + provider metadata
+	else primary fails and fallback is allowed
+		Agent->>Factory: resolve fallback sequence
+		Factory-->>Agent: fallback client
+		Agent->>Fallback: generate with fallback model
+		Fallback-->>Response: fallback content + status
+	else all providers fail
+		Agent-->>Response: controlled error status
+	end
+```
+
+Refs: SRS FR-1.3, FR-4.1, FR-4.2; [ARCHITECTURE_DESIGN.md section 4.3.2](./ARCHITECTURE_DESIGN.md#432-route-classification-view); [ARCHITECTURE_DESIGN.md section 4.3.3](./ARCHITECTURE_DESIGN.md#433-model-provider-selection-and-fallback-view); `src/core/model_factory.py`; `src/core/base_model_client.py`; `src/core/openai_model_client.py`; `src/core/grok_model_client.py`; `src/core/stock_query_router.py`; `src/core/routes.py`; `tests/test_model_factory.py`; `tests/test_stock_query_router.py`; `tests/test_agent_fallback.py`.
 
 #### ModelClientFactory
 
@@ -409,6 +515,8 @@ The layered architecture treats retrieval as a distinct evidence path rather tha
 
 This design preserves two technical invariants from ADR-001: retrieved evidence is sourced and attributable, and any interpretation produced from that evidence remains in the model output rather than being written back into memory as domain truth.
 
+Refs: [ADR-001](./DECISIONS/ADR-AGENT-001-LAYERED-LLM-ARCHITECTURE.md); SRS FR-1.5.1, FR-1.5.5, FR-4.2.1; `src/core/tools`; `src/core/data_manager.py`; `tests/test_data_manager.py`.
+
 #### Immutable Response Types
 
 **Decision**: Use frozen dataclasses for all response types.
@@ -449,34 +557,38 @@ def process_query(
 				return f"Sorry, I encountered an error: {e}"
 ```
 
+Refs: SRS FR-1.2.2, FR-1.3.2, FR-1.3.3; `src/core/types.py`; `src/core/stock_assistant_agent.py`; `tests/test_agent_regression.py`; `tests/test_agent_fallback.py`.
+
 ### 3.5 Prompt Realization and Guardrails
 
-> **Status:** Planned realization path.
-> **Decision coupling:** This section reflects the prompt-system direction proposed in the companion research document and the prompt-related ADRs.
+> **Status:** Mixed current, gated, and planned realization path.
+> **Decision coupling:** This section reflects implemented M1/M2 source evidence, verified Spec Kit reviews, and the prompt-related ADRs.
 
-The prompt system should evolve from one governed runtime prompt into a structured realization path that externalizes prompt assets, composes route-aware behavior deterministically, and keeps response-policy enforcement visible. This section therefore emphasizes the technical-design views needed for implementation and review: realization stack, component interfaces, request flow, data flow, runtime contracts, degradation behavior, and control-plane configuration.
+The prompt system has moved from one governed runtime prompt toward a structured realization path. M1 externalized and versioned the baseline prompt with loader-backed fallback and response metadata. M2 implemented route-skill assets and `PromptAssembler`, but route-aware assembly is gated in the default runtime because the API server currently injects only `PromptAssetLoader` and `prompts.route_contexts.enabled` defaults to `false`. Response guardrail middleware, experiment rollout, and full streaming guardrail behavior remain planned.
 
 | Concern family | Primary authority | Use this section for |
 |----------------|-------------------|----------------------|
-| Boundary, precedence, and component ownership | [ARCHITECTURE_DESIGN.md §4.8 Prompt and Behavior View](./ARCHITECTURE_DESIGN.md#48-prompt-and-behavior-view), [ADR-AGENT-001-LAYERED-LLM-ARCHITECTURE.md](./decisions/ADR-AGENT-001-LAYERED-LLM-ARCHITECTURE.md), [ADR-AGENT-002-SKILLS-PATTERN-PROMPT-COMPOSITION.md](./decisions/ADR-AGENT-002-SKILLS-PATTERN-PROMPT-COMPOSITION.md), [ADR-AGENT-003-EXTERNALIZE-VERSION-PROMPT-ASSETS.md](./decisions/ADR-AGENT-003-EXTERNALIZE-VERSION-PROMPT-ASSETS.md) | Realization views that stay inside the architecture boundary rather than redefining it |
+| Boundary, precedence, and component ownership | [ARCHITECTURE_DESIGN.md §4.8 Prompt and Behavior View](./ARCHITECTURE_DESIGN.md#48-prompt-and-behavior-view), [ADR-AGENT-001-LAYERED-LLM-ARCHITECTURE.md](./DECISIONS/ADR-AGENT-001-LAYERED-LLM-ARCHITECTURE.md), [ADR-AGENT-002-SKILLS-PATTERN-PROMPT-COMPOSITION.md](./DECISIONS/ADR-AGENT-002-SKILLS-PATTERN-PROMPT-COMPOSITION.md), [ADR-AGENT-003-EXTERNALIZE-VERSION-PROMPT-ASSETS.md](./DECISIONS/ADR-AGENT-003-EXTERNALIZE-VERSION-PROMPT-ASSETS.md) | Realization views that stay inside the architecture boundary rather than redefining it |
 | Requirements, rollout gates, and release controls | [SOFTWARE_REQUIREMENTS_SPECIFICATION.md §FR-1.4 System Prompt](./SOFTWARE_REQUIREMENTS_SPECIFICATION.md#fr-14-system-prompt), [SOFTWARE_REQUIREMENTS_SPECIFICATION.md §NFR-5: Observability](./SOFTWARE_REQUIREMENTS_SPECIFICATION.md#nfr-5-observability), [SOFTWARE_REQUIREMENTS_SPECIFICATION.md §AC-8: Prompt System](./SOFTWARE_REQUIREMENTS_SPECIFICATION.md#ac-8-prompt-system), [PHASE_2_AGENT_ENHANCEMENT_ROADMAP.md §2A.2 Prompt Compiler Path & Controlled Rollout](./PHASE_2_AGENT_ENHANCEMENT_ROADMAP.md#22-prompt-compiler-path--controlled-rollout) | Mapping technical contracts, diagrams, and residual rules back to FR, NFR, AC, and rollout controls |
-| Design rationale, benchmark alignment, and sync | [PROMPT_SYSTEM_RESEARCH_PROPOSAL.md §Target Prompt System Architecture](./PROMPT_SYSTEM_RESEARCH_PROPOSAL.md#target-prompt-system-architecture), [PROMPT_SYSTEM_BENCHMARK_REVIEW.md §4.3 Guardrails Belong at Boundaries](./PROMPT_SYSTEM_BENCHMARK_REVIEW.md#43-guardrails-belong-at-boundaries), [SRS_SPEC_TRACEABILITY.md §Reverse Trace](./SRS_SPEC_TRACEABILITY.md#reverse-trace) | Checking whether the realization stays aligned with the target design, benchmark guidance, and post-change traceability duties |
+| Design rationale, benchmark alignment, and sync | [PROMPT_SYSTEM_RESEARCH_PROPOSAL.md §Target Prompt System Architecture](./PROMPT_SYSTEM_RESEARCH_PROPOSAL.md#target-prompt-system-architecture), [PROMPT_SYSTEM_BENCHMARK_REVIEW.md §4.3 Guardrails Belong at Boundaries](./PROMPT_SYSTEM_BENCHMARK_REVIEW.md#43-guardrails-belong-at-boundaries), [SRS_SPEC_TRACEABILITY.md §Reverse Trace](./SRS_SPEC_TRACEABILITY.md#reverse-trace), [spec-sync-status.md](../../../specs/spec-sync-status.md) | Checking whether the realization stays aligned with the target design, benchmark guidance, and post-change traceability duties |
 
-The following planned stack shows which runtime technologies realize the prompt control plane, orchestration loop, and observability boundary.
+Refs: [prompt-system-milestone1 review](../../../specs/prompt-system-milestone1/review.md); [prompt-system-milestone2 review](../../../specs/prompt-system-milestone2/review.md); `src/core/prompt_asset_loader.py`; `src/core/prompt_assembler.py`; `src/core/prompt_types.py`; `src/prompts`; `tests/test_prompt_asset_loader.py`; `tests/test_prompt_assembler.py`; `tests/test_prompt_metadata.py`; `tests/test_prompt_config.py`.
+
+The following stack separates current, gated, and planned runtime technologies in the prompt control plane, orchestration loop, and observability boundary.
 
 ```mermaid
 flowchart LR
-	subgraph Control["Prompt control plane [Planned]"]
-		Assets["Prompt assets\nsystem | skills | experiments"]
-		Manifest["Manifest + review state"]
-		Config["prompts.* config"]
+	subgraph Control["Prompt control plane"]
+		Assets["Prompt assets\nCurrent: system/react_analyst.md\nGated: skills/routes/*.md\nFuture: experiments"]
+		Manifest["Manifest scan\nCurrent: system + skills/routes"]
+		Config["prompts.* config\nCurrent: registry/system/selection\nGated: route_contexts"]
 	end
 	subgraph Runtime["Request runtime"]
 		Router["Route classification"]
-		Loader["PromptAssetLoader"]
-		Assembler["PromptAssembler"]
+		Loader["PromptAssetLoader\nCurrent"]
+		Assembler["PromptAssembler\nImplemented / gated"]
 		Agent["LangGraph + LangChain agent loop"]
-		Guard["ResponseGuardrailMiddleware"]
+		Guard["ResponseGuardrailMiddleware\nPlanned"]
 		Surface["REST / SSE / Socket.IO surface"]
 	end
 	subgraph StateObs["State and observability"]
@@ -503,49 +615,46 @@ flowchart LR
 	Surface -.-> Trace
 ```
 
-The current baseline remains relevant only to explain the transition into the planned target design. It should not be read as evidence that the prompt compiler path, rollout controls, or prompt-governance verification model are already fully implemented.
+The current default request path uses loader-resolved prompt content. Route-aware compilation is implemented at component level and becomes active only when `PromptAssembler` is constructed and injected into `StockAssistantAgent` while `prompts.route_contexts.enabled` is `true`. Guardrail middleware and experiment controls are not current runtime behavior.
 
 #### 3.5.1 Current Baseline and Transition Direction
 
-The current baseline is one centrally managed runtime prompt contract supported by prompt assets under `src/prompts/`. The planned prompt system does not replace that baseline with an unrelated design; it formalizes it into explicit technical boundaries for asset resolution, prompt assembly, and guardrail enforcement.
+The current baseline is a loader-resolved runtime prompt contract supported by prompt assets under `src/prompts/`. The implementation retains the hardcoded `REACT_SYSTEM_PROMPT` as a legacy fallback alias, while `PromptAssetLoader` is the current authoritative prompt source in the API server path.
 
 For technical design purposes, the key transition is:
 
-- from one centrally managed prompt contract to versioned prompt assets;
-- from implicit behavior shaping to explicit composition rules;
-- from broad prompt changes to bounded route-aware prompt context via the Skills pattern; and
-- from opaque prompt behavior to attributable prompt metadata and guardrail outcomes.
+- from hardcoded prompt content to versioned prompt assets: implemented in M1;
+- from direct asset loading to route-aware prompt compilation: implemented in M2 components and gated for runtime activation;
+- from broad prompt changes to bounded route-aware prompt context via the Skills pattern: implemented as route assets and assembler behavior, not enabled by default server wiring; and
+- from prompt identity metadata to full response guardrail outcomes: metadata is current, guardrail outcome enforcement remains planned.
 
 #### 3.5.2 Prompt Compiler Path
 
 The prompt compiler path is `PromptAssetLoader -> PromptAssembler -> ResponseGuardrailMiddleware`.
 
 **M1 status**: ``PromptAssetLoader`` is **implemented** (``src/core/prompt_asset_loader.py``) with the full
-8-field selection tuple (see §3.5.2.2).
+8-field selection tuple (see §3.5.2.2), startup config validation, baseline fallback, and response metadata emission through the REST chat route.
 
-**M2 status**: ``PromptAssembler`` is **implemented** (``src/core/prompt_assembler.py``) with the full
-deterministic assembly order, route-skill resolution, missing-skill degradation, and dynamic controls
-allowlist (see `specs/prompt-system-milestone2/spec.md`). ``ResponseGuardrailMiddleware``
-remains planned for M3.
+**M2 status**: ``PromptAssembler`` is **implemented but runtime-gated** (``src/core/prompt_assembler.py``) with deterministic assembly order, route-skill resolution, missing-skill degradation, and dynamic-controls allowlist. Unit verification exists in `tests/test_prompt_assembler.py` and delivery verification is recorded in `specs/prompt-system-milestone2/review.md`. The default API server path currently constructs and injects `PromptAssetLoader` only; route-aware compilation requires explicit `PromptAssembler` injection plus `prompts.route_contexts.enabled=true`. ``ResponseGuardrailMiddleware`` remains planned.
 
 The following views explain the interfaces, call flow, and request-scoped data movement for that path.
 
 ##### 3.5.2.1 Component Boundaries and Interfaces
 
-The following component diagram shows the planned service interfaces and the runtime contracts that move between them.
+The following component diagram shows current and gated service interfaces plus the planned guardrail boundary.
 
 ```mermaid
 classDiagram
 	class PromptAssetLoader {
 		<<Service>>
-		+select(requestEnvelope) PromptSelection
+		+resolve(selection: SelectionTuple) PromptSelection
 	}
 	class PromptAssembler {
-		<<Service>>
-		+compile(selection, runtimeContext) CompiledPrompt
+		<<Service: implemented / gated>>
+		+compile(selection: PromptSelection, route: StockQueryRoute, runtime_context) CompiledPrompt
 	}
 	class ResponseGuardrailMiddleware {
-		<<Service>>
+		<<Service: planned>>
 		+finalize(compiledPrompt, modelDraft) GuardrailResult
 	}
 	class PromptSelection {
@@ -553,21 +662,18 @@ classDiagram
 		+selected_assets
 		+prompt_version
 		+prompt_variant
-		+locale
-		+parity_group
 		+selection_mode
 		+fallback_used
 		+degraded_reason
-		+tool_risk_ceiling
-		+output_contract_id
 		+trace_metadata
 	}
 	class CompiledPrompt {
 		<<Contract>>
+		+compiled_text
 		+segment_manifest
-		+dropped_dynamic_fields
-		+tool_policy_snapshot
-		+prompt_metadata
+		+prompt_version
+		+prompt_variant
+		+trace_metadata
 	}
 	class GuardrailResult {
 		<<Contract>>
@@ -588,21 +694,23 @@ classDiagram
 
 | Component | Primary interface | Must not own |
 |-----------|-------------------|--------------|
-| `PromptAssetLoader` | `select(requestEnvelope) -> PromptSelection` | Route classification, prompt concatenation, tool execution, or model invocation |
-| `PromptAssembler` | `compile(selection, runtimeContext) -> CompiledPrompt` | Asset approval, route reclassification, tool-authorization policy, or response disposition |
-| `ResponseGuardrailMiddleware` | `finalize(compiledPrompt, modelDraft) -> GuardrailResult` | Prompt assembly, retrieval, tool execution, or request-level policy selection |
+| `PromptAssetLoader` | Current: `resolve(SelectionTuple) -> PromptSelection` | Route classification, prompt concatenation, tool execution, or model invocation |
+| `PromptAssembler` | Implemented/gated: `compile(PromptSelection, StockQueryRoute, runtime_context) -> CompiledPrompt` | Asset approval, route reclassification, tool-authorization policy, or response disposition |
+| `ResponseGuardrailMiddleware` | Planned: `finalize(compiledPrompt, modelDraft) -> GuardrailResult` | Prompt assembly, retrieval, tool execution, or request-level policy selection |
 
 ##### 3.5.2.2 PromptAssetLoader Realization Contract
 
-- The selection tuple remains explicit: `agent_role`, `route`, `locale`, `selection_mode`, `requested_version`, `prompt_experiment_id`, `workspace_mode`, and `env`. Hidden global switching should not bypass this tuple.
-- Asset admissibility should come only from asset frontmatter, the canonical manifest, review state, and baseline-lineage metadata.
-- Failure remains fail-closed: missing manifest rows, malformed frontmatter, review-state rejection, or unresolved lineage should fall back to approved baseline lineage when available; otherwise the loader emits a controlled degraded selection outcome rather than passing unknown assets downstream.
+- The implemented selection tuple is explicit: `agent_role`, `route`, `locale`, `selection_mode`, `requested_version`, `prompt_experiment_id`, `workspace_mode`, and `env`. M1 actively uses `agent_role`, `requested_version`, and `selection_mode`; the remaining fields are expansion-ready defaults.
+- The implemented manifest scan reads `system`, `skills`, `skills/routes`, and `experiments` directories, silently skipping missing directories and skipping invalid prompt assets with WARN-level logging.
+- Current asset admissibility comes from frontmatter parsing, route-scope validation for route assets, active baseline selection, and `prompts.*` structural validation. Review-state gates and richer rollout admission remain target-state policy.
+- Failure remains fail-closed: missing role assets, missing requested versions, malformed frontmatter, or exhausted baseline lineage fall back to an approved baseline when available or raise an unresolvable prompt error rather than passing unknown assets downstream.
 
 ##### 3.5.2.3 PromptAssembler Realization Contract
 
-- `PromptAssembler` admits only `PromptSelection`, normalized route result, approved dynamic controls, bounded memory summary, evidence bundles, and output-contract requirements.
-- Assembly remains deterministic in this order: shared policy -> always-active skills -> route-specific skill -> bounded memory context -> evidence and tool-derived facts -> task framing -> output contract.
-- If route skills are missing or dynamic fields are rejected, the assembler continues with approved inputs only, records the gaps in metadata, and never synthesizes substitute instructions.
+- `PromptAssembler` admits only `PromptSelection`, a `StockQueryRoute`, and optional runtime context containing approved dynamic controls, bounded memory summary, evidence, task framing, and output contract text.
+- Current M2 assembly is deterministic in this order: shared policy metadata for the role prompt, role prompt content, route-specific skill, bounded memory context, evidence and tool-derived facts, task framing, and output contract.
+- At M2 scope, shared policy is embedded in `system/react_analyst.md`; standalone shared policy files and always-active skills are target evolution.
+- If route skills are missing or dynamic fields are rejected, the assembler continues with approved inputs only, records `missing_route_skills` or `dropped_dynamic_fields` in trace metadata, and never synthesizes substitute instructions.
 
 ##### 3.5.2.4 ResponseGuardrailMiddleware Realization Contract
 
@@ -612,7 +720,7 @@ classDiagram
 
 ##### 3.5.2.5 Request-Scoped Call Flow
 
-The following sequence shows how one request moves through selection, assembly, generation, and final response commitment.
+The following sequence shows the gated route-aware path once `PromptAssembler` is injected and enabled. The default API runtime currently stops at loader-resolved prompt content; guardrail middleware remains planned.
 
 ```mermaid
 sequenceDiagram
@@ -625,16 +733,16 @@ sequenceDiagram
 	participant Surface as Response surface
 	participant Trace as LangSmith / trace sink
 
-	Router->>Loader: selection envelope
+	Router->>Loader: SelectionTuple
 	alt Preferred lineage admissible
 		Loader-->>Assembler: PromptSelection(fallback_used=false)
 	else Approved baseline fallback
 		Loader-->>Assembler: PromptSelection(fallback_used=true, degraded_reason)
 	end
 	opt Route skill missing or dynamic fields rejected
-		Assembler->>Trace: prompt_metadata + dropped_dynamic_fields
+		Assembler->>Trace: trace_metadata + dropped_dynamic_fields
 	end
-	Assembler-->>Agent: CompiledPrompt(segment_manifest, tool_policy_snapshot)
+	Assembler-->>Agent: CompiledPrompt(compiled_text, segment_manifest, trace_metadata)
 	Agent-->>Guard: model draft + evidence map + tool summary
 	alt GuardrailResult.status is pass or warn
 		Guard-->>Surface: response or bounded rewrite + trace metadata
@@ -647,7 +755,7 @@ sequenceDiagram
 
 ##### 3.5.2.6 Data Flow and Request-Scoped Inputs
 
-The following data-flow view separates control components from the request-scoped payloads they consume and emit.
+The following data-flow view separates control components from the request-scoped payloads they consume and emit. `PromptAssetLoader` is current; assembler inputs are implemented and gated; guardrail outputs are planned.
 
 ```mermaid
 flowchart LR
@@ -662,12 +770,12 @@ flowchart LR
 	Manifest --> Loader["PromptAssetLoader"]
 	Assets --> Loader
 	Config --> Loader
-	Loader -->|PromptSelection| Assembler["PromptAssembler"]
+	Loader -->|PromptSelection| Assembler["PromptAssembler\nimplemented / gated"]
 	Memory --> Assembler
 	Evidence --> Assembler
 	Contract --> Assembler
 	Assembler -->|CompiledPrompt + segment_manifest| Agent["Agent invocation"]
-	Agent -->|model draft + tool summary| Guard["ResponseGuardrailMiddleware"]
+	Agent -->|model draft + tool summary| Guard["ResponseGuardrailMiddleware\nplanned"]
 	Guard -->|GuardrailResult| Surface["Response surface"]
 	Loader -.-> Trace
 	Assembler -.-> Trace
@@ -677,27 +785,28 @@ flowchart LR
 
 #### 3.5.3 Prompt Asset Model and Composition Rules
 
-The planned asset taxonomy stays shallow: `system`, `skills`, and `experiments`, with baseline fallback governed by metadata rather than deep directory layout. The following composition view shows the deterministic layering rule that drives assembly.
+The implemented asset taxonomy stays shallow for current prompt assets: `system/react_analyst.md` for the role prompt and `skills/routes/*.md` for M2 route skills. `experiments`, standalone shared policy files, and always-active skills remain target-state extensions. The following composition view shows the implemented M2 layering rule.
 
 ```mermaid
 flowchart TB
-	Shared["1. Shared policy + investment-safety rules"]
-	Always["2. Always-active behavioral skills"]
-	Route["3. Route-specific skill"]
+	Shared["1. Shared policy entry\nembedded in role prompt at M2"]
+	Role["2. Role prompt\nsystem/react_analyst.md"]
+	Route["3. Route-specific skill\nskills/routes/*.md"]
 	Memory["4. Bounded memory context"]
 	Evidence["5. Retrieved evidence + tool-derived facts"]
 	Task["6. Task framing"]
 	Output["7. Output contract"]
-	Shared --> Always --> Route --> Memory --> Evidence --> Task --> Output
+	Shared --> Role --> Route --> Memory --> Evidence --> Task --> Output
 ```
 
 - Higher-authority policy wins from top to bottom in this stack.
 - Baseline fallback remains a lineage rule carried by metadata and loader policy.
+- Standalone shared policy and always-active skills are target evolution, not current M2 runtime facts.
 - The output contract may shape structure, but it must not override earlier policy or evidence constraints.
 
 #### 3.5.4 Static and Dynamic Segment Realization
 
-`PromptAssembler` should classify every fragment before provider invocation so caching, reuse, and authority treatment remain deterministic.
+`PromptAssembler` classifies every emitted segment before provider invocation when route-aware assembly is enabled. This keeps authority treatment deterministic even while runtime activation remains gated.
 
 ```mermaid
 flowchart TD
@@ -764,7 +873,7 @@ erDiagram
 
 #### 3.5.6 Near-Term Skills Pattern and Future Expansion
 
-The near-term specialization path remains the Skills pattern: one agent, one shared policy layer, and route-aware prompt context selected from the existing route taxonomy. Multi-agent routing and retrieval-specialist prompt families remain later evolutions only when contracts materially diverge.
+The near-term specialization path remains the Skills pattern: one agent, one shared policy layer embedded in the role prompt at M2, and route-aware prompt context selected from the existing route taxonomy. Route-skill assets exist for the canonical routes, while default runtime activation still requires `PromptAssembler` injection and `prompts.route_contexts.enabled=true`. Multi-agent routing and retrieval-specialist prompt families remain later evolutions only when contracts materially diverge.
 
 | Route | Canonical route skill |
 |-------|-----------------------|
@@ -777,17 +886,17 @@ The near-term specialization path remains the Skills pattern: one agent, one sha
 | `MARKET_WATCH` | `skills/routes/market_watch.md` |
 | `GENERAL_CHAT` | `skills/routes/general_chat.md` |
 
-Each route skill inherits shared policy and always-on skills so specialization narrows behavior without redefining common investment-safety or output-contract obligations.
+Each route skill inherits the role prompt's shared policy posture so specialization narrows behavior without redefining common investment-safety or output-contract obligations. Always-on skills are a target extension and should not be described as current M2 runtime behavior until implemented.
 
 #### 3.5.7 Prompt Observability and Fault Tolerance
 
-Prompt behavior should remain observable runtime metadata rather than hidden implicit state. The minimum metadata families are:
+Prompt behavior should remain observable runtime metadata rather than hidden implicit state. The current and target metadata families are:
 
-- prompt identity: `prompt_version`, `prompt_variant`, `prompt_locale`, `parity_group`;
-- request classification: selected route, role, skills, and effective tool-risk class; and
-- outcome metadata: `fallback_used`, `degraded_reason`, and final `guardrail_outcome`.
+- current M1 response metadata: `prompt_version`, `prompt_variant`, `prompt_selection_mode`, `fallback_used`, `degraded_reason` when applicable, `model_provider`, and `model_name`;
+- implemented/gated M2 metadata: `route`, `route_skill_used`, `selected_skills`, `missing_route_skills`, and `dropped_dynamic_fields` when `CompiledPrompt` is active;
+- target prompt-governance metadata: `prompt_locale`, `parity_group`, effective tool-risk class, and final `guardrail_outcome`.
 
-The following planned flow shows how preferred selection, locale fallback, route-skill degradation, and final guardrail outcomes converge on traceable response states.
+The following target flow shows how preferred selection, locale fallback, route-skill degradation, and final guardrail outcomes converge on traceable response states. Current M1/M2 verification covers baseline fallback, prompt identity, route-skill degradation, and dropped dynamic fields; locale parity and guardrail outcome enforcement remain planned.
 
 ```mermaid
 flowchart TD
@@ -841,9 +950,9 @@ stateDiagram-v2
 
 #### 3.5.8 Prompt-System Config Surface
 
-> **Status:** Planned control-plane surface only. The current runtime configuration is transitioning toward this shape; this subsection defines the target localized `prompts.*` design surface.
+> **Status:** M1 config surface is current; M2 route context config is present but disabled by default; guardrail, streaming, locale-promotion, and experiment controls remain target state.
 
-The following namespace map shows how the planned prompt control plane is grouped and which components each namespace governs.
+The following namespace map shows how the current and target prompt control plane is grouped and which components each namespace governs.
 
 ```mermaid
 flowchart LR
@@ -852,10 +961,15 @@ flowchart LR
 		Man["manifest"]
 		Refresh["refresh_window_seconds"]
 	end
-	subgraph AgentCfg["prompts.agents.{role}"]
-		Version["baseline_asset_id + active_version"]
-		Mode["selection_mode + output_contract_id"]
-		RouteMap["route_skill_map"]
+	subgraph SystemCfg["prompts.system + prompts.selection_mode"]
+		Version["active_role + active_version"]
+		Mode["selection_mode"]
+		Variants["variants"]
+	end
+	subgraph RouteCfg["prompts.route_contexts"]
+		RouteEnabled["enabled=false by default"]
+		RouteDir["directory"]
+		Supported["supported_routes"]
 	end
 	subgraph Controls["prompts.dynamic_controls"]
 		Allow["allowed_fields"]
@@ -865,16 +979,16 @@ flowchart LR
 		GuardKeys["blocking + rewrite policy"]
 		StreamKeys["checkpoint + terminal behavior"]
 	end
-	subgraph Policy["prompts.locale + prompts.selection + prompts.trace + prompts.cache"]
+	subgraph Policy["prompts.locale + prompts.trace + prompts.cache"]
 		Locale["default_locale + fallback_behavior"]
 		Rollout["fixed | forced | shadow | weighted"]
 		TraceFields["required_fields"]
 		Cache["static segment cache"]
 	end
 
-	Registry --> Loader["PromptAssetLoader"]
-	AgentCfg --> Loader
-	AgentCfg --> Assembler["PromptAssembler"]
+	Registry --> Loader["PromptAssetLoader\ncurrent"]
+	SystemCfg --> Loader
+	RouteCfg --> Assembler["PromptAssembler\nimplemented / gated"]
 	Controls --> Assembler
 	GuardCfg --> Guard["ResponseGuardrailMiddleware"]
 	Policy --> Loader
@@ -884,35 +998,37 @@ flowchart LR
 
 | Namespace family | Key responsibilities | Fail-closed note |
 |------------------|----------------------|------------------|
-| `prompts.registry` | Directory, manifest, refresh window, manifest validation behavior | Manifest or lineage errors must not widen selection authority |
-| `prompts.agents.{role}` and `prompts.dynamic_controls` | Role defaults, active version, selection mode, output contract, route skills, allowed request controls | Unknown or out-of-policy dynamic fields are dropped and traced |
-| `prompts.guardrails` and `prompts.streaming` | Blocking policy, bounded rewrite policy, checkpoint timing, cancellation handling, terminal behavior | Streaming completion requires final guardrail commitment |
-| `prompts.locale`, `prompts.selection`, `prompts.trace`, and `prompts.cache` | Locale fallback, rollout mode, mandatory trace fields, static-segment reuse | Missing mandatory trace fields block promotion to wider rollout |
+| `prompts.registry` | Current directory and refresh-window control for prompt asset discovery | Manifest or lineage errors must not widen selection authority |
+| `prompts.system` and `prompts.selection_mode` | Current active role, active version, variants, and selection mode | Invalid structure blocks startup; missing content falls back through loader policy |
+| `prompts.route_contexts` and `prompts.dynamic_controls` | M2 route-aware assembly gate, route-skill directory, supported routes, and allowed request controls | `route_contexts.enabled=false` preserves M1 behavior; unknown dynamic fields are dropped and traced when assembler is active |
+| `prompts.guardrails` and `prompts.streaming` | Planned blocking policy, bounded rewrite policy, checkpoint timing, cancellation handling, terminal behavior | Streaming completion requires final guardrail commitment |
+| `prompts.locale`, `prompts.trace`, `prompts.cache`, and experiments | Target locale fallback, mandatory trace fields, static-segment reuse, and controlled variants | Missing mandatory trace fields block promotion to wider rollout |
 
 Supported selection modes remain `fixed`, `forced`, `shadow`, and `weighted`, aligned directly with the roadmap and SRS vocabulary.
 
 #### 3.5.9 Component-Level Verification Matrix
 
-This section defines the minimum component-level verification surface implied by the planned prompt compiler path. It states what must be proven for readiness and promotion; it does not prescribe the concrete test harness or repository-specific automation. Detailed verification execution remains governed by [SOFTWARE_REQUIREMENTS_SPECIFICATION.md §AC-8: Prompt System](./SOFTWARE_REQUIREMENTS_SPECIFICATION.md#ac-8-prompt-system), [SOFTWARE_REQUIREMENTS_SPECIFICATION.md §NFR-5: Observability](./SOFTWARE_REQUIREMENTS_SPECIFICATION.md#nfr-5-observability), and [VERIFICATION_AND_TRACEABILITY_STRATEGY.md](../../testing/VERIFICATION_AND_TRACEABILITY_STRATEGY.md).
+This section records the component-level verification surface for the current, gated, and planned prompt compiler path. It does not prescribe the concrete test harness or repository-specific automation. Detailed verification execution remains governed by [SOFTWARE_REQUIREMENTS_SPECIFICATION.md §AC-8: Prompt System](./SOFTWARE_REQUIREMENTS_SPECIFICATION.md#ac-8-prompt-system), [SOFTWARE_REQUIREMENTS_SPECIFICATION.md §NFR-5: Observability](./SOFTWARE_REQUIREMENTS_SPECIFICATION.md#nfr-5-observability), and [VERIFICATION_AND_TRACEABILITY_STRATEGY.md](../../testing/VERIFICATION_AND_TRACEABILITY_STRATEGY.md).
 
-| Component or slice | Planned scenario | Expected outcome | Required emitted metadata or evidence | Governing authority | Verification level |
-|--------------------|------------------|------------------|---------------------------------------|---------------------|--------------------|
-| `PromptAssetLoader` | Preferred asset version is unavailable, withdrawn, or fails manifest validation | Baseline lineage is selected instead of empty prompt resolution; fallback remains attributable | `prompt_version`, `prompt_variant=baseline`, `fallback_used=true`, `degraded_reason` | [SOFTWARE_REQUIREMENTS_SPECIFICATION.md §FR-1.4 System Prompt](./SOFTWARE_REQUIREMENTS_SPECIFICATION.md#fr-14-system-prompt) with FR-1.4.8 and FR-1.4.13 | Component contract |
-| `PromptAssetLoader` | Requested locale variant is missing or parity-blocked | Configured default locale is selected and locale degradation remains visible | `prompt_locale`, `parity_group`, `fallback_used`, `degraded_reason` | [SOFTWARE_REQUIREMENTS_SPECIFICATION.md §FR-1.4 System Prompt](./SOFTWARE_REQUIREMENTS_SPECIFICATION.md#fr-14-system-prompt) with FR-1.4.15 and [SOFTWARE_REQUIREMENTS_SPECIFICATION.md §NFR-5: Observability](./SOFTWARE_REQUIREMENTS_SPECIFICATION.md#nfr-5-observability) | Component contract |
-| `PromptAssembler` | Request includes unknown or unapproved dynamic control fields | Unknown fields are dropped, recorded, and not elevated into policy segments | `dropped_dynamic_fields`, `segment_manifest`, request-to-segment classification evidence | [SOFTWARE_REQUIREMENTS_SPECIFICATION.md §FR-1.4 System Prompt](./SOFTWARE_REQUIREMENTS_SPECIFICATION.md#fr-14-system-prompt) with FR-1.4.7 and FR-1.4.16, plus [SOFTWARE_REQUIREMENTS_SPECIFICATION.md §AC-8: Prompt System](./SOFTWARE_REQUIREMENTS_SPECIFICATION.md#ac-8-prompt-system) | Component contract |
-| `PromptAssembler` | Route-specific skill cannot be resolved for the classified route | Shared policy plus role contract still compile; route-specific degradation remains traceable | `route`, `selected_skills`, `fallback_used` or `degraded_reason`, `prompt_metadata` | [SOFTWARE_REQUIREMENTS_SPECIFICATION.md §FR-1.4 System Prompt](./SOFTWARE_REQUIREMENTS_SPECIFICATION.md#fr-14-system-prompt) with FR-1.4.7 and FR-1.4.8 | Component contract |
-| `PromptAssembler` | Bounded memory summary is included during assembly | Memory context remains a data-bearing runtime-evidence segment rather than policy text | `segment_manifest`, memory-summary classification evidence, prompt lineage preserved independently of memory content | [AGENT_MEMORY_TECHNICAL_DESIGN.md](./AGENT_MEMORY_TECHNICAL_DESIGN.md) and [SOFTWARE_REQUIREMENTS_SPECIFICATION.md §FR-1.4 System Prompt](./SOFTWARE_REQUIREMENTS_SPECIFICATION.md#fr-14-system-prompt) with FR-1.4.16 | Component contract |
-| `ResponseGuardrailMiddleware` | Output contract is incomplete or required disclosures are missing | Final response is blocked or conservatively rewritten before any completed-answer state is recorded | `status`, `triggered_rules`, `response_contract_status`, `user_visible_action` | [SOFTWARE_REQUIREMENTS_SPECIFICATION.md §FR-1.5 Finance-Domain Behavioral Guardrails](./SOFTWARE_REQUIREMENTS_SPECIFICATION.md#fr-15-finance-domain-behavioral-guardrails) with FR-1.5.6, plus [SOFTWARE_REQUIREMENTS_SPECIFICATION.md §AC-8: Prompt System](./SOFTWARE_REQUIREMENTS_SPECIFICATION.md#ac-8-prompt-system) | Component contract |
-| `ResponseGuardrailMiddleware` | Anti-hype, unsupported certainty, instruction-data separation, or tool-risk inconsistencies are detected | The middleware emits `warn`, `block`, or `degraded` exactly as required by the rule class and preserves rule identifiers through any rewrite | `status`, `triggered_rules`, `rewrite_applied`, `trace_metadata` | [PROMPT_SYSTEM_BENCHMARK_REVIEW.md §4.3 Guardrails Belong at Boundaries](./PROMPT_SYSTEM_BENCHMARK_REVIEW.md#43-guardrails-belong-at-boundaries), [SOFTWARE_REQUIREMENTS_SPECIFICATION.md §FR-1.5 Finance-Domain Behavioral Guardrails](./SOFTWARE_REQUIREMENTS_SPECIFICATION.md#fr-15-finance-domain-behavioral-guardrails), and [SOFTWARE_REQUIREMENTS_SPECIFICATION.md §AC-8: Prompt System](./SOFTWARE_REQUIREMENTS_SPECIFICATION.md#ac-8-prompt-system) | Component contract |
-| Cross-component streaming path | A blocker is detected after partial buffering has begun | No further chunks are admitted, a safe terminal frame or equivalent action is emitted, and the stream is not marked complete | `guardrail_outcome`, `triggered_rules`, `stream_terminal_reason`, `prompt_version`, `fallback_used` | [ARCHITECTURE_DESIGN.md §4.8.4 Guardrail Boundary Model](./ARCHITECTURE_DESIGN.md#484-guardrail-boundary-model), [ARCHITECTURE_DESIGN.md §4.8.7 Prompt Observability and Degraded Modes](./ARCHITECTURE_DESIGN.md#487-prompt-observability-and-degraded-modes), and [SOFTWARE_REQUIREMENTS_SPECIFICATION.md §FR-1.5 Finance-Domain Behavioral Guardrails](./SOFTWARE_REQUIREMENTS_SPECIFICATION.md#fr-15-finance-domain-behavioral-guardrails) | Integration slice |
-| Cross-component streaming path | Client cancellation occurs before final guardrail commitment | Generation stops, cancellation is attributed, and no terminal success marker is emitted | `cancelled=true`, `stream_terminal_reason=client_cancelled`, request-level prompt identity metadata | [ARCHITECTURE_DESIGN.md §4.8.7 Prompt Observability and Degraded Modes](./ARCHITECTURE_DESIGN.md#487-prompt-observability-and-degraded-modes) and [SOFTWARE_REQUIREMENTS_SPECIFICATION.md §NFR-5: Observability](./SOFTWARE_REQUIREMENTS_SPECIFICATION.md#nfr-5-observability) | Integration slice |
+| Component or slice | Status | Verified / required scenario | Expected outcome | Required emitted metadata or evidence | Evidence / authority |
+|--------------------|--------|------------------------------|------------------|---------------------------------------|----------------------|
+| `PromptAssetLoader` | Current state - M1 implemented | Preferred version is missing or malformed | Baseline lineage is selected when available; exhausted baseline raises an unresolvable prompt error | `prompt_version`, `prompt_variant`, `selection_mode`, `fallback_used`, `degraded_reason` when applicable | `specs/prompt-system-milestone1/review.md`, `tests/test_prompt_asset_loader.py`, SRS FR-1.4.8 |
+| `prompts.*` structural validation | Current state - M1 implemented | Invalid config structure or unsupported selection mode appears at startup | Startup fails with actionable configuration error rather than silently widening prompt authority | Config validation exception and startup log | `validate_prompts_config()`, `tests/test_prompt_config.py` |
+| Response metadata | Current state - M1 implemented | REST chat response is returned with or without LangSmith availability | Response metadata includes prompt identity and model identity; LangSmith failure does not remove response metadata | `prompt_version`, `prompt_variant`, `prompt_selection_mode`, `fallback_used`, `model_provider`, `model_name` | `src/web/routes/ai_chat_routes.py`, `tests/test_prompt_metadata.py` |
+| `PromptAssembler` | Implemented / gated - M2 | Route skill exists for the classified route | `CompiledPrompt` includes role prompt, route-skill content, segment manifest, and route metadata | `compiled_text`, `segment_manifest`, `route`, `route_skill_used`, `selected_skills` | `specs/prompt-system-milestone2/review.md`, `tests/test_prompt_assembler.py` |
+| `PromptAssembler` | Implemented / gated - M2 | Route-specific skill is missing or all route skills are absent | Assembly continues from approved inputs only and records route-skill degradation | `missing_route_skills`, `route_skill_used=false`, `segment_manifest` | `tests/test_prompt_assembler.py`, SRS FR-1.4.7 and FR-1.4.11 |
+| `PromptAssembler` dynamic controls | Implemented / gated - M2 | Runtime context includes unknown dynamic control fields | Unknown fields are dropped, recorded, and not elevated into policy segments | `dropped_dynamic_fields`, `segment_manifest` | `tests/test_prompt_assembler.py`, SRS FR-1.4.16 |
+| Default API runtime wiring | Current state limitation | API server constructs `StockAssistantAgent` | `PromptAssetLoader` is injected; `PromptAssembler` is not constructed by default; `route_contexts.enabled=false` preserves M1 behavior | Source-code wiring inspection | `src/web/api_server.py`, `config/config.yaml` |
+| `ResponseGuardrailMiddleware` | Planned | Output contract is incomplete or required disclosures are missing | Final response is blocked or conservatively rewritten before completed-answer state is recorded | `status`, `triggered_rules`, `response_contract_status`, `user_visible_action` | SRS FR-1.5.6 and AC-8; implementation pending |
+| Cross-component streaming guardrail path | Planned | A blocker is detected after partial buffering has begun | Further chunks stop and a safe terminal frame or equivalent action is emitted | `guardrail_outcome`, `triggered_rules`, `stream_terminal_reason`, `prompt_version`, `fallback_used` | Architecture guardrail boundary view; implementation pending |
 
 Interpret this matrix as the minimum design-level verification contract:
 
-1. Each component row must be provable before the corresponding prompt compiler slice is considered ready for broader rollout.
-2. Streaming-path rows are required before user-visible streaming prompt behavior is treated as promotion-ready.
-3. Missing mandatory prompt identity, fallback, locale, or guardrail metadata is a verification failure even when the text output appears acceptable.
-4. Release-gate evidence should be collected in the repository verification and traceability workflow rather than duplicated as a test procedure in this document.
+1. Current-state rows must remain backed by source code or verified M1/M2 review evidence.
+2. Implemented/gated rows are component-ready but not default-runtime behavior until API construction and `route_contexts.enabled` are updated.
+3. Planned rows must not be described as implemented until source and verification evidence exists.
+4. Missing mandatory prompt identity, fallback, route-skill, locale, or guardrail metadata is a verification failure for the slice where that metadata is in scope.
+5. Release-gate evidence should be collected in the repository verification and traceability workflow rather than duplicated as a test procedure in this document.
 
 ### 3.6 Fine-Tuning Realization
 
@@ -952,6 +1068,10 @@ Future LTM, when introduced, should enrich the assembly step as optional cross-c
 ## 4. Engineering Constraints and Extension Paths
 
 ### 4.1 Tool and Reporting Enhancements
+
+This section records target-state extension paths. It does not promote research proposals into current runtime behavior unless the implementation and verification evidence already exists.
+
+Refs: [TOOLS_RESEARCH_AND_PROPOSAL.md](./TOOLS_RESEARCH_AND_PROPOSAL.md); [TOOLS_ARCHITECTURE_BENCHMARK_REVIEW.md](./TOOLS_ARCHITECTURE_BENCHMARK_REVIEW.md); [ADR-004](./DECISIONS/ADR-AGENT-004-THIN-TOOL-GATEWAY-AND-NORMALIZED-TOOL-CONTEXT.md); SRS FR-2 and AC-9; `src/core/tools`; `tests/test_tools.py`.
 
 #### StockSymbolTool Enhancements
 
@@ -1027,6 +1147,8 @@ parser = JsonOutputParser(pydantic_object=StockPriceResponse)
 
 ### 4.3 Performance, Observability, and Testing
 
+Refs: SRS NFR-1, NFR-2, NFR-5, NFR-6; `tests/integration`; `tests/api`; `tests/security`; `tests/performance`; `tests/test_agent_regression.py`; `tests/test_langsmith_integration.py`.
+
 #### Performance Optimizations
 
 | Area | Current | Proposed |
@@ -1077,6 +1199,8 @@ flowchart TD
 	Fallback -- "No" --> ControlledError["Controlled terminal error"]
 ```
 
+Refs: [ARCHITECTURE_DESIGN.md section 4.7.3](./ARCHITECTURE_DESIGN.md#473-quality-attribute-scenarios); `src/core/prompt_asset_loader.py`; `src/core/langgraph_bootstrap.py`; `src/core/tools/base.py`; `src/core/model_factory.py`; `tests/test_agent_fallback.py`; `tests/test_prompt_asset_loader.py`; `tests/test_checkpointer.py`.
+
 ### 4.4 Delivery Sequencing for Layered Runtime
 
 The ADR decisions are realized in phases so memory, retrieval, prompt policy, and behavior shaping do not drift out of order.
@@ -1084,10 +1208,12 @@ The ADR decisions are realized in phases so memory, retrieval, prompt policy, an
 | Phase | Realization Focus | Current State |
 |------|--------------------|---------------|
 | 1 | Conversation-scoped STM and checkpoint lifecycle | Implemented |
-| 2 | Prompt externalization and composable skills | Planned |
+| 2 | Prompt externalization and composable skills | M1 implemented; M2 implemented / gated |
 | 3 | Intent-specific retrieval and evidence wiring | Planned / partial by tool path |
 | 4 | Fine-tuning for structure and tone | Planned |
-| 5 | Guardrail observability and experiment controls | Planned |
+| 5 | Guardrail observability, streaming guardrails, and experiment controls | Planned |
+
+Refs: [PHASE_2_AGENT_ENHANCEMENT_ROADMAP.md](./PHASE_2_AGENT_ENHANCEMENT_ROADMAP.md); [PROMPT_SYSTEM_RESEARCH_PROPOSAL.md](./PROMPT_SYSTEM_RESEARCH_PROPOSAL.md); [TOOLS_RESEARCH_AND_PROPOSAL.md](./TOOLS_RESEARCH_AND_PROPOSAL.md); [spec-sync-status.md](../../../specs/spec-sync-status.md).
 
 ## 5. Supporting Patterns, Stacks, and Relationships
 
@@ -1105,8 +1231,8 @@ The ADR decisions are realized in phases so memory, retrieval, prompt policy, an
 | **Registry** | `ToolRegistry` | Dynamic component registration |
 | **Immutable Config** | `MemoryConfig` | Frozen dataclass with fail-fast validation |
 | **Repository** | `ConversationRepository` | Data access for conversations collection |
-| **Asset Loader** | `PromptAssetLoader` | Discover, validate, and cache versioned prompt files (planned) |
-| **Composer** | `PromptAssembler` | Compose skills + base prompt by route classification (M2 — implemented in `src/core/prompt_assembler.py`) |
+| **Asset Loader** | `PromptAssetLoader` | Discover, validate, cache, and fall back for versioned prompt files (M1 implemented) |
+| **Composer** | `PromptAssembler` | Compose route skills plus the role prompt by route classification (M2 implemented / gated in default runtime) |
 | **Middleware** | `ResponseGuardrailMiddleware` | Post-process agent output for behavioral compliance (planned) |
 
 ### 5.2 Software Stack
@@ -1161,6 +1287,10 @@ AgentResponse (frozen dataclass)
 
 ### 5.4 Key File Relationships
 
+The following relationship list remains implementation-facing. Source files are the current-state anchors, while specs and tests provide delivery and verification evidence for those anchors.
+
+Refs: `src/core`; `src/services`; `src/web`; `src/data`; `src/utils`; `specs/spec-sync-status.md`; `tests`.
+
 ```text
 stock_assistant_agent.py
 		imports: types.py (AgentResponse, ToolCall)
@@ -1200,6 +1330,33 @@ stock_query_router.py
 		imports: semantic_router (Route, SemanticRouter)
 		imports: semantic_router.encoders (OpenAIEncoder, HuggingFaceEncoder)
 ```
+
+```mermaid
+flowchart TD
+	Specs["Spec evidence\nprompt M1/M2 + STM features"]
+	Tests["Verification suites\nunit + integration + api + security + performance"]
+	Transport["src/web\nroutes + sockets + API server"]
+	Services["src/services\nchat + conversation lifecycle"]
+	Agent["src/core\nagent + router + prompts + tools + models"]
+	Data["src/data + src/utils\nrepositories + schemas + cache + config"]
+	Design["TECHNICAL_DESIGN.md\nrealization map"]
+
+	Specs --> Design
+	Tests --> Design
+	Transport --> Services --> Agent
+	Services --> Data
+	Agent --> Data
+	Transport --> Design
+	Services --> Design
+	Agent --> Design
+	Data --> Design
+	Tests --> Transport
+	Tests --> Services
+	Tests --> Agent
+	Tests --> Data
+```
+
+Refs: [spec-sync-status.md](../../../specs/spec-sync-status.md); `specs/prompt-system-milestone1`; `specs/prompt-system-milestone2`; `specs/agent-session-with-stm-wiring`; `specs/stm-phase-cde`; `tests/test_agent.py`; `tests/test_chat_service.py`; `tests/test_conversation_service.py`; `tests/integration/test_stm_runtime_wiring.py`; `tests/api/test_chat_routes_memory.py`; `tests/security/test_operator_tooling_boundaries.py`; `tests/performance/test_management_api_latency.py`.
 
 #### 5.4.1 Mirror — Dependency and Ownership Diagram
 
@@ -1305,3 +1462,5 @@ AgentResponse.fallback(content, provider, model, **kwargs)
 | 0.8 | 2026-05-27 | GitHub Copilot | Deepened section 3.5.2 with explicit planned component contracts, canonical route-to-skill mapping, and request-scoped prompt lifecycle and guardrail behavior |
 | 0.9 | 2026-05-27 | GitHub Copilot | Added planned streaming guardrail behavior, localized `prompts.*` control-plane design, and a component-level verification matrix to section 3.5 |
 | 0.10 | 2026-05-27 | GitHub Copilot | Simplified section 3.5 into diagram-first technical-design views for the prompt realization stack, component interfaces, call flow, data flow, logical model, degradation behavior, and config surface |
+| 0.11 | 2026-06-24 | Codex | Synchronized prompt-system technical design with verified M1/M2 implementation evidence; separated current, gated, target, and planned prompt-system behavior |
+| 0.12 | 2026-06-25 | Codex | Added authority and evidence cross-reference map, realization diagrams, compact `Refs:` blocks, and source/spec/test relationship tracing |
