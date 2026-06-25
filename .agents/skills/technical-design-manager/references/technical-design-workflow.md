@@ -17,6 +17,60 @@ Always produce or summarize this map before mutating long-lived technical design
 | Payload or wire format | Executable contract | Interface behavior summary | Schema authority | Link contract, avoid duplicating schema |
 | Research recommendation | Proposal or benchmark report | Target-state or future-state design | Evidence input | Promote only stable claims |
 
+## Compact Cross-Reference Pattern
+
+Use links to make claims traceable without flooding the design text. Prefer one compact reference block per subsection, table row, or diagram caption.
+
+Recommended pattern:
+
+```markdown
+Refs: SRS FR-x/AC-y; ADR-###; `specs/<feature>/plan.md`; `src/<module>.py`; `tests/<module>`.
+```
+
+Rules:
+
+- Use repository-relative links or inline code paths for project artifacts.
+- Link a source once where it supports a design claim; do not repeat the same link in nearby sentences.
+- Prefer stable requirement IDs, ADR IDs, spec paths, contract paths, and source/test files over broad document links.
+- Use a `Refs:` line under a diagram or table when several claims share the same evidence.
+- Report unresolved or unstable links instead of inventing anchors.
+
+## Diagram and Table Selection Guide
+
+Prefer visual structure when it reduces prose:
+
+| Design Need | Preferred Form | Use When |
+|-------------|----------------|----------|
+| Component boundary or ownership | Mermaid `flowchart` or responsibility table | Showing modules, dependencies, stores, and external providers |
+| Runtime interaction | Mermaid `sequenceDiagram` | Showing calls, async steps, gateway behavior, retries, or fallback |
+| Data shape or persistence ownership | Mermaid `classDiagram`, ER-style sketch, or compact table | Showing records, state, cache, lineage, and lifecycle |
+| Interface or contract relationship | Contract summary table | Linking executable schema truth without duplicating payload details |
+| Current vs target drift | Comparison matrix | Separating implemented, transition, target, and future behavior |
+
+Keep diagrams small enough to scan. Use prose only to explain non-obvious constraints, tradeoffs, or failure behavior.
+
+## Link Budget Checklist
+
+Before finalizing technical design content, check:
+
+- Every important design claim has either nearby evidence or an intentional no-link rationale.
+- Each subsection avoids repeated links to the same artifact.
+- Links point to the narrowest useful artifact: requirement ID, ADR, spec file, contract, source file, or test file.
+- Reference blocks support groups of claims instead of adding links to every sentence.
+- External proposal/research links are marked as evidence input, not authority.
+
+## Compactness Checklist
+
+Prefer:
+
+- one diagram plus a short caption over multi-paragraph flow explanation,
+- a responsibility table over repeated component prose,
+- a current/target matrix over mixed-state narrative,
+- a `Refs:` line over repeated parenthetical citations,
+- explicit follow-up bullets over speculative design paragraphs.
+
+Avoid exhaustive method lists, copied schemas, full proposal rationale, duplicated requirements, and implementation task lists unless the requested technical-design slice depends on them.
+
 ## Governing Context Checklist
 
 - Target technical design document and requested section or module are identified.
@@ -46,7 +100,8 @@ Always produce or summarize this map before mutating long-lived technical design
 - Separate current implementation from target or future behavior.
 - Explain runtime flow using a compact sequence, flowchart, or table when prose is ambiguous.
 - Explain state, persistence, cache, and lifecycle behavior when the component owns or transforms data.
-- Link relevant SRS IDs, ADRs, specs, source files, and contracts only where useful.
+- Link relevant SRS IDs, ADRs, specs, source files, tests, and contracts only where useful.
+- Prefer diagrams, matrices, and responsibility tables when they keep the update shorter and clearer than prose.
 - Avoid copying full code structure, exhaustive method lists, or schema payloads unless the design depends on them.
 
 ## State Labeling Rules
@@ -68,6 +123,8 @@ Do not present target or future state as implemented behavior.
 - Terminology matches SRS, architecture, ADRs, and current code where appropriate.
 - Links to SRS IDs, ADRs, specs, contracts, and source files resolve or are reported.
 - Diagrams are Mermaid where helpful and stay at one abstraction level.
+- Cross-references follow the link budget and do not flood prose.
+- Tables and diagrams replace verbose prose where they preserve meaning.
 - `src/` and `specs/` follow-ups are reported when outside the edit scope.
 - `git diff --check` passes for changed docs.
 - Changed-file scope matches the user request.
