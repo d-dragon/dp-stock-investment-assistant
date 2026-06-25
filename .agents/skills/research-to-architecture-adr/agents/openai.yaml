@@ -1,4 +1,4 @@
 interface:
-  display_name: "Research to Architecture ADR"
+  display_name: "Architecture and ADR skills"
   short_description: "Promote research into architecture and ADRs."
-  default_prompt: "Use $research-to-architecture-adr. Inputs: <proposal/research files>. Targets: <architecture file>, <ADR directory/index>. Produce an impact map first, then promote stable claims only into the listed targets."
+  default_prompt: "Use $research-to-architecture-adr. Mode: <brainstorm/review/promote/update/ADR/consistency>. Inputs: <research/proposal/spec/source/benchmark files>. Targets: <architecture file and/or ADR directory/index>. Stay at high-level architecture scope, produce an impact map first, label current/target/transition/future state, route realization detail to $technical-design-manager, update only agreed targets, then run architecture and ADR consistency review."
