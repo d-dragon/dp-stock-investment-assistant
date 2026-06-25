@@ -680,6 +680,28 @@ Filesystem rules:
 
 Refs: SRS FR-2.5, FR-2.10, FR-2.11, IR-3, AC-9, CON-9, CON-10; [ARCHITECTURE_DESIGN.md section 4.4.2](./ARCHITECTURE_DESIGN.md#442-state-and-evidence-allocation-boundaries); [TOOLS_RESEARCH_AND_PROPOSAL.md](./TOOLS_RESEARCH_AND_PROPOSAL.md); `src/data/schema/symbols_schema.py`; `src/data/schema/market_data_schema.py`; `src/data/schema/market_snapshots_schema.py`; `src/data/schema/reports_schema.py`; `src/data/schema/investment_reports_schema.py`; `src/data/schema/conversations_schema.py`; `src/data/schema/agent_checkpoints_schema.py`; `src/data/schema/schema_manager.py`; `src/export/report_exporter.py`; `config/config.yaml`.
 
+Tool invocation stays behind the registry boundary. Cache-aware tools decide whether a request can be served from Redis-backed cache before executing their data-access path, and market-data retrieval remains a tool-owned outbound concern rather than an agent memory concern.
+
+```mermaid
+flowchart LR
+	Agent["StockAssistantAgent"]
+	Registry["ToolRegistry\nget_enabled_tools()"]
+	Tool["CachingTool subclass\nStockSymbol / Reporting / TradingView"]
+	Cache{"Cache hit?"}
+	Redis["CacheBackend / Redis"]
+	Data["DataManager / repositories"]
+	External["External market data\nYahoo Finance today"]
+	Result["Tool result\nreturned to agent loop"]
+
+	Agent --> Registry --> Tool --> Cache
+	Cache -->|"lookup / write-through"| Redis
+	Cache -->|"hit"| Result
+	Cache -->|"miss"| Data --> External --> Data --> Redis
+	Data --> Result --> Agent
+```
+
+Refs: SRS FR-2.1, FR-2.2, FR-2.3; [ADR-004](./DECISIONS/ADR-AGENT-004-THIN-TOOL-GATEWAY-AND-NORMALIZED-TOOL-CONTEXT.md); [ARCHITECTURE_DESIGN.md section 4.3.4](./ARCHITECTURE_DESIGN.md#434-tool-provider-selection-and-fallback-view); `src/core/tools/base.py`; `src/core/tools/registry.py`; `src/core/tools/stock_symbol.py`; `src/core/tools/reporting.py`; `src/core/tools/tradingview.py`; `src/core/data_manager.py`; `src/utils/cache.py`; `tests/test_tools.py`.
+
 #### CachingTool Base Class
 
 **Location**: `src/core/tools/base.py`
