@@ -1,6 +1,6 @@
 ---
 name: technical-design-manager
-description: Maintain long-lived domain technical design documents from governing SRS, architecture, ADRs, roadmap, research/proposals, executable contracts, Spec Kit artifacts, and source implementation evidence. Use when Codex needs to update or review TECHNICAL_DESIGN.md, sync implementation or specs to technical design, focus design changes on a specific module/component/section, produce technical-design impact maps, or run current-vs-target consistency review.
+description: Maintain long-lived domain technical design documents from governing SRS, architecture, ADRs, roadmap, research/proposals, executable contracts, Spec Kit artifacts, source implementation evidence, and tests. Use when Codex needs to update or review TECHNICAL_DESIGN.md, sync implementation or specs to technical design, focus design changes on a specific module/component/section, produce compact linked technical-design impact maps, prefer diagrams/tables over verbose prose, or run current-vs-target consistency review.
 ---
 
 # Technical Design Manager
@@ -9,7 +9,7 @@ description: Maintain long-lived domain technical design documents from governin
 
 Use this skill to maintain technical design documents as realization authority. The workflow consolidates governing documents, verified specs, and source implementation evidence into focused technical-design updates without turning the design doc into an SRS, ADR, roadmap, contract, or delivery task list.
 
-For reusable tables and checklists, read `references/technical-design-workflow.md` when the task asks for an impact map, implementation/spec synchronization, module/component review, consistency review, validation commands, or final update report.
+For reusable tables and checklists, read `references/technical-design-workflow.md` when the task asks for an impact map, compact cross-references, diagram/table guidance, implementation/spec synchronization, module/component review, consistency review, validation commands, or final update report.
 
 ## Operating Rules
 
@@ -20,6 +20,10 @@ For reusable tables and checklists, read `references/technical-design-workflow.m
 - Inspect governing artifacts before editing: SRS, architecture design, ADRs, roadmap, relevant specs, executable contracts, and source implementation evidence.
 - Read only relevant sections after heading or search inspection unless full-document context is needed.
 - Always produce a visible impact map before mutating long-lived technical design unless the user already supplied an equivalent map.
+- Use stable repository-relative links for important SRS, architecture, ADR, spec, contract, `src/`, and test references.
+- Link once per meaningful design claim or compact reference block; avoid repeating the same link in adjacent prose.
+- Prefer Mermaid diagrams, compact matrices, and short responsibility tables over long narrative when they communicate the design more clearly.
+- Keep generated technical-design content compact, semantic, and useful. Remove redundant background and avoid restating authority documents.
 - Report required follow-ups for `src/`, `specs/`, SRS, architecture, ADRs, roadmap, contracts, or traceability instead of editing them, unless the user explicitly includes them as targets.
 - Preserve authority boundaries: requirements belong in SRS, decisions in ADRs, sequencing in roadmap, schema truth in executable contracts, delivery detail in `specs/`, and realization in technical design.
 - Respect the active collaboration mode. If the environment is plan-only, produce a decision-complete plan instead of editing.
@@ -37,15 +41,17 @@ For reusable tables and checklists, read `references/technical-design-workflow.m
 
 2. **Create the impact map**
    - For each source point, assign evidence source, target technical-design section, authority type, and action.
+   - Include compact repository-relative links in the evidence source or a `Refs:` line when they materially improve traceability.
    - Mark actions as `promote`, `defer`, `ADR`, `SRS`, `roadmap`, `contract`, `code follow-up`, `spec follow-up`, or `do not promote`.
    - Show or summarize the impact map before edits when the task requires mutation.
    - Keep out-of-scope follow-ups visible instead of silently editing extra artifacts.
 
 3. **Update technical design**
-   - Translate stable content into realization-level prose, diagrams, and tables.
+   - Translate stable content into realization-level diagrams, tables, and concise prose.
    - Label current state, target state, transition state, and future state explicitly when mixed.
    - Prefer focused edits to the requested module, component, section, or concern.
-   - Link to governing ADRs, allocated SRS IDs, executable contracts, and verified specs when the trace materially helps.
+   - Link to governing ADRs, allocated SRS IDs, executable contracts, verified specs, source files, and tests when the trace materially helps.
+   - Use one abstraction level per diagram and keep captions short.
    - Do not copy proposal or spec prose wholesale; rewrite it for technical-design authority.
 
 4. **Sync implementation and specs**
@@ -85,7 +91,7 @@ Do not promote content into technical design when it is:
 ## Output Expectations
 
 For planning-only requests, output:
-- technical-design impact map,
+- compact linked technical-design impact map,
 - source and authority assessment,
 - proposed target sections,
 - follow-up list for non-technical-design artifacts,
