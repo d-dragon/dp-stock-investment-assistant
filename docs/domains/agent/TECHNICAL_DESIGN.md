@@ -1095,27 +1095,420 @@ Filesystem rules:
 
 Refs: SRS FR-2.5, FR-2.10, FR-2.11, IR-3, AC-9, CON-9, CON-10; [ARCHITECTURE_DESIGN.md section 4.4.2](./ARCHITECTURE_DESIGN.md#442-state-and-evidence-allocation-boundaries); [TOOLS_RESEARCH_AND_PROPOSAL.md](./TOOLS_RESEARCH_AND_PROPOSAL.md); `src/data/schema/symbols_schema.py`; `src/data/schema/market_data_schema.py`; `src/data/schema/market_snapshots_schema.py`; `src/data/schema/reports_schema.py`; `src/data/schema/investment_reports_schema.py`; `src/data/schema/conversations_schema.py`; `src/data/schema/agent_checkpoints_schema.py`; `src/data/schema/schema_manager.py`; `src/export/report_exporter.py`; `config/config.yaml`.
 
-Tool invocation stays behind the registry boundary. Cache-aware tools decide whether a request can be served from Redis-backed cache before executing their data-access path, and market-data retrieval remains a tool-owned outbound concern rather than an agent memory concern.
+Tool invocation currently stays behind the registry boundary. Cache-aware tools decide whether a request can be served from Redis-backed cache before executing their data-access path, and market-data retrieval remains a tool-owned outbound concern rather than an agent memory concern.
+
+The Phase 2B target keeps that current runtime path, then adds a thin in-process exposure and admission layer around it. `ToolSurfaceBuilder` shapes the model-visible tool surface before ReAct invocation; `ToolGateway` validates the selected call after ReAct tool selection; provider selection, normalization, and `ToolContextPack` assembly stay below model-visible tool names.
+
+```mermaid
+flowchart TD
+	Agent["StockAssistantAgent"]
+	Route["stock_query_router\ncurrent route classification"]
+	Surface["ToolSurfaceBuilder\ntarget route-filtered exposure"]
+	ReAct["LangGraph ReAct runtime\ncurrent single agent"]
+	Gateway["ToolGateway\ntarget admission boundary"]
+	Registry["ToolRegistry\ncurrent inventory"]
+	Tool["Current CachingTool /\nTarget AgentTool"]
+	Cache["CacheBackend / Redis\ncurrent cache surface"]
+	CurrentData["DataManager + repositories\ncurrent data path"]
+	TargetOutput["NormalizedOutput + ToolContextPack\ntarget prompt input"]
+
+	Agent --> Route --> Surface
+	Registry -->|"inventory + descriptors"| Surface
+	Surface --> ReAct
+	ReAct -->|"selected tool call"| Gateway --> Registry --> Tool
+	Tool --> Cache
+	Tool --> CurrentData
+	Tool --> TargetOutput --> Agent
+```
+
+Refs: SRS FR-2.1-FR-2.5; [ADR-004](./DECISIONS/ADR-AGENT-004-THIN-TOOL-GATEWAY-AND-NORMALIZED-TOOL-CONTEXT.md); [ARCHITECTURE_DESIGN.md section 4.3.4](./ARCHITECTURE_DESIGN.md#434-tool-provider-selection-and-fallback-view); `src/core/tools/base.py`; `src/core/tools/registry.py`; `src/core/tools/stock_symbol.py`; `src/core/tools/reporting.py`; `src/core/tools/tradingview.py`; `src/core/data_manager.py`; `src/utils/cache.py`; `tests/test_tools.py`.
+
+#### 3.2.1 Current-to-Target Tool Boundary
+
+| Area | Current State | Target Phase 2B State | Future / Not Yet Admitted |
+|------|---------------|-----------------------|----------------------------|
+| Agent-visible tool surface | `StockAssistantAgent` builds the ReAct agent from `ToolRegistry.get_enabled_tools()` | `ToolSurfaceBuilder` builds a compact route-filtered model-visible tool list before ReAct invocation | Remote/MCP tool admission only after descriptor integrity and operational need exist |
+| Tool execution base | `CachingTool` subclasses provide LangChain-compatible execution and cache write-through | `AgentTool` becomes the target architectural name for descriptor-backed, cache-aware tool execution while preserving current behavior | Full rename or wrapper is implementation-spec work |
+| Execution admission | Tool selection is governed primarily by registry enablement and LangChain tool schema | Thin in-process `ToolGateway.execute(route, tool_name, args)` validates route, arguments, risk, license, freshness, timeout, descriptor integrity, and provider state | High-risk mutation paths require explicit authorization and confirmation policy |
+| Provider access | `StockSymbolTool` can call `DataManager` for Yahoo-backed live data and fall back to `SymbolRepository` | Provider choice moves below tools through `ProviderSelectionPolicy` and provider adapters; Vietnam-first providers are target for market-data tools | Generic web fetch remains deny-by-default and only normalized evidence when admitted |
+| Symbol data ownership | `StockSymbolTool` mixes live price lookup and repository metadata fallback | `StockSymbolTool` targets in-system symbol lookup, normalization, aliases, coverage, tags, and internal metadata through a symbol-store boundary | Symbol-store writes remain disabled until mutation policy and `MutationReceipt` behavior exist |
+| Tool outputs | Raw dict-like tool results return to the agent loop | Results are wrapped or normalized into admitted output kinds and assembled into request-scoped `ToolContextPack` | `ToolContextPack` is not persisted wholesale as memory or market truth |
+| TradingView | Placeholder tool raises `NotImplementedError` | `TradingViewTool` returns chart/widget/deep-link payloads as `VisualizationProvenance` | TradingView numeric values are not evidence unless a future approved policy admits them |
+| Reporting | Scaffold returns placeholder markdown | `ReportingTool` composes from `ToolContextPack`, visualization provenance, generated artifacts, warnings, and degraded states | Direct provider scraping from reports remains out of bounds |
+
+Refs: SRS FR-2.4-FR-2.11, AC-9, IR-3, CON-6-CON-10; [PHASE_2_AGENT_ENHANCEMENT_ROADMAP.md section 2B](./PHASE_2_AGENT_ENHANCEMENT_ROADMAP.md#phase-2b-enhanced-tool-system-feature-implementations); [ADR-004](./DECISIONS/ADR-AGENT-004-THIN-TOOL-GATEWAY-AND-NORMALIZED-TOOL-CONTEXT.md); [SRS_SPEC_TRACEABILITY.md](./SRS_SPEC_TRACEABILITY.md); `src/core/tools`.
+
+#### 3.2.2 Target Phase 2B Runtime Flow
+
+The target flow is a logical in-process realization path. It preserves the current LangChain/LangGraph ReAct runtime and registry-backed execution while adding policy, provider, normalization, and context boundaries.
+
+```mermaid
+flowchart TD
+	Query["User query"] --> Route["stock_query_router\nroute + confidence"]
+	Route --> Surface["ToolSurfaceBuilder\nroute-filtered tool surface"]
+	Registry -->|"inventory + descriptors"| Surface
+	Surface --> ReAct["LangGraph ReAct runtime\nsingle agent"]
+	ReAct -->|"selected tool call"| Gateway["ToolGateway.execute(route, tool_name, args)"]
+	Gateway --> Admission{"Admission passes?"}
+	Admission -- "No" --> Degraded["DegradedState\nblocked / stale / license / invalid"]
+	Admission -- "Yes" --> Registry["ToolRegistry\ncurrent inventory"]
+	Registry --> AgentTool["Current CachingTool /\nTarget AgentTool"]
+	AgentTool --> InSystem["In-system records\nsymbol store / snapshots"]
+	AgentTool --> ProviderPolicy["ProviderSelectionPolicy\nmarket-data tools only"]
+	ProviderPolicy --> Adapter["ProviderAdapter\nVietnam-native / official / licensed / fallback"]
+	AgentTool --> Viz["Visualization payload\nTradingView"]
+	AgentTool --> Artifact["Generated artifact / report section"]
+	InSystem --> Normalizer["EvidenceNormalizer\noutput kind + source metadata"]
+	Adapter --> Normalizer
+	Viz --> Normalizer
+	Artifact --> Normalizer
+	Normalizer --> Pack["ToolContextPack\nrequest-scoped data-only context"]
+	Degraded --> Pack
+	Pack --> Prompt["Prompt assembly\nnormalized context only"]
+```
+
+Runtime invariants:
+
+1. Provider adapters are never exposed as a flat model-visible tool list.
+2. Raw provider payloads, raw web content, and page instructions do not enter prompt context.
+3. Market facts carry source, timestamp, exchange, currency, freshness, license posture, and degraded-state warnings when applicable.
+4. Cache hits preserve freshness and source metadata rather than hiding stale or license-unclear data.
+
+##### Tool Call Persistence Decision Flow
+
+This sequence is a target realization view. It explains when data may remain request-scoped, enter cache, or become a retained MongoDB/filesystem derivative; it is not an executable persistence contract or migration plan.
+
+```mermaid
+sequenceDiagram
+	autonumber
+	participant User as User
+	participant Route as Router
+	participant Surface as Tool Surface
+	participant React as ReAct Runtime
+	participant Gateway as Tool Gateway
+	participant Tool as Agent Tool
+	participant Adapter as Provider Adapter
+	participant Normalizer as Normalizer
+	participant Pack as Context Pack
+	participant Cache as Cache Store
+	participant Mongo as MongoDB
+	participant Files as Filesystem
+
+	User->>Route: classify query
+	Route->>Surface: route + locale + request context
+	Surface->>React: route filtered tool surface
+	React->>Gateway: selected tool call
+	Gateway->>Tool: admitted registry backed execution
+	Tool->>Adapter: provider or system access when needed
+	Adapter-->>Normalizer: provider or system result
+	Tool-->>Normalizer: deterministic or generated result
+	Normalizer->>Pack: normalized output kinds only
+	opt request only
+		Pack-->>React: data only context without durable write
+	end
+	opt cacheable result
+		Tool->>Cache: write freshness-aware cache entry
+	end
+	opt retained artifact
+		Pack->>Mongo: write report or artifact metadata with lineage
+		Pack->>Files: write artifact content under export root
+	end
+	opt approved workflow mutation
+		Gateway->>Mongo: write MutationReceipt audit metadata
+	end
+```
+
+#### 3.2.3 Tool and Adapter Responsibility Split
+
+| Model-Visible Tool Family | Target Responsibility | Internal Adapter / Provider Class | Boundary Rule |
+|---------------------------|-----------------------|-----------------------------------|---------------|
+| `StockSymbolTool` | In-system symbol lookup, normalization, aliases, exchange/currency identity, coverage, tags, and stored metadata | `InternalSymbolStoreAdapter`, `SymbolRepository`, optional stored-snapshot adapter | No Yahoo/DataManager ownership for target live market data |
+| Market-data tools | Quotes, history, fundamentals, market breadth, flow, disclosures, and corporate actions | Vietnam-native, official exchange/depository, licensed commercial, public-web, wrapper/prototype, and international-fallback adapters | Provider order and fallback are internal policy, not model-visible choices |
+| `TradingViewTool` | Chart URLs, widget payloads, symbol validation, ticker tape, heatmap/screener payloads where supported | TradingView visualization adapter | Returns `VisualizationProvenance`; not canonical evidence by default |
+| `ReportingTool` | Report composition and generated artifact metadata | `ToolContextPack`, artifact metadata store, report storage boundary | Consumes normalized inputs; does not fetch or scrape providers directly |
+| `GenericWebFetchTool` | Allowlisted public-web evidence retrieval when concrete tools cannot cover a source | Generic web fetch policy, parser/extractor, citation normalizer | Deny-by-default and produces `EvidenceSnippet` or `EvidenceDocument` only |
+
+Refs: SRS FR-2.6-FR-2.11, IR-3; [ARCHITECTURE_DESIGN.md section 4.3.4](./ARCHITECTURE_DESIGN.md#434-tool-provider-selection-and-fallback-view); [TOOLS_RESEARCH_AND_PROPOSAL.md](./TOOLS_RESEARCH_AND_PROPOSAL.md); `src/core/tools/stock_symbol.py`; `src/core/tools/tradingview.py`; `src/core/tools/reporting.py`.
+
+#### 3.2.4 Target Tool Contract and Failure Realization
+
+The following tables describe target realization ownership only. They do not replace SRS `IR-3`, executable contracts, or implementation specs.
+
+| Target Contract | Target Runtime Owner | Validation / Assembly Point | Persistence and Authority Rule |
+|-----------------|----------------------|-----------------------------|--------------------------------|
+| `ToolCapabilityDescriptor` | `ToolSurfaceBuilder` | Before pre-model tool exposure | Model-visible only; no credentials, provider fallback, license policy, or parser limits |
+| `ToolPolicyDescriptor` | `ToolGateway` | Before execution admission | Internal policy only; traced by descriptor version or integrity marker |
+| `ProviderAdapterDescriptor` | `ProviderSelectionPolicy` | Before provider-backed adapter execution | Hidden from the model; carries provider class, license posture, freshness, and credential owner |
+| `ProviderSelectionPolicy` | Provider-backed `AgentTool` families | Provider order, fallback, market-session, freshness, timeout, and fail-closed checks | No admissible provider returns `DegradedState`; provider choice is not prompt-controlled |
+| `ToolExecutionEnvelope` | `ToolGateway` | Around every governed tool call | Request-scoped trace, admission outcome, cache/freshness status, warnings, and degraded reason |
+| `NormalizedOutput` | `EvidenceNormalizer` | After tool execution and before prompt assembly | Only admitted output kinds enter `ToolContextPack` |
+| `ToolContextPack` | Prompt assembly boundary | After normalization and before LLM context assembly | Request-scoped data-only context; not persisted wholesale as memory or market truth |
+| `GenericWebFetchPolicy` | `GenericWebFetchTool` and parser adapter | Before fetch and after extraction | Deny-by-default; raw HTML, PDF bytes, scripts, hidden text, and page instructions stay outside prompt context |
+| `MutationReceipt` | Mutation policy boundary | After approved `workflow_mutation` / `internal_state_mutation` execution | Retained as audit metadata for approved mutations; unauthorized mutations are blocked or degraded |
+| `ArtifactMetadata` | `ReportingTool` and artifact storage boundary | When report/export/document/chart artifacts are retained | Stores URI/reference, retention class, checksum where available, and source lineage |
+
+| Failure / Guard | Target Detection Point | Target Result |
+|-----------------|------------------------|---------------|
+| Route-tool mismatch or disallowed risk class | `ToolSurfaceBuilder` before exposure; `ToolGateway` before execution | Tool is not exposed, or selected call returns `DegradedState` |
+| Invalid or missing tool arguments | `ToolGateway` schema and admission validation | Execution is blocked with validation warning and `DegradedState` |
+| Descriptor drift, tampering, or unapproved remote descriptor | `ToolSurfaceBuilder` and `ToolGateway` descriptor-integrity check | Tool is not exposed or executed; trace records descriptor version/hash mismatch |
+| License-unclear provider or unsupported credential scope | `ProviderSelectionPolicy` | Fail closed with `DegradedState`; no silent provider substitution |
+| Stale cache or stale provider data | `AgentTool` cache path and `ProviderSelectionPolicy` freshness check | Refresh from admissible provider, or return stale-data `DegradedState` with source metadata |
+| Provider outage, timeout, or missing fields | `ProviderAdapter` and `ToolGateway` timeout/error boundary | Try admitted fallback provider when available; otherwise return degraded provider state |
+| Raw web prompt-injection text, parser limit, or blocked domain | `GenericWebFetchTool`, parser adapter, and normalizer | Quarantine page instructions; return normalized snippets/documents or `DegradedState` only |
+| TradingView numeric fact used as evidence | `EvidenceNormalizer` and prompt assembly boundary | Classify as `VisualizationProvenance`; final numeric facts must come from approved evidence or computation tools |
+| Unauthorized symbol-store mutation | `ToolGateway` and mutation policy boundary | Block or degrade; no durable mutation occurs without authorization, confirmation, and audit metadata |
+| Report section lacks source lineage | `ReportingTool` and artifact metadata boundary | Surface warning/degraded state; retained report artifacts preserve lineage for sourced sections |
+
+Refs: SRS IR-3, FR-2.4-FR-2.11, AC-9, CON-6-CON-10; [ADR-004](./DECISIONS/ADR-AGENT-004-THIN-TOOL-GATEWAY-AND-NORMALIZED-TOOL-CONTEXT.md); [ARCHITECTURE_DESIGN.md section 4.3.4](./ARCHITECTURE_DESIGN.md#434-tool-provider-selection-and-fallback-view); [PHASE_2_AGENT_ENHANCEMENT_ROADMAP.md section 2B](./PHASE_2_AGENT_ENHANCEMENT_ROADMAP.md#phase-2b-enhanced-tool-system-feature-implementations).
+
+#### 3.2.5 Tool Data Model and Persistent Storage Realization
+
+The tool-system data model is a target-state realization view. It uses current MongoDB schemas and filesystem export behavior as anchors, but it does not claim that the target tool metadata collections, artifact paths, or schema overlays are implemented. Executable MongoDB schemas, migrations, and repository classes remain future implementation-spec work.
 
 ```mermaid
 flowchart LR
-	Agent["StockAssistantAgent"]
-	Registry["ToolRegistry\nget_enabled_tools()"]
-	Tool["CachingTool subclass\nStockSymbol / Reporting / TradingView"]
-	Cache{"Cache hit?"}
-	Redis["CacheBackend / Redis"]
-	Data["DataManager / repositories"]
-	External["External market data\nYahoo Finance today"]
-	Result["Tool result\nreturned to agent loop"]
+	Request["Request memory\nToolContextPack\nToolExecutionEnvelope\nNormalizedOutput"]
+	Cache["Redis / in-memory cache\nfreshness-aware tool results"]
+	Mongo["MongoDB\ncurrent domain records\ntarget tool metadata"]
+	Files["Filesystem artifacts\nreports/tool-artifacts/..."]
+	Config["Reviewed code/config\ndescriptors policies allowlists"]
+	Providers["External providers\nsource authority before normalization"]
+	Normalizer["EvidenceNormalizer\nsource lineage + output kind"]
+	Prompt["Prompt assembly\ndata-only context"]
 
-	Agent --> Registry --> Tool --> Cache
-	Cache -->|"lookup / write-through"| Redis
-	Cache -->|"hit"| Result
-	Cache -->|"miss"| Data --> External --> Data --> Redis
-	Data --> Result --> Agent
+	Config --> Request
+	Providers --> Normalizer
+	Cache --> Normalizer
+	Mongo --> Normalizer
+	Files -->|"metadata URI only"| Mongo
+	Normalizer --> Request --> Prompt
+	Request -->|"selected retained derivatives only"| Mongo
+	Request -->|"artifact content only"| Files
 ```
 
-Refs: SRS FR-2.1, FR-2.2, FR-2.3; [ADR-004](./DECISIONS/ADR-AGENT-004-THIN-TOOL-GATEWAY-AND-NORMALIZED-TOOL-CONTEXT.md); [ARCHITECTURE_DESIGN.md section 4.3.4](./ARCHITECTURE_DESIGN.md#434-tool-provider-selection-and-fallback-view); `src/core/tools/base.py`; `src/core/tools/registry.py`; `src/core/tools/stock_symbol.py`; `src/core/tools/reporting.py`; `src/core/tools/tradingview.py`; `src/core/data_manager.py`; `src/utils/cache.py`; `tests/test_tools.py`.
+Data-tier rules:
+
+1. `ToolContextPack`, `ToolExecutionEnvelope`, and raw normalized outputs are request-scoped by default.
+2. Redis and in-memory cache are performance layers; cached market data must carry source timestamp and freshness metadata.
+3. MongoDB is the durable domain-record and metadata store, not a dumping ground for raw prompt context.
+4. Filesystem storage is the initial artifact-content backend; MongoDB stores the metadata, URI/path, checksum, retention class, and lineage.
+5. Reviewed descriptors, provider policy, parser limits, and allowlists remain code/config authority and should be traceable by version or hash.
+
+##### Tool Data Storage Stack and Access Mechanisms
+
+This C4-style storage view is a target realization diagram. It shows component ownership and access mechanisms, not a mandate to create new services or a claim that target metadata collections already exist.
+
+```mermaid
+flowchart LR
+	subgraph Runtime["Agent Tool Runtime"]
+		Gateway["ToolGateway\ntarget in-process policy"]
+		Tool["AgentTool\ncurrent CachingTool-compatible execution"]
+		Policy["ProviderSelectionPolicy\ntarget provider order"]
+		Adapter["ProviderAdapter\ntarget source integration"]
+		Normalizer["EvidenceNormalizer\ntarget output classification"]
+		Exporter["ArtifactExporter\ntarget filesystem writer"]
+	end
+
+	subgraph Access["Access Mechanisms"]
+		CacheAccess["CacheBackend / redis client\ncurrent cache protocol"]
+		RepoAccess["Repository layer + pymongo\nMongoDB wire protocol"]
+		FileAccess["pathlib / os\nfilesystem writes"]
+		HttpAccess["HTTPS / provider SDK\nexternal provider protocol"]
+	end
+
+	subgraph Storage["Storage and Provider Stack"]
+		RedisStore[("Redis\ncurrent cache store")]
+		MongoStore[("MongoDB\ncurrent domain records\ntarget tool metadata")]
+		FileStore[("Local filesystem\nreports/tool-artifacts/...")]
+		ExternalProviders[["External providers\nVietnam-native / official / licensed / public / fallback"]]
+	end
+
+	Gateway --> Tool
+	Tool --> Policy
+	Policy --> Adapter
+	Adapter --> HttpAccess --> ExternalProviders
+	Tool --> CacheAccess --> RedisStore
+	Tool --> RepoAccess --> MongoStore
+	Adapter --> Normalizer
+	RepoAccess --> Normalizer
+	Normalizer --> Gateway
+	Normalizer --> Exporter --> FileAccess --> FileStore
+	Exporter --> RepoAccess
+```
+
+##### Current MongoDB Collection Anchors
+
+| Collection | Current Role | Current Schema Anchor | Tool-System Use | Target Overlay / Gap |
+|------------|--------------|-----------------------|-----------------|----------------------|
+| `symbols` | Canonical symbol metadata, listing context, aliases, identifiers, coverage, snapshots, and tags | `src/data/schema/symbols_schema.py`, `SymbolRepository` | Target source for evolved `StockSymbolTool` internal lookup and normalization | Current unique index is ticker-only; target identity needs `symbol + exchange + currency` and Vietnam aliases such as `HOSE:FPT` |
+| `market_data` | Time-series OHLCV records keyed by symbol and timestamp | `src/data/schema/market_data_schema.py` | Target persistence path for approved quote/history facts when retention is explicitly needed | Current metadata is symbol-centric; target provider-backed facts need exchange, currency, source URL/reference, freshness, and license posture |
+| `market_snapshots` | Market-wide snapshot payloads | `src/data/schema/market_snapshots_schema.py`, `MarketSnapshotRepository` | Target retention path for market breadth, index, flow, and dashboard snapshots | Current schema is generic `as_of + data`; target snapshots need market, provider, source lineage, coverage, and degraded-state visibility |
+| `reports` | Workspace/session/analysis-bound publishable reports with sections and attachments | `src/data/schema/reports_schema.py` | Target workspace report metadata and artifact references | Current attachments have name/type/URI; target requires checksum, retention class, source lineage, and degraded-state visibility |
+| `investment_reports` | Symbol-oriented investment report records with analysis sections, charts, and metadata | `src/data/schema/investment_reports_schema.py` | Target symbol report metadata when report output is tied to one security | Current metadata tracks data sources and `data_as_of`; target needs normalized-output lineage and finance-safety/degraded-state metadata |
+| `conversations` | Application-owned conversation lifecycle and metadata | `src/data/schema/conversations_schema.py` | Stores conversation state metadata, not durable market truth | Must not persist `ToolContextPack` wholesale or raw tool outputs as conversation memory |
+| `agent_checkpoints` | LangGraph-managed checkpoint state | `src/data/schema/agent_checkpoints_schema.py` documentation only | Recoverable conversation-scoped agent state | Managed by `MongoDBSaver`; not a schema extension point for tool facts, artifacts, or market truth |
+
+##### Target Tool Metadata Collections
+
+These target collections are proposed technical contracts. They should be implemented only after a Phase 2B implementation spec defines concrete MongoDB schemas, migrations, repositories, and indexes.
+
+| Collection | Purpose | Required Fields | Important Indexes | Retention Rule |
+|------------|---------|-----------------|-------------------|----------------|
+| `tool_artifacts` | Durable metadata for report exports, extracted source documents, chart snapshots, generated sections, and large retained evidence files | `artifact_id`, `artifact_type`, `uri`, `storage_backend`, `workspace_id` where available, `conversation_id` where available, `source_lineage`, `generated_by`, `created_at`, `checksum`, `size_bytes`, `mime_type`, `retention_class` | unique `artifact_id`; `workspace_id + created_at`; `conversation_id`; `source_lineage.provider`; `retention_class` | Persist metadata only for explicitly retained artifacts; content lives on filesystem initially |
+| `tool_mutation_receipts` | Audit records for approved `workflow_mutation` actions, including `internal_state_mutation` symbol-store writes | `mutation_id`, `target_collection`, `target_record`, `action`, `before_summary`, `after_summary`, `actor`, `route`, `tool_name`, `approval_status`, `policy_descriptor_hash`, `gateway_admission`, `created_at`, `result` | unique `mutation_id`; `target_collection + target_record`; `actor.user_id + created_at`; `route + tool_name` | Durable audit metadata for approved, rejected, or blocked mutation attempts when policy requires audit |
+| `tool_execution_traces` | Optional diagnostic trace metadata for governed tool calls | `trace_id`, `request_id`, `conversation_id` where available, `route`, `tool_name`, `adapter_name`, `descriptor_hashes`, `cache_status`, `latency_ms`, `warnings`, `degraded_state`, `created_at`, `expires_at` | unique `trace_id`; `request_id`; `conversation_id + created_at`; TTL index on `expires_at` | Disabled by default; if enabled, TTL-scoped and must not store raw provider payloads or full `ToolContextPack` |
+
+The following collection view is a logical schema relationship diagram. It documents current and target relationships for design review only; executable schemas, migrations, and indexes remain owned by later implementation specs.
+
+```mermaid
+erDiagram
+	SYMBOLS ||--o{ MARKET_DATA : target_identity_for
+	SYMBOLS ||--o{ MARKET_SNAPSHOTS : target_referenced_by
+	SYMBOLS ||--o{ REPORTS : target_mentions
+	SYMBOLS ||--o{ INVESTMENT_REPORTS : current_symbol_report
+	CONVERSATIONS ||--o{ AGENT_CHECKPOINTS : current_maps_to
+	CONVERSATIONS ||--o{ TOOL_ARTIFACTS : target_links
+	CONVERSATIONS ||--o{ TOOL_EXECUTION_TRACES : target_links
+	CONVERSATIONS ||--o{ TOOL_MUTATION_RECEIPTS : target_audits
+	REPORTS ||--o{ TOOL_ARTIFACTS : target_links
+	INVESTMENT_REPORTS ||--o{ TOOL_ARTIFACTS : target_links
+	TOOL_ARTIFACTS ||--|| ARTIFACT_REFERENCE : target_embeds
+	TOOL_ARTIFACTS ||--o{ SOURCE_LINEAGE : target_embeds
+	TOOL_MUTATION_RECEIPTS ||--|| SOURCE_LINEAGE : target_embeds
+	TOOL_EXECUTION_TRACES ||--o{ DEGRADED_STATE : target_embeds
+	MARKET_DATA ||--|| SOURCE_METADATA : target_embeds
+	MARKET_DATA ||--|| SYMBOL_IDENTITY : target_embeds
+	MARKET_DATA ||--|| FRESHNESS_METADATA : target_embeds
+	MARKET_SNAPSHOTS ||--o{ SOURCE_METADATA : target_embeds
+	REPORTS ||--o{ DEGRADED_STATE : target_surfaces
+
+	SYMBOLS {
+		string symbol PK
+		string exchange
+		string currency
+		object listing
+	}
+	MARKET_DATA {
+		string symbol
+		date timestamp
+		double close
+		object metadata
+	}
+	MARKET_SNAPSHOTS {
+		date as_of
+		object data
+	}
+	REPORTS {
+		objectId workspace_id
+		string report_type
+		string status
+		array attachments
+	}
+	INVESTMENT_REPORTS {
+		string symbol
+		date timestamp
+		string report_type
+	}
+	CONVERSATIONS {
+		string conversation_id PK
+		string thread_id
+		string status
+	}
+	AGENT_CHECKPOINTS {
+		string thread_id
+		string checkpoint_id
+		object checkpoint
+	}
+	TOOL_ARTIFACTS {
+		string artifact_id PK
+		string uri
+		string storage_backend
+		string checksum
+	}
+	TOOL_MUTATION_RECEIPTS {
+		string mutation_id PK
+		string target_record
+		string approval_status
+	}
+	TOOL_EXECUTION_TRACES {
+		string trace_id PK
+		string request_id
+		date expires_at
+	}
+	SOURCE_METADATA {
+		string provider
+		string source_url_or_reference
+		string license_mode
+	}
+	SYMBOL_IDENTITY {
+		string symbol
+		string exchange
+		string currency
+	}
+	FRESHNESS_METADATA {
+		date source_timestamp
+		string freshness
+		date expires_at
+	}
+	SOURCE_LINEAGE {
+		string normalized_output_id
+		string descriptor_hash
+	}
+	ARTIFACT_REFERENCE {
+		string artifact_id
+		string uri
+		string mime_type
+	}
+	DEGRADED_STATE {
+		string reason
+		string severity
+		boolean recoverable
+	}
+```
+
+##### Shared Embedded Blocks
+
+| Block | Fields | Used By | Rule |
+|-------|--------|---------|------|
+| `source_metadata` | `provider`, `provider_class`, `source_url_or_reference`, `retrieved_at`, `published_at`, `effective_at`, `license_mode`, `parser_quality`, `warnings` | `EvidenceFact`, `EvidenceSnippet`, `EvidenceDocument`, report sections, artifacts, retained snapshots | Required for every retained market fact or source-derived artifact |
+| `symbol_identity` | `symbol`, `exchange`, `currency`, optional `mic`, `country`, `asset_type`, `provider_symbol` | symbol records, market facts, reports, TradingView payloads, snapshots | Ticker alone is insufficient for durable identity |
+| `freshness_metadata` | `source_timestamp`, `retrieved_at`, `freshness`, `ttl_seconds`, `expires_at`, `market_session`, `degraded_reason` | cache entries, market facts, reports, traces | TTL alone is not enough; freshness must remain visible |
+| `source_lineage` | normalized output ID or run ID, provider/source metadata, artifact IDs, report IDs, mutation IDs, descriptor hashes | `tool_artifacts`, reports, mutation receipts, traces | Retained outputs must be auditable back to normalized source material |
+| `artifact_reference` | `artifact_id`, `artifact_type`, `uri`, `storage_backend`, `checksum`, `size_bytes`, `mime_type`, `created_at` | reports, investment reports, chart metadata, extracted documents | MongoDB stores metadata and URI/path; filesystem stores content |
+| `degraded_state` | `reason`, `severity`, `source`, `tool_name`, `adapter_name`, `recoverable`, `user_visible_message`, `created_at` | envelopes, reports, artifacts, traces | Missing, stale, blocked, parser-limited, provider-down, or license-unclear data must not silently disappear |
+
+##### Filesystem Artifact Storage
+
+The initial artifact-content backend is local filesystem storage under the configured export root. The current config anchor is `export.output_directory`, which defaults to `reports`, and the current exporter writes files through `src/export/report_exporter.py`.
+
+Target path convention:
+
+```text
+reports/tool-artifacts/{workspace_or_global}/{yyyy}/{mm}/{artifact_id}.{ext}
+```
+
+Filesystem rules:
+
+1. `workspace_or_global` is the workspace ID when available; otherwise use `global`.
+2. `artifact_id` is generated before writing content and is the join key to `tool_artifacts`.
+3. The filesystem path is stored as a URI/path in MongoDB; MongoDB remains the metadata authority.
+4. Artifact content may include report exports, generated tables, extracted source documents, chart snapshots, or large evidence files.
+5. Raw provider/web payloads are not prompt context. If retained, they must be treated as artifacts with source lineage, parser warnings, license posture, and checksum metadata.
+6. Future object storage or GridFS may replace the filesystem backend behind the same `artifact_reference` contract.
+
+##### Target Schema Gap Register
+
+| Gap | Current Fact | Target Direction | Implementation Note |
+|-----|--------------|------------------|---------------------|
+| Symbol identity | `symbols` has a unique `symbol` index | Durable identity uses `symbol + exchange + currency`, with aliases for provider and exchange-specific symbols | Add migration and duplicate-resolution plan before changing uniqueness |
+| Market fact lineage | `market_data.metadata` currently tracks source, quality, and last update | Retained facts include provider class, source URL/reference, exchange, currency, freshness, license mode, and degraded-state reason | Extend schema through implementation spec before provider expansion persists facts |
+| Market snapshots | `market_snapshots` accepts generic `data` payload | Retained snapshots include market, provider coverage, source lineage, and snapshot freshness | Keep flexible payload but standardize metadata envelope |
+| Report artifacts | `reports.attachments` stores name/type/URI | Retained report artifacts include checksum, size, MIME/format, retention class, and source lineage | Prefer `tool_artifacts` metadata linked from reports instead of embedding heavy artifact detail |
+| Investment report sources | `investment_reports.metadata.data_sources` and `data_as_of` are coarse | Report sections preserve normalized-output lineage, degraded states, and finance-safety warnings | Avoid persisting unsourced generated recommendations as market truth |
+| Tool traces | No dedicated tool trace collection exists | Optional TTL-scoped `tool_execution_traces` contains metadata only | Do not store raw provider payloads or full context packs in traces |
+
+Refs: SRS FR-2.5, FR-2.10, FR-2.11, IR-3, AC-9, CON-9, CON-10; [ARCHITECTURE_DESIGN.md section 4.4.2](./ARCHITECTURE_DESIGN.md#442-state-and-evidence-allocation-boundaries); [TOOLS_RESEARCH_AND_PROPOSAL.md](./TOOLS_RESEARCH_AND_PROPOSAL.md); `src/data/schema/symbols_schema.py`; `src/data/schema/market_data_schema.py`; `src/data/schema/market_snapshots_schema.py`; `src/data/schema/reports_schema.py`; `src/data/schema/investment_reports_schema.py`; `src/data/schema/conversations_schema.py`; `src/data/schema/agent_checkpoints_schema.py`; `src/data/schema/schema_manager.py`; `src/export/report_exporter.py`; `config/config.yaml`.
 
 #### CachingTool Base Class
 
