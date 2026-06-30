@@ -1,5 +1,5 @@
 {
-  "version": "0.10.2",
+  "version": "0.12.0",
   "integration_state_schema": 1,
   "installed_integrations": [
     "copilot",
@@ -15,6 +15,6 @@
       "invoke_separator": "-"
     }
   },
-  "integration": "copilot",
-  "default_integration": "copilot"
+  "integration": "codex",
+  "default_integration": "codex"
 }
