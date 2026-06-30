@@ -12,6 +12,12 @@
           "speckit.understanding",
           "speckit.understanding.validate",
           "speckit.understanding.energy"
+        ],
+        "codex": [
+          "speckit.understanding.scan",
+          "speckit.understanding",
+          "speckit.understanding.validate",
+          "speckit.understanding.energy"
         ]
       },
       "installed_at": "2026-03-16T04:12:21.870110+00:00"
@@ -26,6 +32,10 @@
         "copilot": [
           "speckit.verify-tasks.run",
           "speckit.verify-tasks"
+        ],
+        "codex": [
+          "speckit.verify-tasks.run",
+          "speckit.verify-tasks"
         ]
       },
       "installed_at": "2026-03-23T03:07:54.641378+00:00"
@@ -38,6 +48,14 @@
       "priority": 10,
       "registered_commands": {
         "copilot": [
+          "speckit.speckit-utils.resume",
+          "speckit.resume",
+          "speckit.speckit-utils.doctor",
+          "speckit.doctor",
+          "speckit.speckit-utils.validate",
+          "speckit.validate"
+        ],
+        "codex": [
           "speckit.speckit-utils.resume",
           "speckit.resume",
           "speckit.speckit-utils.doctor",
@@ -61,6 +79,13 @@
           "speckit.git.remote",
           "speckit.git.initialize",
           "speckit.git.commit"
+        ],
+        "codex": [
+          "speckit.git.feature",
+          "speckit.git.validate",
+          "speckit.git.remote",
+          "speckit.git.initialize",
+          "speckit.git.commit"
         ]
       },
       "registered_skills": [],
@@ -74,6 +99,10 @@
       "priority": 10,
       "registered_commands": {
         "copilot": [
+          "speckit.fleet.run",
+          "speckit.fleet.review"
+        ],
+        "codex": [
           "speckit.fleet.run",
           "speckit.fleet.review"
         ]
@@ -90,6 +119,9 @@
       "registered_commands": {
         "copilot": [
           "speckit.verify.run"
+        ],
+        "codex": [
+          "speckit.verify.run"
         ]
       },
       "registered_skills": [],
@@ -103,6 +135,9 @@
       "priority": 10,
       "registered_commands": {
         "copilot": [
+          "speckit.memory-loader.load"
+        ],
+        "codex": [
           "speckit.memory-loader.load"
         ]
       },
@@ -119,6 +154,10 @@
         "copilot": [
           "speckit.arch.generate",
           "speckit.arch.reverse"
+        ],
+        "codex": [
+          "speckit.arch.generate",
+          "speckit.arch.reverse"
         ]
       },
       "registered_skills": [],
@@ -132,6 +171,9 @@
       "priority": 10,
       "registered_commands": {
         "copilot": [
+          "speckit.agent-context.update"
+        ],
+        "codex": [
           "speckit.agent-context.update"
         ]
       },
