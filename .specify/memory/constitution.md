@@ -1,36 +1,38 @@
 <!--
 SYNC IMPACT REPORT
 ==================
-Version Change: 2.1.0 -> 2.2.0 (MINOR)
-Bump Rationale: Added explicit governance for the repository's current local Spec Kit
-  operating state: command normalization, sync gate posture, feature status semantics,
-  spec persistence policy, and current REST contract ownership. This expands process
-  obligations without replacing the existing core principles.
+Version Change: 2.2.0 -> 2.3.0 (MINOR)
+Bump Rationale: Added explicit agent tool-system and architecture governance aligned to
+  Phase 2B tool architecture, SRS v2.8, ADR-004, the current architecture and technical
+  design package, repository Spec Kit methodology, and official Spec Kit lifecycle guidance.
+  Existing principles remain intact; the amendment materially expands deterministic tool
+  governance and verification duties for the agent domain.
 
 Modified Principles:
-- Spec-Driven, Traceable Delivery: expanded with current status and sync obligations.
-- Deterministic Tools and Contracted Interfaces: clarified current `docs/openapi.yaml`
-  ownership until governed migration.
+- Deterministic Tools and Contracted Interfaces -> Deterministic Tools and Contracted Interfaces
+  (expanded with route-filtered tool surfaces, gateway admission, provider adapter separation,
+  normalized context, source lineage, and degraded-state requirements)
 
 Added Sections:
-- Current Spec Kit Command Surface
-- Spec Persistence and Feature Status Semantics
+- Agent Tool System and Architecture Governance
 
 Removed Sections:
 - None
 
 Template Consistency Check:
-- .specify/templates/spec-template.md: updated before constitution sync; aligned with
-  governance context, traceability target, sync target, contract impact, and lifecycle status.
-- .specify/templates/plan-template.md: updated before constitution sync; aligned with
-  governance and traceability context, sync reports, public contract impact, and status target.
-- .specify/templates/tasks-template.md: updated before constitution sync; aligned with
-  traceability, contract, long-lived docs, sync gate, and anchor validation tasks.
-- .specify/templates/commands/*.md: not present in this repository; no update required.
+- .specify/templates/plan-template.md: checked; no structural change required because
+  Constitution Check remains constitution-derived
+- .specify/templates/spec-template.md: checked; no structural change required
+- .specify/templates/tasks-template.md: checked; no structural change required
+- .specify/templates/checklist-template.md: checked; no structural change required
+- .specify/templates/agent-file-template.md: checked; no structural change required
+- .specify/templates/constitution-template.md: checked; no structural change required
+- .specify/templates/commands/*.md: not present in this repository
 
 Follow-up TODOs:
 - None
 -->
+
 
 # DP Stock Investment Assistant Constitution
 
@@ -79,11 +81,16 @@ rather than factual content. Rationale: the repository's current prompt-system a
 assumes this separation, and governance must keep it explicit.
 
 ### V. Deterministic Tools and Contracted Interfaces
-Deterministic tools MUST fetch or compute facts; the model interprets them. Public interfaces
-such as REST endpoints, streaming responses, WebSocket events, and machine-readable contracts
-MUST remain explicit, version-aware, and synchronized with implementation. Rationale: the
-project relies on OpenAPI, route registration, streaming surfaces, and auditable tool results;
-opaque interface drift is operational risk.
+Deterministic tools MUST fetch or compute facts; the model interprets them. Agent tools MUST be
+exposed through route-filtered, policy-admitted surfaces rather than broad provider lists.
+Provider-specific fetching, parsing, licensing, freshness, fallback, and health behavior MUST
+stay behind deterministic provider policies and adapters. Tool results MUST be normalized into
+typed, source-attributed, freshness-aware, warning-aware context before entering prompt
+assembly. Public interfaces such as REST endpoints, streaming responses, WebSocket events, and
+machine-readable contracts MUST remain explicit, version-aware, and synchronized with
+implementation. Rationale: the project relies on OpenAPI, route registration, streaming
+surfaces, auditable tool results, and finance-domain source integrity; opaque interface or tool
+drift is operational risk.
 
 ### VI. Testability and Observability Are First-Class
 Every material behavior MUST be verifiable and diagnosable. Focused tests, health endpoints,
@@ -268,6 +275,107 @@ These items MUST stay in retrieval, tools, or governed data stores rather than L
   hidden knowledge base.
 - Deterministic tools fetch and compute facts; the model interprets, frames, and cites them.
 
+### Agent Tool System and Architecture Governance
+
+Agent tool-system work MUST preserve the target Phase 2B architecture unless an ADR explicitly
+changes it. This section governs `ToolRegistry`, target `AgentTool`, `ToolSurfaceBuilder`,
+`ToolGateway`, provider adapters, normalized outputs, reporting, TradingView, generic web
+evidence, and future remote or MCP-style tool admission.
+
+#### Tool Architecture Boundary Rules
+
+1. **Route-filtered exposure before model invocation.** The model-visible tool surface MUST be
+   derived from the classified route, locale, feature flags, session state where allowed, and
+   reviewed capability descriptors. The model MUST NOT receive every tool, provider adapter, or
+   utility by default.
+2. **Gateway as thin in-process policy boundary.** `ToolGateway` MAY admit, reject, trace, and
+   wrap tool execution, but it MUST NOT become a second agent runtime, a separate service by
+   default, a provider parser, a prompt-policy author, or a business lifecycle owner.
+3. **Registry remains inventory authority.** `ToolRegistry` remains the inventory and enablement
+   boundary for repo-owned tools. New tools MUST register through the existing registry pattern
+   or an approved successor, not through ad-hoc model prompts.
+4. **Tools hide providers from the model.** Agent-facing tools MUST express stable capabilities
+   such as symbol lookup, market data, visualization, reporting, or web evidence. Provider
+   adapters such as official exchange sources, licensed providers, public-web sources, wrappers,
+   TradingView, Yahoo, or future Vietnam-market connectors MUST remain below the tool layer.
+5. **Provider policy is deterministic.** Provider ordering, fallback eligibility, market-session
+   rules, license posture, freshness expectations, timeout/retry budget, and degraded-state
+   mapping MUST be decided by application policy, not by LLM prompt text.
+6. **Adapters own source-specific behavior.** Provider adapters own credentials, source fetch,
+   parsing, health, source metadata, and field mapping. Gateway, reporting, and prompt assembly
+   MUST NOT embed provider-specific parsing logic.
+
+#### Tool Contracts and Data Integrity
+
+1. Every admitted tool MUST have a reviewed capability descriptor and policy descriptor covering
+   model-visible name, description, input schema, output kind, route coverage, descriptor
+   version or integrity marker, risk class, license mode, freshness policy, cache policy,
+   timeout budget, credential owner, mutation policy, and required metadata where applicable.
+2. Every provider adapter used by a production path MUST declare supported markets, data
+   categories, provider class, license posture, credential owner, parser limits,
+   source-attribution requirements, production eligibility, and an integrity marker.
+3. Tool execution MUST return an envelope that records selected route, selected tool, selected
+   adapter where applicable, descriptor versions or hashes, admission outcome, normalized output
+   reference, cache status, warnings, degraded-state reason, and trace metadata.
+4. Raw provider payloads, raw HTML, raw PDFs, page scripts, hidden text, and untrusted page
+   instructions MUST NOT enter prompt context. Prompt assembly may consume only normalized,
+   data-only tool context.
+5. `ToolContextPack` is request-scoped by default. It MUST NOT be persisted wholesale as
+   conversation memory or durable market truth. Durable retention is allowed only for approved
+   derivatives such as domain records, retained sourced artifacts, reports, mutation receipts,
+   audit metadata, trace metadata, or approved market snapshots with source lineage.
+6. Cache entries are performance artifacts, not authority. Market-data caches MUST preserve
+   enough source timestamp, provider, exchange/currency where applicable, freshness, warnings,
+   and degraded-state metadata to avoid stale or anonymous facts.
+
+#### Source Authority and Provider Posture
+
+1. Vietnam-market data work MUST prefer official exchange/depository sources and approved
+   licensed providers for canonical records. Public web sources and wrappers MAY support
+   research or evidence only after terms, licensing, parser, and source-attribution posture are
+   reviewed.
+2. International fallback providers such as Yahoo Finance or Alpha Vantage MAY be used only when
+   the route, coverage, license posture, and user-facing caveats permit fallback. They MUST NOT
+   silently replace a Vietnam-native provider when that would weaken source authority.
+3. TradingView outputs MUST be classified as `VisualizationProvenance` unless a future approved
+   policy explicitly admits a specific TradingView data path as canonical evidence.
+4. Generic web fetch MUST be deny-by-default, domain-allowlisted, parser-limited,
+   source-attributed, prompt-injection quarantined, and normalized into snippets, documents, or
+   degraded states before use.
+5. Reporting tools MUST compose from `ToolContextPack`, visualization provenance, generated
+   artifacts, and retained source lineage. Reporting tools MUST NOT fetch or scrape provider
+   data directly.
+
+#### Mutation, Remote Tools, and Security
+
+1. State-changing tools, including future symbol-store upserts, coverage updates, alias merges,
+   tag updates, or retirements, MUST require route admission, authorization, explicit mutation
+   policy, audit metadata, and confirmation policy before enablement.
+2. Remote or MCP-style tools are untrusted until locally admitted. They MUST use the same
+   descriptor integrity, gateway admission, risk classification, normalized output, tracing, and
+   degraded-state controls as local tools.
+3. Tool descriptor drift, missing source lineage, unclear license posture, stale data beyond the
+   policy threshold, blocked parser limits, or failed normalized-output validation MUST fail
+   closed into a machine-detectable degraded state.
+
+#### Tool Verification Gates
+
+Agent tool-system plans and implementations MUST include focused evidence for:
+
+- route-filtered tool exposure and static route preservation;
+- gateway admission, rejection, and degraded-state behavior;
+- descriptor integrity and descriptor drift handling;
+- tool-versus-adapter separation and hidden provider fallback;
+- source attribution, timestamp/freshness, cache metadata, and warning propagation;
+- normalized output classification before prompt assembly;
+- TradingView non-evidence classification;
+- generic web prompt-injection resistance;
+- reporting source discipline and degraded report behavior;
+- request-scoped `ToolContextPack` retention boundaries;
+- mutation receipt integrity for state-changing tools;
+- Vietnamese and mixed-language route coverage where Vietnam-market tools are affected;
+- finance-safety checks for unsourced recommendations, guaranteed-return language, and hype.
+
 ### Architecture and Design Constraints
 
 - Use `ModelClientFactory`, `RepositoryFactory`, `ServiceFactory`, and immutable route or socket
@@ -336,6 +444,9 @@ delivery MUST preserve one coherent feature workflow and one authoritative artif
   public route surface.
 - Prompt or agent behavior changes MUST preserve prompt identity, fallback or degradation
   metadata, and finance-safety guardrail expectations where those surfaces exist.
+- Agent tool-system changes MUST validate route-filtered exposure, gateway admission,
+  descriptor integrity, provider policy, normalized output classification, source lineage,
+  degraded states, and request-scoped retention before production enablement.
 - Data schema, migration, or cache behavior changes MUST include migration or initialization
   evidence and compatibility checks.
 - Frontend, backend, agent, and IaC changes MUST validate the affected user or operator journey
@@ -350,6 +461,8 @@ delivery MUST preserve one coherent feature workflow and one authoritative artif
 - [ ] Governing artifacts and affected domains are identified.
 - [ ] Focused executable validation or diagnostics have been run.
 - [ ] Required contracts, long-lived docs, and sync artifacts are updated.
+- [ ] Agent tool-system changes include descriptor, route, provider, normalized-output, source
+  lineage, and degraded-state evidence where applicable.
 - [ ] Cross-references in spec-kit artifacts use section-level anchors and resolve to valid targets.
 - [ ] No secrets or unsafe internal details are exposed.
 - [ ] Any migration, fallback, rollout, or breaking-change path is documented.
@@ -401,4 +514,4 @@ specific concern MUST then be reconciled across dependent artifacts.
 - **MINOR**: New articles, principles, or materially expanded guidance
 - **PATCH**: Clarifications, typo fixes, non-semantic refinements
 
-**Version**: 2.2.0 | **Ratified**: 2026-01-27 | **Last Amended**: 2026-07-01
+**Version**: 2.3.0 | **Ratified**: 2026-01-27 | **Last Amended**: 2026-07-01
