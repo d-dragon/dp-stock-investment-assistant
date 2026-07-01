@@ -1,38 +1,32 @@
 <!--
 SYNC IMPACT REPORT
 ==================
-Version Change: 1.3.0 → 2.0.0 (MAJOR)
-Bump Rationale: Replaced an agent-memory-centric constitution with a repo-wide practical
-  constitution aligned to current Spec-Driven Development, layered architecture, contract
-  synchronization, multi-surface delivery, and AI runtime governance. v2.1.0 adds explicit
-  document-referencing rules governing how `docs/` documents are referenced during spec-kit
-  phases, including anchor-level precision, lifecycle obligations, and cross-reference
-  validation.
+Version Change: 2.1.0 -> 2.2.0 (MINOR)
+Bump Rationale: Added explicit governance for the repository's current local Spec Kit
+  operating state: command normalization, sync gate posture, feature status semantics,
+  spec persistence policy, and current REST contract ownership. This expands process
+  obligations without replacing the existing core principles.
 
 Modified Principles:
-- Memory Never Stores Facts → Spec-Driven, Traceable Delivery
-- RAG Never Stores Opinions → Layered Boundaries and Explicit Ownership
-- Fine-Tuning Never Stores Knowledge → Evidence-Grounded Financial Intelligence
-- Prompting Controls Behavior, Not Data → Prompts, Memory, and Fine-Tuning Control Behavior, Not Truth
-- Tools Compute Numbers, LLM Reasons About Them → Deterministic Tools and Contracted Interfaces
-- Investment Data Sources Are External → Testability and Observability Are First-Class
-- Market Manipulation Safeguards Are Enforced → Secure, Simple, Reversible Change
+- Spec-Driven, Traceable Delivery: expanded with current status and sync obligations.
+- Deterministic Tools and Contracted Interfaces: clarified current `docs/openapi.yaml`
+  ownership until governed migration.
 
 Added Sections:
-- Artifact and Documentation Boundaries
-- Document Referencing in Spec-Kit Workflows
-- Spec Kit Lifecycle Obligations
-- Delivery Sync Gates
+- Current Spec Kit Command Surface
+- Spec Persistence and Feature Status Semantics
 
 Removed Sections:
-- None; earlier agent-specific governance was absorbed into repo-wide principles and Memory and AI Runtime Boundaries.
+- None
 
 Template Consistency Check:
-- .specify/templates/plan-template.md: ✅ updated in v2.0.0; doc-referencing rules are cross-cutting and are now captured in the constitution directly; no template structural change needed
-- .specify/templates/spec-template.md: ✅ updated in v2.0.0
-- .specify/templates/tasks-template.md: ✅ updated in v2.0.0
-- .specify/templates/constitution-template.md: ✅ checked, no change required
-- .github/prompts/speckit.constitution.prompt.md: ✅ checked, no change required
+- .specify/templates/spec-template.md: updated before constitution sync; aligned with
+  governance context, traceability target, sync target, contract impact, and lifecycle status.
+- .specify/templates/plan-template.md: updated before constitution sync; aligned with
+  governance and traceability context, sync reports, public contract impact, and status target.
+- .specify/templates/tasks-template.md: updated before constitution sync; aligned with
+  traceability, contract, long-lived docs, sync gate, and anchor validation tasks.
+- .specify/templates/commands/*.md: not present in this repository; no update required.
 
 Follow-up TODOs:
 - None
@@ -119,12 +113,16 @@ contract, runbook, or feature spec before changing code, docs, or IaC.
 #### 2. Respect Artifact Lifecycles and Locations
 `docs/` is the long-lived baseline, `specs/` is the governed delivery evidence area, and
 `.specify/` is runtime and tooling support. Stable knowledge is promoted from `specs/` to `docs/`
-only after verification.
+only after verification. Active feature specs remain living artifacts until closeout; verified
+feature directories become delivery evidence and SHOULD flow forward into long-lived documents
+rather than being repeatedly rewritten.
 
 #### 3. Keep Contracts and Sync Artifacts Current
 When stable behavior changes, update `docs/openapi.yaml`, `specs/spec-traceability.yaml`,
 `specs/spec-sync-status.md`, affected reverse-trace documents, and impacted technical design or
-runbook artifacts in the same delivery cycle when relevant.
+runbook artifacts in the same delivery cycle when relevant. The sync report MUST be regenerated
+with `python scripts/sync_spec_status.py --gate` when requirement coverage, feature lifecycle
+status, or evidence paths change.
 
 #### 4. Protect Secrets and Privileged Access
 Secrets MUST NOT appear in source, logs, docs, or test fixtures. Use environment variables,
@@ -160,6 +158,9 @@ test updates, and justify any unavoidable complexity against a simpler alternati
   status.
 - `.specify/` is the project-local Spec Kit runtime and configuration area and MUST NOT be used
   as the canonical store for governed feature delivery evidence.
+- `docs/openapi.yaml` is the current canonical REST contract. A future move to
+  `docs/domains/backend/api/openapi.yaml` MUST be handled as a governed migration that updates
+  references, validation paths, CI or scripts, and contributor guidance in one change set.
 - If code, specs, contracts, and long-lived docs disagree, fix the authoritative artifact first,
   then reconcile dependent references.
 
@@ -207,9 +208,33 @@ agentic workflow context.
 - When renaming a section heading in a `docs/` document, use grep or equivalent search to find
   all inbound references across `specs/`, other `docs/` files, and `.github/` customization
   files before committing the rename.
-- Placeholder or template-style references such as `[link to relevant design doc]` MUST NOT
+- Placeholder or template-style references such as `link to relevant design doc` MUST NOT
   survive into a published spec, plan, or task artifact. Every reference MUST be resolved to a
   concrete file path and section anchor before the artifact leaves draft status.
+
+### Spec Persistence and Feature Status Semantics
+
+Feature directories under `specs/` MUST use lifecycle status names consistently. `Draft`,
+`Clarified`, `Planned`, `Implemented`, `Verified`, `Backfilled`, and `Superseded` are the
+approved status vocabulary for feature `spec.md` headers, traceability notes, and sync
+discussion.
+
+- `Draft` applies before clarification and planning have completed.
+- `Clarified` applies when ambiguity has been resolved and planning can proceed.
+- `Planned` applies when `plan.md` exists and the design direction is accepted.
+- `Implemented` applies when tasks are complete and implementation evidence exists, but the
+  final verification marker is absent.
+- `Verified` applies only when `review.md`, `.verify-done`, complete tasks, and the sync gate
+  all support the verified state.
+- `Backfilled` applies only to governance restoration for pre-existing behavior.
+- `Superseded` applies when a feature directory is retained for history and points to its
+  replacement authority.
+
+Active feature work MAY flow backward from implementation findings into `spec.md`, `plan.md`, or
+`tasks.md`, but that reconciliation MUST be followed by analysis or sync review. Verified feature
+directories SHOULD flow forward into `docs/`, contracts, traceability, roadmap, or ADRs instead
+of being mutated as active design documents. Material behavior changes after verification MUST
+use a follow-up feature, governed doc update, or explicit supersession link.
 
 ### Memory and AI Runtime Boundaries
 
@@ -272,8 +297,8 @@ These items MUST stay in retrieval, tools, or governed data stores rather than L
 
 - Non-trivial work MUST follow the repository's Spec-Driven Development chain: governed
   requirements and design inputs, `speckit.constitution`, `speckit.specify`, clarification and
-  checklist steps when needed, `speckit.plan`, `speckit.tasks`, implementation, verification,
-  and delivery synchronization.
+  checklist steps when needed, `speckit.plan`, `speckit.tasks`, implementation,
+  `speckit.verify-tasks.run`, `speckit.verify.run`, and delivery synchronization.
 - Plans MUST identify governing artifacts, affected domains, sync targets, validation strategy,
   architecture impact, and rollback or migration implications.
 - Tasks MUST include tests, contract updates, traceability refresh, and long-lived doc sync work
@@ -283,6 +308,27 @@ These items MUST stay in retrieval, tools, or governed data stores rather than L
   Workflows defines the responsibility per phase.
 - Documentation-first work MAY start from documentation-focused agents or workflows, but it MUST
   obey the same artifact boundaries and sync duties.
+
+### Current Spec Kit Command Surface
+
+The constitution governs the current local command surface, not only upstream examples. As of the
+current repository state, contributors MUST use these normalized surfaces unless a governed Spec
+Kit upgrade changes installed commands and managed files:
+
+- Pre-implementation review: `speckit.fleet.review`; historical `speckit.review` is shorthand
+  only.
+- Phantom completion detection: `speckit.verify-tasks.run`; historical `speckit.verify-tasks`
+  is shorthand only.
+- Post-implementation verification: `speckit.verify.run`; historical `speckit.verify` is
+  shorthand only.
+- Traceability and sync gate: `python scripts/sync_spec_status.py --gate`; `speckit.sync.*` is
+  not an installed/enabled surface until `specify extension list` confirms adoption.
+- Upstream convergence commands such as `speckit.converge` are upgrade-gated and MUST NOT be
+  documented as locally available until the CLI, prompts, skills, and managed files expose them.
+
+Copilot remains the default integration unless changed by a governed `specify integration use`
+operation. Codex may remain installed as a secondary integration for portability, but mixed-agent
+delivery MUST preserve one coherent feature workflow and one authoritative artifact set.
 
 ### Verification and Delivery Gates
 
@@ -316,6 +362,8 @@ These items MUST stay in retrieval, tools, or governed data stores rather than L
   requirement coverage or feature verification status changes.
 - Domain reverse-trace documents, such as `docs/domains/agent/SRS_SPEC_TRACEABILITY.md`, MUST be
   updated when their requirement mappings change.
+- `python scripts/sync_spec_status.py --gate` MUST pass before mapped requirement-linked feature
+  work is considered synchronized.
 - Affected technical design, architecture, or runbook documents MUST be synchronized when stable
   behavior becomes part of the long-lived baseline.
 
@@ -342,6 +390,9 @@ specific concern MUST then be reconciled across dependent artifacts.
 - `/speckit.tasks`, implementation, review, and post-implementation verification MUST confirm
   that required tests, contracts, traceability, and long-lived doc sync tasks are present when
   relevant.
+- `speckit.verify-tasks.run`, `speckit.verify.run`, and
+  `python scripts/sync_spec_status.py --gate` are the current closeout gates for implemented
+  feature work when those surfaces apply.
 - Any approved deviation MUST be written as an explicit justification in the affected plan,
   review, ADR, or equivalent governing artifact.
 
@@ -350,4 +401,4 @@ specific concern MUST then be reconciled across dependent artifacts.
 - **MINOR**: New articles, principles, or materially expanded guidance
 - **PATCH**: Clarifications, typo fixes, non-semantic refinements
 
-**Version**: 2.1.0 | **Ratified**: 2026-01-27 | **Last Amended**: 2026-06-02
+**Version**: 2.2.0 | **Ratified**: 2026-01-27 | **Last Amended**: 2026-07-01

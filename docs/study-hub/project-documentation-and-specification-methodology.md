@@ -25,7 +25,7 @@ The current recommendation is:
 - keep **ADRs** as decision records rather than requirement documents
 - keep **OpenAPI** and other contract artifacts as executable interface sources of truth rather than duplicating them in prose
 - keep **feature specs** under `specs/` as delivery-scoped realization artifacts linked back to approved requirement IDs, following the 18-step SDD lifecycle
-- maintain **automated traceability** through `spec-traceability.yaml`, `sync_spec_status.py`, and spec-kit sync extensions to detect and resolve drift
+- maintain **automated traceability** through `spec-traceability.yaml`, `sync_spec_status.py`, and any future governed sync extension adoption to detect and resolve drift
 
 This proposal is intentionally designed to be the next-step input for generating the future project documentation set. It does not attempt to rewrite the current document corpus. Instead, it defines the target structure, the SDD lifecycle integration, the governance model, and the document boundaries needed to guide the next documentation-generation phase.
 
@@ -97,7 +97,7 @@ This means:
 - ADRs that explain architecturally significant decisions, not functional scope
 - contract artifacts owned by the relevant domain that define interfaces directly, without unnecessary prose duplication
 - feature specs that remain delivery-scoped and traceable to stable requirement IDs
-- **automated traceability** (spec-traceability.yaml, sync_spec_status.py, speckit.sync) as the mechanism that keeps documentation and code aligned
+- **automated traceability** (`spec-traceability.yaml`, `sync_spec_status.py`, and verified doc promotion) as the current mechanism that keeps documentation and code aligned
 
 Throughout this proposal, the units grouped under `docs/domains/` are better understood as **bounded contexts or delivery domains**, not technology stacks. The repository path is retained for brevity, but terms such as frontend, backend, agent, and data should be read as ownership domains or layers rather than as references to React, Flask, LangGraph, or similar implementation stacks.
 
@@ -206,13 +206,15 @@ The project has established an 18-step SDD lifecycle that governs all feature de
 | 8 | Task generation | `speckit.tasks` | Create tasks.md with user-story-organized implementation tasks |
 | 9 | Validation | `speckit.validate` | Verify spec-to-task traceability and file integrity |
 | 10 | Analysis | `speckit.analyze` | Cross-artifact consistency and quality analysis |
-| 11 | Review | `speckit.review` | Cross-model evaluation of plan and tasks before implementation |
+| 11 | Review | `speckit.fleet.review` | Cross-model evaluation of plan and tasks before implementation |
 | 12 | Implementation | `speckit.implement` | Execute tasks; code changes aligned to spec and plan |
-| 13 | Task verification | `speckit.verify-tasks` | Detect phantom completions; verify code exists for every checked task |
-| 14 | Post-implementation verification | `speckit.verify` | Validate implementation against spec, plan, tasks, and constitution |
-| 15 | Testing and traceability | Manual + sync | Run tests; update spec-traceability.yaml with gate status |
-| 16 | Maintenance | `speckit.sync` | Detect and resolve spec-to-code drift; backfill unspecced code |
+| 13 | Task verification | `speckit.verify-tasks.run` | Detect phantom completions; verify code exists for every checked task |
+| 14 | Post-implementation verification | `speckit.verify.run` | Validate implementation against spec, plan, tasks, and constitution |
+| 15 | Testing and traceability | Manual + `scripts/sync_spec_status.py --gate` | Run tests; update spec-traceability.yaml with gate status and regenerate forward/reverse reports |
+| 16 | Maintenance | `scripts/sync_spec_status.py --gate` plus manual or skill-assisted promotion | Detect and resolve spec-to-code drift; backfill unspecced code when needed |
 | 17 | Documentation sync | Manual | Synchronize long-lived docs affected by the delivered feature |
+
+Command-surface rule: this methodology names the current local command surfaces. Older shorthand such as `speckit.review`, `speckit.verify`, and `speckit.sync` may appear in historical notes, but new process guidance should use `speckit.fleet.review`, `speckit.verify.run`, and `scripts/sync_spec_status.py --gate`. Upstream-only concepts such as `speckit.converge` are upgrade-gated here until the CLI and local managed prompt/skill files expose them.
 
 ### 7.2 How SDD Connects to System Documentation
 
@@ -226,7 +228,7 @@ The SDD lifecycle connects delivery-scoped artifacts (`specs/`) to long-lived sy
 
 4. **Post-delivery documentation sync**: Step 17 is where the SDD lifecycle feeds back into long-lived documentation. When a feature changes API behavior, the OpenAPI contract must be updated (Constitution Golden Rule 9). When a feature introduces new architectural patterns, ADRs are created. When a feature covers new SRS territory, the traceability summary is updated.
 
-5. **Drift detection**: Step 16 (`speckit.sync`) identifies when code has diverged from specs, when specs have diverged from SRS, or when code exists without spec coverage. This is the automated maintenance mechanism for the documentation set.
+5. **Drift detection**: Step 16 currently uses `scripts/sync_spec_status.py --gate` for requirement-to-spec status and manual or skill-assisted review for code-to-doc drift. The `speckit.sync.*` surface is not installed/enabled today; if adopted later, it should supplement the local script rather than replace the manifest/report authority without a governed migration.
 
 ### 7.3 SRS as Upstream Requirement Pool
 
@@ -254,6 +256,16 @@ That translates into these practical operating rules:
 5. **Use executable artifacts as the contract source of truth.** If `openapi.yaml`, code-level schemas, or test contracts already express the interface, prose should explain obligations and rationale, not restate the contract.
 6. **Create subordinate SRS documents only when the domain has sustained change pressure.** In this repository that likely means agent, frontend, and operations first; API and data should only gain separate requirement documents when repeated cross-feature obligations justify them.
 7. **Promote requirement-level content after verification, not before.** SRS documents and requirement baselines should be updated after a feature passes implementation and verification, so the requirement record reflects proven behavior rather than planned intent. However, technical design documents and ADRs may be updated earlier in the lifecycle to communicate architectural direction to concurrent work — these serve as coordination tools, not just records of what was built.
+
+#### Spec Persistence Policy
+
+The repository uses Spec Kit persistence deliberately rather than treating every generated artifact the same way.
+
+- **Living specs for active work**: while a feature is being clarified, planned, implemented, or verified, `spec.md`, `plan.md`, and `tasks.md` remain living artifacts. If implementation discovers a requirement or design issue, update the active artifacts and rerun analysis/sync before continuing.
+- **Flow-forward after verification**: once a feature directory is verified, treat it as delivery evidence. Promote stable knowledge into `docs/`, contracts, traceability, roadmap, or ADRs instead of repeatedly rewriting the historical feature directory.
+- **Flow-back only during active implementation**: updates from code back into `spec.md` or `plan.md` are allowed while the feature is active, but they must pass an analysis/sync reconciliation gate so the feature directory, tasks, traceability, and long-lived docs remain aligned.
+- **Backfill as restoration, not normal delivery**: use `Backfilled` only when restoring governance coverage for behavior that already exists. A backfilled spec must name source evidence and then move through reconciliation before it is treated like planned or implemented SDD work.
+- **Supersede instead of mutating history**: if verified behavior changes materially later, create a follow-up feature spec or governed doc update, link the old spec as superseded, and move traceability intentionally.
 
 ### 7.5 SRS Lifecycle During Development
 
@@ -299,14 +311,15 @@ The SDD practice uses a chain of quality gates enforced through spec-kit extensi
 | Gate | Extension | When Applied | What It Catches |
 |------|-----------|--------------|-----------------|
 | Spec quality | `speckit.understanding.validate` | After specify | Ambiguity, untestability, structural weakness (31 metrics, ISO 29148 gates) |
-| Project health | `speckit.doctor` | Before plan | Missing templates, broken config, stale artifacts |
+| Project health | `speckit.doctor` / `speckit.speckit-utils.doctor` | Before plan | Missing templates, broken config, stale artifacts |
 | Constitution compliance | `speckit.plan` (constitution check) | Before and after planning | Violations of core principles or golden rules |
-| Traceability completeness | `speckit.validate` | After tasks | Unmapped requirements, orphaned tasks, missing files |
+| Traceability completeness | `speckit.validate` / `speckit.speckit-utils.validate` | After tasks | Unmapped requirements, orphaned tasks, missing files |
 | Cross-artifact consistency | `speckit.analyze` | After tasks | Contradictions between spec, plan, and tasks |
-| Cross-model review | `speckit.review` | Before implement | Blind spots, feasibility gaps, risk assessment |
-| Phantom completion detection | `speckit.verify-tasks` | After implement | Tasks marked done but code missing or dead |
-| Post-implementation verification | `speckit.verify` | After implement | Gaps between implemented code and spec/plan/tasks/constitution |
-| Drift detection | `speckit.sync.analyze` | During maintenance | Code-to-spec divergence, unspecced features, inter-spec contradictions |
+| Cross-model review | `speckit.fleet.review` | Before implement | Blind spots, feasibility gaps, risk assessment |
+| Phantom completion detection | `speckit.verify-tasks.run` | After implement | Tasks marked done but code missing or dead |
+| Post-implementation verification | `speckit.verify.run` | After implement | Gaps between implemented code and spec/plan/tasks/constitution |
+| Traceability and sync gate | `scripts/sync_spec_status.py --gate` | During maintenance | SRS baseline mismatch, feature status drift, stale forward/reverse reports |
+| Code-to-document drift review | Manual or skill-assisted review, typically `$technical-design-manager` for technical design promotion | During maintenance | Code-to-spec divergence, unspecced behavior, long-lived doc promotion gaps |
 
 These gates apply to feature-level work today. As system-level documentation is generated, the same governance model should extend to long-lived documents through periodic sync analysis and constitution-aware authoring.
 
@@ -319,6 +332,8 @@ The project maintains automated traceability through three interconnected artifa
 2. **`specs/spec-sync-status.md`** — Human-readable summary report showing feature mapping status, coverage, linked SRS items, and evidence links.
 
 3. **`scripts/sync_spec_status.py`** — CLI automation that generates forward and reverse traceability reports from the YAML manifest.
+
+Sync extension posture: `speckit.sync.*` is not installed or enabled in the current repository command surface. The supported operating path is the local script plus manual or skill-assisted promotion into long-lived docs. If a future upgrade adopts the sync extension, it should be documented as a governed change with command availability confirmed by `specify extension list`, not inferred from upstream examples.
 
 When the system-level SRS is created, the traceability registry should be extended to track:
 
@@ -416,6 +431,8 @@ This is the recommended compact domain model for this repository. The important 
 - domain folders do not need symmetric document sets; each domain only grows when repeated delivery pressure justifies it
 - delivery detail stays in `specs/`, so these domain folders hold stable design and specialized obligations rather than feature-by-feature change history
 
+Current-vs-target contract note: the target tree shows backend-owned API contract placement, but the current canonical REST contract is still `docs/openapi.yaml`. Do not move or replace it until a governed migration updates every reference and validation path.
+
 ### 9.2 Purpose and Standards Stance by Document Type
 
 Each document type has both a standards stance and a notation policy. The standards stance describes how the artifact relates to external standards; Section 9.3 defines the diagram and notation rules that keep visuals consistent across the documentation set.
@@ -428,7 +445,7 @@ Each document type has both a standards stance and a notation policy. The standa
 | **ADRs** | `docs/architecture/DECISIONS/` and `docs/domains/*/DECISIONS/` | Capture architecturally significant decisions and tradeoffs at system or domain scope | **Practice-Based** ADR discipline |
 | **Domain Technical Design** | `docs/domains/*/TECHNICAL_DESIGN.md` | Explains how each domain realizes the requirements allocated to it and records domain-specific constraints that do not belong in the system-level architecture documents | **Aligned** design practice |
 | **Domain-Specific Requirement Documents** | only where justified, for example `docs/domains/agent/SOFTWARE_REQUIREMENTS_SPECIFICATION.md` | Holds subordinate requirement sets only when a bounded context is independently complex, specialized, or already mature enough to need its own requirement baseline | **Aligned** subordinate SRS practice |
-| **Executable Contracts** | domain-owned artifacts such as `docs/domains/backend/api/openapi.yaml` | Defines request/response schemas, event contracts, and integration payloads without duplicating them in prose | **Conformant** to schema or contract standards |
+| **Executable Contracts** | current canonical REST contract: `docs/openapi.yaml`; target domain-owned path after governed migration: `docs/domains/backend/api/openapi.yaml` | Defines request/response schemas, event contracts, and integration payloads without duplicating them in prose | **Conformant** to schema or contract standards |
 | **Operations Policy and Runbooks** | `docs/operations/OPERATIONS_AND_RELEASE_POLICY.md`, `docs/operations/RUNBOOKS/` | Defines supportability, release readiness, migration, reconciliation, rollback, and incident handling expectations | **Aligned** for policy; **Practice-Based** for runbooks |
 | **Verification and Traceability Strategy** | `docs/testing/VERIFICATION_AND_TRACEABILITY_STRATEGY.md` | Defines test levels, evidence expectations, and how requirements are proven through specs and tests | **Aligned** internal verification standard |
 | **Study and Analysis Documents** | `docs/study-hub/` | Holds research, comparison studies, and planning proposals that inform decisions but are not themselves long-lived authority documents | **Practice-Based** study format |
@@ -599,7 +616,7 @@ The examples below show how domain allocation should work in practice.
 | Priority | P0 |
 | Primary Owning Domain | backend |
 | Contributing Domains | frontend, agent |
-| Linked Domain Documents / Contracts | `docs/domains/backend/TECHNICAL_DESIGN.md`, `docs/domains/frontend/TECHNICAL_DESIGN.md`, `docs/domains/backend/api/openapi.yaml` |
+| Linked Domain Documents / Contracts | `docs/domains/backend/TECHNICAL_DESIGN.md`, `docs/domains/frontend/TECHNICAL_DESIGN.md`, current `docs/openapi.yaml` contract; future `docs/domains/backend/api/openapi.yaml` after governed migration |
 | Spec Coverage Status | mapped via feature spec(s) in `specs/` |
 
 **Example Non-Functional Requirement**
@@ -668,7 +685,7 @@ The frontend domain should gain a `TECHNICAL_DESIGN.md` before it gains a subord
 
 #### 11.4.3 Backend Domain
 
-The backend domain should own both its internal realization and its external API contracts. Under the target model, the current [OpenAPI Specification](../openapi.yaml) maps conceptually to `docs/domains/backend/api/openapi.yaml`.
+The backend domain should own both its internal realization and its external API contracts. The current canonical REST contract remains [OpenAPI Specification](../openapi.yaml). The target model may move that contract to `docs/domains/backend/api/openapi.yaml`, but only through a governed migration that updates references, traceability, CI checks, and contributor guidance in one change set.
 
 The backend domain technical design should explain route, service, and integration layering. It should not duplicate API contract schemas that already live in OpenAPI.
 
@@ -698,7 +715,7 @@ Generate or stabilize only the documents that the rest of the SDD workflow depen
 2. `docs/system/SYSTEM_REQUIREMENTS_SPECIFICATION.md` — The upstream requirement pool for cross-domain requirements.
 3. `docs/architecture/SYSTEM_OVERVIEW_AND_BOUNDARIES.md` — Whole-system static view and domain boundaries.
 4. `docs/architecture/RUNTIME_AND_INTEGRATION_FLOWS.md` — Whole-system runtime flows across frontend, backend, agent, data, and operations concerns.
-5. `docs/domains/backend/api/openapi.yaml` — The executable backend API contract, initially sourced from the current `docs/openapi.yaml`.
+5. `docs/openapi.yaml` — The current executable backend API contract; `docs/domains/backend/api/openapi.yaml` is the target location only after a governed migration.
 
 **SDD integration**: Extend `spec-traceability.yaml` to support system-level requirement IDs (SR-x, SNR-x) alongside the existing domain-level IDs (FR-x, NFR-x).
 
@@ -708,7 +725,7 @@ Do not generate parallel replacements for documents the repository already maint
 
 1. Reclassify the current `docs/langchain-agent/` material into the future `docs/domains/agent/` ownership model.
 2. Reclassify the current frontend ADRs into the future `docs/domains/frontend/DECISIONS/` ownership model.
-3. Reclassify the current `docs/openapi.yaml` into the future `docs/domains/backend/api/openapi.yaml` ownership model.
+3. Reclassify the current `docs/openapi.yaml` into the future `docs/domains/backend/api/openapi.yaml` ownership model only after a governed migration plan exists.
 
 This phase is mostly classification, not content generation.
 
@@ -730,7 +747,7 @@ As features are delivered, promote only stable, repeated knowledge from `specs/`
 
 1. stable requirements into the master or subordinate SRS
 2. stable decisions into ADRs
-3. stable contracts into domain-owned executable artifacts such as `docs/domains/backend/api/openapi.yaml`
+3. stable contracts into the current executable contract at `docs/openapi.yaml`, or into future domain-owned executable artifacts such as `docs/domains/backend/api/openapi.yaml` after migration
 4. stable operating procedures into runbooks
 5. stable diagrams into the target long-lived document only after they have been normalized to the notation policy for that document type
 
@@ -782,3 +799,4 @@ The practical recommendation is to keep `docs/` small, keep `specs/` rich, and p
 | 0.7 | 2026-04-03 | GitHub Copilot | Resolved remaining glossary drift by aligning the target file tree back to `docs/domains/`, correcting lifecycle wording to the 18-step SDD lifecycle consistently, and adding an explicit API Boundary / API Contract glossary entry to clarify that API is a backend domain boundary rather than a separate ownership domain |
 | 0.8 | 2026-05-27 | GitHub Copilot | Added a document-type notation policy and explicit diagram visualization quality rules covering diagram scope statements, state labeling, readable flow direction, legend discipline, accessibility of meaning without color, and when to split visuals or pair them with tables |
 | 0.9 | 2026-05-28 | GitHub Copilot | Added a discoverability pointer to the documentation-focused custom agent and aligned related-document guidance with the repository's Spec Kit HOW-TO and documentation maintenance workflow |
+| 1.0 | 2026-07-01 | Codex | Aligned methodology with current local Spec Kit command surfaces, documented spec persistence policy, clarified sync-extension posture, and preserved `docs/openapi.yaml` as the current canonical contract until governed migration |

@@ -36,6 +36,28 @@
 
 **Scale/Scope**: [domain-specific, e.g., 10k users, 1M LOC, 50 screens or NEEDS CLARIFICATION]
 
+## Governance and Traceability Context
+
+<!--
+  ACTION REQUIRED: Replace placeholders with repo-specific authority and sync details.
+  Use exact file paths and anchor-level references. If a row is not applicable, say N/A
+  and explain why.
+-->
+
+**Source Requirements**: [SRS/system/domain IDs and links carried from spec.md]
+
+**Authority References**: [Constitution, architecture, technical design, ADR, roadmap, research, contract, or runbook anchors used to constrain the plan]
+
+**Traceability Updates**: [Required `specs/spec-traceability.yaml` edits, expected `mapped_srs_items`, functional groups, coverage status, and evidence paths]
+
+**Sync Report Updates**: [When to run `python scripts/sync_spec_status.py --gate` and which generated reports must change]
+
+**Public Contract Impact**: [N/A, or exact contract files. Current REST contract authority is `docs/openapi.yaml` until a governed migration changes it.]
+
+**Long-Lived Documentation Impact**: [N/A, or exact `docs/` targets that must be promoted after implementation or verification]
+
+**Lifecycle Status Target**: [Planned, Implemented, Verified, Backfilled, or Superseded closeout expectation]
+
 ## Constitution Check
 
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*

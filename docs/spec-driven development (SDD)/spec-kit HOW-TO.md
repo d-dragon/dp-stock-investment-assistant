@@ -100,7 +100,21 @@ specify workflow list
 
 For documentation-first work in Copilot, contributors can start with the [Documentation Spec Maintainer Agent](../../.github/agents/documentation.spec-maintainer.agent.md). It is the fastest entry point for maintaining long-lived docs, delivery-scoped specs, traceability, and Copilot customization files while staying inside the same SDD lifecycle described in this HOW-TO. When feature-scoped artifacts are needed, the agent can hand off to `speckit.specify`, `speckit.plan`, and `speckit.verify.run`.
 
-### 2.3 Install or Recreate Local CLI Access
+### 2.3 Current Installed State
+
+As of 2026-07-01, this repository should be operated from the local installed truth below. Upstream documentation is useful context, but a command is adopted locally only after `specify version --features --json`, `specify extension list`, and the installed prompt/skill files confirm it exists in this checkout.
+
+| Surface | Current local state | Operating interpretation |
+|---------|---------------------|--------------------------|
+| Spec Kit CLI | `specify 0.12.0`; latest observed upstream release is `0.12.2` from 2026-06-30 | Use local command availability first; treat newer upstream commands as upgrade-gated until the CLI and managed files are upgraded together. |
+| CLI feature flags | `self_check_command`, `integration_upgrade_command`, `integration_use_command`, `workflow_catalog`, `bundled_templates`, and multi-install metadata support are present | The repo can use `self check`, `self upgrade`, `integration use`, and `integration upgrade`, but must still review managed-file diffs. |
+| Integration metadata | `.specify/integration.json` uses metadata version `0.10.2`, default integration `copilot`, installed integrations `copilot` and `codex` | Copilot remains the default integration unless a governed change switches it with `specify integration use codex`. |
+| Integration status | `specify integration status` currently exits non-zero because Copilot + Codex is a forced multi-install and Copilot is not declared multi-install safe upstream | Treat `unsafe-multi-install` as a known portability warning only when no managed files are missing or invalid. Missing manifests, invalid manifests, or unexpected default changes remain blockers. |
+| Workflow catalog | `specify workflow info speckit` reports the six-step bundled workflow: specify, review-spec, plan, review-plan, tasks, implement | This repository's 18-step SDLC is a governance overlay around the bundled workflow, not a replacement for the local prompt/skill commands. |
+| Installed extensions | Understanding, Verify Tasks, Spec Kit Utilities, Git, Fleet, Verify, Memory Loader, Architecture Workflow, Coding Agent Context, Research Harness, Security Review, and Architecture Guard are enabled | Use current extension command names from this HOW-TO instead of older shorthand names. |
+| Sync extension | A sync extension package may exist in `.specify/extensions/sync`, but `speckit.sync.*` is not installed/enabled in the current command surface | Use `python scripts/sync_spec_status.py --gate` for supported sync reporting until a governed extension install adopts `speckit.sync.*`. |
+
+### 2.4 Install or Recreate Local CLI Access
 
 Persistent installation:
 
@@ -123,7 +137,7 @@ specify init --here --integration copilot --script ps
 
 Only re-run initialization when you intentionally need to restore or recreate `.specify/` and related managed assets.
 
-### 2.4 Upgrade an Existing Spec Kit Setup
+### 2.5 Upgrade an Existing Spec Kit Setup
 
 When upgrading Spec Kit in this repository, treat the CLI tool and the project files as separate layers. Upgrade the CLI to get new features and bug fixes, then refresh the repository's installed Spec Kit assets so prompts, templates, scripts, and shared memory stay aligned with the version you are actually running.
 
@@ -133,23 +147,38 @@ Use the following commands before upgrading:
 
 ```powershell
 specify self check
-specify version
+specify version --features --json
 specify check
+specify integration status
+specify extension list
+specify workflow info speckit
 ```
 
 - `specify self check` looks for newer released CLI versions.
-- `specify version` confirms which persistent `specify` is on your `PATH`.
+- `specify version --features --json` confirms which persistent `specify` is on your `PATH` and which command surfaces are actually available.
 - `specify check` validates the local installation and environment.
+- `specify integration status` shows default integration, installed integrations, shared-template health, and managed-file drift.
+- `specify extension list` and `specify workflow info speckit` confirm which extension commands and bundled workflow steps are locally available.
 
 #### Upgrade the CLI Tool
 
-If you installed `specify` with `uv tool install`, upgrade it with:
+Prefer the CLI's own upgrade flow when it is available:
+
+```powershell
+specify self upgrade --dry-run
+specify self upgrade
+specify version --features --json
+```
+
+The dry run is required for this repository because Spec Kit upgrades can change managed prompts, skills, templates, and scripts. Review the proposed target version before applying it.
+
+If the self-upgrade flow is unavailable or you need to pin a specific version, use the package-manager fallback. For `uv tool install`:
 
 ```powershell
 uv tool install specify-cli --force --from git+https://github.com/github/spec-kit.git@vX.Y.Z
 ```
 
-If you installed it with `pipx`, use:
+For `pipx`:
 
 ```powershell
 pipx install --force git+https://github.com/github/spec-kit.git@vX.Y.Z
@@ -171,13 +200,15 @@ If the repository is clean in Git, you can also restore customized files afterwa
 
 #### Refresh Project Files for This Repository
 
-After upgrading the CLI and backing up customizations, refresh the repository's Spec Kit assets with the same integration style this project uses:
+After upgrading the CLI and backing up customizations, refresh the repository's Spec Kit assets with the same integration style this project uses. Prefer integration-aware refreshes over a blanket re-initialization:
 
 ```powershell
-specify init --here --force --integration copilot --script ps
+specify integration upgrade copilot --script ps
+specify integration upgrade codex --script ps
+specify integration status
 ```
 
-This updates the repository's installed Spec Kit infrastructure such as command files, templates, scripts, and shared memory content. It does **not** overwrite your governed feature work under [../../specs/](../../specs/), your source code, or your Git history.
+Only use `specify init --here --force --integration copilot --script ps` when the repository metadata must be recreated. Only use `integration upgrade --force` after reviewing the managed-file diff and deciding how local customizations will be preserved. These commands update the repository's installed Spec Kit infrastructure such as command files, templates, scripts, and shared memory content. They do **not** overwrite governed feature work under [../../specs/](../../specs/), source code, or Git history, but they can replace customized `.specify/`, prompt, or skill files.
 
 #### After the Upgrade
 
@@ -190,7 +221,7 @@ After refreshing project files:
 
 For this repository, treat upgrades as governed maintenance work: preserve local customizations, validate command availability, and avoid assuming that `--force` is safe for customized `.specify` assets unless you have a backup or a clean Git restore path.
 
-### 2.5 Multiple Integrations in the Same Project
+### 2.6 Multiple Integrations in the Same Project
 
 This repository may use more than one Spec Kit AI coding-agent integration so contributors can work with GitHub Copilot in VS Code and Codex in the Codex app, Codex CLI, or Codex IDE extension. Treat this as a portability setup, not as permission to mix agents casually inside one feature workflow.
 
@@ -206,6 +237,8 @@ specify integration list
 ```
 
 `specify integration status` reports the default integration, installed integrations, missing managed files, modified managed files, and shared template health. The command behavior is documented in Spec Kit's [Report Integration Status](https://github.github.io/spec-kit/reference/integrations.html#report-integration-status) reference.
+
+Current repository exception: `specify integration status` can exit non-zero because this checkout intentionally has both Copilot and Codex installed, while upstream metadata does not declare Copilot as multi-install safe. Treat that `unsafe-multi-install` finding as expected only when the default integration is still `copilot`, Codex remains isolated in `.agents/skills`, and there are no missing or invalid managed files. Any other status failure requires normal investigation before feature work continues.
 
 #### Install Codex Beside GitHub Copilot
 
@@ -245,8 +278,8 @@ Use the command style that belongs to the agent you are working in:
 
 | Tool | Spec Kit invocation style |
 | --- | --- |
-| GitHub Copilot | `/speckit.constitution`, `/speckit.specify`, `/speckit.plan`, `/speckit.tasks`, `/speckit.implement` |
-| Codex | `$speckit-constitution`, `$speckit-specify`, `$speckit-plan`, `$speckit-tasks`, `$speckit-implement` |
+| GitHub Copilot | `/speckit.constitution`, `/speckit.specify`, `/speckit.clarify`, `/speckit.checklist`, `/speckit.plan`, `/speckit.tasks`, `/speckit.analyze`, `/speckit.implement` plus installed extension prompts such as `/speckit.fleet.review`, `/speckit.verify-tasks.run`, and `/speckit.verify.run` |
+| Codex | `$speckit-constitution`, `$speckit-specify`, `$speckit-clarify`, `$speckit-checklist`, `$speckit-plan`, `$speckit-tasks`, `$speckit-analyze`, `$speckit-implement` plus installed extension skills such as `$speckit-architecture-guard-*`, `$speckit-security-review-*`, and verification skills |
 
 The core Spec Kit lifecycle commands are described in the official Spec Kit README under [Available Slash Commands](https://github.com/github/spec-kit#available-slash-commands). The naming differs because Codex uses Spec Kit skills mode while Copilot uses slash-command prompts.
 
@@ -614,7 +647,7 @@ The 18-step lifecycle below is the detailed execution model inside the SDLC loop
     - **Cross-Reference Prompt Hint**:
       > *Prompt Hint*: "Drive implementation: 'Code the feature following the generated plan. Strictly conform to interface constraints in [openapi.yaml](../openapi.yaml) and design conventions in [backend/TECHNICAL_DESIGN.md](../domains/backend/TECHNICAL_DESIGN.md).'"
 
-13. **`speckit.verify-tasks`**: Detect phantom completions and verify that tasks marked complete correspond to actual implemented work.
+13. **`speckit.verify-tasks.run`**: Detect phantom completions and verify that tasks marked complete correspond to actual implemented work.
     - **Mapped Long-Lived Documents**:
       - Feature tasks in `tasks.md`
     - **Cross-Reference Prompt Hint**:
@@ -684,7 +717,7 @@ flowchart TB
   end
 
   subgraph F3["⚙️ Delivery and Verification"]
-    S12["12 · speckit.implement"] --> S13["13 · speckit.verify-tasks"]
+    S12["12 · speckit.implement"] --> S13["13 · speckit.verify-tasks.run"]
     S13 --> S14["14 · speckit.verify.run"]
   end
 
@@ -824,8 +857,33 @@ The repository still contains older lifecycle terminology in some places. Use th
 | `speckit.validate` | `speckit.validate` alias for `speckit.speckit-utils.validate` |
 | `speckit.review` | typically handled as `speckit.fleet.review` in this repository |
 | `speckit.verify` | `speckit.verify.run` |
+| `speckit.verify-tasks` | `speckit.verify-tasks.run` |
+| `speckit.sync` or `speckit.sync.analyze` | not installed/enabled today; use `python scripts/sync_spec_status.py --gate` plus manual or skill-assisted doc promotion |
+| `speckit.converge` | official upstream convergence concept, upgrade-gated here until the CLI and local managed prompts/skills expose it; current closeout is `speckit.verify-tasks.run`, `speckit.verify.run`, sync gate, and documentation promotion |
 | `speckit.tests` | repository test execution plus traceability refresh, not a single core Spec Kit command |
 | `speckit.maintain` | maintenance stage name, not a single installed core command |
+
+### 3.6 Feature Status Taxonomy
+
+Use the status names below in feature `spec.md` headers, reviews, traceability notes, and sync discussions. Status names should describe the lifecycle state of the feature directory, not optimism about future work.
+
+| Status | Meaning | Required evidence |
+|--------|---------|-------------------|
+| `Draft` | Initial spec exists but clarification is incomplete or the feature has not reached a governed quality gate | `spec.md` exists and may still contain unresolved questions. |
+| `Clarified` | Major ambiguity has been resolved and the spec is ready for planning | `spec.md` records clarification decisions; no blocking `NEEDS CLARIFICATION` remains for the approved scope. |
+| `Planned` | Implementation approach is accepted but delivery is not complete | `plan.md` exists and constitution/technical context checks are recorded. |
+| `Implemented` | Tasks are complete and implementation evidence exists, but final verification marker is not present | `tasks.md` is complete; implementation, review, or verify-task evidence exists; `.verify-done` may be absent. |
+| `Verified` | Implementation has passed the post-implementation gate | `review.md` exists, `.verify-done` exists, task completion is complete, and the sync gate reports `current`. |
+| `Backfilled` | Spec was created after existing behavior to restore governance coverage | The spec names the source implementation evidence and must be reconciled through analysis and sync before it becomes normal planned/implemented work. |
+| `Superseded` | Feature directory is retained for history but replaced by another spec or governed artifact | `spec.md` links the replacement and explains whether traceability moved or remains historical. |
+
+Status movement rules:
+
+- Update the `**Status**` field in `spec.md` when the feature moves between these lifecycle states.
+- Create or update `review.md` during implementation verification; create `.verify-done` only after the post-implementation verification gate passes.
+- Regenerate [spec-sync-status.md](../../specs/spec-sync-status.md) and [SRS_SPEC_TRACEABILITY.md](../domains/agent/SRS_SPEC_TRACEABILITY.md) with `python scripts/sync_spec_status.py --gate` after status, tasks, review, or SRS mapping changes.
+- Use `Implemented`, not `Verified`, when implementation evidence is complete but `.verify-done` is absent.
+- Use `Backfilled` for governance restoration of pre-existing behavior; do not use it for a normal feature that is merely late in updating docs.
 
 ## 4. Repository Artifact Authority
 
@@ -847,7 +905,7 @@ Spec Kit extensions are managed through the `specify` CLI and repository configu
 
 | Path | Purpose |
 |------|---------|
-| [../../.specify/integration.json](../../.specify/integration.json) | Declares the default integration and script style. This repository is set up for GitHub Copilot with PowerShell-oriented scripts. |
+| [../../.specify/integration.json](../../.specify/integration.json) | Declares the default integration, installed integrations, metadata version, and script style. This repository currently defaults to GitHub Copilot with PowerShell-oriented scripts while also carrying Codex skills for portability. |
 | [../../.specify/extensions.yml](../../.specify/extensions.yml) | Defines extension hooks before and after key lifecycle commands. |
 | [../../.specify/extension-catalogs.yml](../../.specify/extension-catalogs.yml) | Lists the official and community extension catalogs. |
 | [../../.specify/extensions/](../../.specify/extensions/) | Stores extension packages, prompts, configs, and command assets used by the repository. |
@@ -887,15 +945,17 @@ The repository's configured extension hooks form an operating overlay around the
 | Before `tasks` | optional commit, memory loading | Keep task generation grounded in current state |
 | After `tasks` | requirements validation, fleet review, architecture follow-up | Strengthen readiness before implementation |
 | Before `implement` | optional commit, memory loading | Reduce context loss before code generation |
-| After `implement` | verify-tasks, verify.run, architecture review | Confirm real delivery and post-implementation compliance |
+| After `implement` | verify-tasks.run, verify.run, architecture review | Confirm real delivery and post-implementation compliance |
 
 When documenting or adjusting this automation, prefer what is actually configured in [../../.specify/extensions.yml](../../.specify/extensions.yml) over generic examples from older Spec Kit material.
+
+The current supported synchronization posture is local-script first: regenerate forward and reverse traceability with `python scripts/sync_spec_status.py --gate`. Do not document `speckit.sync.*` as an available command surface until `specify extension list` shows the sync extension installed and enabled.
 
 ## 6. Best Practices
 
 - Create and maintain governed feature artifacts under [../../specs/](../../specs/), not under `docs/` and not as the primary record in `.specify/specs/`.
 - Keep [../../specs/spec-traceability.yaml](../../specs/spec-traceability.yaml) synchronized whenever SRS scope changes.
-- Keep [../../specs/spec-sync-status.md](../../specs/spec-sync-status.md) aligned with actual feature status and evidence.
+- Keep [../../specs/spec-sync-status.md](../../specs/spec-sync-status.md) aligned with actual feature status and evidence by running `python scripts/sync_spec_status.py --gate` after traceability, status, or review changes.
 - Treat the project constitution in [../../.specify/memory/constitution.md](../../.specify/memory/constitution.md) as binding when reviewing or implementing work.
 - Use [../../docs/openapi.yaml](../../docs/openapi.yaml) as a mandatory synchronization target for REST API changes.
 - Prefer current official documentation links from `https://github.github.io/spec-kit/` over older repository blob links.
@@ -906,9 +966,9 @@ When documenting or adjusting this automation, prefer what is actually configure
 
 - **`specify` is not available**: install the CLI with `uv tool install` or use one-shot execution with `uvx --from git+https://github.com/github/spec-kit.git specify ...`.
 - **A command does not appear in the agent**: run `specify extension list`, confirm the related extension is available locally, and review [../../.specify/extensions.yml](../../.specify/extensions.yml).
-- **The integration looks wrong**: run `specify integration list`; this repository expects GitHub Copilot with PowerShell-oriented scripts.
+- **The integration looks wrong**: run `specify integration status` and `specify integration list`; this repository expects GitHub Copilot as default, Codex as an installed secondary integration, and PowerShell-oriented scripts.
 - **Unsure where to place new feature artifacts**: publish governed work in [../../specs/](../../specs/). Treat `.specify/` as supporting automation and template infrastructure.
-- **Traceability is stale**: update [../../specs/spec-traceability.yaml](../../specs/spec-traceability.yaml), refresh task and review evidence, then bring [../../specs/spec-sync-status.md](../../specs/spec-sync-status.md) back in line.
+- **Traceability is stale**: update [../../specs/spec-traceability.yaml](../../specs/spec-traceability.yaml), refresh task and review evidence, then run `python scripts/sync_spec_status.py --gate` to bring [../../specs/spec-sync-status.md](../../specs/spec-sync-status.md) and [SRS_SPEC_TRACEABILITY.md](../domains/agent/SRS_SPEC_TRACEABILITY.md) back in line.
 - **REST behavior changed but documentation did not**: update [../../docs/openapi.yaml](../../docs/openapi.yaml) as part of the same delivery cycle.
 - **Mermaid does not render cleanly**: keep diagrams in fenced `mermaid` blocks and use short labels with simple punctuation.
 
