@@ -6,7 +6,7 @@
 
 **Created**: 2026-06-04
 
-**Status**: Draft
+**Status**: Implemented
 
 **Input**: Milestone M2 from [PHASE_2_AGENT_ENHANCEMENT_ROADMAP.md §2A.2 Prompt Compiler Path & Controlled Rollout](../../docs/domains/agent/PHASE_2_AGENT_ENHANCEMENT_ROADMAP.md#2a2-prompt-compiler-path--controlled-rollout), backlog items `PS-07` and `PS-08`.
 

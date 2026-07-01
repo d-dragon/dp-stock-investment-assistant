@@ -14,7 +14,7 @@ import yaml
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_MANIFEST = ROOT / "specs" / "spec-traceability.yaml"
 DEFAULT_OUTPUT = ROOT / "specs" / "spec-sync-status.md"
-DEFAULT_REVERSE_OUTPUT = ROOT / "docs" / "langchain-agent" / "SRS_SPEC_TRACEABILITY.md"
+DEFAULT_REVERSE_OUTPUT = ROOT / "docs" / "domains" / "agent" / "SRS_SPEC_TRACEABILITY.md"
 
 
 TASK_PATTERN = re.compile(r"^- \[(?P<mark>[ xX])\] (?P<task>T\d+)\b")
@@ -289,10 +289,10 @@ def render_report(manifest: Dict[str, Any], results: List[FeatureSyncResult], ou
     lines: List[str] = []
     lines.append("# Spec Sync Status")
     lines.append("")
-    lines.append(f"> **Document Version**: {report_metadata.get('version', '1.0')}  ")
-    lines.append(f"> **Generated**: {generated_at}  ")
-    lines.append(f"> **Status**: {report_metadata.get('status', 'Active')}  ")
-    lines.append(f"> **Traceability Manifest Version**: {manifest.get('version', 'n/a')}  ")
+    lines.append(f"> **Document Version**: {report_metadata.get('version', '1.0')}")
+    lines.append(f"> **Generated**: {generated_at}")
+    lines.append(f"> **Status**: {report_metadata.get('status', 'Active')}")
+    lines.append(f"> **Traceability Manifest Version**: {manifest.get('version', 'n/a')}")
     lines.append("")
     lines.append("## Baseline")
     lines.append("")
@@ -351,7 +351,7 @@ def render_report(manifest: Dict[str, Any], results: List[FeatureSyncResult], ou
     lines.append("")
     lines.append("- Update `spec-traceability.yaml` when a feature gains or changes SRS scope.")
     lines.append("- Update `tasks.md` and workflow markers during delivery.")
-    lines.append("- Regenerate this report with `python scripts/sync_spec_status.py` whenever either side changes.")
+    lines.append("- Regenerate this report with `python scripts/sync_spec_status.py --gate` whenever either side changes.")
     lines.append("")
     return "\n".join(lines)
 
@@ -366,10 +366,10 @@ def render_reverse_trace(manifest: Dict[str, Any], results: List[FeatureSyncResu
     lines: List[str] = []
     lines.append("# SRS To Spec Traceability")
     lines.append("")
-    lines.append(f"> **Document Version**: {report_metadata.get('version', '1.0')}  ")
-    lines.append(f"> **Generated**: {generated_at}  ")
-    lines.append(f"> **Status**: {report_metadata.get('status', 'Active')}  ")
-    lines.append(f"> **Traceability Manifest Version**: {manifest.get('version', 'n/a')}  ")
+    lines.append(f"> **Document Version**: {report_metadata.get('version', '1.0')}")
+    lines.append(f"> **Generated**: {generated_at}")
+    lines.append(f"> **Status**: {report_metadata.get('status', 'Active')}")
+    lines.append(f"> **Traceability Manifest Version**: {manifest.get('version', 'n/a')}")
     lines.append("")
     lines.append("## Baseline")
     lines.append("")
