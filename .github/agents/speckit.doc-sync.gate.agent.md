@@ -1,0 +1,1 @@
+../../.specify/extensions/doc-sync/.specify-dev/agent-commands/copilot/speckit.doc-sync.gate.agent.md

@@ -1,0 +1,51 @@
+schema_version: "1.0"
+
+extension:
+  id: "doc-sync"
+  name: "Document Spec Sync Gate"
+  version: "1.0.1"
+  description: "Hard SRS/spec sync gate for Spec Kit workflows."
+  author: "dp-stock-investment-assistant"
+  repository: "https://github.com/d-dragon/dp-stock-investment-assistant"
+  homepage: "https://github.com/d-dragon/dp-stock-investment-assistant/tree/main/.specify/extensions/doc-sync"
+  license: "MIT"
+
+requires:
+  speckit_version: ">=0.1.0"
+  commands:
+    - "speckit.plan"
+    - "speckit.implement"
+    - "speckit.verify.run"
+
+provides:
+  commands:
+    - name: "speckit.doc-sync.gate"
+      file: "commands/speckit.doc-sync.gate.md"
+      description: "Run the canonical document/spec synchronization gate and report regenerated traceability outputs"
+
+hooks:
+  after_plan:
+    command: "speckit.doc-sync.gate"
+    priority: 10
+    optional: false
+    prompt: "Run document-spec sync gate after planning?"
+    description: "Validate planned SRS mappings and sync reports before task generation"
+
+  after_implement:
+    - command: "speckit.doc-sync.gate"
+      priority: 5
+      optional: false
+      prompt: "Run implementation document-spec sync gate before verification?"
+      description: "Refresh traceability reports from implementation evidence before verification"
+    - command: "speckit.doc-sync.gate"
+      priority: 50
+      optional: false
+      prompt: "Run final document-spec sync gate after verification?"
+      description: "Final hard sync gate before treating a feature as Verified"
+
+tags:
+  - "governance"
+  - "traceability"
+  - "srs"
+  - "sync"
+  - "quality-gate"
