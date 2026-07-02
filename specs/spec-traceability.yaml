@@ -3,7 +3,7 @@ generated_on: 2026-03-31
 
 reports:
   spec_sync_status:
-    version: "1.1"
+    version: "1.7"
     status: Active
     revision_history:
       - version: "1.0"
@@ -21,8 +21,20 @@ reports:
       - version: "1.4"
         date: 2026-06-04
         summary: Updated prompt-system-milestone2 (M2) feature entry — mapping_status implemented, all design and delivery artifacts added to evidence paths. PromptAssembler, route-skill assets, and agent wiring delivered.
+      - version: "1.5"
+        date: 2026-07-01
+        summary: Normalized feature mapping_status values back to mapped, aligned legacy STM feature baselines to SRS v2.7, and expanded M2 evidence paths for regenerated sync reports.
+      - version: "1.6"
+        date: 2026-07-01
+        summary: Added tool-system-implementation-m2b.1 feature entry at clarified status and aligned mapped feature baselines to SRS v2.8 for regenerated sync reports.
+      - version: "1.7"
+        date: 2026-07-01
+        summary: Promoted tool-system-implementation-m2b.1 to planned status and added plan, research, design, contract, and quickstart evidence paths.
+      - version: "1.8"
+        date: 2026-07-02
+        summary: Added tool-system-implementation-m2b.1 task checklist and requirements-alignment checklist evidence after task generation.
   srs_spec_traceability:
-    version: "1.5"
+    version: "2.1"
     status: Active
     revision_history:
       - version: "1.0"
@@ -43,11 +55,35 @@ reports:
       - version: "1.5"
         date: 2026-04-13
         summary: Added prompt-system trace entries and updated the governing SRS baseline to v2.3.
+      - version: "1.6"
+        date: 2026-05-21
+        summary: Updated the governing SRS baseline to v2.6 and added prompt-governance trace entries for FR-1.4.10-FR-1.4.16, FR-1.5.6, NFR-5.2.8-NFR-5.2.11, and AC-8.5-AC-8.11.
+      - version: "1.7"
+        date: 2026-05-22
+        summary: Repointed prompt-system reverse-trace entries from the missing prompt-governance spec reference to existing design-governance artifacts in the proposal, roadmap, benchmark review, and ADR set.
+      - version: "1.8"
+        date: 2026-06-03
+        summary: Updated M1-mapped prompt-system entries from clarified/unmapped to implemented with SRS v2.7 baseline.
+      - version: "1.9"
+        date: 2026-06-22
+        summary: Updated the governing SRS baseline to v2.8 and added manual Phase 2B tool-system trace entries.
+      - version: "2.0"
+        date: 2026-07-01
+        summary: Added generated reverse trace coverage for tool-system-implementation-m2b.1 against SRS v2.8 tool gateway requirements.
+      - version: "2.1"
+        date: 2026-07-01
+        summary: Regenerated reverse trace after tool-system-implementation-m2b.1 planning artifacts advanced the feature lifecycle to planned.
+      - version: "2.2"
+        date: 2026-07-02
+        summary: Regenerated reverse trace after tool-system-implementation-m2b.1 task generation added implementation-task evidence.
+      - version: "2.3"
+        date: 2026-07-02
+        summary: Added NFR-4.2.3 reverse trace coverage and regenerated after pre-implementation analysis remediation for tool-system-implementation-m2b.1.
 
 srs:
   path: docs/domains/agent/SOFTWARE_REQUIREMENTS_SPECIFICATION.md
-  version: "2.7"
-  last_updated: 2026-06-03
+  version: "2.8"
+  last_updated: 2026-06-18
 
 status_rules:
   analyzed:
@@ -81,7 +117,7 @@ features:
       synchronized_documents:
         - specs/agent-session-with-stm-wiring/spec.md
     srs_mapping:
-      baseline_version: "2.2"
+      baseline_version: "2.8"
       coverage_status: partial
       mapped_srs_items:
         - FR-3.1.1
@@ -285,7 +321,7 @@ features:
         - specs/stm-phase-cde/quickstart.md
         - specs/stm-phase-cde/review.md
     srs_mapping:
-      baseline_version: "2.2"
+      baseline_version: "2.8"
       coverage_status: partial
       mapped_srs_items:
         - FR-3.1.3
@@ -547,7 +583,7 @@ features:
       source_of_truth: derived
       gate_enforced: true
     srs_mapping:
-      baseline_version: "2.2"
+      baseline_version: "2.8"
       coverage_status: partial
       mapped_srs_items:
         - FR-3.1.1
@@ -593,7 +629,7 @@ features:
     feature_path: specs/prompt-system-milestone1
     reference_document: specs/prompt-system-milestone1/spec.md
     reference_anchor: user-scenarios--testing-mandatory
-    mapping_status: implemented
+    mapping_status: mapped
     feature_kind: implementation-feature
     status_sync:
       source_of_truth: derived
@@ -606,7 +642,7 @@ features:
         - specs/prompt-system-milestone1/verify-tasks-report.md
         - specs/prompt-system-milestone1/review.md
     srs_mapping:
-      baseline_version: "2.7"
+      baseline_version: "2.8"
       coverage_status: partial
       mapped_srs_items:
         - FR-1.4.5
@@ -668,7 +704,7 @@ features:
     feature_path: specs/prompt-system-milestone2
     reference_document: specs/prompt-system-milestone2/spec.md
     reference_anchor: governance-context-mandatory
-    mapping_status: implemented
+    mapping_status: mapped
     feature_kind: implementation-feature
     status_sync:
       source_of_truth: derived
@@ -684,7 +720,7 @@ features:
         - specs/prompt-system-milestone2/contracts/prompt-assembler-interface.md
         - specs/prompt-system-milestone2/contracts/route-skill-asset-schema.md
     srs_mapping:
-      baseline_version: "2.7"
+      baseline_version: "2.8"
       coverage_status: partial
       mapped_srs_items:
         - FR-1.4.7
@@ -714,3 +750,138 @@ features:
           anchor: governance-context-mandatory
         - path: specs/prompt-system-milestone2/checklists/requirements.md
           label: Quality gate checklist
+
+  - feature_id: tool-system-implementation-m2b.1
+    feature_title: Tool Contract and Gateway Baseline - M2B.1
+    feature_path: specs/tool-system-implementation-m2b.1
+    reference_document: specs/tool-system-implementation-m2b.1/spec.md
+    reference_anchor: governance-context-mandatory
+    mapping_status: mapped
+    feature_kind: implementation-feature
+    status_sync:
+      source_of_truth: derived
+      gate_enforced: true
+      synchronized_documents:
+        - specs/tool-system-implementation-m2b.1/spec.md
+        - specs/tool-system-implementation-m2b.1/plan.md
+        - specs/tool-system-implementation-m2b.1/research.md
+        - specs/tool-system-implementation-m2b.1/data-model.md
+        - specs/tool-system-implementation-m2b.1/quickstart.md
+        - specs/tool-system-implementation-m2b.1/contracts/tool-descriptor-contract.md
+        - specs/tool-system-implementation-m2b.1/contracts/route-surface-contract.md
+        - specs/tool-system-implementation-m2b.1/contracts/gateway-admission-trace-contract.md
+        - specs/tool-system-implementation-m2b.1/checklists/requirements.md
+        - specs/tool-system-implementation-m2b.1/checklists/requirements-alignment.md
+        - specs/tool-system-implementation-m2b.1/tasks.md
+    srs_mapping:
+      baseline_version: "2.8"
+      coverage_status: partial
+      mapped_srs_items:
+        - FR-2.4.1
+        - FR-2.4.2
+        - FR-2.4.3
+        - FR-2.4.4
+        - FR-2.4.5
+        - FR-2.4.6
+        - FR-4.2.1
+        - NFR-4.2.3
+        - NFR-5.2.12
+        - NFR-6.2.6
+        - CON-6
+        - CON-9
+        - CON-10
+        - AC-9.1
+        - AC-9.2
+        - AC-9.3
+        - AC-9.4
+        - IR-3.1
+        - IR-3.2
+      mapped_functional_groups:
+        - group: FR-2.4
+          coverage: full
+          includes:
+            - FR-2.4.1
+            - FR-2.4.2
+            - FR-2.4.3
+            - FR-2.4.4
+            - FR-2.4.5
+            - FR-2.4.6
+        - group: FR-4.2
+          coverage: partial
+          includes:
+            - FR-4.2.1
+      mapped_non_functional:
+        - NFR-4.2.3
+        - NFR-5.2.12
+        - NFR-6.2.6
+      mapped_acceptance_criteria:
+        - AC-9.1
+        - AC-9.2
+        - AC-9.3
+        - AC-9.4
+      sync_notes:
+        - M2B.1 scope is strict to Phase 2B TS-01 and TS-02.
+        - Descriptor coverage includes StockSymbolTool, TradingViewTool, and ReportingTool; placeholder or disabled tools remain non-exposed.
+        - Gateway traces are internal by default; public surfaces may expose only safe degraded-state or warning metadata.
+        - Socket.IO lifecycle parity remains outside this milestone.
+        - Planning artifacts generated for TS-01 and TS-02 only; provider policy, normalized output, ToolContextPack, and public API contract changes remain out of scope.
+        - Coverage evaluated against SRS v2.8 on 2026-07-01.
+    speckit_mapping:
+      spec_requirements:
+        - M2B1-FR-001
+        - M2B1-FR-002
+        - M2B1-FR-003
+        - M2B1-FR-004
+        - M2B1-FR-005
+        - M2B1-FR-006
+        - M2B1-FR-007
+        - M2B1-FR-008
+        - M2B1-FR-009
+        - M2B1-FR-010
+        - M2B1-FR-011
+        - M2B1-FR-012
+        - M2B1-FR-013
+        - M2B1-FR-014
+        - M2B1-FR-015
+        - M2B1-FR-016
+        - M2B1-FR-017
+        - M2B1-FR-018
+      success_criteria:
+        - SC-001
+        - SC-002
+        - SC-003
+        - SC-004
+        - SC-005
+        - SC-006
+        - SC-007
+        - SC-008
+        - SC-009
+        - SC-010
+      evidence_paths:
+        - path: specs/tool-system-implementation-m2b.1/spec.md
+          label: Feature specification
+          anchor: governance-context-mandatory
+        - path: specs/tool-system-implementation-m2b.1/spec.md
+          label: Clarified boundary decisions
+          anchor: clarifications
+        - path: specs/tool-system-implementation-m2b.1/plan.md
+          label: Implementation plan
+          anchor: governance-and-traceability-context
+        - path: specs/tool-system-implementation-m2b.1/research.md
+          label: Phase 0 research decisions
+        - path: specs/tool-system-implementation-m2b.1/data-model.md
+          label: Phase 1 data model
+        - path: specs/tool-system-implementation-m2b.1/contracts/tool-descriptor-contract.md
+          label: Tool descriptor contract
+        - path: specs/tool-system-implementation-m2b.1/contracts/route-surface-contract.md
+          label: Route-filtered surface contract
+        - path: specs/tool-system-implementation-m2b.1/contracts/gateway-admission-trace-contract.md
+          label: Gateway admission and trace contract
+        - path: specs/tool-system-implementation-m2b.1/quickstart.md
+          label: Quickstart validation guide
+        - path: specs/tool-system-implementation-m2b.1/checklists/requirements.md
+          label: Requirements quality checklist
+        - path: specs/tool-system-implementation-m2b.1/checklists/requirements-alignment.md
+          label: Requirements alignment checklist
+        - path: specs/tool-system-implementation-m2b.1/tasks.md
+          label: Implementation task checklist

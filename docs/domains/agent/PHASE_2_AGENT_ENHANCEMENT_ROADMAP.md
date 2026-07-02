@@ -413,7 +413,7 @@ Phase 2B replaces the earlier generic TradingView and multi-source-data plan wit
 
 #### Immediate Delivery Slice
 
-The first delivery slice should cover `TS-01` to `TS-05` plus the non-mutating parts of `TS-11`. This creates the minimum executable tool-system foundation: existing tool descriptors, route-filtered exposure, in-process gateway admission, internal symbol-store direction, provider policy, normalized outputs, and request-scoped `ToolContextPack` behavior. Vietnam provider expansion, reporting persistence, generic web fetch, and remote/MCP-style admission remain follow-up slices behind their gates.
+The first delivery wave is intentionally split across milestone gates. `M2B.1` covers only `TS-01` to `TS-02`: existing tool descriptors, route-filtered exposure, and in-process gateway admission without changing the current ReAct runtime. Later milestones extend that foundation into `TS-03` to `TS-05` plus the non-mutating parts of `TS-11`, including internal symbol-store direction, provider policy, normalized outputs, and request-scoped `ToolContextPack` behavior. Vietnam provider expansion, reporting persistence, generic web fetch, and remote/MCP-style admission remain follow-up slices behind their gates.
 
 ---
 

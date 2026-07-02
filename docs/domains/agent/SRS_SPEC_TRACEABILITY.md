@@ -1,9 +1,9 @@
 # SRS To Spec Traceability
 
-> **Document Version**: 1.9
-> **Generated**: 2026-06-22 (manual reconciliation)
-> **Status**: Active  
-> **Traceability Manifest Version**: 1  
+> **Document Version**: 2.1
+> **Generated**: 2026-07-02 04:38:41Z
+> **Status**: Active
+> **Traceability Manifest Version**: 1
 
 ## Baseline
 
@@ -12,11 +12,9 @@
 
 ## Summary
 
-- Total traced SRS items discovered: `337`
-- Items with linked specs: `151`
-- Items without linked specs: `186`
-
-For prompt-system entries that do not yet have a dedicated `specs/*` artifact, the `Linked Spec` column may point to an equivalent design-governance artifact in `docs/domains/agent/` or `docs/domains/agent/DECISIONS/`.
+- Total traced SRS items discovered: `425`
+- Items with linked specs: `159`
+- Items without linked specs: `266`
 
 ## Revision History
 
@@ -28,10 +26,14 @@ For prompt-system entries that do not yet have a dedicated `specs/*` artifact, t
 | `1.3` | `2026-03-19` | Reformatted the family index into a grouped markdown table for easier navigation by requirement type. |
 | `1.4` | `2026-03-31` | Updated stm-phase-cde reverse-trace statuses from clarified to verified after implementation and verification completion. |
 | `1.5` | `2026-04-13` | Added prompt-system trace entries and updated the governing SRS baseline to v2.3. |
-| `1.6` | `2026-05-21` | Updated the governing SRS baseline to v2.6 and added prompt-governance trace entries for FR-1.4.10–1.4.16, FR-1.5.6, NFR-5.2.8–5.2.11, and AC-8.5–8.11. |
+| `1.6` | `2026-05-21` | Updated the governing SRS baseline to v2.6 and added prompt-governance trace entries for FR-1.4.10-FR-1.4.16, FR-1.5.6, NFR-5.2.8-NFR-5.2.11, and AC-8.5-AC-8.11. |
 | `1.7` | `2026-05-22` | Repointed prompt-system reverse-trace entries from the missing prompt-governance spec reference to existing design-governance artifacts in the proposal, roadmap, benchmark review, and ADR set. |
-| `1.8` | `2026-06-03` | Updated M1-mapped prompt-system entries (FR-1.4.5, FR-1.4.6, FR-1.4.8, FR-1.4.16, NFR-5.2.5–5.2.9, NFR-6.2.3, AC-8.1, AC-8.2) from `clarified`/`unmapped` to `implemented` with SRS v2.7 baseline. Pointed linked spec references to `specs/prompt-system-milestone1/spec.md`.
-| `1.9` | `2026-06-22` | Updated the governing SRS baseline to v2.8 and added manual Phase 2B tool-system trace entries for FR-2.4–FR-2.11, CON-6–CON-10, AC-9.1–AC-9.17, IR-3.1–IR-3.10, and related privacy/source-lineage requirements. |
+| `1.8` | `2026-06-03` | Updated M1-mapped prompt-system entries from clarified/unmapped to implemented with SRS v2.7 baseline. |
+| `1.9` | `2026-06-22` | Updated the governing SRS baseline to v2.8 and added manual Phase 2B tool-system trace entries. |
+| `2.0` | `2026-07-01` | Added generated reverse trace coverage for tool-system-implementation-m2b.1 against SRS v2.8 tool gateway requirements. |
+| `2.1` | `2026-07-01` | Regenerated reverse trace after tool-system-implementation-m2b.1 planning artifacts advanced the feature lifecycle to planned. |
+| `2.2` | `2026-07-02` | Regenerated reverse trace after tool-system-implementation-m2b.1 task generation added implementation-task evidence. |
+| `2.3` | `2026-07-02` | Added NFR-4.2.3 reverse trace coverage and regenerated after pre-implementation analysis remediation for tool-system-implementation-m2b.1. |
 
 ## Family Index
 
@@ -49,65 +51,112 @@ For prompt-system entries that do not yet have a dedicated `specs/*` artifact, t
 
 ### FR-1
 
-Mapped: `17/37`. Unmapped: `20`.
+Mapped: `6/37`. Unmapped: `31`.
 
 | SRS Item | Linked Spec | Current Status | Sync Status |
 |----------|-------------|----------------|-------------|
-| [FR-1.1.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L140) | `-` | `unmapped` | `unmapped` |
-| [FR-1.1.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L141) | `-` | `unmapped` | `unmapped` |
-| [FR-1.1.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L142) | `-` | `unmapped` | `unmapped` |
-| [FR-1.1.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L143) | `-` | `unmapped` | `unmapped` |
-| [FR-1.1.5](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L144) | `-` | `unmapped` | `unmapped` |
-| [FR-1.2.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L150) | `-` | `unmapped` | `unmapped` |
-| [FR-1.2.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L151) | `-` | `unmapped` | `unmapped` |
-| [FR-1.2.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L152) | `-` | `unmapped` | `unmapped` |
-| [FR-1.2.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L153) | `-` | `unmapped` | `unmapped` |
-| [FR-1.2.5](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L154) | `-` | `unmapped` | `unmapped` |
-| [FR-1.3.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L160) | `-` | `unmapped` | `unmapped` |
-| [FR-1.3.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L161) | `-` | `unmapped` | `unmapped` |
-| [FR-1.3.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L162) | `-` | `unmapped` | `unmapped` |
-| [FR-1.3.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L163) | `-` | `unmapped` | `unmapped` |
-| [FR-1.3.5](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L164) | `-` | `unmapped` | `unmapped` |
-| [FR-1.4.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L170) | [PROMPT_SYSTEM_RESEARCH_PROPOSAL.md](PROMPT_SYSTEM_RESEARCH_PROPOSAL.md) | `clarified` | `current` |
-| [FR-1.4.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L171) | [PROMPT_SYSTEM_RESEARCH_PROPOSAL.md](PROMPT_SYSTEM_RESEARCH_PROPOSAL.md) | `clarified` | `current` |
-| [FR-1.4.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L172) | [PROMPT_SYSTEM_RESEARCH_PROPOSAL.md](PROMPT_SYSTEM_RESEARCH_PROPOSAL.md) | `clarified` | `current` |
-| [FR-1.4.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L173) | [PROMPT_SYSTEM_RESEARCH_PROPOSAL.md](PROMPT_SYSTEM_RESEARCH_PROPOSAL.md) | `clarified` | `current` |
-| [FR-1.4.5](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L174) | [prompt-system-milestone1 spec.md](../../../specs/prompt-system-milestone1/spec.md) | `implemented` | `2.7` |
-| [FR-1.4.6](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L175) | [prompt-system-milestone1 spec.md](../../../specs/prompt-system-milestone1/spec.md) | `implemented` | `2.7` |
-| [FR-1.4.7](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L176) | [prompt-system-milestone2 spec.md](../../../specs/prompt-system-milestone2/spec.md) | `implemented` | `2.7` |
-| [FR-1.4.8](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L177) | [prompt-system-milestone1 spec.md](../../../specs/prompt-system-milestone1/spec.md) | `implemented` | `2.7` |
-| [FR-1.4.9](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L178) | [PHASE_2_AGENT_ENHANCEMENT_ROADMAP.md](PHASE_2_AGENT_ENHANCEMENT_ROADMAP.md) | `clarified` | `current` |
-| [FR-1.4.10](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L179) | [PROMPT_SYSTEM_RESEARCH_PROPOSAL.md](PROMPT_SYSTEM_RESEARCH_PROPOSAL.md) | `clarified` | `current` |
-| [FR-1.4.11](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L180) | [prompt-system-milestone2 spec.md](../../../specs/prompt-system-milestone2/spec.md) | `implemented` | `2.7` |
-| [FR-1.4.12](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L181) | [PROMPT_SYSTEM_RESEARCH_PROPOSAL.md](PROMPT_SYSTEM_RESEARCH_PROPOSAL.md) | `clarified` | `current` |
-| [FR-1.4.13](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L182) | [PROMPT_SYSTEM_RESEARCH_PROPOSAL.md](PROMPT_SYSTEM_RESEARCH_PROPOSAL.md) | `clarified` | `current` |
-| [FR-1.4.14](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L183) | [PROMPT_SYSTEM_RESEARCH_PROPOSAL.md](PROMPT_SYSTEM_RESEARCH_PROPOSAL.md) | `clarified` | `current` |
-| [FR-1.4.15](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L184) | [PROMPT_SYSTEM_RESEARCH_PROPOSAL.md](PROMPT_SYSTEM_RESEARCH_PROPOSAL.md) | `clarified` | `current` |
-| [FR-1.4.16](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L185) | [prompt-system-milestone1 spec.md](../../../specs/prompt-system-milestone1/spec.md) | `implemented` | `2.7` |
-| [FR-1.5.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L196) | `-` | `unmapped` | `unmapped` |
-| [FR-1.5.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L197) | `-` | `unmapped` | `unmapped` |
-| [FR-1.5.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L198) | `-` | `unmapped` | `unmapped` |
-| [FR-1.5.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L199) | `-` | `unmapped` | `unmapped` |
-| [FR-1.5.5](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L200) | `-` | `unmapped` | `unmapped` |
-| [FR-1.5.6](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L201) | [PROMPT_SYSTEM_BENCHMARK_REVIEW.md](PROMPT_SYSTEM_BENCHMARK_REVIEW.md) | `clarified` | `current` |
+| [FR-1.1.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L153) | `-` | `unmapped` | `unmapped` |
+| [FR-1.1.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L154) | `-` | `unmapped` | `unmapped` |
+| [FR-1.1.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L155) | `-` | `unmapped` | `unmapped` |
+| [FR-1.1.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L156) | `-` | `unmapped` | `unmapped` |
+| [FR-1.1.5](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L157) | `-` | `unmapped` | `unmapped` |
+| [FR-1.2.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L163) | `-` | `unmapped` | `unmapped` |
+| [FR-1.2.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L164) | `-` | `unmapped` | `unmapped` |
+| [FR-1.2.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L165) | `-` | `unmapped` | `unmapped` |
+| [FR-1.2.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L166) | `-` | `unmapped` | `unmapped` |
+| [FR-1.2.5](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L167) | `-` | `unmapped` | `unmapped` |
+| [FR-1.3.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L173) | `-` | `unmapped` | `unmapped` |
+| [FR-1.3.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L174) | `-` | `unmapped` | `unmapped` |
+| [FR-1.3.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L175) | `-` | `unmapped` | `unmapped` |
+| [FR-1.3.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L176) | `-` | `unmapped` | `unmapped` |
+| [FR-1.3.5](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L177) | `-` | `unmapped` | `unmapped` |
+| [FR-1.4.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L183) | `-` | `unmapped` | `unmapped` |
+| [FR-1.4.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L184) | `-` | `unmapped` | `unmapped` |
+| [FR-1.4.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L185) | `-` | `unmapped` | `unmapped` |
+| [FR-1.4.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L186) | `-` | `unmapped` | `unmapped` |
+| [FR-1.4.5](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L187) | [prompt-system-milestone1](../../../specs/prompt-system-milestone1/spec.md#user-scenarios--testing-mandatory) | `implemented` | `current` |
+| [FR-1.4.6](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L188) | [prompt-system-milestone1](../../../specs/prompt-system-milestone1/spec.md#user-scenarios--testing-mandatory) | `implemented` | `current` |
+| [FR-1.4.7](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L189) | [prompt-system-milestone2](../../../specs/prompt-system-milestone2/spec.md#governance-context-mandatory) | `implemented` | `current` |
+| [FR-1.4.8](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L190) | [prompt-system-milestone1](../../../specs/prompt-system-milestone1/spec.md#user-scenarios--testing-mandatory) | `implemented` | `current` |
+| [FR-1.4.9](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L191) | `-` | `unmapped` | `unmapped` |
+| [FR-1.4.10](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L192) | `-` | `unmapped` | `unmapped` |
+| [FR-1.4.11](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L193) | [prompt-system-milestone2](../../../specs/prompt-system-milestone2/spec.md#governance-context-mandatory) | `implemented` | `current` |
+| [FR-1.4.12](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L194) | `-` | `unmapped` | `unmapped` |
+| [FR-1.4.13](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L195) | `-` | `unmapped` | `unmapped` |
+| [FR-1.4.14](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L196) | `-` | `unmapped` | `unmapped` |
+| [FR-1.4.15](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L197) | `-` | `unmapped` | `unmapped` |
+| [FR-1.4.16](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L198) | [prompt-system-milestone1](../../../specs/prompt-system-milestone1/spec.md#user-scenarios--testing-mandatory) | `implemented` | `current` |
+|  | [prompt-system-milestone2](../../../specs/prompt-system-milestone2/spec.md#governance-context-mandatory) | `implemented` | `current` |
+| [FR-1.5.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L209) | `-` | `unmapped` | `unmapped` |
+| [FR-1.5.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L210) | `-` | `unmapped` | `unmapped` |
+| [FR-1.5.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L211) | `-` | `unmapped` | `unmapped` |
+| [FR-1.5.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L212) | `-` | `unmapped` | `unmapped` |
+| [FR-1.5.5](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L213) | `-` | `unmapped` | `unmapped` |
+| [FR-1.5.6](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L214) | `-` | `unmapped` | `unmapped` |
 
 ### FR-2
 
-Mapped: `8/25` requirement groups manually reconciled for SRS v2.8. Legacy FR-2.1–FR-2.3 item-level rows remain implementation-unmapped until a delivery spec is created.
+Mapped: `6/57`. Unmapped: `51`.
 
 | SRS Item | Linked Spec | Current Status | Sync Status |
 |----------|-------------|----------------|-------------|
-| [FR-2.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#fr-21-tool-result-caching) | `-` | `unmapped` | `unmapped` |
-| [FR-2.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#fr-22-tool-registry) | `-` | `unmapped` | `unmapped` |
-| [FR-2.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#fr-23-stock-investment-tools) | `-` | `unmapped` | `unmapped` |
-| [FR-2.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#fr-24-tool-gateway-and-tool-exposure) | [ADR-004](DECISIONS/ADR-AGENT-004-THIN-TOOL-GATEWAY-AND-NORMALIZED-TOOL-CONTEXT.md), [Phase 2B roadmap](PHASE_2_AGENT_ENHANCEMENT_ROADMAP.md#2b2-route-filtered-tool-surface-and-thin-gateway), [tool proposal](TOOLS_RESEARCH_AND_PROPOSAL.md#123-phase-2-route-filtered-tool-surface-and-thin-gateway) | `clarified` | `2.8` |
-| [FR-2.5](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#fr-25-tool-output-normalization-and-toolcontextpack) | [ADR-004](DECISIONS/ADR-AGENT-004-THIN-TOOL-GATEWAY-AND-NORMALIZED-TOOL-CONTEXT.md), [Phase 2B roadmap](PHASE_2_AGENT_ENHANCEMENT_ROADMAP.md#2b4-provider-policy-and-normalized-output-backbone), [tool proposal](TOOLS_RESEARCH_AND_PROPOSAL.md#125-phase-4-provider-policy-and-normalized-output-backbone) | `clarified` | `2.8` |
-| [FR-2.6](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#fr-26-vietnam-market-tool-coverage) | [Phase 2B roadmap](PHASE_2_AGENT_ENHANCEMENT_ROADMAP.md#2b5-concrete-market-data-and-visualization-tools), [tool proposal](TOOLS_RESEARCH_AND_PROPOSAL.md#101-vietnam-market-provider-strategy) | `clarified` | `2.8` |
-| [FR-2.7](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#fr-27-provider-selection-and-source-attribution) | [ADR-004](DECISIONS/ADR-AGENT-004-THIN-TOOL-GATEWAY-AND-NORMALIZED-TOOL-CONTEXT.md), [Architecture provider view](ARCHITECTURE_DESIGN.md#434-tool-provider-selection-and-fallback-view), [tool proposal](TOOLS_RESEARCH_AND_PROPOSAL.md#117-providerselectionpolicy) | `clarified` | `2.8` |
-| [FR-2.8](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#fr-28-tradingview-visualization) | [ADR-004](DECISIONS/ADR-AGENT-004-THIN-TOOL-GATEWAY-AND-NORMALIZED-TOOL-CONTEXT.md), [Phase 2B roadmap](PHASE_2_AGENT_ENHANCEMENT_ROADMAP.md#2b5-concrete-market-data-and-visualization-tools), [tool proposal](TOOLS_RESEARCH_AND_PROPOSAL.md#102-tradingview-visualization-strategy) | `clarified` | `2.8` |
-| [FR-2.9](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#fr-29-generic-web-evidence) | [ADR-004](DECISIONS/ADR-AGENT-004-THIN-TOOL-GATEWAY-AND-NORMALIZED-TOOL-CONTEXT.md), [Phase 2B roadmap](PHASE_2_AGENT_ENHANCEMENT_ROADMAP.md#2b7-generic-web-evidence-pipeline), [tool proposal](TOOLS_RESEARCH_AND_PROPOSAL.md#103-generic-web-evidence-trust-model) | `clarified` | `2.8` |
-| [FR-2.10](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#fr-210-reporting-and-generated-artifacts) | [Phase 2B roadmap](PHASE_2_AGENT_ENHANCEMENT_ROADMAP.md#2b6-reporting-from-toolcontextpack), [tool proposal](TOOLS_RESEARCH_AND_PROPOSAL.md#127-phase-6-reporting-from-tool-context-packs) | `clarified` | `2.8` |
-| [FR-2.11](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#fr-211-tool-data-integrity-and-mutation-receipts) | [ADR-004](DECISIONS/ADR-AGENT-004-THIN-TOOL-GATEWAY-AND-NORMALIZED-TOOL-CONTEXT.md), [tool proposal](TOOLS_RESEARCH_AND_PROPOSAL.md#9-tool-data-architecture-and-integrity-design), [Phase 2B roadmap](PHASE_2_AGENT_ENHANCEMENT_ROADMAP.md#2b3-evolved-stocksymboltool-over-internal-symbol-store) | `clarified` | `2.8` |
+| [FR-2.1.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L225) | `-` | `unmapped` | `unmapped` |
+| [FR-2.1.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L226) | `-` | `unmapped` | `unmapped` |
+| [FR-2.1.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L227) | `-` | `unmapped` | `unmapped` |
+| [FR-2.1.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L228) | `-` | `unmapped` | `unmapped` |
+| [FR-2.1.5](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L229) | `-` | `unmapped` | `unmapped` |
+| [FR-2.1.6](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L230) | `-` | `unmapped` | `unmapped` |
+| [FR-2.2.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L236) | `-` | `unmapped` | `unmapped` |
+| [FR-2.2.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L237) | `-` | `unmapped` | `unmapped` |
+| [FR-2.2.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L238) | `-` | `unmapped` | `unmapped` |
+| [FR-2.2.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L239) | `-` | `unmapped` | `unmapped` |
+| [FR-2.2.5](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L240) | `-` | `unmapped` | `unmapped` |
+| [FR-2.2.6](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L241) | `-` | `unmapped` | `unmapped` |
+| [FR-2.3.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L247) | `-` | `unmapped` | `unmapped` |
+| [FR-2.3.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L248) | `-` | `unmapped` | `unmapped` |
+| [FR-2.3.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L249) | `-` | `unmapped` | `unmapped` |
+| [FR-2.3.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L250) | `-` | `unmapped` | `unmapped` |
+| [FR-2.3.5](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L251) | `-` | `unmapped` | `unmapped` |
+| [FR-2.4.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L257) | [tool-system-implementation-m2b.1](../../../specs/tool-system-implementation-m2b.1/spec.md#governance-context-mandatory) | `planned` | `current` |
+| [FR-2.4.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L258) | [tool-system-implementation-m2b.1](../../../specs/tool-system-implementation-m2b.1/spec.md#governance-context-mandatory) | `planned` | `current` |
+| [FR-2.4.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L259) | [tool-system-implementation-m2b.1](../../../specs/tool-system-implementation-m2b.1/spec.md#governance-context-mandatory) | `planned` | `current` |
+| [FR-2.4.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L260) | [tool-system-implementation-m2b.1](../../../specs/tool-system-implementation-m2b.1/spec.md#governance-context-mandatory) | `planned` | `current` |
+| [FR-2.4.5](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L261) | [tool-system-implementation-m2b.1](../../../specs/tool-system-implementation-m2b.1/spec.md#governance-context-mandatory) | `planned` | `current` |
+| [FR-2.4.6](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L262) | [tool-system-implementation-m2b.1](../../../specs/tool-system-implementation-m2b.1/spec.md#governance-context-mandatory) | `planned` | `current` |
+| [FR-2.5.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L268) | `-` | `unmapped` | `unmapped` |
+| [FR-2.5.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L269) | `-` | `unmapped` | `unmapped` |
+| [FR-2.5.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L270) | `-` | `unmapped` | `unmapped` |
+| [FR-2.5.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L271) | `-` | `unmapped` | `unmapped` |
+| [FR-2.5.5](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L272) | `-` | `unmapped` | `unmapped` |
+| [FR-2.6.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L278) | `-` | `unmapped` | `unmapped` |
+| [FR-2.6.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L279) | `-` | `unmapped` | `unmapped` |
+| [FR-2.6.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L280) | `-` | `unmapped` | `unmapped` |
+| [FR-2.6.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L281) | `-` | `unmapped` | `unmapped` |
+| [FR-2.6.5](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L282) | `-` | `unmapped` | `unmapped` |
+| [FR-2.6.6](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L283) | `-` | `unmapped` | `unmapped` |
+| [FR-2.7.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L289) | `-` | `unmapped` | `unmapped` |
+| [FR-2.7.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L290) | `-` | `unmapped` | `unmapped` |
+| [FR-2.7.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L291) | `-` | `unmapped` | `unmapped` |
+| [FR-2.7.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L292) | `-` | `unmapped` | `unmapped` |
+| [FR-2.7.5](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L293) | `-` | `unmapped` | `unmapped` |
+| [FR-2.8.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L299) | `-` | `unmapped` | `unmapped` |
+| [FR-2.8.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L300) | `-` | `unmapped` | `unmapped` |
+| [FR-2.8.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L301) | `-` | `unmapped` | `unmapped` |
+| [FR-2.8.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L302) | `-` | `unmapped` | `unmapped` |
+| [FR-2.9.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L308) | `-` | `unmapped` | `unmapped` |
+| [FR-2.9.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L309) | `-` | `unmapped` | `unmapped` |
+| [FR-2.9.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L310) | `-` | `unmapped` | `unmapped` |
+| [FR-2.9.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L311) | `-` | `unmapped` | `unmapped` |
+| [FR-2.10.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L317) | `-` | `unmapped` | `unmapped` |
+| [FR-2.10.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L318) | `-` | `unmapped` | `unmapped` |
+| [FR-2.10.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L319) | `-` | `unmapped` | `unmapped` |
+| [FR-2.10.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L320) | `-` | `unmapped` | `unmapped` |
+| [FR-2.11.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L326) | `-` | `unmapped` | `unmapped` |
+| [FR-2.11.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L327) | `-` | `unmapped` | `unmapped` |
+| [FR-2.11.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L328) | `-` | `unmapped` | `unmapped` |
+| [FR-2.11.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L329) | `-` | `unmapped` | `unmapped` |
+| [FR-2.11.5](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L330) | `-` | `unmapped` | `unmapped` |
+| [FR-2.11.6](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L331) | `-` | `unmapped` | `unmapped` |
 
 ### FR-3
 
@@ -115,72 +164,72 @@ Mapped: `25/38`. Unmapped: `13`.
 
 | SRS Item | Linked Spec | Current Status | Sync Status |
 |----------|-------------|----------------|-------------|
-| [FR-3.1.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L263) | [agent-session-with-stm-wiring](../../../specs/agent-session-with-stm-wiring/spec.md#requirements-mandatory) | `verified` | `current` |
+| [FR-3.1.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L356) | [agent-session-with-stm-wiring](../../../specs/agent-session-with-stm-wiring/spec.md#requirements-mandatory) | `verified` | `current` |
 |  | [spec-driven-development-pilot](../../../specs/spec-driven-development-pilot/plan.md#summary) | `implemented` | `current` |
-| [FR-3.1.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L264) | [agent-session-with-stm-wiring](../../../specs/agent-session-with-stm-wiring/spec.md#requirements-mandatory) | `verified` | `current` |
+| [FR-3.1.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L357) | [agent-session-with-stm-wiring](../../../specs/agent-session-with-stm-wiring/spec.md#requirements-mandatory) | `verified` | `current` |
 |  | [spec-driven-development-pilot](../../../specs/spec-driven-development-pilot/plan.md#summary) | `implemented` | `current` |
-| [FR-3.1.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L265) | [agent-session-with-stm-wiring](../../../specs/agent-session-with-stm-wiring/spec.md#requirements-mandatory) | `verified` | `current` |
+| [FR-3.1.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L358) | [agent-session-with-stm-wiring](../../../specs/agent-session-with-stm-wiring/spec.md#requirements-mandatory) | `verified` | `current` |
 |  | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
-| [FR-3.1.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L266) | [agent-session-with-stm-wiring](../../../specs/agent-session-with-stm-wiring/spec.md#requirements-mandatory) | `verified` | `current` |
+| [FR-3.1.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L359) | [agent-session-with-stm-wiring](../../../specs/agent-session-with-stm-wiring/spec.md#requirements-mandatory) | `verified` | `current` |
 |  | [spec-driven-development-pilot](../../../specs/spec-driven-development-pilot/plan.md#summary) | `implemented` | `current` |
-| [FR-3.1.5](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L267) | [agent-session-with-stm-wiring](../../../specs/agent-session-with-stm-wiring/spec.md#requirements-mandatory) | `verified` | `current` |
-| [FR-3.1.6](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L268) | [agent-session-with-stm-wiring](../../../specs/agent-session-with-stm-wiring/spec.md#requirements-mandatory) | `verified` | `current` |
+| [FR-3.1.5](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L360) | [agent-session-with-stm-wiring](../../../specs/agent-session-with-stm-wiring/spec.md#requirements-mandatory) | `verified` | `current` |
+| [FR-3.1.6](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L361) | [agent-session-with-stm-wiring](../../../specs/agent-session-with-stm-wiring/spec.md#requirements-mandatory) | `verified` | `current` |
 |  | [spec-driven-development-pilot](../../../specs/spec-driven-development-pilot/plan.md#summary) | `implemented` | `current` |
-| [FR-3.1.7](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L269) | [agent-session-with-stm-wiring](../../../specs/agent-session-with-stm-wiring/spec.md#requirements-mandatory) | `verified` | `current` |
+| [FR-3.1.7](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L362) | [agent-session-with-stm-wiring](../../../specs/agent-session-with-stm-wiring/spec.md#requirements-mandatory) | `verified` | `current` |
 |  | [spec-driven-development-pilot](../../../specs/spec-driven-development-pilot/plan.md#summary) | `implemented` | `current` |
-| [FR-3.1.8](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L270) | [agent-session-with-stm-wiring](../../../specs/agent-session-with-stm-wiring/spec.md#requirements-mandatory) | `verified` | `current` |
+| [FR-3.1.8](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L363) | [agent-session-with-stm-wiring](../../../specs/agent-session-with-stm-wiring/spec.md#requirements-mandatory) | `verified` | `current` |
 |  | [spec-driven-development-pilot](../../../specs/spec-driven-development-pilot/plan.md#summary) | `implemented` | `current` |
-| [FR-3.2.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L278) | [agent-session-with-stm-wiring](../../../specs/agent-session-with-stm-wiring/spec.md#requirements-mandatory) | `verified` | `current` |
-| [FR-3.2.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L279) | [agent-session-with-stm-wiring](../../../specs/agent-session-with-stm-wiring/spec.md#requirements-mandatory) | `verified` | `current` |
+| [FR-3.2.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L371) | [agent-session-with-stm-wiring](../../../specs/agent-session-with-stm-wiring/spec.md#requirements-mandatory) | `verified` | `current` |
+| [FR-3.2.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L372) | [agent-session-with-stm-wiring](../../../specs/agent-session-with-stm-wiring/spec.md#requirements-mandatory) | `verified` | `current` |
 |  | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
-| [FR-3.2.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L280) | [agent-session-with-stm-wiring](../../../specs/agent-session-with-stm-wiring/spec.md#requirements-mandatory) | `verified` | `current` |
+| [FR-3.2.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L373) | [agent-session-with-stm-wiring](../../../specs/agent-session-with-stm-wiring/spec.md#requirements-mandatory) | `verified` | `current` |
 |  | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
-| [FR-3.2.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L281) | [agent-session-with-stm-wiring](../../../specs/agent-session-with-stm-wiring/spec.md#requirements-mandatory) | `verified` | `current` |
-| [FR-3.2.5](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L282) | [agent-session-with-stm-wiring](../../../specs/agent-session-with-stm-wiring/spec.md#requirements-mandatory) | `verified` | `current` |
-| [FR-3.2.6](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L283) | [agent-session-with-stm-wiring](../../../specs/agent-session-with-stm-wiring/spec.md#requirements-mandatory) | `verified` | `current` |
+| [FR-3.2.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L374) | [agent-session-with-stm-wiring](../../../specs/agent-session-with-stm-wiring/spec.md#requirements-mandatory) | `verified` | `current` |
+| [FR-3.2.5](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L375) | [agent-session-with-stm-wiring](../../../specs/agent-session-with-stm-wiring/spec.md#requirements-mandatory) | `verified` | `current` |
+| [FR-3.2.6](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L376) | [agent-session-with-stm-wiring](../../../specs/agent-session-with-stm-wiring/spec.md#requirements-mandatory) | `verified` | `current` |
 |  | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
-| [FR-3.2.7](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L284) | [agent-session-with-stm-wiring](../../../specs/agent-session-with-stm-wiring/spec.md#requirements-mandatory) | `verified` | `current` |
+| [FR-3.2.7](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L377) | [agent-session-with-stm-wiring](../../../specs/agent-session-with-stm-wiring/spec.md#requirements-mandatory) | `verified` | `current` |
 |  | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
-| [FR-3.2.8](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L285) | [agent-session-with-stm-wiring](../../../specs/agent-session-with-stm-wiring/spec.md#requirements-mandatory) | `verified` | `current` |
+| [FR-3.2.8](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L378) | [agent-session-with-stm-wiring](../../../specs/agent-session-with-stm-wiring/spec.md#requirements-mandatory) | `verified` | `current` |
 |  | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
-| [FR-3.2.9](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L286) | [agent-session-with-stm-wiring](../../../specs/agent-session-with-stm-wiring/spec.md#requirements-mandatory) | `verified` | `current` |
-| [FR-3.2.10](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L287) | [agent-session-with-stm-wiring](../../../specs/agent-session-with-stm-wiring/spec.md#requirements-mandatory) | `verified` | `current` |
+| [FR-3.2.9](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L379) | [agent-session-with-stm-wiring](../../../specs/agent-session-with-stm-wiring/spec.md#requirements-mandatory) | `verified` | `current` |
+| [FR-3.2.10](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L380) | [agent-session-with-stm-wiring](../../../specs/agent-session-with-stm-wiring/spec.md#requirements-mandatory) | `verified` | `current` |
 |  | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
-| [FR-3.3.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L297) | `-` | `unmapped` | `unmapped` |
-| [FR-3.3.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L298) | `-` | `unmapped` | `unmapped` |
-| [FR-3.3.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L299) | `-` | `unmapped` | `unmapped` |
-| [FR-3.3.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L300) | `-` | `unmapped` | `unmapped` |
-| [FR-3.3.5](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L301) | `-` | `unmapped` | `unmapped` |
-| [FR-3.3.6](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L302) | `-` | `unmapped` | `unmapped` |
-| [FR-3.3.7](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L303) | `-` | `unmapped` | `unmapped` |
-| [FR-3.3.8](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L304) | `-` | `unmapped` | `unmapped` |
-| [FR-3.4.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L312) | [agent-session-with-stm-wiring](../../../specs/agent-session-with-stm-wiring/spec.md#requirements-mandatory) | `verified` | `current` |
-| [FR-3.4.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L313) | [agent-session-with-stm-wiring](../../../specs/agent-session-with-stm-wiring/spec.md#requirements-mandatory) | `verified` | `current` |
-| [FR-3.4.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L314) | [agent-session-with-stm-wiring](../../../specs/agent-session-with-stm-wiring/spec.md#requirements-mandatory) | `verified` | `current` |
-| [FR-3.4.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L315) | [agent-session-with-stm-wiring](../../../specs/agent-session-with-stm-wiring/spec.md#requirements-mandatory) | `verified` | `current` |
-| [FR-3.4.5](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L316) | [agent-session-with-stm-wiring](../../../specs/agent-session-with-stm-wiring/spec.md#requirements-mandatory) | `verified` | `current` |
-| [FR-3.4.6](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L317) | [agent-session-with-stm-wiring](../../../specs/agent-session-with-stm-wiring/spec.md#requirements-mandatory) | `verified` | `current` |
-| [FR-3.4.7](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L318) | [agent-session-with-stm-wiring](../../../specs/agent-session-with-stm-wiring/spec.md#requirements-mandatory) | `verified` | `current` |
-| [FR-3.5.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L328) | `-` | `unmapped` | `unmapped` |
-| [FR-3.5.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L329) | `-` | `unmapped` | `unmapped` |
-| [FR-3.5.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L330) | `-` | `unmapped` | `unmapped` |
-| [FR-3.5.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L331) | `-` | `unmapped` | `unmapped` |
-| [FR-3.5.5](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L332) | `-` | `unmapped` | `unmapped` |
+| [FR-3.3.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L390) | `-` | `unmapped` | `unmapped` |
+| [FR-3.3.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L391) | `-` | `unmapped` | `unmapped` |
+| [FR-3.3.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L392) | `-` | `unmapped` | `unmapped` |
+| [FR-3.3.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L393) | `-` | `unmapped` | `unmapped` |
+| [FR-3.3.5](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L394) | `-` | `unmapped` | `unmapped` |
+| [FR-3.3.6](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L395) | `-` | `unmapped` | `unmapped` |
+| [FR-3.3.7](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L396) | `-` | `unmapped` | `unmapped` |
+| [FR-3.3.8](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L397) | `-` | `unmapped` | `unmapped` |
+| [FR-3.4.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L405) | [agent-session-with-stm-wiring](../../../specs/agent-session-with-stm-wiring/spec.md#requirements-mandatory) | `verified` | `current` |
+| [FR-3.4.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L406) | [agent-session-with-stm-wiring](../../../specs/agent-session-with-stm-wiring/spec.md#requirements-mandatory) | `verified` | `current` |
+| [FR-3.4.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L407) | [agent-session-with-stm-wiring](../../../specs/agent-session-with-stm-wiring/spec.md#requirements-mandatory) | `verified` | `current` |
+| [FR-3.4.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L408) | [agent-session-with-stm-wiring](../../../specs/agent-session-with-stm-wiring/spec.md#requirements-mandatory) | `verified` | `current` |
+| [FR-3.4.5](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L409) | [agent-session-with-stm-wiring](../../../specs/agent-session-with-stm-wiring/spec.md#requirements-mandatory) | `verified` | `current` |
+| [FR-3.4.6](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L410) | [agent-session-with-stm-wiring](../../../specs/agent-session-with-stm-wiring/spec.md#requirements-mandatory) | `verified` | `current` |
+| [FR-3.4.7](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L411) | [agent-session-with-stm-wiring](../../../specs/agent-session-with-stm-wiring/spec.md#requirements-mandatory) | `verified` | `current` |
+| [FR-3.5.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L421) | `-` | `unmapped` | `unmapped` |
+| [FR-3.5.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L422) | `-` | `unmapped` | `unmapped` |
+| [FR-3.5.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L423) | `-` | `unmapped` | `unmapped` |
+| [FR-3.5.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L424) | `-` | `unmapped` | `unmapped` |
+| [FR-3.5.5](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L425) | `-` | `unmapped` | `unmapped` |
 
 ### FR-4
 
-Mapped: `0/8`. Unmapped: `8`.
+Mapped: `1/8`. Unmapped: `7`.
 
 | SRS Item | Linked Spec | Current Status | Sync Status |
 |----------|-------------|----------------|-------------|
-| [FR-4.1.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L344) | `-` | `unmapped` | `unmapped` |
-| [FR-4.1.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L345) | `-` | `unmapped` | `unmapped` |
-| [FR-4.1.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L346) | `-` | `unmapped` | `unmapped` |
-| [FR-4.1.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L347) | `-` | `unmapped` | `unmapped` |
-| [FR-4.1.5](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L348) | `-` | `unmapped` | `unmapped` |
-| [FR-4.2.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L354) | `-` | `unmapped` | `unmapped` |
-| [FR-4.2.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L355) | `-` | `unmapped` | `unmapped` |
-| [FR-4.2.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L356) | `-` | `unmapped` | `unmapped` |
+| [FR-4.1.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L437) | `-` | `unmapped` | `unmapped` |
+| [FR-4.1.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L438) | `-` | `unmapped` | `unmapped` |
+| [FR-4.1.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L439) | `-` | `unmapped` | `unmapped` |
+| [FR-4.1.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L440) | `-` | `unmapped` | `unmapped` |
+| [FR-4.1.5](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L441) | `-` | `unmapped` | `unmapped` |
+| [FR-4.2.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L447) | [tool-system-implementation-m2b.1](../../../specs/tool-system-implementation-m2b.1/spec.md#governance-context-mandatory) | `planned` | `current` |
+| [FR-4.2.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L448) | `-` | `unmapped` | `unmapped` |
+| [FR-4.2.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L449) | `-` | `unmapped` | `unmapped` |
 
 ### FR-5
 
@@ -188,46 +237,46 @@ Mapped: `31/39`. Unmapped: `8`.
 
 | SRS Item | Linked Spec | Current Status | Sync Status |
 |----------|-------------|----------------|-------------|
-| [FR-5.1.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L368) | `-` | `unmapped` | `unmapped` |
-| [FR-5.1.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L369) | [agent-session-with-stm-wiring](../../../specs/agent-session-with-stm-wiring/spec.md#requirements-mandatory) | `verified` | `current` |
-| [FR-5.1.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L370) | `-` | `unmapped` | `unmapped` |
-| [FR-5.1.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L371) | `-` | `unmapped` | `unmapped` |
-| [FR-5.1.5](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L372) | [agent-session-with-stm-wiring](../../../specs/agent-session-with-stm-wiring/spec.md#requirements-mandatory) | `verified` | `current` |
-| [FR-5.1.6](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L373) | `-` | `unmapped` | `unmapped` |
-| [FR-5.1.7](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L374) | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
-| [FR-5.1.8](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L375) | [agent-session-with-stm-wiring](../../../specs/agent-session-with-stm-wiring/spec.md#requirements-mandatory) | `verified` | `current` |
+| [FR-5.1.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L461) | `-` | `unmapped` | `unmapped` |
+| [FR-5.1.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L462) | [agent-session-with-stm-wiring](../../../specs/agent-session-with-stm-wiring/spec.md#requirements-mandatory) | `verified` | `current` |
+| [FR-5.1.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L463) | `-` | `unmapped` | `unmapped` |
+| [FR-5.1.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L464) | `-` | `unmapped` | `unmapped` |
+| [FR-5.1.5](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L465) | [agent-session-with-stm-wiring](../../../specs/agent-session-with-stm-wiring/spec.md#requirements-mandatory) | `verified` | `current` |
+| [FR-5.1.6](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L466) | `-` | `unmapped` | `unmapped` |
+| [FR-5.1.7](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L467) | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
+| [FR-5.1.8](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L468) | [agent-session-with-stm-wiring](../../../specs/agent-session-with-stm-wiring/spec.md#requirements-mandatory) | `verified` | `current` |
 |  | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
-| [FR-5.2.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L381) | `-` | `unmapped` | `unmapped` |
-| [FR-5.2.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L382) | [agent-session-with-stm-wiring](../../../specs/agent-session-with-stm-wiring/spec.md#requirements-mandatory) | `verified` | `current` |
-| [FR-5.2.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L383) | `-` | `unmapped` | `unmapped` |
-| [FR-5.2.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L384) | `-` | `unmapped` | `unmapped` |
-| [FR-5.2.5](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L385) | `-` | `unmapped` | `unmapped` |
-| [FR-5.2.6](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L386) | [agent-session-with-stm-wiring](../../../specs/agent-session-with-stm-wiring/spec.md#requirements-mandatory) | `verified` | `current` |
-| [FR-5.3.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L397) | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
-| [FR-5.3.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L398) | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
-| [FR-5.3.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L399) | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
-| [FR-5.3.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L400) | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
-| [FR-5.3.5](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L401) | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
-| [FR-5.3.6](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L402) | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
-| [FR-5.4.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L413) | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
-| [FR-5.4.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L414) | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
-| [FR-5.4.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L415) | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
-| [FR-5.4.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L416) | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
-| [FR-5.4.5](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L417) | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
-| [FR-5.4.6](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L418) | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
-| [FR-5.4.7](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L419) | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
-| [FR-5.4.8](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L420) | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
-| [FR-5.5.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L431) | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
-| [FR-5.5.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L432) | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
-| [FR-5.5.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L433) | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
-| [FR-5.5.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L434) | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
-| [FR-5.5.5](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L435) | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
-| [FR-5.5.6](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L436) | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
-| [FR-5.6.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L446) | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
-| [FR-5.6.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L447) | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
-| [FR-5.6.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L448) | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
-| [FR-5.6.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L449) | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
-| [FR-5.6.5](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L450) | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
+| [FR-5.2.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L474) | `-` | `unmapped` | `unmapped` |
+| [FR-5.2.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L475) | [agent-session-with-stm-wiring](../../../specs/agent-session-with-stm-wiring/spec.md#requirements-mandatory) | `verified` | `current` |
+| [FR-5.2.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L476) | `-` | `unmapped` | `unmapped` |
+| [FR-5.2.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L477) | `-` | `unmapped` | `unmapped` |
+| [FR-5.2.5](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L478) | `-` | `unmapped` | `unmapped` |
+| [FR-5.2.6](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L479) | [agent-session-with-stm-wiring](../../../specs/agent-session-with-stm-wiring/spec.md#requirements-mandatory) | `verified` | `current` |
+| [FR-5.3.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L490) | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
+| [FR-5.3.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L491) | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
+| [FR-5.3.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L492) | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
+| [FR-5.3.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L493) | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
+| [FR-5.3.5](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L494) | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
+| [FR-5.3.6](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L495) | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
+| [FR-5.4.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L506) | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
+| [FR-5.4.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L507) | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
+| [FR-5.4.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L508) | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
+| [FR-5.4.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L509) | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
+| [FR-5.4.5](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L510) | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
+| [FR-5.4.6](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L511) | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
+| [FR-5.4.7](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L512) | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
+| [FR-5.4.8](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L513) | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
+| [FR-5.5.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L524) | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
+| [FR-5.5.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L525) | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
+| [FR-5.5.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L526) | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
+| [FR-5.5.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L527) | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
+| [FR-5.5.5](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L528) | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
+| [FR-5.5.6](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L529) | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
+| [FR-5.6.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L539) | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
+| [FR-5.6.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L540) | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
+| [FR-5.6.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L541) | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
+| [FR-5.6.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L542) | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
+| [FR-5.6.5](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L543) | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
 
 ### FR-6
 
@@ -235,12 +284,12 @@ Mapped: `0/6`. Unmapped: `6`.
 
 | SRS Item | Linked Spec | Current Status | Sync Status |
 |----------|-------------|----------------|-------------|
-| [FR-6.1.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L462) | `-` | `unmapped` | `unmapped` |
-| [FR-6.1.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L463) | `-` | `unmapped` | `unmapped` |
-| [FR-6.1.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L464) | `-` | `unmapped` | `unmapped` |
-| [FR-6.1.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L465) | `-` | `unmapped` | `unmapped` |
-| [FR-6.1.5](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L466) | `-` | `unmapped` | `unmapped` |
-| [FR-6.1.6](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L467) | `-` | `unmapped` | `unmapped` |
+| [FR-6.1.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L555) | `-` | `unmapped` | `unmapped` |
+| [FR-6.1.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L556) | `-` | `unmapped` | `unmapped` |
+| [FR-6.1.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L557) | `-` | `unmapped` | `unmapped` |
+| [FR-6.1.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L558) | `-` | `unmapped` | `unmapped` |
+| [FR-6.1.5](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L559) | `-` | `unmapped` | `unmapped` |
+| [FR-6.1.6](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L560) | `-` | `unmapped` | `unmapped` |
 
 ### FR-7
 
@@ -248,24 +297,24 @@ Mapped: `16/16`. Unmapped: `0`.
 
 | SRS Item | Linked Spec | Current Status | Sync Status |
 |----------|-------------|----------------|-------------|
-| [FR-7.1.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L480) | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
-| [FR-7.1.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L481) | [agent-session-with-stm-wiring](../../../specs/agent-session-with-stm-wiring/spec.md#requirements-mandatory) | `verified` | `current` |
+| [FR-7.1.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L573) | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
+| [FR-7.1.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L574) | [agent-session-with-stm-wiring](../../../specs/agent-session-with-stm-wiring/spec.md#requirements-mandatory) | `verified` | `current` |
 |  | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
-| [FR-7.1.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L482) | [agent-session-with-stm-wiring](../../../specs/agent-session-with-stm-wiring/spec.md#requirements-mandatory) | `verified` | `current` |
+| [FR-7.1.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L575) | [agent-session-with-stm-wiring](../../../specs/agent-session-with-stm-wiring/spec.md#requirements-mandatory) | `verified` | `current` |
 |  | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
-| [FR-7.1.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L483) | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
-| [FR-7.1.5](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L484) | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
-| [FR-7.2.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L492) | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
-| [FR-7.2.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L493) | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
-| [FR-7.2.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L494) | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
-| [FR-7.2.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L495) | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
-| [FR-7.2.5](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L496) | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
-| [FR-7.3.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L504) | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
-| [FR-7.3.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L505) | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
-| [FR-7.3.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L506) | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
-| [FR-7.3.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L507) | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
-| [FR-7.3.5](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L508) | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
-| [FR-7.3.6](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L509) | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
+| [FR-7.1.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L576) | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
+| [FR-7.1.5](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L577) | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
+| [FR-7.2.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L585) | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
+| [FR-7.2.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L586) | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
+| [FR-7.2.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L587) | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
+| [FR-7.2.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L588) | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
+| [FR-7.2.5](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L589) | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
+| [FR-7.3.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L597) | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
+| [FR-7.3.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L598) | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
+| [FR-7.3.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L599) | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
+| [FR-7.3.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L600) | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
+| [FR-7.3.5](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L601) | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
+| [FR-7.3.6](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L602) | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
 
 ### NFR-1
 
@@ -273,50 +322,53 @@ Mapped: `4/16`. Unmapped: `12`.
 
 | SRS Item | Linked Spec | Current Status | Sync Status |
 |----------|-------------|----------------|-------------|
-| [NFR-1.1.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L522) | `-` | `unmapped` | `unmapped` |
-| [NFR-1.1.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L523) | `-` | `unmapped` | `unmapped` |
-| [NFR-1.1.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L524) | `-` | `unmapped` | `unmapped` |
-| [NFR-1.1.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L525) | `-` | `unmapped` | `unmapped` |
-| [NFR-1.1.5](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L526) | `-` | `unmapped` | `unmapped` |
-| [NFR-1.1.6](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L527) | `-` | `unmapped` | `unmapped` |
-| [NFR-1.2.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L534) | `-` | `unmapped` | `unmapped` |
-| [NFR-1.2.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L535) | `-` | `unmapped` | `unmapped` |
-| [NFR-1.2.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L536) | `-` | `unmapped` | `unmapped` |
-| [NFR-1.3.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L543) | `-` | `unmapped` | `unmapped` |
-| [NFR-1.3.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L544) | `-` | `unmapped` | `unmapped` |
-| [NFR-1.3.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L545) | `-` | `unmapped` | `unmapped` |
-| [NFR-1.4.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L552) | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
-| [NFR-1.4.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L553) | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
-| [NFR-1.4.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L554) | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
-| [NFR-1.4.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L555) | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
+| [NFR-1.1.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L615) | `-` | `unmapped` | `unmapped` |
+| [NFR-1.1.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L616) | `-` | `unmapped` | `unmapped` |
+| [NFR-1.1.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L617) | `-` | `unmapped` | `unmapped` |
+| [NFR-1.1.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L618) | `-` | `unmapped` | `unmapped` |
+| [NFR-1.1.5](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L619) | `-` | `unmapped` | `unmapped` |
+| [NFR-1.1.6](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L620) | `-` | `unmapped` | `unmapped` |
+| [NFR-1.2.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L627) | `-` | `unmapped` | `unmapped` |
+| [NFR-1.2.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L628) | `-` | `unmapped` | `unmapped` |
+| [NFR-1.2.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L629) | `-` | `unmapped` | `unmapped` |
+| [NFR-1.3.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L636) | `-` | `unmapped` | `unmapped` |
+| [NFR-1.3.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L637) | `-` | `unmapped` | `unmapped` |
+| [NFR-1.3.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L638) | `-` | `unmapped` | `unmapped` |
+| [NFR-1.4.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L645) | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
+| [NFR-1.4.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L646) | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
+| [NFR-1.4.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L647) | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
+| [NFR-1.4.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L648) | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
 
 ### NFR-2
 
-Mapped: `11/20`. Unmapped: `9`.
+Mapped: `11/23`. Unmapped: `12`.
 
 | SRS Item | Linked Spec | Current Status | Sync Status |
 |----------|-------------|----------------|-------------|
-| [NFR-2.1.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L566) | `-` | `unmapped` | `unmapped` |
-| [NFR-2.1.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L567) | `-` | `unmapped` | `unmapped` |
-| [NFR-2.1.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L568) | `-` | `unmapped` | `unmapped` |
-| [NFR-2.2.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L575) | `-` | `unmapped` | `unmapped` |
-| [NFR-2.2.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L576) | `-` | `unmapped` | `unmapped` |
-| [NFR-2.2.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L577) | `-` | `unmapped` | `unmapped` |
-| [NFR-2.2.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L578) | `-` | `unmapped` | `unmapped` |
-| [NFR-2.2.5](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L579) | `-` | `unmapped` | `unmapped` |
-| [NFR-2.3.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L586) | [agent-session-with-stm-wiring](../../../specs/agent-session-with-stm-wiring/spec.md#requirements-mandatory) | `verified` | `current` |
-| [NFR-2.3.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L587) | [agent-session-with-stm-wiring](../../../specs/agent-session-with-stm-wiring/spec.md#requirements-mandatory) | `verified` | `current` |
+| [NFR-2.1.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L659) | `-` | `unmapped` | `unmapped` |
+| [NFR-2.1.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L660) | `-` | `unmapped` | `unmapped` |
+| [NFR-2.1.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L661) | `-` | `unmapped` | `unmapped` |
+| [NFR-2.2.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L668) | `-` | `unmapped` | `unmapped` |
+| [NFR-2.2.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L669) | `-` | `unmapped` | `unmapped` |
+| [NFR-2.2.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L670) | `-` | `unmapped` | `unmapped` |
+| [NFR-2.2.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L671) | `-` | `unmapped` | `unmapped` |
+| [NFR-2.2.5](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L672) | `-` | `unmapped` | `unmapped` |
+| [NFR-2.2.6](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L673) | `-` | `unmapped` | `unmapped` |
+| [NFR-2.3.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L680) | [agent-session-with-stm-wiring](../../../specs/agent-session-with-stm-wiring/spec.md#requirements-mandatory) | `verified` | `current` |
+| [NFR-2.3.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L681) | [agent-session-with-stm-wiring](../../../specs/agent-session-with-stm-wiring/spec.md#requirements-mandatory) | `verified` | `current` |
 |  | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
-| [NFR-2.3.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L588) | `-` | `unmapped` | `unmapped` |
-| [NFR-2.4.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L595) | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
-| [NFR-2.4.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L596) | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
-| [NFR-2.4.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L597) | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
-| [NFR-2.4.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L598) | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
-| [NFR-2.4.5](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L599) | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
-| [NFR-2.5.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L606) | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
-| [NFR-2.5.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L607) | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
-| [NFR-2.5.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L608) | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
-| [NFR-2.5.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L609) | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
+| [NFR-2.3.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L682) | `-` | `unmapped` | `unmapped` |
+| [NFR-2.3.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L683) | `-` | `unmapped` | `unmapped` |
+| [NFR-2.3.5](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L684) | `-` | `unmapped` | `unmapped` |
+| [NFR-2.4.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L691) | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
+| [NFR-2.4.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L692) | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
+| [NFR-2.4.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L693) | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
+| [NFR-2.4.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L694) | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
+| [NFR-2.4.5](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L695) | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
+| [NFR-2.5.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L702) | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
+| [NFR-2.5.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L703) | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
+| [NFR-2.5.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L704) | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
+| [NFR-2.5.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L705) | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
 
 ### NFR-3
 
@@ -324,98 +376,108 @@ Mapped: `0/7`. Unmapped: `7`.
 
 | SRS Item | Linked Spec | Current Status | Sync Status |
 |----------|-------------|----------------|-------------|
-| [NFR-3.1.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L620) | `-` | `unmapped` | `unmapped` |
-| [NFR-3.1.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L621) | `-` | `unmapped` | `unmapped` |
-| [NFR-3.1.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L622) | `-` | `unmapped` | `unmapped` |
-| [NFR-3.1.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L623) | `-` | `unmapped` | `unmapped` |
-| [NFR-3.2.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L630) | `-` | `unmapped` | `unmapped` |
-| [NFR-3.2.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L631) | `-` | `unmapped` | `unmapped` |
-| [NFR-3.2.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L632) | `-` | `unmapped` | `unmapped` |
+| [NFR-3.1.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L716) | `-` | `unmapped` | `unmapped` |
+| [NFR-3.1.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L717) | `-` | `unmapped` | `unmapped` |
+| [NFR-3.1.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L718) | `-` | `unmapped` | `unmapped` |
+| [NFR-3.1.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L719) | `-` | `unmapped` | `unmapped` |
+| [NFR-3.2.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L726) | `-` | `unmapped` | `unmapped` |
+| [NFR-3.2.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L727) | `-` | `unmapped` | `unmapped` |
+| [NFR-3.2.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L728) | `-` | `unmapped` | `unmapped` |
 
 ### NFR-4
 
-Mapped: `2/12`. Unmapped: `10`.
+Mapped: `3/13`. Unmapped: `10`.
 
 | SRS Item | Linked Spec | Current Status | Sync Status |
 |----------|-------------|----------------|-------------|
-| [NFR-4.1.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L643) | `-` | `unmapped` | `unmapped` |
-| [NFR-4.1.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L644) | `-` | `unmapped` | `unmapped` |
-| [NFR-4.1.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L645) | [agent-session-with-stm-wiring](../../../specs/agent-session-with-stm-wiring/spec.md#requirements-mandatory) | `verified` | `current` |
-| [NFR-4.1.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L646) | [agent-session-with-stm-wiring](../../../specs/agent-session-with-stm-wiring/spec.md#requirements-mandatory) | `verified` | `current` |
-| [NFR-4.2.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L653) | `-` | `unmapped` | `unmapped` |
-| [NFR-4.2.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L654) | `-` | `unmapped` | `unmapped` |
-| [NFR-4.2.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L655) | `-` | `unmapped` | `unmapped` |
-| [NFR-4.2.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L656) | `-` | `unmapped` | `unmapped` |
-| [NFR-4.3.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L663) | `-` | `unmapped` | `unmapped` |
-| [NFR-4.3.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L664) | `-` | `unmapped` | `unmapped` |
-| [NFR-4.3.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L665) | `-` | `unmapped` | `unmapped` |
-| [NFR-4.3.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L666) | `-` | `unmapped` | `unmapped` |
+| [NFR-4.1.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L739) | `-` | `unmapped` | `unmapped` |
+| [NFR-4.1.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L740) | `-` | `unmapped` | `unmapped` |
+| [NFR-4.1.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L741) | [agent-session-with-stm-wiring](../../../specs/agent-session-with-stm-wiring/spec.md#requirements-mandatory) | `verified` | `current` |
+| [NFR-4.1.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L742) | [agent-session-with-stm-wiring](../../../specs/agent-session-with-stm-wiring/spec.md#requirements-mandatory) | `verified` | `current` |
+| [NFR-4.2.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L749) | `-` | `unmapped` | `unmapped` |
+| [NFR-4.2.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L750) | `-` | `unmapped` | `unmapped` |
+| [NFR-4.2.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L751) | [tool-system-implementation-m2b.1](../../../specs/tool-system-implementation-m2b.1/spec.md#governance-context-mandatory) | `planned` | `current` |
+| [NFR-4.2.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L752) | `-` | `unmapped` | `unmapped` |
+| [NFR-4.3.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L759) | `-` | `unmapped` | `unmapped` |
+| [NFR-4.3.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L760) | `-` | `unmapped` | `unmapped` |
+| [NFR-4.3.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L761) | `-` | `unmapped` | `unmapped` |
+| [NFR-4.3.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L762) | `-` | `unmapped` | `unmapped` |
+| [NFR-4.3.5](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L763) | `-` | `unmapped` | `unmapped` |
 
 ### NFR-5
 
-Mapped: `4/22`. Unmapped: `18`.
+Mapped: `6/28`. Unmapped: `22`.
 
 | SRS Item | Linked Spec | Current Status | Sync Status |
 |----------|-------------|----------------|-------------|
-| [NFR-5.1.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L677) | `-` | `unmapped` | `unmapped` |
-| [NFR-5.1.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L678) | `-` | `unmapped` | `unmapped` |
-| [NFR-5.1.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L679) | `-` | `unmapped` | `unmapped` |
-| [NFR-5.1.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L680) | `-` | `unmapped` | `unmapped` |
-| [NFR-5.1.5](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L681) | `-` | `unmapped` | `unmapped` |
-| [NFR-5.2.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L688) | `-` | `unmapped` | `unmapped` |
-| [NFR-5.2.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L689) | `-` | `unmapped` | `unmapped` |
-| [NFR-5.2.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L690) | `-` | `unmapped` | `unmapped` |
-| [NFR-5.2.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L691) | `-` | `unmapped` | `unmapped` |
-| [NFR-5.2.5](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L692) | [prompt-system-milestone1 spec.md](../../../specs/prompt-system-milestone1/spec.md) | `implemented` | `2.7` |
-| [NFR-5.2.6](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L693) | [prompt-system-milestone1 spec.md](../../../specs/prompt-system-milestone1/spec.md) | `implemented` | `2.7` |
-| [NFR-5.2.7](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L694) | [prompt-system-milestone1 spec.md](../../../specs/prompt-system-milestone1/spec.md) | `implemented` | `2.7` |
-| [NFR-5.2.8](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L695) | [prompt-system-milestone1 spec.md](../../../specs/prompt-system-milestone1/spec.md) | `implemented` | `2.7` |
-| [NFR-5.2.9](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L696) | [prompt-system-milestone1 spec.md](../../../specs/prompt-system-milestone1/spec.md) | `implemented` | `2.7` |
-| [NFR-5.2.10](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L697) | [PROMPT_SYSTEM_RESEARCH_PROPOSAL.md](PROMPT_SYSTEM_RESEARCH_PROPOSAL.md) | `clarified` | `current` |
-| [NFR-5.2.11](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L698) | [PROMPT_SYSTEM_RESEARCH_PROPOSAL.md](PROMPT_SYSTEM_RESEARCH_PROPOSAL.md) | `clarified` | `current` |
-| [NFR-5.3.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L705) | `-` | `unmapped` | `unmapped` |
-| [NFR-5.3.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L706) | `-` | `unmapped` | `unmapped` |
-| [NFR-5.3.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L707) | `-` | `unmapped` | `unmapped` |
-| [NFR-5.3.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L708) | `-` | `unmapped` | `unmapped` |
-| [NFR-5.3.5](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L709) | `-` | `unmapped` | `unmapped` |
-| [NFR-5.3.6](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L710) | `-` | `unmapped` | `unmapped` |
+| [NFR-5.1.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L774) | `-` | `unmapped` | `unmapped` |
+| [NFR-5.1.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L775) | `-` | `unmapped` | `unmapped` |
+| [NFR-5.1.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L776) | `-` | `unmapped` | `unmapped` |
+| [NFR-5.1.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L777) | `-` | `unmapped` | `unmapped` |
+| [NFR-5.1.5](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L778) | `-` | `unmapped` | `unmapped` |
+| [NFR-5.2.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L785) | `-` | `unmapped` | `unmapped` |
+| [NFR-5.2.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L786) | `-` | `unmapped` | `unmapped` |
+| [NFR-5.2.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L787) | `-` | `unmapped` | `unmapped` |
+| [NFR-5.2.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L788) | `-` | `unmapped` | `unmapped` |
+| [NFR-5.2.5](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L789) | [prompt-system-milestone1](../../../specs/prompt-system-milestone1/spec.md#user-scenarios--testing-mandatory) | `implemented` | `current` |
+| [NFR-5.2.6](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L790) | [prompt-system-milestone1](../../../specs/prompt-system-milestone1/spec.md#user-scenarios--testing-mandatory) | `implemented` | `current` |
+| [NFR-5.2.7](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L791) | [prompt-system-milestone1](../../../specs/prompt-system-milestone1/spec.md#user-scenarios--testing-mandatory) | `implemented` | `current` |
+| [NFR-5.2.8](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L792) | [prompt-system-milestone1](../../../specs/prompt-system-milestone1/spec.md#user-scenarios--testing-mandatory) | `implemented` | `current` |
+|  | [prompt-system-milestone2](../../../specs/prompt-system-milestone2/spec.md#governance-context-mandatory) | `implemented` | `current` |
+| [NFR-5.2.9](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L793) | [prompt-system-milestone1](../../../specs/prompt-system-milestone1/spec.md#user-scenarios--testing-mandatory) | `implemented` | `current` |
+| [NFR-5.2.10](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L794) | `-` | `unmapped` | `unmapped` |
+| [NFR-5.2.11](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L795) | `-` | `unmapped` | `unmapped` |
+| [NFR-5.2.12](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L796) | [tool-system-implementation-m2b.1](../../../specs/tool-system-implementation-m2b.1/spec.md#governance-context-mandatory) | `planned` | `current` |
+| [NFR-5.2.13](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L797) | `-` | `unmapped` | `unmapped` |
+| [NFR-5.2.14](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L798) | `-` | `unmapped` | `unmapped` |
+| [NFR-5.2.15](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L799) | `-` | `unmapped` | `unmapped` |
+| [NFR-5.3.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L806) | `-` | `unmapped` | `unmapped` |
+| [NFR-5.3.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L807) | `-` | `unmapped` | `unmapped` |
+| [NFR-5.3.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L808) | `-` | `unmapped` | `unmapped` |
+| [NFR-5.3.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L809) | `-` | `unmapped` | `unmapped` |
+| [NFR-5.3.5](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L810) | `-` | `unmapped` | `unmapped` |
+| [NFR-5.3.6](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L811) | `-` | `unmapped` | `unmapped` |
+| [NFR-5.3.7](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L812) | `-` | `unmapped` | `unmapped` |
+| [NFR-5.3.8](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L813) | `-` | `unmapped` | `unmapped` |
 
 ### NFR-6
 
-Mapped: `1/13`. Unmapped: `12`.
+Mapped: `3/15`. Unmapped: `12`.
 
 | SRS Item | Linked Spec | Current Status | Sync Status |
 |----------|-------------|----------------|-------------|
-| [NFR-6.1.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L721) | `-` | `unmapped` | `unmapped` |
-| [NFR-6.1.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L722) | `-` | `unmapped` | `unmapped` |
-| [NFR-6.1.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L723) | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
-| [NFR-6.1.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L724) | `-` | `unmapped` | `unmapped` |
-| [NFR-6.1.5](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L725) | `-` | `unmapped` | `unmapped` |
-| [NFR-6.2.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L732) | `-` | `unmapped` | `unmapped` |
-| [NFR-6.2.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L733) | `-` | `unmapped` | `unmapped` |
-| [NFR-6.2.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L734) | [prompt-system-milestone1 spec.md](../../../specs/prompt-system-milestone1/spec.md) | `implemented` | `2.7` |
-| [NFR-6.2.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L735) | `-` | `unmapped` | `unmapped` |
-| [NFR-6.3.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L742) | `-` | `unmapped` | `unmapped` |
-| [NFR-6.3.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L743) | `-` | `unmapped` | `unmapped` |
-| [NFR-6.3.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L744) | `-` | `unmapped` | `unmapped` |
-| [NFR-6.3.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L745) | `-` | `unmapped` | `unmapped` |
+| [NFR-6.1.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L824) | `-` | `unmapped` | `unmapped` |
+| [NFR-6.1.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L825) | `-` | `unmapped` | `unmapped` |
+| [NFR-6.1.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L826) | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
+| [NFR-6.1.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L827) | `-` | `unmapped` | `unmapped` |
+| [NFR-6.1.5](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L828) | `-` | `unmapped` | `unmapped` |
+| [NFR-6.2.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L835) | `-` | `unmapped` | `unmapped` |
+| [NFR-6.2.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L836) | `-` | `unmapped` | `unmapped` |
+| [NFR-6.2.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L837) | [prompt-system-milestone1](../../../specs/prompt-system-milestone1/spec.md#user-scenarios--testing-mandatory) | `implemented` | `current` |
+| [NFR-6.2.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L838) | `-` | `unmapped` | `unmapped` |
+| [NFR-6.2.5](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L839) | `-` | `unmapped` | `unmapped` |
+| [NFR-6.2.6](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L840) | [tool-system-implementation-m2b.1](../../../specs/tool-system-implementation-m2b.1/spec.md#governance-context-mandatory) | `planned` | `current` |
+| [NFR-6.3.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L847) | `-` | `unmapped` | `unmapped` |
+| [NFR-6.3.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L848) | `-` | `unmapped` | `unmapped` |
+| [NFR-6.3.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L849) | `-` | `unmapped` | `unmapped` |
+| [NFR-6.3.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L850) | `-` | `unmapped` | `unmapped` |
 
 ### CON
 
-Mapped: `5/10` manually reconciled for SRS v2.8. CON-1–CON-5 remain implementation-unmapped.
+Mapped: `3/10`. Unmapped: `7`.
 
 | SRS Item | Linked Spec | Current Status | Sync Status |
 |----------|-------------|----------------|-------------|
-| [CON-1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L753) | `-` | `unmapped` | `unmapped` |
-| [CON-2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L754) | `-` | `unmapped` | `unmapped` |
-| [CON-3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L755) | `-` | `unmapped` | `unmapped` |
-| [CON-4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L756) | `-` | `unmapped` | `unmapped` |
-| [CON-5](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L757) | `-` | `unmapped` | `unmapped` |
-| [CON-6](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#4-constraints) | [ADR-004](DECISIONS/ADR-AGENT-004-THIN-TOOL-GATEWAY-AND-NORMALIZED-TOOL-CONTEXT.md), [tool proposal](TOOLS_RESEARCH_AND_PROPOSAL.md#101-vietnam-market-provider-strategy) | `clarified` | `2.8` |
-| [CON-7](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#4-constraints) | [ADR-004](DECISIONS/ADR-AGENT-004-THIN-TOOL-GATEWAY-AND-NORMALIZED-TOOL-CONTEXT.md), [Architecture tool risk view](ARCHITECTURE_DESIGN.md#485-tool-risk-and-approval-envelope) | `clarified` | `2.8` |
-| [CON-8](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#4-constraints) | [ADR-004](DECISIONS/ADR-AGENT-004-THIN-TOOL-GATEWAY-AND-NORMALIZED-TOOL-CONTEXT.md), [tool proposal](TOOLS_RESEARCH_AND_PROPOSAL.md#103-generic-web-evidence-trust-model) | `clarified` | `2.8` |
-| [CON-9](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#4-constraints) | [ADR-004](DECISIONS/ADR-AGENT-004-THIN-TOOL-GATEWAY-AND-NORMALIZED-TOOL-CONTEXT.md), [tool proposal](TOOLS_RESEARCH_AND_PROPOSAL.md#95-cache-and-freshness-design) | `clarified` | `2.8` |
-| [CON-10](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#4-constraints) | [ADR-004](DECISIONS/ADR-AGENT-004-THIN-TOOL-GATEWAY-AND-NORMALIZED-TOOL-CONTEXT.md), [tool proposal](TOOLS_RESEARCH_AND_PROPOSAL.md#93-logical-data-models) | `clarified` | `2.8` |
+| [CON-1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L858) | `-` | `unmapped` | `unmapped` |
+| [CON-2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L859) | `-` | `unmapped` | `unmapped` |
+| [CON-3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L860) | `-` | `unmapped` | `unmapped` |
+| [CON-4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L861) | `-` | `unmapped` | `unmapped` |
+| [CON-5](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L862) | `-` | `unmapped` | `unmapped` |
+| [CON-6](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L863) | [tool-system-implementation-m2b.1](../../../specs/tool-system-implementation-m2b.1/spec.md#governance-context-mandatory) | `planned` | `current` |
+| [CON-7](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L864) | `-` | `unmapped` | `unmapped` |
+| [CON-8](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L865) | `-` | `unmapped` | `unmapped` |
+| [CON-9](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L866) | [tool-system-implementation-m2b.1](../../../specs/tool-system-implementation-m2b.1/spec.md#governance-context-mandatory) | `planned` | `current` |
+| [CON-10](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L867) | [tool-system-implementation-m2b.1](../../../specs/tool-system-implementation-m2b.1/spec.md#governance-context-mandatory) | `planned` | `current` |
 
 ### AC-1
 
@@ -423,10 +485,10 @@ Mapped: `0/4`. Unmapped: `4`.
 
 | SRS Item | Linked Spec | Current Status | Sync Status |
 |----------|-------------|----------------|-------------|
-| [AC-1.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L767) | `-` | `unmapped` | `unmapped` |
-| [AC-1.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L768) | `-` | `unmapped` | `unmapped` |
-| [AC-1.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L769) | `-` | `unmapped` | `unmapped` |
-| [AC-1.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L770) | `-` | `unmapped` | `unmapped` |
+| [AC-1.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L877) | `-` | `unmapped` | `unmapped` |
+| [AC-1.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L878) | `-` | `unmapped` | `unmapped` |
+| [AC-1.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L879) | `-` | `unmapped` | `unmapped` |
+| [AC-1.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L880) | `-` | `unmapped` | `unmapped` |
 
 ### AC-2
 
@@ -434,16 +496,16 @@ Mapped: `5/7`. Unmapped: `2`.
 
 | SRS Item | Linked Spec | Current Status | Sync Status |
 |----------|-------------|----------------|-------------|
-| [AC-2.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L776) | [agent-session-with-stm-wiring](../../../specs/agent-session-with-stm-wiring/spec.md#requirements-mandatory) | `verified` | `current` |
-| [AC-2.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L777) | [agent-session-with-stm-wiring](../../../specs/agent-session-with-stm-wiring/spec.md#requirements-mandatory) | `verified` | `current` |
+| [AC-2.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L886) | [agent-session-with-stm-wiring](../../../specs/agent-session-with-stm-wiring/spec.md#requirements-mandatory) | `verified` | `current` |
+| [AC-2.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L887) | [agent-session-with-stm-wiring](../../../specs/agent-session-with-stm-wiring/spec.md#requirements-mandatory) | `verified` | `current` |
 |  | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
-| [AC-2.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L778) | `-` | `unmapped` | `unmapped` |
-| [AC-2.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L779) | `-` | `unmapped` | `unmapped` |
-| [AC-2.5](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L780) | [agent-session-with-stm-wiring](../../../specs/agent-session-with-stm-wiring/spec.md#requirements-mandatory) | `verified` | `current` |
+| [AC-2.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L888) | `-` | `unmapped` | `unmapped` |
+| [AC-2.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L889) | `-` | `unmapped` | `unmapped` |
+| [AC-2.5](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L890) | [agent-session-with-stm-wiring](../../../specs/agent-session-with-stm-wiring/spec.md#requirements-mandatory) | `verified` | `current` |
 |  | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
-| [AC-2.6](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L781) | [agent-session-with-stm-wiring](../../../specs/agent-session-with-stm-wiring/spec.md#requirements-mandatory) | `verified` | `current` |
+| [AC-2.6](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L891) | [agent-session-with-stm-wiring](../../../specs/agent-session-with-stm-wiring/spec.md#requirements-mandatory) | `verified` | `current` |
 |  | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
-| [AC-2.7](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L782) | [agent-session-with-stm-wiring](../../../specs/agent-session-with-stm-wiring/spec.md#requirements-mandatory) | `verified` | `current` |
+| [AC-2.7](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L892) | [agent-session-with-stm-wiring](../../../specs/agent-session-with-stm-wiring/spec.md#requirements-mandatory) | `verified` | `current` |
 
 ### AC-3
 
@@ -451,9 +513,9 @@ Mapped: `0/3`. Unmapped: `3`.
 
 | SRS Item | Linked Spec | Current Status | Sync Status |
 |----------|-------------|----------------|-------------|
-| [AC-3.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L788) | `-` | `unmapped` | `unmapped` |
-| [AC-3.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L789) | `-` | `unmapped` | `unmapped` |
-| [AC-3.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L790) | `-` | `unmapped` | `unmapped` |
+| [AC-3.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L898) | `-` | `unmapped` | `unmapped` |
+| [AC-3.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L899) | `-` | `unmapped` | `unmapped` |
+| [AC-3.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L900) | `-` | `unmapped` | `unmapped` |
 
 ### AC-4
 
@@ -461,9 +523,9 @@ Mapped: `1/3`. Unmapped: `2`.
 
 | SRS Item | Linked Spec | Current Status | Sync Status |
 |----------|-------------|----------------|-------------|
-| [AC-4.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L796) | `-` | `unmapped` | `unmapped` |
-| [AC-4.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L797) | [agent-session-with-stm-wiring](../../../specs/agent-session-with-stm-wiring/spec.md#requirements-mandatory) | `verified` | `current` |
-| [AC-4.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L798) | `-` | `unmapped` | `unmapped` |
+| [AC-4.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L906) | `-` | `unmapped` | `unmapped` |
+| [AC-4.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L907) | [agent-session-with-stm-wiring](../../../specs/agent-session-with-stm-wiring/spec.md#requirements-mandatory) | `verified` | `current` |
+| [AC-4.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L908) | `-` | `unmapped` | `unmapped` |
 
 ### AC-5
 
@@ -471,13 +533,13 @@ Mapped: `7/7`. Unmapped: `0`.
 
 | SRS Item | Linked Spec | Current Status | Sync Status |
 |----------|-------------|----------------|-------------|
-| [AC-5.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L804) | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
-| [AC-5.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L805) | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
-| [AC-5.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L806) | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
-| [AC-5.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L807) | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
-| [AC-5.5](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L808) | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
-| [AC-5.6](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L809) | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
-| [AC-5.7](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L810) | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
+| [AC-5.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L914) | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
+| [AC-5.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L915) | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
+| [AC-5.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L916) | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
+| [AC-5.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L917) | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
+| [AC-5.5](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L918) | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
+| [AC-5.6](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L919) | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
+| [AC-5.7](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L920) | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
 
 ### AC-6
 
@@ -485,13 +547,13 @@ Mapped: `6/6`. Unmapped: `0`.
 
 | SRS Item | Linked Spec | Current Status | Sync Status |
 |----------|-------------|----------------|-------------|
-| [AC-6.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L816) | [agent-session-with-stm-wiring](../../../specs/agent-session-with-stm-wiring/spec.md#requirements-mandatory) | `verified` | `current` |
+| [AC-6.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L926) | [agent-session-with-stm-wiring](../../../specs/agent-session-with-stm-wiring/spec.md#requirements-mandatory) | `verified` | `current` |
 |  | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
-| [AC-6.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L817) | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
-| [AC-6.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L818) | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
-| [AC-6.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L819) | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
-| [AC-6.5](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L820) | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
-| [AC-6.6](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L821) | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
+| [AC-6.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L927) | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
+| [AC-6.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L928) | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
+| [AC-6.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L929) | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
+| [AC-6.5](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L930) | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
+| [AC-6.6](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L931) | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
 
 ### AC-7
 
@@ -499,56 +561,56 @@ Mapped: `5/5`. Unmapped: `0`.
 
 | SRS Item | Linked Spec | Current Status | Sync Status |
 |----------|-------------|----------------|-------------|
-| [AC-7.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L827) | [agent-session-with-stm-wiring](../../../specs/agent-session-with-stm-wiring/spec.md#requirements-mandatory) | `verified` | `current` |
+| [AC-7.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L937) | [agent-session-with-stm-wiring](../../../specs/agent-session-with-stm-wiring/spec.md#requirements-mandatory) | `verified` | `current` |
 |  | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
-| [AC-7.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L828) | [agent-session-with-stm-wiring](../../../specs/agent-session-with-stm-wiring/spec.md#requirements-mandatory) | `verified` | `current` |
+| [AC-7.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L938) | [agent-session-with-stm-wiring](../../../specs/agent-session-with-stm-wiring/spec.md#requirements-mandatory) | `verified` | `current` |
 |  | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
-| [AC-7.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L829) | [agent-session-with-stm-wiring](../../../specs/agent-session-with-stm-wiring/spec.md#requirements-mandatory) | `verified` | `current` |
+| [AC-7.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L939) | [agent-session-with-stm-wiring](../../../specs/agent-session-with-stm-wiring/spec.md#requirements-mandatory) | `verified` | `current` |
 |  | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
-| [AC-7.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L830) | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
-| [AC-7.5](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L831) | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
+| [AC-7.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L940) | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
+| [AC-7.5](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L941) | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
 
 ### AC-8
 
-Mapped: `7/11`. Unmapped: `4`.
+Mapped: `5/11`. Unmapped: `6`.
 
 | SRS Item | Linked Spec | Current Status | Sync Status |
 |----------|-------------|----------------|-------------|
-| [AC-8.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L836) | [prompt-system-milestone1 spec.md](../../../specs/prompt-system-milestone1/spec.md) | `implemented` | `2.7` |
-| [AC-8.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L837) | [prompt-system-milestone1 spec.md](../../../specs/prompt-system-milestone1/spec.md) | `implemented` | `2.7` |
-| [AC-8.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L838) | `-` | `unmapped` | `unmapped` (M2 does not address tool-sourced attribution — that is FR-1.5.1/FR-1.5.5 scope) |
-| [AC-8.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L839) | `-` | `unmapped` | `unmapped` (M2 does not address anti-hype — that is FR-1.5.3 scope) |
-| [AC-8.5](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L840) | [prompt-system-milestone2 spec.md](../../../specs/prompt-system-milestone2/spec.md) | `implemented` | `2.7` |
-| [AC-8.6](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L841) | [PROMPT_SYSTEM_BENCHMARK_REVIEW.md](PROMPT_SYSTEM_BENCHMARK_REVIEW.md) | `clarified` | `current` |
-| [AC-8.7](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L842) | [PROMPT_SYSTEM_BENCHMARK_REVIEW.md](PROMPT_SYSTEM_BENCHMARK_REVIEW.md) | `clarified` | `current` |
-| [AC-8.8](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L843) | [prompt-system-milestone2 spec.md](../../../specs/prompt-system-milestone2/spec.md) | `implemented` | `2.7` |
-| [AC-8.9](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L844) | [PROMPT_SYSTEM_BENCHMARK_REVIEW.md](PROMPT_SYSTEM_BENCHMARK_REVIEW.md) | `clarified` | `current` |
-| [AC-8.10](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L845) | [PROMPT_SYSTEM_BENCHMARK_REVIEW.md](PROMPT_SYSTEM_BENCHMARK_REVIEW.md) | `clarified` | `current` |
-| [AC-8.11](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L846) | [prompt-system-milestone2 spec.md](../../../specs/prompt-system-milestone2/spec.md) | `implemented` | `2.7` |
+| [AC-8.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L946) | [prompt-system-milestone1](../../../specs/prompt-system-milestone1/spec.md#user-scenarios--testing-mandatory) | `implemented` | `current` |
+| [AC-8.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L947) | [prompt-system-milestone1](../../../specs/prompt-system-milestone1/spec.md#user-scenarios--testing-mandatory) | `implemented` | `current` |
+| [AC-8.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L948) | `-` | `unmapped` | `unmapped` |
+| [AC-8.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L949) | `-` | `unmapped` | `unmapped` |
+| [AC-8.5](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L950) | [prompt-system-milestone2](../../../specs/prompt-system-milestone2/spec.md#governance-context-mandatory) | `implemented` | `current` |
+| [AC-8.6](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L951) | `-` | `unmapped` | `unmapped` |
+| [AC-8.7](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L952) | `-` | `unmapped` | `unmapped` |
+| [AC-8.8](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L953) | [prompt-system-milestone2](../../../specs/prompt-system-milestone2/spec.md#governance-context-mandatory) | `implemented` | `current` |
+| [AC-8.9](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L954) | `-` | `unmapped` | `unmapped` |
+| [AC-8.10](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L955) | `-` | `unmapped` | `unmapped` |
+| [AC-8.11](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L956) | [prompt-system-milestone2](../../../specs/prompt-system-milestone2/spec.md#governance-context-mandatory) | `implemented` | `current` |
 
 ### AC-9
 
-Mapped: `17/17` manually reconciled for SRS v2.8. These are design-governance mappings until a Phase 2B implementation spec exists.
+Mapped: `4/17`. Unmapped: `13`.
 
 | SRS Item | Linked Spec | Current Status | Sync Status |
 |----------|-------------|----------------|-------------|
-| [AC-9.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#ac-9-tool-system-architecture-and-vietnam-market-integration) | [Phase 2B roadmap](PHASE_2_AGENT_ENHANCEMENT_ROADMAP.md#2b1-agenttool-baseline-and-descriptor-inventory), [ADR-004](DECISIONS/ADR-AGENT-004-THIN-TOOL-GATEWAY-AND-NORMALIZED-TOOL-CONTEXT.md) | `clarified` | `2.8` |
-| [AC-9.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#ac-9-tool-system-architecture-and-vietnam-market-integration) | [Phase 2B roadmap](PHASE_2_AGENT_ENHANCEMENT_ROADMAP.md#2b2-route-filtered-tool-surface-and-thin-gateway), [ADR-004](DECISIONS/ADR-AGENT-004-THIN-TOOL-GATEWAY-AND-NORMALIZED-TOOL-CONTEXT.md) | `clarified` | `2.8` |
-| [AC-9.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#ac-9-tool-system-architecture-and-vietnam-market-integration) | [Phase 2B roadmap](PHASE_2_AGENT_ENHANCEMENT_ROADMAP.md#2b2-route-filtered-tool-surface-and-thin-gateway), [ADR-004](DECISIONS/ADR-AGENT-004-THIN-TOOL-GATEWAY-AND-NORMALIZED-TOOL-CONTEXT.md) | `clarified` | `2.8` |
-| [AC-9.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#ac-9-tool-system-architecture-and-vietnam-market-integration) | [ADR-004](DECISIONS/ADR-AGENT-004-THIN-TOOL-GATEWAY-AND-NORMALIZED-TOOL-CONTEXT.md), [Phase 2B roadmap](PHASE_2_AGENT_ENHANCEMENT_ROADMAP.md#2b8-optional-remote-mcp-style-tool-admission) | `clarified` | `2.8` |
-| [AC-9.5](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#ac-9-tool-system-architecture-and-vietnam-market-integration) | [Phase 2B roadmap](PHASE_2_AGENT_ENHANCEMENT_ROADMAP.md#2b3-evolved-stocksymboltool-over-internal-symbol-store), [tool proposal](TOOLS_RESEARCH_AND_PROPOSAL.md#124-phase-3-evolved-stocksymboltool-over-internal-symbol-store) | `clarified` | `2.8` |
-| [AC-9.6](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#ac-9-tool-system-architecture-and-vietnam-market-integration) | [Phase 2B roadmap](PHASE_2_AGENT_ENHANCEMENT_ROADMAP.md#2b3-evolved-stocksymboltool-over-internal-symbol-store), [tool proposal](TOOLS_RESEARCH_AND_PROPOSAL.md#101-vietnam-market-provider-strategy) | `clarified` | `2.8` |
-| [AC-9.7](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#ac-9-tool-system-architecture-and-vietnam-market-integration) | [Architecture provider view](ARCHITECTURE_DESIGN.md#434-tool-provider-selection-and-fallback-view), [ADR-004](DECISIONS/ADR-AGENT-004-THIN-TOOL-GATEWAY-AND-NORMALIZED-TOOL-CONTEXT.md) | `clarified` | `2.8` |
-| [AC-9.8](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#ac-9-tool-system-architecture-and-vietnam-market-integration) | [Phase 2B roadmap](PHASE_2_AGENT_ENHANCEMENT_ROADMAP.md#2b5-concrete-market-data-and-visualization-tools), [tool proposal](TOOLS_RESEARCH_AND_PROPOSAL.md#135-source-verification-metadata) | `clarified` | `2.8` |
-| [AC-9.9](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#ac-9-tool-system-architecture-and-vietnam-market-integration) | [Phase 2B roadmap](PHASE_2_AGENT_ENHANCEMENT_ROADMAP.md#2b9-verification-and-quality-gates), [tool proposal](TOOLS_RESEARCH_AND_PROPOSAL.md#136-data-integrity-acceptance-checks) | `clarified` | `2.8` |
-| [AC-9.10](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#ac-9-tool-system-architecture-and-vietnam-market-integration) | [Phase 2B roadmap](PHASE_2_AGENT_ENHANCEMENT_ROADMAP.md#2b4-provider-policy-and-normalized-output-backbone), [tool proposal](TOOLS_RESEARCH_AND_PROPOSAL.md#119-normalizedoutputkind) | `clarified` | `2.8` |
-| [AC-9.11](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#ac-9-tool-system-architecture-and-vietnam-market-integration) | [ADR-004](DECISIONS/ADR-AGENT-004-THIN-TOOL-GATEWAY-AND-NORMALIZED-TOOL-CONTEXT.md), [tool proposal](TOOLS_RESEARCH_AND_PROPOSAL.md#102-tradingview-visualization-strategy) | `clarified` | `2.8` |
-| [AC-9.12](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#ac-9-tool-system-architecture-and-vietnam-market-integration) | [ADR-004](DECISIONS/ADR-AGENT-004-THIN-TOOL-GATEWAY-AND-NORMALIZED-TOOL-CONTEXT.md), [tool proposal](TOOLS_RESEARCH_AND_PROPOSAL.md#103-generic-web-evidence-trust-model) | `clarified` | `2.8` |
-| [AC-9.13](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#ac-9-tool-system-architecture-and-vietnam-market-integration) | [Phase 2B roadmap](PHASE_2_AGENT_ENHANCEMENT_ROADMAP.md#2b6-reporting-from-toolcontextpack), [tool proposal](TOOLS_RESEARCH_AND_PROPOSAL.md#127-phase-6-reporting-from-tool-context-packs) | `clarified` | `2.8` |
-| [AC-9.14](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#ac-9-tool-system-architecture-and-vietnam-market-integration) | [ADR-004](DECISIONS/ADR-AGENT-004-THIN-TOOL-GATEWAY-AND-NORMALIZED-TOOL-CONTEXT.md), [tool proposal](TOOLS_RESEARCH_AND_PROPOSAL.md#9-tool-data-architecture-and-integrity-design) | `clarified` | `2.8` |
-| [AC-9.15](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#ac-9-tool-system-architecture-and-vietnam-market-integration) | [ADR-004](DECISIONS/ADR-AGENT-004-THIN-TOOL-GATEWAY-AND-NORMALIZED-TOOL-CONTEXT.md), [tool proposal](TOOLS_RESEARCH_AND_PROPOSAL.md#935-mutation-receipt) | `clarified` | `2.8` |
-| [AC-9.16](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#ac-9-tool-system-architecture-and-vietnam-market-integration) | [Phase 2B roadmap](PHASE_2_AGENT_ENHANCEMENT_ROADMAP.md#2b9-verification-and-quality-gates), [tool proposal](TOOLS_RESEARCH_AND_PROPOSAL.md#133-evaluation-dataset-families) | `clarified` | `2.8` |
-| [AC-9.17](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#ac-9-tool-system-architecture-and-vietnam-market-integration) | [Phase 2B roadmap](PHASE_2_AGENT_ENHANCEMENT_ROADMAP.md#2b6-reporting-from-toolcontextpack), [tool proposal](TOOLS_RESEARCH_AND_PROPOSAL.md#134-quality-reliability-and-accuracy-benchmarks) | `clarified` | `2.8` |
+| [AC-9.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L962) | [tool-system-implementation-m2b.1](../../../specs/tool-system-implementation-m2b.1/spec.md#governance-context-mandatory) | `planned` | `current` |
+| [AC-9.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L963) | [tool-system-implementation-m2b.1](../../../specs/tool-system-implementation-m2b.1/spec.md#governance-context-mandatory) | `planned` | `current` |
+| [AC-9.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L964) | [tool-system-implementation-m2b.1](../../../specs/tool-system-implementation-m2b.1/spec.md#governance-context-mandatory) | `planned` | `current` |
+| [AC-9.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L965) | [tool-system-implementation-m2b.1](../../../specs/tool-system-implementation-m2b.1/spec.md#governance-context-mandatory) | `planned` | `current` |
+| [AC-9.5](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L966) | `-` | `unmapped` | `unmapped` |
+| [AC-9.6](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L967) | `-` | `unmapped` | `unmapped` |
+| [AC-9.7](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L968) | `-` | `unmapped` | `unmapped` |
+| [AC-9.8](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L969) | `-` | `unmapped` | `unmapped` |
+| [AC-9.9](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L970) | `-` | `unmapped` | `unmapped` |
+| [AC-9.10](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L971) | `-` | `unmapped` | `unmapped` |
+| [AC-9.11](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L972) | `-` | `unmapped` | `unmapped` |
+| [AC-9.12](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L973) | `-` | `unmapped` | `unmapped` |
+| [AC-9.13](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L974) | `-` | `unmapped` | `unmapped` |
+| [AC-9.14](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L975) | `-` | `unmapped` | `unmapped` |
+| [AC-9.15](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L976) | `-` | `unmapped` | `unmapped` |
+| [AC-9.16](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L977) | `-` | `unmapped` | `unmapped` |
+| [AC-9.17](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L978) | `-` | `unmapped` | `unmapped` |
 
 ### IR-1
 
@@ -556,19 +618,19 @@ Mapped: `9/13`. Unmapped: `4`.
 
 | SRS Item | Linked Spec | Current Status | Sync Status |
 |----------|-------------|----------------|-------------|
-| [IR-1.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L911) | `-` | `unmapped` | `unmapped` |
-| [IR-1.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L912) | `-` | `unmapped` | `unmapped` |
-| [IR-1.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L913) | `-` | `unmapped` | `unmapped` |
-| [IR-1.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L914) | `-` | `unmapped` | `unmapped` |
-| [IR-1.5](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L915) | [agent-session-with-stm-wiring](../../../specs/agent-session-with-stm-wiring/spec.md#requirements-mandatory) | `verified` | `current` |
-| [IR-1.6](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L916) | [agent-session-with-stm-wiring](../../../specs/agent-session-with-stm-wiring/spec.md#requirements-mandatory) | `verified` | `current` |
-| [IR-1.7](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L917) | [agent-session-with-stm-wiring](../../../specs/agent-session-with-stm-wiring/spec.md#requirements-mandatory) | `verified` | `current` |
-| [IR-1.8](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L918) | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
-| [IR-1.9](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L919) | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
-| [IR-1.10](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L920) | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
-| [IR-1.11](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L921) | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
-| [IR-1.12](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L922) | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
-| [IR-1.13](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L923) | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
+| [IR-1.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L1060) | `-` | `unmapped` | `unmapped` |
+| [IR-1.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L1061) | `-` | `unmapped` | `unmapped` |
+| [IR-1.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L1062) | `-` | `unmapped` | `unmapped` |
+| [IR-1.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L1063) | `-` | `unmapped` | `unmapped` |
+| [IR-1.5](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L1064) | [agent-session-with-stm-wiring](../../../specs/agent-session-with-stm-wiring/spec.md#requirements-mandatory) | `verified` | `current` |
+| [IR-1.6](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L1065) | [agent-session-with-stm-wiring](../../../specs/agent-session-with-stm-wiring/spec.md#requirements-mandatory) | `verified` | `current` |
+| [IR-1.7](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L1066) | [agent-session-with-stm-wiring](../../../specs/agent-session-with-stm-wiring/spec.md#requirements-mandatory) | `verified` | `current` |
+| [IR-1.8](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L1067) | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
+| [IR-1.9](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L1068) | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
+| [IR-1.10](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L1069) | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
+| [IR-1.11](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L1070) | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
+| [IR-1.12](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L1071) | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
+| [IR-1.13](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L1072) | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
 
 ### IR-2
 
@@ -576,28 +638,28 @@ Mapped: `0/5`. Unmapped: `5`.
 
 | SRS Item | Linked Spec | Current Status | Sync Status |
 |----------|-------------|----------------|-------------|
-| [IR-2.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L929) | `-` | `unmapped` | `unmapped` |
-| [IR-2.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L930) | `-` | `unmapped` | `unmapped` |
-| [IR-2.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L931) | `-` | `unmapped` | `unmapped` |
-| [IR-2.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L932) | `-` | `unmapped` | `unmapped` |
-| [IR-2.5](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L933) | `-` | `unmapped` | `unmapped` |
+| [IR-2.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L1078) | `-` | `unmapped` | `unmapped` |
+| [IR-2.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L1079) | `-` | `unmapped` | `unmapped` |
+| [IR-2.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L1080) | `-` | `unmapped` | `unmapped` |
+| [IR-2.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L1081) | `-` | `unmapped` | `unmapped` |
+| [IR-2.5](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L1082) | `-` | `unmapped` | `unmapped` |
 
 ### IR-3
 
-Mapped: `10/10` manually reconciled for SRS v2.8. These are contract-design mappings until executable schema artifacts exist.
+Mapped: `2/10`. Unmapped: `8`.
 
 | SRS Item | Linked Spec | Current Status | Sync Status |
 |----------|-------------|----------------|-------------|
-| [IR-3.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#ir-3-tool-system-contracts) | [tool proposal](TOOLS_RESEARCH_AND_PROPOSAL.md#113-toolcapabilitydescriptor), [ADR-004](DECISIONS/ADR-AGENT-004-THIN-TOOL-GATEWAY-AND-NORMALIZED-TOOL-CONTEXT.md) | `clarified` | `2.8` |
-| [IR-3.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#ir-3-tool-system-contracts) | [tool proposal](TOOLS_RESEARCH_AND_PROPOSAL.md#115-toolpolicydescriptor), [ADR-004](DECISIONS/ADR-AGENT-004-THIN-TOOL-GATEWAY-AND-NORMALIZED-TOOL-CONTEXT.md) | `clarified` | `2.8` |
-| [IR-3.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#ir-3-tool-system-contracts) | [tool proposal](TOOLS_RESEARCH_AND_PROPOSAL.md#116-provideradapterdescriptor), [ADR-004](DECISIONS/ADR-AGENT-004-THIN-TOOL-GATEWAY-AND-NORMALIZED-TOOL-CONTEXT.md) | `clarified` | `2.8` |
-| [IR-3.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#ir-3-tool-system-contracts) | [tool proposal](TOOLS_RESEARCH_AND_PROPOSAL.md#117-providerselectionpolicy), [ADR-004](DECISIONS/ADR-AGENT-004-THIN-TOOL-GATEWAY-AND-NORMALIZED-TOOL-CONTEXT.md) | `clarified` | `2.8` |
-| [IR-3.5](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#ir-3-tool-system-contracts) | [tool proposal](TOOLS_RESEARCH_AND_PROPOSAL.md#118-toolexecutionenvelope), [ADR-004](DECISIONS/ADR-AGENT-004-THIN-TOOL-GATEWAY-AND-NORMALIZED-TOOL-CONTEXT.md) | `clarified` | `2.8` |
-| [IR-3.6](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#ir-3-tool-system-contracts) | [tool proposal](TOOLS_RESEARCH_AND_PROPOSAL.md#119-normalizedoutputkind), [ADR-004](DECISIONS/ADR-AGENT-004-THIN-TOOL-GATEWAY-AND-NORMALIZED-TOOL-CONTEXT.md) | `clarified` | `2.8` |
-| [IR-3.7](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#ir-3-tool-system-contracts) | [tool proposal](TOOLS_RESEARCH_AND_PROPOSAL.md#1111-toolcontextpack), [ADR-004](DECISIONS/ADR-AGENT-004-THIN-TOOL-GATEWAY-AND-NORMALIZED-TOOL-CONTEXT.md) | `clarified` | `2.8` |
-| [IR-3.8](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#ir-3-tool-system-contracts) | [tool proposal](TOOLS_RESEARCH_AND_PROPOSAL.md#1112-genericwebfetchpolicy), [ADR-004](DECISIONS/ADR-AGENT-004-THIN-TOOL-GATEWAY-AND-NORMALIZED-TOOL-CONTEXT.md) | `clarified` | `2.8` |
-| [IR-3.9](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#ir-3-tool-system-contracts) | [tool proposal](TOOLS_RESEARCH_AND_PROPOSAL.md#935-mutation-receipt), [ADR-004](DECISIONS/ADR-AGENT-004-THIN-TOOL-GATEWAY-AND-NORMALIZED-TOOL-CONTEXT.md) | `clarified` | `2.8` |
-| [IR-3.10](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#ir-3-tool-system-contracts) | [tool proposal](TOOLS_RESEARCH_AND_PROPOSAL.md#934-artifact-metadata), [Phase 2B roadmap](PHASE_2_AGENT_ENHANCEMENT_ROADMAP.md#2b6-reporting-from-toolcontextpack) | `clarified` | `2.8` |
+| [IR-3.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L1088) | [tool-system-implementation-m2b.1](../../../specs/tool-system-implementation-m2b.1/spec.md#governance-context-mandatory) | `planned` | `current` |
+| [IR-3.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L1089) | [tool-system-implementation-m2b.1](../../../specs/tool-system-implementation-m2b.1/spec.md#governance-context-mandatory) | `planned` | `current` |
+| [IR-3.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L1090) | `-` | `unmapped` | `unmapped` |
+| [IR-3.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L1091) | `-` | `unmapped` | `unmapped` |
+| [IR-3.5](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L1092) | `-` | `unmapped` | `unmapped` |
+| [IR-3.6](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L1093) | `-` | `unmapped` | `unmapped` |
+| [IR-3.7](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L1094) | `-` | `unmapped` | `unmapped` |
+| [IR-3.8](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L1095) | `-` | `unmapped` | `unmapped` |
+| [IR-3.9](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L1096) | `-` | `unmapped` | `unmapped` |
+| [IR-3.10](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L1097) | `-` | `unmapped` | `unmapped` |
 
 ### ERR
 
@@ -605,34 +667,34 @@ Mapped: `0/8`. Unmapped: `8`.
 
 | SRS Item | Linked Spec | Current Status | Sync Status |
 |----------|-------------|----------------|-------------|
-| [ERR-1.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L943) | `-` | `unmapped` | `unmapped` |
-| [ERR-1.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L944) | `-` | `unmapped` | `unmapped` |
-| [ERR-1.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L945) | `-` | `unmapped` | `unmapped` |
-| [ERR-2.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L951) | `-` | `unmapped` | `unmapped` |
-| [ERR-2.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L952) | `-` | `unmapped` | `unmapped` |
-| [ERR-2.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L953) | `-` | `unmapped` | `unmapped` |
-| [ERR-3.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L959) | `-` | `unmapped` | `unmapped` |
-| [ERR-3.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L960) | `-` | `unmapped` | `unmapped` |
+| [ERR-1.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L1107) | `-` | `unmapped` | `unmapped` |
+| [ERR-1.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L1108) | `-` | `unmapped` | `unmapped` |
+| [ERR-1.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L1109) | `-` | `unmapped` | `unmapped` |
+| [ERR-2.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L1115) | `-` | `unmapped` | `unmapped` |
+| [ERR-2.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L1116) | `-` | `unmapped` | `unmapped` |
+| [ERR-2.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L1117) | `-` | `unmapped` | `unmapped` |
+| [ERR-3.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L1123) | `-` | `unmapped` | `unmapped` |
+| [ERR-3.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L1124) | `-` | `unmapped` | `unmapped` |
 
 ### PRIV
 
-Mapped: `4/13` manually reconciled for SRS v2.8. Existing non-tool privacy rows remain implementation-unmapped.
+Mapped: `0/13`. Unmapped: `13`.
 
 | SRS Item | Linked Spec | Current Status | Sync Status |
 |----------|-------------|----------------|-------------|
-| [PRIV-1.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L970) | `-` | `unmapped` | `unmapped` |
-| [PRIV-1.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L971) | `-` | `unmapped` | `unmapped` |
-| [PRIV-1.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L972) | `-` | `unmapped` | `unmapped` |
-| [PRIV-1.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#priv-1-data-minimization-and-classification) | [ADR-004](DECISIONS/ADR-AGENT-004-THIN-TOOL-GATEWAY-AND-NORMALIZED-TOOL-CONTEXT.md), [tool proposal](TOOLS_RESEARCH_AND_PROPOSAL.md#103-generic-web-evidence-trust-model) | `clarified` | `2.8` |
-| [PRIV-1.5](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#priv-1-data-minimization-and-classification) | [ADR-004](DECISIONS/ADR-AGENT-004-THIN-TOOL-GATEWAY-AND-NORMALIZED-TOOL-CONTEXT.md), [tool proposal](TOOLS_RESEARCH_AND_PROPOSAL.md#93-logical-data-models) | `clarified` | `2.8` |
-| [PRIV-1.6](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#priv-1-data-minimization-and-classification) | [tool proposal](TOOLS_RESEARCH_AND_PROPOSAL.md#94-storage-ownership-matrix), [Phase 2B roadmap](PHASE_2_AGENT_ENHANCEMENT_ROADMAP.md#2b6-reporting-from-toolcontextpack) | `clarified` | `2.8` |
-| [PRIV-2.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L978) | `-` | `unmapped` | `unmapped` |
-| [PRIV-2.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L979) | `-` | `unmapped` | `unmapped` |
-| [PRIV-2.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L980) | `-` | `unmapped` | `unmapped` |
-| [PRIV-3.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L986) | `-` | `unmapped` | `unmapped` |
-| [PRIV-3.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L987) | `-` | `unmapped` | `unmapped` |
-| [PRIV-3.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L988) | `-` | `unmapped` | `unmapped` |
-| [PRIV-3.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#priv-3-pii-handling-and-redaction) | [tool proposal](TOOLS_RESEARCH_AND_PROPOSAL.md#96-data-integrity-rules), [ADR-004](DECISIONS/ADR-AGENT-004-THIN-TOOL-GATEWAY-AND-NORMALIZED-TOOL-CONTEXT.md) | `clarified` | `2.8` |
+| [PRIV-1.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L1134) | `-` | `unmapped` | `unmapped` |
+| [PRIV-1.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L1135) | `-` | `unmapped` | `unmapped` |
+| [PRIV-1.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L1136) | `-` | `unmapped` | `unmapped` |
+| [PRIV-1.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L1137) | `-` | `unmapped` | `unmapped` |
+| [PRIV-1.5](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L1138) | `-` | `unmapped` | `unmapped` |
+| [PRIV-1.6](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L1139) | `-` | `unmapped` | `unmapped` |
+| [PRIV-2.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L1145) | `-` | `unmapped` | `unmapped` |
+| [PRIV-2.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L1146) | `-` | `unmapped` | `unmapped` |
+| [PRIV-2.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L1147) | `-` | `unmapped` | `unmapped` |
+| [PRIV-3.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L1153) | `-` | `unmapped` | `unmapped` |
+| [PRIV-3.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L1154) | `-` | `unmapped` | `unmapped` |
+| [PRIV-3.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L1155) | `-` | `unmapped` | `unmapped` |
+| [PRIV-3.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L1156) | `-` | `unmapped` | `unmapped` |
 
 ## Gate Rule
 
