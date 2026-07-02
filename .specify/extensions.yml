@@ -2,6 +2,7 @@ installed:
 - agent-context
 - arch
 - architecture-guard
+- doc-sync
 - harness
 - memory-loader
 - security-review
@@ -48,6 +49,14 @@ hooks:
     description: ''
     condition: null
   after_implement:
+  - extension: doc-sync
+    command: speckit.doc-sync.gate
+    enabled: true
+    optional: false
+    priority: 5
+    prompt: Run implementation document-spec sync gate before verification?
+    description: Refresh traceability reports from implementation evidence before verification
+    condition: null
   - extension: verify-tasks
     command: speckit.verify-tasks.run
     enabled: true
@@ -69,11 +78,19 @@ hooks:
     prompt: Run verify to validate implementation against specification?
     description: Post-implementation verification gate
     condition: null
+  - extension: doc-sync
+    command: speckit.doc-sync.gate
+    enabled: true
+    optional: false
+    priority: 50
+    prompt: Run final document-spec sync gate after verification?
+    description: Final hard sync gate before treating a feature as Verified
+    condition: null
   - extension: security-review
     command: speckit.security-review.branch
     enabled: true
     optional: true
-    priority: 10
+    priority: 60
     prompt: Would you like to scan the new implementation for security vulnerabilities?
     description: ''
     condition: null
@@ -81,7 +98,7 @@ hooks:
     command: speckit.architecture-guard.architecture-review
     enabled: true
     optional: true
-    priority: 10
+    priority: 70
     prompt: Would you like to run a post-implementation architecture review?
     description: ''
     condition: null
@@ -122,6 +139,14 @@ hooks:
     optional: true
     prompt: Validate spec-to-task traceability?
     description: Verify requirements map to planned tasks after planning
+    condition: null
+  - extension: doc-sync
+    command: speckit.doc-sync.gate
+    enabled: true
+    optional: false
+    priority: 10
+    prompt: Run document-spec sync gate after planning?
+    description: Validate planned SRS mappings and sync reports before task generation
     condition: null
   - extension: git
     command: speckit.git.commit

@@ -112,7 +112,8 @@ As of 2026-07-01, this repository should be operated from the local installed tr
 | Integration status | `specify integration status` currently exits non-zero because Copilot + Codex is a forced multi-install and Copilot is not declared multi-install safe upstream | Treat `unsafe-multi-install` as a known portability warning only when no managed files are missing or invalid. Missing manifests, invalid manifests, or unexpected default changes remain blockers. |
 | Workflow catalog | `specify workflow info speckit` reports the six-step bundled workflow: specify, review-spec, plan, review-plan, tasks, implement | This repository's 18-step SDLC is a governance overlay around the bundled workflow, not a replacement for the local prompt/skill commands. |
 | Installed extensions | Understanding, Verify Tasks, Spec Kit Utilities, Git, Fleet, Verify, Memory Loader, Architecture Workflow, Coding Agent Context, Research Harness, Security Review, and Architecture Guard are enabled | Use current extension command names from this HOW-TO instead of older shorthand names. |
-| Sync extension | A sync extension package may exist in `.specify/extensions/sync`, but `speckit.sync.*` is not installed/enabled in the current command surface | Use `python scripts/sync_spec_status.py --gate` for supported sync reporting until a governed extension install adopts `speckit.sync.*`. |
+| Document/spec sync gate | `speckit.doc-sync.gate` is the repository-local wrapper around `python scripts/sync_spec_status.py --gate` | Run this hard gate after `speckit.plan`, after `speckit.implement`, and after `speckit.verify.run`; it regenerates `specs/spec-sync-status.md` and `docs/domains/agent/SRS_SPEC_TRACEABILITY.md`. |
+| Third-party sync extension | A sync extension package may exist in `.specify/extensions/sync`, but `speckit.sync.*` is not installed/enabled in the current command surface | Treat it as optional drift-analysis support only until a governed migration proves it covers this repository's generated SRS/spec reports. |
 
 ### 2.4 Install or Recreate Local CLI Access
 
@@ -660,6 +661,8 @@ The 18-step lifecycle below is the detailed execution model inside the SDLC loop
     - **Cross-Reference Prompt Hint**:
       > *Prompt Hint*: "Run verification: 'Verify implementation compliance with [constitution.md](../../.specify/memory/constitution.md) principles and confirm test results conform to evidence policies in [VERIFICATION_AND_TRACEABILITY_STRATEGY.md](../testing/VERIFICATION_AND_TRACEABILITY_STRATEGY.md).'"
 
+**Document-Spec Sync Gates**: Run `speckit.doc-sync.gate` at three hard checkpoints around delivery. After `speckit.plan`, the gate validates planned SRS mappings, baseline version, lifecycle status, and evidence paths before task generation. After `speckit.implement`, it refreshes forward and reverse reports from implementation evidence before verification. After `speckit.verify.run`, it is the final closeout gate before a feature can be treated as `Verified`. The command surface is `speckit.doc-sync.gate`, and the canonical executable operation remains `python scripts/sync_spec_status.py --gate`.
+
 #### 3.3.5 Synchronization and Maintenance
 
 15. **Test and Traceability Refresh**: Run project test suites and update [spec-traceability.yaml](../../specs/spec-traceability.yaml) whenever delivered scope changes.
@@ -668,7 +671,7 @@ The 18-step lifecycle below is the detailed execution model inside the SDLC loop
       - [spec-sync-status.md](../../specs/spec-sync-status.md)
       - [SRS_SPEC_TRACEABILITY.md](../domains/agent/SRS_SPEC_TRACEABILITY.md)
     - **Cross-Reference Prompt Hint**:
-      > *Prompt Hint*: "Refresh traceability manifests: 'Execute the project's test suite and compile evidence links. Update [spec-traceability.yaml](../../specs/spec-traceability.yaml) status to `verified` and update [spec-sync-status.md](../../specs/spec-sync-status.md) coverage metrics.'"
+      > *Prompt Hint*: "Refresh traceability manifests: 'Execute the project's test suite and compile evidence links. Update [spec-traceability.yaml](../../specs/spec-traceability.yaml) status to `verified`, then run `python scripts/sync_spec_status.py --gate` to regenerate [spec-sync-status.md](../../specs/spec-sync-status.md) and [SRS_SPEC_TRACEABILITY.md](../domains/agent/SRS_SPEC_TRACEABILITY.md).'"
 
 16. **Maintenance Update**: Keep governed feature artifacts current after delivery, including plan, review, status, and operational notes when behavior evolves.
     - **Mapped Long-Lived Documents**:
@@ -784,7 +787,7 @@ flowchart TB
   class BS,AS,BP,AP,BT,AT,BI,AI,L_Hook hook;
 ```
 
-In this repository, the hook sequence usually covers branch setup, memory loading, `doctor`, `validate`, fleet review, verification, and architecture review around the core `specify`, `plan`, `tasks`, and `implement` commands.
+In this repository, the hook sequence usually covers branch setup, memory loading, `doctor`, `validate`, required document/spec sync gates, fleet review, verification, and architecture review around the core `specify`, `plan`, `tasks`, and `implement` commands. The required sync gates run after `speckit.plan`, after `speckit.implement`, and after `speckit.verify.run`.
 
 #### 3.4.3 Artifact Flow and Synchronization
 
@@ -858,8 +861,8 @@ The repository still contains older lifecycle terminology in some places. Use th
 | `speckit.review` | typically handled as `speckit.fleet.review` in this repository |
 | `speckit.verify` | `speckit.verify.run` |
 | `speckit.verify-tasks` | `speckit.verify-tasks.run` |
-| `speckit.sync` or `speckit.sync.analyze` | not installed/enabled today; use `python scripts/sync_spec_status.py --gate` plus manual or skill-assisted doc promotion |
-| `speckit.converge` | official upstream convergence concept, upgrade-gated here until the CLI and local managed prompts/skills expose it; current closeout is `speckit.verify-tasks.run`, `speckit.verify.run`, sync gate, and documentation promotion |
+| `speckit.sync` or `speckit.sync.analyze` | not installed/enabled today; use `speckit.doc-sync.gate` / `python scripts/sync_spec_status.py --gate` plus manual or skill-assisted doc promotion |
+| `speckit.converge` | official upstream convergence concept, upgrade-gated here until the CLI and local managed prompts/skills expose it; current closeout is `speckit.verify-tasks.run`, `speckit.verify.run`, final document/spec sync gate, and documentation promotion |
 | `speckit.tests` | repository test execution plus traceability refresh, not a single core Spec Kit command |
 | `speckit.maintain` | maintenance stage name, not a single installed core command |
 
@@ -873,15 +876,15 @@ Use the status names below in feature `spec.md` headers, reviews, traceability n
 | `Clarified` | Major ambiguity has been resolved and the spec is ready for planning | `spec.md` records clarification decisions; no blocking `NEEDS CLARIFICATION` remains for the approved scope. |
 | `Planned` | Implementation approach is accepted but delivery is not complete | `plan.md` exists and constitution/technical context checks are recorded. |
 | `Implemented` | Tasks are complete and implementation evidence exists, but final verification marker is not present | `tasks.md` is complete; implementation, review, or verify-task evidence exists; `.verify-done` may be absent. |
-| `Verified` | Implementation has passed the post-implementation gate | `review.md` exists, `.verify-done` exists, task completion is complete, and the sync gate reports `current`. |
+| `Verified` | Implementation has passed the post-implementation gate | `review.md` exists, `.verify-done` exists, task completion is complete, and the final after-verify sync gate reports `current`. |
 | `Backfilled` | Spec was created after existing behavior to restore governance coverage | The spec names the source implementation evidence and must be reconciled through analysis and sync before it becomes normal planned/implemented work. |
 | `Superseded` | Feature directory is retained for history but replaced by another spec or governed artifact | `spec.md` links the replacement and explains whether traceability moved or remains historical. |
 
 Status movement rules:
 
 - Update the `**Status**` field in `spec.md` when the feature moves between these lifecycle states.
-- Create or update `review.md` during implementation verification; create `.verify-done` only after the post-implementation verification gate passes.
-- Regenerate [spec-sync-status.md](../../specs/spec-sync-status.md) and [SRS_SPEC_TRACEABILITY.md](../domains/agent/SRS_SPEC_TRACEABILITY.md) with `python scripts/sync_spec_status.py --gate` after status, tasks, review, or SRS mapping changes.
+- Create or update `review.md` during implementation verification; create `.verify-done` only after `speckit.verify.run` passes.
+- Regenerate [spec-sync-status.md](../../specs/spec-sync-status.md) and [SRS_SPEC_TRACEABILITY.md](../domains/agent/SRS_SPEC_TRACEABILITY.md) with `speckit.doc-sync.gate` / `python scripts/sync_spec_status.py --gate` after planning, implementation, verification, status, tasks, review, or SRS mapping changes.
 - Use `Implemented`, not `Verified`, when implementation evidence is complete but `.verify-done` is absent.
 - Use `Backfilled` for governance restoration of pre-existing behavior; do not use it for a normal feature that is merely late in updating docs.
 
@@ -941,21 +944,21 @@ The repository's configured extension hooks form an operating overlay around the
 | Before `specify` | feature branch creation, memory loading | Prepare a clean feature context |
 | After `specify` | doctor, optional commit | Check project health and preserve generated state |
 | Before `plan` | optional commit, memory loading | Carry forward clean context into planning |
-| After `plan` | validate, architecture scan | Check traceability and detect drift early |
+| After `plan` | validate, document/spec sync gate, architecture scan | Check planned SRS mappings, lifecycle status, evidence paths, and drift before task generation |
 | Before `tasks` | optional commit, memory loading | Keep task generation grounded in current state |
 | After `tasks` | requirements validation, fleet review, architecture follow-up | Strengthen readiness before implementation |
 | Before `implement` | optional commit, memory loading | Reduce context loss before code generation |
-| After `implement` | verify-tasks.run, verify.run, architecture review | Confirm real delivery and post-implementation compliance |
+| After `implement` | document/spec sync gate, verify-tasks.run, verify.run, final document/spec sync gate, architecture review | Confirm real delivery, verification evidence, generated reports, and post-implementation compliance |
 
 When documenting or adjusting this automation, prefer what is actually configured in [../../.specify/extensions.yml](../../.specify/extensions.yml) over generic examples from older Spec Kit material.
 
-The current supported synchronization posture is local-script first: regenerate forward and reverse traceability with `python scripts/sync_spec_status.py --gate`. Do not document `speckit.sync.*` as an available command surface until `specify extension list` shows the sync extension installed and enabled.
+The current supported synchronization posture is local-script first: `speckit.doc-sync.gate` runs `python scripts/sync_spec_status.py --gate` to regenerate forward and reverse traceability. Do not document third-party `speckit.sync.*` as the canonical sync surface until a governed migration shows the extension installed, enabled, and capable of producing this repository's SRS/spec reports.
 
 ## 6. Best Practices
 
 - Create and maintain governed feature artifacts under [../../specs/](../../specs/), not under `docs/` and not as the primary record in `.specify/specs/`.
 - Keep [../../specs/spec-traceability.yaml](../../specs/spec-traceability.yaml) synchronized whenever SRS scope changes.
-- Keep [../../specs/spec-sync-status.md](../../specs/spec-sync-status.md) aligned with actual feature status and evidence by running `python scripts/sync_spec_status.py --gate` after traceability, status, or review changes.
+- Keep [../../specs/spec-sync-status.md](../../specs/spec-sync-status.md) aligned with actual feature status and evidence by running `speckit.doc-sync.gate` / `python scripts/sync_spec_status.py --gate` after planning, implementation, verification, traceability, status, or review changes.
 - Treat the project constitution in [../../.specify/memory/constitution.md](../../.specify/memory/constitution.md) as binding when reviewing or implementing work.
 - Use [../../docs/openapi.yaml](../../docs/openapi.yaml) as a mandatory synchronization target for REST API changes.
 - Prefer current official documentation links from `https://github.github.io/spec-kit/` over older repository blob links.
@@ -968,7 +971,7 @@ The current supported synchronization posture is local-script first: regenerate 
 - **A command does not appear in the agent**: run `specify extension list`, confirm the related extension is available locally, and review [../../.specify/extensions.yml](../../.specify/extensions.yml).
 - **The integration looks wrong**: run `specify integration status` and `specify integration list`; this repository expects GitHub Copilot as default, Codex as an installed secondary integration, and PowerShell-oriented scripts.
 - **Unsure where to place new feature artifacts**: publish governed work in [../../specs/](../../specs/). Treat `.specify/` as supporting automation and template infrastructure.
-- **Traceability is stale**: update [../../specs/spec-traceability.yaml](../../specs/spec-traceability.yaml), refresh task and review evidence, then run `python scripts/sync_spec_status.py --gate` to bring [../../specs/spec-sync-status.md](../../specs/spec-sync-status.md) and [SRS_SPEC_TRACEABILITY.md](../domains/agent/SRS_SPEC_TRACEABILITY.md) back in line.
+- **Traceability is stale**: update [../../specs/spec-traceability.yaml](../../specs/spec-traceability.yaml), refresh planning, task, implementation, and review evidence as appropriate, then run `speckit.doc-sync.gate` / `python scripts/sync_spec_status.py --gate` to bring [../../specs/spec-sync-status.md](../../specs/spec-sync-status.md) and [SRS_SPEC_TRACEABILITY.md](../domains/agent/SRS_SPEC_TRACEABILITY.md) back in line.
 - **REST behavior changed but documentation did not**: update [../../docs/openapi.yaml](../../docs/openapi.yaml) as part of the same delivery cycle.
 - **Mermaid does not render cleanly**: keep diagrams in fenced `mermaid` blocks and use short labels with simple punctuation.
 
