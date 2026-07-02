@@ -1,15 +1,15 @@
 # Spec Sync Status
 
-> **Document Version**: 1.5
-> **Generated**: 2026-07-01 04:02:48Z
+> **Document Version**: 1.7
+> **Generated**: 2026-07-02 09:05:16Z
 > **Status**: Active
 > **Traceability Manifest Version**: 1
 
 ## Baseline
 
 - SRS: [docs/domains/agent/SOFTWARE_REQUIREMENTS_SPECIFICATION.md](../docs/domains/agent/SOFTWARE_REQUIREMENTS_SPECIFICATION.md)
-- SRS version: `2.7`
-- SRS last updated: `2026-06-03`
+- SRS version: `2.8`
+- SRS last updated: `2026-06-18`
 
 ## Summary
 
@@ -21,6 +21,7 @@
 | [spec-driven-development-pilot](spec-driven-development-pilot/plan.md#summary) | `mapped` | `partial` | `implemented` | `current` | `42/42` |
 | [prompt-system-milestone1](prompt-system-milestone1/spec.md#user-scenarios--testing-mandatory) | `mapped` | `partial` | `implemented` | `current` | `42/42` |
 | [prompt-system-milestone2](prompt-system-milestone2/spec.md#governance-context-mandatory) | `mapped` | `partial` | `implemented` | `current` | `45/45` |
+| [tool-system-implementation-m2b.1](tool-system-implementation-m2b.1/spec.md#governance-context-mandatory) | `mapped` | `partial` | `planned` | `current` | `0/70` |
 
 ## Revision History
 
@@ -32,6 +33,9 @@
 | `1.3` | `2026-06-04` | Added prompt-system-milestone2 (M2) feature entry — mapping_status planned, spec.md and quality checklist as evidence paths. SRS v2.7 baseline reused. |
 | `1.4` | `2026-06-04` | Updated prompt-system-milestone2 (M2) feature entry — mapping_status implemented, all design and delivery artifacts added to evidence paths. PromptAssembler, route-skill assets, and agent wiring delivered. |
 | `1.5` | `2026-07-01` | Normalized feature mapping_status values back to mapped, aligned legacy STM feature baselines to SRS v2.7, and expanded M2 evidence paths for regenerated sync reports. |
+| `1.6` | `2026-07-01` | Added tool-system-implementation-m2b.1 feature entry at clarified status and aligned mapped feature baselines to SRS v2.8 for regenerated sync reports. |
+| `1.7` | `2026-07-01` | Promoted tool-system-implementation-m2b.1 to planned status and added plan, research, design, contract, and quickstart evidence paths. |
+| `1.8` | `2026-07-02` | Added tool-system-implementation-m2b.1 task checklist and requirements-alignment checklist evidence after task generation. |
 
 ## agent-session-with-stm-wiring
 
@@ -145,14 +149,32 @@
 - Evidence:
   - [Feature specification](prompt-system-milestone2/spec.md#governance-context-mandatory)
   - [Quality gate checklist](prompt-system-milestone2/checklists/requirements.md)
-  - [Implementation plan](prompt-system-milestone2/plan.md)
-  - [Task checklist](prompt-system-milestone2/tasks.md)
-  - [Research notes](prompt-system-milestone2/research.md)
-  - [Data model](prompt-system-milestone2/data-model.md)
-  - [Quickstart validation](prompt-system-milestone2/quickstart.md)
-  - [Prompt assembler contract](prompt-system-milestone2/contracts/prompt-assembler-interface.md)
-  - [Route skill asset contract](prompt-system-milestone2/contracts/route-skill-asset-schema.md)
-  - [Verification review](prompt-system-milestone2/review.md)
+
+## tool-system-implementation-m2b.1
+
+- Title: Tool Contract and Gateway Baseline - M2B.1
+- Path: [specs/tool-system-implementation-m2b.1](tool-system-implementation-m2b.1/spec.md#governance-context-mandatory)
+- Mapping status: `mapped`
+- Coverage status: `partial`
+- Derived status: `planned`
+- Sync status: `current`
+- Sync gate enforced: `yes`
+- spec.md status field: `Planned`
+- Task completion: `0/70`
+- Linked SRS items: `FR-2.4.1, FR-2.4.2, FR-2.4.3, FR-2.4.4, FR-2.4.5, FR-2.4.6, FR-4.2.1, NFR-4.2.3, NFR-5.2.12, NFR-6.2.6, CON-6, CON-9, CON-10, AC-9.1, AC-9.2, AC-9.3, AC-9.4, IR-3.1, IR-3.2`
+- Evidence:
+  - [Feature specification](tool-system-implementation-m2b.1/spec.md#governance-context-mandatory)
+  - [Clarified boundary decisions](tool-system-implementation-m2b.1/spec.md#clarifications)
+  - [Implementation plan](tool-system-implementation-m2b.1/plan.md#governance-and-traceability-context)
+  - [Phase 0 research decisions](tool-system-implementation-m2b.1/research.md)
+  - [Phase 1 data model](tool-system-implementation-m2b.1/data-model.md)
+  - [Tool descriptor contract](tool-system-implementation-m2b.1/contracts/tool-descriptor-contract.md)
+  - [Route-filtered surface contract](tool-system-implementation-m2b.1/contracts/route-surface-contract.md)
+  - [Gateway admission and trace contract](tool-system-implementation-m2b.1/contracts/gateway-admission-trace-contract.md)
+  - [Quickstart validation guide](tool-system-implementation-m2b.1/quickstart.md)
+  - [Requirements quality checklist](tool-system-implementation-m2b.1/checklists/requirements.md)
+  - [Requirements alignment checklist](tool-system-implementation-m2b.1/checklists/requirements-alignment.md)
+  - [Implementation task checklist](tool-system-implementation-m2b.1/tasks.md)
 
 ## Status Semantics
 
