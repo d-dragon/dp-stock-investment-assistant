@@ -1,0 +1,1 @@
+../../../.specify/extensions/doc-sync/.specify-dev/agent-commands/zed/speckit-doc-sync-gate/SKILL.md
