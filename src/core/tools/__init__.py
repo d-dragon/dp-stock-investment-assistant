@@ -20,6 +20,29 @@ from .registry import ToolRegistry, get_tool_registry, reset_tool_registry
 from .stock_symbol import StockSymbolTool
 from .reporting import ReportingTool
 from .tradingview import TradingViewTool
+from .descriptors import (
+    BaselineInventoryState,
+    ExposureStatus,
+    LicenseMode,
+    MutationPolicy,
+    RiskClass,
+    ToolCapabilityDescriptor,
+    ToolPolicyDescriptor,
+    get_baseline_tool_descriptors,
+    get_baseline_tool_inventory,
+    validate_descriptor_inventory,
+)
+from .gateway import (
+    DegradedToolResult,
+    GatewayAdmissionDecision,
+    ToolGateway,
+    ToolTraceRecord,
+)
+from .surface import (
+    RouteFilteredToolSurface,
+    RouteSurfaceRequest,
+    ToolSurfaceBuilder,
+)
 
 __all__ = [
     # Base
@@ -32,4 +55,23 @@ __all__ = [
     "StockSymbolTool",
     "ReportingTool",
     "TradingViewTool",
+    # M2B.1 descriptors
+    "BaselineInventoryState",
+    "ExposureStatus",
+    "LicenseMode",
+    "MutationPolicy",
+    "RiskClass",
+    "ToolCapabilityDescriptor",
+    "ToolPolicyDescriptor",
+    "get_baseline_tool_descriptors",
+    "get_baseline_tool_inventory",
+    "validate_descriptor_inventory",
+    # M2B.1 surface and gateway
+    "RouteFilteredToolSurface",
+    "RouteSurfaceRequest",
+    "ToolSurfaceBuilder",
+    "DegradedToolResult",
+    "GatewayAdmissionDecision",
+    "ToolGateway",
+    "ToolTraceRecord",
 ]

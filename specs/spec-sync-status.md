@@ -1,7 +1,7 @@
 # Spec Sync Status
 
 > **Document Version**: 1.7
-> **Generated**: 2026-07-02 09:05:16Z
+> **Generated**: 2026-07-03 08:43:49Z
 > **Status**: Active
 > **Traceability Manifest Version**: 1
 
@@ -21,7 +21,7 @@
 | [spec-driven-development-pilot](spec-driven-development-pilot/plan.md#summary) | `mapped` | `partial` | `implemented` | `current` | `42/42` |
 | [prompt-system-milestone1](prompt-system-milestone1/spec.md#user-scenarios--testing-mandatory) | `mapped` | `partial` | `implemented` | `current` | `42/42` |
 | [prompt-system-milestone2](prompt-system-milestone2/spec.md#governance-context-mandatory) | `mapped` | `partial` | `implemented` | `current` | `45/45` |
-| [tool-system-implementation-m2b.1](tool-system-implementation-m2b.1/spec.md#governance-context-mandatory) | `mapped` | `partial` | `planned` | `current` | `0/70` |
+| [tool-system-implementation-m2b.1](tool-system-implementation-m2b.1/spec.md#governance-context-mandatory) | `mapped` | `partial` | `verified` | `current` | `70/70` |
 
 ## Revision History
 
@@ -36,6 +36,7 @@
 | `1.6` | `2026-07-01` | Added tool-system-implementation-m2b.1 feature entry at clarified status and aligned mapped feature baselines to SRS v2.8 for regenerated sync reports. |
 | `1.7` | `2026-07-01` | Promoted tool-system-implementation-m2b.1 to planned status and added plan, research, design, contract, and quickstart evidence paths. |
 | `1.8` | `2026-07-02` | Added tool-system-implementation-m2b.1 task checklist and requirements-alignment checklist evidence after task generation. |
+| `1.9` | `2026-07-02` | Added M2B.1 implementation review evidence and coverage-gate mappings after application code implementation. |
 
 ## agent-session-with-stm-wiring
 
@@ -156,12 +157,12 @@
 - Path: [specs/tool-system-implementation-m2b.1](tool-system-implementation-m2b.1/spec.md#governance-context-mandatory)
 - Mapping status: `mapped`
 - Coverage status: `partial`
-- Derived status: `planned`
+- Derived status: `verified`
 - Sync status: `current`
 - Sync gate enforced: `yes`
-- spec.md status field: `Planned`
-- Task completion: `0/70`
-- Linked SRS items: `FR-2.4.1, FR-2.4.2, FR-2.4.3, FR-2.4.4, FR-2.4.5, FR-2.4.6, FR-4.2.1, NFR-4.2.3, NFR-5.2.12, NFR-6.2.6, CON-6, CON-9, CON-10, AC-9.1, AC-9.2, AC-9.3, AC-9.4, IR-3.1, IR-3.2`
+- spec.md status field: `Verified`
+- Task completion: `70/70`
+- Linked SRS items: `FR-2.4.1, FR-2.4.2, FR-2.4.3, FR-2.4.4, FR-2.4.5, FR-2.4.6, FR-4.2.1, NFR-4.2.3, NFR-5.2.12, NFR-6.1.3, NFR-6.1.4, NFR-6.2.6, CON-6, CON-9, CON-10, AC-9.1, AC-9.2, AC-9.3, AC-9.4, IR-3.1, IR-3.2`
 - Evidence:
   - [Feature specification](tool-system-implementation-m2b.1/spec.md#governance-context-mandatory)
   - [Clarified boundary decisions](tool-system-implementation-m2b.1/spec.md#clarifications)
@@ -175,6 +176,9 @@
   - [Requirements quality checklist](tool-system-implementation-m2b.1/checklists/requirements.md)
   - [Requirements alignment checklist](tool-system-implementation-m2b.1/checklists/requirements-alignment.md)
   - [Implementation task checklist](tool-system-implementation-m2b.1/tasks.md)
+  - [Implementation review evidence](tool-system-implementation-m2b.1/review.md)
+  - [Final verification re-run verdict](tool-system-implementation-m2b.1/review.md#final-verification-re-run-verdict)
+  - [Verify marker](tool-system-implementation-m2b.1/.verify-done)
 
 ## Status Semantics
 

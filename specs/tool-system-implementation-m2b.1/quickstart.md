@@ -13,7 +13,7 @@ This guide describes focused validation for the M2B.1 plan. Commands assume the 
 Run the focused descriptor tests after implementation:
 
 ```powershell
-pytest tests/test_tool_gateway_m2b1.py -k descriptor
+python -m pytest tests/test_tool_gateway_m2b1.py -k descriptor -q
 ```
 
 Expected outcome:
@@ -26,7 +26,7 @@ Expected outcome:
 Run route filtering fixtures:
 
 ```powershell
-pytest tests/test_tool_gateway_m2b1.py -k route_surface
+python -m pytest tests/test_tool_gateway_m2b1.py -k route_surface -q
 ```
 
 Expected outcome:
@@ -39,7 +39,7 @@ Expected outcome:
 Run admission fixtures:
 
 ```powershell
-pytest tests/test_tool_gateway_m2b1.py -k gateway_admission
+python -m pytest tests/test_tool_gateway_m2b1.py -k gateway_admission -q
 ```
 
 Expected outcome:
@@ -52,7 +52,7 @@ Expected outcome:
 Run current tool tests:
 
 ```powershell
-pytest tests/test_tools.py
+python -m pytest tests/test_tools.py tests/test_stock_query_router.py tests/test_agent_regression.py -q
 ```
 
 Expected outcome:
@@ -64,7 +64,8 @@ Expected outcome:
 Run focused agent/router tests:
 
 ```powershell
-pytest tests/test_stock_query_router.py tests/test_agent.py
+python -m pytest tests/test_tool_gateway_m2b1.py tests/test_stock_query_router.py tests/test_agent_regression.py --cov=src.core.stock_query_router --cov-fail-under=80 -q
+python -m pytest tests/test_tool_gateway_m2b1.py tests/test_tools.py --cov=src/core/tools --cov-fail-under=70 -q
 ```
 
 Expected outcome:
