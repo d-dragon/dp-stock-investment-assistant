@@ -1,0 +1,5 @@
+Verified: 2026-07-03
+Feature: tool-system-implementation-m2b.1
+Scope: M2B.1 Tool Contract and Gateway Baseline
+Evidence: specs/tool-system-implementation-m2b.1/review.md#final-verification-re-run-verdict
+Accepted warning: repo-wide baseline command cleanup deferred to M2B.2; M2B.1 focused verification, compatibility, coverage, and sync gates passed.

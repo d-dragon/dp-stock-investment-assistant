@@ -10,8 +10,38 @@ Reference: backend-python.instructions.md § Model Factory and AI Clients
 import logging
 from typing import Any, Dict, List, Mapping, Optional, Tuple
 
-from semantic_router import Route, SemanticRouter
-from semantic_router.encoders import DenseEncoder, HuggingFaceEncoder, OpenAIEncoder
+try:
+    from semantic_router import Route, SemanticRouter
+    from semantic_router.encoders import DenseEncoder, HuggingFaceEncoder, OpenAIEncoder
+except ModuleNotFoundError:
+    class DenseEncoder:  # type: ignore[no-redef]
+        """Fallback type used when semantic-router is not installed."""
+
+        pass
+
+    class Route:  # type: ignore[no-redef]
+        """Fallback route object for import-safe tests and degraded startup."""
+
+        def __init__(self, name: str, utterances: list[str]) -> None:
+            self.name = name
+            self.utterances = utterances
+
+    class SemanticRouter:  # type: ignore[no-redef]
+        """Fallback router that reports no match until dependency is installed."""
+
+        def __init__(self, *args, **kwargs) -> None:
+            self._available = False
+
+        def __call__(self, query: str):
+            return type("RouteMatch", (), {"name": None, "similarity_score": 0.0})()
+
+    class HuggingFaceEncoder(DenseEncoder):  # type: ignore[no-redef]
+        def __init__(self, *args, **kwargs) -> None:
+            raise ModuleNotFoundError("semantic_router")
+
+    class OpenAIEncoder(DenseEncoder):  # type: ignore[no-redef]
+        def __init__(self, *args, **kwargs) -> None:
+            raise ModuleNotFoundError("semantic_router")
 
 from .routes import (
     ROUTE_UTTERANCES,

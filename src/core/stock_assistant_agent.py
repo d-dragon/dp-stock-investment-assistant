@@ -59,7 +59,10 @@ from .prompt_asset_loader import PromptAssetLoader
 from .prompt_assembler import PromptAssembler
 from .prompt_types import PromptSelection, SelectionTuple
 from .routes import StockQueryRoute
+from .stock_query_router import StockQueryRouter
+from .tools.gateway import ToolGateway, safe_public_metadata
 from .tools.registry import ToolRegistry, get_tool_registry
+from .tools.surface import RouteFilteredToolSurface, ToolSurfaceBuilder
 from .types import AgentResponse, ResponseStatus, TokenUsage, ToolCall
 
 
@@ -121,6 +124,9 @@ If you don't have a tool for a specific request, provide helpful general guidanc
         logger: Optional[logging.Logger] = None,
         prompt_asset_loader: Optional[PromptAssetLoader] = None,
         prompt_assembler: Optional[PromptAssembler] = None,
+        stock_query_router: Optional[StockQueryRouter] = None,
+        tool_surface_builder: Optional[ToolSurfaceBuilder] = None,
+        tool_gateway: Optional[ToolGateway] = None,
     ) -> None:
         """Initialize StockAssistantAgent.
         
@@ -137,6 +143,9 @@ If you don't have a tool for a specific request, provide helpful general guidanc
                 When provided and ``route_contexts.enabled`` is ``True`` in config, the agent
                 composes the system prompt through ``PromptAssembler.compile()`` instead of using
                 the raw ``PromptSelection`` content.
+            stock_query_router: Optional router used to classify the per-query tool route.
+            tool_surface_builder: Optional M2B.1 route-filtered tool surface builder.
+            tool_gateway: Optional M2B.1 thin gateway around registry-backed execution.
         """
         self.config = config
         self.data_manager = data_manager
@@ -154,6 +163,15 @@ If you don't have a tool for a specific request, provide helpful general guidanc
         
         # Initialize tools into the registry
         self._initialize_tools()
+
+        # M2B.1 route-filtered tool surface and gateway overlays.
+        self._stock_query_router = stock_query_router
+        self._tool_surface_builder = tool_surface_builder or ToolSurfaceBuilder(
+            registry=self._tool_registry,
+            environment=str(self.config.get("environment", "production")),
+        )
+        self._tool_gateway = tool_gateway or ToolGateway(self._tool_registry)
+        self._last_tool_surface: Optional[RouteFilteredToolSurface] = None
         
         # Preload default client (for model info)
         self._client = ModelClientFactory.get_client(self.config)
@@ -466,15 +484,15 @@ If you don't have a tool for a specific request, provide helpful general guidanc
         except Exception as e:
             self.logger.error(f"Failed to initialize tools: {e}", exc_info=True)
     
-    def _build_agent_executor(self):
+    def _build_agent_executor(self, tools: Optional[List[Any]] = None):
         """Build LangGraph ReAct agent.
         
         Returns:
             CompiledStateGraph configured with enabled tools and optional checkpointer,
             or None if no tools are available.
         """
-        # Get enabled tools from registry
-        enabled_tools = self._tool_registry.get_enabled_tools()
+        # Get enabled tools from registry unless a per-turn filtered surface is supplied.
+        enabled_tools = tools if tools is not None else self._tool_registry.get_enabled_tools()
         
         if not enabled_tools:
             self.logger.warning("No enabled tools found. Agent will run without tools.")
@@ -521,6 +539,62 @@ If you don't have a tool for a specific request, provide helpful general guidanc
         except Exception as e:
             self.logger.error(f"Failed to build ReAct agent: {e}")
             return None
+
+    def _classify_tool_route(self, query: str) -> StockQueryRoute:
+        """Classify a query for M2B.1 tool-surface construction."""
+
+        if self._stock_query_router is not None:
+            try:
+                return self._stock_query_router.route(query).route
+            except Exception:
+                self.logger.debug("StockQueryRouter failed during tool-surface classification", exc_info=True)
+
+        q = query.lower()
+        if any(token in q for token in ("price", "quote", "trading at", "market cap", "current")):
+            return StockQueryRoute.PRICE_CHECK
+        if any(token in q for token in ("rsi", "macd", "chart", "bollinger", "technical")):
+            return StockQueryRoute.TECHNICAL_ANALYSIS
+        if any(token in q for token in ("p/e", "pe ratio", "earnings", "revenue", "fundamental", "dividend")):
+            return StockQueryRoute.FUNDAMENTALS
+        if any(token in q for token in ("portfolio", "holdings", "allocation", "rebalance")):
+            return StockQueryRoute.PORTFOLIO
+        if any(token in q for token in ("news", "headline", "latest")):
+            return StockQueryRoute.NEWS_ANALYSIS
+        if any(token in q for token in ("market", "index", "sector performance", "breadth")):
+            return StockQueryRoute.MARKET_WATCH
+        if any(token in q for token in ("should i buy", "recommend", "ideas", "stocks should")):
+            return StockQueryRoute.IDEAS
+        return StockQueryRoute.GENERAL_CHAT
+
+    def _build_tool_surface_for_query(self, query: str) -> RouteFilteredToolSurface:
+        """Build and remember the per-query M2B.1 route-filtered tool surface."""
+
+        route = self._classify_tool_route(query)
+        surface = self._tool_surface_builder.build_for_route(
+            route,
+            feature_flags=self.config.get("tool_feature_flags", {}),
+            available_context={},
+        )
+        self._last_tool_surface = surface
+        return surface
+
+    def _build_executor_for_query(self, query: str):
+        """Build a per-turn executor with only gateway-admitted wrappers."""
+
+        surface = self._build_tool_surface_for_query(query)
+        wrapped_tools = list(
+            self._tool_gateway.create_wrapped_tools(
+                route=surface.route,
+                surface=surface,
+            )
+        )
+        if not wrapped_tools:
+            self.logger.info(
+                "M2B.1 tool surface for route=%s exposed no tools",
+                surface.route.value,
+            )
+            return None
+        return self._build_agent_executor(tools=wrapped_tools)
     
     # -------- Public API (Compatible with StockAgent interface) --------
     
@@ -571,9 +645,15 @@ If you don't have a tool for a specific request, provide helpful general guidanc
             Complete response text
         """
         try:
-            # Try ReAct agent first
-            if self._agent_executor:
-                return self._process_with_react(query, provider=provider, conversation_id=conversation_id)
+            # Build a route-filtered gateway-wrapped executor for this turn.
+            turn_executor = self._build_executor_for_query(query)
+            if turn_executor:
+                return self._process_with_react(
+                    query,
+                    provider=provider,
+                    conversation_id=conversation_id,
+                    agent_executor=turn_executor,
+                )
             
             # Fallback to legacy processing
             return self._process_legacy(query, provider=provider)
@@ -605,11 +685,17 @@ If you don't have a tool for a specific request, provide helpful general guidanc
         """
         try:
             # If we have a ReAct agent, use async streaming
-            if self._agent_executor:
+            turn_executor = self._build_executor_for_query(query)
+            if turn_executor:
                 # Run async streaming in sync context
                 loop = asyncio.new_event_loop()
                 try:
-                    async_gen = self._stream_with_react_async(query, provider=provider, conversation_id=conversation_id)
+                    async_gen = self._stream_with_react_async(
+                        query,
+                        provider=provider,
+                        conversation_id=conversation_id,
+                        agent_executor=turn_executor,
+                    )
                     while True:
                         try:
                             chunk = loop.run_until_complete(async_gen.__anext__())
@@ -649,14 +735,15 @@ If you don't have a tool for a specific request, provide helpful general guidanc
         tool_calls: List[ToolCall] = []
         
         try:
-            if self._agent_executor:
+            turn_executor = self._build_executor_for_query(query)
+            if turn_executor:
                 # Build invoke config for conversation memory
                 invoke_config = None
                 if conversation_id and self._checkpointer:
                     invoke_config = {"configurable": {"thread_id": conversation_id}}
                 
                 # Use LangGraph ReAct agent
-                result = self._agent_executor.invoke(
+                result = turn_executor.invoke(
                     {"messages": [HumanMessage(content=query)]},
                     config=invoke_config,
                 )
@@ -681,15 +768,34 @@ If you don't have a tool for a specific request, provide helpful general guidanc
                 # Get model info
                 client = self._select_client(provider)
                 
+                metadata = {
+                    "execution_time_ms": (time.time() - start_time) * 1000,
+                    "tools_used": len(tool_calls),
+                }
+                if self._last_tool_surface is not None:
+                    metadata.update(
+                        {
+                            "tool_route": self._last_tool_surface.route.value,
+                            "tool_surface_hash": self._last_tool_surface.surface_hash,
+                            "tool_surface_exposed_tools": self._last_tool_surface.exposed_tool_names,
+                        }
+                    )
+                if self._tool_gateway.trace_records:
+                    latest_trace = self._tool_gateway.trace_records[-1]
+                    if latest_trace.degraded_state_reason or latest_trace.warning:
+                        metadata.update(safe_public_metadata(type("DecisionSummary", (), {
+                            "outcome": latest_trace.admission_outcome,
+                            "degraded_reason": latest_trace.degraded_state_reason,
+                            "machine_code": latest_trace.degraded_state_reason or "",
+                            "trace_record": latest_trace,
+                        })()))
+
                 return AgentResponse.success(
                     content=content,
                     provider=client.provider,
                     model=client.model_name,
                     tool_calls=tuple(tool_calls),
-                    metadata={
-                        "execution_time_ms": (time.time() - start_time) * 1000,
-                        "tools_used": len(tool_calls),
-                    },
+                    metadata=metadata,
                 )
             
             # Fallback to legacy
@@ -719,6 +825,7 @@ If you don't have a tool for a specific request, provide helpful general guidanc
         *,
         provider: Optional[str] = None,
         conversation_id: Optional[str] = None,
+        agent_executor: Optional[Any] = None,
     ) -> str:
         """Process query using LangGraph ReAct agent.
         
@@ -758,8 +865,12 @@ If you don't have a tool for a specific request, provide helpful general guidanc
                 # LangSmith unavailable — degrade silently (M1-NFR-004)
                 self.logger.debug("Failed to inject LangSmith trace tags (non-critical)")
             
+            executor = agent_executor or self._agent_executor
+            if executor is None:
+                return self._process_legacy(query, provider=provider)
+
             # LangGraph agent uses messages format
-            result = self._agent_executor.invoke(
+            result = executor.invoke(
                 {"messages": [HumanMessage(content=query)]},
                 config=invoke_config,
             )
@@ -790,6 +901,7 @@ If you don't have a tool for a specific request, provide helpful general guidanc
         *,
         provider: Optional[str] = None,
         conversation_id: Optional[str] = None,
+        agent_executor: Optional[Any] = None,
     ):
         """Async stream using astream_events for tool visibility.
         
@@ -809,7 +921,12 @@ If you don't have a tool for a specific request, provide helpful general guidanc
                 stream_config = {"configurable": {"thread_id": conversation_id}}
                 self.logger.debug(f"Conversation-aware streaming with thread_id: {conversation_id}")
             
-            async for event in self._agent_executor.astream_events(
+            executor = agent_executor or self._agent_executor
+            if executor is None:
+                yield self._process_legacy(query, provider=provider)
+                return
+
+            async for event in executor.astream_events(
                 {"messages": [HumanMessage(content=query)]},
                 version="v2",
                 config=stream_config,

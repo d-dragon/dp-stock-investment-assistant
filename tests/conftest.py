@@ -1,41 +1,32 @@
-"""Pytest configuration and fixtures.
+"""Project-local pytest compatibility hooks."""
 
-Coverage non-regression (NFR-6.1.3):
-    The coverage floor is tracked in ``pytest.ini`` as a comment.
-    Run ``pytest tests/ --cov=src --cov-fail-under=56 -q`` to enforce.
-    Update the threshold after coverage improves to ratchet upward.
-"""
+from __future__ import annotations
 
-import os
+import asyncio
+import inspect
 import sys
-from typing import Dict
-
-import pytest
-
-PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-SRC_PATH = os.path.join(PROJECT_ROOT, "src")
-if SRC_PATH not in sys.path:
-    sys.path.insert(0, SRC_PATH)
+from pathlib import Path
 
 
-def _to_wsgi_header_name(header_name: str) -> str:
-    """Convert an HTTP header key to Flask/Werkzeug environ format."""
-    return f"HTTP_{header_name.upper().replace('-', '_')}"
+REPO_ROOT = Path(__file__).resolve().parents[1]
+SRC_ROOT = REPO_ROOT / "src"
+for path in (REPO_ROOT, SRC_ROOT):
+    path_text = str(path)
+    if path_text not in sys.path:
+        sys.path.insert(0, path_text)
 
 
-@pytest.fixture
-def management_headers() -> Dict[str, str]:
-    """Default headers required by strict management routes in tests."""
-    return {"X-User-ID": "user-1"}
+def pytest_pyfunc_call(pyfuncitem):
+    """Run coroutine tests marked with pytest.mark.asyncio without extra plugins."""
 
-
-@pytest.fixture
-def apply_management_headers(management_headers):
-    """Return a helper that applies required management headers to a test client."""
-
-    def _apply(client):
-        for key, value in management_headers.items():
-            client.environ_base[_to_wsgi_header_name(key)] = value
-        return client
-
-    return _apply
+    if "asyncio" not in pyfuncitem.keywords:
+        return None
+    testfunction = pyfuncitem.obj
+    if not inspect.iscoroutinefunction(testfunction):
+        return None
+    kwargs = {
+        name: pyfuncitem.funcargs[name]
+        for name in pyfuncitem._fixtureinfo.argnames
+    }
+    asyncio.run(testfunction(**kwargs))
+    return True

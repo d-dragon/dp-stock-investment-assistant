@@ -33,6 +33,9 @@ reports:
       - version: "1.8"
         date: 2026-07-02
         summary: Added tool-system-implementation-m2b.1 task checklist and requirements-alignment checklist evidence after task generation.
+      - version: "1.9"
+        date: 2026-07-02
+        summary: Added M2B.1 implementation review evidence and coverage-gate mappings after application code implementation.
   srs_spec_traceability:
     version: "2.1"
     status: Active
@@ -79,6 +82,9 @@ reports:
       - version: "2.3"
         date: 2026-07-02
         summary: Added NFR-4.2.3 reverse trace coverage and regenerated after pre-implementation analysis remediation for tool-system-implementation-m2b.1.
+      - version: "2.4"
+        date: 2026-07-02
+        summary: Regenerated reverse trace after M2B.1 implementation evidence and coverage-gate mappings were added.
 
 srs:
   path: docs/domains/agent/SOFTWARE_REQUIREMENTS_SPECIFICATION.md
@@ -773,6 +779,7 @@ features:
         - specs/tool-system-implementation-m2b.1/checklists/requirements.md
         - specs/tool-system-implementation-m2b.1/checklists/requirements-alignment.md
         - specs/tool-system-implementation-m2b.1/tasks.md
+        - specs/tool-system-implementation-m2b.1/review.md
     srs_mapping:
       baseline_version: "2.8"
       coverage_status: partial
@@ -786,6 +793,8 @@ features:
         - FR-4.2.1
         - NFR-4.2.3
         - NFR-5.2.12
+        - NFR-6.1.3
+        - NFR-6.1.4
         - NFR-6.2.6
         - CON-6
         - CON-9
@@ -813,6 +822,8 @@ features:
       mapped_non_functional:
         - NFR-4.2.3
         - NFR-5.2.12
+        - NFR-6.1.3
+        - NFR-6.1.4
         - NFR-6.2.6
       mapped_acceptance_criteria:
         - AC-9.1
@@ -826,6 +837,8 @@ features:
         - Socket.IO lifecycle parity remains outside this milestone.
         - Planning artifacts generated for TS-01 and TS-02 only; provider policy, normalized output, ToolContextPack, and public API contract changes remain out of scope.
         - Coverage evaluated against SRS v2.8 on 2026-07-01.
+        - Implementation review evidence added on 2026-07-02; focused M2B.1 verification passes, but the repo-wide baseline command remains open because unrelated existing tests fail while coverage itself exceeds 56%.
+        - Verified on 2026-07-03 after final M2B.1 verification re-run, compatibility and coverage gates passed, `.verify-done` was created, and the repo-wide baseline warning was accepted for M2B.2 follow-up.
     speckit_mapping:
       spec_requirements:
         - M2B1-FR-001
@@ -885,3 +898,10 @@ features:
           label: Requirements alignment checklist
         - path: specs/tool-system-implementation-m2b.1/tasks.md
           label: Implementation task checklist
+        - path: specs/tool-system-implementation-m2b.1/review.md
+          label: Implementation review evidence
+        - path: specs/tool-system-implementation-m2b.1/review.md
+          label: Final verification re-run verdict
+          anchor: final-verification-re-run-verdict
+        - path: specs/tool-system-implementation-m2b.1/.verify-done
+          label: Verify marker
