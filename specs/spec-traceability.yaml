@@ -3,7 +3,7 @@ generated_on: 2026-03-31
 
 reports:
   spec_sync_status:
-    version: "1.7"
+    version: "1.13"
     status: Active
     revision_history:
       - version: "1.0"
@@ -36,8 +36,20 @@ reports:
       - version: "1.9"
         date: 2026-07-02
         summary: Added M2B.1 implementation review evidence and coverage-gate mappings after application code implementation.
+      - version: "1.10"
+        date: 2026-07-06
+        summary: Added tool-system-m2b.2 clarified feature mapping for M2B.2 internal symbol, provider-policy, normalization, context, and mutation-receipt backbone scope.
+      - version: "1.11"
+        date: 2026-07-06
+        summary: Promoted tool-system-m2b.2 to planned with implementation plan, research, data model, contracts, and quickstart evidence.
+      - version: "1.12"
+        date: 2026-07-06
+        summary: Added tool-system-m2b.2 implementation task breakdown and requirements-alignment checklist evidence.
+      - version: "1.13"
+        date: 2026-07-06
+        summary: Regenerated after M2B.2 cross-artifact analysis aligned plan, quickstart, checklist, and task evidence.
   srs_spec_traceability:
-    version: "2.1"
+    version: "2.8"
     status: Active
     revision_history:
       - version: "1.0"
@@ -85,6 +97,18 @@ reports:
       - version: "2.4"
         date: 2026-07-02
         summary: Regenerated reverse trace after M2B.1 implementation evidence and coverage-gate mappings were added.
+      - version: "2.5"
+        date: 2026-07-06
+        summary: Added reverse trace coverage for tool-system-m2b.2 clarified specification against M2B.2 SRS scope.
+      - version: "2.6"
+        date: 2026-07-06
+        summary: Regenerated reverse trace after tool-system-m2b.2 planning artifacts advanced the feature lifecycle to planned.
+      - version: "2.7"
+        date: 2026-07-06
+        summary: Regenerated reverse trace after tool-system-m2b.2 task generation added implementation-task evidence.
+      - version: "2.8"
+        date: 2026-07-06
+        summary: Regenerated reverse trace after M2B.2 cross-artifact analysis remediation aligned delivery evidence.
 
 srs:
   path: docs/domains/agent/SOFTWARE_REQUIREMENTS_SPECIFICATION.md
@@ -905,3 +929,177 @@ features:
           anchor: final-verification-re-run-verdict
         - path: specs/tool-system-implementation-m2b.1/.verify-done
           label: Verify marker
+
+  - feature_id: tool-system-m2b.2
+    feature_title: Internal Symbol and Normalization Backbone - M2B.2
+    feature_path: specs/tool-system-m2b.2
+    reference_document: specs/tool-system-m2b.2/spec.md
+    reference_anchor: governance-context-mandatory
+    mapping_status: mapped
+    feature_kind: implementation-feature
+    status_sync:
+      source_of_truth: derived
+      gate_enforced: true
+      synchronized_documents:
+        - specs/tool-system-m2b.2/spec.md
+        - specs/tool-system-m2b.2/plan.md
+        - specs/tool-system-m2b.2/research.md
+        - specs/tool-system-m2b.2/data-model.md
+        - specs/tool-system-m2b.2/quickstart.md
+        - specs/tool-system-m2b.2/contracts/symbol-normalization-contract.md
+        - specs/tool-system-m2b.2/contracts/provider-policy-contract.md
+        - specs/tool-system-m2b.2/contracts/tool-normalization-contract.md
+        - specs/tool-system-m2b.2/contracts/mutation-retention-contract.md
+        - specs/tool-system-m2b.2/checklists/requirements.md
+        - specs/tool-system-m2b.2/checklists/requirements-alignment.md
+        - specs/tool-system-m2b.2/tasks.md
+    srs_mapping:
+      baseline_version: "2.8"
+      coverage_status: partial
+      mapped_srs_items:
+        - FR-2.5.1
+        - FR-2.5.2
+        - FR-2.5.3
+        - FR-2.5.4
+        - FR-2.5.5
+        - FR-2.6.1
+        - FR-2.7.1
+        - FR-2.7.2
+        - FR-2.11.1
+        - FR-2.11.2
+        - FR-2.11.3
+        - FR-2.11.4
+        - FR-2.11.5
+        - FR-2.11.6
+        - NFR-2.2.6
+        - NFR-2.3.4
+        - NFR-5.2.15
+        - NFR-6.2.5
+        - CON-6
+        - CON-10
+        - AC-9.5
+        - AC-9.6
+        - AC-9.7
+        - AC-9.10
+        - AC-9.14
+        - AC-9.15
+        - IR-3.3
+        - IR-3.4
+        - IR-3.5
+        - IR-3.6
+        - IR-3.7
+        - IR-3.9
+      mapped_functional_groups:
+        - group: FR-2.5
+          coverage: full
+          includes:
+            - FR-2.5.1
+            - FR-2.5.2
+            - FR-2.5.3
+            - FR-2.5.4
+            - FR-2.5.5
+        - group: FR-2.6
+          coverage: partial
+          includes:
+            - FR-2.6.1
+        - group: FR-2.7
+          coverage: partial
+          includes:
+            - FR-2.7.1
+            - FR-2.7.2
+        - group: FR-2.11
+          coverage: partial
+          includes:
+            - FR-2.11.1
+            - FR-2.11.2
+            - FR-2.11.3
+            - FR-2.11.4
+            - FR-2.11.5
+            - FR-2.11.6
+      mapped_non_functional:
+        - NFR-2.2.6
+        - NFR-2.3.4
+        - NFR-5.2.15
+        - NFR-6.2.5
+      mapped_acceptance_criteria:
+        - AC-9.5
+        - AC-9.6
+        - AC-9.7
+        - AC-9.10
+        - AC-9.14
+        - AC-9.15
+      sync_notes:
+        - M2B.2 scope is strict to Phase 2B TS-03 through TS-05 plus non-mutating TS-11.
+        - Concrete Vietnam quote/history/fundamental providers, market-data answer attribution, cache-freshness coverage, TradingView expansion, reporting persistence, generic web fetch, and remote/MCP-style admission remain downstream milestones.
+        - FR-2.7.4, NFR-5.2.13, CON-9, and AC-9.8 are intentionally not mapped to this feature because the roadmap places them in TS-06/M2B.3; M2B.2 defines only the normalized source-metadata backbone those later capabilities use.
+        - Specification clarified on 2026-07-06 after cross-document review against roadmap, SRS, architecture, research, Spec Kit HOW-TO, and documentation methodology.
+        - Planning artifacts generated on 2026-07-06 keep M2B.2 scoped to target internal contracts and do not change public API contracts.
+        - Implementation task breakdown generated on 2026-07-06 adds dependency-aware test, implementation, verification, and sync tasks while keeping the feature in planned status.
+        - Cross-artifact analysis remediation on 2026-07-06 aligned retention/mutation test coverage, prompt-boundary integration, requirements-alignment disposition, and verification command evidence across plan, quickstart, and tasks.
+    speckit_mapping:
+      spec_requirements:
+        - M2B2-FR-001
+        - M2B2-FR-002
+        - M2B2-FR-003
+        - M2B2-FR-004
+        - M2B2-FR-005
+        - M2B2-FR-006
+        - M2B2-FR-007
+        - M2B2-FR-008
+        - M2B2-FR-009
+        - M2B2-FR-010
+        - M2B2-FR-011
+        - M2B2-FR-012
+        - M2B2-FR-013
+        - M2B2-FR-014
+        - M2B2-FR-015
+        - M2B2-FR-016
+        - M2B2-FR-017
+        - M2B2-FR-018
+        - M2B2-FR-019
+        - M2B2-FR-020
+        - M2B2-FR-021
+        - M2B2-FR-022
+      success_criteria:
+        - SC-001
+        - SC-002
+        - SC-003
+        - SC-004
+        - SC-005
+        - SC-006
+        - SC-007
+        - SC-008
+        - SC-009
+        - SC-010
+        - SC-011
+        - SC-012
+      evidence_paths:
+        - path: specs/tool-system-m2b.2/spec.md
+          label: Feature specification
+          anchor: governance-context-mandatory
+        - path: specs/tool-system-m2b.2/spec.md
+          label: Requirements and success criteria
+          anchor: requirements-mandatory
+        - path: specs/tool-system-m2b.2/plan.md
+          label: Implementation plan
+          anchor: governance-and-traceability-context
+        - path: specs/tool-system-m2b.2/research.md
+          label: Phase 0 research
+        - path: specs/tool-system-m2b.2/data-model.md
+          label: Data model
+        - path: specs/tool-system-m2b.2/quickstart.md
+          label: Quickstart verification guide
+        - path: specs/tool-system-m2b.2/contracts/symbol-normalization-contract.md
+          label: Symbol normalization contract
+        - path: specs/tool-system-m2b.2/contracts/provider-policy-contract.md
+          label: Provider policy contract
+        - path: specs/tool-system-m2b.2/contracts/tool-normalization-contract.md
+          label: Tool normalization contract
+        - path: specs/tool-system-m2b.2/contracts/mutation-retention-contract.md
+          label: Mutation and retention contract
+        - path: specs/tool-system-m2b.2/checklists/requirements.md
+          label: Requirements quality checklist
+        - path: specs/tool-system-m2b.2/checklists/requirements-alignment.md
+          label: Requirements alignment checklist
+        - path: specs/tool-system-m2b.2/tasks.md
+          label: Implementation tasks
