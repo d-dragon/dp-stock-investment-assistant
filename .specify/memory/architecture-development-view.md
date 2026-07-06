@@ -1,4 +1,4 @@
-# Development View — DP Stock Investment Assistant
+# Development View - DP Stock Investment Assistant
 
 **Input**: `.specify/memory/architecture-logical-view.md`, `.specify/memory/architecture-process-view.md`
 
@@ -6,121 +6,142 @@
 
 ## Architecture Intent
 
-This view preserves the component-level separation where transport, orchestration, reasoning, tool execution, memory, prompt policy, and governance are distinct development boundaries with explicit dependency direction and forbidden crossings.
+This view preserves development-time ownership boundaries so teams and agents extend the system through the correct package responsibilities: transport admits requests, services govern lifecycle, the agent reasons, prompt policy shapes behavior, tools expose capabilities, gateway/policy boundaries admit execution, provider adapters fetch source data, normalization creates request-scoped context, retention stores approved derivatives, and Spec Kit governs delivery evidence.
 
 ## Core Tensions
 
 | Tension | Current Tradeoff Direction | Development Consequence |
 |---------|----------------------------|-------------------------|
-| Single agent runtime vs tool expansion | Current ToolRegistry contains two active tools (StockSymbol, Reporting); TradingView is Phase 2 | Tool package boundary must support additive tool registration without requiring agent-runtime changes for each new tool |
-| Factory/service/repository layering vs cross-layer shortcuts | All backend data access must flow through repositories; routes must not issue ad-hoc queries | Three distinct package boundaries exist (routes, services, repositories) with strict dependency direction; violations break testability |
-| REST blueprint registration vs growing endpoint surface | Blueprints registered in app factory; new blueprints are additive | Component boundary for each new route package must follow the immutable-context registration pattern; no global state injection |
-| Prompt-system evolution from inline to compiler path | Current prompt assets live under src/prompts/; planned compiler path adds loader, assembler, and middleware | Prompt-system component boundary will expand from one package to three cooperating components; each remains independent of agent-runtime packages |
+| Additive evolution vs rewrites | Keep the current agent/runtime structure and add route, prompt, tool, and provider boundaries around it | New capabilities extend owning packages instead of replacing the runtime |
+| Tool expansion vs agent coupling | Tool inventory, tool surface, gateway admission, provider policy, and normalization are separate packages | Adding providers or output kinds should not require agent reasoning changes |
+| Prompt assets vs runtime policy | Prompt asset resolution and route skills are separate from reasoning, tools, and memory | Prompt changes remain behavior-policy changes, not state or data-access changes |
+| Service lifecycle vs checkpoint state | Service and checkpoint packages have different ownership even when sharing storage infrastructure | Development dependencies must not make checkpoint code responsible for lifecycle |
+| Architecture memory vs implementation detail | 4+1 memory captures boundary intent, not source layout or task plans | Generated architecture artifacts must avoid code-level ownership claims |
 
 ## Stable Boundaries
 
 | Boundary | Must Remain Stable Because | Explicitly Must Not Own |
 |----------|----------------------------|-------------------------|
-| Transport layer (Flask blueprints) | All inbound requests and streaming responses flow through blueprints with immutable DI context | Request authorization, service orchestration, agent reasoning, tool execution, lifecycle metadata, prompt policy |
-| Service layer | ServiceFactory wires repositories and caches into services; all business orchestration lives here | Transport concerns, agent-runtime state, checkpoint persistence, prompt asset storage |
-| Agent runtime | StockAssistantAgent and LangGraph bootstrap own reasoning and tool orchestration | Lifecycle authority, durable metadata, transport framing, prompt variant selection |
-| Repository layer | MongoGenericRepository base class; all database access through RepositoryFactory singletons | Business logic, transport concerns, agent reasoning, cache management |
-| Tool package | CachingTool base class; tools registered in singleton ToolRegistry | LLM provider selection, lifecycle governance, checkpoint management, prompt composition |
-| Prompt assets and compiler path | Current src/prompts/ for inline assets; planned compiler path adds three packages | Agent-runtime state, tool execution, metadata persistence, provider selection |
-| Spec-kit governance | specs/ owns delivery artifacts; docs/ owns long-lived references; .specify/ owns runtime and templates | Implementation code, runtime configuration, deployment manifests |
+| Transport Package | It owns request/response framing and streaming surfaces | Business lifecycle, provider policy, tool admission, persistence internals |
+| Service Orchestration Package | It owns ownership, lifecycle, archive guards, session context, and metadata receipts | Reasoning state, model provider selection, prompt assets, provider parsing |
+| Agent Reasoning Package | It owns route classification, one reasoning runtime, model interaction, tool selection, and checkpoint participation | Lifecycle state, provider adapter details, durable market records |
+| STM and Memory Package | It owns conversation-scoped checkpoint continuity and future memory boundary integration | Session context, LTM truth, market evidence retention, lifecycle metadata |
+| Prompt Policy Package | It owns prompt lineage, route-skill policy, segment authority, locale posture, fallback metadata, and future guardrails | Tool execution, provider credentials, conversation lifecycle |
+| Tool Inventory Package | It owns repo-owned tool capabilities and enablement | Route-specific exposure decisions, provider selection, prompt assembly |
+| Tool Surface and Gateway Package | It owns model-visible filtering, descriptor integrity, execution admission, traces, and degraded outcomes | Provider parsing, lifecycle management, second agent runtime |
+| Provider Policy and Adapter Package | It owns source classes, provider posture, fallback eligibility, licensing, freshness, and source attribution | Model-visible tool list, prompt policy, durable memory |
+| Normalization and Context Package | It owns output classification and request-scoped context assembly | Raw provider retention, lifecycle metadata, prompt policy authority |
+| Retention and Audit Package | It owns retained artifact metadata, mutation receipts, approved snapshots, and diagnostic traces | Full request context persistence or raw provider payload stores |
+| Governance Package | It owns spec artifacts, architecture memory, traceability, and sync reports | Application runtime behavior, deployment state |
 
 ## Change Axes
 
 | Expected Change | Isolated By | Development Impact |
 |-----------------|-------------|--------------------|
-| New agent tool added | ToolRegistry with register() pattern; add one tool class under src/core/tools/ | Only the tool package boundary changes; agent runtime, prompt assembly, and provider selection are unaffected |
-| New Flask blueprint added | Blueprint factory with immutable APIRouteContext; register in app factory sequence | Only the route package boundary changes; service, repository, and agent boundaries are unaffected |
-| New MongoDB repository added | RepositoryFactory with repository class extending MongoGenericRepository | Only the repository package boundary changes; the data access pattern remains consistent |
-| New LLM provider added | ModelClientFactory with provider-specific client class; registered in provider map | Only the provider client boundary changes; agent reasoning, routing, and tool execution are unaffected |
-| Prompt compiler path activated (planned) | Three additive package boundaries (loader, assembler, middleware); existing src/prompts/ remains for baseline | Prompt-system package boundary expands without modifying agent-runtime or service-layer packages |
+| New prompt variant, route skill, or locale | Prompt Policy Package | Prompt package evolves; tools, providers, services, and memory remain stable |
+| New tool capability | Tool Inventory plus Tool Surface/Gateway Package | Inventory gains capability; exposure/admission policies decide visibility and execution |
+| New source provider | Provider Policy and Adapter Package | Provider set expands below tools; model-visible capabilities remain stable |
+| New normalized output kind | Normalization and Context Package | Prompt/report consumers receive classified context without parsing providers |
+| Report and artifact retention | Retention and Audit Package | Approved derivatives gain lineage without persisting full request context |
+| Future mutation capability | Gateway, Approval, and Retention Packages | State-changing action requires admission, confirmation, and receipt before any durable effect |
+| Transport parity improvement | Transport and Service Packages | WebSocket-style flow adopts lifecycle receipt without changing agent reasoning |
+| Production observability | Retention/Trace and Operations Packages | Cross-boundary degraded modes become observable without changing business logic |
 
 ## Invariants
 
 | Invariant | Source Boundary / Contract / Dependency Rule | Risk If Violated |
 |-----------|----------------------------------------------|------------------|
-| Routes must not issue database queries directly | Repository pattern constitution rule; all persistence goes through repositories | Ad-hoc queries bypass indexing, health checks, and logging conventions |
-| Services must not import route-level types | Dependency direction: routes→services→repositories | Circular dependencies break DI patterns and testability |
-| Provider clients must be obtained through ModelClientFactory | Factory cache keyed by {provider}:{model_name}; direct provider instantiation bypasses fallback | Provider fallback stops working; caching is duplicated |
-| Tools must extend CachingTool base class | CachingTool provides caching and base run/arun contract | Tool caching and health-check patterns become inconsistent |
-| Spec-kit artifacts in specs/ must not be used as long-lived documentation | Constitution artifact boundaries; stable knowledge is promoted to docs/ only after verification | Delivery artifacts become stale reference material; docs/ and specs/ drift |
+| Transport depends on services, not directly on agent/tool/provider internals | Transport and service boundary | Lifecycle and metadata receipts are bypassed |
+| Services own lifecycle and may not depend on checkpoint internals | Service lifecycle boundary | Checkpoint format becomes business metadata authority |
+| Agent reasoning depends on prompt/tool/model abstractions, not provider adapters | Agent reasoning boundary | Provider details leak into reasoning and prompt selection |
+| Tool surface depends on descriptors and policy, not prompt text | Tool surface boundary | Prompt assets can widen tool exposure beyond governance |
+| Gateway depends on descriptors, route, and policy before execution | Tool gateway boundary | Disallowed calls execute or fail silently |
+| Provider adapters are hidden below tools | Provider policy boundary | The model sees provider choices and bypasses source posture |
+| Normalization precedes prompt/report consumption | Normalization boundary | Raw payloads or untrusted instructions enter prompt or report output |
+| Governance artifacts are not runtime dependencies | Spec Kit governance boundary | Application behavior becomes coupled to delivery artifacts |
 
 ## Non-goals / Anti-patterns
 
 | Non-goal / Anti-pattern | Why It Is Out of Scope or Harmful |
 |-------------------------|-----------------------------------|
-| Ad-hoc provider instantiation outside ModelClientFactory | Would bypass caching and fallback; every direct instantiation is a missed fallback path |
-| Route-level database queries bypassing repositories | Would break the layered architecture; routes would own persistence concerns that belong in repositories |
-| Agent runtime setting conversation lifecycle status | Lifecycle is a service-layer concern; the agent must not change active/archived status |
-| Spec-kit tools extending into runtime code | Governance tools live in scripts/ and specs/; they must not be imported by application code |
+| Building a second agent runtime for tool gateway | Gateway is an admission boundary, not a reasoning or orchestration package |
+| Placing provider fallback in prompt assets | Fallback is deterministic provider policy, not prompt instruction |
+| Making reports a provider-integration package | Reports should consume normalized context and artifacts, not source providers directly |
+| Storing raw provider payloads in retention packages by default | Retention packages store approved derivatives and lineage, not unbounded source payloads |
+| Letting governance files drive runtime decisions | Governance guides delivery and traceability; runtime decisions belong in application packages |
+| Documenting code paths in architecture memory | 4+1 artifacts describe boundary intent and tradeoffs, not implementation file layout |
 
 ## Architecture-Level Components
 
 | Component / Capability Package | Responsibility | Input / Output Boundary | Collaborators | Explicitly Must Not Own | Source View Evidence |
 |--------------------------------|----------------|-------------------------|---------------|--------------------------|----------------------|
-| Transport package (Flask blueprints / Socket.IO handlers) | Accept HTTP/Socket.IO requests, manage SSE streaming, provide health surfaces | Inbound HTTP/Socket.IO → normalized request; response → SSE stream or JSON | Service layer through immutable context | Authorization, business orchestration, agent reasoning, tool execution, prompt assembly | RL-1, RL-11, R1-R4 (Process View) |
-| Service orchestration package | Validate lifecycle, resolve session context, record metadata, reconcile runtime | Validated request → agent invocation; lifecycle outcomes → persistence | Repository package, CacheBackend, Agent runtime | Transport framing, checkpoint state, tool execution, prompt variant selection | RL-2, RL-3, H2 (Process View); Capability: Service Orchestration (Logical View) |
-| Agent reasoning package | Route classification, ReAct loop, tool orchestration, checkpoint management, fallback handling | Validated work item → generated response (streamed or complete); checkpoint state → MongoDB | ModelClientFactory, ToolRegistry, Checkpointer, Guardrail middleware (planned) | Lifecycle authority, durable metadata, prompt variant storage | RL-3, RL-4, RL-5, RL-7, RL-8, RL-9 (Process View) |
-| Provider client package (ModelClientFactory + clients) | Provider selection, model binding, client caching, fallback sequence | Prompt content → model completion; provider config → cached client | Agent runtime as consumer; external LLM providers as targets | Tool execution, lifecycle governance, prompt asset selection, checkpoint state | RL-6, RL-7, H3, F1, F2 (Process View) |
-| Tool package | Implement domain-specific tools with caching and health contracts | Tool request → structured data result; tool result → agent runtime | Agent runtime, CacheBackend, external financial data sources | LLM reasoning, policy enforcement, checkpoint management | RL-8, F8 (Process View) |
-| Checkpoint and memory package | Persist and retrieve thread-local agent state via LangGraph MongoDBSaver | Thread-id, conversation-turn data → persisted checkpoint; thread-id → loaded checkpoint | Agent runtime as primary consumer, MongoDB as storage | Lifecycle metadata, session context, tool-cache content, provider client instances | RL-9, F10 (Process View) |
-| Repository package | Provide CRUD access to MongoDB collections through typed repositories | CRUD operations on domain entities → persisted documents | Service package, RepositoryFactory singleton | Business logic, transport concerns, agent reasoning, cache management | RL-2 (indirectly); Capability: Metadata Persistence (Logical View) |
-| Prompt asset and compiler package (current + planned) | Current: inline prompt templates under src/prompts/. Planned: PromptAssetLoader, PromptAssembler, ResponseGuardrailMiddleware | Route classification, request envelope → compiled prompt; model draft → guardrail result | Agent runtime, Trace/metadata sink | State management, tool execution, metadata persistence, provider selection | RL-5, RL-10, H4, F4, F5, F6 (Process View) |
-| Spec-kit governance package | Author and maintain specs/, manage traceability and synchronization | Feature requirements → spec.md, plan.md, tasks.md, review.md, sync artifacts | docs/ (sync targets), specs/traceability, .github/instructions/ | Application code, runtime configuration, deployment state | RL-12, H5, F9 (Process View); UC-6 (Scenario View) |
-| Frontend application package | Render UI, manage client-side state, stream responses, provide user interaction surface | User input → REST/WebSocket request; SSE chunks → progressive UI | Backend transport endpoints | Backend lifecycle authority, agent reasoning, data persistence | R1-R4 (Process View) |
+| Transport Edge | Admit user and operator requests; expose complete, streaming, and realtime response surfaces | User request -> normalized work item; response outcome -> client | Service Orchestration | Lifecycle policy, reasoning, provider policy | UC-1, UC-2, RL-1 |
+| Service Orchestration | Validate ownership/lifecycle, resolve session context, and record metadata receipts | Normalized work item -> admitted agent work item or safe rejection | Transport Edge, Agent Reasoning, Persistence | Checkpoint format, prompt lineage, tool admission | UC-3, UC-4, RL-2 |
+| Agent Reasoning | Maintain one reasoning runtime, classify route, coordinate prompt context, model calls, and selected tool calls | Admitted work item -> draft/streamed response and tool-call requests | Prompt Policy, Tool Surface/Gateway, Model Provider Boundary, STM | Lifecycle status, provider parsing, durable market truth | UC-1, UC-5, RL-3 through RL-7 |
+| STM and Memory | Provide conversation-local continuity and planned future memory integration boundaries | Conversation identity -> checkpoint state or fresh-state receipt | Agent Reasoning, Service Orchestration | Session context, market facts, full Tool Context Pack | UC-3, RL-3 |
+| Prompt Policy | Manage baseline prompt, implemented/gated route skills, segment authority, locale posture, fallback metadata, and planned guardrails | Route/request context/model draft -> prompt contract or guardrail result | Agent Reasoning, Normalization and Context | Provider credentials, tool execution, lifecycle metadata | UC-8, RL-6, RL-12 |
+| Tool Inventory | Own repo tool capabilities, enablement, and health semantics | Registered capability state -> inventory | Tool Surface/Gateway | Route admission, provider order, prompt policy | UC-5, RL-5 |
+| Tool Surface and Gateway | Build model-visible surfaces, admit selected calls, record descriptor/admission traces, and return degraded states | Route/context/tool call -> exposed capability, allowed execution, or degraded result | Agent Reasoning, Tool Inventory, Provider Policy | Provider parsing, prompt authoring, lifecycle changes | UC-5, UC-9, RL-5 through RL-8 |
+| Provider Policy and Adapters | Govern source classes, license posture, fallback eligibility, freshness, credentials, and source attribution | Admitted source request -> provider result or degraded state | Tool Surface/Gateway, Normalization and Context | Model-visible tool surface, prompt policy | UC-6, RL-9 |
+| Normalization and Context | Convert tool/provider results into data-only normalized outputs and request-scoped context | Provider/tool result -> normalized output and context pack | Provider Policy, Prompt Policy, Reporting/Retention | Raw payload retention, policy authority, lifecycle state | UC-6, UC-7, RL-10 |
+| Reporting and Artifact Retention | Compose reports from normalized context and retain approved artifacts, lineage, warnings, and receipts | Normalized context/retention trigger -> generated artifact metadata or receipt | Normalization and Context, Service Orchestration | Direct provider scraping, full context persistence | UC-7, RL-13 |
+| Governance and Traceability | Preserve requirements, architecture, Spec Kit feature evidence, and sync reports | Authority documents and verified evidence -> updated architecture memory/traceability | All delivery participants | Runtime state, source providers, deployment execution | UC-10, RL-14 |
 
 ## Package Boundary Intent
 
 | Package / Boundary | Abstraction Level | Owned Concepts | May Depend On | Must Not Depend On | Evolution Rule |
 |--------------------|-------------------|----------------|---------------|--------------------|----------------|
-| Transport | Entry-point | Request routing, response framing, streaming connections, health surfaces | Service orchestration package (APIRouteContext) | Agent runtime, repository package, provider clients | Additive: new blueprints register via factory; existing blueprints are not modified |
-| Service orchestration | Business logic | Lifecycle validation, session context resolution, metadata recording | Repository package, CacheBackend, protocol interfaces | Transport internals, agent runtime checkpoints, provider clients | Additive: new services extend BaseService and register in ServiceFactory |
-| Agent reasoning | Core orchestration | Route classification, ReAct loop, tool orchestration, fallback handling | ModelClientFactory (interface), ToolRegistry (interface), Checkpointer, Guardrail | Service layer internals, transport specifics, repository internals | Additive: new routes, tools, or providers do not require agent-runtime changes |
-| Provider clients | Provider abstraction | Provider selection, model binding, client caching, fallback sequence | External LLM SDKs (httpx, openai) | Agent reasoning internals, service orchestration, tool execution | Additive: new providers register in the provider map in ModelClientFactory |
-| Tools | Domain data access | Tool implementation, caching, health checks | CacheBackend, external data SDKs (yfinance) | Agent reasoning internals, lifecycle governance, prompt composition | Additive: new tools extend CachingTool and register in ToolRegistry |
-| Repository | Data access | CRUD operations, MongoDB queries, document normalization | MongoDB driver (pymongo) | Service internals, transport specifics, agent reasoning | Additive: new repositories extend MongoGenericRepository and register in RepositoryFactory |
-| Prompt assets | Policy | Prompt templates, behavior policy, guardrail rules (planned) | File system (current); manifest/lineage sources (planned) | Agent reasoning internals, tool execution, lifecycle governance | Additive: compiler path packages are added without modifying existing runtime packages |
-| Spec-kit governance | Delivery management | Feature specs, plans, tasks, traceability, sync reports | docs/ and specs/ file system, sync scripts | Application code, runtime config, deployment manifests | Additive: new features create new specs/ directories; no modification to existing features' artifacts |
-| Frontend | Presentation | UI rendering, client state, SSE/WebSocket streaming | Backend transport endpoints via HTTP/WebSocket | Backend service internals, agent runtime, repositories | Additive: new components do not require changes to backend packages |
+| Transport | Entry and response framing | Request shape, response mode, streaming terminal state | Service Orchestration | Agent/tool/provider internals | Add response surfaces without bypassing service lifecycle |
+| Service Orchestration | Business lifecycle | Ownership, archive state, session context, metadata receipt | Persistence, Agent abstraction | Checkpoint internals, provider adapters | Add lifecycle rules in service boundary only |
+| Agent Reasoning | Reasoning orchestration | Route classification, one runtime loop, model interaction, selected tool calls | Prompt Policy, Tool Surface, Model Provider, STM | Service internals, provider adapters | Specialize through route/prompt/tool policy, not second runtime |
+| Prompt Policy | Behavior governance | Shared policy, route skills, segment classes, locale, prompt identity, guardrail outcome | Agent Reasoning, Normalized Context | Provider credentials, lifecycle metadata | Promote assets only through governance gates |
+| Tools | Capability inventory | Repo-owned tool capability and enablement | Cache/performance boundary, Gateway | Provider policy, prompt policy | Add tools as capabilities; provider choice stays lower |
+| Tool Surface/Gateway | Exposure and admission policy | Capability descriptors, policy descriptors, admission decisions, degraded state, trace | Tool Inventory, Provider Policy | Prompt authoring, lifecycle authority | Add rules without replacing registry-backed execution |
+| Provider Policy/Adapters | Source integration | Provider descriptor, provider order, license/freshness, source attribution | Tool Gateway, external source classes | Model-visible tool surface | Add providers behind policy and descriptor review |
+| Normalization/Context | Evidence shaping | Normalized output, Tool Context Pack, warnings, degraded states | Provider Policy, Prompt Policy | Durable memory, raw source storage | Add output kinds before consumers depend on them |
+| Retention/Audit | Approved durable derivatives | Artifact metadata, mutation receipt, retained snapshot, diagnostic trace | Normalized Context, Service Orchestration | Full request context, raw provider payloads by default | Retain only explicitly admitted derivatives |
+| Governance | Delivery control | Architecture memory, specs, traceability, sync status | Authority documents and verified evidence | Runtime application packages | Update after verification or explicit target-design authority |
 
 ## Contracts and Artifacts
 
 | Contract / Artifact | Semantics | Producer | Consumer | Lifecycle | Architecture Consequence |
 |---------------------|-----------|----------|----------|-----------|--------------------------|
-| APIRouteContext (immutable dataclass) | Dependency injection contract for all Flask blueprints; provides agent, factories, config, logger | api_server.py (app factory) | All Flask route blueprints | Created once per app factory; reused across all routes | Every blueprint depends on the same DI contract; changing APIRouteContext affects all blueprints |
-| REST API endpoints (defined in OpenAPI) | Public HTTP contract for chat, models, users, workspaces, sessions, conversations, health | Flask blueprints | Frontend, external clients, tests | Evolves via constitution delivery sync gates; must stay synchronized with docs/openapi.yaml | REST API changes require traceability and doc sync; undocumented endpoints are unsupported |
-| Socket.IO events (chat_message, connect, disconnect) | Real-time event contract for chat streaming | Socket.IO handler in chat_events.py | Frontend webSocketService.ts | Not yet at full lifecycle parity with REST | Socket.IO events bypass ChatService lifecycle validation; parity gap is a known process gap |
-| SSE streaming format (text/event-stream) | Streaming response contract with chunk and terminal events | Flask SSE response via stream_with_context | Frontend restApiClient.js | Governed by streaming admission and guardrail rules | Streaming semantics differ from Socket.IO; two streaming surfaces exist with different lifecycle coverage |
-| Provider selection envelope | Contract between agent runtime and ModelClientFactory for provider resolution | Agent runtime | ModelClientFactory | Per-request; cached by {provider}:{model_name} key | Provider selection is opaque to transport and service layers |
-| Tool invocation contract | Contract between agent runtime and tool implementations for evidence acquisition | Agent runtime (ReAct loop) | Tool implementations (CachingTool subclasses) | Per-tool-call; tool results are data-only context | Tool output shape determines how evidence is presented to the LLM; tool caching affects freshness |
-| Spec feature artifacts (spec.md, plan.md, tasks.md, review.md) | Delivery-scoped governed artifacts for feature implementation | Speckit commands (speckit.specify, speckit.plan, speckit.tasks) | Implementation, verification, and sync agents | Created per feature; verified after implementation; may trigger doc updates during sync | Every non-trivial feature must produce these artifacts; stale artifacts create drift |
-| Long-lived docs (docs/) | Stable reference requirements, architecture, design, ADRs, contracts, runbooks | Authors via SDD lifecycle (step 17 sync) | Future feature work, governance reviews, operator guidance | Updated during step 17 (docs sync) after verified implementation | Outdated long-lived docs are authoritative artifacts that create false confidence |
-| Traceability manifest (spec-traceability.yaml) | Machine-readable SRS-to-feature mapping with status gates | Sync script (sync_spec_status.py) | Sync reports, governance reviews | Updated when feature scope or verification status changes | Stale traceability is a verification failure under constitution rules |
+| Public Transport Contract | User-facing request, response, streaming, and realtime semantics | Transport Edge | Client and service boundary | Evolves through governed contract sync | Transport changes cannot bypass service lifecycle |
+| Conversation Lifecycle Receipt | Proof that ownership/status/session context were resolved | Service Orchestration | Agent Reasoning and audit/metadata surfaces | Per request | Agent receives admitted work rather than raw user traffic |
+| Prompt Lineage and Route Skill Artifact | Governed behavior policy and route-specific context | Prompt Policy | Agent Reasoning | Baseline/current/gated/planned states | Prompt evolution remains auditable and reversible |
+| Tool Capability Descriptor | Model-safe capability declaration | Tool Surface/Gateway | Agent Reasoning and model-visible tool surface | Reviewed and versioned | Keeps model surface safe and compact |
+| Tool Policy Descriptor | Internal admission and risk policy | Tool Surface/Gateway | Gateway Admission | Reviewed and traceable | Keeps risk/license/freshness policy out of prompt text |
+| Provider Adapter Descriptor | Internal source connector posture | Provider Policy | Provider selection and adapter boundary | Reviewed before production enablement | Keeps provider classes hidden and auditable |
+| Tool Execution Envelope | Runtime inspection wrapper for a governed tool call | Tool Gateway | Normalization, traces, safe metadata | Per call | Admission, freshness, warnings, and degraded states are inspectable |
+| Normalized Output | Data-only classified tool/provider output | Normalization and Context | Prompt Policy, Reporting | Per request unless retained derivative exists | Prompt/report consumers do not parse raw providers |
+| Tool Context Pack | Request-scoped normalized context bundle | Normalization and Context | Prompt Policy and response assembly | Per request | Prevents wholesale persistence of dynamic evidence |
+| Artifact Metadata | Retained derivative lineage and reference | Retention/Audit | Users, operators, reports | Retained by policy | Reports and artifacts remain source-attributed |
+| Mutation Receipt | Audit record for approved future state-changing tool action | Retention/Audit | User/operator/governance | Durable when mutation is admitted | Mutations cannot be silent or unaudited |
+| Architecture Memory Artifact | 4+1 architecture reasoning and synthesis | Governance | Feature planning, review, and agents | Updated through architecture workflow | Architecture claims remain traceable and boundary-focused |
 
 ## Dependency Rules
 
 | Rule | Allowed Direction | Forbidden Direction | Reason | Risk If Violated |
 |------|-------------------|---------------------|--------|------------------|
-| Routes → Services → Repositories | Routes import services; services import repositories; repositories import database driver | Repositories importing routes; services importing transport types; routes importing agent runtime directly | Layered architecture ensures testability and clear responsibility boundaries | Circular dependencies, untestable layers, ad-hoc data access |
-| Agent runtime → ModelClientFactory (interface) | Agent depends on ModelClientFactory interface for provider selection; does not instantiate providers directly | ModelClientFactory depending on agent-runtime internals | Provider selection is a separate concern; the agent must not know provider implementation details | Provider selection logic becomes coupled to agent reasoning flow |
-| Agent runtime → ToolRegistry (interface) | Agent depends on ToolRegistry to list and invoke tools; does not instantiate tools directly | Tool implementations depending on agent-runtime internals | Tool registration and execution are separate from reasoning orchestration | Adding a new tool requires agent-runtime changes |
-| Services → Repository interface | Services depend on repository interfaces (protocols); not on concrete repository classes | Repositories depending on service types | Protocol-based DI prevents circular imports and enables mock injection | Direct coupling between concrete classes prevents isolated testing |
-| Frontend → Backend endpoints | Frontend communicates through HTTP REST and Socket.IO events; never imports backend packages | Backend importing frontend types | Frontend and backend are separately deployable units; no shared code between them | Build-time coupling prevents independent deployment |
-| Spec-kit → Code (governance only) | Spec-kit artifacts reference code via file paths and requirement IDs; never import code packages | Code importing from specs/ or .specify/ | Governance artifacts are metadata about code, not runtime dependencies | Runtime imports from governance artifacts would couple delivery workflow to application behavior |
+| Transport -> Service -> Agent | Requests flow through service lifecycle before reasoning where parity exists | Transport directly owning lifecycle bypass or provider/tool execution | Keeps admission, ownership, and metadata centralized | Archived or unauthorized work reaches agent |
+| Agent -> Prompt/Tool/Model abstractions | Reasoning consumes governed boundaries | Prompt/tools/providers depending on agent internals for policy | Keeps specialization additive | Tool or prompt changes require runtime rewrites |
+| Tool Surface/Gateway -> Tool Inventory and Provider Policy | Exposure/admission reads descriptors and source posture | Tool inventory deciding route exposure alone | Separates inventory from model visibility and execution safety | Broad tool exposure or unsafe execution |
+| Provider Policy -> External Source Classes | Provider boundary owns source access | External source classes exposed as model-visible capabilities | Keeps source authority and license posture internal | Model selects providers directly |
+| Normalization -> Prompt/Reporting | Consumers receive data-only normalized context | Prompt/report consumers parsing raw provider payloads | Maintains instruction-authority separation | Prompt injection and source-lineage loss |
+| Retention -> Normalized Derivatives Only | Durable stores hold approved artifacts, traces, receipts, snapshots | Retention storing full Tool Context Pack or raw payloads by default | Preserves memory and market-truth boundaries | Stale or unsafe evidence becomes durable truth |
+| Governance -> Runtime by guidance only | Specs/docs guide implementation and sync | Runtime importing or executing governance artifacts | Keeps delivery workflow separate from application behavior | Runtime breaks when governance files change |
 
 ## Development View Gaps
 
 | Gap | Affected Component / Boundary | Why It Matters |
 |-----|-------------------------------|----------------|
-| Socket.IO handler does not use ChatService lifecycle path | Transport package, Socket.IO handler | Socket.IO chat bypasses the service-orchestration boundary; the Socket.IO handler invokes the agent directly without archive or ownership validation |
-| Mid-stream provider fallback undefined for SSE streaming | Provider client package, Agent reasoning package | The current request-granularity fallback cannot handle a provider failure that occurs during an SSE streaming session |
-| No protocol-based contract for prompt compiler path components | Prompt asset and compiler package (planned) | The planned PromptAssetLoader, PromptAssembler, and ResponseGuardrailMiddleware interfaces are not yet defined; their integration contracts are speculative |
-| Frontend has no package boundary for its test infrastructure | Frontend application package | Zero frontend tests exist; the frontend test boundary is entirely absent |
+| Socket.IO lifecycle parity | Transport Edge, Service Orchestration | Realtime transport must adopt the same lifecycle receipt before parity can be claimed |
+| Mid-stream provider fallback contract | Agent Reasoning, Model Provider Boundary, Transport Edge | Streaming failure closure needs a defined handoff or terminal policy |
+| Production provider admission contracts | Provider Policy and Adapters | Provider classes need licensing, credential scope, terms, and source-authority review |
+| Executable IR-3 implementation contracts | Tool Surface/Gateway, Normalization, Retention | Architecture-level contracts need implementation specs before full validation |
+| Prompt guardrail activation | Prompt Policy | Route-skill and prompt asset implementation does not equal universal response-guardrail enforcement |
+| Observability package maturity | Tool Gateway, Provider Policy, Prompt Policy, Retention | Cross-boundary trace correlation and proactive alerts remain incomplete |
 
 ## Prohibited Content
 
-Do not write source file paths, concrete package trees, classes, functions, implementation tasks, framework-specific wiring, or code generation notes here.
+Do not write source file paths, concrete package trees, classes, functions, implementation tasks, framework-specific wiring, code generation notes, or tests here.
