@@ -1,7 +1,7 @@
 # Spec Sync Status
 
-> **Document Version**: 1.7
-> **Generated**: 2026-07-03 08:43:49Z
+> **Document Version**: 1.13
+> **Generated**: 2026-07-06 09:25:03Z
 > **Status**: Active
 > **Traceability Manifest Version**: 1
 
@@ -22,6 +22,7 @@
 | [prompt-system-milestone1](prompt-system-milestone1/spec.md#user-scenarios--testing-mandatory) | `mapped` | `partial` | `implemented` | `current` | `42/42` |
 | [prompt-system-milestone2](prompt-system-milestone2/spec.md#governance-context-mandatory) | `mapped` | `partial` | `implemented` | `current` | `45/45` |
 | [tool-system-implementation-m2b.1](tool-system-implementation-m2b.1/spec.md#governance-context-mandatory) | `mapped` | `partial` | `verified` | `current` | `70/70` |
+| [tool-system-m2b.2](tool-system-m2b.2/spec.md#governance-context-mandatory) | `mapped` | `partial` | `planned` | `current` | `0/105` |
 
 ## Revision History
 
@@ -37,6 +38,10 @@
 | `1.7` | `2026-07-01` | Promoted tool-system-implementation-m2b.1 to planned status and added plan, research, design, contract, and quickstart evidence paths. |
 | `1.8` | `2026-07-02` | Added tool-system-implementation-m2b.1 task checklist and requirements-alignment checklist evidence after task generation. |
 | `1.9` | `2026-07-02` | Added M2B.1 implementation review evidence and coverage-gate mappings after application code implementation. |
+| `1.10` | `2026-07-06` | Added tool-system-m2b.2 clarified feature mapping for M2B.2 internal symbol, provider-policy, normalization, context, and mutation-receipt backbone scope. |
+| `1.11` | `2026-07-06` | Promoted tool-system-m2b.2 to planned with implementation plan, research, data model, contracts, and quickstart evidence. |
+| `1.12` | `2026-07-06` | Added tool-system-m2b.2 implementation task breakdown and requirements-alignment checklist evidence. |
+| `1.13` | `2026-07-06` | Regenerated after M2B.2 cross-artifact analysis aligned plan, quickstart, checklist, and task evidence. |
 
 ## agent-session-with-stm-wiring
 
@@ -179,6 +184,33 @@
   - [Implementation review evidence](tool-system-implementation-m2b.1/review.md)
   - [Final verification re-run verdict](tool-system-implementation-m2b.1/review.md#final-verification-re-run-verdict)
   - [Verify marker](tool-system-implementation-m2b.1/.verify-done)
+
+## tool-system-m2b.2
+
+- Title: Internal Symbol and Normalization Backbone - M2B.2
+- Path: [specs/tool-system-m2b.2](tool-system-m2b.2/spec.md#governance-context-mandatory)
+- Mapping status: `mapped`
+- Coverage status: `partial`
+- Derived status: `planned`
+- Sync status: `current`
+- Sync gate enforced: `yes`
+- spec.md status field: `Planned`
+- Task completion: `0/105`
+- Linked SRS items: `FR-2.5.1, FR-2.5.2, FR-2.5.3, FR-2.5.4, FR-2.5.5, FR-2.6.1, FR-2.7.1, FR-2.7.2, FR-2.11.1, FR-2.11.2, FR-2.11.3, FR-2.11.4, FR-2.11.5, FR-2.11.6, NFR-2.2.6, NFR-2.3.4, NFR-5.2.15, NFR-6.2.5, CON-6, CON-10, AC-9.5, AC-9.6, AC-9.7, AC-9.10, AC-9.14, AC-9.15, IR-3.3, IR-3.4, IR-3.5, IR-3.6, IR-3.7, IR-3.9`
+- Evidence:
+  - [Feature specification](tool-system-m2b.2/spec.md#governance-context-mandatory)
+  - [Requirements and success criteria](tool-system-m2b.2/spec.md#requirements-mandatory)
+  - [Implementation plan](tool-system-m2b.2/plan.md#governance-and-traceability-context)
+  - [Phase 0 research](tool-system-m2b.2/research.md)
+  - [Data model](tool-system-m2b.2/data-model.md)
+  - [Quickstart verification guide](tool-system-m2b.2/quickstart.md)
+  - [Symbol normalization contract](tool-system-m2b.2/contracts/symbol-normalization-contract.md)
+  - [Provider policy contract](tool-system-m2b.2/contracts/provider-policy-contract.md)
+  - [Tool normalization contract](tool-system-m2b.2/contracts/tool-normalization-contract.md)
+  - [Mutation and retention contract](tool-system-m2b.2/contracts/mutation-retention-contract.md)
+  - [Requirements quality checklist](tool-system-m2b.2/checklists/requirements.md)
+  - [Requirements alignment checklist](tool-system-m2b.2/checklists/requirements-alignment.md)
+  - [Implementation tasks](tool-system-m2b.2/tasks.md)
 
 ## Status Semantics
 
