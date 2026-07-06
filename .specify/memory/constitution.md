@@ -1,20 +1,25 @@
 <!--
 SYNC IMPACT REPORT
 ==================
-Version Change: 2.2.0 -> 2.3.0 (MINOR)
-Bump Rationale: Added explicit agent tool-system and architecture governance aligned to
-  Phase 2B tool architecture, SRS v2.8, ADR-004, the current architecture and technical
-  design package, repository Spec Kit methodology, and official Spec Kit lifecycle guidance.
-  Existing principles remain intact; the amendment materially expands deterministic tool
-  governance and verification duties for the agent domain.
+Version Change: 2.3.0 -> 2.4.0 (MINOR)
+Bump Rationale: Added explicit current-vs-target architecture status governance aligned to
+  ARCHITECTURE_DESIGN.md and TECHNICAL_DESIGN.md. Existing principles remain intact; the
+  amendment materially expands runtime authority, prompt-status, tool-target labeling, and
+  promotion rules so target Phase 2B concepts are not treated as current unless authority
+  documents and implementation evidence agree.
 
 Modified Principles:
+- Layered Boundaries and Explicit Ownership -> Layered Boundaries and Explicit Ownership
+  (expanded with service-owned lifecycle/session/archive authority and STM-only checkpointer
+  boundaries)
+- Prompts, Memory, and Fine-Tuning Control Behavior, Not Truth -> Prompts, Memory, and
+  Fine-Tuning Control Behavior, Not Truth
+  (expanded with current/gated/planned prompt status discipline)
 - Deterministic Tools and Contracted Interfaces -> Deterministic Tools and Contracted Interfaces
-  (expanded with route-filtered tool surfaces, gateway admission, provider adapter separation,
-  normalized context, source lineage, and degraded-state requirements)
+  (expanded with current-vs-target tool labeling and promotion rules for Phase 2B boundaries)
 
 Added Sections:
-- Agent Tool System and Architecture Governance
+- Architecture Current/Target Status Semantics
 
 Removed Sections:
 - None
@@ -62,9 +67,13 @@ Implementation MUST respect ownership boundaries across frontend, backend, agent
 operations, and IaC surfaces. Backend request flow MUST remain `routes -> services ->
 repositories -> database`; cross-cutting dependencies MUST be injected via factories,
 protocols, or immutable context objects; cross-domain behavior MUST be implemented in the owning
-surface rather than through ad-hoc reach-through. Rationale: the current codebase already
-depends on blueprint, service, repository, and factory patterns, and preserving those seams
-keeps change reviewable and testable.
+surface rather than through ad-hoc reach-through. Service orchestration owns lifecycle,
+ownership, archive guards, and reusable session context; the agent runtime consumes those
+controls and MUST NOT absorb them. The checkpointer owns conversation-scoped STM only and MUST
+NOT become authority for lifecycle metadata, ownership, session context, retained artifacts, or
+market evidence. Rationale: the current codebase already depends on blueprint, service,
+repository, factory, and checkpointer boundaries, and preserving those seams keeps change
+reviewable and testable.
 
 ### III. Evidence-Grounded Financial Intelligence
 Financial outputs MUST be grounded in approved external sources, governed internal data stores,
@@ -77,20 +86,26 @@ a safety failure.
 Prompt assets, memory, and fine-tuning MAY shape behavior, structure, routing, and
 personalization, but they MUST NOT become hidden fact stores. Memory retains preferences and
 session context only; retrieval retains sourced documents; fine-tuning reinforces format or tone
-rather than factual content. Rationale: the repository's current prompt-system and memory work
-assumes this separation, and governance must keep it explicit.
+rather than factual content. Prompt behavior MUST preserve explicit status labels: the current
+baseline, implemented or gated M1/M2 prompt assets and route skills, planned guardrail
+middleware, and future experiment controls are different authority states. Rationale: the
+repository's current prompt-system and memory work assumes this separation, and governance must
+keep implemented, gated, planned, and future behavior explicit.
 
 ### V. Deterministic Tools and Contracted Interfaces
-Deterministic tools MUST fetch or compute facts; the model interprets them. Agent tools MUST be
-exposed through route-filtered, policy-admitted surfaces rather than broad provider lists.
-Provider-specific fetching, parsing, licensing, freshness, fallback, and health behavior MUST
-stay behind deterministic provider policies and adapters. Tool results MUST be normalized into
-typed, source-attributed, freshness-aware, warning-aware context before entering prompt
-assembly. Public interfaces such as REST endpoints, streaming responses, WebSocket events, and
-machine-readable contracts MUST remain explicit, version-aware, and synchronized with
-implementation. Rationale: the project relies on OpenAPI, route registration, streaming
-surfaces, auditable tool results, and finance-domain source integrity; opaque interface or tool
-drift is operational risk.
+Deterministic tools MUST fetch or compute facts; the model interprets them. Current registry-
+backed cache-aware tools MUST be labeled separately from target Phase 2B boundaries such as
+route-filtered exposure, `ToolSurfaceBuilder`, `ToolGateway`, provider policy, normalized
+outputs, and `ToolContextPack` until authority documents and implementation evidence promote
+them. Agent tools MUST be exposed through route-filtered, policy-admitted surfaces rather than
+broad provider lists when that target boundary is in scope. Provider-specific fetching,
+parsing, licensing, freshness, fallback, and health behavior MUST stay behind deterministic
+provider policies and adapters. Tool results MUST be normalized into typed, source-attributed,
+freshness-aware, warning-aware context before entering prompt assembly. Public interfaces such
+as REST endpoints, streaming responses, WebSocket events, and machine-readable contracts MUST
+remain explicit, version-aware, and synchronized with implementation. Rationale: the project
+relies on OpenAPI, route registration, streaming surfaces, auditable tool results, and
+finance-domain source integrity; opaque interface, tool, or status drift is operational risk.
 
 ### VI. Testability and Observability Are First-Class
 Every material behavior MUST be verifiable and diagnosable. Focused tests, health endpoints,
@@ -242,6 +257,36 @@ Active feature work MAY flow backward from implementation findings into `spec.md
 directories SHOULD flow forward into `docs/`, contracts, traceability, roadmap, or ADRs instead
 of being mutated as active design documents. Material behavior changes after verification MUST
 use a follow-up feature, governed doc update, or explicit supersession link.
+
+### Architecture Current/Target Status Semantics
+
+Long-lived architecture and technical design documents MUST preserve the status labels used by
+their authority chain. A concept MAY be described as `Current`, `Implemented`, `Implemented /
+gated`, `Target`, `Planned`, or `Gap`, but those labels are not interchangeable.
+
+- `Current` applies only to baseline behavior the authority documents identify as active in the
+  runtime, such as the single ReAct runtime, service-owned lifecycle/session/archive controls,
+  conversation-scoped STM, current registry-backed cache-aware tools, and the current external
+  market-data path.
+- `Implemented` or `Implemented / gated` applies only when the authority documents identify
+  delivery evidence and any activation gate. Gated behavior MUST name the gate or condition
+  rather than being presented as unconditional baseline behavior.
+- `Target` applies to approved architecture direction that constrains implementation but is not
+  yet current by default. Target Phase 2B tool concepts include route-filtered tool exposure,
+  thin in-process gateway admission, provider policy, provider adapters, normalized output,
+  request-scoped `ToolContextPack`, and degraded-state handling unless the authority documents
+  explicitly promote a subset.
+- `Planned` applies to designed future behavior such as prompt guardrail middleware, future
+  LTM/RAG, executable tool-contract schemas, broader prompt experiments, production
+  observability controls, and provider licensing hardening.
+- `Gap` applies to known missing or unresolved behavior such as Socket.IO lifecycle parity,
+  mid-stream provider fallback, production provider licensing posture, and production-grade
+  observability controls.
+
+Feature verification, task completion, or a traceability status update MUST NOT by itself
+promote a target architecture concept to current. Promotion requires consistent implementation
+evidence, updated long-lived architecture or technical design, and synchronized traceability
+where requirement mappings are affected.
 
 ### Memory and AI Runtime Boundaries
 
@@ -514,4 +559,4 @@ specific concern MUST then be reconciled across dependent artifacts.
 - **MINOR**: New articles, principles, or materially expanded guidance
 - **PATCH**: Clarifications, typo fixes, non-semantic refinements
 
-**Version**: 2.3.0 | **Ratified**: 2026-01-27 | **Last Amended**: 2026-07-01
+**Version**: 2.4.0 | **Ratified**: 2026-01-27 | **Last Amended**: 2026-07-06

@@ -1,4 +1,4 @@
-# Logical View — DP Stock Investment Assistant
+# Logical View - DP Stock Investment Assistant
 
 **Input**: `.specify/memory/architecture-scenario-view.md`
 
@@ -6,131 +6,145 @@
 
 ## Architecture Intent
 
-This view preserves the logical separation between transport, orchestration, reasoning, tool execution, memory, policy, and persistence so that each capability boundary can evolve independently without collapsing concerns into a shared layer.
+This view preserves the logical separation between transport admission, service-owned lifecycle, agent reasoning, prompt policy, conversation-scoped STM, governed tools, provider mediation, normalized evidence, metadata retention, and delivery governance. The target design must allow richer tools and providers without collapsing source authority, prompt policy, memory, and lifecycle into the reasoning runtime.
 
 ## Core Tensions
 
 | Tension | Current Tradeoff Direction | Logical Consequence |
 |---------|----------------------------|---------------------|
-| Single agent runtime vs route-aware specialization | One ReAct agent handles all routes via skill selection; multi-agent orchestration is deferred | Logical boundaries around reasoning and tool orchestration must accommodate route-aware skills without creating a separate orchestrator boundary |
-| Service-layer lifecycle governance vs agent-runtime checkpoint authority | ChatService owns archive guards and metadata; agent runtime owns checkpoint-managed reasoning state | Two distinct authority surfaces exist for the same conversation; their correspondence is correspondence-based, not unified |
-| Inline prompt policy vs external compiler path | Current runtime uses a single governed prompt; compiler path adds asset loader, assembler, and guardrail middleware | Prompt policy semantics are split across current and planned boundaries; the current baseline does not expose variant or experiment selection |
-| REST vs streaming vs WebSocket transport parity | REST includes full lifecycle guards; SSE supports streaming with partial guard coverage; Socket.IO has limited lifecycle parity | Transport-specific boundaries introduce different safety surfaces for the same logical capability |
+| One reasoning runtime vs route specialization | Keep one agent runtime and specialize through route, prompt, and tool policies | Route Classification becomes a shared logical input to prompt and tool boundaries, not a new orchestrator |
+| Registry-backed tools vs gateway-governed tools | Preserve registry inventory while adding route surface, descriptors, and gateway admission | Tool Inventory, Tool Surface, and Tool Admission are distinct logical boundaries |
+| Provider convenience vs source authority | Provider policy and adapters remain below model-visible tools | Provider Adapter Descriptor and Provider Selection Policy are internal policy objects, not model capabilities |
+| Raw output vs normalized context | Tool results must be classified before prompt use | Normalized Output and Tool Context Pack become the logical bridge from tools to prompt assembly |
+| Current prompt baseline vs governed prompt evolution | Current baseline remains stable; M1/M2 are implemented or gated; guardrails remain planned | Prompt Asset, Route Skill, and Guardrail Result carry different lifecycle states |
+| STM continuity vs durable truth | Checkpoints persist conversation runtime state only | Conversation, Session Context, Checkpoint, Tool Context Pack, and retained artifacts are different logical objects |
 
 ## Stable Boundaries
 
 | Boundary | Must Remain Stable Because | Explicitly Does Not Own |
 |----------|----------------------------|-------------------------|
-| Transport-layer request admission | All inbound requests pass through transport before orchestration; this boundary isolates transport concerns from reasoning, state, and policy | Request validation, authorization, lifecycle governance, agent reasoning, prompt composition, tool execution |
-| Service-layer lifecycle and ownership | Conversation existence, archive status, ownership chain, and session context resolution are enforced before and after agent execution | Agent-runtime state, tool execution results, prompt behavior, LLM provider selection |
-| Agent-runtime reasoning and tool orchestration | The ReAct loop selects tools, invokes LLM providers, and manages thread-local checkpoint state | Lifecycle authority, transport semantics, durable metadata persistence, prompt policy selection |
-| Checkpoint-managed conversation state | MongoDB checkpointer stores thread-local agent state scoped to conversation_id | Service-layer lifecycle metadata, session context, cross-conversation state, prompt policies |
-| Tool-invocation evidence acquisition | Tools fetch financial data from external sources through controlled interfaces and return results for LLM interpretation | Caching policy, provider selection, checkpoint persistence, response guardrails |
-| Prompt policy and guardrail enforcement | Inline prompt defines behavior; planned compiler path separates asset resolution, composition, and guardrail evaluation | State management, tool execution, metadata persistence, provider selection |
-| Spec-kit artifact governance | Delivery-scoped artifacts in specs/ and long-lived docs in docs/ are governed by the constitution | Implementation code, runtime configuration, deployment manifests |
+| Transport Admission | Normalizes inbound work and response modes before service orchestration | Business lifecycle, provider policy, tool admission, prompt policy |
+| Service Lifecycle Authority | Owns ownership, active/archived status, parent context, and per-turn metadata | Checkpoint state, prompt asset lineage, provider adapter decisions |
+| Agent Reasoning Boundary | Owns route classification, reasoning loop, tool selection, model interaction, and checkpoint participation | Lifecycle status, provider parsing, durable market records |
+| STM Checkpoint Boundary | Owns recoverable state for one conversation thread | Session context, LTM personalization, raw tool outputs, Tool Context Pack persistence |
+| Prompt Policy Boundary | Owns shared policy, route skills, segment authority, locale posture, prompt identity, and future guardrail outcomes | Financial facts, provider credentials, cache freshness, lifecycle metadata |
+| Tool Surface Boundary | Owns model-visible capability selection for one turn | Provider order, parser limits, credentials, source scraping, prompt authoring |
+| Tool Gateway Boundary | Owns execution admission, descriptor integrity, risk/license/freshness checks, degraded outcomes, and trace metadata | Provider parsing, lifecycle management, second agent runtime |
+| Provider and Normalization Boundary | Owns source selection, provider class, license posture, freshness, source attribution, output classification | Model-visible tool names, prompt policy, conversation memory |
+| Retention Boundary | Owns retained reports, artifacts, snapshots, mutation receipts, and diagnostic traces when admitted | Wholesale Tool Context Pack or raw provider payload persistence |
 
 ## Change Axes
 
 | Expected Change | Isolated By | Logical Impact |
 |-----------------|-------------|----------------|
-| New LLM provider added | ModelClientFactory with provider registration pattern | Provider selection boundary expands but transport, routing, tool, and memory boundaries are unaffected |
-| Prompt compiler path activated (planned) | ADR-002 and ADR-003 govern additive introduction without breaking current baseline | Prompt policy boundary gains selection and composition semantics without changing current runtime behavior |
-| Frontend framework migration | Transport contract stability; REST and Socket.IO events do not change | No logical boundary impact; only the transport-layer client implementation changes |
-| LTM/RAG tier implementation (planned) | ADR-001 reserves LTM and RAG as dedicated surfaces; they do not extend checkpoint or service boundaries | Memory domain expands with a cross-conversation personalization surface and a sourced-evidence surface |
-| Conversation lifecycle expansion (summarized state) | Schema supports summarized status and fields, but automated summarization trigger is not yet wired | Lifecycle boundary gains a planned transition path without altering current active/archived semantics |
+| New market provider class | Provider Adapter Descriptor and Provider Selection Policy | Provider coverage expands without changing model-visible tools |
+| Vietnam-market coverage | Market Provider Authority Class and Symbol Authority | More source classes and symbol normalization states appear below tools |
+| Generic web evidence | Deny-by-default Web Evidence Policy | Web sources can produce normalized snippets/documents only when admitted |
+| TradingView enablement | Visualization Provenance object | Visualization expands without becoming canonical evidence by default |
+| Report generation | Generated Artifact and Artifact Metadata objects | Reports retain lineage and warnings without persisting raw request context |
+| Prompt route contexts | Prompt Asset and Route Skill lifecycle | Gated route behavior expands while shared prompt policy remains authoritative |
+| Future mutation tools | Mutation Policy and Mutation Receipt objects | State-changing actions require approval and audit semantics before enablement |
 
 ## Invariants
 
 | Invariant | Source Scenario / Object / State | Risk If Violated |
 |-----------|----------------------------------|------------------|
-| Service layer enforces lifecycle before agent runtime | S1, S3, S4: ChatService validates conversation existence and archive status before invoking the agent | Archived conversations accept new turns; ownership chain is bypassed |
-| Checkpoint stores only thread-local reasoning state | S4: Checkpoints are keyed by conversation_id→thread_id and do not contain session context or lifecycle metadata | Checkpoints become the source of truth for ownership and break service-layer lifecycle authority |
-| Tool results are data-only context, not policy segments | S1: Tool outputs are injected as evidence for the LLM to interpret, not as instruction-bearing prompt content | Tool outputs can override behavioral policy or be treated as higher-authority instructions |
-| Spec-kit artifacts reference docs/ documents with section-level anchors | S6: Cross-references between specs/ and docs/ must be precise and durable under constitution rules | Agentic workflow loses traceability; references break when headings change |
-| Guardrail evaluation precedes response commitment | S1, S2: Guardrails execute after model generation but before any response is committed to the response surface | Unsafe output reaches the user; guardrail outcomes are not attributable |
+| Conversation lifecycle is service-owned | UC-3, UC-4, Conversation state | Agent or checkpointer could accept archived writes |
+| Route Classification does not execute tools | UC-1, UC-5, Route Classification | Routing becomes a hidden execution path |
+| Capability descriptors are model-safe only | UC-5, Tool Capability Descriptor | Credentials, provider fallback, license policy, or parser limits leak to the model |
+| Policy descriptors are internal only | UC-5, Tool Policy Descriptor | Model-visible text exposes risk, credential, or provider-policy internals |
+| Provider adapters are not model-visible tools | UC-6, Provider Adapter Descriptor | The model bypasses deterministic provider policy |
+| Normalized Output is the prompt-facing evidence unit | UC-1, UC-6, Normalized Output | Raw provider payloads, pages, or parser artifacts enter prompt context |
+| Tool Context Pack is request-scoped by default | UC-7, Tool Context Pack | Runtime evidence becomes durable memory or market truth |
+| Degraded State is machine-detectable | UC-9, Tool Admission Decision | Failures silently fall back or appear as valid facts |
 
 ## Non-goals / Anti-patterns
 
 | Non-goal / Anti-pattern | Why It Is Out of Scope or Harmful |
 |-------------------------|-----------------------------------|
-| Checkpointer as lifecycle authority | Would collapse two distinct logical boundaries (runtime state and business governance) into one store, creating coupling between checkpointer schema and lifecycle policy |
-| Agent runtime owning session context | Would duplicate service-layer authority inside the reasoning loop, making session-context resolution dependent on agent availability |
-| Prompt assets as fact store | Would violate ADR-001 separation; prompts control behavior, not domain truth |
-| Tool layer caching as persistence | Tool caches have TTLs and are not authoritative for any logical object's lifecycle or ownership |
-| Specs/ as long-lived documentation | Would mix delivery-scoped evidence with stable reference material; only stable verified knowledge is promoted to docs/ |
+| Treating descriptor contracts as prompt text | Descriptors govern exposure and admission; they are not a policy layer for model behavior |
+| Persisting full normalized context as memory | Request-scoped context can contain stale or route-specific evidence and must not become durable truth |
+| Folding provider policy into tools or prompts | Provider order, fallback, licensing, freshness, and credentials belong below the tool capability boundary |
+| Using visualization as canonical market evidence | Visualization provenance is useful context, but numeric facts require approved evidence or computation |
+| Letting reports fetch market data directly | Reporting composes retained and normalized inputs; direct provider scraping bypasses policy and lineage |
+| Treating future LTM as expanded STM | LTM is cross-conversation personalization; STM is conversation-local runtime continuity |
 
 ## Capability Boundaries
 
 | Capability / Boundary | Responsibility | Input | Output | Explicitly Does Not Own | Scenario Source |
 |-----------------------|----------------|-------|--------|--------------------------|-----------------|
-| Transport and Request Admission | Accept inbound requests, route to correct handler, manage streaming connections | HTTP requests, Socket.IO events, SSE connections | Normalized work items routed to service layer | Request validation, lifecycle governance, agent reasoning, tool execution | UC-1, UC-2 |
-| Service Orchestration and Lifecycle | Validate conversation existence and archive status, resolve session context, record per-turn metadata | Normalized conversation-id and request payload | Validated work item for agent runtime, lifecycle outcomes recorded | Checkpoint state, tool results, prompt composition, provider selection | UC-1, UC-2, UC-3, UC-4, UC-7 |
-| Agent Reasoning and Tool Orchestration | Route classification, tool selection and invocation, LLM provider interaction, checkpoint management | Validated work item from service layer, thread-id from conversation binding | Generated response content (streamed or complete), checkpoint state saved | Lifecycle authority, durable metadata, transport framing, prompt variant selection | UC-1, UC-2, UC-4, UC-5 |
-| Checkpoint and Memory Management | Persist and retrieve thread-local agent execution state scoped to conversation_id | Thread-id, conversation-turn data | Checkpoint state for recovery | Lifecycle metadata, session context, tool execution results, prompt policy | UC-4 |
-| Tool-Invocation Evidence Acquisition | Fetch financial data from external sources through governed interfaces, cache results | Normalized tool request with symbol and parameters | Structured data result with provenance | LLM reasoning, policy enforcement, checkpoint management, provider selection | UC-1, UC-2 |
-| Provider Selection and Model Invocation | Select LLM provider based on configuration, manage provider fallback sequence, cache client instances | Prompt content, model selection parameters | Model-generated content (streamed or complete) | Tool execution, lifecycle governance, prompt asset selection, checkpoint state | UC-1, UC-2, UC-5 |
-| Prompt Policy and Guardrail Enforcement | Compose prompt from policy assets, control behavior and output contracts, enforce guardrails at response boundary | Route classification, request context, model draft | Compiled prompt, guardrail result | State management, tool execution, metadata persistence, provider selection | UC-1, UC-2, UC-8 |
-| Metadata Persistence | Store conversation lifecycle state, ownership data, session linkage, and per-turn counters | CRUD operations on conversation metadata | Persistent conversation records with lifecycle and ownership fields | Checkpoint state, tool results, LLM provider cache, prompt state | UC-3, UC-7 |
-| Spec-Kit Artifact Governance | Manage delivery-scoped specs, plans, tasks, review evidence, and synchronization with long-lived docs | Feature requirements, architecture and design inputs | Governed artifacts in specs/, synchronized docs/ and traceability | Implementation code, runtime configuration, deployment state | UC-6 |
-| Financial Data Source Provision | Supply market data, prices, and fundamentals through external API access | Symbol and data-type parameters | Structured financial data with freshness metadata | Prompt composition, lifecycle governance, checkpoint persistence | UC-1 |
+| Transport Admission | Accept user requests and response-mode choices | User message, transport metadata | Normalized work item or safe rejection | Business lifecycle and agent reasoning | UC-1, UC-2 |
+| Service Lifecycle Authority | Validate ownership, active/archive status, and session context | Normalized work item | Admitted agent work item and metadata receipt | Checkpoint state and provider policy | UC-1, UC-3, UC-4 |
+| Agent Reasoning | Classify route, coordinate prompt context, model reasoning, and selected tool calls | Admitted work item and checkpoint context | Draft response, tool-call requests, checkpoint update | Lifecycle state and provider adapter internals | UC-1, UC-5 |
+| Prompt Policy | Apply shared policy, route skills, segment authority, locale posture, and future guardrails | Route, request context, model draft | Prompt contract, guardrail outcome, prompt metadata | Market facts and tool execution | UC-8 |
+| Tool Inventory | Maintain repo-owned tool capabilities and enablement | Tool registration and health state | Available tool inventory | Route admission and provider selection | UC-5 |
+| Tool Surface | Build model-visible capability list for one turn | Route, locale, context, descriptors, feature posture | Filtered model-visible tool surface and hidden reasons | Provider order and execution | UC-5 |
+| Tool Gateway | Admit or deny selected calls before execution | Tool call, route, descriptors, risk/license/freshness policy | Admission decision, trace, degraded state, or allowed execution | Provider parsing and prompt authoring | UC-5, UC-9 |
+| Provider Policy and Adapters | Select and invoke admitted source classes below tools | Tool intent, market, provider posture | Provider result or provider degraded state | Model-visible capability selection | UC-6 |
+| Normalization and Context | Classify tool/provider outputs and assemble request-scoped data-only context | Tool results, source metadata, warnings | Normalized outputs and Tool Context Pack | Durable memory and raw payload retention | UC-1, UC-6, UC-7 |
+| Retained Artifact and Audit Metadata | Preserve explicitly retained report/artifact/mutation/trace lineage | Normalized context, approved retention trigger | Artifact metadata, mutation receipt, diagnostic trace | Full request context persistence | UC-7, UC-10 |
+| Spec Kit Governance | Keep requirements, architecture, delivery evidence, and traceability synchronized | SRS/design inputs and verified delivery evidence | Governed artifacts and sync reports | Runtime execution | UC-10 |
 
 ## Domain Objects and Relationships
 
 | Object | Meaning | Owning Capability | Key Relationships | Fact Source | Invariants |
 |--------|---------|-------------------|-------------------|-------------|------------|
-| Conversation | A scoped reasoning thread with lifecycle status, ownership metadata, and checkpoint-managed agent state | Service Orchestration and Lifecycle | Belongs to a session; has a checkpoint (1:1 via conversation_id=thread_id); owns per-turn metadata (message_count, total_tokens) | Service layer creates and manages; checkpoint stores runtime state | Must have an active status to accept new turns; archive is irreversible; owned by exactly one user through workspace→session hierarchy |
-| Session | A parent business grouping for related conversations with reusable context | Service Orchestration and Lifecycle | Contains conversations; belongs to a workshop; owns assumptions, pinned_intent, focused_symbols | Service layer manages session context independently from checkpoint state | Cannot be deleted while conversations exist; archive cascades to all child conversations |
-| Workspace | A top-level user-owned organizational container for sessions | Service Orchestration and Lifecycle | Owns sessions; belongs to exactly one user | Service layer creates and manages | Archive cascades to all child sessions and conversations |
-| Checkpoint | Serialized agent-runtime state for a single conversation thread | Checkpoint and Memory Management | Maps 1:1 to conversation via thread_id | LangGraph MongoDBSaver stores and retrieves | Contains only thread-local reasoning state; no lifecycle metadata, session context, or tool-cache content |
-| Route Classification | The semantic category assigned to a user query for skill selection | Agent Reasoning and Tool Orchestration | Determines which tools the agent may invoke and which route skill is activated | Agent runtime classifies via semantic-router | Does not execute tools or persist state; may be overridden by explicit routing hints |
-| Prompt Asset (planned) | A versioned, reviewed prompt fragment with metadata (locale, parity, selection mode) | Prompt Policy and Guardrail Enforcement | Belongs to a lineage; shares a parity group with locale siblings | Prompt compiler path manages through manifest and frontmatter | Must pass review before promotion; baseline variant exists for fallback |
-| Guardrail Result | The outcome of response-policy checks against the model draft | Prompt Policy and Guardrail Enforcement | Originates from ResponseGuardrailMiddleware; is consumed by the response surface | Guardrail evaluation at the final response boundary | Status must be "pass", "warn", "block", or "degraded"; must preserve triggered rule identifiers |
-| Provider Client | A cached LLM provider instance bound to a specific model | Provider Selection and Model Invocation | Keyed by {provider}:{model_name}; retrieved from ModelClientFactory cache | ModelClientFactory creates and caches | May be replaced via cache invalidation; fallback sequence is configured via config |
-| Spec Feature Artifact | A delivery-scoped specification, plan, or task artifact under specs/ | Spec-Kit Artifact Governance | References SRS IDs, architecture/design docs via section-level anchors; drives implementation evidence | Created and maintained through the SDD lifecycle | Must pass constitution check before planning; must be synchronized with long-lived docs after delivery |
-| Long-Lived Doc | A stable reference document under docs/ for requirements, architecture, design, ADRs, contracts, or runbooks | Spec-Kit Artifact Governance | Receives updates from spec-kit sync phase; provides section-level anchors for spec references | Maintained through the SDD delivery-and-sync lifecycle | Must be updated in the same delivery cycle when stable behavior changes |
+| Conversation | User-owned reasoning thread with lifecycle and checkpoint identity | Service Lifecycle Authority | Belongs to session/workspace; maps to one checkpoint identity | Service metadata and checkpointer | Active required for new turns; archive is terminal |
+| Session Context | Reusable parent business context for related conversations | Service Lifecycle Authority | May inform a turn; does not merge conversation threads | Service metadata | Not persisted inside checkpoint state |
+| Checkpoint | Recoverable conversation-local runtime state | STM Checkpoint Boundary | Bound to one conversation | Checkpointer | No lifecycle metadata, market facts, or Tool Context Pack wholesale |
+| Route Classification | Semantic route assigned to a user query | Agent Reasoning | Drives prompt route skill and tool surface | Agent classification boundary | Does not execute tools |
+| Prompt Asset | Governed behavior policy segment with lineage and status | Prompt Policy | Shared policy, route skills, locale and variant lineage | Prompt governance | Data-only inputs cannot override it |
+| Tool Capability Descriptor | Model-safe declaration of a tool capability | Tool Surface | Paired with internal policy descriptor | Reviewed descriptor source | No internal provider, credential, license, or parser details |
+| Tool Policy Descriptor | Internal admission policy for a tool | Tool Gateway | Paired with capability descriptor | Reviewed policy source | Hidden from model-visible surface |
+| Provider Adapter Descriptor | Internal source connector posture | Provider Policy and Adapters | Supports provider selection policy | Provider governance | Not exposed as a model-visible tool |
+| Tool Execution Envelope | Runtime wrapper for governed tool outcome | Tool Gateway | References route, selected tool, adapter where applicable, admission, cache/freshness, warnings | Tool gateway trace | Used for inspection, not as prompt policy |
+| Normalized Output | Admitted data-only output kind from a tool/provider result | Normalization and Context | May become fact, snippet, document, system record, mutation receipt, visualization provenance, artifact, or degraded state | Normalizer | Raw payloads and page instructions excluded |
+| Tool Context Pack | Request-scoped bundle of normalized outputs and warnings | Normalization and Context | Consumed by prompt assembly for the current request | Tool boundary | Not persisted wholesale |
+| Degraded State | Machine-detectable limitation or denied outcome | Tool Gateway or Provider Policy | Appears in envelope, context, traces, and safe response metadata | Detection boundary | Cannot be silently treated as successful evidence |
+| Visualization Provenance | Chart/widget/deep-link provenance output | Provider Policy and Adapters | May be used by reports and responses as visualization context | Visualization provider boundary | Not canonical evidence by default |
+| Generated Artifact | Retained or emitted user-facing generated output | Retained Artifact and Audit Metadata | Carries source lineage and warnings | Reporting boundary | Cannot hide degraded-state or source-lineage gaps |
+| Mutation Receipt | Audit object for future approved state-changing tool actions | Retained Artifact and Audit Metadata | Linked to approval, route, actor, and target record | Mutation policy boundary | Required before durable mutation is accepted |
+| Market Provider Authority Class | Logical class of external source authority | Provider Policy and Adapters | Official, licensed, public-web, wrapper/prototype, visualization, fallback | SRS/provider posture | Determines licensing, freshness, fallback, and attribution |
 
 ## State and Lifecycle
 
 | Object / Flow | State | Entered When | Exited When | Forbidden Transition | Responsible Boundary |
 |---------------|-------|--------------|-------------|----------------------|----------------------|
-| Conversation | active | Created via management API or first message in stateless flow | User closes, session closes, or archive is requested | archived→active | Service Orchestration and Lifecycle |
-| Conversation | closed | Parent session is closed; existing conversations remain read-write but no new conversations may be created | Archived | closed→active | Service Orchestration and Lifecycle |
-| Conversation | archived | User requests archive or parent session/workspace is archived | None (terminal) | archived→any | Service Orchestration and Lifecycle |
-| Session | active | Created via management API | Closed or archived | archived→active | Service Orchestration and Lifecycle |
-| Session | closed | User requests close; existing conversations continue, new conversation creation blocked | Archived | closed→active | Service Orchestration and Lifecycle |
-| Session | archived | User requests archive or parent workspace is archived | None (terminal) | archived→any | Service Orchestration and Lifecycle |
-| Workspace | active | Created via management API | Archived | archived→active | Service Orchestration and Lifecycle |
-| Workspace | archived | User requests archive | None (terminal) | archived→any | Service Orchestration and Lifecycle |
-| Checkpoint (thread) | active | First agent invocation for a conversation | No checkpoint data remains (purge or cleanup) | N/A | Checkpoint and Memory Management |
-| Checkpoint (thread) | saved | After each agent turn | Next turn overwrites | N/A | Checkpoint and Memory Management |
-| Prompt Asset (planned) | draft | Created for new or variant prompt content | Submitted for review | N/A | Prompt Policy and Guardrail Enforcement |
-| Prompt Asset | reviewed | Passed review gate | Promoted to approved lineage or returned to draft | N/A | Prompt Policy and Guardrail Enforcement |
-| Prompt Asset | approved | Active in the prompt lineage for a role/route | Deprecated by newer version | N/A | Prompt Policy and Guardrail Enforcement |
-| Prompt Asset | deprecated | Replaced by newer version | Removed from manifest | deprecated→approved | Prompt Policy and Guardrail Enforcement |
-| Provider Client | cached | Created by ModelClientFactory on first use | Removed via cache invalidation or config change | N/A | Provider Selection and Model Invocation |
-| Provider Client | available | Provider endpoint is reachable and returns valid results | Consecutive failures trigger fallback | N/A | Provider Selection and Model Invocation |
-| Provider Client | degraded | Provider is reachable but has elevated latency or error rate | Recovery or fallback activation | N/A | Provider Selection and Model Invocation |
+| Conversation | Active | Created or reopened under allowed lifecycle rules | Closed or archived | Archived to active | Service Lifecycle Authority |
+| Conversation | Archived | User or parent lifecycle archives it | None | Archived to any writable state | Service Lifecycle Authority |
+| Checkpoint | Available | A conversation turn has persisted runtime state | State is unavailable or intentionally cleared | Checkpoint becomes lifecycle authority | STM Checkpoint Boundary |
+| Prompt Asset | Baseline | Approved stable behavior path is available | Replaced by newer approved baseline | Data-only evidence promotes to baseline | Prompt Policy |
+| Prompt Route Skill | Gated | Asset exists but activation depends on configuration and route | Promoted or disabled | Lower-authority route skill weakens shared policy | Prompt Policy |
+| Guardrail Result | Planned/Active By Slice | Response-policy boundary is enabled for a slice | Response is committed or blocked | Blocked output committed as normal response | Prompt Policy |
+| Tool Capability | Exposed | Surface admits capability for route/context | Turn ends or condition blocks it | Disabled/internal capability exposed | Tool Surface |
+| Tool Call | Admitted | Gateway approves route, descriptor, risk, license, freshness, and arguments | Execution completes | Denied call executes | Tool Gateway |
+| Provider Result | Normalized | Provider output passes policy and normalization | Tool context consumed for the request | Raw provider payload enters prompt | Provider and Normalization Boundary |
+| Tool Context Pack | Request-scoped | Normalized outputs are assembled for one request | Request completes | Persisted wholesale as memory or market truth | Normalization and Context |
+| Artifact or Receipt | Retained | Explicit retention, report, or mutation policy admits it | Retention policy expires or supersedes it | Retained without lineage | Retained Artifact and Audit Metadata |
 
 ## Logical Decisions
 
 | Decision | Scope | Owner / Boundary | Affected Objects or Flows | Consequence |
 |----------|-------|------------------|---------------------------|-------------|
-| conversation_id→thread_id as canonical STM binding | Memory and lifecycle | Service Orchestration, Checkpoint Management, Agent Runtime | Conversation, Session, Checkpoint | Creates a two-authority model where service layer owns lifecycle and checkpointer owns runtime state; requires correspondence management |
-| Archive-over-delete for all lifecycle objects | Lifecycle governance | Service Orchestration | Conversation, Session, Workspace | Prevents permanent data loss; supports audit and recovery; complicates storage management over time |
-| Route-aware skills pattern instead of multi-agent | Agent reasoning | Agent Runtime | Route Classification, Prompt Asset | Keeps reasoning in one agent with route-specific prompt context; defers orchestrator complexity; limits parallelism |
-| Provider fallback at request granularity not mid-stream | Provider selection | Provider Selection | Provider Client, Conversation | Simplifies fallback logic but means mid-stream provider failures are not recoverable within a single request |
-| Spec-kit governance for all non-trivial changes | Delivery governance | Spec-Kit Artifact Governance | Spec Feature Artifact, Long-Lived Doc | Ensures traceability but adds process overhead; requires synchronization discipline during step 17 |
+| Keep one agent runtime and specialize by route/prompt/tool policy | Agent topology | Agent Reasoning | Route Classification, Prompt Asset, Tool Surface | Avoids multi-agent complexity while requiring strong admission boundaries |
+| Preserve registry inventory while adding surface and gateway controls | Tool architecture | Tool Inventory, Tool Surface, Tool Gateway | Capability Descriptor, Policy Descriptor, Tool Call | Separates inventory from exposure and execution admission |
+| Keep provider policy below tool capabilities | Source authority | Provider Policy and Adapters | Provider Descriptor, Market Provider Authority Class | Prevents provider lists and credentials from becoming model-visible choices |
+| Normalize before prompt assembly | Evidence boundary | Normalization and Context | Normalized Output, Tool Context Pack, Degraded State | Preserves data-only context and source-lineage discipline |
+| Treat Tool Context Pack as request-scoped | Memory and retention | Normalization and Retention Boundaries | Tool Context Pack, Artifact Metadata, Checkpoint | Avoids storing transient evidence as memory or market truth |
+| Represent unresolved capabilities as gaps, not current behavior | Architecture governance | Spec Kit Governance | Prompt guardrails, LTM/RAG, provider licensing, IR-3 schemas | Keeps target design accurate without overclaiming implementation state |
 
 ## Logical Gaps
 
 | Gap | Affected Capability / Object | Why It Matters |
 |-----|------------------------------|----------------|
-| Socket.IO lifecycle parity with REST | Service Orchestration, Transport | Socket.IO chat bypasses ChatService archive/ownership checks; the same logical capability has two different safety surfaces |
-| Mid-stream provider fallback undefined | Provider Selection, Transport | If a provider fails during streaming, there is no defined handoff to a fallback provider mid-stream |
-| Automated summarization trigger not wired | Service Orchestration, Memory | The summarized state exists in schema but is not automatically triggered; lifecycles have a gap between active and archived |
-| Prompt compiler path not yet implemented | Prompt Policy | All prompt variant, experiment, and guardrail middleware scenarios are planned behavior; current architecture uses inline prompts only |
-| LTM/RAG not implemented | Memory | Cross-conversation personalization and sourced-evidence retrieval are architecturally reserved but not available at runtime |
+| Socket.IO lifecycle parity | Transport Admission, Service Lifecycle Authority | Same user scenario can bypass lifecycle receipts depending on transport path |
+| Mid-stream provider fallback | Provider Policy, Transport Admission | Streaming failure cannot safely hand off to fallback without explicit protocol |
+| Production provider licensing posture | Provider Descriptor, Market Provider Authority Class | Provider enablement cannot be production-safe without terms, credential scope, and redistribution posture |
+| Executable IR-3 realization | Descriptors, Envelope, Normalized Output, Context Pack, Receipts, Artifacts | Architecture names contracts, but implementation specs must define enforceable shape and validation |
+| Prompt guardrail middleware | Prompt Policy, Guardrail Result | Final response safety is not universal until the boundary is active across target paths |
+| Future LTM/RAG | Memory and Retrieval Boundaries | Personalization and sourced retrieval remain planned and must not be confused with STM |
+| Production observability controls | Tool Trace, Provider Trace, Request Trace | Operators lack full metrics/alerting/correlation for architecture-level degraded modes |
 
 ## Prohibited Content
 
-Do not write classes, DTOs, database tables, fields, method names, endpoints, schemas, or implementation data structures here.
+Do not write code constructs, transport routes, persistence fields, method names, source locations, or implementation data structures here.

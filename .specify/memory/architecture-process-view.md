@@ -1,4 +1,4 @@
-# Process View — DP Stock Investment Assistant
+# Process View - DP Stock Investment Assistant
 
 **Input**: `.specify/memory/architecture-scenario-view.md`, `.specify/memory/architecture-logical-view.md`
 
@@ -6,116 +6,143 @@
 
 ## Architecture Intent
 
-This view preserves the runtime collaboration model where service-layer lifecycle governance, agent-runtime reasoning, tool-invocation evidence acquisition, provider fallback, and guardrail enforcement are executed as separate runtime links with defined handoffs, receipts, and failure-closure paths.
+This view preserves the runtime collaboration model for an admitted user turn: service lifecycle validation precedes reasoning; route classification drives prompt and tool policy; the model sees only admitted capabilities; selected tool calls pass through a thin gateway; provider policy, normalization, and request-scoped context happen below the model-visible tool layer; responses close with safe output, warning, block, cancellation, or degraded state.
 
 ## Core Tensions
 
 | Tension | Current Tradeoff Direction | Process Consequence |
 |---------|----------------------------|---------------------|
-| Service layer before agent runtime vs agent-first invocation | REST path enforces lifecycle checks via ChatService before agent invocation; Socket.IO path invokes the agent directly | Two runtime paths exist with different handoff sequences; Socket.IO lacks the service-layer lifecycle receipt |
-| Streaming vs non-streaming response commitment | Non-streaming: full response evaluated at once. Streaming: partial chunks admitted through windows, final guardrail commits the stream | Streaming requires a checkpoint-emission loop that non-streaming does not; failure closure differs between modes |
-| Provider fallback at request granularity vs potential mid-stream handoff | Fallback loop completes before streaming begins; mid-stream provider switching is not defined | A provider failure during a request triggers a full restart with the fallback provider, not a seamless handoff |
-| Prompt compiler path as additive process step vs inline replacement | Current process uses inline prompt; compiler path would insert asset loading, composition, and guardrail middleware as explicit process steps | Adding compiler steps changes the runtime link order but does not alter the handoff semantics of existing steps |
+| Fast agent invocation vs lifecycle receipt | Service-owned lifecycle must complete before agent work where parity exists | Agent work item includes lifecycle admission, not raw transport input |
+| Direct ReAct tool call vs governed admission | Tool selection remains inside one reasoning runtime, but execution is mediated by gateway policy | Tool execution has a pre-execution admission handoff and denied-call closure |
+| Provider fallback vs provider authority | Provider policy can choose fallback only within admitted source posture | Fallback and degraded states are deterministic, not prompt-selected |
+| Streaming progress vs response safety | Streaming can emit progressively, but terminal outcomes must remain explicit | Cancellation, block, degradation, and completion are separate closure states |
+| Current prompt baseline vs route-aware prompt behavior | Prompt route skills are gated and guardrails remain planned | Process links must label which prompt controls are current, gated, or planned |
+| Request-scoped evidence vs durable retention | Normalized context exists for the turn; only approved derivatives are retained | Retention requires explicit artifact, trace, or audit handoff |
 
 ## Stable Boundaries
 
 | Boundary | Must Remain Stable Because | Explicitly Does Not Control |
 |----------|----------------------------|-----------------------------|
-| Service-layer lifecycle precedes agent invocation | REST path enforces archive checks and conversation existence before any agent call; this prevents archived conversations from entering the reasoning loop | Agent-runtime checkpoint recovery, tool execution, LLM provider selection |
-| Provider selection precedes model invocation | ModelClientFactory resolves provider and model before any LLM call; fallback is resolved before the first provider attempt | Tool execution order, prompt composition, checkpoint saving |
-| Guardrail evaluation precedes response commitment | Guardrail middleware executes after model generation but before any output reaches the response surface | Prompt assembly, tool execution, checkpoint management |
-| Spec-kit sync phase follows implementation verification | Step 14 (verify.run) runs before step 17 (docs and contract sync); synchronization does not begin before verification evidence exists | Implementation tasks, test execution, deployment |
+| Transport to Service Handoff | User requests need consistent admission into lifecycle governance | Tool exposure, provider selection, lifecycle policy itself |
+| Service Lifecycle Gate | Archived or unauthorized work must stop before reasoning or checkpoint updates | Model choice, tool execution, prompt asset resolution |
+| Route Classification Link | Prompt and tool policies need a common route signal | Provider parsing, data retrieval, lifecycle state |
+| Prompt Policy Link | Behavior policy must be applied before model invocation and future guardrail commitment | Market fact authority, provider licensing, persistent memory |
+| Tool Surface Link | Model-visible capabilities must be filtered before ReAct tool selection | Execution, provider order, parser limits, credentials |
+| Gateway Admission Link | Unsafe selected calls must fail closed before registry-backed execution | Provider parsing, report composition, lifecycle transitions |
+| Provider and Normalization Link | Source authority, freshness, license posture, and output class must be resolved before prompt context | Model-visible tool names or prompt policy |
+| Response Commitment Link | User-visible output must close with explicit success, warning, block, cancellation, or degradation | Lifecycle mutation or source acquisition |
+| Spec Kit Sync Link | Architecture memory and traceability should update only from verified evidence or explicit target-state authority | Runtime execution and code changes |
 
 ## Change Axes
 
 | Expected Change | Isolated By | Process Impact |
 |-----------------|-------------|----------------|
-| Prompt compiler path introduction | Compiler steps (load→assemble→guard) are additive between route classification and agent invocation | Runtime link order gains asset resolution and guardrail middleware steps but existing links remain unchanged |
-| Socket.IO lifecycle parity | Adding ChatService-equivalent checks in the Socket.IO path would mirror the REST handoff sequence | The Socket.IO runtime link gains a service-layer lifecycle receipt; agent invocation precondition now includes archive validation |
-| LTM personalization activation (planned) | LTM context would be injected as an additional input to the agent reasoning loop, not as a replacement for checkpoint state | Agent invocation receives an additional data input (LTM preferences) but the handoff sequence from service layer to agent does not change |
-| Streaming admission-window parameterization | Window size and checkpoint interval are config parameters, not process-structure changes | The checkpoint→emit→buffer loop structure stays stable; only timing and admission thresholds vary |
+| Route-skill activation | Prompt policy link | Adds route-specific prompt context without changing tool admission or provider policy |
+| Tool gateway maturity | Gateway admission link | Adds stronger denial and trace closure while preserving registry-backed execution |
+| Provider ecosystem expansion | Provider and normalization link | Adds fallback and source classes below tools without changing model-visible surface |
+| Reporting persistence | Retention handoff | Adds artifact/lineage retention after normalized context, not direct provider fetch |
+| Mutation-capable tools | Approval and mutation receipt handoff | Adds explicit authorization, confirmation, and audit closure before any durable change |
+| Transport parity | Transport to service handoff | Aligns Socket.IO-style flow with service lifecycle gate |
+| Observability hardening | Trace and receipt handoffs | Adds metrics/alerts/correlation without changing scenario order |
 
 ## Invariants
 
 | Invariant | Source Scenario / Runtime Link | Risk If Violated |
 |-----------|--------------------------------|------------------|
-| Lifecycle validation completes before agent reasoning begins | S1, S3: ChatService's archive check and conversation-existence validation precede any agent invocation | Archived conversations could accept new turns and modify checkpoint state |
-| Tool results are data-only context, not instruction-bearing content | S1: Tool outputs flow into the LLM as evidence, not as behavioral instructions | Model could treat tool outputs as overriding policy directives |
-| Provider fallback completes before response streaming begins | S5: Fallback loop runs entirely during the LLM call, not mid-stream | Incomplete or switching responses could reach the user mid-stream |
-| Guardrail result determines response commitment, not generation | S1, S2: The guardrail outcome ("pass", "warn", "block", "degraded") is read after generation is complete, not before | Blocked output could be leaked or partially emitted before guardrail evaluation finishes |
-| Sync phase follows verification, not precedes it | S6: Step 16 (maintenance) and step 17 (docs sync) execute after step 14 (verify.run) | Stale or incorrect documentation could be synchronized before the implementation is proven |
+| Lifecycle gate runs before agent reasoning where parity exists | S1, S2, S5; RL-2 | Archived or unauthorized conversations modify runtime state |
+| Tool surface is built before model tool selection | S1, S3; RL-5 | The model sees unrelated, disabled, internal, or high-risk tools |
+| Gateway denies before execution | S3; RL-7 | Disallowed calls execute and only fail after side effects or provider calls |
+| Provider policy is deterministic and below tools | S6; RL-9 | The model chooses providers or bypasses licensing/freshness posture |
+| Normalization happens before prompt context | S1, S4; RL-10 | Raw payloads or untrusted instructions enter the model context |
+| Degraded outcomes are explicit | S3, S6, S9; F1-F8 | Users receive unsupported facts without visible limitations |
+| Sync follows verification or target-design authority | S7; RL-14 | Architecture memory reports unverified implementation as current |
 
 ## Non-goals / Anti-patterns
 
 | Non-goal / Anti-pattern | Why It Is Out of Scope or Harmful |
 |-------------------------|-----------------------------------|
-| Mid-stream provider switching | Would require streaming-aware provider handoff that no current scenario requires and that the current fallback infrastructure does not support |
-| Agent-initiated lifecycle state changes | Agent runtime must not set conversation status or ownership; lifecycle is a service-layer concern |
-| Transport-layer lifecycle enforcement | Transport boundaries must not short-circuit service-layer lifecycle checks by calling the agent directly |
-| Synchronous commit before streaming admission | Streaming admission windows are designed for progressive release; waiting for full model completion before any emission negates the streaming benefit |
+| Mid-stream provider handoff without protocol | Streaming cannot safely merge partial outputs from different providers without a defined process |
+| Tool gateway as second agent runtime | Gateway admits, denies, traces, and wraps execution; it does not reason, plan, or own prompts |
+| Provider fallback selected by prompt text | Fallback must be deterministic application policy, not model instruction |
+| Silent fallback from blocked tool to unrelated tool | Degradation must be visible and machine-detectable |
+| Report generation before normalization | Reports must not become an alternate route around provider policy and source lineage |
+| Syncing memory architecture from code diffs alone | The authority for this refresh is the named architecture, technical design, and SRS documents |
 
 ## Main Runtime Links
 
 | Runtime Link | Trigger | Source | Target | Transferred Content / Fact | Completion Condition |
 |--------------|---------|--------|--------|----------------------------|----------------------|
-| RL-1: Request Admission | Inbound HTTP/Socket.IO request | Transport boundary (Flask blueprint / Socket.IO handler) | Service layer (ChatService or equivalent) | Normalized request including conversation_id, message content, stream flag | Request is accepted and routed to the correct service handler; or rejected at transport (auth, rate limit) |
-| RL-2: Lifecycle Validation and Context Resolution | Request arrives at service layer | ChatService | Service layer internal | Validated conversation state: exists, active, owned by correct user; session context resolved | Lifecycle check passes (not archived, ownership confirmed); or 409/403 returned |
-| RL-3: Agent Invocation | Service layer has validated request and resolved context | ChatService | Agent runtime (StockAssistantAgent) | Validated conversation_id, message payload, resolved session context | Agent runtime begins reasoning; or invocation rejected if conversation found archived during race |
-| RL-4: Route Classification | Agent runtime receives the validated work item | Agent runtime (semantic-router) | Agent runtime internal | Query classified into one of 8 route categories | Route category determined; or fallback to GENERAL_CHAT for ambiguous queries |
-| RL-5: Prompt Assembly | Route classification is complete | Agent runtime; planned PromptAssembler | Agent runtime internal | Compiled prompt including shared policy, route skill, memory context, evidence | Prompt is ready for LLM submission; or falls back to shared-policy-only if route skill missing |
-| RL-6: Provider Selection | Prompt is ready for LLM submission | ModelClientFactory | Selected LLM provider client | Cached provider client instance for the configured model | Provider client is available; or fallback sequence activated |
-| RL-7: Model Invocation and Response Generation | Provider client is selected | LLM provider (OpenAI/Grok) | Agent runtime | Generated response content (streamed or complete) | Response generation completes; or provider returns error triggering fallback |
-| RL-8: Tool Invocation and Evidence Return | LLM requests a tool call | Agent runtime (through ReAct loop) | Tool implementation (StockSymbol, Reporting, etc.) | Structured data result with provenance metadata | Tool returns data; or returns cache hit; or returns error (tool unavailable, network failure) |
-| RL-9: Checkpoint Save | After each agent turn (user+assistant message pair) | LangGraph MongoDBSaver | MongoDB checkpoints collection | Serialized thread-local agent state: messages, tool call history | Checkpoint stored successfully; or degraded mode continues without persistence |
-| RL-10: Guardrail Evaluation | Model generation completes | ResponseGuardrailMiddleware (planned) | Agent runtime | GuardrailResult: status, triggered_rules, rewrite_applied, trace_metadata | Guardrail status determined (pass/warn/block/degraded); blocked outputs trigger safe terminal |
-| RL-11: Response Emission | Guardrail evaluation completes with pass or warn status | Transport layer (Flask SSE response or Socket.IO emit) | End User | Streaming SSE chunks or complete JSON response | Response reaches client; stream terminates with final event |
-| RL-12: Sync and Traceability Refresh | Feature implementation is verified | Spec-kit verify.run (step 14) | Sync targets: docs/, specs/, traceability | Updated artifacts: spec-traceability.yaml, long-lived docs, reverse-trace docs | Sync gates pass; or sync gap is flagged for correction |
+| RL-1: Request Admission | User sends message or management action | Transport boundary | Service lifecycle boundary | Normalized request intent and response mode | Request is structurally accepted or safely rejected |
+| RL-2: Lifecycle and Context Validation | Request is admitted by transport | Service lifecycle boundary | Agent reasoning boundary | Active conversation status, ownership result, session context receipt | Work is admitted or stopped with safe lifecycle error |
+| RL-3: STM Recovery | Agent work item begins | Agent reasoning boundary | STM checkpoint boundary | Conversation-scoped thread identity | Prior state is loaded or fresh state is declared |
+| RL-4: Route Classification | Agent receives admitted query | Agent reasoning boundary | Prompt and tool policy boundaries | Route category and confidence posture | Route is selected or conservative route is used |
+| RL-5: Tool Surface Construction | Route is available before model invocation | Tool surface boundary | Agent reasoning boundary | Model-safe admitted tool capabilities and hidden reasons | ReAct loop receives compact surface or no tools |
+| RL-6: Prompt Assembly | Route and request context are available | Prompt policy boundary | Agent reasoning boundary | Baseline prompt, implemented/gated route context, data segment posture | Prompt is ready or stable fallback is used |
+| RL-7: Model Tool Selection | ReAct loop requests a tool call | Agent reasoning boundary | Tool gateway boundary | Selected tool name and arguments | Gateway admission begins |
+| RL-8: Gateway Admission | Tool call reaches gateway | Tool gateway boundary | Tool inventory boundary | Admission decision, descriptor identity, risk/license/freshness posture | Call is denied/degraded or allowed to execute |
+| RL-9: Provider Mediation | Tool needs external or internal source access | Provider policy boundary | Provider adapter boundary | Admitted provider class, source posture, freshness, attribution requirements | Provider returns result or degraded state |
+| RL-10: Output Normalization | Tool/provider result returns | Normalization boundary | Prompt policy and response boundary | Normalized output, warnings, degraded state, source lineage | Tool Context Pack is assembled for the request |
+| RL-11: Model Response Generation | Prompt and data-only context are ready | Agent reasoning boundary | External LLM provider | Governed prompt and request-scoped context | Draft response or provider failure returns |
+| RL-12: Response Guardrail and Commitment | Draft response exists | Prompt policy boundary | Transport boundary | Pass, warning, block, rewrite, cancellation, or degradation outcome | User-visible response is committed safely |
+| RL-13: Retention Handoff | Report, artifact, trace, or mutation retention is admitted | Retention boundary | Metadata and artifact boundary | Source lineage, warnings, receipt, artifact reference, retention posture | Approved derivative is retained; full request context is discarded |
+| RL-14: Delivery Sync | Architecture or feature evidence is ready | Spec Kit governance boundary | Architecture/docs/traceability memory | Verified or target-labeled architecture facts | Sync passes or gap remains explicit |
 
 ## Handoffs and Approvals
 
 | Handoff / Approval | From | To | Meaning | Accepted Path | Rejected / Returned Path |
 |--------------------|------|----|---------|---------------|--------------------------|
-| H1: Request Admitted | Transport | Service Layer | Request is structurally valid and may proceed to lifecycle validation | Request flows to ChatService | Transport rejects: 401 (no auth), 429 (rate limit), 400 (bad request) |
-| H2: Conversation Lifecycle Approved | Service Layer | Agent Runtime | Conversation exists, is active, and is owned by the requesting user | Validated request proceeds to agent invocation | 409 Conflict (archived), 403/404 (wrong user or missing conversation) |
-| H3: Provider Selected | ModelClientFactory | Agent Runtime | LLM provider is available and configured for the request | Provider client is used for model invocation | Fallback sequence triggered; if all providers fail, error response returned |
-| H4: Guardrail Outcome Determined | Guardrail Middleware | Transport Layer | Response content passes safety checks | Response emitted to user (pass/warn) | Blocked response replaced with safe refusal; degraded response returned with limited content |
-| H5: Sync Approved | Verify.run | Docs/Specs Sync | Implementation matches spec and passes constitution checks | Long-lived docs and traceability are updated | Sync gap flagged; drift repair required before promotion |
+| H1: Work admitted | Transport boundary | Service lifecycle boundary | Request may be checked against business lifecycle | Continue to lifecycle and context validation | Safe transport rejection |
+| H2: Lifecycle approved | Service lifecycle boundary | Agent reasoning boundary | Conversation/session ownership and status permit reasoning | Agent receives admitted work item | No agent invocation; lifecycle error closes request |
+| H3: Prompt context accepted | Prompt policy boundary | Agent reasoning boundary | Baseline/gated route prompt can be used without weakening policy | Prompt proceeds to model invocation | Baseline fallback or degraded prompt metadata |
+| H4: Tool surface accepted | Tool surface boundary | Agent reasoning boundary | Model sees only admitted capabilities | ReAct tool selection can occur | Empty surface; agent proceeds without tools |
+| H5: Tool call admitted | Tool gateway boundary | Tool inventory/provider boundary | Selected call is valid for route, risk, license, freshness, and descriptors | Registry-backed execution proceeds | Degraded state; no underlying execution |
+| H6: Provider source admitted | Provider policy boundary | Provider adapter boundary | Source class is legal, fresh enough, attributed, and permitted | Provider result can be normalized | Provider degraded state or fallback path |
+| H7: Output accepted for context | Normalization boundary | Prompt policy boundary | Output is data-only and classified | Tool Context Pack enters prompt assembly | Raw payload quarantined or degraded state returned |
+| H8: Response committed | Prompt policy boundary | Transport boundary | Output is safe to expose | Complete/streaming response emitted | Safe refusal, warning, degradation, cancellation, or block |
+| H9: Mutation approved | Approval boundary | Retention and mutation audit boundary | Future state-changing action has authorization and confirmation | Mutation receipt can be retained | Mutation is blocked or degraded |
+| H10: Sync approved | Verification/governance boundary | Architecture memory and traceability | Delivery evidence supports the state label | Architecture memory and sync artifacts update | Gap remains documented |
 
 ## Receipts and User Participation
 
 | Receipt / Participation Point | Sender | Receiver | Content | User Action | Architecture Consequence |
 |-------------------------------|--------|----------|---------|-------------|--------------------------|
-| R1: Query Submitted | End User | Transport Layer | Natural language query | User types and submits a message | Triggers RL-1 through RL-11 sequence |
-| R2: Streaming Chunk Received | Transport Layer | End User | Partial response token (SSE chunk) | User observes progressive output | Streaming admission window must pass before chunk is emitted |
-| R3: Terminal Event Received | Transport Layer | End User | "done", "cancelled", or "blocked" event | User sees completion or error state | Terminal guardrail commitment determines which event fires |
-| R4: Management API Response | Service Layer | End User | JSON response with resource state | User creates/lists/updates/archives resources | Lifecycle state transition is persisted; cascading effects enforced |
-| R5: Sync Report Generated | Sync Script | System Operator | spec-sync-status.md report | Operator reviews sync status and drift | Sync gate pass/fail determines whether delivery is complete |
-| R6: Error Response | Transport Layer | End User | JSON error with safe user-visible message | User sees explanation of failure | Error is logged with context; secrets must not appear in response |
+| R1: Request accepted or rejected | Transport/Service boundary | End User | Safe admission, lifecycle, or validation result | User sends or corrects request | Stops unsafe work before agent reasoning |
+| R2: Tool limitation disclosed | Tool gateway or provider policy | End User through response boundary | Safe warning or degraded-state summary | User interprets caveat or changes request | Prevents silent unsupported facts |
+| R3: Streaming terminal state | Transport boundary | End User | Completed, cancelled, blocked, or degraded terminal outcome | User observes final state | Makes partial response closure explicit |
+| R4: Visualization provenance | Visualization boundary | End User/report boundary | Chart/widget/deep-link provenance and caveat | User inspects visualization | Keeps visualization separate from evidence facts |
+| R5: Report/artifact receipt | Reporting/retention boundary | End User/operator | Generated artifact reference with lineage and warnings | User downloads or reviews report | Retained derivative is auditable |
+| R6: Mutation receipt | Future mutation boundary | User/operator | Approval and state-change audit result | User confirms or reviews mutation | Durable changes become traceable |
+| R7: Sync report | Spec Kit governance boundary | System Operator | Current/stale status and linked evidence | Operator reviews delivery readiness | Architecture and requirement drift is visible |
 
 ## Failure, Degradation, and Closure
 
 | Failure / Branch | Detection Boundary | Responsible Boundary | Degradation or Compensation | User-Visible Result | Closure Condition |
 |------------------|--------------------|----------------------|-----------------------------|---------------------|-------------------|
-| F1: Provider unavailable (primary) | ModelClientFactory provider health check or timeout | Provider Selection | Fallback to configured secondary provider in fallback_order | Response generated by fallback provider; user may see provider change indicated in metadata | Request completes with fallback content; or all providers fail → error response |
-| F2: All providers unavailable | ModelClientFactory fallback loop exhausted | Provider Selection | Error response with safe messaging; no further model interaction | "Unable to process your request at this time." | Request terminates with error; no checkpoint is saved for a failed request |
-| F3: Archive guard triggered (attempted write to archived conversation) | ChatService lifecycle check | Service Orchestration | Request rejected with 409 conflict; no agent invocation occurs | "This conversation is archived and cannot accept new messages." | Request terminates at service layer; checkpoint is not modified |
-| F4: Guardrail blocks response | ResponseGuardrailMiddleware | Prompt Enforcement | Safe refusal message replaces generated content; triggered rules recorded in trace metadata | "I cannot provide that information." (or equivalent safe response) | Blocked response committed; guardrail outcome attributable via trace_metadata |
-| F5: Guardrail degrades response | ResponseGuardrailMiddleware | Prompt Enforcement | Reduced response content emitted with degradation metadata | Partial or disclaimer-heavy response | Degraded response committed with degradation_reason |
-| F6: Mid-stream blocker detected | Streaming admission checkpoint | Transport / Guardrail | Immediate emission stop; safe terminal frame emitted | Partial content visible, then safe terminal event | Stream marked as blocked at terminal |
-| F7: Client cancellation | Transport layer receives cancellation signal | Transport | Generation stops; no completed-answer state recorded | Stream ends without terminal success event | Stream marked as cancelled |
-| F8: Tool execution failure | Tool-invocation interface | Agent Runtime / Tool Layer | Cache miss returns tool error; agent may retry, use cached value, or explain unavailability | "I could not retrieve the latest data for that symbol." or cached data shown with staleness note | Agent continues with available data or explains the gap |
-| F9: Sync gap detected (stale traceability or docs) | Sync script or manual review | Spec-Kit Governance | Gap is flagged in sync report; drift is not automatically repaired | Sync report shows "flag" or "fail" status for affected mappings | Sync phase not complete until gaps are corrected |
-| F10: Checkpoint save failure | LangGraph MongoDBSaver | Agent Runtime | Request continues without persistence; next request starts with fresh state | No user-visible effect on the current response; subsequent responses lack prior context | Checkpoint failure logged; degraded mode continues |
+| F1: Archived or unauthorized conversation | Service lifecycle boundary | Service lifecycle authority | Reject before agent invocation | Safe lifecycle or ownership error | Request closes without checkpoint or tool changes |
+| F2: Ambiguous route | Agent reasoning boundary | Agent reasoning and prompt policy | Conservative route and narrower tool surface | General or cautious answer | Response commits with limited scope |
+| F3: No admitted tools | Tool surface boundary | Tool surface boundary | Empty model-visible surface | Agent answers without tool claim or explains limitation | No tool execution occurs |
+| F4: Descriptor drift or missing descriptor | Tool surface/gateway boundary | Tool gateway boundary | Hide capability or deny selected call | Safe limitation/degraded-state summary | Trace records descriptor failure |
+| F5: Invalid or disallowed tool call | Tool gateway boundary | Tool gateway boundary | Deny before execution | Limitation or corrected request guidance | Underlying tool not executed |
+| F6: Provider license or freshness blocked | Provider policy boundary | Provider policy boundary | Try admitted fallback or return degraded state | Source/freshness caveat | No unsupported provider result is used |
+| F7: Raw web or provider content unsafe | Normalization boundary | Normalization boundary | Quarantine raw content and emit snippets/documents or degraded state | Safe evidence caveat | Raw instructions excluded from prompt |
+| F8: Visualization mistaken for evidence | Normalization or response boundary | Prompt policy and normalization | Classify as Visualization Provenance only | Chart caveat or sourced numeric facts from another source | Response avoids unsupported numeric claim |
+| F9: Report lacks normalized context | Reporting boundary | Reporting/retention boundary | Degraded report or no report | User sees missing-data limitation | No direct provider scraping occurs |
+| F10: LLM provider failure before response | Provider/model boundary | Provider selection boundary | Deterministic fallback or safe error | Fallback response or unavailable message | Request closes with provider outcome |
+| F11: Mid-stream provider failure | Streaming boundary | Transport and provider boundary | Stop stream or safe terminal state; no seamless handoff | Partial stream ends safely | Gap remains until protocol exists |
+| F12: Prompt asset missing or invalid | Prompt policy boundary | Prompt policy boundary | Stable baseline fallback with metadata | Response continues with baseline behavior | Prompt degradation is traceable |
+| F13: Sync drift | Spec Kit governance boundary | Governance boundary | Mark stale/gap and block promotion | Sync report shows gap | Corrected by later governed update |
 
 ## Process Gaps
 
 | Gap | Affected Runtime Link / Scenario | Why It Matters |
 |-----|----------------------------------|----------------|
-| Socket.IO path lacks RL-2 (lifecycle validation) | RL-1 (Socket.IO request admission), RL-2 (lifecycle validation) | Socket.IO chat bypasses ChatService; a message to an archived conversation via Socket.IO would not be rejected |
-| Mid-stream provider fallback undefined | RL-7 (model invocation), F1 (provider failure) | If the primary provider fails mid-stream during SSE emission, there is no defined handoff to a fallback provider without restarting the request |
-| Prompt compiler path steps not yet inserted | RL-5 (prompt assembly), RL-10 (guardrail evaluation) | Prompt variant selection, experiment assignment, and explicit guardrail middleware are not present in the current runtime; all prompt-related process steps are planned |
-| No checkpoint-before-provider-call pattern | RL-6/RL-7 (provider selection/invocation) | The current process does not save checkpoint state before an LLM call; a failure during generation after a successful tool call loses the tool-call result |
+| Socket.IO lifecycle parity | RL-1, RL-2, S2 | WebSocket-style chat can lack the same service lifecycle receipt as REST/SSE |
+| Mid-stream provider fallback | RL-11, F11, S2/S6 | Current fallback is request-granular; streaming handoff needs a defined protocol |
+| Prompt guardrail middleware | RL-12, UC-8 | Prompt route assets exist/gate behavior, but final guardrail enforcement is not universal |
+| Full provider licensing posture | RL-9, F6 | Production source admission needs terms, credential scope, redistribution, and caveat rules |
+| Executable IR-3 contracts | RL-5 through RL-13 | Architecture names the flow, but implementation specs must define enforceable contract details |
+| Observability correlation | RL-8 through RL-14 | Tool/provider/prompt degraded modes need stronger cross-boundary trace correlation |
 
 ## Prohibited Content
 
-Do not write call stacks, queue names, retry counts, thread/process details, endpoint sequences, workflow engine configuration, or orchestration code here.
+Do not write call stacks, retry counts, transport route sequences, queue identifiers, thread/process implementation details, workflow engine configuration, or orchestration code here.

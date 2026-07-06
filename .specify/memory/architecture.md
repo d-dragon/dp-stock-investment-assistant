@@ -7,120 +7,123 @@
 - Development: `.specify/memory/architecture-development-view.md`
 - Physical: `.specify/memory/architecture-physical-view.md`
 
-**Note**: This synthesis is filled by the speckit.arch.generate agent after the five 4+1 view files are updated.
+**Authority Basis**: This synthesis reflects the current agent-domain target design stated in `ARCHITECTURE_DESIGN.md`, `TECHNICAL_DESIGN.md`, and the SRS. Repository facts may explain existing implementation evidence, but this refresh does not edit the repository-facts artifact.
 
 ## View Index
 
 | View | File | Purpose | Current Status |
 |------|------|---------|----------------|
-| Scenario | `.specify/memory/architecture-scenario-view.md` | UC-producing actor, use case, path, branch, and acceptance semantics | Updated 2026-06-02 |
-| Logical | `.specify/memory/architecture-logical-view.md` | Capability boundaries, domain objects, states, and invariants | Updated 2026-06-02 |
-| Process | `.specify/memory/architecture-process-view.md` | Runtime links, handoffs, approvals, receipts, failure closure | Updated 2026-06-02 |
-| Development | `.specify/memory/architecture-development-view.md` | Architecture-level components, package boundaries, contracts, dependencies | Updated 2026-06-02 |
-| Physical | `.specify/memory/architecture-physical-view.md` | Deployment, external systems, fact sources, observability, operations | Updated 2026-06-02 |
+| Scenario | `.specify/memory/architecture-scenario-view.md` | Actor goals, user-observable behavior, boundary scenarios, and acceptance outcomes | Refreshed 2026-07-06 |
+| Logical | `.specify/memory/architecture-logical-view.md` | Architecture objects, ownership boundaries, invariants, and non-responsibilities | Refreshed 2026-07-06 |
+| Process | `.specify/memory/architecture-process-view.md` | Runtime collaborations, fail-closed branches, and response-boundary handoffs | Refreshed 2026-07-06 |
+| Development | `.specify/memory/architecture-development-view.md` | Package intent, dependency direction, and forbidden compile-time crossings | Refreshed 2026-07-06 |
+| Physical | `.specify/memory/architecture-physical-view.md` | External systems, operational stores, provider classes, and deployment constraints | Refreshed 2026-07-06 |
 
 ## Architecture Intent
 
-The five views stabilize the architecture of the DP Stock Investment Assistant as a layered, spec-governed, multi-provider AI system where transport, orchestration, reasoning, tool execution, memory, prompt policy, and governance are separable boundaries with explicit dependency direction and independent evolution paths. The architecture preserves conversation-scoped memory isolation, evidence-grounded financial intelligence, archive-over-delete lifecycle semantics, and spec-driven traceability as cross-cutting invariants.
+The architecture stabilizes an agent-domain target design where a single ReAct-style runtime remains the reasoning topology, while service orchestration, prompt policy, tool exposure, gateway admission, provider mediation, normalization, request-scoped context, persistence, and governance remain separate responsibilities. Current behavior remains explicitly distinguished from implemented, gated, target, and planned behavior so architecture memory does not overstate delivery status.
+
+The main architectural shift is the move from broad tool availability toward route-filtered, descriptor-backed, policy-governed tool execution. Tools remain model-visible capabilities only at the descriptor surface; provider adapters, provider policies, normalized evidence, retained artifacts, and degraded execution states stay below that surface.
 
 ## Central Design Forces
 
-Five design forces connect the views:
-
-1. **Conversation-scoped memory as the identity unit** — conversation_id→thread_id binding constrains all five views: scenarios assume single-conversation context, the logical model separates checkpoint state from lifecycle metadata, the process model saves state after each agent turn, the development boundary separates the checkpoint package from the repository package, and the physical deployment uses MongoDB for both but maintains logical separation.
-
-2. **Spec-driven, traceable delivery as the governance engine** — The SDD lifecycle constrains all delivery: scenarios require governed artifacts, the logical model separates delivery-scoped specs from long-lived docs, the process model places sync after verification, the development boundary isolates governance from runtime code, and the physical model stores governance artifacts in the repository file system independently from container images.
-
-3. **Archive-over-delete lifecycle semantics** — The irreversible archive chain constrains all views: scenarios expect cascade behavior, the logical model enforces forbidden transitions (archived to active), the process model terminates requests at the service layer for archived resources, the development boundary assigns lifecycle to the service orchestration package, and the physical model relies on data retention rather than deletion.
-
-4. **Provider fallback at request granularity** — The request-level fallback constrains runtime collaboration: scenarios assume graceful degradation, the logical model separates provider selection from agent reasoning, the process model defines fallback as a pre-streaming loop, the development boundary isolates provider clients behind ModelClientFactory, and the physical model treats LLM providers as independent external dependencies.
-
-5. **Prompt policy as an additive planned evolution** — The prompt compiler path as additive constrains architecture evolution: scenarios gain variant and experiment options without changing current behavior, the logical model keeps prompt policy separate from state and tools, the process model adds compiler steps between routing and agent invocation, the development boundary grows three additive packages without modifying existing runtime packages, and the physical model stores prompt assets on the file system independent of container images.
+| Force | Architectural Meaning | Cross-View Consequence |
+|-------|-----------------------|------------------------|
+| Single-agent topology with governed capabilities | The current agent topology is one ReAct runtime, not a multi-agent system | Scenario and process views route the query before tool exposure; development view keeps orchestration and tool execution separate |
+| Service-layer lifecycle authority | Lifecycle, ownership, archive guards, and session context belong to service orchestration | Logical, process, and development views forbid the agent runtime and checkpointer from setting lifecycle state |
+| Checkpointer as STM only | Conversation-scoped short-term memory persists runtime state only | Physical and logical views separate checkpoint state from service-owned metadata, retained artifacts, and governance artifacts |
+| Evidence before response | Market facts flow through admitted tools, provider policy, normalization, context packaging, and prompt boundaries | Tool outputs must carry lineage, freshness, and degraded-state semantics before they influence a response |
+| Provider authority hierarchy | Official or licensed Vietnam-market providers have higher authority than public web, wrapper, visualization, or international fallback sources | Physical and logical views require provider class and freshness semantics to remain visible in normalized outputs |
+| Visualization as provenance, not default evidence | TradingView is visualization provenance unless explicitly admitted for a visual or chart-backed task | Scenario, logical, and physical views prevent chart widgets from becoming canonical market evidence by default |
+| Governance as delivery boundary | Spec Kit artifacts, traceability, and sync status are part of the architecture change control path | Development and scenario views keep governance separate from runtime code and require verified status before downstream synchronization |
 
 ## Primary Tradeoffs
 
-| Tradeoff | Chosen Direction | Consequence | Revisit When |
-|----------|------------------|-------------|--------------|
-| Single-agent simplicity vs future multi-agent routing | One ReAct agent with route-aware skills; multi-agent orchestrator deferred | Limited specialist-agent parallelism | When prompt contracts for different routes materially diverge |
-| Service-layer lifecycle authority vs agent-runtime checkpoint authority | Two separate authorities for the same conversation | Requires correspondence management; bounded divergence tolerated | When automated reconciliation becomes a reliability requirement |
-| Streaming parity between REST and Socket.IO | REST includes full lifecycle guards; Socket.IO bypasses them | Two streaming surfaces with different safety characteristics | When Socket.IO becomes the primary streaming path |
-| Inline prompt baseline vs compiler path adoption | Inline prompts current; compiler path additive | No prompt variant or experiment capability today | When prompt variant selection becomes a feature requirement |
-| Archive-over-delete vs data lifecycle management | Archive is irreversible; data accumulates | Long-term storage costs grow | When storage costs or regulations require lifecycle management |
-| Provider fallback at request vs mid-stream granularity | Fallback completes before streaming begins | Mid-stream provider failures unrecoverable per request | When streaming session durations make mid-stream fallback necessary |
+| Tradeoff | Chosen Direction | Consequence | Review Trigger |
+|----------|------------------|-------------|----------------|
+| Single ReAct runtime vs specialized agents | Keep one ReAct runtime with route-filtered capability exposure | Lower coordination complexity, but no specialist-agent parallelism | Revisit when routes require materially different reasoning loops |
+| Thin gateway vs heavy workflow engine | Gateway performs admission, policy checks, and envelope handling; registry and providers do the work | Keeps the execution boundary small and auditable | Revisit if multi-step tool workflows require orchestration beyond admission |
+| Request-scoped context vs durable evidence store | `ToolContextPack` is scoped to one request; durable evidence is retained as artifact metadata where required | Reduces memory leakage and stale evidence reuse | Revisit if cross-request evidence reuse becomes a requirement |
+| Visualization provider vs canonical source | TradingView remains visualization provenance by default | Prevents chart availability from overriding source authority | Revisit if a signed or licensed visualization feed becomes canonical |
+| Deny-by-default generic web fetch vs broad research access | Generic web fetch is admitted only through policy and normalized output | Reduces untrusted evidence injection risk | Revisit if broad web research becomes a governed product feature |
+| Prompt guardrails as planned middleware vs current prompt baseline | Current baseline remains in effect; gated M1/M2 behavior and planned guardrails are layered explicitly | Avoids claiming middleware exists before implementation | Revisit when executable prompt guardrail contracts are approved |
+| Provider fallback before response vs mid-stream fallback | Fallback is modeled before committed output; mid-stream fallback remains an explicit gap | Streaming failures may require degraded completion or retry | Revisit before high-reliability streaming commitments |
 
 ## Stable Boundaries
 
-| Boundary | Affected Views | Must Remain Stable Because | Forbidden Crossing |
-|----------|----------------|----------------------------|--------------------|
-| Conversation as STM identity unit | Scenario, Logical, Process, Development, Physical | All agent runtime, checkpointer, lifecycle, and management API surfaces assume conversation_id→thread_id binding | Service layer must not set checkpoint state; agent must not set lifecycle status |
-| Layered routes to services to repositories to database | Logical, Development | All blueprints, factories, and repository singletons assume this ordering | Routes must not issue DB queries; services must not import route types |
-| Tools compute facts, LLM reasons about them | Scenario, Logical, Process, Development, Physical | ADR-001 enforces separation; prevents fabricated figures | Tool results must not be instruction-bearing prompt content |
-| Spec-driven traceable delivery | Scenario, Logical, Process, Development, Physical | Constitution v2.1.0 enforces governed artifacts | Code must not import from specs/; sync must follow verification |
-| Archive-over-delete lifecycle | Scenario, Logical, Process, Development | All scenarios assume archival is terminal | Agent must not change lifecycle status; checkpoints must not contain lifecycle metadata |
-
-## Change Axes
-
-| Expected Change | Isolated By | Affected Views | Architecture Consequence |
-|-----------------|-------------|----------------|--------------------------|
-| New LLM provider added | ModelClientFactory provider registration | Development, Physical | Provider boundary expands; no change to scenario, logical, or process views |
-| Prompt compiler path activated | ADR-002/003 additive packages | All five views | New scenario capabilities; new process steps; new development packages; new storage on file system |
-| Frontend framework migration | Stable transport contract (REST + Socket.IO) | Physical only | No change to scenario, logical, process, or development views |
-| LTM/RAG tier implementation | ADR-001 reserved boundaries | All five views | New scenario capabilities; new memory surfaces; new process inputs; new development packages |
-| Socket.IO lifecycle parity achieved | ChatService-like checks in Socket.IO handler | Process, Development | Runtime link RL-2 now applies to Socket.IO path |
-| Kubernetes HPA/PDN configured | Infrastructure overlay | Physical only | Deployment topology changes only; no architectural boundary impact |
-| Mid-stream provider fallback defined | New streaming-aware provider handoff protocol | Process, Development | New failure branch; new client logic in provider package |
-
-## Anti-patterns
-
-| Anti-pattern | Why It Violates Intent | Affected Views |
-|--------------|------------------------|----------------|
-| Agent runtime setting lifecycle status | Collapses two distinct authority boundaries into one | Logical, Process, Development |
-| Checkpointer becoming source of truth for metadata | Makes checkpoint schema responsible for service-layer lifecycle data | Logical, Development |
-| Routes issuing ad-hoc database queries | Bypasses repository layer health-check, logging, and indexing conventions | Logical, Development |
-| Prompt assets used as fact store | Violates ADR-001 separation of policy from truth | Scenario, Logical |
-| Mid-stream provider switching without defined protocol | Risks partial or duplicated content | Process |
-| Spec-kit sync preceding verification | Updates long-lived docs before implementation is proven | Scenario, Process, Development |
+| Boundary | Owner | Must Remain Stable Because | Forbidden Crossing |
+|----------|-------|----------------------------|--------------------|
+| Transport boundary | Transport package | It adapts clients to service workflows without owning domain policy | Transport must not bypass service lifecycle, ownership, archive, or session-context checks |
+| Service orchestration boundary | Service layer | It owns lifecycle, ownership, archive guards, and session context | Agent runtime, tools, and checkpointer must not set lifecycle state |
+| Agent runtime boundary | ReAct runtime | It selects among exposed capabilities and composes responses | Runtime must not see provider adapters directly or infer hidden tools |
+| Prompt policy boundary | Prompt assets and planned guardrails | It shapes behavior without becoming a fact store | Prompts must not become canonical price, ratio, forecast, or provider metadata stores |
+| Tool surface and gateway boundary | Tool system | It exposes route-filtered descriptors and admits execution envelopes | Providers must not be exposed directly as model-visible tools |
+| Provider policy and adapter boundary | Provider layer | It resolves market authority, freshness, access posture, and fallback ordering | Adapters must not return raw provider-specific payloads to the prompt boundary |
+| Normalization and context boundary | Evidence/context layer | It packages lineage, freshness, degraded states, and retained artifact references for one request | `ToolContextPack` must not become persistent STM or lifecycle metadata |
+| Persistence and artifact metadata boundary | Persistence layer | It stores conversations, checkpoints, metadata, and artifact references with different ownership semantics | Artifact content stores must not become service metadata authority |
+| Governance boundary | Spec Kit workflow | It controls feature readiness and traceability | Runtime packages must not import or depend on governance artifacts |
 
 ## Cross-View Architecture Model
 
-Normalizes the 4+1 design results into the architecture SSOT. Do not treat view-specific concepts as equivalent or interchangeable.
+| Concept | Scenario Meaning | Logical Interpretation | Runtime Role | Development Boundary | Physical Constraint |
+|---------|------------------|------------------------|--------------|----------------------|---------------------|
+| User request | Investment or management task initiated by a user | Request with ownership, session, route, and archive context | Enters service orchestration before agent work | Transport to service orchestration | Client-facing transport surfaces |
+| Route classification | Determines task family and expected capabilities | Route label with confidence and allowed capability categories | Filters tool descriptors before ReAct selection | Agent orchestration and tool surface packages | No dedicated external system required |
+| Tool surface | User-visible capability set for one request | Descriptor set with capability, policy, risk, and provider expectations | Constrains the model-visible action space | Tool surface and gateway packages | In-process boundary in the current architecture |
+| Gateway admission | Execution approval for one selected tool call | Envelope with admitted parameters, policy decision, and degraded-state path | Fails closed before registry execution when policy is unmet | Tool gateway package | No provider credentials exposed at model boundary |
+| Registry execution | Concrete tool capability invocation | Registered capability contract below the gateway | Calls provider policy and normalization paths as needed | Tool registry package | Runs inside application runtime |
+| Provider policy | Market and authority decision point | Provider descriptor with class, license posture, freshness, and fallback order | Selects adapters and handles fallback before normalization | Provider policy package | Yahoo current path; target Vietnam-first and fallback providers |
+| Provider adapter | External data integration | Source-specific boundary below tools | Fetches provider data but does not shape final prompt context | Provider adapter package | External official, licensed, public-web, wrapper, international, or visualization systems |
+| Normalized output | Evidence package returned by tools | Provider-neutral output with lineage, freshness, confidence, and degraded state | Supplies response context and retained metadata | Normalization and context packages | Cache, metadata, and artifact stores retain supporting information where required |
+| `ToolContextPack` | Request-scoped evidence and artifact context | Non-persistent context bundle for response composition | Feeds prompt/response boundary for the active request only | Normalization/context package | Not a database, cache, or long-term memory store |
+| Visualization provenance | Chart or visual source support | Provenance record for visualization-backed output | Supports charts and reports without becoming default evidence | Reporting and visualization packages | TradingView and retained visualization artifacts |
+| Mutation receipt | Confirmation of governed side effects | Receipt with actor, target, status, and audit metadata | Returned after admitted mutation-oriented tool execution | Tool gateway, service orchestration, and persistence boundaries | Stored as metadata where retention policy requires |
+| Artifact metadata | Retained report or visualization references | Metadata about generated output and evidence lineage | Enables reporting continuity and traceability | Persistence/artifact packages | Metadata in database; large generated content in filesystem storage |
+| Degraded state | User-visible limitation when evidence or provider access is incomplete | State marker with cause, affected capability, and safe fallback | Shapes response boundary and prevents silent omission | Gateway, provider, normalization, and prompt packages | Observability and metadata should record the condition |
 
-| Architecture Concept | Scenario Meaning | Logical Interpretation | Runtime Role | Development Boundary | Physical Constraint | Architecture Constraint |
-|----------------------|------------------|------------------------|--------------|----------------------|---------------------|---------------------------|
-| Conversation | UC-1, UC-2, UC-4: unit of user interaction with memory retrieval | Conversation object with lifecycle, ownership, and checkpoint identity | RL-2 to RL-5, RL-9: lifecycle-resolved work item through agent, saved as checkpoint | Service orchestration package (lifecycle); Checkpoint package (runtime state) | MongoDB conversations + checkpoints collections | conversation_id→thread_id must be 1:1; checkpoint must not contain lifecycle metadata |
-| Route Classification | UC-1: query categorized for skill selection | Route Classification domain object; one of 8 route categories | RL-4: semantic-router classifies before prompt assembly | Agent reasoning package | No dedicated physical storage; in-memory classification | Must not execute tools; must not persist state |
-| Prompt Compilation | UC-8: prompt variant/experiment selection (planned) | Prompt Asset lineage with version, locale, fallback, selection_mode | RL-5: assemble prompt from assets before agent invocation (planned) | Prompt asset and compiler package (planned) | File system under src/prompts/ | Must be additive to current baseline; must preserve section-level cross-references |
-| Guardrail Enforcement | UC-1, UC-2: safe response boundary | GuardrailResult with status, triggered_rules, trace_metadata | RL-10: evaluate model draft before response commitment | Prompt asset and compiler package (planned) | No dedicated storage; outcomes as trace metadata | After generation and before commitment; attributable outcome required |
-| Provider Selection | UC-5: model provider chosen with fallback | Provider Client cached by \{provider\:\{model_name\} key | RL-6: resolve client; RL-7: invoke model; F1/F2: fallback | Provider client package via ModelClientFactory | External OpenAI/Grok endpoints; in-memory client cache | Fallback before streaming; mid-stream fallback not defined |
-| Spec-Driven Delivery | UC-6: governed feature lifecycle | Spec Feature Artifact + Long-Lived Doc | RL-12: sync after verification; H5: approved after review | Spec-kit governance package | GitHub file system: specs/, docs/, .specify/ | All non-trivial changes from governed artifacts; sync after verification |
-| Lifecycle State Machine | UC-3, UC-7: create to close to archive | State: active to archived; forbidden archived to active | RL-2 validates lifecycle; F3 rejects archived writes | Service orchestration package | MongoDB collections | Archive is terminal; service layer owns lifecycle; agent must not set lifecycle status |
-
-## Key Architecture Conclusions
+## Architecture Conclusions
 
 | Conclusion | Affected Views | Boundary/Owner | Consequence |
 |------------|----------------|----------------|-------------|
-| Conversation is the single identity unit for STM across all views | Scenario, Logical, Process, Development, Physical | Checkpoint and Memory / Service Orchestration | Two-authority model requires correspondence management; bounded divergence tolerated but not reconciled automatically |
-| Provider fallback is limited to request granularity | Scenario, Process, Development | Provider Selection / ModelClientFactory | Mid-stream provider failures during SSE cannot be recovered without restart; explicit gap |
-| Prompt compiler path is additive, not replacive | Scenario, Logical, Process, Development | Prompt Policy and Guardrail | Adding compiler path activates variant/experiment/guardrail capabilities without changing current behavior |
-| Socket.IO and REST have different lifecycle safety | Scenario, Process, Development | Transport / Service Orchestration | Socket.IO chat bypasses lifecycle validation; parity is a documented gap |
-| Spec-driven delivery is the mandatory change path | Scenario, Process, Development, Physical | Spec-Kit Governance / Constitution | Every non-trivial change must start from governed artifacts and must sync long-lived docs after verification |
+| The agent remains a single ReAct runtime | Scenario, Process, Development | Agent runtime | Tool-system enhancement is capability governance, not a multi-agent redesign |
+| Service orchestration and checkpointer remain separate authorities | Logical, Process, Development, Physical | Service layer and checkpointer | Lifecycle and archive behavior cannot be recovered from STM alone |
+| Provider adapters remain hidden behind tools | Logical, Process, Development, Physical | Tool gateway and provider layer | The model sees capabilities and descriptors, not provider-specific integration surfaces |
+| Normalized context is the response contract | Scenario, Logical, Process | Normalization/context boundary | Responses depend on source lineage, freshness, and degraded-state metadata rather than raw provider payloads |
+| Visualization must preserve provenance | Scenario, Logical, Physical | Visualization/reporting boundary | TradingView-backed artifacts support visual explanation but do not supersede canonical evidence by default |
+| Reporting composes retained context | Scenario, Logical, Development, Physical | Reporting and artifact metadata boundaries | Reports should use normalized context and retained artifact metadata, not direct provider scraping |
+| Governance is part of architecture readiness | Scenario, Development, Physical | Spec Kit boundary | Verified feature state and synchronized traceability are required before architecture memory claims completion |
 
-## Cross-Cutting Constraints
+## Current, Target, Planned, And Gated Labels
 
-| Constraint | Source | Affected Views | Scope | Architecture Consequence |
-|------------|--------|----------------|-------|--------------------------|
-| Constitution v2.1.0 governs all delivery | Constitution Principle I, Golden Rules, Document Referencing, Lifecycle Obligations | Scenario, Logical, Process, Development, Physical | All non-trivial code, docs, and IaC changes | All architectural work must respect spec-driven delivery, archive-over-delete, section-level cross-references, and sync gates |
-| ADR-001 layered LLM architecture | ADR-AGENT-001 | Scenario, Logical, Process, Development | Agent memory, tools, prompts, retrieval | Memory never stores prices/ratios/forecasts; tools compute facts, LLM reasons about them; prompts control behavior not truth |
-| ADR-002/003 prompt evolution | ADR-AGENT-002, ADR-AGENT-003 | Scenario, Logical, Process, Development | Prompt asset taxonomy, composition, compiler path | Prompt evolution is additive to current baseline; compiler path does not replace existing behavior |
-| Transport contract stability | Architecture review; frontend uses REST + Socket.IO only | Physical | Frontend-to-backend communication | Frontend modernization does not affect backend or agent architecture |
+| Label | Meaning In This Architecture Memory | Examples |
+|-------|-------------------------------------|----------|
+| Current | Existing baseline behavior stated by the authority documents | Single ReAct runtime, service-owned lifecycle, conversation-scoped STM, current registry-backed cache-aware tools, Yahoo-backed current market path |
+| Implemented or gated | Behavior the authority documents explicitly mark delivered or activation-gated | Prompt M1/M2 externalization and route-skill assembly where enabled; feature verification status does not by itself promote target Phase 2B tool concepts to current architecture |
+| Target | Agreed architecture direction that guides near-term implementation until authority documents mark it current | Provider policy, descriptors, gateway admission, route-filtered tool surface, normalized output, degraded states, Vietnam-first provider strategy |
+| Planned | Designed but not yet treated as implemented | Prompt guardrail middleware, future LTM/RAG, executable IR-3 schemas, production observability controls |
+| Gap | Known missing capability or unresolved operational posture | Socket.IO lifecycle parity, mid-stream provider fallback, production provider licensing, production observability hardening |
 
-## Open Risks and Review Triggers
+## Open Risks And Review Triggers
 
-| Risk or Trigger | Missing Evidence / Change Condition | Affected Views | Required Architecture Review |
-|-----------------|-------------------------------------|----------------|------------------------------|
-| Socket.IO lifecycle parity gap | Socket.IO handler does not use ChatService lifecycle validation | Process, Development | Required before Socket.IO becomes primary streaming path or before lifecycle bypass incident |
-| Mid-stream provider fallback undefined | No streaming-aware provider handoff protocol | Process, Development | Required before streaming session durations increase significantly |
-| Prompt compiler path not yet implemented | Loader, Assembler, GuardrailMiddleware are planned but not built | Scenario, Logical, Process, Development | Required before prompt variant selection or experiment assignment becomes a feature |
-| No Prometheus metrics, HPA, PDB, or NetworkPolicy | Infrastructure monitoring and resilience not configured | Physical | Required before production deployment with availability SLAs |
-| Automated summarization trigger not wired | Summarized schema exists but no trigger | Logical, Process | Required before lifecycle gap becomes a user-facing concern |
-| No OpenTelemetry tracing | Request correlation not instrumented | Physical | Required before cross-service latency debugging becomes necessary |
+| Risk Or Trigger | Missing Evidence Or Change Condition | Affected Views | Required Architecture Review |
+|-----------------|--------------------------------------|----------------|------------------------------|
+| Socket.IO lifecycle parity remains unresolved | Streaming path lacks the same lifecycle and archive guarantees as service-managed flows | Scenario, Process, Development | Required before Socket.IO becomes the primary managed streaming path |
+| Mid-stream provider fallback is undefined | Provider failure after response streaming begins lacks an approved handoff model | Process, Development, Physical | Required before high-reliability streaming guarantees are made |
+| Future LTM/RAG is not active architecture | Long-term memory and retrieval remain reserved future capabilities | Scenario, Logical, Process, Development | Required before persistent investment facts or retrieval context are introduced |
+| Prompt guardrail middleware is planned | Guardrail policy exists as target behavior but not as fully executable middleware | Scenario, Logical, Process, Development | Required before claiming automated prompt-policy enforcement |
+| Production provider licensing posture is unresolved | Official, licensed, public-web, wrapper, and international fallback sources have different legal and reliability characteristics | Logical, Physical | Required before production Vietnam-market provider commitments |
+| Executable IR-3 schemas are not complete | Tool descriptors and policy descriptors need machine-checkable contracts for full governance | Logical, Development | Required before broad third-party or remote tool expansion |
+| Production observability controls are incomplete | Trace, metrics, alerting, and degraded-state telemetry are not yet production-grade | Process, Physical | Required before operational SLA commitments |
+
+## Architecture Review Triggers
+
+Re-run this architecture synthesis when any of the following changes occur:
+
+- The agent topology changes from one ReAct runtime to multiple coordinated agents.
+- Tool execution moves out of the in-process gateway boundary.
+- Provider adapters become directly visible to model prompts or user-facing routing.
+- TradingView or another visualization source is promoted to canonical evidence.
+- Generic web fetch is admitted for broad research without provider-class normalization.
+- Conversation memory expands from STM into durable LTM/RAG.
+- Prompt guardrails become executable middleware or change response commitment rules.
+- Production provider licensing, caching, retention, or observability posture changes materially.
