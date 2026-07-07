@@ -18,14 +18,14 @@
 
 **Purpose**: Prepare focused M2B.2 test and evidence surfaces without changing runtime behavior.
 
-- [ ] T001 Review `specs/tool-system-m2b.2/spec.md`, `specs/tool-system-m2b.2/plan.md`, and `specs/tool-system-m2b.2/checklists/requirements-alignment.md`; record the M2B.2 implementation baseline in `specs/tool-system-m2b.2/review.md`.
-- [ ] T002 [P] Create shared symbol and provider fixture directory `tests/fixtures/tool_system_m2b2/`.
-- [ ] T003 [P] Add shared M2B.2 assertion helpers in `tests/helpers/tool_system_m2b2_helpers.py`.
-- [ ] T004 [P] Create the symbol-normalization test module skeleton in `tests/test_stock_symbol_m2b2.py`.
-- [ ] T005 [P] Create the provider-policy test module skeleton in `tests/test_provider_policy_m2b2.py`.
-- [ ] T006 [P] Create the tool-normalization test module skeleton in `tests/test_tool_normalization_m2b2.py`.
-- [ ] T007 [P] Create the retention and mutation test module skeleton in `tests/test_tool_retention_m2b2.py`.
-- [ ] T008 Create implementation evidence sections for story gates, compatibility gates, sync gates, and accepted warnings in `specs/tool-system-m2b.2/review.md`.
+- [X] T001 Review `specs/tool-system-m2b.2/spec.md`, `specs/tool-system-m2b.2/plan.md`, and `specs/tool-system-m2b.2/checklists/requirements-alignment.md`; record the M2B.2 implementation baseline in `specs/tool-system-m2b.2/review.md`.
+- [X] T002 [P] Create shared symbol and provider fixture directory `tests/fixtures/tool_system_m2b2/`.
+- [X] T003 [P] Add shared M2B.2 assertion helpers in `tests/helpers/tool_system_m2b2_helpers.py`.
+- [X] T004 [P] Create the symbol-normalization test module skeleton in `tests/test_stock_symbol_m2b2.py`.
+- [X] T005 [P] Create the provider-policy test module skeleton in `tests/test_provider_policy_m2b2.py`.
+- [X] T006 [P] Create the tool-normalization test module skeleton in `tests/test_tool_normalization_m2b2.py`.
+- [X] T007 [P] Create the retention and mutation test module skeleton in `tests/test_tool_retention_m2b2.py`.
+- [X] T008 Create implementation evidence sections for story gates, compatibility gates, sync gates, and accepted warnings in `specs/tool-system-m2b.2/review.md`.
 
 ---
 
@@ -35,20 +35,20 @@
 
 **Critical**: No user story implementation should begin until this phase is complete.
 
-- [ ] T009 [P] Add provider policy module structure in `src/core/tools/provider_policy.py`.
-- [ ] T010 [P] Add tool normalization module structure in `src/core/tools/normalization.py`.
-- [ ] T011 [P] Add request-scoped context module structure in `src/core/tools/context.py`.
-- [ ] T012 [P] Add mutation receipt module structure in `src/core/tools/mutation_receipts.py`.
-- [ ] T013 [P] Export new M2B.2 internal modules from `src/core/tools/__init__.py` without exposing providers as model-visible tools.
-- [ ] T014 Define shared normalized output constants and validation helpers in `src/core/tools/normalization.py`.
-- [ ] T015 Define shared degraded-state reason constants in `src/core/tools/normalization.py`.
-- [ ] T016 Preserve M2B.1 descriptor hash/version compatibility while extending internal metadata in `src/core/tools/descriptors.py`.
-- [ ] T017 Preserve M2B.1 route-filtered surface behavior while preventing provider adapter exposure in `src/core/tools/surface.py`.
-- [ ] T018 Preserve M2B.1 gateway admission and registry-backed execution behavior while preparing envelope integration in `src/core/tools/gateway.py`.
-- [ ] T019 Add a no-public-contract-change verification note for `docs/openapi.yaml` in `specs/tool-system-m2b.2/review.md`.
-- [ ] T020 [P] Add Vietnam symbol and index fixture data in `tests/fixtures/tool_system_m2b2/symbols.py`.
-- [ ] T021 [P] Add provider descriptor and policy fixture data in `tests/fixtures/tool_system_m2b2/providers.py`.
-- [ ] T022 [P] Add raw-payload, freshness, and degraded-state fixture data in `tests/fixtures/tool_system_m2b2/payloads.py`.
+- [X] T009 [P] Add provider policy module structure in `src/core/tools/provider_policy.py`.
+- [X] T010 [P] Add tool normalization module structure in `src/core/tools/normalization.py`.
+- [X] T011 [P] Add request-scoped context module structure in `src/core/tools/context.py`.
+- [X] T012 [P] Add mutation receipt module structure in `src/core/tools/mutation_receipts.py`.
+- [X] T013 Export new M2B.2 internal modules from `src/core/tools/__init__.py` after T009-T012 exist, without exposing providers as model-visible tools.
+- [X] T014 Define shared normalized output constants and validation helpers in `src/core/tools/normalization.py`.
+- [X] T015 Define shared degraded-state reason constants in `src/core/tools/normalization.py`.
+- [X] T016 Preserve M2B.1 descriptor hash/version compatibility while extending internal metadata in `src/core/tools/descriptors.py`.
+- [X] T017 Preserve M2B.1 route-filtered surface behavior while preventing provider adapter exposure in `src/core/tools/surface.py`.
+- [X] T018 Preserve M2B.1 gateway admission and registry-backed execution behavior while preparing envelope integration in `src/core/tools/gateway.py`.
+- [X] T019 Add a no-public-contract-change verification note for `docs/openapi.yaml` in `specs/tool-system-m2b.2/review.md`.
+- [X] T020 [P] Add Vietnam symbol and index fixture data in `tests/fixtures/tool_system_m2b2/symbols.py`.
+- [X] T021 [P] Add provider descriptor and policy fixture data in `tests/fixtures/tool_system_m2b2/providers.py`.
+- [X] T022 [P] Add raw-payload, freshness, and degraded-state fixture data in `tests/fixtures/tool_system_m2b2/payloads.py`.
 
 **Checkpoint**: Foundation ready. M2B.1 gateway behavior remains intact and M2B.2 contracts exist for story work.
 
@@ -62,25 +62,25 @@
 
 ### Tests for User Story 1
 
-- [ ] T023 [P] [US1] Add canonical symbol and index identity tests for `FPT`, `HOSE:FPT`, `HNX:SHS`, `UPCOM:BSR`, `VNINDEX`, `VN30`, `HNXINDEX`, and `UPINDEX` in `tests/test_stock_symbol_m2b2.py`.
-- [ ] T024 [P] [US1] Add ticker-only ambiguity and duplicate-alias degraded-state tests in `tests/test_stock_symbol_m2b2.py`.
-- [ ] T025 [P] [US1] Add tests proving live quote, history, and fundamental retrieval are not target `StockSymbolTool` responsibilities in `tests/test_stock_symbol_m2b2.py`.
-- [ ] T026 [P] [US1] Add `SystemRecord` normalized output shape tests for internal symbol-store results in `tests/test_stock_symbol_m2b2.py`.
+- [X] T023 [US1] Add canonical symbol and index identity tests for `FPT`, `HOSE:FPT`, `HNX:SHS`, `UPCOM:BSR`, `VNINDEX`, `VN30`, `HNXINDEX`, and `UPINDEX` in `tests/test_stock_symbol_m2b2.py`.
+- [X] T024 [US1] Add ticker-only ambiguity and duplicate-alias degraded-state tests in `tests/test_stock_symbol_m2b2.py`.
+- [X] T025 [US1] Add tests proving live quote, history, and fundamental retrieval are not target `StockSymbolTool` responsibilities in `tests/test_stock_symbol_m2b2.py`.
+- [X] T026 [US1] Add `SystemRecord` normalized output shape tests for internal symbol-store results in `tests/test_stock_symbol_m2b2.py`.
 
 ### Implementation for User Story 1
 
-- [ ] T027 [US1] Implement `CanonicalSymbolIdentity` and `InternalSymbolRecord` structures in `src/core/tools/normalization.py`.
-- [ ] T028 [US1] Add internal symbol-store read helpers around `SymbolRepository` in `src/core/tools/stock_symbol.py`.
-- [ ] T029 [US1] Refactor lookup, search, list, coverage, alias, identifier, and tag outputs in `src/core/tools/stock_symbol.py` to use internal symbol-store semantics.
-- [ ] T030 [US1] Implement exchange, currency, alias, identifier, and index normalization in `src/core/tools/stock_symbol.py`.
-- [ ] T031 [US1] Implement ambiguous, missing, duplicated, stale, and conflicting symbol degraded states in `src/core/tools/stock_symbol.py`.
-- [ ] T032 [US1] Classify internal symbol outputs as `SystemRecord` normalized outputs through `src/core/tools/normalization.py`.
-- [ ] T033 [US1] Block or degrade quote, history, and fundamental actions in `src/core/tools/stock_symbol.py` when they are requested through the evolved symbol tool boundary.
-- [ ] T034 [US1] Update the `stock_symbol` descriptor purpose, output contract, and compatibility metadata in `src/core/tools/descriptors.py`.
-- [ ] T035 [US1] Keep Yahoo/DataManager access out of the target symbol-store adapter path in `src/core/tools/stock_symbol.py` while preserving explicitly required legacy compatibility.
-- [ ] T036 [US1] Run `python -m pytest tests/test_stock_symbol_m2b2.py -q` and record the result in `specs/tool-system-m2b.2/review.md`.
-- [ ] T037 [US1] Run `python -m pytest tests/test_tool_gateway_m2b1.py -q` and record M2B.1 compatibility in `specs/tool-system-m2b.2/review.md`.
-- [ ] T038 [US1] Record `SC-002` and `SC-003` fixture coverage evidence in `specs/tool-system-m2b.2/review.md`.
+- [X] T027 [US1] Implement `CanonicalSymbolIdentity` and `InternalSymbolRecord` structures in `src/core/tools/normalization.py`.
+- [X] T028 [US1] Add internal symbol-store read helpers around `SymbolRepository` in `src/core/tools/stock_symbol.py`.
+- [X] T029 [US1] Refactor lookup and search outputs in `src/core/tools/stock_symbol.py` to use internal symbol-store semantics.
+- [X] T030 [US1] Implement list, coverage, exchange, currency, alias, identifier, tag, and index normalization in `src/core/tools/stock_symbol.py`.
+- [X] T031 [US1] Implement ambiguous, missing, duplicated, stale, and conflicting symbol degraded states in `src/core/tools/stock_symbol.py`.
+- [X] T032 [US1] Classify internal symbol outputs as `SystemRecord` normalized outputs through `src/core/tools/normalization.py`.
+- [X] T033 [US1] Block or degrade quote, history, and fundamental actions in `src/core/tools/stock_symbol.py` when they are requested through the evolved symbol tool boundary.
+- [X] T034 [US1] Update the `stock_symbol` descriptor purpose, output contract, and compatibility metadata in `src/core/tools/descriptors.py`.
+- [X] T035 [US1] Keep Yahoo/DataManager access out of the target symbol-store adapter path in `src/core/tools/stock_symbol.py` while preserving explicitly required legacy compatibility.
+- [X] T036 [US1] Run `python -m pytest tests/test_stock_symbol_m2b2.py -q` and record the result in `specs/tool-system-m2b.2/review.md`.
+- [X] T037 [US1] Run `python -m pytest tests/test_tool_gateway_m2b1.py -q` and record M2B.1 compatibility in `specs/tool-system-m2b.2/review.md`.
+- [X] T038 [US1] Record `SC-002` and `SC-003` fixture coverage evidence in `specs/tool-system-m2b.2/review.md`.
 
 **Checkpoint**: US1 is independently testable and does not claim live market-data ownership.
 
@@ -94,23 +94,23 @@
 
 ### Tests for User Story 2
 
-- [ ] T039 [P] [US2] Add provider descriptor completeness tests in `tests/test_provider_policy_m2b2.py`.
-- [ ] T040 [P] [US2] Add provider order, fallback eligibility, market-session, freshness, timeout, and degraded-state mapping tests in `tests/test_provider_policy_m2b2.py`.
-- [ ] T041 [P] [US2] Add tests proving provider adapters are hidden from model-visible tool surfaces in `tests/test_provider_policy_m2b2.py`.
-- [ ] T042 [P] [US2] Add fail-closed tests for unreviewed licensing, missing credential scope, unclear redistribution posture, and non-production eligibility in `tests/test_provider_policy_m2b2.py`.
+- [X] T039 [US2] Add provider descriptor completeness tests in `tests/test_provider_policy_m2b2.py`.
+- [X] T040 [US2] Add provider order, fallback eligibility, market-session, freshness, timeout, and degraded-state mapping tests in `tests/test_provider_policy_m2b2.py`.
+- [X] T041 [US2] Add tests proving provider adapters are hidden from model-visible tool surfaces in `tests/test_provider_policy_m2b2.py`.
+- [X] T042 [US2] Add fail-closed tests for unreviewed licensing, missing credential scope, unclear redistribution posture, and non-production eligibility in `tests/test_provider_policy_m2b2.py`.
 
 ### Implementation for User Story 2
 
-- [ ] T043 [US2] Implement provider class, data category, license posture, credential owner, and production eligibility enums in `src/core/tools/provider_policy.py`.
-- [ ] T044 [US2] Implement `ProviderAdapterDescriptor` validation in `src/core/tools/provider_policy.py`.
-- [ ] T045 [US2] Implement `ProviderSelectionPolicy` and `ProviderSelectionDecision` in `src/core/tools/provider_policy.py`.
-- [ ] T046 [US2] Implement fail-closed provider admission for licensing, credential scope, redistribution posture, and production eligibility in `src/core/tools/provider_policy.py`.
-- [ ] T047 [US2] Implement fallback decision metadata and degraded-state mapping in `src/core/tools/provider_policy.py`.
-- [ ] T048 [US2] Connect provider decision metadata to envelope-ready normalization fields in `src/core/tools/normalization.py`.
-- [ ] T049 [US2] Verify and adjust `src/core/tools/surface.py` and `src/core/tools/gateway.py` so provider adapters remain hidden below model-visible tool descriptors.
-- [ ] T050 [US2] Run `python -m pytest tests/test_provider_policy_m2b2.py -q` and record the result in `specs/tool-system-m2b.2/review.md`.
-- [ ] T051 [US2] Run `python -m pytest tests/test_tool_gateway_m2b1.py tests/test_provider_policy_m2b2.py -q` and record provider-hidden compatibility evidence in `specs/tool-system-m2b.2/review.md`.
-- [ ] T052 [US2] Record `SC-004` and `SC-005` fixture coverage evidence in `specs/tool-system-m2b.2/review.md`.
+- [X] T043 [US2] Implement provider class, data category, license posture, credential owner, and production eligibility enums in `src/core/tools/provider_policy.py`.
+- [X] T044 [US2] Implement `ProviderAdapterDescriptor` validation in `src/core/tools/provider_policy.py`.
+- [X] T045 [US2] Implement `ProviderSelectionPolicy` and `ProviderSelectionDecision` in `src/core/tools/provider_policy.py`.
+- [X] T046 [US2] Implement fail-closed provider admission for licensing, credential scope, redistribution posture, and production eligibility in `src/core/tools/provider_policy.py`.
+- [X] T047 [US2] Implement fallback decision metadata and degraded-state mapping in `src/core/tools/provider_policy.py`.
+- [X] T048 [US2] Connect provider decision metadata to envelope-ready normalization fields in `src/core/tools/normalization.py`.
+- [X] T049 [US2] Verify and adjust `src/core/tools/surface.py` and `src/core/tools/gateway.py` so provider adapters remain hidden below model-visible tool descriptors.
+- [X] T050 [US2] Run `python -m pytest tests/test_provider_policy_m2b2.py -q` and record the result in `specs/tool-system-m2b.2/review.md`.
+- [X] T051 [US2] Run `python -m pytest tests/test_tool_gateway_m2b1.py tests/test_provider_policy_m2b2.py -q` and record provider-hidden compatibility evidence in `specs/tool-system-m2b.2/review.md`.
+- [X] T052 [US2] Record `SC-004` and `SC-005` fixture coverage evidence in `specs/tool-system-m2b.2/review.md`.
 
 **Checkpoint**: US2 is independently testable and provider selection remains internal.
 
@@ -124,26 +124,26 @@
 
 ### Tests for User Story 3
 
-- [ ] T053 [P] [US3] Add `ToolExecutionEnvelope` required-field tests in `tests/test_tool_normalization_m2b2.py`.
-- [ ] T054 [P] [US3] Add exactly-one-normalized-output-kind tests for all admitted output kinds in `tests/test_tool_normalization_m2b2.py`.
-- [ ] T055 [P] [US3] Add raw provider payload, raw web/PDF bytes, scripts, hidden text, untrusted instruction, credential, parser-internal, and raw trace exclusion tests in `tests/test_tool_normalization_m2b2.py`.
-- [ ] T056 [P] [US3] Add stale, missing-field, provider-down, parser-limited, blocked-license, freshness-unknown, validation-failed, and unsupported-provider degraded-state tests in `tests/test_tool_normalization_m2b2.py`.
-- [ ] T057 [P] [US3] Add safe public metadata and internal trace metadata separation tests in `tests/test_tool_normalization_m2b2.py`.
+- [X] T053 [US3] Add `ToolExecutionEnvelope` required-field tests in `tests/test_tool_normalization_m2b2.py`.
+- [X] T054 [US3] Add exactly-one-normalized-output-kind tests for all admitted output kinds in `tests/test_tool_normalization_m2b2.py`.
+- [X] T055 [US3] Add raw provider payload, raw web/PDF bytes, scripts, hidden text, untrusted instruction, credential, parser-internal, and raw trace exclusion tests in `tests/test_tool_normalization_m2b2.py`.
+- [X] T056 [US3] Add stale, missing-field, provider-down, parser-limited, blocked-license, freshness-unknown, validation-failed, and unsupported-provider degraded-state tests in `tests/test_tool_normalization_m2b2.py`.
+- [X] T057 [US3] Add safe public metadata and internal trace metadata separation tests in `tests/test_tool_normalization_m2b2.py`.
 
 ### Implementation for User Story 3
 
-- [ ] T058 [US3] Implement `NormalizedOutputKind` and `NormalizedOutput` in `src/core/tools/normalization.py`.
-- [ ] T059 [US3] Implement `SourceMetadata` and freshness metadata helpers in `src/core/tools/normalization.py`.
-- [ ] T060 [US3] Implement `DegradedState` and machine-detectable degraded reasons in `src/core/tools/normalization.py`.
-- [ ] T061 [US3] Implement `ToolExecutionEnvelope` in `src/core/tools/normalization.py`.
-- [ ] T062 [US3] Implement output classification and normalization factories in `src/core/tools/normalization.py`.
-- [ ] T063 [US3] Implement raw payload quarantine and prompt-safe projection helpers in `src/core/tools/normalization.py`.
-- [ ] T064 [US3] Implement request-scoped `ToolContextPack` assembly in `src/core/tools/context.py`.
-- [ ] T065 [US3] Integrate `ToolExecutionEnvelope` and normalized output references into `src/core/tools/gateway.py`.
-- [ ] T066 [US3] Update `src/core/stock_assistant_agent.py` to consume prompt-safe `ToolContextPack` projections without injecting raw provider or tool payloads.
-- [ ] T067 [US3] Run `python -m pytest tests/test_tool_normalization_m2b2.py -q` and record the result in `specs/tool-system-m2b.2/review.md`.
-- [ ] T068 [US3] Run `python -m pytest tests/test_tools.py tests/test_stock_query_router.py tests/test_agent_regression.py -q` and record compatibility evidence in `specs/tool-system-m2b.2/review.md`.
-- [ ] T069 [US3] Record `SC-006`, `SC-007`, and `SC-008` fixture coverage evidence in `specs/tool-system-m2b.2/review.md`.
+- [X] T058 [US3] Implement `NormalizedOutputKind` and `NormalizedOutput` in `src/core/tools/normalization.py`.
+- [X] T059 [US3] Implement `SourceMetadata` and freshness metadata helpers in `src/core/tools/normalization.py`.
+- [X] T060 [US3] Implement `DegradedState` and machine-detectable degraded reasons in `src/core/tools/normalization.py`.
+- [X] T061 [US3] Implement `ToolExecutionEnvelope` in `src/core/tools/normalization.py`.
+- [X] T062 [US3] Implement output classification and normalization factories in `src/core/tools/normalization.py`.
+- [X] T063 [US3] Implement raw payload quarantine and prompt-safe projection helpers in `src/core/tools/normalization.py`.
+- [X] T064 [US3] Implement request-scoped `ToolContextPack` assembly in `src/core/tools/context.py`.
+- [X] T065 [US3] Integrate `ToolExecutionEnvelope` and normalized output references into `src/core/tools/gateway.py`.
+- [X] T066 [US3] Update `src/core/stock_assistant_agent.py` to consume prompt-safe `ToolContextPack` projections without injecting raw provider or tool payloads.
+- [X] T067 [US3] Run `python -m pytest tests/test_tool_normalization_m2b2.py -q` and record the result in `specs/tool-system-m2b.2/review.md`.
+- [X] T068 [US3] Run `python -m pytest tests/test_tools.py tests/test_stock_query_router.py tests/test_agent_regression.py -q` and record compatibility evidence in `specs/tool-system-m2b.2/review.md`.
+- [X] T069 [US3] Record `SC-006`, `SC-007`, and `SC-008` fixture coverage evidence in `specs/tool-system-m2b.2/review.md`.
 
 **Checkpoint**: US3 is independently testable and no raw payload enters prompt context.
 
@@ -157,21 +157,21 @@
 
 ### Tests for User Story 4
 
-- [ ] T070 [P] [US4] Add retained derivative source-lineage tests in `tests/test_tool_retention_m2b2.py`.
-- [ ] T071 [P] [US4] Add tests proving the full `ToolContextPack` is not persisted as conversation memory or durable market truth in `tests/test_tool_retention_m2b2.py`.
-- [ ] T072 [P] [US4] Add missing-source and no-source degraded-reason tests in `tests/test_tool_retention_m2b2.py`.
-- [ ] T073 [P] [US4] Add visualization provenance and generated artifact metadata tests that prevent those artifacts from becoming canonical evidence in `tests/test_tool_retention_m2b2.py`.
+- [X] T070 [US4] Add retained derivative source-lineage tests in `tests/test_tool_retention_m2b2.py`.
+- [X] T071 [US4] Add tests proving the full `ToolContextPack` is not persisted as conversation memory or durable market truth in `tests/test_tool_retention_m2b2.py`.
+- [X] T072 [US4] Add missing-source and no-source degraded-reason tests in `tests/test_tool_retention_m2b2.py`.
+- [X] T073 [US4] Add visualization provenance and generated artifact metadata tests that prevent those artifacts from becoming canonical evidence in `tests/test_tool_retention_m2b2.py`.
 
 ### Implementation for User Story 4
 
-- [ ] T074 [US4] Implement `RetainedDerivative` in `src/core/tools/context.py`.
-- [ ] T075 [US4] Implement retention guard helpers that reject whole-pack persistence in `src/core/tools/context.py`.
-- [ ] T076 [US4] Implement source-lineage validation helpers in `src/core/tools/context.py`.
-- [ ] T077 [US4] Implement visualization provenance and generated artifact metadata projections in `src/core/tools/context.py`.
-- [ ] T078 [US4] Implement safe retained trace, cache, freshness, warning, and degraded-state metadata subsets in `src/core/tools/context.py`.
-- [ ] T079 [US4] Verify `src/services/symbols_service.py` and `src/data/repositories/symbol_repository.py` do not persist full request-scoped `ToolContextPack` objects.
-- [ ] T080 [US4] Run `python -m pytest tests/test_tool_retention_m2b2.py -q` and record the result in `specs/tool-system-m2b.2/review.md`.
-- [ ] T081 [US4] Record `SC-009` fixture coverage evidence in `specs/tool-system-m2b.2/review.md`.
+- [X] T074 [US4] Implement `RetainedDerivative` in `src/core/tools/context.py`.
+- [X] T075 [US4] Implement retention guard helpers that reject whole-pack persistence in `src/core/tools/context.py`.
+- [X] T076 [US4] Implement source-lineage validation helpers in `src/core/tools/context.py`.
+- [X] T077 [US4] Implement visualization provenance and generated artifact metadata projections in `src/core/tools/context.py`.
+- [X] T078 [US4] Implement safe retained trace, cache, freshness, warning, and degraded-state metadata subsets in `src/core/tools/context.py`.
+- [X] T079 [US4] Verify `src/services/symbols_service.py` and `src/data/repositories/symbol_repository.py` do not persist full request-scoped `ToolContextPack` objects.
+- [X] T080 [US4] Run `python -m pytest tests/test_tool_retention_m2b2.py -q` and record the result in `specs/tool-system-m2b.2/review.md`.
+- [X] T081 [US4] Record `SC-009` fixture coverage evidence in `specs/tool-system-m2b.2/review.md`.
 
 **Checkpoint**: US4 is independently testable and request-scoped context remains non-durable by default.
 
@@ -185,20 +185,20 @@
 
 ### Tests for User Story 5
 
-- [ ] T082 [P] [US5] Add disabled-by-default tests for symbol upsert, alias merge, tag update, coverage update, and retirement marker requests in `tests/test_tool_retention_m2b2.py`.
-- [ ] T083 [P] [US5] Add `MutationReceipt` required-field tests in `tests/test_tool_retention_m2b2.py`.
-- [ ] T084 [P] [US5] Add no-durable-write tests for default symbol mutation requests in `tests/test_tool_retention_m2b2.py`.
-- [ ] T085 [P] [US5] Add test-only or future approved mutation receipt fixture tests in `tests/test_tool_retention_m2b2.py`.
+- [X] T082 [US5] Add disabled-by-default tests for symbol upsert, alias merge, tag update, coverage update, and retirement marker requests in `tests/test_tool_retention_m2b2.py`.
+- [X] T083 [US5] Add `MutationReceipt` required-field tests in `tests/test_tool_retention_m2b2.py`.
+- [X] T084 [US5] Add no-durable-write tests for default symbol mutation requests in `tests/test_tool_retention_m2b2.py`.
+- [X] T085 [US5] Add test-only or future approved mutation receipt fixture tests in `tests/test_tool_retention_m2b2.py`.
 
 ### Implementation for User Story 5
 
-- [ ] T086 [US5] Implement mutation kind, mutation status, and `MutationReceipt` structures in `src/core/tools/mutation_receipts.py`.
-- [ ] T087 [US5] Implement disabled-by-default mutation guards for symbol-store write actions in `src/core/tools/mutation_receipts.py`.
-- [ ] T088 [US5] Integrate blocked mutation requests with `DegradedState` and `MutationReceipt` normalized output handling in `src/core/tools/normalization.py`.
-- [ ] T089 [US5] Verify `src/services/symbols_service.py` and `src/data/repositories/symbol_repository.py` write paths are not exposed to model-visible tool execution by default.
-- [ ] T090 [US5] Run `python -m pytest tests/test_tool_retention_m2b2.py -q -k mutation` and record the result in `specs/tool-system-m2b.2/review.md`.
-- [ ] T091 [US5] Run `python -m pytest tests/test_stock_symbol_m2b2.py tests/test_provider_policy_m2b2.py tests/test_tool_normalization_m2b2.py tests/test_tool_retention_m2b2.py -q` and record focused M2B.2 evidence in `specs/tool-system-m2b.2/review.md`.
-- [ ] T092 [US5] Record `SC-010` and `SC-011` fixture coverage evidence in `specs/tool-system-m2b.2/review.md`.
+- [X] T086 [US5] Implement mutation kind, mutation status, and `MutationReceipt` structures in `src/core/tools/mutation_receipts.py`.
+- [X] T087 [US5] Implement disabled-by-default mutation guards for symbol-store write actions in `src/core/tools/mutation_receipts.py`.
+- [X] T088 [US5] Integrate blocked mutation requests with `DegradedState` and `MutationReceipt` normalized output handling in `src/core/tools/normalization.py`.
+- [X] T089 [US5] Verify `src/services/symbols_service.py` and `src/data/repositories/symbol_repository.py` write paths are not exposed to model-visible tool execution by default.
+- [X] T090 [US5] Run `python -m pytest tests/test_tool_retention_m2b2.py -q -k mutation` and record the result in `specs/tool-system-m2b.2/review.md`.
+- [X] T091 [US5] Run `python -m pytest tests/test_stock_symbol_m2b2.py tests/test_provider_policy_m2b2.py tests/test_tool_normalization_m2b2.py tests/test_tool_retention_m2b2.py -q` and record focused M2B.2 evidence in `specs/tool-system-m2b.2/review.md`.
+- [X] T092 [US5] Record `SC-010` and `SC-011` fixture coverage evidence in `specs/tool-system-m2b.2/review.md`.
 
 **Checkpoint**: US5 is independently testable and production symbol-store writes remain disabled.
 
@@ -208,19 +208,19 @@
 
 **Purpose**: Prove all story work remains within M2B.2 scope, preserves M2B.1 compatibility, and updates Spec Kit traceability.
 
-- [ ] T093 Run `python -m pytest tests/test_tool_gateway_m2b1.py -q` and record M2B.1 regression evidence in `specs/tool-system-m2b.2/review.md`.
-- [ ] T094 Run `python -m pytest tests/test_stock_symbol_m2b2.py tests/test_provider_policy_m2b2.py tests/test_tool_normalization_m2b2.py tests/test_tool_retention_m2b2.py -q` and record focused M2B.2 evidence in `specs/tool-system-m2b.2/review.md`.
-- [ ] T095 Run `python -m pytest tests/test_tools.py tests/test_stock_query_router.py tests/test_agent_regression.py -q` and record compatibility evidence in `specs/tool-system-m2b.2/review.md`.
-- [ ] T096 Run `python -m pytest tests/test_stock_symbol_m2b2.py tests/test_provider_policy_m2b2.py tests/test_tool_normalization_m2b2.py tests/test_tool_retention_m2b2.py --cov=src.core.tools --cov-report=term-missing` and record coverage evidence in `specs/tool-system-m2b.2/review.md`.
-- [ ] T097 Run `python -m pytest tests/test_tool_normalization_m2b2.py tests/test_agent_regression.py --cov=src.core.stock_assistant_agent --cov-report=term-missing` and record prompt-boundary coverage evidence in `specs/tool-system-m2b.2/review.md`.
-- [ ] T098 Validate `docs/openapi.yaml` has no public contract changes for M2B.2 and record the result in `specs/tool-system-m2b.2/review.md`.
-- [ ] T099 Validate provider adapters are absent from model-visible descriptors and route surfaces by inspecting `src/core/tools/descriptors.py`, `src/core/tools/surface.py`, and `src/core/tools/gateway.py`; record the result in `specs/tool-system-m2b.2/review.md`.
-- [ ] T100 Revalidate `specs/tool-system-m2b.2/checklists/requirements-alignment.md` after implementation evidence exists and record any reopened checklist item in `specs/tool-system-m2b.2/review.md`.
-- [ ] T101 Update `specs/spec-traceability.yaml` with M2B.2 implementation evidence paths, lifecycle status, synchronized documents, and accepted deferrals.
-- [ ] T102 Run `python scripts/sync_spec_status.py --gate` and confirm regenerated `specs/spec-sync-status.md` plus `docs/domains/agent/SRS_SPEC_TRACEABILITY.md` are current.
-- [ ] T103 Run `git diff --check` and record whitespace or line-ending findings in `specs/tool-system-m2b.2/review.md`.
-- [ ] T104 Run `/speckit-validate` for M2B.2 task-to-requirement readiness and record any findings in `specs/tool-system-m2b.2/review.md`.
-- [ ] T105 Run `/speckit-verify-tasks` and `/speckit-verify-run` after all implementation tasks are complete; record the verification verdict in `specs/tool-system-m2b.2/review.md`.
+- [X] T093 Run `python -m pytest tests/test_tool_gateway_m2b1.py -q` and record M2B.1 regression evidence in `specs/tool-system-m2b.2/review.md`.
+- [X] T094 Run `python -m pytest tests/test_stock_symbol_m2b2.py tests/test_provider_policy_m2b2.py tests/test_tool_normalization_m2b2.py tests/test_tool_retention_m2b2.py -q` and record focused M2B.2 evidence in `specs/tool-system-m2b.2/review.md`.
+- [X] T095 Run `python -m pytest tests/test_tools.py tests/test_stock_query_router.py tests/test_agent_regression.py -q` and record compatibility evidence in `specs/tool-system-m2b.2/review.md`.
+- [X] T096 Run `python -m pytest tests/test_stock_symbol_m2b2.py tests/test_provider_policy_m2b2.py tests/test_tool_normalization_m2b2.py tests/test_tool_retention_m2b2.py --cov=core.tools --cov-report=term-missing --cov-fail-under=56` and record enforced coverage evidence in `specs/tool-system-m2b.2/review.md`.
+- [X] T097 Run `python -m pytest tests/test_tool_normalization_m2b2.py tests/test_agent_regression.py --cov=core.tools.context --cov=core.tools.normalization --cov-report=term-missing --cov-fail-under=56` and record enforced prompt-boundary coverage evidence in `specs/tool-system-m2b.2/review.md`.
+- [X] T098 Validate `docs/openapi.yaml` has no public contract changes for M2B.2 and record the result in `specs/tool-system-m2b.2/review.md`.
+- [X] T099 Validate provider adapters are absent from model-visible descriptors and route surfaces by inspecting `src/core/tools/descriptors.py`, `src/core/tools/surface.py`, and `src/core/tools/gateway.py`; record the result in `specs/tool-system-m2b.2/review.md`.
+- [X] T100 Revalidate `specs/tool-system-m2b.2/checklists/requirements-alignment.md` after implementation evidence exists and record any reopened checklist item in `specs/tool-system-m2b.2/review.md`.
+- [X] T101 Update `specs/spec-traceability.yaml` with M2B.2 implementation evidence paths, lifecycle status, synchronized documents, and accepted deferrals.
+- [X] T102 Run `python scripts/sync_spec_status.py --gate` and confirm regenerated `specs/spec-sync-status.md` plus `docs/domains/agent/SRS_SPEC_TRACEABILITY.md` are current.
+- [X] T103 Run `git diff --check` and record whitespace or line-ending findings in `specs/tool-system-m2b.2/review.md`.
+- [X] T104 Run `/speckit-validate` for M2B.2 task-to-requirement readiness and record any findings in `specs/tool-system-m2b.2/review.md`.
+- [X] T105 Run `/speckit-verify-tasks` and `/speckit-verify-run` after all implementation tasks are complete; record the verification verdict in `specs/tool-system-m2b.2/review.md`.
 
 ---
 
@@ -255,16 +255,16 @@
 ## Parallel Opportunities
 
 - Setup tasks T002 through T007 can run in parallel.
-- Foundation module skeleton tasks T009 through T013 can run in parallel.
+- Foundation module skeleton tasks T009 through T012 can run in parallel; T013 follows after those modules exist.
 - Foundation fixture tasks T020 through T022 can run in parallel.
-- Tests inside each story marked `[P]` can run in parallel.
+- Story test tasks that write to the same test file should be sequenced within that file.
 - US1 and US2 can proceed in parallel after Foundation.
 - US4 and US5 tests can be prepared in parallel after Foundation, but their integrated implementation depends on US3 primitives.
 
 ## Parallel Example: US1
 
 ```powershell
-# Add US1 tests in parallel before implementation:
+# Add US1 tests sequentially before implementation because they share one test file:
 Task: "T023 canonical symbol and index identity tests in tests/test_stock_symbol_m2b2.py"
 Task: "T024 ticker-only ambiguity tests in tests/test_stock_symbol_m2b2.py"
 Task: "T025 live market-data exclusion tests in tests/test_stock_symbol_m2b2.py"

@@ -4,7 +4,7 @@
 
 **Created**: 2026-07-06
 
-**Status**: Planned
+**Status**: Verified
 
 **Input**: User requested a follow-up feature specification for milestone `M2B.2`, continuing after verified `M2B.1`, scoped to the Phase 2B roadmap, SRS, traceability, architecture, and tool-system research documents.
 
@@ -39,7 +39,7 @@
 
 **Contract Impact**: No public REST, SSE, Socket.IO, or OpenAPI contract change is expected from the specification. Planning should define feature-local contracts for provider adapter descriptors, provider selection policy, tool execution envelopes, normalized outputs, request-scoped `ToolContextPack`, and disabled mutation receipt behavior.
 
-**Lifecycle Status Rule**: This feature started as `Draft`, advanced to `Clarified` after cross-document alignment, and is now `Planned` after implementation planning artifacts were generated. Promote to `Implemented` and `Verified` only after matching Spec Kit evidence exists. M2B.2 must not be treated as current architecture solely because the spec or plan exists.
+**Lifecycle Status Rule**: This feature started as `Draft`, advanced to `Clarified` after cross-document alignment, advanced to `Planned` after implementation planning artifacts were generated, and is now `Verified` after implementation evidence, verify-tasks disposition, verify-run remediation, `.verify-done`, and synchronized traceability evidence. M2B.2 implementation evidence does not promote deferred M2B.3+ market-data, provider-enablement, reporting persistence, generic web fetch, remote admission, or TradingView expansion concepts to current architecture.
 
 ## User Scenarios & Testing *(mandatory)*
 

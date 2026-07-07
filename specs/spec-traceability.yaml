@@ -3,7 +3,7 @@ generated_on: 2026-03-31
 
 reports:
   spec_sync_status:
-    version: "1.13"
+    version: "1.16"
     status: Active
     revision_history:
       - version: "1.0"
@@ -48,8 +48,17 @@ reports:
       - version: "1.13"
         date: 2026-07-06
         summary: Regenerated after M2B.2 cross-artifact analysis aligned plan, quickstart, checklist, and task evidence.
+      - version: "1.14"
+        date: 2026-07-06
+        summary: Regenerated after M2B.2 pre-implementation review remediation aligned task parallelism, dependency ordering, coverage gates, and task granularity.
+      - version: "1.15"
+        date: 2026-07-06
+        summary: Added M2B.2 implementation review evidence and synchronized partial task completion after application code implementation.
+      - version: "1.16"
+        date: 2026-07-06
+        summary: Promoted tool-system-m2b.2 to verified after verify-tasks preservation evidence and verify-run remediation closed all implementation tasks.
   srs_spec_traceability:
-    version: "2.8"
+    version: "3.1"
     status: Active
     revision_history:
       - version: "1.0"
@@ -109,6 +118,15 @@ reports:
       - version: "2.8"
         date: 2026-07-06
         summary: Regenerated reverse trace after M2B.2 cross-artifact analysis remediation aligned delivery evidence.
+      - version: "2.9"
+        date: 2026-07-06
+        summary: Regenerated reverse trace after M2B.2 pre-implementation review remediation aligned task readiness evidence.
+      - version: "3.0"
+        date: 2026-07-06
+        summary: Regenerated reverse trace after M2B.2 implementation evidence was added while post-implementation verification remains pending.
+      - version: "3.1"
+        date: 2026-07-06
+        summary: Regenerated reverse trace after tool-system-m2b.2 verification evidence and verify marker were added.
 
 srs:
   path: docs/domains/agent/SOFTWARE_REQUIREMENTS_SPECIFICATION.md
@@ -953,6 +971,9 @@ features:
         - specs/tool-system-m2b.2/checklists/requirements.md
         - specs/tool-system-m2b.2/checklists/requirements-alignment.md
         - specs/tool-system-m2b.2/tasks.md
+        - specs/tool-system-m2b.2/review.md
+        - specs/tool-system-m2b.2/verify-tasks-report.md
+        - specs/tool-system-m2b.2/.verify-done
     srs_mapping:
       baseline_version: "2.8"
       coverage_status: partial
@@ -1036,6 +1057,8 @@ features:
         - Planning artifacts generated on 2026-07-06 keep M2B.2 scoped to target internal contracts and do not change public API contracts.
         - Implementation task breakdown generated on 2026-07-06 adds dependency-aware test, implementation, verification, and sync tasks while keeping the feature in planned status.
         - Cross-artifact analysis remediation on 2026-07-06 aligned retention/mutation test coverage, prompt-boundary integration, requirements-alignment disposition, and verification command evidence across plan, quickstart, and tasks.
+        - Implementation evidence added on 2026-07-06; focused M2B.2 tests, M2B.1 regression, compatibility suites, coverage gates, OpenAPI no-change check, provider-hidden inspection, and task-to-requirement mapping passed. Post-implementation verify-tasks and verify-run remain pending.
+        - Verification remediation completed on 2026-07-06; T017, T079, and T089 preservation findings are accepted in review evidence, T105 is complete, `.verify-done` exists, and deferred M2B.3+ capabilities remain out of scope.
     speckit_mapping:
       spec_requirements:
         - M2B2-FR-001
@@ -1103,3 +1126,12 @@ features:
           label: Requirements alignment checklist
         - path: specs/tool-system-m2b.2/tasks.md
           label: Implementation tasks
+        - path: specs/tool-system-m2b.2/review.md
+          label: Implementation review evidence
+        - path: specs/tool-system-m2b.2/verify-tasks-report.md
+          label: Verify-tasks report
+        - path: specs/tool-system-m2b.2/review.md
+          label: Final verification verdict
+          anchor: final-verification-verdict
+        - path: specs/tool-system-m2b.2/.verify-done
+          label: Verify marker
