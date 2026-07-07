@@ -43,6 +43,42 @@ from .surface import (
     RouteSurfaceRequest,
     ToolSurfaceBuilder,
 )
+from .normalization import (
+    AdmissionOutcome,
+    CanonicalSymbolIdentity,
+    DegradedReason,
+    DegradedState,
+    FreshnessStatus,
+    InternalSymbolRecord,
+    NormalizedOutput,
+    NormalizedOutputKind,
+    SourceMetadata,
+    ToolExecutionEnvelope,
+    make_degraded_output,
+    make_system_record_output,
+)
+from .provider_policy import (
+    CredentialOwner,
+    DataCategory,
+    LicensePosture,
+    ProviderAdapterDescriptor,
+    ProviderClass,
+    ProviderSelectionDecision,
+    ProviderSelectionPolicy,
+)
+from .context import (
+    RetainedDerivative,
+    ToolContextPack,
+    assemble_tool_context_pack,
+    reject_whole_pack_persistence,
+    validate_retained_derivative,
+)
+from .mutation_receipts import (
+    MutationReceipt,
+    MutationStatus,
+    disabled_mutation_receipt,
+    guard_symbol_mutation,
+)
 
 __all__ = [
     # Base
@@ -74,4 +110,33 @@ __all__ = [
     "GatewayAdmissionDecision",
     "ToolGateway",
     "ToolTraceRecord",
+    # M2B.2 normalization/context/provider contracts
+    "AdmissionOutcome",
+    "CanonicalSymbolIdentity",
+    "DegradedReason",
+    "DegradedState",
+    "FreshnessStatus",
+    "InternalSymbolRecord",
+    "NormalizedOutput",
+    "NormalizedOutputKind",
+    "SourceMetadata",
+    "ToolExecutionEnvelope",
+    "make_degraded_output",
+    "make_system_record_output",
+    "CredentialOwner",
+    "DataCategory",
+    "LicensePosture",
+    "ProviderAdapterDescriptor",
+    "ProviderClass",
+    "ProviderSelectionDecision",
+    "ProviderSelectionPolicy",
+    "RetainedDerivative",
+    "ToolContextPack",
+    "assemble_tool_context_pack",
+    "reject_whole_pack_persistence",
+    "validate_retained_derivative",
+    "MutationReceipt",
+    "MutationStatus",
+    "disabled_mutation_receipt",
+    "guard_symbol_mutation",
 ]

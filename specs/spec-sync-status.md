@@ -1,7 +1,7 @@
 # Spec Sync Status
 
-> **Document Version**: 1.13
-> **Generated**: 2026-07-06 09:25:03Z
+> **Document Version**: 1.16
+> **Generated**: 2026-07-07 07:16:08Z
 > **Status**: Active
 > **Traceability Manifest Version**: 1
 
@@ -22,7 +22,7 @@
 | [prompt-system-milestone1](prompt-system-milestone1/spec.md#user-scenarios--testing-mandatory) | `mapped` | `partial` | `implemented` | `current` | `42/42` |
 | [prompt-system-milestone2](prompt-system-milestone2/spec.md#governance-context-mandatory) | `mapped` | `partial` | `implemented` | `current` | `45/45` |
 | [tool-system-implementation-m2b.1](tool-system-implementation-m2b.1/spec.md#governance-context-mandatory) | `mapped` | `partial` | `verified` | `current` | `70/70` |
-| [tool-system-m2b.2](tool-system-m2b.2/spec.md#governance-context-mandatory) | `mapped` | `partial` | `planned` | `current` | `0/105` |
+| [tool-system-m2b.2](tool-system-m2b.2/spec.md#governance-context-mandatory) | `mapped` | `partial` | `verified` | `current` | `105/105` |
 
 ## Revision History
 
@@ -42,6 +42,9 @@
 | `1.11` | `2026-07-06` | Promoted tool-system-m2b.2 to planned with implementation plan, research, data model, contracts, and quickstart evidence. |
 | `1.12` | `2026-07-06` | Added tool-system-m2b.2 implementation task breakdown and requirements-alignment checklist evidence. |
 | `1.13` | `2026-07-06` | Regenerated after M2B.2 cross-artifact analysis aligned plan, quickstart, checklist, and task evidence. |
+| `1.14` | `2026-07-06` | Regenerated after M2B.2 pre-implementation review remediation aligned task parallelism, dependency ordering, coverage gates, and task granularity. |
+| `1.15` | `2026-07-06` | Added M2B.2 implementation review evidence and synchronized partial task completion after application code implementation. |
+| `1.16` | `2026-07-06` | Promoted tool-system-m2b.2 to verified after verify-tasks preservation evidence and verify-run remediation closed all implementation tasks. |
 
 ## agent-session-with-stm-wiring
 
@@ -191,11 +194,11 @@
 - Path: [specs/tool-system-m2b.2](tool-system-m2b.2/spec.md#governance-context-mandatory)
 - Mapping status: `mapped`
 - Coverage status: `partial`
-- Derived status: `planned`
+- Derived status: `verified`
 - Sync status: `current`
 - Sync gate enforced: `yes`
-- spec.md status field: `Planned`
-- Task completion: `0/105`
+- spec.md status field: `Verified`
+- Task completion: `105/105`
 - Linked SRS items: `FR-2.5.1, FR-2.5.2, FR-2.5.3, FR-2.5.4, FR-2.5.5, FR-2.6.1, FR-2.7.1, FR-2.7.2, FR-2.11.1, FR-2.11.2, FR-2.11.3, FR-2.11.4, FR-2.11.5, FR-2.11.6, NFR-2.2.6, NFR-2.3.4, NFR-5.2.15, NFR-6.2.5, CON-6, CON-10, AC-9.5, AC-9.6, AC-9.7, AC-9.10, AC-9.14, AC-9.15, IR-3.3, IR-3.4, IR-3.5, IR-3.6, IR-3.7, IR-3.9`
 - Evidence:
   - [Feature specification](tool-system-m2b.2/spec.md#governance-context-mandatory)
@@ -211,6 +214,10 @@
   - [Requirements quality checklist](tool-system-m2b.2/checklists/requirements.md)
   - [Requirements alignment checklist](tool-system-m2b.2/checklists/requirements-alignment.md)
   - [Implementation tasks](tool-system-m2b.2/tasks.md)
+  - [Implementation review evidence](tool-system-m2b.2/review.md)
+  - [Verify-tasks report](tool-system-m2b.2/verify-tasks-report.md)
+  - [Final verification verdict](tool-system-m2b.2/review.md#final-verification-verdict)
+  - [Verify marker](tool-system-m2b.2/.verify-done)
 
 ## Status Semantics
 

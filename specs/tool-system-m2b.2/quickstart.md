@@ -40,8 +40,8 @@ python -m pytest tests/test_tools.py tests/test_stock_query_router.py tests/test
 Run coverage checks for the touched tool and prompt-boundary surfaces:
 
 ```powershell
-python -m pytest tests/test_stock_symbol_m2b2.py tests/test_provider_policy_m2b2.py tests/test_tool_normalization_m2b2.py tests/test_tool_retention_m2b2.py --cov=src.core.tools --cov-report=term-missing
-python -m pytest tests/test_tool_normalization_m2b2.py tests/test_agent_regression.py --cov=src.core.stock_assistant_agent --cov-report=term-missing
+python -m pytest tests/test_stock_symbol_m2b2.py tests/test_provider_policy_m2b2.py tests/test_tool_normalization_m2b2.py tests/test_tool_retention_m2b2.py --cov=core.tools --cov-report=term-missing --cov-fail-under=56
+python -m pytest tests/test_tool_normalization_m2b2.py tests/test_agent_regression.py --cov=core.tools.context --cov=core.tools.normalization --cov-report=term-missing --cov-fail-under=56
 ```
 
 Run traceability sync after task, implementation, or verification evidence changes:

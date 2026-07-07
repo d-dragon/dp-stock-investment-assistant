@@ -18,6 +18,14 @@ from .descriptors import (
     get_baseline_tool_descriptors,
 )
 from .registry import ToolRegistry
+from .normalization import (
+    AdmissionOutcome,
+    NormalizedOutput,
+    NormalizedOutputKind,
+    ToolExecutionEnvelope,
+    classify_normalized_output,
+    make_degraded_output,
+)
 from .surface import RouteFilteredToolSurface
 
 
@@ -313,6 +321,36 @@ class ToolGateway:
         self.trace_records.append(trace)
         return result
 
+    def build_execution_envelope(
+        self,
+        *,
+        route: StockQueryRoute,
+        tool_name: str,
+        result: Any,
+        admission_outcome: str = "allowed",
+    ) -> ToolExecutionEnvelope:
+        """Build an M2B.2 envelope around an already computed normalized result."""
+
+        capability = self.capability_descriptors.get(tool_name)
+        normalized_output = self._coerce_normalized_output(tool_name, result)
+        return ToolExecutionEnvelope(
+            route=route.value,
+            selected_tool=tool_name,
+            selected_adapter=NOT_APPLICABLE,
+            descriptor_identity=capability.descriptor_hash if capability else tool_name,
+            admission_outcome=AdmissionOutcome(admission_outcome),
+            normalized_output=normalized_output,
+            cache_status=NOT_APPLICABLE,
+            freshness_status=(
+                normalized_output.source_metadata.freshness_status
+                if normalized_output.source_metadata
+                else NOT_APPLICABLE
+            ),
+            warnings=normalized_output.warnings,
+            degraded_state_reason=normalized_output.degraded_state.code if normalized_output.degraded_state else None,
+            trace_metadata={"descriptor_version": capability.descriptor_version if capability else ""},
+        )
+
     def create_wrapped_tools(
         self,
         *,
@@ -375,6 +413,33 @@ class ToolGateway:
             if "enum" in spec and value not in spec["enum"]:
                 return False
         return True
+
+    @staticmethod
+    def _coerce_normalized_output(tool_name: str, result: Any) -> NormalizedOutput:
+        if isinstance(result, NormalizedOutput):
+            return result
+        if isinstance(result, Mapping) and isinstance(result.get("normalized_output"), Mapping):
+            payload = result["normalized_output"]
+            kind = classify_normalized_output(payload)
+            if kind == NormalizedOutputKind.DEGRADED_STATE:
+                content = payload.get("content", {})
+                return make_degraded_output(
+                    code=str(content.get("code", result.get("machine_code", "degraded"))),
+                    safe_message=str(content.get("message", "Tool returned a degraded state.")),
+                    reason=str(content.get("code", "degraded")),
+                    tool_name=tool_name,
+                )
+            return NormalizedOutput(
+                kind=kind,
+                content=payload.get("content", {}),
+                warnings=tuple(payload.get("warnings", ())),
+            )
+        return make_degraded_output(
+            code="normalization_missing",
+            safe_message="Tool result did not include an admitted normalized output.",
+            reason="validation_failed",
+            tool_name=tool_name,
+        )
 
 
 class GatewayToolWrapper(CachingTool):

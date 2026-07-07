@@ -11,7 +11,7 @@ from typing import Any, Dict, Iterable, List, Mapping, Optional, Sequence
 from ..routes import StockQueryRoute
 
 
-DESCRIPTOR_VERSION = "m2b1.1"
+DESCRIPTOR_VERSION = "m2b2.0"
 
 
 class BaselineInventoryState(str, Enum):
@@ -235,21 +235,40 @@ def _baseline_capabilities() -> Sequence[ToolCapabilityDescriptor]:
         ToolCapabilityDescriptor(
             name="stock_symbol",
             display_name="Stock symbol lookup",
-            purpose="Retrieve stock symbol metadata and current price information for admitted lookup routes.",
+            purpose=(
+                "Resolve internal stock and index identity records, aliases, coverage, tags, "
+                "and stored symbol metadata for admitted lookup routes; live quote, history, "
+                "and fundamental facts belong to downstream market-data tools."
+            ),
             input_schema={
                 "type": "object",
                 "properties": {
-                    "action": {"type": "string", "enum": ["get_info", "search"]},
+                    "action": {
+                        "type": "string",
+                        "enum": [
+                            "get_info",
+                            "search",
+                            "lookup",
+                            "list",
+                            "coverage",
+                            "quote",
+                            "history",
+                            "fundamentals",
+                        ],
+                    },
                     "symbol": {"type": "string"},
                     "query": {"type": "string"},
                     "limit": {"type": "integer", "minimum": 1, "maximum": 25},
+                    "exchange": {"type": "string"},
+                    "currency": {"type": "string"},
+                    "normalized": {"type": "boolean"},
                 },
                 "required_any": [["symbol"], ["query"]],
             },
             route_coverage=(StockQueryRoute.PRICE_CHECK.value, StockQueryRoute.FUNDAMENTALS.value),
-            output_kind="market_data_lookup",
+            output_kind="system_record_or_degraded_state",
             locale_coverage=("any",),
-            examples=({"action": "get_info", "symbol": "AAPL"},),
+            examples=({"action": "lookup", "symbol": "FPT", "exchange": "HOSE"},),
         ),
         ToolCapabilityDescriptor(
             name="tradingview",
@@ -305,7 +324,13 @@ def _baseline_policies() -> Sequence[ToolPolicyDescriptor]:
             timeout_budget_ms=2500,
             credential_owner="tool_dependency",
             mutation_policy=MutationPolicy.NONE,
-            required_metadata=("route", "descriptor_hash", "admission_outcome"),
+            required_metadata=(
+                "route",
+                "descriptor_hash",
+                "admission_outcome",
+                "normalized_output_kind",
+                "source_metadata",
+            ),
             enabled_environments=("development", "test", "production"),
             exposure_status=ExposureStatus.MODEL_VISIBLE,
             allowed_routes=(StockQueryRoute.PRICE_CHECK.value, StockQueryRoute.FUNDAMENTALS.value),

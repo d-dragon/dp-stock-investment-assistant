@@ -22,14 +22,23 @@ from typing import Any, Dict, Generator, List, Mapping, Optional
 
 import yaml
 
-try:
-    from langchain.agents import create_agent  # type: ignore
-except ImportError:
-    try:
-        from langgraph.prebuilt import create_react_agent
+def _create_agent(*, model, tools, system_prompt, checkpointer=None, name=None):
+    """Resolve the optional LangChain/LangGraph agent constructor lazily."""
 
-        def create_agent(*, model, tools, system_prompt, checkpointer=None, name=None):
-            """Compatibility wrapper for older LangChain/LangGraph stacks."""
+    try:
+        from langchain.agents import create_agent as langchain_create_agent  # type: ignore
+
+        return langchain_create_agent(
+            model=model,
+            tools=tools,
+            system_prompt=system_prompt,
+            checkpointer=checkpointer,
+            name=name,
+        )
+    except Exception as langchain_error:
+        try:
+            from langgraph.prebuilt import create_react_agent
+
             kwargs = {}
             if checkpointer is not None:
                 kwargs["checkpointer"] = checkpointer
@@ -41,14 +50,12 @@ except ImportError:
                 prompt=system_prompt,
                 **kwargs,
             )
-    except ImportError:
-        def create_agent(*, model, tools, system_prompt, checkpointer=None, name=None):
-            """Defer missing optional dependency failure to agent construction time."""
+        except ImportError as langgraph_error:
             raise ImportError(
                 "No compatible agent constructor found. Install a supported "
                 "LangChain/LangGraph version that provides either "
                 "langchain.agents.create_agent or langgraph.prebuilt.create_react_agent."
-            )
+            ) from langgraph_error or langchain_error
 from langchain_core.messages import HumanMessage, SystemMessage, AIMessage
 from langchain_openai import ChatOpenAI
 
@@ -61,6 +68,8 @@ from .prompt_types import PromptSelection, SelectionTuple
 from .routes import StockQueryRoute
 from .stock_query_router import StockQueryRouter
 from .tools.gateway import ToolGateway, safe_public_metadata
+from .tools.context import assemble_tool_context_pack
+from .tools.normalization import make_degraded_output
 from .tools.registry import ToolRegistry, get_tool_registry
 from .tools.surface import RouteFilteredToolSurface, ToolSurfaceBuilder
 from .types import AgentResponse, ResponseStatus, TokenUsage, ToolCall
@@ -172,6 +181,7 @@ If you don't have a tool for a specific request, provide helpful general guidanc
         )
         self._tool_gateway = tool_gateway or ToolGateway(self._tool_registry)
         self._last_tool_surface: Optional[RouteFilteredToolSurface] = None
+        self._last_tool_context_projection: Dict[str, Any] = {}
         
         # Preload default client (for model info)
         self._client = ModelClientFactory.get_client(self.config)
@@ -522,7 +532,7 @@ If you don't have a tool for a specific request, provide helpful general guidanc
                     "Using inline fallback prompt — asset resolution failed: %s",
                     self._current_prompt.degraded_reason,
                 )
-            agent = create_agent(
+            agent = _create_agent(
                 model=llm,
                 tools=enabled_tools,
                 system_prompt=system_prompt_text,
@@ -593,8 +603,47 @@ If you don't have a tool for a specific request, provide helpful general guidanc
                 "M2B.1 tool surface for route=%s exposed no tools",
                 surface.route.value,
             )
+            self._last_tool_context_projection = self._build_prompt_safe_tool_context_projection(
+                request_id=f"tool-surface:{surface.surface_hash}",
+                route=surface.route.value,
+                normalized_outputs=[],
+            )
             return None
+        self._last_tool_context_projection = self._build_prompt_safe_tool_context_projection(
+            request_id=f"tool-surface:{surface.surface_hash}",
+            route=surface.route.value,
+            normalized_outputs=[],
+        )
         return self._build_agent_executor(tools=wrapped_tools)
+
+    def _build_prompt_safe_tool_context_projection(
+        self,
+        *,
+        request_id: str,
+        route: str,
+        normalized_outputs: Optional[List[Any]] = None,
+    ) -> Dict[str, Any]:
+        """Build the M2B.2 prompt-safe ToolContextPack projection only."""
+
+        outputs = tuple(normalized_outputs or ())
+        if not outputs and self._tool_gateway.trace_records:
+            latest_trace = self._tool_gateway.trace_records[-1]
+            if latest_trace.degraded_state_reason:
+                outputs = (
+                    make_degraded_output(
+                        code=latest_trace.degraded_state_reason,
+                        safe_message="Tool execution was degraded before prompt assembly.",
+                        reason=latest_trace.degraded_state_reason,
+                        route=route,
+                        tool_name=latest_trace.selected_tool,
+                    ),
+                )
+        pack = assemble_tool_context_pack(
+            request_id=request_id,
+            route=route,
+            normalized_outputs=outputs,
+        )
+        return pack.prompt_projection()
     
     # -------- Public API (Compatible with StockAgent interface) --------
     
@@ -780,6 +829,8 @@ If you don't have a tool for a specific request, provide helpful general guidanc
                             "tool_surface_exposed_tools": self._last_tool_surface.exposed_tool_names,
                         }
                     )
+                if self._last_tool_context_projection:
+                    metadata["tool_context_pack_projection"] = self._last_tool_context_projection
                 if self._tool_gateway.trace_records:
                     latest_trace = self._tool_gateway.trace_records[-1]
                     if latest_trace.degraded_state_reason or latest_trace.warning:
