@@ -1,7 +1,7 @@
 # Spec Sync Status
 
-> **Document Version**: 1.16
-> **Generated**: 2026-07-07 07:16:08Z
+> **Document Version**: 1.20
+> **Generated**: 2026-07-08 02:53:16Z
 > **Status**: Active
 > **Traceability Manifest Version**: 1
 
@@ -23,6 +23,7 @@
 | [prompt-system-milestone2](prompt-system-milestone2/spec.md#governance-context-mandatory) | `mapped` | `partial` | `implemented` | `current` | `45/45` |
 | [tool-system-implementation-m2b.1](tool-system-implementation-m2b.1/spec.md#governance-context-mandatory) | `mapped` | `partial` | `verified` | `current` | `70/70` |
 | [tool-system-m2b.2](tool-system-m2b.2/spec.md#governance-context-mandatory) | `mapped` | `partial` | `verified` | `current` | `105/105` |
+| [tool-system-m2b.3](tool-system-m2b.3/spec.md#governance-context-mandatory) | `mapped` | `partial` | `planned` | `current` | `0/128` |
 
 ## Revision History
 
@@ -45,6 +46,10 @@
 | `1.14` | `2026-07-06` | Regenerated after M2B.2 pre-implementation review remediation aligned task parallelism, dependency ordering, coverage gates, and task granularity. |
 | `1.15` | `2026-07-06` | Added M2B.2 implementation review evidence and synchronized partial task completion after application code implementation. |
 | `1.16` | `2026-07-06` | Promoted tool-system-m2b.2 to verified after verify-tasks preservation evidence and verify-run remediation closed all implementation tasks. |
+| `1.17` | `2026-07-07` | Added tool-system-m2b.3 clarified feature mapping for Vietnam market-data, TradingView visualization provenance, attribution, cache freshness, and route-evaluation scope. |
+| `1.18` | `2026-07-07` | Promoted tool-system-m2b.3 to planned with implementation plan, research, data model, quickstart, and feature-local market-data, attribution, TradingView, and route-evaluation contracts. |
+| `1.19` | `2026-07-07` | Added tool-system-m2b.3 implementation task breakdown with dependency-aware story phases, verification commands, and requirement coverage matrix. |
+| `1.20` | `2026-07-07` | Added tool-system-m2b.3 fleet-review remediation for NFR-6.1.3 and NFR-6.1.4 coverage gates, final verification scope, and setup task sequencing. |
 
 ## agent-session-with-stm-wiring
 
@@ -218,6 +223,32 @@
   - [Verify-tasks report](tool-system-m2b.2/verify-tasks-report.md)
   - [Final verification verdict](tool-system-m2b.2/review.md#final-verification-verdict)
   - [Verify marker](tool-system-m2b.2/.verify-done)
+
+## tool-system-m2b.3
+
+- Title: Vietnam Market and Visualization Coverage - M2B.3
+- Path: [specs/tool-system-m2b.3](tool-system-m2b.3/spec.md#governance-context-mandatory)
+- Mapping status: `mapped`
+- Coverage status: `partial`
+- Derived status: `planned`
+- Sync status: `current`
+- Sync gate enforced: `yes`
+- spec.md status field: `Planned`
+- Task completion: `0/128`
+- Linked SRS items: `FR-2.6.2, FR-2.6.3, FR-2.6.4, FR-2.6.5, FR-2.6.6, FR-2.7.3, FR-2.7.4, FR-2.7.5, FR-2.8.1, FR-2.8.2, FR-2.8.3, FR-2.8.4, FR-4.1.3, NFR-2.3.5, NFR-5.2.13, NFR-5.3.8, NFR-6.1.3, NFR-6.1.4, CON-7, CON-9, AC-9.8, AC-9.9, AC-9.11, AC-9.16`
+- Evidence:
+  - [Feature specification](tool-system-m2b.3/spec.md#governance-context-mandatory)
+  - [Requirements and success criteria](tool-system-m2b.3/spec.md#requirements-mandatory)
+  - [Implementation plan](tool-system-m2b.3/plan.md#governance-and-traceability-context)
+  - [Phase 0 research](tool-system-m2b.3/research.md)
+  - [Data model](tool-system-m2b.3/data-model.md)
+  - [Quickstart verification guide](tool-system-m2b.3/quickstart.md)
+  - [Market-data evidence contract](tool-system-m2b.3/contracts/market-data-evidence-contract.md)
+  - [Attribution, cache, and trace contract](tool-system-m2b.3/contracts/attribution-cache-trace-contract.md)
+  - [TradingView visualization provenance contract](tool-system-m2b.3/contracts/tradingview-visualization-contract.md)
+  - [Route-evaluation contract](tool-system-m2b.3/contracts/route-evaluation-contract.md)
+  - [Implementation tasks](tool-system-m2b.3/tasks.md#requirement-coverage-matrix)
+  - [Requirements quality checklist](tool-system-m2b.3/checklists/requirements.md)
 
 ## Status Semantics
 

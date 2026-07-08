@@ -1,25 +1,23 @@
 <!--
 SYNC IMPACT REPORT
 ==================
-Version Change: 2.3.0 -> 2.4.0 (MINOR)
-Bump Rationale: Added explicit current-vs-target architecture status governance aligned to
-  ARCHITECTURE_DESIGN.md and TECHNICAL_DESIGN.md. Existing principles remain intact; the
-  amendment materially expands runtime authority, prompt-status, tool-target labeling, and
-  promotion rules so target Phase 2B concepts are not treated as current unless authority
-  documents and implementation evidence agree.
+Version Change: 2.4.0 -> 2.5.0 (MINOR)
+Bump Rationale: Added explicit Vietnam market-data and visualization evidence gates aligned to
+  the M2B.3 specification, ARCHITECTURE_DESIGN.md, TECHNICAL_DESIGN.md, and SRS v2.8. Existing
+  principles remain intact; the amendment materially expands source attribution, freshness,
+  TradingView non-evidence, provider production posture, and Vietnamese/mixed-language route
+  evaluation governance for provider-backed market-data work.
 
 Modified Principles:
-- Layered Boundaries and Explicit Ownership -> Layered Boundaries and Explicit Ownership
-  (expanded with service-owned lifecycle/session/archive authority and STM-only checkpointer
-  boundaries)
-- Prompts, Memory, and Fine-Tuning Control Behavior, Not Truth -> Prompts, Memory, and
-  Fine-Tuning Control Behavior, Not Truth
-  (expanded with current/gated/planned prompt status discipline)
+- Evidence-Grounded Financial Intelligence -> Evidence-Grounded Financial Intelligence
+  (expanded with answer-level market-fact attribution, freshness, license posture, and
+  TradingView non-evidence rules)
 - Deterministic Tools and Contracted Interfaces -> Deterministic Tools and Contracted Interfaces
-  (expanded with current-vs-target tool labeling and promotion rules for Phase 2B boundaries)
+  (expanded with provider-backed market-data production gates and visualization provenance
+  constraints)
 
 Added Sections:
-- Architecture Current/Target Status Semantics
+- Vietnam Market Data and Visualization Evidence Gates
 
 Removed Sections:
 - None
@@ -33,6 +31,7 @@ Template Consistency Check:
 - .specify/templates/agent-file-template.md: checked; no structural change required
 - .specify/templates/constitution-template.md: checked; no structural change required
 - .specify/templates/commands/*.md: not present in this repository
+- AGENTS.md and relevant .github/instructions/*.md: checked; no structural change required
 
 Follow-up TODOs:
 - None
@@ -79,8 +78,12 @@ reviewable and testable.
 Financial outputs MUST be grounded in approved external sources, governed internal data stores,
 retrieved documents with provenance, or deterministic tool output. The assistant MUST NOT invent
 prices, metrics, forecasts, or investment certainty, and all outputs MUST remain informational
-rather than manipulative. Rationale: in this finance domain, unsourced or hype-driven output is
-a safety failure.
+rather than manipulative. Market facts in answers, report inputs, retained artifacts, snapshots,
+traces, and cache-backed responses MUST preserve provider/source identity, source reference,
+timestamps, exchange and currency where applicable, freshness, license posture, and warnings or
+degraded-state reason. Visualization provenance, including TradingView output, MUST NOT be
+treated as canonical market evidence by default. Rationale: in this finance domain, unsourced,
+anonymous, stale, or visualization-derived facts are safety failures.
 
 ### IV. Prompts, Memory, and Fine-Tuning Control Behavior, Not Truth
 Prompt assets, memory, and fine-tuning MAY shape behavior, structure, routing, and
@@ -103,7 +106,10 @@ parsing, licensing, freshness, fallback, and health behavior MUST stay behind de
 provider policies and adapters. Tool results MUST be normalized into typed, source-attributed,
 freshness-aware, warning-aware context before entering prompt assembly. Public interfaces such
 as REST endpoints, streaming responses, WebSocket events, and machine-readable contracts MUST
-remain explicit, version-aware, and synchronized with implementation. Rationale: the project
+remain explicit, version-aware, and synchronized with implementation. Provider-backed
+market-data tools MUST pass source-attribution, freshness, license-posture, cache, and
+degraded-state gates before production use, and visualization-only tools MUST remain outside
+canonical evidence paths unless governed policy explicitly admits them. Rationale: the project
 relies on OpenAPI, route registration, streaming surfaces, auditable tool results, and
 finance-domain source integrity; opaque interface, tool, or status drift is operational risk.
 
@@ -391,6 +397,43 @@ evidence, and future remote or MCP-style tool admission.
    artifacts, and retained source lineage. Reporting tools MUST NOT fetch or scrape provider
    data directly.
 
+#### Vietnam Market Data and Visualization Evidence Gates
+
+These gates apply whenever a feature adds or changes Vietnam-market tools, market-data answers,
+TradingView visualization, provider-backed traces, or Vietnamese/mixed-language route coverage.
+
+1. **Market-data tools are separate from symbol identity.** Vietnam quote, history,
+   fundamentals, breadth, flow, disclosure, corporate-action, and indicator evidence MUST be
+   owned by approved market-data tool families and provider policy, not by the internal symbol
+   lookup boundary.
+2. **Vietnam-first source posture is mandatory.** Official, depository, Vietnam-native, or
+   approved licensed sources MUST be preferred where available. International providers such as
+   Yahoo Finance or Alpha Vantage MAY be fallback or cross-market comparison sources only when
+   provider policy, license posture, source attribution, freshness, and user-facing caveats
+   allow that use.
+3. **Production provider enablement is gated.** A Vietnam provider MUST NOT be promoted to a
+   production evidence source until license or terms-of-use posture, credential scope,
+   redistribution posture, freshness behavior, source-attribution fields, parser limits, and
+   degraded-state behavior have been reviewed.
+4. **Market facts require answer-level attribution.** Any market fact used in an answer, report
+   input, artifact, snapshot, trace, cache hit, or retained derivative MUST carry provider/source,
+   source URL or reference, retrieved timestamp, source/published/effective timestamp where
+   available, exchange, currency, freshness category, license posture, and warnings or degraded
+   reason where applicable. Missing mandatory attribution MUST fail closed to a degraded no-source
+   outcome.
+5. **Cache freshness is part of evidence authority.** Cached market-data entries MUST preserve
+   provider/source, source timestamp where available, retrieved timestamp, freshness category,
+   TTL or expiry, warnings, and degraded-state reason where applicable. Stale, expired,
+   freshness-unknown, or anonymous cache hits MUST refresh through admitted policy or degrade.
+6. **TradingView remains visualization provenance.** TradingView charts, widgets, deep links,
+   ticker tape, heatmaps, screeners, symbol validation, and similar payloads MUST be classified as
+   `VisualizationProvenance`. Numeric values from those payloads MUST NOT be used as canonical
+   market evidence unless a future approved policy explicitly admits a specific data category.
+7. **Vietnamese and mixed-language routing must be measured.** Features affecting Vietnam-market
+   price, chart, fundamentals, disclosures, breadth, flow, or report-like routes MUST include
+   Vietnamese and mixed-language route fixtures, expected tool-family mappings, ambiguity handling,
+   and route-tool precision/recall or equivalent acceptance targets before verification.
+
 #### Mutation, Remote Tools, and Security
 
 1. State-changing tools, including future symbol-store upserts, coverage updates, alias merges,
@@ -412,8 +455,12 @@ Agent tool-system plans and implementations MUST include focused evidence for:
 - descriptor integrity and descriptor drift handling;
 - tool-versus-adapter separation and hidden provider fallback;
 - source attribution, timestamp/freshness, cache metadata, and warning propagation;
+- market-data answer attribution coverage, stale-cache behavior, provider fault handling, and
+  degraded no-source outcomes;
 - normalized output classification before prompt assembly;
 - TradingView non-evidence classification;
+- TradingView visualization provenance classification for every chart, widget, deep-link,
+  ticker-tape, heatmap, screener, or symbol-validation payload;
 - generic web prompt-injection resistance;
 - reporting source discipline and degraded report behavior;
 - request-scoped `ToolContextPack` retention boundaries;
@@ -559,4 +606,4 @@ specific concern MUST then be reconciled across dependent artifacts.
 - **MINOR**: New articles, principles, or materially expanded guidance
 - **PATCH**: Clarifications, typo fixes, non-semantic refinements
 
-**Version**: 2.4.0 | **Ratified**: 2026-01-27 | **Last Amended**: 2026-07-06
+**Version**: 2.5.0 | **Ratified**: 2026-01-27 | **Last Amended**: 2026-07-07
