@@ -107,7 +107,7 @@ For documentation-first work in Copilot, contributors can start with the [Docume
 
 ### 2.3 Current Installed State
 
-As of 2026-07-06, this repository should be operated from the local installed truth below. Upstream documentation is useful context, but a command is adopted locally only after `specify version --features --json`, `specify extension list`, `specify workflow info speckit`, and the installed prompt/skill files confirm it exists in this checkout.
+As of 2026-07-07, this repository should be operated from the local installed truth below. Upstream documentation is useful context, but a command is adopted locally only after `specify version --features --json`, `specify extension list`, `specify workflow info speckit`, `specify workflow info sdd-feature-delivery`, and the installed prompt/skill files confirm it exists in this checkout.
 
 | Surface | Current local state | Operating interpretation |
 |---------|---------------------|--------------------------|
@@ -116,8 +116,10 @@ As of 2026-07-06, this repository should be operated from the local installed tr
 | Active feature pointer | `.specify/feature.json` points to `specs/prompt-system-milestone2` | Continue from that feature directory unless a new feature is intentionally created. |
 | Integration metadata | `.specify/integration.json` declares default integration `codex`, installed integrations `copilot` and `codex`, and shared template alignment to `codex` | Codex is the current default. Copilot remains installed for portability. Keep one coherent feature workflow and one authoritative artifact set. |
 | Integration status | `specify integration status` currently exits non-zero with `unsafe-multi-install` plus managed-file modification warnings; missing managed files and invalid manifest paths are `0` | Treat this as a known warning only while missing files and invalid manifests remain zero and the default remains intentionally `codex`. Missing files, invalid manifests, or unexpected default changes remain blockers. |
-| Workflow catalog | `specify workflow info speckit` reports 14 steps: specify, review-spec, plan, review-plan, sync-after-plan, review-sync-after-plan, tasks, implement, sync-after-implement, review-sync-after-implement, verify-tasks, verify, sync-after-verify, review-sync-after-verify | The installed 14-step workflow is the current execution surface. This repository's 18-step SDLC remains the broader governance overlay around that workflow. |
-| Workflow metadata drift | `.specify/workflows/speckit/workflow.yml` still has an input default of `copilot` while `.specify/integration.json` defaults to `codex` | Prefer the integration state from `.specify/integration.json` and `specify integration status` unless the workflow metadata is corrected in a separate governed maintenance pass. |
+| Workflow catalog | `specify workflow list` reports the bundled `speckit` workflow and the project-owned `sdd-feature-delivery` workflow | Keep `speckit` as the compatibility/default closeout workflow. Use `sdd-feature-delivery` as the recommended normal governed feature-delivery path for this repository. |
+| Compatibility workflow | `specify workflow info speckit` reports 14 steps: specify, review-spec, plan, review-plan, sync-after-plan, review-sync-after-plan, tasks, implement, sync-after-implement, review-sync-after-implement, verify-tasks, verify, sync-after-verify, review-sync-after-verify | The bundled 14-step workflow remains available and unchanged. This repository's 18-step SDLC remains the broader governance overlay around that workflow. |
+| SDD feature-delivery workflow | `specify workflow info sdd-feature-delivery` reports the project-owned workflow with context grounding, specify, review gates, clarify, plan, hard sync gates, checklist, tasks, validate, analyze, implementation, scope tests, verify-tasks, verify, final sync, and a final Verified gate | Use this for normal feature delivery. Scope-specific test gates are selected by workflow input: `agent-tool`, `backend-api`, `frontend`, or `full`. Doc-only, risky-change, and backfill workflow variants are reserved for future governed work. |
+| Workflow metadata drift | `.specify/workflows/speckit/workflow.yml` still has an input default of `copilot` while `.specify/integration.json` defaults to `codex`; `.specify/workflows/sdd-feature-delivery/workflow.yml` defaults to `codex` and supports `codex` plus `copilot` | Prefer the integration state from `.specify/integration.json` and `specify integration status` for existing workflows unless workflow metadata is corrected in a separate governed maintenance pass. |
 | Installed extensions | Understanding, Verify Tasks, Spec Kit Utilities, Git, Fleet, Verify, Memory Loader, Architecture Workflow, Coding Agent Context, Research Harness, Security Review, Architecture Guard, and Document Spec Sync Gate are enabled | Use current extension command names from this HOW-TO instead of older shorthand names. |
 | Document/spec sync gate | `speckit.doc-sync.gate` is the repository-local wrapper around `python scripts/sync_spec_status.py --gate` | Run this hard gate after `speckit.plan`, after `speckit.implement`, and after `speckit.verify.run`; it regenerates `specs/spec-sync-status.md` and `docs/domains/agent/SRS_SPEC_TRACEABILITY.md`. |
 | Third-party sync extension | A sync extension package may exist in `.specify/extensions/sync`, but `speckit.sync.*` is not installed/enabled in the current command surface | Treat it as optional drift-analysis support only until a governed migration proves it covers this repository's generated SRS/spec reports. |
@@ -707,9 +709,9 @@ The installed `speckit` workflow currently executes 14 concrete steps, including
     - **Drift Review Prompt Hint**:
       > *Prompt Hint*: "Use `$technical-design-manager` to compare verified `specs/`, current `src/` behavior, executable contracts, and the target domain `TECHNICAL_DESIGN.md`. Produce an impact map, update only the agreed technical-design section, and report any required `src/`, `specs/`, SRS, architecture, ADR, roadmap, contract, or traceability follow-ups."
 
-### 3.4 Workflow Visuals
+### 3.4 Workflows
 
-The diagrams below answer three different workflow questions: where the 18 steps sit inside the SDLC loop, where repository hooks and gates attach, and which project artifacts move through the governed delivery flow.
+This section presents four workflow views: where the 18 steps sit inside the SDLC loop, where repository hooks and gates attach, which project artifacts move through the governed delivery flow, and how the project-owned feature-delivery workflow executes.
 
 #### 3.4.1 18-Step Placement in the SDLC Loop
 
@@ -770,38 +772,77 @@ flowchart TB
 
 #### 3.4.2 Hook and Review Overlay
 
-The diagram below illustrates where custom pre- and post-automation hooks integrate with the core Spec Kit execution commands.
+The diagram below shows the currently installed 14-step `speckit` workflow and the repository extension hook overlay from [extensions.yml](../../.specify/extensions.yml). It separates blocking gates from optional confidence checks so the operating path is clear.
 
 ```mermaid
 flowchart TB
-  %% Main command chain with hook overlay
-  BS(["📍 Before specify Hook"]) --> SP["⚙️ speckit.specify"]
-  SP --> AS(["📍 After specify Hook"])
-  AS --> BP(["📍 Before plan Hook"])
-  BP --> PL["⚙️ speckit.plan"]
-  PL --> AP(["📍 After plan Hook"])
-  AP --> BT(["📍 Before tasks Hook"])
-  BT --> TK["⚙️ speckit.tasks"]
-  TK --> AT(["📍 After tasks Hook"])
-  AT --> BI(["📍 Before implement Hook"])
-  BI --> IM["⚙️ speckit.implement"]
-  IM --> AI(["📍 After implement Hook"])
-
-  %% Legend
-  subgraph Legend ["Visual Legend"]
+  subgraph CommandFlow["Command Flow: installed speckit workflow"]
     direction LR
-    L_CMD["⚙️ Core SDD Command"] ~~~ L_Hook(["📍 Automation Hook"])
+    C1["speckit.specify"] --> G1{{"review-spec gate"}}
+    G1 --> C2["speckit.plan"]
+    C2 --> G2{{"review-plan gate"}}
+    G2 --> S1[["sync-after-plan: sync_spec_status.py --gate"]]
+    S1 --> G3{{"review-sync-after-plan gate"}}
+    G3 --> C3["speckit.tasks"]
+    C3 --> C4["speckit.implement"]
+    C4 --> S2[["sync-after-implement: sync_spec_status.py --gate"]]
+    S2 --> G4{{"review-sync-after-implement gate"}}
+    G4 --> C5["speckit.verify-tasks.run"]
+    C5 --> C6["speckit.verify.run"]
+    C6 --> S3[["sync-after-verify: sync_spec_status.py --gate"]]
+    S3 --> G5{{"review-sync-after-verify gate"}}
   end
 
-  %% Styling
-  classDef cmd fill:#EFF6FF,stroke:#3B82F6,stroke-width:2px,color:#1E3A8A;
-  classDef hook fill:#FFF7ED,stroke:#F97316,stroke-width:2px,color:#7C2D12;
+  subgraph RequiredGates["Required Gates and Hooks"]
+    direction LR
+    R1["before_specify: git feature + memory load"]
+    R2["before_plan/tasks/implement: memory load"]
+    R3[["after_plan: speckit.doc-sync.gate"]]
+    R4[["after_implement: pre-verification doc-sync"]]
+    R5[["after_implement: final doc-sync before Verified"]]
+    R1 --> R2 --> R3 --> R4 --> R5
+  end
 
-  class SP,PL,TK,IM,L_CMD cmd;
-  class BS,AS,BP,AP,BT,AT,BI,AI,L_Hook hook;
+  subgraph OptionalGates["Optional Confidence Gates"]
+    direction LR
+    O1["after_specify: doctor, commit, agent context, harness init"]
+    O2["after_plan: validate, commit, agent context, harness, security, architecture"]
+    O3["after_tasks: understanding, commit, fleet, security, architecture"]
+    O4["after_implement: verify-tasks, commit, verify, security, architecture"]
+    O1 --> O2 --> O3 --> O4
+  end
+
+  R1 -. "prepares" .-> C1
+  R2 -. "loads context" .-> C2
+  R2 -. "loads context" .-> C3
+  R2 -. "loads context" .-> C4
+  R3 -. "same gate as workflow sync" .-> S1
+  R4 -. "same gate as workflow sync" .-> S2
+  R5 -. "same gate as workflow sync" .-> S3
+  O1 -. "optional review" .-> C1
+  O2 -. "optional review" .-> C2
+  O3 -. "optional review" .-> C3
+  O4 -. "optional review" .-> C4
+  O4 -. "verification prompts" .-> C5
+  O4 -. "verification prompts" .-> C6
+
+  classDef command fill:#EFF6FF,stroke:#2563EB,stroke-width:2px,color:#1E3A8A;
+  classDef gate fill:#FEF3C7,stroke:#D97706,stroke-width:2px,color:#78350F;
+  classDef sync fill:#DCFCE7,stroke:#16A34A,stroke-width:2px,color:#14532D;
+  classDef required fill:#FEE2E2,stroke:#DC2626,stroke-width:2px,color:#7F1D1D;
+  classDef optional fill:#F8FAFC,stroke:#64748B,stroke-width:2px,color:#0F172A;
+
+  class C1,C2,C3,C4,C5,C6 command;
+  class G1,G2,G3,G4,G5 gate;
+  class S1,S2,S3 sync;
+  class R1,R2 required;
+  class R3,R4,R5 sync;
+  class O1,O2,O3,O4 optional;
 ```
 
-In this repository, hooks are configured automation from [extensions.yml](../../.specify/extensions.yml), while gates are decision or verification points that determine whether work can advance. A required gate is blocking where configured; an optional gate is a review aid that should be used when risk, security, architecture, or ambiguity warrants more confidence. The hook sequence usually covers branch setup, memory loading, `doctor`, `validate`, required document/spec sync gates, fleet review, verification, and architecture review around the core `specify`, `plan`, `tasks`, and `implement` commands. The required sync gates run after `speckit.plan`, after `speckit.implement`, and after `speckit.verify.run`.
+In this repository, hooks are configured automation from [extensions.yml](../../.specify/extensions.yml), while gates are decision, shell, or verification points that determine whether work can advance. Required gates block advancement when they fail or when their review decision is rejected. Optional gates add confidence for ambiguous, high-risk, security-sensitive, or architecture-sensitive work, but they do not replace required sync, task-verification, or final verification evidence.
+
+The hard document/spec synchronization surface is `speckit.doc-sync.gate`, which runs the canonical `python scripts/sync_spec_status.py --gate` operation. The installed workflow runs sync gates after planning, after implementation, and after verification; the extension configuration also registers mandatory `doc-sync` hooks after `plan` and during the `after_implement` closeout sequence. The optional hook set includes verification prompts (`speckit.verify-tasks.run`, `speckit.verify.run`), fleet review, security review, architecture guard checks, research harness checks, git commits, and agent-context refreshes. Treat `speckit.verify-tasks.run` and `speckit.verify.run` as verification gates; treat fleet, security, architecture, and harness checks as confidence gates unless the repository later makes a specific hook mandatory.
 
 #### 3.4.3 Artifact Flow and Synchronization
 
@@ -863,6 +904,92 @@ flowchart TB
 The main synchronization targets behind the final node are [spec-traceability.yaml](../../specs/spec-traceability.yaml), [spec-sync-status.md](../../specs/spec-sync-status.md), [SRS_SPEC_TRACEABILITY.md](../domains/agent/SRS_SPEC_TRACEABILITY.md), and [openapi.yaml](../openapi.yaml). In this repository, the IaC outputs in [IaC/](../../IaC/) and the QA results captured in `tests/` plus `specs/feature/review.md` are also part of the governed evidence chain.
 
 For skill-assisted synchronization, use [`$technical-design-manager`](../../.agents/skills/technical-design-manager/SKILL.md) to check design-to-implementation and implementation-to-design drift between `TECHNICAL_DESIGN.md`, verified `specs/`, executable contracts, and `src/`. Use [`$research-to-architecture-adr`](../../.agents/skills/research-to-architecture-adr/SKILL.md) when synchronization reveals proposal-to-architecture promotion needs, ADR candidates, or durable architecture boundary changes. These skills complement the diagram by preserving authority boundaries: technical design owns realization, architecture owns boundaries and viewpoints, ADRs own decisions, specs own delivery evidence, and contracts own schema truth.
+
+#### 3.4.4 SDD Feature Delivery Workflow
+
+Use `sdd-feature-delivery` for normal governed feature delivery in this repository. It does not rename or replace `speckit`; it adds a project-owned path that makes context grounding, hard document/spec sync, scope-selected tests, verification, and final Verified evidence explicit.
+
+```powershell
+specify workflow info sdd-feature-delivery
+specify workflow run sdd-feature-delivery
+```
+
+The visual below shows how the workflow moves from context grounding through specification, planning, readiness checks, implementation, tests, verification, sync gates, and final approval.
+
+```mermaid
+flowchart TB
+  subgraph Grounding["Context Grounding"]
+    direction TB
+    C0["preflight-context"]
+    C1["pre-plan-context"]
+    C2["pre-implement-context"]
+  end
+
+  subgraph SpecPlan["Spec and Plan"]
+    direction TB
+    S1["speckit.specify"]
+    G1{{"review-spec gate"}}
+    S2["speckit.clarify"]
+    G2{{"review-clarification gate"}}
+    S3["speckit.plan"]
+    G3{{"review-plan gate"}}
+    Y1[["sync-after-plan"]]
+    G4{{"review-sync-after-plan gate"}}
+  end
+
+  subgraph Readiness["Build Readiness"]
+    direction TB
+    R1["speckit.checklist"]
+    R2["speckit.tasks"]
+    R3["speckit.speckit-utils.validate"]
+    R4["speckit.analyze"]
+    G5{{"confidence-review gate"}}
+  end
+
+  subgraph Delivery["Delivery and Closeout"]
+    direction TB
+    D1["speckit.implement"]
+    T1["scope tests"]
+    Y2[["sync-after-implement"]]
+    V1["speckit.verify-tasks.run"]
+    V2["speckit.verify.run"]
+    Y3[["sync-after-verify"]]
+    G6{{"final Verified gate"}}
+  end
+
+  C0 --> S1 --> G1 --> S2 --> G2 --> C1 --> S3 --> G3 --> Y1 --> G4
+  G4 --> R1 --> R2 --> R3 --> R4 --> G5 --> C2 --> D1 --> T1 --> Y2 --> V1 --> V2 --> Y3 --> G6
+
+  C0 -. "baseline docs and scope instructions" .-> C1
+  C1 -. "active spec required" .-> S3
+  C2 -. "spec plan tasks required" .-> D1
+  Y1 -. "sync_spec_status.py --gate" .-> G4
+  Y2 -. "sync_spec_status.py --gate" .-> V1
+  Y3 -. "sync_spec_status.py --gate" .-> G6
+
+  classDef context fill:#E0F2FE,stroke:#0284C7,stroke-width:2px,color:#075985;
+  classDef command fill:#EFF6FF,stroke:#2563EB,stroke-width:2px,color:#1E3A8A;
+  classDef gate fill:#FEF3C7,stroke:#D97706,stroke-width:2px,color:#78350F;
+  classDef sync fill:#DCFCE7,stroke:#16A34A,stroke-width:2px,color:#14532D;
+  classDef test fill:#F5F3FF,stroke:#7C3AED,stroke-width:2px,color:#4C1D95;
+
+  class C0,C1,C2 context;
+  class S1,S2,S3,R1,R2,R3,R4,D1,V1,V2 command;
+  class G1,G2,G3,G4,G5,G6 gate;
+  class Y1,Y2,Y3 sync;
+  class T1 test;
+```
+
+| Workflow Input | Supported Values | Gate Effect |
+|----------------|------------------|-------------|
+| `integration` | `codex`, `copilot` | Selects the installed agent integration used for Spec Kit command steps. The default is `codex`. |
+| `scope` | `agent-tool`, `backend-api`, `frontend`, `full` | Selects the post-implementation test shell gate. `agent-tool` runs tool gateway, router, and agent regression tests; `backend-api` runs API and integration tests; `frontend` runs `npm run test:ci` in `frontend/`; `full` runs backend pytest plus frontend CI tests. |
+
+The context-grounding shell step validates and prints an explicit read list; it does not concatenate document contents. Baseline grounding includes core Spec Kit state, the agent-domain SRS/architecture/technical design/traceability files, `docs/openapi.yaml`, generated spec sync reports, `README.md`, [project-documentation-and-specification-methodology.md](../study-hub/project-documentation-and-specification-methodology.md), this HOW-TO, `.github/copilot-instructions.md`, and global `.github/instructions` anchors for architecture, documentation/specification, and testing.
+
+Context grounding is also scope-aware and stage-aware. The selected `scope` adds matching `.github/instructions` files: backend and LangChain instructions for `agent-tool`, backend instructions for `backend-api`, frontend instructions for `frontend`, and all of those for `full`; testing instructions are always included. The `preflight` stage checks baseline and scope context only. The `pre-plan` stage also requires the active feature directory and `spec.md`. The `pre-implement` stage requires `spec.md`, `plan.md`, and `tasks.md`, and only warns when optional design artifacts such as `research.md`, `data-model.md`, `quickstart.md`, `contracts/`, or `checklists/` are absent.
+
+The workflow keeps `python .\scripts\sync_spec_status.py --gate` first-class through the local sync helper after planning, after implementation, and after verification. Optional fleet, security, architecture, harness, and understanding checks remain confidence gates unless a future governed change makes a specific gate mandatory. Planned workflow variants such as doc-only, risky-change, and backfill remain out of scope for this pass.
 
 ### 3.5 Command Normalization Notes
 
@@ -934,7 +1061,7 @@ Spec Kit extensions are managed through the `specify` CLI and repository configu
 | [../../.specify/extensions.yml](../../.specify/extensions.yml) | Defines extension hooks before and after key lifecycle commands. |
 | [../../.specify/extension-catalogs.yml](../../.specify/extension-catalogs.yml) | Lists the official and community extension catalogs. |
 | [../../.specify/extensions/](../../.specify/extensions/) | Stores extension packages, prompts, configs, and command assets used by the repository. |
-| [../../.specify/workflows/](../../.specify/workflows/) | Stores workflow definitions such as the local `speckit` workflow. |
+| [../../.specify/workflows/](../../.specify/workflows/) | Stores workflow definitions such as the bundled `speckit` workflow and the project-owned `sdd-feature-delivery` workflow. |
 
 ### 5.2 Current CLI Patterns
 
@@ -945,6 +1072,7 @@ specify integration list
 specify extension list
 specify workflow list
 specify workflow info speckit
+specify workflow info sdd-feature-delivery
 ```
 
 Use the current extension commands, not older `spec-kit` CLI forms:

@@ -8,6 +8,14 @@
       "source": "bundled",
       "installed_at": "2026-05-04T03:20:00.436566+00:00",
       "updated_at": "2026-05-04T03:20:00.436577+00:00"
+    },
+    "sdd-feature-delivery": {
+      "name": "SDD Feature Delivery Workflow",
+      "version": "1.0.0",
+      "description": "Project-owned governed feature delivery workflow with context grounding, sync gates, scope tests, and verification closeout.",
+      "source": "local",
+      "installed_at": "2026-07-07T00:00:00+00:00",
+      "updated_at": "2026-07-07T00:00:00+00:00"
     }
   }
 }
