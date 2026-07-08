@@ -1,0 +1,159 @@
+schema_version: "1.0"
+workflow:
+  id: "sdd-feature-delivery"
+  name: "SDD Feature Delivery Workflow"
+  version: "1.0.0"
+  author: "dp-stock-agent-dev-process"
+  description: "Project-owned governed feature delivery workflow with context grounding, sync gates, scope tests, and verification closeout."
+
+requires:
+  speckit_version: ">=0.12.0"
+  integrations:
+    any: ["codex", "copilot"]
+
+inputs:
+  spec:
+    type: string
+    required: true
+    prompt: "Describe what you want to build"
+  integration:
+    type: string
+    default: "codex"
+    prompt: "Integration to use (codex or copilot)"
+  scope:
+    type: string
+    default: "agent-tool"
+    enum: ["agent-tool", "backend-api", "frontend", "full"]
+    prompt: "Project test scope to run after implementation"
+
+steps:
+  - id: preflight-context
+    type: shell
+    command: >-
+      powershell -NoProfile -ExecutionPolicy Bypass -File .\.specify\scripts\powershell\sdd-context-grounding.ps1 -Scope "{{ inputs.scope }}" -Stage preflight
+
+  - id: specify
+    command: speckit.specify
+    integration: "{{ inputs.integration }}"
+    input:
+      args: "{{ inputs.spec }}"
+
+  - id: review-spec
+    type: gate
+    message: "Review spec.md for SRS mapping, scope boundaries, and unresolved ambiguity before clarification."
+    options: [approve, reject]
+    on_reject: abort
+
+  - id: clarify
+    command: speckit.clarify
+    integration: "{{ inputs.integration }}"
+    input:
+      args: "{{ inputs.spec }}"
+
+  - id: review-clarification
+    type: gate
+    message: "Review clarification decisions. Approve only when blocking ambiguity is resolved or explicitly deferred."
+    options: [approve, reject]
+    on_reject: abort
+
+  - id: pre-plan-context
+    type: shell
+    command: >-
+      powershell -NoProfile -ExecutionPolicy Bypass -File .\.specify\scripts\powershell\sdd-context-grounding.ps1 -Scope "{{ inputs.scope }}" -Stage pre-plan
+
+  - id: plan
+    command: speckit.plan
+    integration: "{{ inputs.integration }}"
+    input:
+      args: "{{ inputs.spec }}"
+
+  - id: review-plan
+    type: gate
+    message: "Review plan.md for architecture, technical design, SRS mappings, contracts, and validation strategy."
+    options: [approve, reject]
+    on_reject: abort
+
+  - id: sync-after-plan
+    type: shell
+    command: >-
+      powershell -NoProfile -ExecutionPolicy Bypass -File .\.specify\scripts\powershell\sdd-doc-sync-gate.ps1 -Stage after-plan
+
+  - id: review-sync-after-plan
+    type: gate
+    message: "Review regenerated specs/spec-sync-status.md and docs/domains/agent/SRS_SPEC_TRACEABILITY.md before task generation."
+    options: [approve, reject]
+    on_reject: abort
+
+  - id: checklist
+    command: speckit.checklist
+    integration: "{{ inputs.integration }}"
+    input:
+      args: "{{ inputs.spec }}"
+
+  - id: tasks
+    command: speckit.tasks
+    integration: "{{ inputs.integration }}"
+    input:
+      args: "{{ inputs.spec }}"
+
+  - id: validate
+    command: speckit.speckit-utils.validate
+    integration: "{{ inputs.integration }}"
+    input:
+      args: "{{ inputs.spec }}"
+
+  - id: analyze
+    command: speckit.analyze
+    integration: "{{ inputs.integration }}"
+    input:
+      args: "{{ inputs.spec }}"
+
+  - id: confidence-review
+    type: gate
+    message: "Optional confidence checks may include fleet, security, architecture, harness, or understanding reviews. Approve when readiness is sufficient for implementation."
+    options: [approve, reject]
+    on_reject: abort
+
+  - id: pre-implement-context
+    type: shell
+    command: >-
+      powershell -NoProfile -ExecutionPolicy Bypass -File .\.specify\scripts\powershell\sdd-context-grounding.ps1 -Scope "{{ inputs.scope }}" -Stage pre-implement
+
+  - id: implement
+    command: speckit.implement
+    integration: "{{ inputs.integration }}"
+    input:
+      args: "{{ inputs.spec }}"
+
+  - id: scope-tests
+    type: shell
+    command: >-
+      powershell -NoProfile -ExecutionPolicy Bypass -File .\.specify\scripts\powershell\sdd-scope-tests.ps1 -Scope "{{ inputs.scope }}"
+
+  - id: sync-after-implement
+    type: shell
+    command: >-
+      powershell -NoProfile -ExecutionPolicy Bypass -File .\.specify\scripts\powershell\sdd-doc-sync-gate.ps1 -Stage after-implement
+
+  - id: verify-tasks
+    command: speckit.verify-tasks.run
+    integration: "{{ inputs.integration }}"
+    input:
+      args: "{{ inputs.spec }}"
+
+  - id: verify
+    command: speckit.verify.run
+    integration: "{{ inputs.integration }}"
+    input:
+      args: "{{ inputs.spec }}"
+
+  - id: sync-after-verify
+    type: shell
+    command: >-
+      powershell -NoProfile -ExecutionPolicy Bypass -File .\.specify\scripts\powershell\sdd-doc-sync-gate.ps1 -Stage after-verify
+
+  - id: final-verified-gate
+    type: gate
+    message: "Final Verified gate: approve only when review.md, .verify-done, completed tasks, passing scope tests, and current final sync output agree."
+    options: [approve, reject]
+    on_reject: abort
