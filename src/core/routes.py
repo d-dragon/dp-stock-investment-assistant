@@ -67,6 +67,8 @@ ROUTE_UTTERANCES: Dict[StockQueryRoute, List[str]] = {
         "What is HPG trading at right now?",
         "Show me the latest price for VIC",
         "How much does one share of Google cost?",
+        "Gia hien tai cua FPT tren HOSE la bao nhieu?",
+        "Lich su gia SHS trong 30 ngay gan nhat",
     ],
     
     StockQueryRoute.NEWS_ANALYSIS: [
@@ -106,6 +108,8 @@ ROUTE_UTTERANCES: Dict[StockQueryRoute, List[str]] = {
         "Analyze the chart pattern for HPG",
         "Is MSFT overbought or oversold?",
         "Show me the candlestick chart",
+        "Mo bieu do TradingView cho FPT",
+        "Show TradingView heatmap for HOSE",
     ],
     
     StockQueryRoute.FUNDAMENTALS: [
@@ -119,6 +123,8 @@ ROUTE_UTTERANCES: Dict[StockQueryRoute, List[str]] = {
         "Analyze HPG's profit margins",
         "Get the dividend yield for VIC",
         "Is this stock undervalued?",
+        "Lay BCTC va ROE cua FPT",
+        "Show financial statement for VNM",
     ],
     
     StockQueryRoute.IDEAS: [
@@ -145,6 +151,8 @@ ROUTE_UTTERANCES: Dict[StockQueryRoute, List[str]] = {
         "What's the market sentiment?",
         "How are Asian markets doing?",
         "Give me a market summary",
+        "Do rong thi truong va dong tien nuoc ngoai",
+        "Foreign flow on VN-Index today",
     ],
     
     StockQueryRoute.GENERAL_CHAT: [

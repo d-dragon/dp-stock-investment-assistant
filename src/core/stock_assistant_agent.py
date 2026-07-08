@@ -441,9 +441,10 @@ If you don't have a tool for a specific request, provide helpful general guidanc
         as enabled or disabled based on configuration.
         """
         try:
-            from core.tools.stock_symbol import StockSymbolTool
             from core.tools.reporting import ReportingTool
-            # from core.tools.tradingview import TradingViewTool  # Phase 2
+            from core.tools.market_data import VietnamMarketDataTool
+            from core.tools.stock_symbol import StockSymbolTool
+            from core.tools.tradingview import TradingViewTool
             
             langchain_config = self.config.get('langchain', {})
             tools_config = langchain_config.get('tools', {})
@@ -465,6 +466,16 @@ If you don't have a tool for a specific request, provide helpful general guidanc
                 self._tool_registry.register(stock_tool, enabled=True)
             except Exception as e:
                 self.logger.warning(f"Failed to initialize StockSymbolTool: {e}")
+
+            # Initialize and register VietnamMarketDataTool
+            try:
+                market_data_tool = VietnamMarketDataTool(
+                    cache=self.cache,
+                    logger=self.logger.getChild("market_data_tool"),
+                )
+                self._tool_registry.register(market_data_tool, enabled=True)
+            except Exception as e:
+                self.logger.warning(f"Failed to initialize VietnamMarketDataTool: {e}")
             
             # Initialize and register ReportingTool
             try:
@@ -477,16 +488,16 @@ If you don't have a tool for a specific request, provide helpful general guidanc
             except Exception as e:
                 self.logger.warning(f"Failed to initialize ReportingTool: {e}")
             
-            # TradingViewTool - Phase 2
-            # try:
-            #     tradingview_tool = TradingViewTool(
-            #         data_manager=self.data_manager,
-            #         cache=self.cache,
-            #         logger=self.logger.getChild("tradingview_tool")
-            #     )
-            #     self._tool_registry.register(tradingview_tool, enabled=False)  # Disabled for Phase 2
-            # except Exception as e:
-            #     self.logger.warning(f"Failed to initialize TradingViewTool: {e}")
+            # Initialize and register TradingViewTool for visualization provenance
+            try:
+                tradingview_tool = TradingViewTool(
+                    data_manager=self.data_manager,
+                    cache=self.cache,
+                    logger=self.logger.getChild("tradingview_tool")
+                )
+                self._tool_registry.register(tradingview_tool, enabled=True)
+            except Exception as e:
+                self.logger.warning(f"Failed to initialize TradingViewTool: {e}")
             
             enabled_count = len(self._tool_registry.get_enabled_tools())
             self.logger.info(f"Tools initialized: {enabled_count} enabled, {len(self._tool_registry)} total")

@@ -8,7 +8,7 @@ Reference: backend-python.instructions.md § Model Factory and AI Clients
 """
 
 import logging
-from typing import Any, Dict, List, Mapping, Optional, Tuple
+from typing import Any, Dict, List, Mapping, Optional, Sequence, Tuple
 
 try:
     from semantic_router import Route, SemanticRouter
@@ -51,6 +51,126 @@ from .routes import (
 )
 
 logger = logging.getLogger(__name__)
+
+
+MARKET_TOOL_FAMILY_BY_ROUTE: Dict[StockQueryRoute, Tuple[str, ...]] = {
+    StockQueryRoute.PRICE_CHECK: ("market_data", "stock_symbol"),
+    StockQueryRoute.FUNDAMENTALS: ("market_data",),
+    StockQueryRoute.TECHNICAL_ANALYSIS: ("market_data", "tradingview"),
+    StockQueryRoute.MARKET_WATCH: ("market_data",),
+    StockQueryRoute.NEWS_ANALYSIS: ("market_data",),
+    StockQueryRoute.PORTFOLIO: (),
+    StockQueryRoute.IDEAS: (),
+    StockQueryRoute.GENERAL_CHAT: (),
+}
+
+
+_MARKET_ROUTE_KEYWORDS: Sequence[Tuple[StockQueryRoute, str, Tuple[str, ...]]] = (
+    (
+        StockQueryRoute.TECHNICAL_ANALYSIS,
+        "tradingview",
+        (
+            "chart",
+            "bieu do",
+            "biểu đồ",
+            "candlestick",
+            "widget",
+            "heatmap",
+            "screener",
+            "ticker tape",
+            "rsi",
+            "macd",
+            "duong gia",
+            "đường giá",
+        ),
+    ),
+    (
+        StockQueryRoute.FUNDAMENTALS,
+        "market_data",
+        (
+            "fundamental",
+            "fundamentals",
+            "p/e",
+            "pe",
+            "roe",
+            "roa",
+            "eps",
+            "bctc",
+            "bao cao tai chinh",
+            "báo cáo tài chính",
+            "statement",
+            "financial statement",
+            "doanh thu",
+            "loi nhuan",
+            "lợi nhuận",
+        ),
+    ),
+    (
+        StockQueryRoute.NEWS_ANALYSIS,
+        "market_data",
+        (
+            "disclosure",
+            "cong bo thong tin",
+            "công bố thông tin",
+            "official notice",
+            "dividend",
+            "co tuc",
+            "cổ tức",
+            "quyen mua",
+            "quyền mua",
+            "corporate action",
+            "listing change",
+            "niem yet",
+            "niêm yết",
+        ),
+    ),
+    (
+        StockQueryRoute.MARKET_WATCH,
+        "market_data",
+        (
+            "breadth",
+            "market breadth",
+            "do rong thi truong",
+            "độ rộng thị trường",
+            "foreign flow",
+            "dong tien",
+            "dòng tiền",
+            "nuoc ngoai",
+            "nước ngoài",
+            "vn-index",
+            "vnindex",
+            "sector",
+        ),
+    ),
+    (
+        StockQueryRoute.PRICE_CHECK,
+        "market_data",
+        (
+            "price",
+            "quote",
+            "gia",
+            "giá",
+            "ohlcv",
+            "history",
+            "lich su gia",
+            "lịch sử giá",
+            "gia hien tai",
+            "giá hiện tại",
+            "close",
+            "volume",
+        ),
+    ),
+)
+
+
+_DEFERRED_REPORT_KEYWORDS = (
+    "report",
+    "bao cao dau tu",
+    "báo cáo đầu tư",
+    "investment report",
+    "write report",
+    "generate report",
+)
 
 
 class StockQueryRouter:
@@ -332,3 +452,118 @@ def reset_stock_query_router() -> None:
     """Reset the singleton instance (useful for testing)."""
     global _router_instance
     _router_instance = None
+
+
+def classify_market_tool_family(query: str) -> Dict[str, Any]:
+    """Classify market fixture queries without invoking embedding services."""
+
+    normalized = " ".join((query or "").lower().split())
+    if not normalized:
+        return {
+            "route": StockQueryRoute.GENERAL_CHAT,
+            "tool_family": None,
+            "confidence": 0.0,
+            "degraded": True,
+            "degraded_reason": "empty_query",
+            "deferred_scope": False,
+        }
+
+    if any(keyword in normalized for keyword in _DEFERRED_REPORT_KEYWORDS):
+        return {
+            "route": StockQueryRoute.MARKET_WATCH,
+            "tool_family": "report_fixture",
+            "confidence": 0.82,
+            "degraded": True,
+            "degraded_reason": "report_generation_deferred",
+            "deferred_scope": True,
+        }
+
+    best: Optional[Tuple[StockQueryRoute, str, int]] = None
+    for route, tool_family, keywords in _MARKET_ROUTE_KEYWORDS:
+        score = sum(1 for keyword in keywords if keyword in normalized)
+        if score and (best is None or score > best[2]):
+            best = (route, tool_family, score)
+
+    if best is None:
+        return {
+            "route": StockQueryRoute.GENERAL_CHAT,
+            "tool_family": None,
+            "confidence": 0.0,
+            "degraded": True,
+            "degraded_reason": "ambiguous_or_unsupported",
+            "deferred_scope": False,
+        }
+
+    route, tool_family, score = best
+    confidence = min(0.99, 0.74 + (score * 0.08))
+    return {
+        "route": route,
+        "tool_family": tool_family,
+        "confidence": confidence,
+        "degraded": False,
+        "degraded_reason": None,
+        "deferred_scope": False,
+        "allowed_tool_families": MARKET_TOOL_FAMILY_BY_ROUTE.get(route, ()),
+    }
+
+
+def evaluate_market_route_cases(cases: Sequence[Mapping[str, Any]]) -> Dict[str, Any]:
+    """Evaluate route and tool-family fixture cases for market acceptance gates."""
+
+    total = len(cases)
+    if total == 0:
+        return {
+            "total": 0,
+            "accuracy": 1.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "correct": 0,
+            "results": [],
+        }
+
+    results: List[Dict[str, Any]] = []
+    route_correct = 0
+    tool_correct = 0
+    expected_tool_count = 0
+    predicted_tool_count = 0
+    for case in cases:
+        outcome = classify_market_tool_family(str(case.get("query", "")))
+        expected_route = case.get("expected_route")
+        expected_tool = case.get("expected_tool_family")
+        expected_deferred = bool(case.get("deferred_scope", False))
+        route_value = outcome["route"].value if isinstance(outcome["route"], StockQueryRoute) else str(outcome["route"])
+        route_ok = route_value == str(expected_route)
+        tool_ok = outcome.get("tool_family") == expected_tool
+        deferred_ok = bool(outcome.get("deferred_scope", False)) == expected_deferred
+        if route_ok and deferred_ok:
+            route_correct += 1
+        if expected_tool is not None:
+            expected_tool_count += 1
+        if outcome.get("tool_family") is not None:
+            predicted_tool_count += 1
+        if tool_ok:
+            tool_correct += 1
+        results.append(
+            {
+                "query": case.get("query"),
+                "expected_route": expected_route,
+                "actual_route": route_value,
+                "expected_tool_family": expected_tool,
+                "actual_tool_family": outcome.get("tool_family"),
+                "route_ok": route_ok,
+                "tool_ok": tool_ok,
+                "deferred_ok": deferred_ok,
+            }
+        )
+
+    precision_denominator = predicted_tool_count or 1
+    recall_denominator = expected_tool_count or 1
+    return {
+        "total": total,
+        "accuracy": route_correct / total,
+        "precision": tool_correct / precision_denominator,
+        "recall": tool_correct / recall_denominator,
+        "correct": route_correct,
+        "tool_family_correct": tool_correct,
+        "results": results,
+    }

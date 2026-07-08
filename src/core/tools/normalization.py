@@ -159,6 +159,20 @@ class SourceMetadata:
 
 
 @dataclass(frozen=True)
+class AttributionCoverageCounters:
+    """Small coverage summary for market-data attribution evidence."""
+
+    complete_attribution: int = 0
+    degraded_no_source: int = 0
+    stale_cache: int = 0
+    provider_or_license_blocked: int = 0
+    unsafe_trace_leak: int = 0
+
+    def to_dict(self) -> Dict[str, int]:
+        return _to_plain_dict(self)
+
+
+@dataclass(frozen=True)
 class DegradedState:
     """Safe degraded outcome for blocked, stale, missing, or invalid tool results."""
 
@@ -335,6 +349,140 @@ def make_system_record_output(record: InternalSymbolRecord | Mapping[str, Any]) 
         source_metadata=source,
         freshness_metadata={"updated_at": internal.updated_at},
         symbol_identity=internal.identity,
+    )
+
+
+def make_evidence_fact_output(
+    *,
+    output_type: str,
+    content: Mapping[str, Any],
+    source_metadata: SourceMetadata,
+    freshness_metadata: Optional[Mapping[str, Any]] = None,
+    warnings: Sequence[str] = (),
+) -> NormalizedOutput:
+    """Create a source-attributed market evidence output."""
+
+    payload = {"output_type": output_type, **dict(content)}
+    if not has_complete_market_attribution(source_metadata):
+        return make_degraded_output(
+            code=DegradedReason.MISSING_SOURCE.value,
+            safe_message="Market data source attribution is incomplete.",
+            reason=DegradedReason.MISSING_SOURCE,
+            provider_id=source_metadata.provider_id,
+        )
+    return NormalizedOutput(
+        kind=NormalizedOutputKind.EVIDENCE_FACT,
+        content=payload,
+        source_metadata=source_metadata,
+        freshness_metadata=dict(freshness_metadata or {}),
+        symbol_identity=source_metadata.symbol_identity,
+        warnings=tuple(warnings) + tuple(source_metadata.warnings),
+    )
+
+
+def make_visualization_provenance_output(
+    *,
+    provider_id: str,
+    symbol: str,
+    payload: Mapping[str, Any],
+    source_url_or_reference: Optional[str] = None,
+    warnings: Sequence[str] = (),
+) -> NormalizedOutput:
+    """Create a TradingView-style visualization output that is never evidence by default."""
+
+    warning = "Visualization provenance is not canonical market evidence."
+    source = SourceMetadata(
+        provider_id=provider_id,
+        provider_class="visualization",
+        source_url_or_reference=source_url_or_reference,
+        retrieved_at=utc_now_iso(),
+        license_posture="not_applicable",
+        freshness_status=FreshnessStatus.NOT_APPLICABLE,
+        warnings=(warning, *tuple(warnings)),
+    )
+    return NormalizedOutput(
+        kind=NormalizedOutputKind.VISUALIZATION_PROVENANCE,
+        content={
+            "output_type": "VisualizationProvenance",
+            "symbol": normalize_symbol_code(symbol),
+            "canonical_evidence": False,
+            **dict(payload),
+        },
+        source_metadata=source,
+        warnings=(warning, *tuple(warnings)),
+    )
+
+
+def cache_freshness_metadata(
+    *,
+    provider_id: str,
+    retrieved_at: str,
+    freshness_status: FreshnessStatus | str,
+    source_timestamp: Optional[str] = None,
+    ttl_seconds: Optional[int] = None,
+    expires_at: Optional[str] = None,
+    warnings: Sequence[str] = (),
+    degraded_state_reason: Optional[str] = None,
+) -> Dict[str, Any]:
+    """Build cache freshness metadata required by market-data evidence gates."""
+
+    return {
+        "provider_id": provider_id,
+        "source_timestamp": source_timestamp,
+        "retrieved_at": retrieved_at,
+        "freshness_status": _enum_value(freshness_status),
+        "ttl_seconds": ttl_seconds,
+        "expires_at": expires_at,
+        "warnings": list(warnings),
+        "degraded_state_reason": degraded_state_reason,
+    }
+
+
+def has_complete_market_attribution(source: Optional[SourceMetadata]) -> bool:
+    """Return true when a market fact has the minimum required attribution."""
+
+    if source is None:
+        return False
+    required = (
+        source.provider_id,
+        source.source_url_or_reference,
+        source.retrieved_at,
+        source.exchange,
+        source.currency,
+        source.license_posture,
+    )
+    return all(value not in (None, "") for value in required)
+
+
+def attribution_coverage_counters(outputs: Iterable[NormalizedOutput]) -> AttributionCoverageCounters:
+    """Count complete and degraded attribution outcomes for verification evidence."""
+
+    complete = degraded_no_source = stale_cache = blocked = unsafe = 0
+    for output in outputs:
+        if contains_blocked_prompt_payload(output.to_dict()):
+            unsafe += 1
+        if output.degraded_state and output.degraded_state.code in {
+            DegradedReason.MISSING_SOURCE.value,
+            DegradedReason.NO_SOURCE_AVAILABLE.value,
+        }:
+            degraded_no_source += 1
+        if output.degraded_state and output.degraded_state.code in {
+            DegradedReason.BLOCKED_LICENSE.value,
+            DegradedReason.PROVIDER_DOWN.value,
+            DegradedReason.UNSUPPORTED_PROVIDER.value,
+        }:
+            blocked += 1
+        freshness = output.freshness_metadata.get("freshness_status") if output.freshness_metadata else None
+        if freshness == FreshnessStatus.STALE.value:
+            stale_cache += 1
+        if output.kind == NormalizedOutputKind.EVIDENCE_FACT and has_complete_market_attribution(output.source_metadata):
+            complete += 1
+    return AttributionCoverageCounters(
+        complete_attribution=complete,
+        degraded_no_source=degraded_no_source,
+        stale_cache=stale_cache,
+        provider_or_license_blocked=blocked,
+        unsafe_trace_leak=unsafe,
     )
 
 

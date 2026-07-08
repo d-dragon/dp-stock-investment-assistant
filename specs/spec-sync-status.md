@@ -1,7 +1,7 @@
 # Spec Sync Status
 
-> **Document Version**: 1.20
-> **Generated**: 2026-07-08 02:53:16Z
+> **Document Version**: 1.19
+> **Generated**: 2026-07-08 07:38:46Z
 > **Status**: Active
 > **Traceability Manifest Version**: 1
 
@@ -23,7 +23,7 @@
 | [prompt-system-milestone2](prompt-system-milestone2/spec.md#governance-context-mandatory) | `mapped` | `partial` | `implemented` | `current` | `45/45` |
 | [tool-system-implementation-m2b.1](tool-system-implementation-m2b.1/spec.md#governance-context-mandatory) | `mapped` | `partial` | `verified` | `current` | `70/70` |
 | [tool-system-m2b.2](tool-system-m2b.2/spec.md#governance-context-mandatory) | `mapped` | `partial` | `verified` | `current` | `105/105` |
-| [tool-system-m2b.3](tool-system-m2b.3/spec.md#governance-context-mandatory) | `mapped` | `partial` | `planned` | `current` | `0/128` |
+| [tool-system-m2b.3](tool-system-m2b.3/spec.md#governance-context-mandatory) | `mapped` | `partial` | `verified` | `current` | `128/128` |
 
 ## Revision History
 
@@ -49,7 +49,6 @@
 | `1.17` | `2026-07-07` | Added tool-system-m2b.3 clarified feature mapping for Vietnam market-data, TradingView visualization provenance, attribution, cache freshness, and route-evaluation scope. |
 | `1.18` | `2026-07-07` | Promoted tool-system-m2b.3 to planned with implementation plan, research, data model, quickstart, and feature-local market-data, attribution, TradingView, and route-evaluation contracts. |
 | `1.19` | `2026-07-07` | Added tool-system-m2b.3 implementation task breakdown with dependency-aware story phases, verification commands, and requirement coverage matrix. |
-| `1.20` | `2026-07-07` | Added tool-system-m2b.3 fleet-review remediation for NFR-6.1.3 and NFR-6.1.4 coverage gates, final verification scope, and setup task sequencing. |
 
 ## agent-session-with-stm-wiring
 
@@ -230,11 +229,11 @@
 - Path: [specs/tool-system-m2b.3](tool-system-m2b.3/spec.md#governance-context-mandatory)
 - Mapping status: `mapped`
 - Coverage status: `partial`
-- Derived status: `planned`
+- Derived status: `verified`
 - Sync status: `current`
 - Sync gate enforced: `yes`
-- spec.md status field: `Planned`
-- Task completion: `0/128`
+- spec.md status field: `Verified`
+- Task completion: `128/128`
 - Linked SRS items: `FR-2.6.2, FR-2.6.3, FR-2.6.4, FR-2.6.5, FR-2.6.6, FR-2.7.3, FR-2.7.4, FR-2.7.5, FR-2.8.1, FR-2.8.2, FR-2.8.3, FR-2.8.4, FR-4.1.3, NFR-2.3.5, NFR-5.2.13, NFR-5.3.8, NFR-6.1.3, NFR-6.1.4, CON-7, CON-9, AC-9.8, AC-9.9, AC-9.11, AC-9.16`
 - Evidence:
   - [Feature specification](tool-system-m2b.3/spec.md#governance-context-mandatory)
@@ -249,6 +248,10 @@
   - [Route-evaluation contract](tool-system-m2b.3/contracts/route-evaluation-contract.md)
   - [Implementation tasks](tool-system-m2b.3/tasks.md#requirement-coverage-matrix)
   - [Requirements quality checklist](tool-system-m2b.3/checklists/requirements.md)
+  - [Implementation review and verification evidence](tool-system-m2b.3/review.md#story-gate-evidence)
+  - [Post-rename verification evidence](tool-system-m2b.3/review.md#verification-run-2026-07-08)
+  - [Task verification report](tool-system-m2b.3/verify-tasks-report.md)
+  - [Verify marker](tool-system-m2b.3/.verify-done)
 
 ## Status Semantics
 

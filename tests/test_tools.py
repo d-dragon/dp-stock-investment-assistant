@@ -778,34 +778,36 @@ class TestReportingTool:
 # ============================================================================
 
 class TestTradingViewTool:
-    """Tests for TradingViewTool placeholder."""
+    """Tests for TradingViewTool visualization provenance."""
     
-    def test_execute_raises_not_implemented(self, mock_cache):
-        """Test _execute raises NotImplementedError."""
+    def test_execute_returns_visualization_provenance(self, mock_cache):
+        """Test _execute returns non-canonical visualization provenance."""
         from src.core.tools.tradingview import TradingViewTool
         
         tool = TradingViewTool(cache=mock_cache)
         
-        with pytest.raises(NotImplementedError, match="Phase 2"):
-            tool._run(action="get_chart_url", symbol="AAPL")
+        result = tool._run(action="get_chart_url", symbol="AAPL")
+
+        assert result["kind"] == "VisualizationProvenance"
+        assert result["content"]["canonical_evidence"] is False
+        assert result["source_metadata"]["provider_id"] == "tradingview"
     
-    def test_convenience_methods_raise(self, mock_cache):
-        """Test convenience methods raise NotImplementedError."""
+    def test_convenience_methods_return_provenance(self, mock_cache):
+        """Test convenience methods return visualization provenance."""
         from src.core.tools.tradingview import TradingViewTool
         
         tool = TradingViewTool(cache=mock_cache)
         
-        with pytest.raises(NotImplementedError):
-            tool.get_chart_url("AAPL")
-        
-        with pytest.raises(NotImplementedError):
-            tool.get_widget("AAPL")
-        
-        with pytest.raises(NotImplementedError):
-            tool.get_analysis("AAPL")
+        chart = tool.get_chart_url("AAPL")
+        widget = tool.get_widget("AAPL")
+        analysis = tool.get_analysis("AAPL")
+
+        assert chart["kind"] == "VisualizationProvenance"
+        assert widget["kind"] == "VisualizationProvenance"
+        assert analysis["kind"] == "VisualizationProvenance"
     
     def test_health_check_returns_healthy(self, mock_cache):
-        """Test placeholder is always 'healthy'."""
+        """Test provenance builder is healthy."""
         from src.core.tools.tradingview import TradingViewTool
         
         tool = TradingViewTool(cache=mock_cache)
@@ -813,8 +815,9 @@ class TestTradingViewTool:
         healthy, details = tool.health_check()
         
         assert healthy is True
-        assert details["implementation_status"] == "placeholder"
-        assert details["phase"] == "Phase 2"
+        assert details["implementation_status"] == "visualization_provenance"
+        assert details["phase"] == "visualization_provenance"
+        assert details["canonical_evidence"] is False
 
 
 # ============================================================================
