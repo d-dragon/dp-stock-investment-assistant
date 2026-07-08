@@ -452,4 +452,5 @@ This guide is living documentation—update it when you add patterns, services, 
 <!-- SPECKIT START -->
 For additional context about technologies to be used, project structure,
 shell commands, and other important information, read the current plan
+at specs/tool-system-m2b.3/plan.md
 <!-- SPECKIT END -->

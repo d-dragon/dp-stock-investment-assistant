@@ -3,7 +3,7 @@ generated_on: 2026-03-31
 
 reports:
   spec_sync_status:
-    version: "1.16"
+    version: "1.19"
     status: Active
     revision_history:
       - version: "1.0"
@@ -57,8 +57,17 @@ reports:
       - version: "1.16"
         date: 2026-07-06
         summary: Promoted tool-system-m2b.2 to verified after verify-tasks preservation evidence and verify-run remediation closed all implementation tasks.
+      - version: "1.17"
+        date: 2026-07-07
+        summary: Added tool-system-m2b.3 clarified feature mapping for Vietnam market-data, TradingView visualization provenance, attribution, cache freshness, and route-evaluation scope.
+      - version: "1.18"
+        date: 2026-07-07
+        summary: Promoted tool-system-m2b.3 to planned with implementation plan, research, data model, quickstart, and feature-local market-data, attribution, TradingView, and route-evaluation contracts.
+      - version: "1.19"
+        date: 2026-07-07
+        summary: Added tool-system-m2b.3 implementation task breakdown with dependency-aware story phases, verification commands, and requirement coverage matrix.
   srs_spec_traceability:
-    version: "3.1"
+    version: "3.4"
     status: Active
     revision_history:
       - version: "1.0"
@@ -127,6 +136,15 @@ reports:
       - version: "3.1"
         date: 2026-07-06
         summary: Regenerated reverse trace after tool-system-m2b.2 verification evidence and verify marker were added.
+      - version: "3.2"
+        date: 2026-07-07
+        summary: Added reverse trace coverage for tool-system-m2b.3 clarified specification against M2B.3 Vietnam market and visualization SRS scope.
+      - version: "3.3"
+        date: 2026-07-07
+        summary: Regenerated reverse trace after tool-system-m2b.3 planning artifacts advanced the feature lifecycle to planned.
+      - version: "3.4"
+        date: 2026-07-07
+        summary: Regenerated reverse trace after tool-system-m2b.3 task generation added tasks.md as planned implementation evidence.
 
 srs:
   path: docs/domains/agent/SOFTWARE_REQUIREMENTS_SPECIFICATION.md
@@ -1135,3 +1153,170 @@ features:
           anchor: final-verification-verdict
         - path: specs/tool-system-m2b.2/.verify-done
           label: Verify marker
+
+  - feature_id: tool-system-m2b.3
+    feature_title: Vietnam Market and Visualization Coverage - M2B.3
+    feature_path: specs/tool-system-m2b.3
+    reference_document: specs/tool-system-m2b.3/spec.md
+    reference_anchor: governance-context-mandatory
+    mapping_status: mapped
+    feature_kind: implementation-feature
+    status_sync:
+      source_of_truth: derived
+      gate_enforced: true
+      synchronized_documents:
+        - specs/tool-system-m2b.3/spec.md
+        - specs/tool-system-m2b.3/plan.md
+        - specs/tool-system-m2b.3/research.md
+        - specs/tool-system-m2b.3/data-model.md
+        - specs/tool-system-m2b.3/quickstart.md
+        - specs/tool-system-m2b.3/contracts/market-data-evidence-contract.md
+        - specs/tool-system-m2b.3/contracts/attribution-cache-trace-contract.md
+        - specs/tool-system-m2b.3/contracts/tradingview-visualization-contract.md
+        - specs/tool-system-m2b.3/contracts/route-evaluation-contract.md
+        - specs/tool-system-m2b.3/tasks.md
+        - specs/tool-system-m2b.3/checklists/requirements.md
+    srs_mapping:
+      baseline_version: "2.8"
+      coverage_status: partial
+      mapped_srs_items:
+        - FR-2.6.2
+        - FR-2.6.3
+        - FR-2.6.4
+        - FR-2.6.5
+        - FR-2.6.6
+        - FR-2.7.3
+        - FR-2.7.4
+        - FR-2.7.5
+        - FR-2.8.1
+        - FR-2.8.2
+        - FR-2.8.3
+        - FR-2.8.4
+        - FR-4.1.3
+        - NFR-2.3.5
+        - NFR-5.2.13
+        - NFR-5.3.8
+        - NFR-6.1.3
+        - NFR-6.1.4
+        - CON-7
+        - CON-9
+        - AC-9.8
+        - AC-9.9
+        - AC-9.11
+        - AC-9.16
+      mapped_functional_groups:
+        - group: FR-2.6
+          coverage: partial
+          includes:
+            - FR-2.6.2
+            - FR-2.6.3
+            - FR-2.6.4
+            - FR-2.6.5
+            - FR-2.6.6
+        - group: FR-2.7
+          coverage: partial
+          includes:
+            - FR-2.7.3
+            - FR-2.7.4
+            - FR-2.7.5
+        - group: FR-2.8
+          coverage: full
+          includes:
+            - FR-2.8.1
+            - FR-2.8.2
+            - FR-2.8.3
+            - FR-2.8.4
+        - group: FR-4.1
+          coverage: partial
+          includes:
+            - FR-4.1.3
+      mapped_non_functional:
+        - NFR-2.3.5
+        - NFR-5.2.13
+        - NFR-5.3.8
+        - NFR-6.1.3
+        - NFR-6.1.4
+      mapped_constraints:
+        - CON-7
+        - CON-9
+      mapped_acceptance_criteria:
+        - AC-9.8
+        - AC-9.9
+        - AC-9.11
+        - AC-9.16
+      sync_notes:
+        - M2B.3 scope is strict to Phase 2B TS-06, TS-07, TS-08, and TS-12.
+        - M2B.3 builds on verified M2B.1 descriptors, route-filtered exposure, gateway admission, and registry-backed execution, plus verified M2B.2 symbol-store, provider-policy, normalization, ToolContextPack, and degraded-state backbone.
+        - TS-07 breadth, flow, disclosure, and corporate-action coverage remains in M2B.3 scope as P2 delivery relative to P1 quote/history, fundamentals, attribution, TradingView authority, and route-evaluation gates.
+        - TradingView outputs remain VisualizationProvenance and must not be treated as canonical market evidence by default.
+        - IR-3.8 generic web evidence is intentionally not mapped to this feature and remains deferred to later generic web fetch governance.
+        - Specification clarified on 2026-07-07 after cross-document review against roadmap, SRS, reverse trace, architecture, technical design, research, constitution, architecture memory, repository instructions, Spec Kit HOW-TO, and documentation methodology.
+        - Planning artifacts generated on 2026-07-07 keep M2B.3 scoped to internal agent/tool contracts and do not change public REST, SSE, Socket.IO, or OpenAPI contracts.
+        - Implementation tasks generated on 2026-07-07 cover all M2B.3 functional requirements, success criteria, test-first story phases, verification commands, and sync gates.
+        - Fleet-review remediation on 2026-07-07 added explicit NFR-6.1.3 and NFR-6.1.4 coverage evidence gates before implementation.
+    speckit_mapping:
+      spec_requirements:
+        - M2B3-FR-001
+        - M2B3-FR-002
+        - M2B3-FR-003
+        - M2B3-FR-004
+        - M2B3-FR-005
+        - M2B3-FR-006
+        - M2B3-FR-007
+        - M2B3-FR-008
+        - M2B3-FR-009
+        - M2B3-FR-010
+        - M2B3-FR-011
+        - M2B3-FR-012
+        - M2B3-FR-013
+        - M2B3-FR-014
+        - M2B3-FR-015
+        - M2B3-FR-016
+        - M2B3-FR-017
+        - M2B3-FR-018
+        - M2B3-FR-019
+        - M2B3-FR-020
+        - M2B3-FR-021
+        - M2B3-FR-022
+        - M2B3-FR-023
+        - M2B3-FR-024
+        - M2B3-FR-025
+      success_criteria:
+        - SC-001
+        - SC-002
+        - SC-003
+        - SC-004
+        - SC-005
+        - SC-006
+        - SC-007
+        - SC-008
+        - SC-009
+      evidence_paths:
+        - path: specs/tool-system-m2b.3/spec.md
+          label: Feature specification
+          anchor: governance-context-mandatory
+        - path: specs/tool-system-m2b.3/spec.md
+          label: Requirements and success criteria
+          anchor: requirements-mandatory
+        - path: specs/tool-system-m2b.3/plan.md
+          label: Implementation plan
+          anchor: governance-and-traceability-context
+        - path: specs/tool-system-m2b.3/research.md
+          label: Phase 0 research
+        - path: specs/tool-system-m2b.3/data-model.md
+          label: Data model
+        - path: specs/tool-system-m2b.3/quickstart.md
+          label: Quickstart verification guide
+        - path: specs/tool-system-m2b.3/contracts/market-data-evidence-contract.md
+          label: Market-data evidence contract
+        - path: specs/tool-system-m2b.3/contracts/attribution-cache-trace-contract.md
+          label: Attribution, cache, and trace contract
+        - path: specs/tool-system-m2b.3/contracts/tradingview-visualization-contract.md
+          label: TradingView visualization provenance contract
+        - path: specs/tool-system-m2b.3/contracts/route-evaluation-contract.md
+          label: Route-evaluation contract
+        - path: specs/tool-system-m2b.3/tasks.md
+          label: Implementation tasks
+          anchor: requirement-coverage-matrix
+        - path: specs/tool-system-m2b.3/checklists/requirements.md
+          label: Requirements quality checklist
