@@ -1,7 +1,8 @@
-"""TradingView Tool placeholder for Phase 2 implementation.
+"""TradingView visualization provenance tool.
 
-This tool will provide TradingView integration for advanced charting
-and technical analysis visualization.
+This tool builds chart, widget, deep-link, ticker-tape, heatmap, screener,
+and symbol-validation payloads as visualization provenance. It does not
+produce canonical market evidence.
 
 Reference: .github/instructions/backend-python.instructions.md § Service Layer
 """
@@ -12,31 +13,18 @@ import logging
 from typing import Any, Dict, Optional
 
 from .base import CachingTool
+from .normalization import NormalizedOutput, make_visualization_provenance_output, normalize_symbol_code
 from utils.cache import CacheBackend
 
 
 class TradingViewTool(CachingTool):
-    """Tool for TradingView integration (Phase 2 placeholder).
-    
-    This tool will provide:
-    - Chart URL generation
-    - Widget embedding support
-    - Technical analysis overlays
-    
-    Note: This is a placeholder implementation. All methods raise
-    NotImplementedError with a Phase 2 message.
-    
-    Example:
-        >>> tool = TradingViewTool()
-        >>> result = tool._run(action="get_chart_url", symbol="AAPL")
-        NotImplementedError: TradingView integration is scheduled for Phase 2
-    """
+    """Build TradingView visualization payloads as non-evidence provenance."""
     
     name: str = "tradingview"
     description: str = (
-        "TradingView integration for charts and technical analysis. "
-        "Actions: 'get_chart_url', 'get_widget', 'get_analysis'. "
-        "Note: Phase 2 feature - not yet implemented."
+        "TradingView visualization provenance for charts, widgets, links, "
+        "ticker tape, heatmaps, screeners, and symbol validation. "
+        "Outputs are not canonical market evidence."
     )
     
     def __init__(
@@ -65,53 +53,31 @@ class TradingViewTool(CachingTool):
         )
     
     def _execute(self, **kwargs: Any) -> Dict[str, Any]:
-        """Execute TradingView operation.
-        
-        All operations raise NotImplementedError as this is a Phase 2 feature.
-        
-        Args:
-            action: One of 'get_chart_url', 'get_widget', 'get_analysis'
-            symbol: Stock symbol
-            
-        Raises:
-            NotImplementedError: Always raised with Phase 2 message
-        """
-        action = kwargs.get("action", "unknown")
-        symbol = kwargs.get("symbol", "N/A")
-        
-        self.logger.info(
-            f"TradingView action '{action}' requested for {symbol} - Phase 2 feature"
-        )
-        
-        raise NotImplementedError(
-            f"TradingView integration (action='{action}') is scheduled for Phase 2. "
-            "This tool is currently a placeholder. "
-            "See: https://www.tradingview.com/widget/ for planned features."
-        )
+        """Build a visualization provenance payload."""
+
+        action = str(kwargs.get("action", "chart")).lower()
+        symbol = normalize_symbol_code(str(kwargs.get("symbol") or ""))
+        if not symbol:
+            return self._provenance_output(
+                symbol="",
+                action=action,
+                payload={"validation_status": "degraded", "reason": "missing_symbol"},
+                warning="TradingView symbol is required.",
+            ).to_dict()
+
+        payload = self._build_payload(action=action, symbol=symbol, options=kwargs)
+        output = self._provenance_output(symbol=symbol, action=action, payload=payload)
+        self.logger.info("TradingView visualization provenance built: action=%s symbol=%s", action, symbol)
+        return output.to_dict()
     
-    def get_chart_url(self, symbol: str, **kwargs: Any) -> str:
-        """Get TradingView chart URL for a symbol.
-        
-        Args:
-            symbol: Stock symbol
-            **kwargs: Additional chart options
-            
-        Raises:
-            NotImplementedError: Phase 2 feature
-        """
+    def get_chart_url(self, symbol: str, **kwargs: Any) -> Dict[str, Any]:
+        """Get TradingView chart URL provenance for a symbol."""
+
         return self._run(action="get_chart_url", symbol=symbol, **kwargs)
     
     def get_widget(self, symbol: str, widget_type: str = "chart", **kwargs: Any) -> Dict[str, Any]:
-        """Get TradingView widget embed code.
-        
-        Args:
-            symbol: Stock symbol
-            widget_type: Type of widget (chart, ticker, etc.)
-            **kwargs: Additional widget options
-            
-        Raises:
-            NotImplementedError: Phase 2 feature
-        """
+        """Get TradingView widget provenance for a symbol."""
+
         return self._run(
             action="get_widget",
             symbol=symbol,
@@ -120,31 +86,82 @@ class TradingViewTool(CachingTool):
         )
     
     def get_analysis(self, symbol: str, **kwargs: Any) -> Dict[str, Any]:
-        """Get TradingView technical analysis summary.
-        
-        Args:
-            symbol: Stock symbol
-            **kwargs: Analysis options
-            
-        Raises:
-            NotImplementedError: Phase 2 feature
-        """
+        """Return visualization-only analysis provenance, not evidence."""
+
         return self._run(action="get_analysis", symbol=symbol, **kwargs)
+
+    def _build_payload(self, *, action: str, symbol: str, options: Dict[str, Any]) -> Dict[str, Any]:
+        interval = str(options.get("interval") or "1D")
+        widget_type = str(options.get("widget_type") or "chart")
+        base_url = f"https://www.tradingview.com/chart/?symbol={symbol}&interval={interval}"
+        supported_intervals = {"1D", "1W", "1M", "4H", "1H"}
+        supported_widgets = {"chart", "advanced_chart", "symbol_overview", "ticker_tape", "heatmap", "screener"}
+        payload: Dict[str, Any] = {
+            "action": action,
+            "symbol": symbol,
+            "interval": interval,
+            "validation_status": "valid",
+            "generated_by": "TradingViewTool",
+        }
+        if interval not in supported_intervals:
+            payload["validation_status"] = "degraded"
+            payload["reason"] = "invalid_interval"
+            return payload
+        if action in {"get_chart_url", "chart", "deep_link"}:
+            payload["chart_url"] = base_url
+            payload["deep_link"] = base_url
+        elif action in {"get_widget", "widget"}:
+            if widget_type not in supported_widgets:
+                payload["validation_status"] = "degraded"
+                payload["reason"] = "unsupported_widget"
+                return payload
+            payload["widget_type"] = widget_type
+            payload["widget_payload"] = {
+                "symbol": symbol,
+                "interval": interval,
+                "type": widget_type,
+                "canonical_evidence": False,
+            }
+        elif action in {"ticker_tape", "heatmap", "screener", "get_analysis"}:
+            payload["widget_type"] = action
+            payload["rows"] = []
+            payload["canonical_evidence"] = False
+        elif action == "validate_symbol":
+            payload["validation_status"] = "valid" if symbol else "degraded"
+        else:
+            payload["validation_status"] = "degraded"
+            payload["reason"] = "unsupported_visualization_action"
+        return payload
+
+    @staticmethod
+    def _provenance_output(
+        *,
+        symbol: str,
+        action: str,
+        payload: Dict[str, Any],
+        warning: str = "TradingView output is visualization provenance only.",
+    ) -> NormalizedOutput:
+        source_reference = payload.get("chart_url") or f"tradingview:{action}:{symbol}"
+        return make_visualization_provenance_output(
+            provider_id="tradingview",
+            symbol=symbol,
+            payload=payload,
+            source_url_or_reference=str(source_reference),
+            warnings=(warning,),
+        )
     
     def health_check(self) -> tuple[bool, Dict[str, Any]]:
         """Check tool health.
         
-        Always returns healthy since this is a placeholder.
+        Returns healthy when provenance builders are available.
         
         Returns:
-            Tuple of (True, details_dict) with Phase 2 note
+        Tuple of (True, details_dict) with visualization provenance status
         """
         base_healthy, details = super().health_check()
         
-        details["implementation_status"] = "placeholder"
-        details["phase"] = "Phase 2"
-        details["status"] = "placeholder"
-        details["note"] = "TradingView integration pending Phase 2 implementation"
-        
-        # Placeholder is always "healthy" (doesn't block other tools)
+        details["implementation_status"] = "visualization_provenance"
+        details["phase"] = "visualization_provenance"
+        details["status"] = "ready"
+        details["canonical_evidence"] = False
         return True, details

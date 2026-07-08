@@ -20,6 +20,18 @@ from .registry import ToolRegistry, get_tool_registry, reset_tool_registry
 from .stock_symbol import StockSymbolTool
 from .reporting import ReportingTool
 from .tradingview import TradingViewTool
+from .market_data import (
+    MarketDataEvidence,
+    MarketDataOutputType,
+    MarketDataRequest,
+    VietnamMarketDataTool,
+    default_vietnam_provider_descriptors,
+    market_evidence_output,
+    no_market_source_output,
+    select_vietnam_provider,
+    tradingview_values_are_canonical,
+    vietnam_provider_policy,
+)
 from .descriptors import (
     BaselineInventoryState,
     ExposureStatus,
@@ -45,6 +57,7 @@ from .surface import (
 )
 from .normalization import (
     AdmissionOutcome,
+    AttributionCoverageCounters,
     CanonicalSymbolIdentity,
     DegradedReason,
     DegradedState,
@@ -54,8 +67,13 @@ from .normalization import (
     NormalizedOutputKind,
     SourceMetadata,
     ToolExecutionEnvelope,
+    attribution_coverage_counters,
+    cache_freshness_metadata,
+    has_complete_market_attribution,
     make_degraded_output,
+    make_evidence_fact_output,
     make_system_record_output,
+    make_visualization_provenance_output,
 )
 from .provider_policy import (
     CredentialOwner,
@@ -91,6 +109,16 @@ __all__ = [
     "StockSymbolTool",
     "ReportingTool",
     "TradingViewTool",
+    "VietnamMarketDataTool",
+    "MarketDataEvidence",
+    "MarketDataOutputType",
+    "MarketDataRequest",
+    "default_vietnam_provider_descriptors",
+    "market_evidence_output",
+    "no_market_source_output",
+    "select_vietnam_provider",
+    "tradingview_values_are_canonical",
+    "vietnam_provider_policy",
     # M2B.1 descriptors
     "BaselineInventoryState",
     "ExposureStatus",
@@ -112,6 +140,7 @@ __all__ = [
     "ToolTraceRecord",
     # M2B.2 normalization/context/provider contracts
     "AdmissionOutcome",
+    "AttributionCoverageCounters",
     "CanonicalSymbolIdentity",
     "DegradedReason",
     "DegradedState",
@@ -121,8 +150,13 @@ __all__ = [
     "NormalizedOutputKind",
     "SourceMetadata",
     "ToolExecutionEnvelope",
+    "attribution_coverage_counters",
+    "cache_freshness_metadata",
+    "has_complete_market_attribution",
     "make_degraded_output",
+    "make_evidence_fact_output",
     "make_system_record_output",
+    "make_visualization_provenance_output",
     "CredentialOwner",
     "DataCategory",
     "LicensePosture",

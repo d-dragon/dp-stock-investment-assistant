@@ -14,10 +14,10 @@ Use this guide to validate the M2B.3 implementation after tasks are generated an
 ## Planned Focused Verification
 
 ```powershell
-python -m pytest tests/test_market_data_m2b3.py -q
-python -m pytest tests/test_tradingview_m2b3.py -q
-python -m pytest tests/test_route_evaluation_m2b3.py -q
-python -m pytest tests/test_attribution_cache_m2b3.py -q
+python -m pytest tests/test_market_data_tools.py -q
+python -m pytest tests/test_tradingview_visualization.py -q
+python -m pytest tests/test_market_route_evaluation.py -q
+python -m pytest tests/test_market_attribution_cache.py -q
 ```
 
 Expected outcomes:
@@ -41,6 +41,18 @@ Expected outcomes:
 - M2B.2 provider policy, normalization, and request-scoped context behavior remains intact.
 - Existing route taxonomy remains static unless a governed route change is explicitly introduced.
 - No public API contract behavior changes are required.
+
+## Coverage Verification
+
+```powershell
+python -m pytest tests/test_stock_query_router.py tests/test_market_route_evaluation.py --cov=src.core.stock_query_router --cov-report=term-missing --cov-fail-under=80 -q
+python -m pytest tests/test_market_data_tools.py tests/test_tradingview_visualization.py tests/test_market_route_evaluation.py tests/test_market_attribution_cache.py --cov=core.tools.market_data --cov=core.tools.tradingview --cov=core.tools.normalization --cov=core.tools.provider_policy --cov=core.tools.gateway --cov=core.tools.surface --cov-report=term-missing --cov-fail-under=70 -q
+```
+
+Expected outcomes:
+
+- Route-evaluation touched surface stays above the agent-core threshold.
+- M2B.3 tool-layer touched modules stay above the tool threshold without measuring unrelated legacy tools.
 
 ## Traceability Sync
 

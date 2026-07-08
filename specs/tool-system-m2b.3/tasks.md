@@ -19,19 +19,19 @@
 
 **Purpose**: Prepare the M2B.3 task, review, fixture, and test surfaces without changing runtime behavior.
 
-- [ ] T001 Review `specs/tool-system-m2b.3/spec.md`, `specs/tool-system-m2b.3/plan.md`, `docs/domains/agent/ARCHITECTURE_DESIGN.md#485a-tool-gateway-and-evidence-admission-boundary`, and `docs/domains/agent/TECHNICAL_DESIGN.md#322-target-phase-2b-runtime-flow`; record the implementation baseline in `specs/tool-system-m2b.3/review.md`.
-- [ ] T002 Create shared M2B.3 fixture directory `tests/fixtures/tool_system_m2b3/`.
-- [ ] T003 [P] Add shared M2B.3 assertion helpers using `core.*` imports in `tests/helpers/tool_system_m2b3_helpers.py`.
-- [ ] T004 [P] Create the market-data test module skeleton in `tests/test_market_data_m2b3.py`.
-- [ ] T005 [P] Create the TradingView visualization test module skeleton in `tests/test_tradingview_m2b3.py`.
-- [ ] T006 [P] Create the route-evaluation test module skeleton in `tests/test_route_evaluation_m2b3.py`.
-- [ ] T007 [P] Create the attribution/cache/trace test module skeleton in `tests/test_attribution_cache_m2b3.py`.
-- [ ] T008 [P] After T002, add Vietnam symbol and exchange fixture data in `tests/fixtures/tool_system_m2b3/symbols.py`.
-- [ ] T009 [P] After T002, add provider posture fixture data for Vietnam-native, official, licensed, fallback, visualization, and blocked providers in `tests/fixtures/tool_system_m2b3/providers.py`.
-- [ ] T010 [P] After T002, add Vietnamese, English, and mixed-language route fixture data in `tests/fixtures/tool_system_m2b3/route_cases.py`.
-- [ ] T011 [P] After T002, add safe market-data, stale-cache, missing-field, and degraded fixture payloads in `tests/fixtures/tool_system_m2b3/market_payloads.py`.
-- [ ] T012 [P] After T002, add TradingView chart, widget, deep-link, heatmap, screener, ticker-tape, and validation fixture payloads in `tests/fixtures/tool_system_m2b3/tradingview_payloads.py`.
-- [ ] T013 Create review sections for story gates, compatibility gates, provider posture, public-contract guard, sync evidence, and accepted deferrals in `specs/tool-system-m2b.3/review.md`.
+- [X] T001 Review `specs/tool-system-m2b.3/spec.md`, `specs/tool-system-m2b.3/plan.md`, `docs/domains/agent/ARCHITECTURE_DESIGN.md#485a-tool-gateway-and-evidence-admission-boundary`, and `docs/domains/agent/TECHNICAL_DESIGN.md#322-target-phase-2b-runtime-flow`; record the implementation baseline in `specs/tool-system-m2b.3/review.md`.
+- [X] T002 Create shared M2B.3 fixture directory `tests/fixtures/market_tools/`.
+- [X] T003 [P] Add shared M2B.3 assertion helpers using `core.*` imports in `tests/helpers/market_tool_helpers.py`.
+- [X] T004 [P] Create the market-data test module skeleton in `tests/test_market_data_tools.py`.
+- [X] T005 [P] Create the TradingView visualization test module skeleton in `tests/test_tradingview_visualization.py`.
+- [X] T006 [P] Create the route-evaluation test module skeleton in `tests/test_market_route_evaluation.py`.
+- [X] T007 [P] Create the attribution/cache/trace test module skeleton in `tests/test_market_attribution_cache.py`.
+- [X] T008 [P] After T002, add Vietnam symbol and exchange fixture data in `tests/fixtures/market_tools/symbols.py`.
+- [X] T009 [P] After T002, add provider posture fixture data for Vietnam-native, official, licensed, fallback, visualization, and blocked providers in `tests/fixtures/market_tools/providers.py`.
+- [X] T010 [P] After T002, add Vietnamese, English, and mixed-language route fixture data in `tests/fixtures/market_tools/route_cases.py`.
+- [X] T011 [P] After T002, add safe market-data, stale-cache, missing-field, and degraded fixture payloads in `tests/fixtures/market_tools/market_payloads.py`.
+- [X] T012 [P] After T002, add TradingView chart, widget, deep-link, heatmap, screener, ticker-tape, and validation fixture payloads in `tests/fixtures/market_tools/tradingview_payloads.py`.
+- [X] T013 Create review sections for story gates, compatibility gates, provider posture, public-contract guard, sync evidence, and accepted deferrals in `specs/tool-system-m2b.3/review.md`.
 
 ---
 
@@ -41,20 +41,20 @@
 
 **Critical**: No user story implementation should begin until this phase is complete.
 
-- [ ] T014 [P] Add the Vietnam market-data tool module structure in `src/core/tools/market_data.py`.
-- [ ] T015 [P] Extend provider data-category and provider-class support for M2B.3 market-data and visualization classes in `src/core/tools/provider_policy.py`.
-- [ ] T016 [P] Extend normalized output helpers for market facts, price history, fundamentals, breadth/flow, disclosures, corporate actions, cache freshness, and attribution counters in `src/core/tools/normalization.py`.
-- [ ] T017 [P] Extend request-scoped context helpers for M2B.3 market-data warnings, freshness metadata, and retained-derivative candidates in `src/core/tools/context.py`.
-- [ ] T018 [P] Extend descriptor inventory with market-data and TradingView M2B.3 capability/policy descriptors in `src/core/tools/descriptors.py`.
-- [ ] T019 Preserve route-filtered exposure and prevent provider adapters from becoming model-visible tools in `src/core/tools/surface.py`.
-- [ ] T020 Preserve thin gateway admission, trace sanitization, and registry-backed execution for M2B.3 tool wrappers in `src/core/tools/gateway.py`.
-- [ ] T021 Export only stable M2B.3 internal tool contracts from `src/core/tools/__init__.py` after T014-T018 exist.
-- [ ] T022 Add canonical symbol fixture adapters and identity helpers for M2B.3 tests in `tests/helpers/tool_system_m2b3_helpers.py`.
-- [ ] T023 Add source-attribution, cache-freshness, VisualizationProvenance, and no-raw-payload assertion helpers in `tests/helpers/tool_system_m2b3_helpers.py`.
-- [ ] T024 Add route-evaluation metric helpers for accuracy, precision, and recall in `tests/helpers/tool_system_m2b3_helpers.py`.
-- [ ] T025 Add provider posture fixtures for `vnstock`, Vietstock, CafeF, FiinGroup/FiinTrade/FiinQuant, VSDC, HOSE, HNX, Yahoo, Alpha Vantage, and TradingView in `tests/fixtures/tool_system_m2b3/providers.py`.
-- [ ] T026 Add a no-public-contract-change verification note for `docs/openapi.yaml` in `specs/tool-system-m2b.3/review.md`.
-- [ ] T027 Run `python -m pytest tests/test_tool_gateway_m2b1.py tests/test_provider_policy_m2b2.py tests/test_tool_normalization_m2b2.py -q` and record predecessor compatibility evidence in `specs/tool-system-m2b.3/review.md`.
+- [X] T014 [P] Add the Vietnam market-data tool module structure in `src/core/tools/market_data.py`.
+- [X] T015 [P] Extend provider data-category and provider-class support for M2B.3 market-data and visualization classes in `src/core/tools/provider_policy.py`.
+- [X] T016 [P] Extend normalized output helpers for market facts, price history, fundamentals, breadth/flow, disclosures, corporate actions, cache freshness, and attribution counters in `src/core/tools/normalization.py`.
+- [X] T017 [P] Extend request-scoped context helpers for M2B.3 market-data warnings, freshness metadata, and retained-derivative candidates in `src/core/tools/context.py`.
+- [X] T018 [P] Extend descriptor inventory with market-data and TradingView M2B.3 capability/policy descriptors in `src/core/tools/descriptors.py`.
+- [X] T019 Preserve route-filtered exposure and prevent provider adapters from becoming model-visible tools in `src/core/tools/surface.py`.
+- [X] T020 Preserve thin gateway admission, trace sanitization, and registry-backed execution for M2B.3 tool wrappers in `src/core/tools/gateway.py`.
+- [X] T021 Export only stable M2B.3 internal tool contracts from `src/core/tools/__init__.py` after T014-T018 exist.
+- [X] T022 Add canonical symbol fixture adapters and identity helpers for M2B.3 tests in `tests/helpers/market_tool_helpers.py`.
+- [X] T023 Add source-attribution, cache-freshness, VisualizationProvenance, and no-raw-payload assertion helpers in `tests/helpers/market_tool_helpers.py`.
+- [X] T024 Add route-evaluation metric helpers for accuracy, precision, and recall in `tests/helpers/market_tool_helpers.py`.
+- [X] T025 Add provider posture fixtures for `vnstock`, Vietstock, CafeF, FiinGroup/FiinTrade/FiinQuant, VSDC, HOSE, HNX, Yahoo, Alpha Vantage, and TradingView in `tests/fixtures/market_tools/providers.py`.
+- [X] T026 Add a no-public-contract-change verification note for `docs/openapi.yaml` in `specs/tool-system-m2b.3/review.md`.
+- [X] T027 Run `python -m pytest tests/test_tool_gateway_m2b1.py tests/test_provider_policy_m2b2.py tests/test_tool_normalization_m2b2.py -q` and record predecessor compatibility evidence in `specs/tool-system-m2b.3/review.md`.
 
 **Checkpoint**: Foundation ready. M2B.1 gateway behavior and M2B.2 provider/normalization/context behavior remain intact.
 
@@ -64,30 +64,30 @@
 
 **Goal**: Handle Vietnam quote, price-history, OHLCV, and deterministic indicator requests through approved market-data tool families instead of `StockSymbolTool`, raw provider payloads, or TradingView values.
 
-**Independent Test**: `python -m pytest tests/test_market_data_m2b3.py -q -k "quote or history or indicator"`
+**Independent Test**: `python -m pytest tests/test_market_data_tools.py -q -k "quote or history or indicator"`
 
 ### Tests for User Story 1
 
-- [ ] T028 [US1] Add supported-symbol quote and history tests for `FPT`, `HOSE:FPT`, `HNX:SHS`, and `UPCOM:BSR` in `tests/test_market_data_m2b3.py`.
-- [ ] T029 [US1] Add canonical symbol identity and ambiguous ticker degraded-state tests for quote/history evidence in `tests/test_market_data_m2b3.py`.
-- [ ] T030 [US1] Add Vietnam-first provider selection and international fallback tests for quote/history evidence in `tests/test_market_data_m2b3.py`.
-- [ ] T031 [US1] Add stale, missing-source, parser-limited, rate-limited, timeout, and blocked-license degraded-state tests for quote/history evidence in `tests/test_market_data_m2b3.py`.
-- [ ] T032 [US1] Add deterministic indicator lineage tests that prove indicators use approved price-history input in `tests/test_market_data_m2b3.py`.
-- [ ] T033 [US1] Add tests proving `StockSymbolTool` does not own quote, history, OHLCV, or indicator retrieval in `tests/test_market_data_m2b3.py`.
+- [X] T028 [US1] Add supported-symbol quote and history tests for `FPT`, `HOSE:FPT`, `HNX:SHS`, and `UPCOM:BSR` in `tests/test_market_data_tools.py`.
+- [X] T029 [US1] Add canonical symbol identity and ambiguous ticker degraded-state tests for quote/history evidence in `tests/test_market_data_tools.py`.
+- [X] T030 [US1] Add Vietnam-first provider selection and international fallback tests for quote/history evidence in `tests/test_market_data_tools.py`.
+- [X] T031 [US1] Add stale, missing-source, parser-limited, rate-limited, timeout, and blocked-license degraded-state tests for quote/history evidence in `tests/test_market_data_tools.py`.
+- [X] T032 [US1] Add deterministic indicator lineage tests that prove indicators use approved price-history input in `tests/test_market_data_tools.py`.
+- [X] T033 [US1] Add tests proving `StockSymbolTool` does not own quote, history, OHLCV, or indicator retrieval in `tests/test_market_data_tools.py`.
 
 ### Implementation for User Story 1
 
-- [ ] T034 [US1] Implement quote/history request and result structures in `src/core/tools/market_data.py`.
-- [ ] T035 [US1] Implement Vietnam-first provider selection for quote/history categories in `src/core/tools/provider_policy.py`.
-- [ ] T036 [US1] Implement `MarketFact` and `PriceHistorySeries` normalized output builders in `src/core/tools/normalization.py`.
-- [ ] T037 [US1] Implement source timestamp, retrieved timestamp, exchange, currency, freshness, and warning propagation for quote/history outputs in `src/core/tools/market_data.py`.
-- [ ] T038 [US1] Implement stale, missing-source, parser-limited, rate-limited, timeout, blocked-license, and unsupported-provider degraded states in `src/core/tools/market_data.py`.
-- [ ] T039 [US1] Implement deterministic indicator computation over approved price-history inputs with lineage preservation in `src/core/tools/market_data.py`.
-- [ ] T040 [US1] Update market-data capability and policy descriptors for quote/history and indicator families in `src/core/tools/descriptors.py`.
-- [ ] T041 [US1] Register the market-data tool family without exposing provider adapters directly in `src/core/tools/registry.py`.
-- [ ] T042 [US1] Ensure `StockAssistantAgent` can invoke the route-filtered market-data family through the existing gateway path in `src/core/stock_assistant_agent.py`.
-- [ ] T043 [US1] Run `python -m pytest tests/test_market_data_m2b3.py -q -k "quote or history or indicator"` and record US1 evidence in `specs/tool-system-m2b.3/review.md`.
-- [ ] T044 [US1] Record `SC-001`, `SC-002`, and `SC-003` quote/history fixture coverage evidence in `specs/tool-system-m2b.3/review.md`.
+- [X] T034 [US1] Implement quote/history request and result structures in `src/core/tools/market_data.py`.
+- [X] T035 [US1] Implement Vietnam-first provider selection for quote/history categories in `src/core/tools/provider_policy.py`.
+- [X] T036 [US1] Implement `MarketFact` and `PriceHistorySeries` normalized output builders in `src/core/tools/normalization.py`.
+- [X] T037 [US1] Implement source timestamp, retrieved timestamp, exchange, currency, freshness, and warning propagation for quote/history outputs in `src/core/tools/market_data.py`.
+- [X] T038 [US1] Implement stale, missing-source, parser-limited, rate-limited, timeout, blocked-license, and unsupported-provider degraded states in `src/core/tools/market_data.py`.
+- [X] T039 [US1] Implement deterministic indicator computation over approved price-history inputs with lineage preservation in `src/core/tools/market_data.py`.
+- [X] T040 [US1] Update market-data capability and policy descriptors for quote/history and indicator families in `src/core/tools/descriptors.py`.
+- [X] T041 [US1] Register the market-data tool family without exposing provider adapters directly in `src/core/tools/registry.py`.
+- [X] T042 [US1] Ensure `StockAssistantAgent` can invoke the route-filtered market-data family through the existing gateway path in `src/core/stock_assistant_agent.py`.
+- [X] T043 [US1] Run `python -m pytest tests/test_market_data_tools.py -q -k "quote or history or indicator"` and record US1 evidence in `specs/tool-system-m2b.3/review.md`.
+- [X] T044 [US1] Record `SC-001`, `SC-002`, and `SC-003` quote/history fixture coverage evidence in `specs/tool-system-m2b.3/review.md`.
 
 **Checkpoint**: US1 is independently testable and does not use TradingView or `StockSymbolTool` as canonical market-data evidence.
 
@@ -97,25 +97,25 @@
 
 **Goal**: Route fundamentals and statement requests to the Vietnam market-data tool family with period metadata, source attribution, license posture, missing-field warnings, and degraded-state handling.
 
-**Independent Test**: `python -m pytest tests/test_market_data_m2b3.py -q -k fundamentals`
+**Independent Test**: `python -m pytest tests/test_market_data_tools.py -q -k fundamentals`
 
 ### Tests for User Story 2
 
-- [ ] T045 [US2] Add fundamentals and statement route/tool-family tests in `tests/test_market_data_m2b3.py`.
-- [ ] T046 [US2] Add period, provider/source, source reference, timestamp, freshness, and license posture tests for fundamentals in `tests/test_market_data_m2b3.py`.
-- [ ] T047 [US2] Add missing-field, stale, parser-limited, blocked-license, and no-source degraded-state tests for fundamentals in `tests/test_market_data_m2b3.py`.
-- [ ] T048 [US2] Add tests proving fundamentals do not fall back to generic web fetch or TradingView values in `tests/test_market_data_m2b3.py`.
+- [X] T045 [US2] Add fundamentals and statement route/tool-family tests in `tests/test_market_data_tools.py`.
+- [X] T046 [US2] Add period, provider/source, source reference, timestamp, freshness, and license posture tests for fundamentals in `tests/test_market_data_tools.py`.
+- [X] T047 [US2] Add missing-field, stale, parser-limited, blocked-license, and no-source degraded-state tests for fundamentals in `tests/test_market_data_tools.py`.
+- [X] T048 [US2] Add tests proving fundamentals do not fall back to generic web fetch or TradingView values in `tests/test_market_data_tools.py`.
 
 ### Implementation for User Story 2
 
-- [ ] T049 [US2] Implement fundamentals and statement request/result structures in `src/core/tools/market_data.py`.
-- [ ] T050 [US2] Extend provider data-category support for fundamentals and statements in `src/core/tools/provider_policy.py`.
-- [ ] T051 [US2] Implement `FundamentalEvidence` normalized output builders in `src/core/tools/normalization.py`.
-- [ ] T052 [US2] Implement missing-field warning and degraded-state behavior for fundamentals in `src/core/tools/market_data.py`.
-- [ ] T053 [US2] Update market-data capability and policy descriptors for fundamentals in `src/core/tools/descriptors.py`.
-- [ ] T054 [US2] Integrate fundamentals outputs into request-scoped `ToolContextPack` assembly in `src/core/tools/context.py`.
-- [ ] T055 [US2] Run `python -m pytest tests/test_market_data_m2b3.py -q -k fundamentals` and record US2 evidence in `specs/tool-system-m2b.3/review.md`.
-- [ ] T056 [US2] Record `SC-002` and `SC-003` fundamentals fixture coverage evidence in `specs/tool-system-m2b.3/review.md`.
+- [X] T049 [US2] Implement fundamentals and statement request/result structures in `src/core/tools/market_data.py`.
+- [X] T050 [US2] Extend provider data-category support for fundamentals and statements in `src/core/tools/provider_policy.py`.
+- [X] T051 [US2] Implement `FundamentalEvidence` normalized output builders in `src/core/tools/normalization.py`.
+- [X] T052 [US2] Implement missing-field warning and degraded-state behavior for fundamentals in `src/core/tools/market_data.py`.
+- [X] T053 [US2] Update market-data capability and policy descriptors for fundamentals in `src/core/tools/descriptors.py`.
+- [X] T054 [US2] Integrate fundamentals outputs into request-scoped `ToolContextPack` assembly in `src/core/tools/context.py`.
+- [X] T055 [US2] Run `python -m pytest tests/test_market_data_tools.py -q -k fundamentals` and record US2 evidence in `specs/tool-system-m2b.3/review.md`.
+- [X] T056 [US2] Record `SC-002` and `SC-003` fundamentals fixture coverage evidence in `specs/tool-system-m2b.3/review.md`.
 
 **Checkpoint**: US2 is independently testable and separates fundamentals from symbol lookup, visualization, and generic web evidence.
 
@@ -125,26 +125,26 @@
 
 **Goal**: Return TradingView charts, widgets, deep links, symbol validation, ticker tape, heatmaps, and screeners as `VisualizationProvenance`, never canonical market evidence by default.
 
-**Independent Test**: `python -m pytest tests/test_tradingview_m2b3.py -q`
+**Independent Test**: `python -m pytest tests/test_tradingview_visualization.py -q`
 
 ### Tests for User Story 4
 
-- [ ] T057 [US4] Add chart, widget, deep-link, ticker-tape, heatmap, screener, and symbol-validation tests in `tests/test_tradingview_m2b3.py`.
-- [ ] T058 [US4] Add tests that every TradingView output is classified as `VisualizationProvenance` in `tests/test_tradingview_m2b3.py`.
-- [ ] T059 [US4] Add tests proving TradingView numeric values, indicators, heatmap rows, and screener values are not canonical evidence in `tests/test_tradingview_m2b3.py`.
-- [ ] T060 [US4] Add unsupported, ambiguous, invalid interval, unsupported widget, and validation-failed degraded visualization tests in `tests/test_tradingview_m2b3.py`.
-- [ ] T061 [US4] Add public metadata safety tests for TradingView outputs in `tests/test_tradingview_m2b3.py`.
+- [X] T057 [US4] Add chart, widget, deep-link, ticker-tape, heatmap, screener, and symbol-validation tests in `tests/test_tradingview_visualization.py`.
+- [X] T058 [US4] Add tests that every TradingView output is classified as `VisualizationProvenance` in `tests/test_tradingview_visualization.py`.
+- [X] T059 [US4] Add tests proving TradingView numeric values, indicators, heatmap rows, and screener values are not canonical evidence in `tests/test_tradingview_visualization.py`.
+- [X] T060 [US4] Add unsupported, ambiguous, invalid interval, unsupported widget, and validation-failed degraded visualization tests in `tests/test_tradingview_visualization.py`.
+- [X] T061 [US4] Add public metadata safety tests for TradingView outputs in `tests/test_tradingview_visualization.py`.
 
 ### Implementation for User Story 4
 
-- [ ] T062 [US4] Implement TradingView chart URL, widget, deep-link, ticker-tape, heatmap, screener, and symbol-validation output builders in `src/core/tools/tradingview.py`.
-- [ ] T063 [US4] Implement TradingView symbol, exchange/market, interval/view, generated timestamp, validation status, warning, and provenance metadata handling in `src/core/tools/tradingview.py`.
-- [ ] T064 [US4] Implement `VisualizationProvenance` normalized output helpers for TradingView payloads in `src/core/tools/normalization.py`.
-- [ ] T065 [US4] Update TradingView capability and policy descriptors for visualization-only exposure in `src/core/tools/descriptors.py`.
-- [ ] T066 [US4] Ensure TradingView route-surface exposure remains limited to visualization/chart routes in `src/core/tools/surface.py`.
-- [ ] T067 [US4] Ensure factual market-data composition rejects TradingView values as canonical evidence in `src/core/tools/market_data.py`.
-- [ ] T068 [US4] Run `python -m pytest tests/test_tradingview_m2b3.py -q` and record US4 evidence in `specs/tool-system-m2b.3/review.md`.
-- [ ] T069 [US4] Record `SC-005` TradingView fixture coverage and non-evidence proof in `specs/tool-system-m2b.3/review.md`.
+- [X] T062 [US4] Implement TradingView chart URL, widget, deep-link, ticker-tape, heatmap, screener, and symbol-validation output builders in `src/core/tools/tradingview.py`.
+- [X] T063 [US4] Implement TradingView symbol, exchange/market, interval/view, generated timestamp, validation status, warning, and provenance metadata handling in `src/core/tools/tradingview.py`.
+- [X] T064 [US4] Implement `VisualizationProvenance` normalized output helpers for TradingView payloads in `src/core/tools/normalization.py`.
+- [X] T065 [US4] Update TradingView capability and policy descriptors for visualization-only exposure in `src/core/tools/descriptors.py`.
+- [X] T066 [US4] Ensure TradingView route-surface exposure remains limited to visualization/chart routes in `src/core/tools/surface.py`.
+- [X] T067 [US4] Ensure factual market-data composition rejects TradingView values as canonical evidence in `src/core/tools/market_data.py`.
+- [X] T068 [US4] Run `python -m pytest tests/test_tradingview_visualization.py -q` and record US4 evidence in `specs/tool-system-m2b.3/review.md`.
+- [X] T069 [US4] Record `SC-005` TradingView fixture coverage and non-evidence proof in `specs/tool-system-m2b.3/review.md`.
 
 **Checkpoint**: US4 is independently testable and TradingView remains visualization provenance only.
 
@@ -154,25 +154,25 @@
 
 **Goal**: Verify Vietnamese, English, and mixed-language route/tool-family selection for price, chart, fundamentals, disclosures, breadth, flow, and report-like prompts with at least 85% meaning-based classification accuracy.
 
-**Independent Test**: `python -m pytest tests/test_route_evaluation_m2b3.py -q`
+**Independent Test**: `python -m pytest tests/test_market_route_evaluation.py -q`
 
 ### Tests for User Story 5
 
-- [ ] T070 [US5] Add deterministic price, chart, fundamentals, disclosure, breadth, flow, and report-like route fixtures in `tests/fixtures/tool_system_m2b3/route_cases.py`.
-- [ ] T071 [US5] Add route accuracy and tool-family mapping tests with at least 85% meaning-based classification threshold in `tests/test_route_evaluation_m2b3.py`.
-- [ ] T072 [US5] Add route-tool exposure precision and recall target tests in `tests/test_route_evaluation_m2b3.py`.
-- [ ] T073 [US5] Add ambiguous ticker-only, unsupported, and deferred-scope disambiguation/degraded tests in `tests/test_route_evaluation_m2b3.py`.
-- [ ] T074 [US5] Add tests proving report-like prompts remain route/evaluation fixtures only in `tests/test_route_evaluation_m2b3.py`.
+- [X] T070 [US5] Add deterministic price, chart, fundamentals, disclosure, breadth, flow, and report-like route fixtures in `tests/fixtures/market_tools/route_cases.py`.
+- [X] T071 [US5] Add route accuracy and tool-family mapping tests with at least 85% meaning-based classification threshold in `tests/test_market_route_evaluation.py`.
+- [X] T072 [US5] Add route-tool exposure precision and recall target tests in `tests/test_market_route_evaluation.py`.
+- [X] T073 [US5] Add ambiguous ticker-only, unsupported, and deferred-scope disambiguation/degraded tests in `tests/test_market_route_evaluation.py`.
+- [X] T074 [US5] Add tests proving report-like prompts remain route/evaluation fixtures only in `tests/test_market_route_evaluation.py`.
 
 ### Implementation for User Story 5
 
-- [ ] T075 [US5] Add Vietnamese and mixed-language route utterances while preserving the static `StockQueryRoute` taxonomy in `src/core/routes.py`.
-- [ ] T076 [US5] Add route evaluation helpers and deterministic fixture evaluation in `src/core/stock_query_router.py`.
-- [ ] T077 [US5] Map M2B.3 route outcomes to market-data, visualization, and deferred report tool families in `src/core/tools/surface.py`.
-- [ ] T078 [US5] Implement ambiguous and low-confidence route degradation or disambiguation behavior in `src/core/stock_query_router.py`.
-- [ ] T079 [US5] Ensure route evaluation does not enable report generation, generic web fetch, remote admission, or symbol-store writes in `src/core/tools/surface.py`.
-- [ ] T080 [US5] Run `python -m pytest tests/test_route_evaluation_m2b3.py -q` and record US5 evidence in `specs/tool-system-m2b.3/review.md`.
-- [ ] T081 [US5] Record `SC-006` route accuracy, precision, recall, and ambiguity evidence in `specs/tool-system-m2b.3/review.md`.
+- [X] T075 [US5] Add Vietnamese and mixed-language route utterances while preserving the static `StockQueryRoute` taxonomy in `src/core/routes.py`.
+- [X] T076 [US5] Add route evaluation helpers and deterministic fixture evaluation in `src/core/stock_query_router.py`.
+- [X] T077 [US5] Map M2B.3 route outcomes to market-data, visualization, and deferred report tool families in `src/core/tools/surface.py`.
+- [X] T078 [US5] Implement ambiguous and low-confidence route degradation or disambiguation behavior in `src/core/stock_query_router.py`.
+- [X] T079 [US5] Ensure route evaluation does not enable report generation, generic web fetch, remote admission, or symbol-store writes in `src/core/tools/surface.py`.
+- [X] T080 [US5] Run `python -m pytest tests/test_market_route_evaluation.py -q` and record US5 evidence in `specs/tool-system-m2b.3/review.md`.
+- [X] T081 [US5] Record `SC-006` route accuracy, precision, recall, and ambiguity evidence in `specs/tool-system-m2b.3/review.md`.
 
 **Checkpoint**: US5 is independently testable and route evaluation gates new market-data/visualization exposure.
 
@@ -182,26 +182,26 @@
 
 **Goal**: Preserve source attribution, freshness, provider posture, warnings, safe trace metadata, and coverage counters for market-data answers, cache hits, tool traces, and retained derivatives.
 
-**Independent Test**: `python -m pytest tests/test_attribution_cache_m2b3.py -q`
+**Independent Test**: `python -m pytest tests/test_market_attribution_cache.py -q`
 
 ### Tests for User Story 6
 
-- [ ] T082 [US6] Add market-fact attribution completeness tests in `tests/test_attribution_cache_m2b3.py`.
-- [ ] T083 [US6] Add cache-hit freshness metadata tests for provider/source, timestamps, TTL/expiry, warnings, and degraded reasons in `tests/test_attribution_cache_m2b3.py`.
-- [ ] T084 [US6] Add provider-backed trace metadata tests for selected route, tool family, adapter, provider class, license mode, timestamps, fallback, and degraded reasons in `tests/test_attribution_cache_m2b3.py`.
-- [ ] T085 [US6] Add unsafe public metadata leak tests for credentials, secrets, raw payloads, parser internals, and raw traces in `tests/test_attribution_cache_m2b3.py`.
-- [ ] T086 [US6] Add attribution coverage counter tests for complete attribution, degraded no-source, stale-cache, provider/license blocked, and unsafe leak counts in `tests/test_attribution_cache_m2b3.py`.
+- [X] T082 [US6] Add market-fact attribution completeness tests in `tests/test_market_attribution_cache.py`.
+- [X] T083 [US6] Add cache-hit freshness metadata tests for provider/source, timestamps, TTL/expiry, warnings, and degraded reasons in `tests/test_market_attribution_cache.py`.
+- [X] T084 [US6] Add provider-backed trace metadata tests for selected route, tool family, adapter, provider class, license mode, timestamps, fallback, and degraded reasons in `tests/test_market_attribution_cache.py`.
+- [X] T085 [US6] Add unsafe public metadata leak tests for credentials, secrets, raw payloads, parser internals, and raw traces in `tests/test_market_attribution_cache.py`.
+- [X] T086 [US6] Add attribution coverage counter tests for complete attribution, degraded no-source, stale-cache, provider/license blocked, and unsafe leak counts in `tests/test_market_attribution_cache.py`.
 
 ### Implementation for User Story 6
 
-- [ ] T087 [US6] Implement market-fact attribution validation helpers in `src/core/tools/normalization.py`.
-- [ ] T088 [US6] Implement cache freshness record helpers and stale-cache degraded behavior in `src/core/tools/market_data.py`.
-- [ ] T089 [US6] Implement provider-backed trace metadata assembly and sanitization for M2B.3 tool calls in `src/core/tools/gateway.py`.
-- [ ] T090 [US6] Extend provider selection decisions with M2B.3 source reference, license mode, fallback, and degraded metadata in `src/core/tools/provider_policy.py`.
-- [ ] T091 [US6] Implement attribution coverage counters in `src/core/tools/market_data.py`.
-- [ ] T092 [US6] Ensure request-scoped `ToolContextPack` preserves source metadata, freshness metadata, warnings, and degraded states without raw payloads in `src/core/tools/context.py`.
-- [ ] T093 [US6] Run `python -m pytest tests/test_attribution_cache_m2b3.py -q` and record US6 evidence in `specs/tool-system-m2b.3/review.md`.
-- [ ] T094 [US6] Record `SC-002`, `SC-003`, `SC-004`, and `SC-007` attribution/cache/trace coverage evidence in `specs/tool-system-m2b.3/review.md`.
+- [X] T087 [US6] Implement market-fact attribution validation helpers in `src/core/tools/normalization.py`.
+- [X] T088 [US6] Implement cache freshness record helpers and stale-cache degraded behavior in `src/core/tools/market_data.py`.
+- [X] T089 [US6] Implement provider-backed trace metadata assembly and sanitization for M2B.3 tool calls in `src/core/tools/gateway.py`.
+- [X] T090 [US6] Extend provider selection decisions with M2B.3 source reference, license mode, fallback, and degraded metadata in `src/core/tools/provider_policy.py`.
+- [X] T091 [US6] Implement attribution coverage counters in `src/core/tools/market_data.py`.
+- [X] T092 [US6] Ensure request-scoped `ToolContextPack` preserves source metadata, freshness metadata, warnings, and degraded states without raw payloads in `src/core/tools/context.py`.
+- [X] T093 [US6] Run `python -m pytest tests/test_market_attribution_cache.py -q` and record US6 evidence in `specs/tool-system-m2b.3/review.md`.
+- [X] T094 [US6] Record `SC-002`, `SC-003`, `SC-004`, and `SC-007` attribution/cache/trace coverage evidence in `specs/tool-system-m2b.3/review.md`.
 
 **Checkpoint**: US6 is independently testable and attribution/freshness/trace coverage is machine-detectable.
 
@@ -211,26 +211,26 @@
 
 **Goal**: Add independently testable P2 coverage for market breadth, flow, disclosures, official notices, dividends, rights, splits, listing changes, and other corporate actions when provider posture allows.
 
-**Independent Test**: `python -m pytest tests/test_market_data_m2b3.py -q -k "breadth or flow or disclosure or corporate"`
+**Independent Test**: `python -m pytest tests/test_market_data_tools.py -q -k "breadth or flow or disclosure or corporate"`
 
 ### Tests for User Story 3
 
-- [ ] T095 [US3] Add breadth and flow route/tool-family tests in `tests/test_market_data_m2b3.py`.
-- [ ] T096 [US3] Add disclosure, official notice, dividend, rights, split, listing-change, and corporate-action tests in `tests/test_market_data_m2b3.py`.
-- [ ] T097 [US3] Add breadth/flow metadata tests for time window, exchange/market, provider/source, freshness, and warnings in `tests/test_market_data_m2b3.py`.
-- [ ] T098 [US3] Add disclosure/corporate-action metadata tests for event type, source reference, published timestamp, effective timestamp, provider class, parser warnings, freshness, and license posture in `tests/test_market_data_m2b3.py`.
-- [ ] T099 [US3] Add no-approved-source degraded-state tests that reject generic web fallback for P2 market evidence in `tests/test_market_data_m2b3.py`.
+- [X] T095 [US3] Add breadth and flow route/tool-family tests in `tests/test_market_data_tools.py`.
+- [X] T096 [US3] Add disclosure, official notice, dividend, rights, split, listing-change, and corporate-action tests in `tests/test_market_data_tools.py`.
+- [X] T097 [US3] Add breadth/flow metadata tests for time window, exchange/market, provider/source, freshness, and warnings in `tests/test_market_data_tools.py`.
+- [X] T098 [US3] Add disclosure/corporate-action metadata tests for event type, source reference, published timestamp, effective timestamp, provider class, parser warnings, freshness, and license posture in `tests/test_market_data_tools.py`.
+- [X] T099 [US3] Add no-approved-source degraded-state tests that reject generic web fallback for P2 market evidence in `tests/test_market_data_tools.py`.
 
 ### Implementation for User Story 3
 
-- [ ] T100 [US3] Implement breadth and flow request/result structures in `src/core/tools/market_data.py`.
-- [ ] T101 [US3] Implement disclosure and corporate-action request/result structures in `src/core/tools/market_data.py`.
-- [ ] T102 [US3] Extend provider data-category support for breadth, flow, disclosure, and corporate-action evidence in `src/core/tools/provider_policy.py`.
-- [ ] T103 [US3] Implement `BreadthAndFlowEvidence` and `DisclosureCorporateActionEvidence` normalized output builders in `src/core/tools/normalization.py`.
-- [ ] T104 [US3] Update market-data capability and policy descriptors for P2 breadth/flow/disclosure/corporate-action families in `src/core/tools/descriptors.py`.
-- [ ] T105 [US3] Integrate P2 route-tool family exposure and degraded no-source behavior in `src/core/tools/surface.py`.
-- [ ] T106 [US3] Run `python -m pytest tests/test_market_data_m2b3.py -q -k "breadth or flow or disclosure or corporate"` and record US3 evidence in `specs/tool-system-m2b.3/review.md`.
-- [ ] T107 [US3] Record P2 `TS-07` scope evidence and non-blocking relation to P1 gates in `specs/tool-system-m2b.3/review.md`.
+- [X] T100 [US3] Implement breadth and flow request/result structures in `src/core/tools/market_data.py`.
+- [X] T101 [US3] Implement disclosure and corporate-action request/result structures in `src/core/tools/market_data.py`.
+- [X] T102 [US3] Extend provider data-category support for breadth, flow, disclosure, and corporate-action evidence in `src/core/tools/provider_policy.py`.
+- [X] T103 [US3] Implement `BreadthAndFlowEvidence` and `DisclosureCorporateActionEvidence` normalized output builders in `src/core/tools/normalization.py`.
+- [X] T104 [US3] Update market-data capability and policy descriptors for P2 breadth/flow/disclosure/corporate-action families in `src/core/tools/descriptors.py`.
+- [X] T105 [US3] Integrate P2 route-tool family exposure and degraded no-source behavior in `src/core/tools/surface.py`.
+- [X] T106 [US3] Run `python -m pytest tests/test_market_data_tools.py -q -k "breadth or flow or disclosure or corporate"` and record US3 evidence in `specs/tool-system-m2b.3/review.md`.
+- [X] T107 [US3] Record P2 `TS-07` scope evidence and non-blocking relation to P1 gates in `specs/tool-system-m2b.3/review.md`.
 
 **Checkpoint**: US3 is independently testable and does not enable generic web evidence or report persistence.
 
@@ -240,27 +240,27 @@
 
 **Purpose**: Prove all story work remains within M2B.3 scope, preserves M2B.1/M2B.2 compatibility, and updates Spec Kit traceability.
 
-- [ ] T108 Run `python -m pytest tests/test_market_data_m2b3.py -q` and record focused market-data evidence in `specs/tool-system-m2b.3/review.md`.
-- [ ] T109 Run `python -m pytest tests/test_tradingview_m2b3.py -q` and record focused TradingView evidence in `specs/tool-system-m2b.3/review.md`.
-- [ ] T110 Run `python -m pytest tests/test_route_evaluation_m2b3.py -q` and record route-evaluation evidence in `specs/tool-system-m2b.3/review.md`.
-- [ ] T111 Run `python -m pytest tests/test_attribution_cache_m2b3.py -q` and record attribution/cache/trace evidence in `specs/tool-system-m2b.3/review.md`.
-- [ ] T112 Run `python -m pytest tests/test_tool_gateway_m2b1.py tests/test_provider_policy_m2b2.py tests/test_tool_normalization_m2b2.py tests/test_tool_retention_m2b2.py -q` and record predecessor compatibility evidence in `specs/tool-system-m2b.3/review.md`.
-- [ ] T113 Run `python -m pytest tests/test_stock_query_router.py tests/test_agent_regression.py --cov=core.stock_query_router --cov-report=term-missing --cov-fail-under=80 -q` and record route/agent touched-surface coverage evidence for `NFR-6.1.3` in `specs/tool-system-m2b.3/review.md`; document any broader agent-core exception explicitly before promotion.
-- [ ] T114 Run `python -m pytest tests/test_market_data_m2b3.py tests/test_tradingview_m2b3.py tests/test_route_evaluation_m2b3.py tests/test_attribution_cache_m2b3.py --cov=core.tools --cov-report=term-missing --cov-fail-under=70` and record tool-layer coverage evidence for `NFR-6.1.4` in `specs/tool-system-m2b.3/review.md`.
-- [ ] T115 Validate `docs/openapi.yaml` has no public REST, SSE, Socket.IO, or OpenAPI contract changes for M2B.3 and record the result in `specs/tool-system-m2b.3/review.md`.
-- [ ] T116 Validate tests under `tests/test_market_data_m2b3.py`, `tests/test_tradingview_m2b3.py`, `tests/test_route_evaluation_m2b3.py`, and `tests/test_attribution_cache_m2b3.py` use `core.*` imports and record the result in `specs/tool-system-m2b.3/review.md`.
-- [ ] T117 Validate no provider credentials, raw provider payloads, parser internals, or live-network assumptions were added to `tests/fixtures/tool_system_m2b3/` and record the result in `specs/tool-system-m2b.3/review.md`.
-- [ ] T118 Validate `docs/domains/agent/ARCHITECTURE_DESIGN.md` and `docs/domains/agent/TECHNICAL_DESIGN.md` do not require current-state promotion before M2B.3 verification and record any deferred long-lived-doc sync in `specs/tool-system-m2b.3/review.md`.
-- [ ] T119 Validate feature-local links and long-lived document anchors referenced by `specs/tool-system-m2b.3/spec.md`, `specs/tool-system-m2b.3/plan.md`, `specs/tool-system-m2b.3/tasks.md`, and `specs/tool-system-m2b.3/contracts/` and record the result in `specs/tool-system-m2b.3/review.md`.
-- [ ] T120 Update `specs/tool-system-m2b.3/spec.md` to `Implemented` only after all implementation and verification-evidence tasks except final verify marker are complete.
-- [ ] T121 Update `specs/spec-traceability.yaml` with M2B.3 implementation evidence paths, lifecycle status, synchronized documents, task completion state, and accepted deferrals.
-- [ ] T122 Run `python scripts/sync_spec_status.py --gate` and confirm regenerated `specs/spec-sync-status.md` plus `docs/domains/agent/SRS_SPEC_TRACEABILITY.md` are current.
-- [ ] T123 Run `git diff --check` and record whitespace or line-ending findings in `specs/tool-system-m2b.3/review.md`.
-- [ ] T124 Run `/speckit-validate` for M2B.3 artifact completeness and task-to-requirement readiness; record any findings in `specs/tool-system-m2b.3/review.md`.
-- [ ] T125 Run `/speckit-analyze` for cross-artifact consistency after implementation evidence exists; record any findings in `specs/tool-system-m2b.3/review.md`.
-- [ ] T126 Run `/speckit-fleet-review` before final promotion if tasks or plan changed materially during implementation; record any findings in `specs/tool-system-m2b.3/review.md`.
-- [ ] T127 Run `/speckit-verify-tasks` after tasks are marked complete and record phantom-completion findings in `specs/tool-system-m2b.3/verify-tasks-report.md`.
-- [ ] T128 Run `/speckit-verify-run`, create `specs/tool-system-m2b.3/.verify-done` only if verification passes, and record the final verdict in `specs/tool-system-m2b.3/review.md`.
+- [X] T108 Run `python -m pytest tests/test_market_data_tools.py -q` and record focused market-data evidence in `specs/tool-system-m2b.3/review.md`.
+- [X] T109 Run `python -m pytest tests/test_tradingview_visualization.py -q` and record focused TradingView evidence in `specs/tool-system-m2b.3/review.md`.
+- [X] T110 Run `python -m pytest tests/test_market_route_evaluation.py -q` and record route-evaluation evidence in `specs/tool-system-m2b.3/review.md`.
+- [X] T111 Run `python -m pytest tests/test_market_attribution_cache.py -q` and record attribution/cache/trace evidence in `specs/tool-system-m2b.3/review.md`.
+- [X] T112 Run `python -m pytest tests/test_tool_gateway_m2b1.py tests/test_provider_policy_m2b2.py tests/test_tool_normalization_m2b2.py tests/test_tool_retention_m2b2.py -q` and record predecessor compatibility evidence in `specs/tool-system-m2b.3/review.md`.
+- [X] T113 Run `python -m pytest tests/test_stock_query_router.py tests/test_market_route_evaluation.py --cov=src.core.stock_query_router --cov-report=term-missing --cov-fail-under=80 -q` and record route/agent touched-surface coverage evidence for `NFR-6.1.3` in `specs/tool-system-m2b.3/review.md`; document any broader agent-core exception explicitly before promotion.
+- [X] T114 Run `python -m pytest tests/test_market_data_tools.py tests/test_tradingview_visualization.py tests/test_market_route_evaluation.py tests/test_market_attribution_cache.py --cov=core.tools.market_data --cov=core.tools.tradingview --cov=core.tools.normalization --cov=core.tools.provider_policy --cov=core.tools.gateway --cov=core.tools.surface --cov-report=term-missing --cov-fail-under=70 -q` and record touched tool-layer coverage evidence for `NFR-6.1.4` in `specs/tool-system-m2b.3/review.md`.
+- [X] T115 Validate `docs/openapi.yaml` has no public REST, SSE, Socket.IO, or OpenAPI contract changes for M2B.3 and record the result in `specs/tool-system-m2b.3/review.md`.
+- [X] T116 Validate tests under `tests/test_market_data_tools.py`, `tests/test_tradingview_visualization.py`, `tests/test_market_route_evaluation.py`, and `tests/test_market_attribution_cache.py` use `core.*` imports and record the result in `specs/tool-system-m2b.3/review.md`.
+- [X] T117 Validate no provider credentials, raw provider payloads, parser internals, or live-network assumptions were added to `tests/fixtures/market_tools/` and record the result in `specs/tool-system-m2b.3/review.md`.
+- [X] T118 Validate `docs/domains/agent/ARCHITECTURE_DESIGN.md` and `docs/domains/agent/TECHNICAL_DESIGN.md` do not require current-state promotion before M2B.3 verification and record any deferred long-lived-doc sync in `specs/tool-system-m2b.3/review.md`.
+- [X] T119 Validate feature-local links and long-lived document anchors referenced by `specs/tool-system-m2b.3/spec.md`, `specs/tool-system-m2b.3/plan.md`, `specs/tool-system-m2b.3/tasks.md`, and `specs/tool-system-m2b.3/contracts/` and record the result in `specs/tool-system-m2b.3/review.md`.
+- [X] T120 Update `specs/tool-system-m2b.3/spec.md` to `Implemented` only after all implementation and verification-evidence tasks except final verify marker are complete.
+- [X] T121 Update `specs/spec-traceability.yaml` with M2B.3 implementation evidence paths, lifecycle status, synchronized documents, task completion state, and accepted deferrals.
+- [X] T122 Run `python scripts/sync_spec_status.py --gate` and confirm regenerated `specs/spec-sync-status.md` plus `docs/domains/agent/SRS_SPEC_TRACEABILITY.md` are current.
+- [X] T123 Run `git diff --check` and record whitespace or line-ending findings in `specs/tool-system-m2b.3/review.md`.
+- [X] T124 Run `/speckit-validate` for M2B.3 artifact completeness and task-to-requirement readiness; record any findings in `specs/tool-system-m2b.3/review.md`.
+- [X] T125 Run `/speckit-analyze` for cross-artifact consistency after implementation evidence exists; record any findings in `specs/tool-system-m2b.3/review.md`.
+- [X] T126 Run `/speckit-fleet-review` before final promotion if tasks or plan changed materially during implementation; record any findings in `specs/tool-system-m2b.3/review.md`.
+- [X] T127 Run `/speckit-verify-tasks` after tasks are marked complete and record phantom-completion findings in `specs/tool-system-m2b.3/verify-tasks-report.md`.
+- [X] T128 Run `/speckit-verify-run`, create `specs/tool-system-m2b.3/.verify-done` only if verification passes, and record the final verdict in `specs/tool-system-m2b.3/review.md`.
 
 ---
 
@@ -296,10 +296,10 @@
 
 ## Parallel Opportunities
 
-- Setup tasks T003 through T007 can run in parallel after T001 clarifies the review baseline. Fixture-file tasks T008 through T012 can run in parallel only after T002 creates `tests/fixtures/tool_system_m2b3/`.
+- Setup tasks T003 through T007 can run in parallel after T001 clarifies the review baseline. Fixture-file tasks T008 through T012 can run in parallel only after T002 creates `tests/fixtures/market_tools/`.
 - Foundation module-extension tasks T014 through T018 can run in parallel; T021 follows after those module updates exist.
 - Fixture and helper tasks T022 through T025 can run in parallel.
-- US1, US2, and US4 test tasks can be prepared in parallel after Foundation because they use different test files or distinct sections of `tests/test_market_data_m2b3.py`.
+- US1, US2, and US4 test tasks can be prepared in parallel after Foundation because they use different test files or distinct sections of `tests/test_market_data_tools.py`.
 - US5 route fixture work can run in parallel with US1/US2/US4 implementation, but final route-tool mapping should wait for descriptors.
 - US3 P2 work can run after Foundation if capacity exists, but should not block P1 verification unless the implementation changes shared market-data contracts.
 
@@ -307,10 +307,10 @@
 
 ```powershell
 # Prepare independent P1 test files after Foundation:
-Task: "T028 quote/history tests in tests/test_market_data_m2b3.py"
-Task: "T057 TradingView tests in tests/test_tradingview_m2b3.py"
-Task: "T070 route fixtures in tests/fixtures/tool_system_m2b3/route_cases.py"
-Task: "T082 attribution tests in tests/test_attribution_cache_m2b3.py"
+Task: "T028 quote/history tests in tests/test_market_data_tools.py"
+Task: "T057 TradingView tests in tests/test_tradingview_visualization.py"
+Task: "T070 route fixtures in tests/fixtures/market_tools/route_cases.py"
+Task: "T082 attribution tests in tests/test_market_attribution_cache.py"
 ```
 
 ## Implementation Strategy
@@ -319,7 +319,7 @@ Task: "T082 attribution tests in tests/test_attribution_cache_m2b3.py"
 
 1. Complete Setup and Foundation.
 2. Complete US1 quote/history and indicators.
-3. Run `python -m pytest tests/test_market_data_m2b3.py -q -k "quote or history or indicator"`.
+3. Run `python -m pytest tests/test_market_data_tools.py -q -k "quote or history or indicator"`.
 4. Stop and review M2B.1/M2B.2 compatibility before adding fundamentals, visualization, and route expansion.
 
 ### Incremental Delivery
@@ -357,15 +357,15 @@ Task: "T082 attribution tests in tests/test_attribution_cache_m2b3.py"
 
 ## Independent Test Criteria
 
-- **US1**: `python -m pytest tests/test_market_data_m2b3.py -q -k "quote or history or indicator"`
-- **US2**: `python -m pytest tests/test_market_data_m2b3.py -q -k fundamentals`
-- **US3**: `python -m pytest tests/test_market_data_m2b3.py -q -k "breadth or flow or disclosure or corporate"`
-- **US4**: `python -m pytest tests/test_tradingview_m2b3.py -q`
-- **US5**: `python -m pytest tests/test_route_evaluation_m2b3.py -q`
-- **US6**: `python -m pytest tests/test_attribution_cache_m2b3.py -q`
+- **US1**: `python -m pytest tests/test_market_data_tools.py -q -k "quote or history or indicator"`
+- **US2**: `python -m pytest tests/test_market_data_tools.py -q -k fundamentals`
+- **US3**: `python -m pytest tests/test_market_data_tools.py -q -k "breadth or flow or disclosure or corporate"`
+- **US4**: `python -m pytest tests/test_tradingview_visualization.py -q`
+- **US5**: `python -m pytest tests/test_market_route_evaluation.py -q`
+- **US6**: `python -m pytest tests/test_market_attribution_cache.py -q`
 - **Regression**: `python -m pytest tests/test_tool_gateway_m2b1.py tests/test_provider_policy_m2b2.py tests/test_tool_normalization_m2b2.py tests/test_tool_retention_m2b2.py tests/test_stock_query_router.py tests/test_agent_regression.py -q`
-- **Agent-core touched surface coverage**: `python -m pytest tests/test_stock_query_router.py tests/test_agent_regression.py --cov=core.stock_query_router --cov-report=term-missing --cov-fail-under=80 -q`
-- **Tool-layer coverage**: `python -m pytest tests/test_market_data_m2b3.py tests/test_tradingview_m2b3.py tests/test_route_evaluation_m2b3.py tests/test_attribution_cache_m2b3.py --cov=core.tools --cov-report=term-missing --cov-fail-under=70`
+- **Agent-core touched surface coverage**: `python -m pytest tests/test_stock_query_router.py tests/test_market_route_evaluation.py --cov=src.core.stock_query_router --cov-report=term-missing --cov-fail-under=80 -q`
+- **Tool-layer touched surface coverage**: `python -m pytest tests/test_market_data_tools.py tests/test_tradingview_visualization.py tests/test_market_route_evaluation.py tests/test_market_attribution_cache.py --cov=core.tools.market_data --cov=core.tools.tradingview --cov=core.tools.normalization --cov=core.tools.provider_policy --cov=core.tools.gateway --cov=core.tools.surface --cov-report=term-missing --cov-fail-under=70 -q`
 - **Sync**: `python scripts/sync_spec_status.py --gate`
 
 ## Notes

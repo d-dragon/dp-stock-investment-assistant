@@ -1,7 +1,7 @@
 # SRS To Spec Traceability
 
 > **Document Version**: 3.4
-> **Generated**: 2026-07-07 13:50:53Z
+> **Generated**: 2026-07-08 07:38:46Z
 > **Status**: Active
 > **Traceability Manifest Version**: 1
 
@@ -140,20 +140,20 @@ Mapped: `32/57`. Unmapped: `25`.
 | [FR-2.5.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L271) | [tool-system-m2b.2](../../../specs/tool-system-m2b.2/spec.md#governance-context-mandatory) | `verified` | `current` |
 | [FR-2.5.5](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L272) | [tool-system-m2b.2](../../../specs/tool-system-m2b.2/spec.md#governance-context-mandatory) | `verified` | `current` |
 | [FR-2.6.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L278) | [tool-system-m2b.2](../../../specs/tool-system-m2b.2/spec.md#governance-context-mandatory) | `verified` | `current` |
-| [FR-2.6.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L279) | [tool-system-m2b.3](../../../specs/tool-system-m2b.3/spec.md#governance-context-mandatory) | `planned` | `current` |
-| [FR-2.6.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L280) | [tool-system-m2b.3](../../../specs/tool-system-m2b.3/spec.md#governance-context-mandatory) | `planned` | `current` |
-| [FR-2.6.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L281) | [tool-system-m2b.3](../../../specs/tool-system-m2b.3/spec.md#governance-context-mandatory) | `planned` | `current` |
-| [FR-2.6.5](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L282) | [tool-system-m2b.3](../../../specs/tool-system-m2b.3/spec.md#governance-context-mandatory) | `planned` | `current` |
-| [FR-2.6.6](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L283) | [tool-system-m2b.3](../../../specs/tool-system-m2b.3/spec.md#governance-context-mandatory) | `planned` | `current` |
+| [FR-2.6.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L279) | [tool-system-m2b.3](../../../specs/tool-system-m2b.3/spec.md#governance-context-mandatory) | `verified` | `current` |
+| [FR-2.6.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L280) | [tool-system-m2b.3](../../../specs/tool-system-m2b.3/spec.md#governance-context-mandatory) | `verified` | `current` |
+| [FR-2.6.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L281) | [tool-system-m2b.3](../../../specs/tool-system-m2b.3/spec.md#governance-context-mandatory) | `verified` | `current` |
+| [FR-2.6.5](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L282) | [tool-system-m2b.3](../../../specs/tool-system-m2b.3/spec.md#governance-context-mandatory) | `verified` | `current` |
+| [FR-2.6.6](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L283) | [tool-system-m2b.3](../../../specs/tool-system-m2b.3/spec.md#governance-context-mandatory) | `verified` | `current` |
 | [FR-2.7.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L289) | [tool-system-m2b.2](../../../specs/tool-system-m2b.2/spec.md#governance-context-mandatory) | `verified` | `current` |
 | [FR-2.7.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L290) | [tool-system-m2b.2](../../../specs/tool-system-m2b.2/spec.md#governance-context-mandatory) | `verified` | `current` |
-| [FR-2.7.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L291) | [tool-system-m2b.3](../../../specs/tool-system-m2b.3/spec.md#governance-context-mandatory) | `planned` | `current` |
-| [FR-2.7.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L292) | [tool-system-m2b.3](../../../specs/tool-system-m2b.3/spec.md#governance-context-mandatory) | `planned` | `current` |
-| [FR-2.7.5](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L293) | [tool-system-m2b.3](../../../specs/tool-system-m2b.3/spec.md#governance-context-mandatory) | `planned` | `current` |
-| [FR-2.8.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L299) | [tool-system-m2b.3](../../../specs/tool-system-m2b.3/spec.md#governance-context-mandatory) | `planned` | `current` |
-| [FR-2.8.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L300) | [tool-system-m2b.3](../../../specs/tool-system-m2b.3/spec.md#governance-context-mandatory) | `planned` | `current` |
-| [FR-2.8.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L301) | [tool-system-m2b.3](../../../specs/tool-system-m2b.3/spec.md#governance-context-mandatory) | `planned` | `current` |
-| [FR-2.8.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L302) | [tool-system-m2b.3](../../../specs/tool-system-m2b.3/spec.md#governance-context-mandatory) | `planned` | `current` |
+| [FR-2.7.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L291) | [tool-system-m2b.3](../../../specs/tool-system-m2b.3/spec.md#governance-context-mandatory) | `verified` | `current` |
+| [FR-2.7.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L292) | [tool-system-m2b.3](../../../specs/tool-system-m2b.3/spec.md#governance-context-mandatory) | `verified` | `current` |
+| [FR-2.7.5](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L293) | [tool-system-m2b.3](../../../specs/tool-system-m2b.3/spec.md#governance-context-mandatory) | `verified` | `current` |
+| [FR-2.8.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L299) | [tool-system-m2b.3](../../../specs/tool-system-m2b.3/spec.md#governance-context-mandatory) | `verified` | `current` |
+| [FR-2.8.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L300) | [tool-system-m2b.3](../../../specs/tool-system-m2b.3/spec.md#governance-context-mandatory) | `verified` | `current` |
+| [FR-2.8.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L301) | [tool-system-m2b.3](../../../specs/tool-system-m2b.3/spec.md#governance-context-mandatory) | `verified` | `current` |
+| [FR-2.8.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L302) | [tool-system-m2b.3](../../../specs/tool-system-m2b.3/spec.md#governance-context-mandatory) | `verified` | `current` |
 | [FR-2.9.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L308) | `-` | `unmapped` | `unmapped` |
 | [FR-2.9.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L309) | `-` | `unmapped` | `unmapped` |
 | [FR-2.9.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L310) | `-` | `unmapped` | `unmapped` |
@@ -235,7 +235,7 @@ Mapped: `2/8`. Unmapped: `6`.
 |----------|-------------|----------------|-------------|
 | [FR-4.1.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L437) | `-` | `unmapped` | `unmapped` |
 | [FR-4.1.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L438) | `-` | `unmapped` | `unmapped` |
-| [FR-4.1.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L439) | [tool-system-m2b.3](../../../specs/tool-system-m2b.3/spec.md#governance-context-mandatory) | `planned` | `current` |
+| [FR-4.1.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L439) | [tool-system-m2b.3](../../../specs/tool-system-m2b.3/spec.md#governance-context-mandatory) | `verified` | `current` |
 | [FR-4.1.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L440) | `-` | `unmapped` | `unmapped` |
 | [FR-4.1.5](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L441) | `-` | `unmapped` | `unmapped` |
 | [FR-4.2.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L447) | [tool-system-implementation-m2b.1](../../../specs/tool-system-implementation-m2b.1/spec.md#governance-context-mandatory) | `verified` | `current` |
@@ -370,7 +370,7 @@ Mapped: `14/23`. Unmapped: `9`.
 |  | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
 | [NFR-2.3.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L682) | `-` | `unmapped` | `unmapped` |
 | [NFR-2.3.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L683) | [tool-system-m2b.2](../../../specs/tool-system-m2b.2/spec.md#governance-context-mandatory) | `verified` | `current` |
-| [NFR-2.3.5](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L684) | [tool-system-m2b.3](../../../specs/tool-system-m2b.3/spec.md#governance-context-mandatory) | `planned` | `current` |
+| [NFR-2.3.5](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L684) | [tool-system-m2b.3](../../../specs/tool-system-m2b.3/spec.md#governance-context-mandatory) | `verified` | `current` |
 | [NFR-2.4.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L691) | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
 | [NFR-2.4.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L692) | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
 | [NFR-2.4.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L693) | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
@@ -439,7 +439,7 @@ Mapped: `9/28`. Unmapped: `19`.
 | [NFR-5.2.10](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L794) | `-` | `unmapped` | `unmapped` |
 | [NFR-5.2.11](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L795) | `-` | `unmapped` | `unmapped` |
 | [NFR-5.2.12](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L796) | [tool-system-implementation-m2b.1](../../../specs/tool-system-implementation-m2b.1/spec.md#governance-context-mandatory) | `verified` | `current` |
-| [NFR-5.2.13](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L797) | [tool-system-m2b.3](../../../specs/tool-system-m2b.3/spec.md#governance-context-mandatory) | `planned` | `current` |
+| [NFR-5.2.13](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L797) | [tool-system-m2b.3](../../../specs/tool-system-m2b.3/spec.md#governance-context-mandatory) | `verified` | `current` |
 | [NFR-5.2.14](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L798) | `-` | `unmapped` | `unmapped` |
 | [NFR-5.2.15](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L799) | [tool-system-m2b.2](../../../specs/tool-system-m2b.2/spec.md#governance-context-mandatory) | `verified` | `current` |
 | [NFR-5.3.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L806) | `-` | `unmapped` | `unmapped` |
@@ -449,7 +449,7 @@ Mapped: `9/28`. Unmapped: `19`.
 | [NFR-5.3.5](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L810) | `-` | `unmapped` | `unmapped` |
 | [NFR-5.3.6](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L811) | `-` | `unmapped` | `unmapped` |
 | [NFR-5.3.7](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L812) | `-` | `unmapped` | `unmapped` |
-| [NFR-5.3.8](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L813) | [tool-system-m2b.3](../../../specs/tool-system-m2b.3/spec.md#governance-context-mandatory) | `planned` | `current` |
+| [NFR-5.3.8](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L813) | [tool-system-m2b.3](../../../specs/tool-system-m2b.3/spec.md#governance-context-mandatory) | `verified` | `current` |
 
 ### NFR-6
 
@@ -461,9 +461,9 @@ Mapped: `5/15`. Unmapped: `10`.
 | [NFR-6.1.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L825) | `-` | `unmapped` | `unmapped` |
 | [NFR-6.1.3](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L826) | [stm-phase-cde](../../../specs/stm-phase-cde/spec.md#requirements-mandatory) | `verified` | `current` |
 |  | [tool-system-implementation-m2b.1](../../../specs/tool-system-implementation-m2b.1/spec.md#governance-context-mandatory) | `verified` | `current` |
-|  | [tool-system-m2b.3](../../../specs/tool-system-m2b.3/spec.md#governance-context-mandatory) | `planned` | `current` |
+|  | [tool-system-m2b.3](../../../specs/tool-system-m2b.3/spec.md#governance-context-mandatory) | `verified` | `current` |
 | [NFR-6.1.4](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L827) | [tool-system-implementation-m2b.1](../../../specs/tool-system-implementation-m2b.1/spec.md#governance-context-mandatory) | `verified` | `current` |
-|  | [tool-system-m2b.3](../../../specs/tool-system-m2b.3/spec.md#governance-context-mandatory) | `planned` | `current` |
+|  | [tool-system-m2b.3](../../../specs/tool-system-m2b.3/spec.md#governance-context-mandatory) | `verified` | `current` |
 | [NFR-6.1.5](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L828) | `-` | `unmapped` | `unmapped` |
 | [NFR-6.2.1](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L835) | `-` | `unmapped` | `unmapped` |
 | [NFR-6.2.2](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L836) | `-` | `unmapped` | `unmapped` |
@@ -489,10 +489,10 @@ Mapped: `4/10`. Unmapped: `6`.
 | [CON-5](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L862) | `-` | `unmapped` | `unmapped` |
 | [CON-6](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L863) | [tool-system-implementation-m2b.1](../../../specs/tool-system-implementation-m2b.1/spec.md#governance-context-mandatory) | `verified` | `current` |
 |  | [tool-system-m2b.2](../../../specs/tool-system-m2b.2/spec.md#governance-context-mandatory) | `verified` | `current` |
-| [CON-7](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L864) | [tool-system-m2b.3](../../../specs/tool-system-m2b.3/spec.md#governance-context-mandatory) | `planned` | `current` |
+| [CON-7](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L864) | [tool-system-m2b.3](../../../specs/tool-system-m2b.3/spec.md#governance-context-mandatory) | `verified` | `current` |
 | [CON-8](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L865) | `-` | `unmapped` | `unmapped` |
 | [CON-9](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L866) | [tool-system-implementation-m2b.1](../../../specs/tool-system-implementation-m2b.1/spec.md#governance-context-mandatory) | `verified` | `current` |
-|  | [tool-system-m2b.3](../../../specs/tool-system-m2b.3/spec.md#governance-context-mandatory) | `planned` | `current` |
+|  | [tool-system-m2b.3](../../../specs/tool-system-m2b.3/spec.md#governance-context-mandatory) | `verified` | `current` |
 | [CON-10](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L867) | [tool-system-implementation-m2b.1](../../../specs/tool-system-implementation-m2b.1/spec.md#governance-context-mandatory) | `verified` | `current` |
 |  | [tool-system-m2b.2](../../../specs/tool-system-m2b.2/spec.md#governance-context-mandatory) | `verified` | `current` |
 
@@ -618,15 +618,15 @@ Mapped: `14/17`. Unmapped: `3`.
 | [AC-9.5](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L966) | [tool-system-m2b.2](../../../specs/tool-system-m2b.2/spec.md#governance-context-mandatory) | `verified` | `current` |
 | [AC-9.6](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L967) | [tool-system-m2b.2](../../../specs/tool-system-m2b.2/spec.md#governance-context-mandatory) | `verified` | `current` |
 | [AC-9.7](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L968) | [tool-system-m2b.2](../../../specs/tool-system-m2b.2/spec.md#governance-context-mandatory) | `verified` | `current` |
-| [AC-9.8](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L969) | [tool-system-m2b.3](../../../specs/tool-system-m2b.3/spec.md#governance-context-mandatory) | `planned` | `current` |
-| [AC-9.9](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L970) | [tool-system-m2b.3](../../../specs/tool-system-m2b.3/spec.md#governance-context-mandatory) | `planned` | `current` |
+| [AC-9.8](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L969) | [tool-system-m2b.3](../../../specs/tool-system-m2b.3/spec.md#governance-context-mandatory) | `verified` | `current` |
+| [AC-9.9](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L970) | [tool-system-m2b.3](../../../specs/tool-system-m2b.3/spec.md#governance-context-mandatory) | `verified` | `current` |
 | [AC-9.10](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L971) | [tool-system-m2b.2](../../../specs/tool-system-m2b.2/spec.md#governance-context-mandatory) | `verified` | `current` |
-| [AC-9.11](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L972) | [tool-system-m2b.3](../../../specs/tool-system-m2b.3/spec.md#governance-context-mandatory) | `planned` | `current` |
+| [AC-9.11](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L972) | [tool-system-m2b.3](../../../specs/tool-system-m2b.3/spec.md#governance-context-mandatory) | `verified` | `current` |
 | [AC-9.12](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L973) | `-` | `unmapped` | `unmapped` |
 | [AC-9.13](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L974) | `-` | `unmapped` | `unmapped` |
 | [AC-9.14](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L975) | [tool-system-m2b.2](../../../specs/tool-system-m2b.2/spec.md#governance-context-mandatory) | `verified` | `current` |
 | [AC-9.15](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L976) | [tool-system-m2b.2](../../../specs/tool-system-m2b.2/spec.md#governance-context-mandatory) | `verified` | `current` |
-| [AC-9.16](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L977) | [tool-system-m2b.3](../../../specs/tool-system-m2b.3/spec.md#governance-context-mandatory) | `planned` | `current` |
+| [AC-9.16](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L977) | [tool-system-m2b.3](../../../specs/tool-system-m2b.3/spec.md#governance-context-mandatory) | `verified` | `current` |
 | [AC-9.17](SOFTWARE_REQUIREMENTS_SPECIFICATION.md#L978) | `-` | `unmapped` | `unmapped` |
 
 ### IR-1

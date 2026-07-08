@@ -126,12 +126,12 @@ src/data/
     `-- market_snapshots_schema.py
 
 tests/
-|-- fixtures/tool_system_m2b3/
-|-- helpers/tool_system_m2b3_helpers.py
-|-- test_market_data_m2b3.py
-|-- test_tradingview_m2b3.py
-|-- test_route_evaluation_m2b3.py
-|-- test_attribution_cache_m2b3.py
+|-- fixtures/market_tools/
+|-- helpers/market_tool_helpers.py
+|-- test_market_data_tools.py
+|-- test_tradingview_visualization.py
+|-- test_market_route_evaluation.py
+|-- test_market_attribution_cache.py
 |-- test_tool_gateway_m2b1.py
 |-- test_provider_policy_m2b2.py
 |-- test_tool_normalization_m2b2.py

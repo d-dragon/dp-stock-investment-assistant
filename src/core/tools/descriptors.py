@@ -11,7 +11,7 @@ from typing import Any, Dict, Iterable, List, Mapping, Optional, Sequence
 from ..routes import StockQueryRoute
 
 
-DESCRIPTOR_VERSION = "m2b2.0"
+DESCRIPTOR_VERSION = "market-tools.1"
 
 
 class BaselineInventoryState(str, Enum):
@@ -214,9 +214,16 @@ def get_baseline_tool_inventory() -> Sequence[BaselineToolInventoryItem]:
         BaselineToolInventoryItem(
             tool_name="tradingview",
             tool_class="TradingViewTool",
-            implementation_status=BaselineInventoryState.PLACEHOLDER,
-            registry_status="unregistered",
-            model_exposure_default=ExposureStatus.NON_EXPOSED,
+            implementation_status=BaselineInventoryState.ACTIVE,
+            registry_status="registered",
+            model_exposure_default=ExposureStatus.MODEL_VISIBLE,
+        ),
+        BaselineToolInventoryItem(
+            tool_name="market_data",
+            tool_class="VietnamMarketDataTool",
+            implementation_status=BaselineInventoryState.ACTIVE,
+            registry_status="registered",
+            model_exposure_default=ExposureStatus.MODEL_VISIBLE,
         ),
         BaselineToolInventoryItem(
             tool_name="reporting",
@@ -271,23 +278,81 @@ def _baseline_capabilities() -> Sequence[ToolCapabilityDescriptor]:
             examples=({"action": "lookup", "symbol": "FPT", "exchange": "HOSE"},),
         ),
         ToolCapabilityDescriptor(
-            name="tradingview",
-            display_name="TradingView visualization",
-            purpose="Reserved visualization capability for a later phase; not exposed while placeholder code remains.",
+            name="market_data",
+            display_name="Vietnam market data evidence",
+            purpose=(
+                "Fetch or compute Vietnam market-data evidence for quotes, history, "
+                "fundamentals, breadth, flow, disclosures, corporate actions, and "
+                "deterministic indicators with source attribution and degraded states."
+            ),
             input_schema={
                 "type": "object",
                 "properties": {
-                    "action": {"type": "string", "enum": ["get_chart_url", "get_widget", "get_analysis"]},
+                    "action": {
+                        "type": "string",
+                        "enum": [
+                            "quote",
+                            "history",
+                            "ohlcv",
+                            "indicator",
+                            "fundamental",
+                            "fundamentals",
+                            "statement",
+                            "breadth",
+                            "flow",
+                            "disclosure",
+                            "corporate_action",
+                        ],
+                    },
                     "symbol": {"type": "string"},
+                    "exchange": {"type": "string"},
+                    "indicator": {"type": "string"},
+                },
+                "required": ["action"],
+            },
+            route_coverage=(
+                StockQueryRoute.PRICE_CHECK.value,
+                StockQueryRoute.FUNDAMENTALS.value,
+                StockQueryRoute.MARKET_WATCH.value,
+                StockQueryRoute.TECHNICAL_ANALYSIS.value,
+                StockQueryRoute.NEWS_ANALYSIS.value,
+            ),
+            output_kind="market_data_evidence_or_degraded_state",
+            locale_coverage=("vi-VN", "en", "mixed"),
+            examples=({"action": "quote", "symbol": "FPT", "exchange": "HOSE"},),
+        ),
+        ToolCapabilityDescriptor(
+            name="tradingview",
+            display_name="TradingView visualization",
+            purpose=(
+                "Build TradingView chart, widget, deep-link, ticker-tape, heatmap, "
+                "screener, and symbol-validation payloads as VisualizationProvenance, "
+                "not canonical market evidence."
+            ),
+            input_schema={
+                "type": "object",
+                "properties": {
+                    "action": {
+                        "type": "string",
+                        "enum": [
+                            "get_chart_url",
+                            "get_widget",
+                            "get_analysis",
+                            "validate_symbol",
+                            "ticker_tape",
+                            "heatmap",
+                            "screener",
+                        ],
+                    },
+                    "symbol": {"type": "string"},
+                    "interval": {"type": "string"},
+                    "widget_type": {"type": "string"},
                 },
                 "required": ["symbol"],
             },
             route_coverage=(StockQueryRoute.TECHNICAL_ANALYSIS.value,),
             output_kind="visualization_provenance",
             locale_coverage=("any",),
-            enabled=False,
-            model_visible=False,
-            non_exposed_reason="placeholder_disabled_m2b1",
         ),
         ToolCapabilityDescriptor(
             name="reporting",
@@ -336,18 +401,46 @@ def _baseline_policies() -> Sequence[ToolPolicyDescriptor]:
             allowed_routes=(StockQueryRoute.PRICE_CHECK.value, StockQueryRoute.FUNDAMENTALS.value),
         ),
         ToolPolicyDescriptor(
+            tool_name="market_data",
+            risk_class=RiskClass.READ_ONLY,
+            license_mode=LicenseMode.FIRST_PARTY_REVIEWED,
+            freshness_policy={"mode": "source_timestamp_required", "stale_after_seconds": 900},
+            cache_policy={"enabled": True, "ttl_seconds": 60},
+            timeout_budget_ms=2500,
+            credential_owner="provider_policy",
+            mutation_policy=MutationPolicy.NONE,
+            required_metadata=(
+                "route",
+                "descriptor_hash",
+                "admission_outcome",
+                "normalized_output_kind",
+                "source_metadata",
+                "freshness_metadata",
+                "degraded_state_reason",
+            ),
+            enabled_environments=("development", "test", "production"),
+            exposure_status=ExposureStatus.MODEL_VISIBLE,
+            allowed_routes=(
+                StockQueryRoute.PRICE_CHECK.value,
+                StockQueryRoute.FUNDAMENTALS.value,
+                StockQueryRoute.MARKET_WATCH.value,
+                StockQueryRoute.TECHNICAL_ANALYSIS.value,
+                StockQueryRoute.NEWS_ANALYSIS.value,
+            ),
+        ),
+        ToolPolicyDescriptor(
             tool_name="tradingview",
             risk_class=RiskClass.READ_ONLY,
-            license_mode=LicenseMode.UNCLEAR,
+            license_mode=LicenseMode.NOT_APPLICABLE,
             freshness_policy={"mode": "not_applicable"},
-            cache_policy={"enabled": False},
-            timeout_budget_ms=0,
+            cache_policy={"enabled": True, "ttl_seconds": 300},
+            timeout_budget_ms=1000,
             credential_owner="none",
             mutation_policy=MutationPolicy.NONE,
-            required_metadata=("route", "descriptor_hash", "admission_outcome"),
-            enabled_environments=("none",),
-            exposure_status=ExposureStatus.NON_EXPOSED,
-            allowed_routes=(),
+            required_metadata=("route", "descriptor_hash", "admission_outcome", "visualization_provenance"),
+            enabled_environments=("development", "test", "production"),
+            exposure_status=ExposureStatus.MODEL_VISIBLE,
+            allowed_routes=(StockQueryRoute.TECHNICAL_ANALYSIS.value,),
         ),
         ToolPolicyDescriptor(
             tool_name="reporting",

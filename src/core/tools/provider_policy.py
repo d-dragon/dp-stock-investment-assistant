@@ -23,7 +23,13 @@ class DataCategory(str, Enum):
     SYMBOL_REFERENCE = "symbol_reference"
     QUOTE = "quote"
     HISTORY = "history"
+    INDICATOR = "indicator"
     FUNDAMENTAL = "fundamental"
+    STATEMENT = "statement"
+    BREADTH = "breadth"
+    FLOW = "flow"
+    DISCLOSURE = "disclosure"
+    CORPORATE_ACTION = "corporate_action"
     NEWS = "news"
     VISUALIZATION = "visualization"
 

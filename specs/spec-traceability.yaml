@@ -1176,6 +1176,9 @@ features:
         - specs/tool-system-m2b.3/contracts/route-evaluation-contract.md
         - specs/tool-system-m2b.3/tasks.md
         - specs/tool-system-m2b.3/checklists/requirements.md
+        - specs/tool-system-m2b.3/review.md
+        - specs/tool-system-m2b.3/verify-tasks-report.md
+        - specs/tool-system-m2b.3/.verify-done
     srs_mapping:
       baseline_version: "2.8"
       coverage_status: partial
@@ -1254,6 +1257,8 @@ features:
         - Planning artifacts generated on 2026-07-07 keep M2B.3 scoped to internal agent/tool contracts and do not change public REST, SSE, Socket.IO, or OpenAPI contracts.
         - Implementation tasks generated on 2026-07-07 cover all M2B.3 functional requirements, success criteria, test-first story phases, verification commands, and sync gates.
         - Fleet-review remediation on 2026-07-07 added explicit NFR-6.1.3 and NFR-6.1.4 coverage evidence gates before implementation.
+        - Implementation and verification evidence recorded on 2026-07-08 covers Vietnam market-data evidence, TradingView VisualizationProvenance, route evaluation, attribution/cache/trace safety, predecessor compatibility, touched-surface coverage gates, verify-task evidence, and final verify marker.
+        - Post-rename verification on 2026-07-08 confirmed implementation-facing code, helpers, fixtures, and tests use domain-oriented market-tool and visualization names instead of M2B.3 milestone labels, while all feature, compatibility, coverage, sync, and whitespace gates still pass.
     speckit_mapping:
       spec_requirements:
         - M2B3-FR-001
@@ -1320,3 +1325,13 @@ features:
           anchor: requirement-coverage-matrix
         - path: specs/tool-system-m2b.3/checklists/requirements.md
           label: Requirements quality checklist
+        - path: specs/tool-system-m2b.3/review.md
+          label: Implementation review and verification evidence
+          anchor: story-gate-evidence
+        - path: specs/tool-system-m2b.3/review.md
+          label: Post-rename verification evidence
+          anchor: verification-run-2026-07-08
+        - path: specs/tool-system-m2b.3/verify-tasks-report.md
+          label: Task verification report
+        - path: specs/tool-system-m2b.3/.verify-done
+          label: Verify marker

@@ -77,8 +77,8 @@ def test_descriptor_inventory_has_all_m2b1_baseline_descriptors(baseline_descrip
     capabilities = baseline_descriptors["capabilities"]
     policies = baseline_descriptors["policies"]
 
-    assert set(capabilities) == {"stock_symbol", "tradingview", "reporting"}
-    assert set(policies) == {"stock_symbol", "tradingview", "reporting"}
+    assert set(capabilities) == {"stock_symbol", "market_data", "tradingview", "reporting"}
+    assert set(policies) == {"stock_symbol", "market_data", "tradingview", "reporting"}
     for tool_name in capabilities:
         assert capabilities[tool_name].descriptor_version
         assert capabilities[tool_name].descriptor_hash
@@ -103,16 +103,21 @@ def test_descriptor_model_visible_fields_are_safe(baseline_descriptors):
         assert not forbidden.intersection(visible)
 
 
-def test_descriptor_placeholder_and_scaffold_status_is_explicit(baseline_descriptors):
+def test_descriptor_active_visualization_and_scaffold_status_is_explicit(baseline_descriptors):
+    market_data = baseline_descriptors["capabilities"]["market_data"]
     tradingview = baseline_descriptors["capabilities"]["tradingview"]
     reporting = baseline_descriptors["capabilities"]["reporting"]
+    market_data_policy = baseline_descriptors["policies"]["market_data"]
     tradingview_policy = baseline_descriptors["policies"]["tradingview"]
     reporting_policy = baseline_descriptors["policies"]["reporting"]
 
-    assert tradingview.enabled is False
-    assert tradingview.model_visible is False
-    assert tradingview.non_exposed_reason
-    assert tradingview_policy.exposure_status == ExposureStatus.NON_EXPOSED
+    assert market_data.enabled is True
+    assert market_data.model_visible is True
+    assert market_data_policy.exposure_status == ExposureStatus.MODEL_VISIBLE
+    assert tradingview.enabled is True
+    assert tradingview.model_visible is True
+    assert tradingview.output_kind == "visualization_provenance"
+    assert tradingview_policy.exposure_status == ExposureStatus.MODEL_VISIBLE
     assert reporting.model_visible is False
     assert reporting.non_exposed_reason
     assert reporting_policy.exposure_status == ExposureStatus.NON_EXPOSED
@@ -180,7 +185,8 @@ def test_route_surface_filters_disabled_context_risk_license_and_feature_flags(s
     assert surface.exposed_tool_names == []
     assert "feature_flag_blocked" in surface.filter_reasons["stock_symbol"]
     assert "risk_blocked" in surface.filter_reasons["stock_symbol"]
-    assert "license_blocked" in surface.filter_reasons["tradingview"]
+    assert "registry_disabled" in surface.filter_reasons["tradingview"]
+    assert "registry_disabled" in surface.filter_reasons["market_data"]
     assert "context_blocked" in surface.filter_reasons["reporting"]
 
 
