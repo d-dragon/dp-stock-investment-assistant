@@ -1,8 +1,8 @@
 
 
-# SDD with Spec-Kit - HOW-TO
+# SDD with Spec Kit - HOW-TO
 
-This guide defines how `dp-stock-investment-assistant` uses Spec Kit for Spec-Driven Development (SDD). It combines the official Spec Kit lifecycle with this repository's governance, traceability, and review conventions.
+This guide defines how `dp-stock-investment-assistant` uses Spec Kit to implement Spec-Driven Development (SDD). It combines the official Spec Kit lifecycle with this repository's governance, traceability, and review conventions.
 
 The most important rule in this repository is simple: governed feature work lives under [../../specs/](../../specs/). The `.specify/` directory supports Spec Kit runtime behavior, templates, integrations, extensions, and workflows, but it is not the canonical home for governed feature delivery artifacts in this project.
 
@@ -107,18 +107,20 @@ For documentation-first work in Copilot, contributors can start with the [Docume
 
 ### 2.3 Current Installed State
 
-As of 2026-07-07, this repository should be operated from the local installed truth below. Upstream documentation is useful context, but a command is adopted locally only after `specify version --features --json`, `specify extension list`, `specify workflow info speckit`, `specify workflow info sdd-feature-delivery`, and the installed prompt/skill files confirm it exists in this checkout.
+As of 2026-07-09, this repository should be operated from the local installed truth below. Upstream documentation is useful context, but a command is adopted locally only after `specify version --features --json`, `specify extension list`, `specify workflow info speckit`, `specify workflow info sdd-feature-delivery`, and the installed prompt/skill files confirm it exists in this checkout.
 
 | Surface | Current local state | Operating interpretation |
 |---------|---------------------|--------------------------|
 | Spec Kit CLI | `specify 0.12.0` | Use local command availability first; treat newer upstream commands as upgrade-gated until the CLI and managed files are upgraded together. |
 | CLI feature flags | `self_check_command`, `integration_upgrade_command`, `integration_use_command`, `workflow_catalog`, `bundled_templates`, and multi-install metadata support are present | The repo can use `self check`, `self upgrade`, `integration use`, and `integration upgrade`, but must still review managed-file diffs. |
-| Active feature pointer | `.specify/feature.json` points to `specs/prompt-system-milestone2` | Continue from that feature directory unless a new feature is intentionally created. |
+| Active feature pointer | `.specify/feature.json` stores the active `specs/<feature>/` pointer for the latest workflow context | Inspect it before plan, tasks, implementation, verification, or sync work. Do not bake the current pointer into reusable runbooks. |
 | Integration metadata | `.specify/integration.json` declares default integration `codex`, installed integrations `copilot` and `codex`, and shared template alignment to `codex` | Codex is the current default. Copilot remains installed for portability. Keep one coherent feature workflow and one authoritative artifact set. |
 | Integration status | `specify integration status` currently exits non-zero with `unsafe-multi-install` plus managed-file modification warnings; missing managed files and invalid manifest paths are `0` | Treat this as a known warning only while missing files and invalid manifests remain zero and the default remains intentionally `codex`. Missing files, invalid manifests, or unexpected default changes remain blockers. |
 | Workflow catalog | `specify workflow list` reports the bundled `speckit` workflow and the project-owned `sdd-feature-delivery` workflow | Keep `speckit` as the compatibility/default closeout workflow. Use `sdd-feature-delivery` as the recommended normal governed feature-delivery path for this repository. |
-| Compatibility workflow | `specify workflow info speckit` reports 14 steps: specify, review-spec, plan, review-plan, sync-after-plan, review-sync-after-plan, tasks, implement, sync-after-implement, review-sync-after-implement, verify-tasks, verify, sync-after-verify, review-sync-after-verify | The bundled 14-step workflow remains available and unchanged. This repository's 18-step SDLC remains the broader governance overlay around that workflow. |
+| Compatibility workflow | `specify workflow info speckit` reports 14 steps: specify, review-spec, plan, review-plan, sync-after-plan, review-sync-after-plan, tasks, implement, sync-after-implement, review-sync-after-implement, verify-tasks, verify, sync-after-verify, review-sync-after-verify | The bundled 14-step workflow remains available with the same step graph. This repository's broader SDLC remains the governance overlay around that workflow. |
 | SDD feature-delivery workflow | `specify workflow info sdd-feature-delivery` reports the project-owned workflow with context grounding, specify, review gates, clarify, plan, hard sync gates, checklist, tasks, validate, analyze, implementation, scope tests, verify-tasks, verify, final sync, and a final Verified gate | Use this for normal feature delivery. Scope-specific test gates are selected by workflow input: `agent-tool`, `backend-api`, `frontend`, or `full`. Doc-only, risky-change, and backfill workflow variants are reserved for future governed work. |
+| Workflow shell-step schema | Shell steps in `.specify/workflows/*/workflow.yml` use `type: shell` with `run:` | Spec Kit 0.12 workflow validation rejects shell steps that still use `command:`. Use `command:` only for Spec Kit command steps such as `speckit.specify`. |
+| Codex workflow runner | `.specify/scripts/powershell/run-sdd-feature-delivery-codex.ps1` wraps `sdd-feature-delivery` for local Codex CLI runs | Pass `-Spec "<feature description>"` for each feature. The wrapper pins the current `codex` executable for the process and injects `SPECKIT_INTEGRATION_CODEX_EXTRA_ARGS="--sandbox workspace-write"` so `codex exec` can create or update feature artifacts. |
 | Workflow metadata drift | `.specify/workflows/speckit/workflow.yml` still has an input default of `copilot` while `.specify/integration.json` defaults to `codex`; `.specify/workflows/sdd-feature-delivery/workflow.yml` defaults to `codex` and supports `codex` plus `copilot` | Prefer the integration state from `.specify/integration.json` and `specify integration status` for existing workflows unless workflow metadata is corrected in a separate governed maintenance pass. |
 | Installed extensions | Understanding, Verify Tasks, Spec Kit Utilities, Git, Fleet, Verify, Memory Loader, Architecture Workflow, Coding Agent Context, Research Harness, Security Review, Architecture Guard, and Document Spec Sync Gate are enabled | Use current extension command names from this HOW-TO instead of older shorthand names. |
 | Document/spec sync gate | `speckit.doc-sync.gate` is the repository-local wrapper around `python scripts/sync_spec_status.py --gate` | Run this hard gate after `speckit.plan`, after `speckit.implement`, and after `speckit.verify.run`; it regenerates `specs/spec-sync-status.md` and `docs/domains/agent/SRS_SPEC_TRACEABILITY.md`. |
@@ -394,7 +396,7 @@ Testing and QA are woven into the loop rather than deferred to the end. Steps `1
 | Requirements and Architecture | Define acceptance boundaries, testability expectations, affected non-functional constraints, and delivery impacts | [VERIFICATION_AND_TRACEABILITY_STRATEGY.md](../testing/VERIFICATION_AND_TRACEABILITY_STRATEGY.md)<br/>requirements and architecture inputs used by the feature |
 | Spec Authoring and Planning | Turn requirements into verifiable acceptance criteria, planned test coverage, and expected infrastructure or deployment impact | [API_TEST_TOOL_COMPARISON_REPORT.md](../testing/API_TEST_TOOL_COMPARISON_REPORT.md)<br/>`specs/feature/spec.md`<br/>`specs/feature/plan.md` |
 | Readiness and Review | Check that planned tasks, traceability, review criteria, and QA scope are strong enough before implementation begins | `specs/feature/tasks.md`<br/>`specs/feature/analysis.md`<br/>readiness and review findings |
-| Delivery and Verification | Execute and record regression, runtime, performance, and security results against the approved plan | `tests/test_*.py`<br/>[api/](../../tests/api/)<br/>[integration/](../../tests/integration/)<br/>[performance/](../../tests/performance/)<br/>[security/](../../tests/security/)<br/>[API tests.md](../../tests/API%20tests.md)<br/>[HOWTO_PYTEST_RUNTIME_API_INTEGRATION.md](../testing/backend-api-service/HOWTO_PYTEST_RUNTIME_API_INTEGRATION.md)<br/>`specs/feature/review.md` |
+| Delivery and Verification | Execute and record regression, runtime, performance, and security results against the approved plan | `tests/test_*.py`<br/>[api/](../../tests/api/)<br/>[integration/](../../tests/integration/)<br/>[performance/](../../tests/performance/)<br/>[security/](../../tests/security/)<br/>[API tests.md](../../tests/API%20tests.md)<br/>[HOWTO_PYTEST_RUNTIME_API_INTEGRATION.md](../testing/backend-api-service/HOWTO_PYTEST_RUNTIME_API_INTEGRATION.md)<br/>`specs/<feature>/review.md` |
 | Synchronization and Maintenance | Preserve QA outcomes as governed evidence and sync all affected contracts, trace links, and maintenance state | [spec-traceability.yaml](../../specs/spec-traceability.yaml)<br/>[spec-sync-status.md](../../specs/spec-sync-status.md)<br/>[SRS_SPEC_TRACEABILITY.md](../domains/agent/SRS_SPEC_TRACEABILITY.md)<br/>[openapi.yaml](../openapi.yaml) |
 
 ### 3.2 Artifact-by-Phase Map
@@ -404,7 +406,7 @@ Testing and QA are woven into the loop rather than deferred to the end. Steps `1
 | Requirements and Architecture | `0-1` | [SOFTWARE_REQUIREMENTS_SPECIFICATION.md](../domains/agent/SOFTWARE_REQUIREMENTS_SPECIFICATION.md)<br/>[SYSTEM_REQUIREMENTS_SPECIFICATION.md](../system/SYSTEM_REQUIREMENTS_SPECIFICATION.md)<br/>[REQUIREMENTS_METHOD_AND_GOVERNANCE.md](../system/REQUIREMENTS_METHOD_AND_GOVERNANCE.md)<br/>[SYSTEM_OVERVIEW_AND_BOUNDARIES.md](../architecture/SYSTEM_OVERVIEW_AND_BOUNDARIES.md)<br/>domain technical design docs under [domains/](../domains/)<br/>research/proposal documents and benchmark review reports as non-authoritative inputs | Scoped requirement set, affected architecture boundaries, long-lived document impact map, planned propagation targets, requirements/design increments, initial acceptance and testability expectations, and expected delivery or operational impact |
 | Spec Authoring and Planning | `2-5` | requirements baseline, architecture references, [spec-traceability.yaml](../../specs/spec-traceability.yaml) | `specs/feature/spec.md`<br/>`specs/feature/plan.md`<br/>updated feature-to-SRS mapping, draft QA intent, and expected application or IaC change scope |
 | Readiness and Review | `6-11` | governed spec and plan artifacts, planned test intent, review criteria | `specs/feature/tasks.md`<br/>`specs/feature/analysis.md`<br/>review findings, readiness verdict, QA scope, and expected test coverage |
-| Delivery and Verification | `12-14` | tasks, review findings, [VERIFICATION_AND_TRACEABILITY_STRATEGY.md](../testing/VERIFICATION_AND_TRACEABILITY_STRATEGY.md)<br/>[HOWTO_PYTEST_RUNTIME_API_INTEGRATION.md](../testing/backend-api-service/HOWTO_PYTEST_RUNTIME_API_INTEGRATION.md) | implemented application changes in `src/` and `frontend/`<br/>IaC artifacts in `IaC/Dockerfile.api`, `IaC/Dockerfile.agent`, `IaC/helm/dp-stock/`, `IaC/infra/terraform/`, and `IaC/ci-cd/`<br/>QA and testing results in `tests/` and `specs/feature/review.md` |
+| Delivery and Verification | `12-14` | tasks, review findings, [VERIFICATION_AND_TRACEABILITY_STRATEGY.md](../testing/VERIFICATION_AND_TRACEABILITY_STRATEGY.md)<br/>[HOWTO_PYTEST_RUNTIME_API_INTEGRATION.md](../testing/backend-api-service/HOWTO_PYTEST_RUNTIME_API_INTEGRATION.md) | implemented application changes in `src/` and `frontend/`<br/>IaC artifacts in `IaC/Dockerfile.api`, `IaC/Dockerfile.agent`, `IaC/helm/dp-stock/`, `IaC/infra/terraform/`, and `IaC/ci-cd/`<br/>QA and testing results in `tests/` and `specs/<feature>/review.md` |
 | Synchronization and Maintenance | `15-17` | delivered code, IaC outputs, QA evidence, review evidence, operational policy, and API contract references | [spec-traceability.yaml](../../specs/spec-traceability.yaml)<br/>[spec-sync-status.md](../../specs/spec-sync-status.md)<br/>[SRS_SPEC_TRACEABILITY.md](../domains/agent/SRS_SPEC_TRACEABILITY.md)<br/>[openapi.yaml](../openapi.yaml)<br/>updated technical design, release, and maintenance notes<br/>for prompt-system changes: [TECHNICAL_DESIGN.md#35-prompt-realization-and-guardrails](../domains/agent/TECHNICAL_DESIGN.md#35-prompt-realization-and-guardrails), [ARCHITECTURE_DESIGN.md](../domains/agent/ARCHITECTURE_DESIGN.md), [PROMPT_SYSTEM_RESEARCH_PROPOSAL.md](../domains/agent/PROMPT_SYSTEM_RESEARCH_PROPOSAL.md), [PHASE_2_AGENT_ENHANCEMENT_ROADMAP.md](../domains/agent/PHASE_2_AGENT_ENHANCEMENT_ROADMAP.md), and [PROMPT_SYSTEM_BENCHMARK_REVIEW.md](../domains/agent/PROMPT_SYSTEM_BENCHMARK_REVIEW.md) |
 
 ### 3.3 18-Step Lifecycle Aligned to the Loop
@@ -770,7 +772,7 @@ flowchart TB
   class S15,S16,S17,L_F4 sync;
 ```
 
-#### 3.4.2 Hook and Review Overlay
+#### 3.4.2 Hook and Gate Overlay
 
 The diagram below shows the currently installed 14-step `speckit` workflow and the repository extension hook overlay from [extensions.yml](../../.specify/extensions.yml). It separates blocking gates from optional confidence checks so the operating path is clear.
 
@@ -901,7 +903,7 @@ flowchart TB
   class SYNC,SYN1,L_Sync sync;
 ```
 
-The main synchronization targets behind the final node are [spec-traceability.yaml](../../specs/spec-traceability.yaml), [spec-sync-status.md](../../specs/spec-sync-status.md), [SRS_SPEC_TRACEABILITY.md](../domains/agent/SRS_SPEC_TRACEABILITY.md), and [openapi.yaml](../openapi.yaml). In this repository, the IaC outputs in [IaC/](../../IaC/) and the QA results captured in `tests/` plus `specs/feature/review.md` are also part of the governed evidence chain.
+The main synchronization targets behind the final node are [spec-traceability.yaml](../../specs/spec-traceability.yaml), [spec-sync-status.md](../../specs/spec-sync-status.md), [SRS_SPEC_TRACEABILITY.md](../domains/agent/SRS_SPEC_TRACEABILITY.md), and [openapi.yaml](../openapi.yaml). In this repository, the IaC outputs in [IaC/](../../IaC/) and the QA results captured in `tests/` plus `specs/<feature>/review.md` are also part of the governed evidence chain.
 
 For skill-assisted synchronization, use [`$technical-design-manager`](../../.agents/skills/technical-design-manager/SKILL.md) to check design-to-implementation and implementation-to-design drift between `TECHNICAL_DESIGN.md`, verified `specs/`, executable contracts, and `src/`. Use [`$research-to-architecture-adr`](../../.agents/skills/research-to-architecture-adr/SKILL.md) when synchronization reveals proposal-to-architecture promotion needs, ADR candidates, or durable architecture boundary changes. These skills complement the diagram by preserving authority boundaries: technical design owns realization, architecture owns boundaries and viewpoints, ADRs own decisions, specs own delivery evidence, and contracts own schema truth.
 
@@ -911,8 +913,85 @@ Use `sdd-feature-delivery` for normal governed feature delivery in this reposito
 
 ```powershell
 specify workflow info sdd-feature-delivery
-specify workflow run sdd-feature-delivery
+specify workflow run sdd-feature-delivery -i spec="<feature description>" -i integration=codex -i scope=agent-tool
 ```
+
+Treat `spec` as the reusable feature brief, not as a fixed repository value. The workflow will create or continue the active `specs/<feature>/` context based on Spec Kit state, then drive gates and artifacts for that feature. Workflow run state is separate from the active feature pointer: `.specify/feature.json` identifies the current feature context, while `.specify/workflows/runs/<run_id>/` records the execution state for a specific workflow run.
+
+##### Workflow Operations
+
+Use workflow status and resume commands before starting another run, especially after an interrupted, failed, or aborted execution:
+
+```powershell
+specify workflow status --json
+specify workflow status <run_id>
+specify workflow resume <run_id>
+```
+
+Each run persists its own state under `.specify/workflows/runs/<run_id>/`. Inspect `state.json` for current step and status, `inputs.json` for resolved workflow inputs, and `log.jsonl` for step-level events and failures. If a run failed because of a missing CLI, shell-step schema issue, or sync-gate problem, fix the cause and resume that run when the feature context is still correct. Start a fresh run only when the earlier run intentionally targeted the wrong feature, used the wrong integration or scope, or was explicitly abandoned.
+
+Use `--json` when another tool needs machine-readable workflow output. In JSON mode, stdout is reserved for the final JSON object and step progress or prompts are redirected to stderr. That is useful for automation, but poor for normal gated feature delivery because review gates require human inspection and approval.
+
+##### Runbook Variant A - Codex CLI
+
+Use this variant when the local terminal can run both `specify` and `codex`. For normal local Codex usage from the VS Code PowerShell terminal, prefer the project wrapper because it supplies the sandbox arguments needed by `codex exec`.
+
+```powershell
+specify workflow info sdd-feature-delivery
+codex --version
+.\.specify\scripts\powershell\run-sdd-feature-delivery-codex.ps1 `
+  -Spec "<feature description>" `
+  -Scope agent-tool `
+  -DryRun
+```
+
+Start the workflow after the dry run shows the expected command, executable paths, and scope:
+
+```powershell
+.\.specify\scripts\powershell\run-sdd-feature-delivery-codex.ps1 `
+  -Spec "<feature description>" `
+  -Scope agent-tool
+```
+
+The wrapper exists because Spec Kit dispatches Codex command steps through `codex exec`. Codex exec defaults to a read-only sandbox unless sandbox permissions are set, so the wrapper injects `--sandbox workspace-write` via `SPECKIT_INTEGRATION_CODEX_EXTRA_ARGS` for the current process.
+
+Use `-Scope backend-api`, `-Scope frontend`, or `-Scope full` when the feature's implementation and tests fall outside the default `agent-tool` gate. Avoid `-Json` for normal feature delivery because review gates are interactive; non-interactive runs cannot approve gates and may abort at `review-spec`.
+
+At each gate, inspect the generated artifact before approving. Reject the gate when the artifact points to the wrong feature directory, has unresolved ambiguity, skips required sync output, or lacks evidence for the requested scope.
+
+##### Runbook Variant B - GitHub Copilot
+
+Use this variant when the local environment is set up for GitHub Copilot. VS Code Copilot chat can use the installed `.github/agents` prompts manually, but `specify workflow run` dispatches command steps through the Copilot CLI, so workflow automation also requires `copilot` or `copilot.cmd` on `PATH`.
+
+```powershell
+specify workflow info sdd-feature-delivery
+copilot --help
+specify workflow run sdd-feature-delivery `
+  -i spec="<feature description>" `
+  -i integration=copilot `
+  -i scope=agent-tool
+```
+
+Use the same `scope` values as the Codex variant. Keep the run interactive for the review gates, and approve only after checking the generated `spec.md`, `plan.md`, task readiness outputs, sync reports, test output, verification output, and final status evidence.
+
+If Copilot CLI is unavailable but VS Code Copilot is available, use the installed Copilot agents and prompts directly for the same lifecycle stages: `/speckit.specify`, `/speckit.clarify`, `/speckit.plan`, `/speckit.checklist`, `/speckit.tasks`, `/speckit.analyze`, `/speckit.implement`, `/speckit.verify-tasks.run`, and `/speckit.verify.run`. In that fallback path, run the repository sync gate manually after plan, implementation, and verification:
+
+```powershell
+python .\scripts\sync_spec_status.py --gate
+```
+
+##### Complex Feature Handling
+
+Large features should not be implemented as one unbounded agent run. The default practice is to scope each implementation pass by task range or phase, then stop and verify progress before continuing:
+
+```text
+speckit.implement only execute tasks T001-T010, then stop and report progress
+speckit.implement only execute the Setup phase, then stop
+```
+
+When the active agent supports sub-agents, use delegation for parallel `[P]` tasks only after `tasks.md` is clear enough for each sub-agent to work from a focused slice. For very large changes, combine both patterns: execute one phase at a time and delegate parallel tasks inside that phase. If a single phase still overwhelms context, split the work into smaller linked feature specs and run each through its own specify, plan, tasks, implementation, verification, and sync cycle.
+
+After every partial implementation pass, reconcile `tasks.md`, run the scope-appropriate tests, run or schedule `speckit.verify-tasks.run`, and keep `speckit.doc-sync.gate` / `python scripts/sync_spec_status.py --gate` current before promoting status. Do not mark a partial pass `Verified` just because a task range completed.
 
 The visual below shows how the workflow moves from context grounding through specification, planning, readiness checks, implementation, tests, verification, sync gates, and final approval.
 
@@ -985,6 +1064,8 @@ flowchart TB
 | `integration` | `codex`, `copilot` | Selects the installed agent integration used for Spec Kit command steps. The default is `codex`. |
 | `scope` | `agent-tool`, `backend-api`, `frontend`, `full` | Selects the post-implementation test shell gate. `agent-tool` runs tool gateway, router, and agent regression tests; `backend-api` runs API and integration tests; `frontend` runs `npm run test:ci` in `frontend/`; `full` runs backend pytest plus frontend CI tests. |
 
+Workflow shell steps run local commands with the current user's privileges. The workflow `requires` block is an advisory precondition for Spec Kit version and integrations; it is not a capability sandbox and does not restrict shell commands at runtime. Review any new or downloaded workflow YAML before running it, and keep human gates before sensitive shell activity.
+
 The context-grounding shell step validates and prints an explicit read list; it does not concatenate document contents. Baseline grounding includes core Spec Kit state, the agent-domain SRS/architecture/technical design/traceability files, `docs/openapi.yaml`, generated spec sync reports, `README.md`, [project-documentation-and-specification-methodology.md](../study-hub/project-documentation-and-specification-methodology.md), this HOW-TO, `.github/copilot-instructions.md`, and global `.github/instructions` anchors for architecture, documentation/specification, and testing.
 
 Context grounding is also scope-aware and stage-aware. The selected `scope` adds matching `.github/instructions` files: backend and LangChain instructions for `agent-tool`, backend instructions for `backend-api`, frontend instructions for `frontend`, and all of those for `full`; testing instructions are always included. The `preflight` stage checks baseline and scope context only. The `pre-plan` stage also requires the active feature directory and `spec.md`. The `pre-implement` stage requires `spec.md`, `plan.md`, and `tasks.md`, and only warns when optional design artifacts such as `research.md`, `data-model.md`, `quickstart.md`, `contracts/`, or `checklists/` are absent.
@@ -1037,6 +1118,16 @@ Status movement rules:
 - Use `Implemented`, not `Verified`, when implementation evidence is complete but `.verify-done` is absent.
 - Use `Backfilled` for governance restoration of pre-existing behavior; do not use it for a normal feature that is merely late in updating docs.
 
+### 3.7 Spec Persistence Policy
+
+Spec Kit does not force one persistence model for `spec.md`, `plan.md`, and `tasks.md`; this repository does. The default policy is Flow-back while a feature is active and Flow-forward after it is Verified.
+
+During active delivery, use Flow-back: implementation discoveries can update `tasks.md`, planning discoveries can revise `plan.md`, and clarification decisions can update `spec.md`, but the artifact set must be reconciled before the next gate. `spec.md` remains the behavioral contract for the feature. `plan.md` and `tasks.md` may evolve during active work, but they cannot silently contradict the accepted spec, SRS mapping, architecture constraints, tests, or sync reports.
+
+After a feature reaches `Verified`, use Flow-forward: treat the completed feature directory as a historical record. New requirements should create a new linked `specs/<feature>/` directory unless the previous feature is explicitly reopened before verification is complete. Use `Superseded` when a later feature replaces an earlier one, and record the replacement link and traceability handling in `spec.md`.
+
+Use Living Spec behavior only for long-lived authority documents outside a completed feature directory, such as SRS, architecture, technical design, OpenAPI, ADRs, and generated sync reports. Verified feature knowledge should flow forward into those authorities instead of repeatedly rewriting closed feature artifacts.
+
 ## 4. Repository Artifact Authority
 
 | Location | Role | Authority Level | Notes |
@@ -1062,6 +1153,8 @@ Spec Kit extensions are managed through the `specify` CLI and repository configu
 | [../../.specify/extension-catalogs.yml](../../.specify/extension-catalogs.yml) | Lists the official and community extension catalogs. |
 | [../../.specify/extensions/](../../.specify/extensions/) | Stores extension packages, prompts, configs, and command assets used by the repository. |
 | [../../.specify/workflows/](../../.specify/workflows/) | Stores workflow definitions such as the bundled `speckit` workflow and the project-owned `sdd-feature-delivery` workflow. |
+| [../../.specify/workflows/runs/](../../.specify/workflows/runs/) | Stores per-run workflow state, resolved inputs, and step logs for status and resume operations. |
+| [../../.specify/scripts/powershell/run-sdd-feature-delivery-codex.ps1](../../.specify/scripts/powershell/run-sdd-feature-delivery-codex.ps1) | Starts the `sdd-feature-delivery` workflow through Codex with the required `codex exec` sandbox arguments. |
 
 ### 5.2 Current CLI Patterns
 
@@ -1073,6 +1166,8 @@ specify extension list
 specify workflow list
 specify workflow info speckit
 specify workflow info sdd-feature-delivery
+specify workflow status --json
+.\.specify\scripts\powershell\run-sdd-feature-delivery-codex.ps1 -Spec "<feature description>" -DryRun
 ```
 
 Use the current extension commands, not older `spec-kit` CLI forms:
@@ -1128,6 +1223,13 @@ The current supported synchronization posture is local-script first: `speckit.do
 - **Integration status exits non-zero**: the current known condition is `unsafe-multi-install` plus managed-file modification warnings with missing managed files `0` and invalid manifest paths `0`. Missing or invalid managed files, unexpected default integration changes, or new manifest errors require investigation before feature work continues.
 - **The active feature looks wrong**: inspect [../../.specify/feature.json](../../.specify/feature.json). If it does not point at the intended `specs/<feature>/`, fix the feature pointer through the appropriate Spec Kit workflow before running plan, tasks, implement, verify, or sync commands.
 - **Workflow metadata defaults to `copilot`**: treat `.specify/integration.json` and `specify integration status` as the current integration authority. The installed workflow metadata can lag behind the project default; document the mismatch or correct it in a separate governed workflow update.
+- **Workflow validation says a shell step is missing `run`**: update the workflow YAML so `type: shell` steps use `run:`. Keep `command:` for Spec Kit command steps only.
+- **Workflow shell steps look permission-scoped**: do not rely on workflow `requires` as a sandbox. Shell steps run with the local user's privileges, so review workflow YAML before running it and keep approval gates around risky shell commands.
+- **The Codex wrapper asks for `-Spec`**: pass the feature brief explicitly, for example `-Spec "portfolio risk explanation refresh"`. The wrapper intentionally has no default feature description.
+- **Codex workflow command cannot find the CLI**: confirm `codex --version` works in the same PowerShell terminal, or use [../../.specify/scripts/powershell/run-sdd-feature-delivery-codex.ps1](../../.specify/scripts/powershell/run-sdd-feature-delivery-codex.ps1), which sets `SPECKIT_INTEGRATION_CODEX_EXECUTABLE` from `Get-Command codex`.
+- **Codex dispatch exits after reaching `codex exec`**: run through the Codex wrapper or set `SPECKIT_INTEGRATION_CODEX_EXTRA_ARGS="--sandbox workspace-write"` before `specify workflow run`. Without this, Codex exec may run read-only and fail to create feature artifacts.
+- **Copilot workflow dispatch cannot find the CLI**: confirm `copilot --help` works in the same terminal, or run the installed Copilot prompts manually in VS Code and execute the repository sync gates yourself. `specify workflow run` needs the Copilot CLI even though normal Copilot prompt usage can happen inside the IDE.
+- **Workflow aborts at `review-spec` in `--json` or non-interactive mode**: run the workflow in an interactive terminal and choose `approve` only after reviewing the generated spec. Do not use `--json` for normal `sdd-feature-delivery` runs unless you intentionally want non-interactive behavior around gates.
 - **Workflow sync gate cannot find `.venv\Scripts\Activate.ps1`**: the shell workflow expects the repository virtual environment before running `python .\scripts\sync_spec_status.py --gate`. Create or activate the expected environment, or run the canonical Python sync command directly only when the project environment is already correct.
 - **Unsure where to place new feature artifacts**: publish governed work in [../../specs/](../../specs/). Treat `.specify/` as supporting automation and template infrastructure.
 - **Traceability is stale**: update [../../specs/spec-traceability.yaml](../../specs/spec-traceability.yaml), refresh planning, task, implementation, and review evidence as appropriate, then run `speckit.doc-sync.gate` / `python scripts/sync_spec_status.py --gate` to bring [../../specs/spec-sync-status.md](../../specs/spec-sync-status.md) and [SRS_SPEC_TRACEABILITY.md](../domains/agent/SRS_SPEC_TRACEABILITY.md) back in line.
@@ -1161,6 +1263,8 @@ The current supported synchronization posture is local-script first: `speckit.do
 - [Installation Guide](https://github.github.io/spec-kit/installation.html)
 - [Quick Start Guide](https://github.github.io/spec-kit/quickstart.html)
 - [What is Spec-Driven Development?](https://github.github.io/spec-kit/concepts/sdd.html)
+- [Handling Complex Features](https://raw.githubusercontent.com/github/spec-kit/main/docs/concepts/complex-features.md)
+- [Spec Persistence Models](https://github.github.io/spec-kit/concepts/spec-persistence.html)
 - [CLI Reference](https://github.github.io/spec-kit/reference/overview.html)
 - [Core Commands Reference](https://github.github.io/spec-kit/reference/core.html)
 - [Integrations Reference](https://github.github.io/spec-kit/reference/integrations.html)

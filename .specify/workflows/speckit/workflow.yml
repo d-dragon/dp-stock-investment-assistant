@@ -52,7 +52,7 @@ steps:
 
   - id: sync-after-plan
     type: shell
-    command: >-
+    run: >-
       powershell -NoProfile -ExecutionPolicy Bypass -Command "if (-not (Test-Path -LiteralPath '.\.venv\Scripts\Activate.ps1')) { Write-Error 'SYNC GATE FAIL: missing .venv\Scripts\Activate.ps1'; exit 1 }; . .\.venv\Scripts\Activate.ps1; python .\scripts\sync_spec_status.py --gate"
 
   - id: review-sync-after-plan
@@ -75,7 +75,7 @@ steps:
 
   - id: sync-after-implement
     type: shell
-    command: >-
+    run: >-
       powershell -NoProfile -ExecutionPolicy Bypass -Command "if (-not (Test-Path -LiteralPath '.\.venv\Scripts\Activate.ps1')) { Write-Error 'SYNC GATE FAIL: missing .venv\Scripts\Activate.ps1'; exit 1 }; . .\.venv\Scripts\Activate.ps1; python .\scripts\sync_spec_status.py --gate"
 
   - id: review-sync-after-implement
@@ -98,7 +98,7 @@ steps:
 
   - id: sync-after-verify
     type: shell
-    command: >-
+    run: >-
       powershell -NoProfile -ExecutionPolicy Bypass -Command "if (-not (Test-Path -LiteralPath '.\.venv\Scripts\Activate.ps1')) { Write-Error 'SYNC GATE FAIL: missing .venv\Scripts\Activate.ps1'; exit 1 }; . .\.venv\Scripts\Activate.ps1; python .\scripts\sync_spec_status.py --gate"
 
   - id: review-sync-after-verify

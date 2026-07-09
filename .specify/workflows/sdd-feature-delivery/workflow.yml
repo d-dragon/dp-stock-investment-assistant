@@ -29,7 +29,7 @@ inputs:
 steps:
   - id: preflight-context
     type: shell
-    command: >-
+    run: >-
       powershell -NoProfile -ExecutionPolicy Bypass -File .\.specify\scripts\powershell\sdd-context-grounding.ps1 -Scope "{{ inputs.scope }}" -Stage preflight
 
   - id: specify
@@ -58,7 +58,7 @@ steps:
 
   - id: pre-plan-context
     type: shell
-    command: >-
+    run: >-
       powershell -NoProfile -ExecutionPolicy Bypass -File .\.specify\scripts\powershell\sdd-context-grounding.ps1 -Scope "{{ inputs.scope }}" -Stage pre-plan
 
   - id: plan
@@ -75,7 +75,7 @@ steps:
 
   - id: sync-after-plan
     type: shell
-    command: >-
+    run: >-
       powershell -NoProfile -ExecutionPolicy Bypass -File .\.specify\scripts\powershell\sdd-doc-sync-gate.ps1 -Stage after-plan
 
   - id: review-sync-after-plan
@@ -116,7 +116,7 @@ steps:
 
   - id: pre-implement-context
     type: shell
-    command: >-
+    run: >-
       powershell -NoProfile -ExecutionPolicy Bypass -File .\.specify\scripts\powershell\sdd-context-grounding.ps1 -Scope "{{ inputs.scope }}" -Stage pre-implement
 
   - id: implement
@@ -127,12 +127,12 @@ steps:
 
   - id: scope-tests
     type: shell
-    command: >-
+    run: >-
       powershell -NoProfile -ExecutionPolicy Bypass -File .\.specify\scripts\powershell\sdd-scope-tests.ps1 -Scope "{{ inputs.scope }}"
 
   - id: sync-after-implement
     type: shell
-    command: >-
+    run: >-
       powershell -NoProfile -ExecutionPolicy Bypass -File .\.specify\scripts\powershell\sdd-doc-sync-gate.ps1 -Stage after-implement
 
   - id: verify-tasks
@@ -149,7 +149,7 @@ steps:
 
   - id: sync-after-verify
     type: shell
-    command: >-
+    run: >-
       powershell -NoProfile -ExecutionPolicy Bypass -File .\.specify\scripts\powershell\sdd-doc-sync-gate.ps1 -Stage after-verify
 
   - id: final-verified-gate
