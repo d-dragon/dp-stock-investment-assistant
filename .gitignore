@@ -152,3 +152,5 @@ nul
 tmp/check_refs.py
 tmp/git-diff-staged.txt
 tmp/split_adr.py
+.specify/integration.json
+.specify/init-options.json

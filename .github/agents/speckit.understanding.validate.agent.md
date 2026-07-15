@@ -1,6 +1,6 @@
 ---
-description: "Enforce quality gates on spec \xE2\u20AC\u201D exits with code 1 if\
-  \ any gate fails. Use in CI/CD or before proceeding to implementation."
+description: Enforce quality gates on spec — exits with code 1 if any gate fails.
+  Use in CI/CD or before proceeding to implementation.
 ---
 
 
