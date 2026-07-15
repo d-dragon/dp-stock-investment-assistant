@@ -2,6 +2,7 @@ installed:
 - agent-context
 - arch
 - architecture-guard
+- companion
 - doc-sync
 - harness
 - memory-loader
@@ -48,6 +49,15 @@ hooks:
     prompt: Would you like to generate architectural refactor tasks before implementation?
     description: ''
     condition: null
+  - extension: companion
+    command: speckit.companion.capture-tasks
+    enabled: true
+    optional: false
+    priority: 10
+    prompt: Execute speckit.companion.capture-tasks?
+    description: Record tasks completion (currentStep=tasks, status=ready-to-implement)
+      into .spec-context.json
+    condition: null
   after_implement:
   - extension: doc-sync
     command: speckit.doc-sync.gate
@@ -55,7 +65,8 @@ hooks:
     optional: false
     priority: 5
     prompt: Run implementation document-spec sync gate before verification?
-    description: Refresh traceability reports from implementation evidence before verification
+    description: Refresh traceability reports from implementation evidence before
+      verification
     condition: null
   - extension: verify-tasks
     command: speckit.verify-tasks.run
@@ -102,6 +113,15 @@ hooks:
     prompt: Would you like to run a post-implementation architecture review?
     description: ''
     condition: null
+  - extension: companion
+    command: speckit.companion.capture-implement
+    enabled: true
+    optional: false
+    priority: 10
+    prompt: Execute speckit.companion.capture-implement?
+    description: Per-task journaling on implement (currentStep=implement; status=implemented
+      when all tasks checked)
+    condition: null
   after_specify:
   - extension: speckit-utils
     command: speckit.speckit-utils.doctor
@@ -131,6 +151,15 @@ hooks:
     priority: 10
     prompt: Set up a state-externalized research harness for this feature?
     description: Initialize harness state after specification
+    condition: null
+  - extension: companion
+    command: speckit.companion.capture
+    enabled: true
+    optional: false
+    priority: 10
+    prompt: Execute speckit.companion.capture?
+    description: Record specify completion (currentStep=specify, status=specified)
+      into .spec-context.json
     condition: null
   after_plan:
   - extension: speckit-utils
@@ -187,6 +216,14 @@ hooks:
     prompt: Would you like to scan the technical plan for architectural drift and
       Constitution violations?
     description: ''
+    condition: null
+  - extension: companion
+    command: speckit.companion.capture-plan
+    enabled: true
+    optional: false
+    priority: 10
+    prompt: Execute speckit.companion.capture-plan?
+    description: Record plan completion (currentStep=plan, status=planned) into .spec-context.json
     condition: null
   before_constitution:
   - extension: git
