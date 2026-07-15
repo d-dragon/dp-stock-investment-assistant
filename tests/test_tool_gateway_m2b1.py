@@ -10,7 +10,7 @@ from unittest.mock import MagicMock
 import pytest
 
 from src.core.routes import StockQueryRoute
-from src.core.tools.base import CachingTool
+from src.core.tools.base import AgentTool, CachingTool
 from src.core.tools.descriptors import (
     ExposureStatus,
     LicenseMode,
@@ -31,7 +31,7 @@ from src.core.tools.stock_symbol import StockSymbolTool
 from src.core.tools.surface import RouteSurfaceRequest, ToolSurfaceBuilder
 
 
-class CountingTool(CachingTool):
+class CountingTool(AgentTool):
     """Small registry-backed tool fixture."""
 
     name: str = "stock_symbol"
@@ -300,8 +300,8 @@ def test_runtime_compatibility_uses_tool_registry_and_caching_tool(registry, gat
     wrapped = gateway.create_wrapped_tools(route=StockQueryRoute.PRICE_CHECK, surface=price_surface)
 
     assert len(wrapped) == 1
-    assert isinstance(wrapped[0], CachingTool)
-    assert isinstance(registry.get("stock_symbol"), CachingTool)
+    assert isinstance(wrapped[0], AgentTool)
+    assert isinstance(registry.get("stock_symbol"), AgentTool)
     assert wrapped[0]._run(action="get_info", symbol="AAPL") == {"symbol": "AAPL", "source": "fixture"}
     assert registry.get("stock_symbol").calls == 1
 

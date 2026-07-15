@@ -1,21 +1,23 @@
 """LangChain Tools Module for Stock Investment Assistant.
 
 This module provides a suite of LangChain-compatible tools for stock data
-retrieval, analysis, and reporting. All tools extend CachingTool which
-provides Redis/in-memory caching integration.
+retrieval, analysis, and reporting. All tools extend AgentTool which
+provides Redis/in-memory caching integration (the earlier name CachingTool
+is retained as a backward-compatibility alias).
 
 Tools:
     - StockSymbolTool: Retrieve stock prices and symbol information
     - ReportingTool: Generate investment reports (markdown)
-    - TradingViewTool: TradingView integration (placeholder for Phase 2)
+    - TradingViewTool: TradingView integration
 
 Registry:
     - ToolRegistry: Central registry for tool management
 
 Reference: .github/instructions/backend-python.instructions.md § Model Factory
+See also: docs/domains/agent/TOOLS_RESEARCH_AND_PROPOSAL.md § 8.2
 """
 
-from .base import CachingTool
+from .base import AgentTool, CachingTool
 from .registry import ToolRegistry, get_tool_registry, reset_tool_registry
 from .stock_symbol import StockSymbolTool
 from .reporting import ReportingTool

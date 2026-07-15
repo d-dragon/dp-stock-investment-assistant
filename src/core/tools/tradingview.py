@@ -12,12 +12,12 @@ from __future__ import annotations
 import logging
 from typing import Any, Dict, Optional
 
-from .base import CachingTool
+from .base import AgentTool
 from .normalization import NormalizedOutput, make_visualization_provenance_output, normalize_symbol_code
 from utils.cache import CacheBackend
 
 
-class TradingViewTool(CachingTool):
+class TradingViewTool(AgentTool):
     """Build TradingView visualization payloads as non-evidence provenance."""
     
     name: str = "tradingview"
