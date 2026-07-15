@@ -1,9 +1,18 @@
-"""Base tool class with caching support.
+"""AgentTool — repo-owned tool execution abstraction.
 
-Provides CachingTool abstract base class that extends LangChain's BaseTool
-with Redis/in-memory caching integration.
+AgentTool is the target architectural name for the repo-owned tool execution
+abstraction (ADR-004 / M2B.1). It extends LangChain's BaseTool with:
+- Cache-aware execution via Redis/in-memory CacheBackend
+- Configurable TTL per tool type
+- Tool-local input handling via _execute()
+- Health metadata via health_check()
+- Bridge to provider-backed or deterministic operations
+
+The class was previously named CachingTool; the old name is retained as a
+backward-compatibility alias. New code SHOULD use AgentTool.
 
 Reference: .github/instructions/backend-python.instructions.md § Cache Backend
+See also: docs/domains/agent/TOOLS_RESEARCH_AND_PROPOSAL.md § 8.2
 """
 
 from __future__ import annotations
@@ -23,12 +32,19 @@ from ..types import ToolCall
 from utils.cache import CacheBackend
 
 
-class CachingTool(BaseTool):
-    """Abstract base class for tools with caching support.
+class AgentTool(BaseTool):
+    """Repo-owned base abstraction for tool execution.
     
-    Extends LangChain's BaseTool to provide:
-    - Automatic caching via Redis/in-memory CacheBackend
+    AgentTool is the target architectural name for cache-aware, descriptor-backed
+    tool execution (ADR-004 / M2B.1). It replaces the earlier CachingTool name
+    as the canonical class, preserving full backward compatibility.
+    
+    Owns:
+    - Cache-aware execution via Redis/in-memory CacheBackend
     - Configurable TTL per tool type
+    - Tool-local input handling via _execute()
+    - Health metadata via health_check()
+    - Bridge to provider-backed or deterministic operations
     - ToolCall tracking for analytics
     - Async wrapper that delegates to sync implementation
     
@@ -43,7 +59,7 @@ class CachingTool(BaseTool):
         enable_cache: Whether caching is enabled (default True)
     
     Example:
-        >>> class MyTool(CachingTool):
+        >>> class MyTool(AgentTool):
         ...     name = "my_tool"
         ...     description = "Does something useful"
         ...     
@@ -71,7 +87,7 @@ class CachingTool(BaseTool):
         logger: Optional[logging.Logger] = None,
         **kwargs: Any,
     ) -> None:
-        """Initialize CachingTool.
+        """Initialize AgentTool.
         
         Args:
             cache: CacheBackend instance for caching (Redis or in-memory)
@@ -264,3 +280,8 @@ class CachingTool(BaseTool):
         details["status"] = "ready" if healthy else "degraded"
         
         return healthy, details
+
+
+# Backward-compatibility alias: CachingTool is now AgentTool.
+# New code SHOULD import and use AgentTool directly.
+CachingTool = AgentTool

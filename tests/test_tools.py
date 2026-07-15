@@ -1,7 +1,7 @@
 """Tests for LangChain Tools Module.
 
 Comprehensive test coverage for:
-- CachingTool base class
+- AgentTool base class (previously CachingTool — alias retained)
 - ToolRegistry singleton
 - StockSymbolTool
 - ReportingTool
@@ -93,11 +93,11 @@ def reset_registry():
 
 
 # ============================================================================
-# CachingTool Base Class Tests
+# AgentTool Base Class Tests (previously CachingTool — alias retained)
 # ============================================================================
 
-class TestCachingTool:
-    """Tests for CachingTool abstract base class."""
+class TestAgentTool:
+    """Tests for AgentTool abstract base class (previously CachingTool)."""
     
     def test_caching_tool_is_abstract(self):
         """Test that CachingTool cannot be instantiated directly."""

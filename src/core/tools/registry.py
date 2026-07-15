@@ -11,7 +11,7 @@ from __future__ import annotations
 import logging
 from typing import Any, Dict, List, Optional, Type
 
-from .base import CachingTool
+from .base import AgentTool
 
 
 # Module-level singleton
@@ -40,7 +40,7 @@ class ToolRegistry:
         Args:
             logger: Optional logger instance
         """
-        self._tools: Dict[str, CachingTool] = {}
+        self._tools: Dict[str, AgentTool] = {}
         self._enabled: Dict[str, bool] = {}
         self._logger = logger or logging.getLogger(self.__class__.__name__)
     
@@ -61,7 +61,7 @@ class ToolRegistry:
     
     def register(
         self,
-        tool: CachingTool,
+        tool: AgentTool,
         *,
         enabled: bool = True,
         replace: bool = False,
@@ -69,7 +69,7 @@ class ToolRegistry:
         """Register a tool in the registry.
         
         Args:
-            tool: CachingTool instance to register
+            tool: AgentTool instance to register
             enabled: Whether the tool is enabled for use
             replace: Whether to replace existing tool with same name
             
@@ -105,7 +105,7 @@ class ToolRegistry:
             return True
         return False
     
-    def get(self, name: str) -> Optional[CachingTool]:
+    def get(self, name: str) -> Optional[AgentTool]:
         """Get a tool by name.
         
         Args:
@@ -143,7 +143,7 @@ class ToolRegistry:
             return True
         return False
     
-    def list_all(self) -> List[CachingTool]:
+    def list_all(self) -> List[AgentTool]:
         """List all registered tools.
         
         Returns:
@@ -159,7 +159,7 @@ class ToolRegistry:
         """
         return list(self._tools.keys())
     
-    def get_enabled_tools(self) -> List[CachingTool]:
+    def get_enabled_tools(self) -> List[AgentTool]:
         """Get all enabled tools.
         
         Returns:
@@ -170,7 +170,7 @@ class ToolRegistry:
             if self._enabled.get(name, False)
         ]
     
-    def get_disabled_tools(self) -> List[CachingTool]:
+    def get_disabled_tools(self) -> List[AgentTool]:
         """Get all disabled tools.
         
         Returns:

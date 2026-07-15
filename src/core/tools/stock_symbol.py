@@ -13,7 +13,7 @@ from typing import Any, Dict, Iterable, List, Mapping, Optional, Sequence, Tuple
 
 from pydantic import Field
 
-from .base import CachingTool
+from .base import AgentTool
 from .mutation_receipts import SYMBOL_MUTATION_ACTIONS, guard_symbol_mutation
 from .normalization import (
     AdmissionOutcome,
@@ -31,7 +31,7 @@ from data.repositories.symbol_repository import SymbolRepository
 from utils.cache import CacheBackend
 
 
-class StockSymbolTool(CachingTool):
+class StockSymbolTool(AgentTool):
     """Tool for retrieving stock symbol information and prices.
     
     Provides two main functionalities:

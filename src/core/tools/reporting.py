@@ -14,11 +14,11 @@ from typing import Any, Dict, Optional
 
 from pydantic import Field
 
-from .base import CachingTool
+from .base import AgentTool
 from utils.cache import CacheBackend
 
 
-class ReportingTool(CachingTool):
+class ReportingTool(AgentTool):
     """Tool for generating investment reports.
     
     Generates markdown-formatted investment reports based on:

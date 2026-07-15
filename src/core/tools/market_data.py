@@ -13,7 +13,7 @@ from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any, Dict, Mapping, Optional, Sequence
 
-from .base import CachingTool
+from .base import AgentTool
 from .normalization import (
     CanonicalSymbolIdentity,
     DegradedReason,
@@ -373,7 +373,7 @@ def tradingview_values_are_canonical(output: NormalizedOutput) -> bool:
     return provider_id == "tradingview" and output.kind != NormalizedOutputKind.VISUALIZATION_PROVENANCE
 
 
-class VietnamMarketDataTool(CachingTool):
+class VietnamMarketDataTool(AgentTool):
     """Deterministic market-data tool family for Vietnam-market evidence."""
 
     name: str = "market_data"

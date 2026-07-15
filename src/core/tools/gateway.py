@@ -7,7 +7,7 @@ from dataclasses import asdict, dataclass, field
 from typing import Any, Dict, Mapping, Optional, Sequence
 
 from ..routes import StockQueryRoute
-from .base import CachingTool
+from .base import AgentTool
 from .descriptors import (
     ExposureStatus,
     LicenseMode,
@@ -356,7 +356,7 @@ class ToolGateway:
         *,
         route: StockQueryRoute,
         surface: RouteFilteredToolSurface,
-    ) -> Sequence[CachingTool]:
+    ) -> Sequence[AgentTool]:
         """Create LangChain-compatible gateway wrappers for exposed tools."""
 
         return tuple(
@@ -442,7 +442,7 @@ class ToolGateway:
         )
 
 
-class GatewayToolWrapper(CachingTool):
+class GatewayToolWrapper(AgentTool):
     """LangChain-compatible tool wrapper that delegates through ToolGateway."""
 
     name: str = "gateway_tool"
