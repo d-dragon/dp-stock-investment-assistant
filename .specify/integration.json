@@ -15,6 +15,6 @@
       "invoke_separator": "-"
     }
   },
-  "integration": "codex",
-  "default_integration": "codex"
+  "integration": "copilot",
+  "default_integration": "copilot"
 }

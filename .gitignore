@@ -154,3 +154,84 @@ tmp/git-diff-staged.txt
 tmp/split_adr.py
 .specify/integration.json
 .specify/init-options.json
+docs/postman/collections/Stock Investment Assistant API Copy/Send a chat message for investment analysis.request.yaml
+docs/postman/collections/Stock Investment Assistant API Copy/.resources/definition.yaml
+docs/postman/collections/Stock Investment Assistant API Copy/api/.resources/definition.yaml
+docs/postman/collections/Stock Investment Assistant API Copy/api/chat/Send a chat message for investment analysis.request.yaml
+docs/postman/collections/Stock Investment Assistant API Copy/api/chat/.resources/definition.yaml
+docs/postman/collections/Stock Investment Assistant API Copy/api/chat/.resources/Send a chat message for investment analysis.resources/examples/archivedSession.example.yaml
+docs/postman/collections/Stock Investment Assistant API Copy/api/chat/.resources/Send a chat message for investment analysis.resources/examples/Invalid UUID format for session_id.example.yaml
+docs/postman/collections/Stock Investment Assistant API Copy/api/chat/.resources/Send a chat message for investment analysis.resources/examples/missingMessage.example.yaml
+docs/postman/collections/Stock Investment Assistant API Copy/api/chat/.resources/Send a chat message for investment analysis.resources/examples/Multi-turn conversation with session tracking-1.example.yaml
+docs/postman/collections/Stock Investment Assistant API Copy/api/chat/.resources/Send a chat message for investment analysis.resources/examples/Multi-turn conversation with session tracking-2.example.yaml
+docs/postman/collections/Stock Investment Assistant API Copy/api/chat/.resources/Send a chat message for investment analysis.resources/examples/Multi-turn conversation with session tracking.example.yaml
+docs/postman/collections/Stock Investment Assistant API Copy/api/chat/.resources/Send a chat message for investment analysis.resources/examples/Response with session context.example.yaml
+docs/postman/collections/Stock Investment Assistant API Copy/api/chat/.resources/Send a chat message for investment analysis.resources/examples/serverError.example.yaml
+docs/postman/collections/Stock Investment Assistant API Copy/api/chat/.resources/Send a chat message for investment analysis.resources/examples/streaming-1.example.yaml
+docs/postman/collections/Stock Investment Assistant API Copy/api/chat/.resources/Send a chat message for investment analysis.resources/examples/streaming.example.yaml
+docs/postman/collections/Stock Investment Assistant API Copy/api/config/Get safe configuration.request.yaml
+docs/postman/collections/Stock Investment Assistant API Copy/api/config/.resources/definition.yaml
+docs/postman/collections/Stock Investment Assistant API Copy/api/config/.resources/Get safe configuration.resources/examples/Internal server error.example.yaml
+docs/postman/collections/Stock Investment Assistant API Copy/api/config/.resources/Get safe configuration.resources/examples/Safe configuration.example.yaml
+docs/postman/collections/Stock Investment Assistant API Copy/api/health/Health check.request.yaml
+docs/postman/collections/Stock Investment Assistant API Copy/api/health/.resources/definition.yaml
+docs/postman/collections/Stock Investment Assistant API Copy/api/health/.resources/Health check.resources/examples/Service is healthy.example.yaml
+docs/postman/collections/Stock Investment Assistant API Copy/api/models/.resources/definition.yaml
+docs/postman/collections/Stock Investment Assistant API Copy/api/models/openai/List OpenAI models (cached).request.yaml
+docs/postman/collections/Stock Investment Assistant API Copy/api/models/openai/.resources/definition.yaml
+docs/postman/collections/Stock Investment Assistant API Copy/api/models/openai/.resources/List OpenAI models (cached).resources/examples/List of models.example.yaml
+docs/postman/collections/Stock Investment Assistant API Copy/api/models/openai/.resources/List OpenAI models (cached).resources/examples/Server error (e.g., missing API key).example.yaml
+docs/postman/collections/Stock Investment Assistant API Copy/api/models/openai/.resources/List OpenAI models (cached).resources/examples/Upstream OpenAI error.example.yaml
+docs/postman/collections/Stock Investment Assistant API Copy/api/models/openai/default/Set the default OpenAI model used by the assistant.request.yaml
+docs/postman/collections/Stock Investment Assistant API Copy/api/models/openai/default/.resources/definition.yaml
+docs/postman/collections/Stock Investment Assistant API Copy/api/models/openai/default/.resources/Set the default OpenAI model used by the assistant.resources/examples/Default model set successfully.example.yaml
+docs/postman/collections/Stock Investment Assistant API Copy/api/models/openai/default/.resources/Set the default OpenAI model used by the assistant.resources/examples/missingModel.example.yaml
+docs/postman/collections/Stock Investment Assistant API Copy/api/models/openai/default/.resources/Set the default OpenAI model used by the assistant.resources/examples/Model management service unavailable.example.yaml
+docs/postman/collections/Stock Investment Assistant API Copy/api/models/openai/default/.resources/Set the default OpenAI model used by the assistant.resources/examples/Server error.example.yaml
+docs/postman/collections/Stock Investment Assistant API Copy/api/models/openai/default/.resources/Set the default OpenAI model used by the assistant.resources/examples/unsupportedModel.example.yaml
+docs/postman/collections/Stock Investment Assistant API Copy/api/models/openai/refresh/Refresh OpenAI models cache.request.yaml
+docs/postman/collections/Stock Investment Assistant API Copy/api/models/openai/refresh/.resources/definition.yaml
+docs/postman/collections/Stock Investment Assistant API Copy/api/models/openai/refresh/.resources/Refresh OpenAI models cache.resources/examples/Fresh list of models.example.yaml
+docs/postman/collections/Stock Investment Assistant API Copy/api/models/openai/refresh/.resources/Refresh OpenAI models cache.resources/examples/Server error.example.yaml
+docs/postman/collections/Stock Investment Assistant API Copy/api/models/openai/refresh/.resources/Refresh OpenAI models cache.resources/examples/Upstream OpenAI error.example.yaml
+docs/postman/collections/Stock Investment Assistant API Copy/api/models/openai/select/Select the model to be used for OpenAI requests.request.yaml
+docs/postman/collections/Stock Investment Assistant API Copy/api/models/openai/select/.resources/definition.yaml
+docs/postman/collections/Stock Investment Assistant API Copy/api/models/openai/select/.resources/Select the model to be used for OpenAI requests.resources/examples/Missing or invalid request data.example.yaml
+docs/postman/collections/Stock Investment Assistant API Copy/api/models/openai/select/.resources/Select the model to be used for OpenAI requests.resources/examples/Selection applied.example.yaml
+docs/postman/collections/Stock Investment Assistant API Copy/api/models/openai/select/.resources/Select the model to be used for OpenAI requests.resources/examples/Server error.example.yaml
+docs/postman/collections/Stock Investment Assistant API Copy/api/models/openai/selected/Get the currently selected model.request.yaml
+docs/postman/collections/Stock Investment Assistant API Copy/api/models/openai/selected/.resources/definition.yaml
+docs/postman/collections/Stock Investment Assistant API Copy/api/models/openai/selected/.resources/Get the currently selected model.resources/examples/Currently active provider-model.example.yaml
+docs/postman/collections/Stock Investment Assistant API Copy/api/sessions/.resources/definition.yaml
+docs/postman/collections/Stock Investment Assistant API Copy/api/sessions/{session_id}/.resources/definition.yaml
+docs/postman/collections/Stock Investment Assistant API Copy/api/sessions/{session_id}/conversation/Get conversation history for a session.request.yaml
+docs/postman/collections/Stock Investment Assistant API Copy/api/sessions/{session_id}/conversation/.resources/definition.yaml
+docs/postman/collections/Stock Investment Assistant API Copy/api/sessions/{session_id}/conversation/.resources/Get conversation history for a session.resources/examples/Active session with ongoing conversation.example.yaml
+docs/postman/collections/Stock Investment Assistant API Copy/api/sessions/{session_id}/conversation/.resources/Get conversation history for a session.resources/examples/Archived session (read-only).example.yaml
+docs/postman/collections/Stock Investment Assistant API Copy/api/sessions/{session_id}/conversation/.resources/Get conversation history for a session.resources/examples/Internal server error.example.yaml
+docs/postman/collections/Stock Investment Assistant API Copy/api/sessions/{session_id}/conversation/.resources/Get conversation history for a session.resources/examples/Invalid session_id format.example.yaml
+docs/postman/collections/Stock Investment Assistant API Copy/api/sessions/{session_id}/conversation/.resources/Get conversation history for a session.resources/examples/Session not found.example.yaml
+docs/postman/collections/Stock Investment Assistant API Copy/api/users/Create or upsert a user.request.yaml
+docs/postman/collections/Stock Investment Assistant API Copy/api/users/Get a user by id or email.request.yaml
+docs/postman/collections/Stock Investment Assistant API Copy/api/users/.resources/definition.yaml
+docs/postman/collections/Stock Investment Assistant API Copy/api/users/.resources/Create or upsert a user.resources/examples/Invalid payload.example.yaml
+docs/postman/collections/Stock Investment Assistant API Copy/api/users/.resources/Create or upsert a user.resources/examples/Server error while persisting user data.example.yaml
+docs/postman/collections/Stock Investment Assistant API Copy/api/users/.resources/Create or upsert a user.resources/examples/User created or updated.example.yaml
+docs/postman/collections/Stock Investment Assistant API Copy/api/users/.resources/Create or upsert a user.resources/examples/User service unavailable.example.yaml
+docs/postman/collections/Stock Investment Assistant API Copy/api/users/.resources/Get a user by id or email.resources/examples/Invalid query parameters.example.yaml
+docs/postman/collections/Stock Investment Assistant API Copy/api/users/.resources/Get a user by id or email.resources/examples/Server error while fetching user data.example.yaml
+docs/postman/collections/Stock Investment Assistant API Copy/api/users/.resources/Get a user by id or email.resources/examples/User found.example.yaml
+docs/postman/collections/Stock Investment Assistant API Copy/api/users/.resources/Get a user by id or email.resources/examples/User not found.example.yaml
+docs/postman/collections/Stock Investment Assistant API Copy/api/users/.resources/Get a user by id or email.resources/examples/User service unavailable.example.yaml
+docs/postman/collections/Stock Investment Assistant API Copy/api/users/{userId}/.resources/definition.yaml
+docs/postman/collections/Stock Investment Assistant API Copy/api/users/{userId}/profile/Update an existing user's profile.request.yaml
+docs/postman/collections/Stock Investment Assistant API Copy/api/users/{userId}/profile/.resources/definition.yaml
+docs/postman/collections/Stock Investment Assistant API Copy/api/users/{userId}/profile/.resources/Update an existing user's profile.resources/examples/Invalid profile payload.example.yaml
+docs/postman/collections/Stock Investment Assistant API Copy/api/users/{userId}/profile/.resources/Update an existing user's profile.resources/examples/Server error while updating profile.example.yaml
+docs/postman/collections/Stock Investment Assistant API Copy/api/users/{userId}/profile/.resources/Update an existing user's profile.resources/examples/Updated user document.example.yaml
+docs/postman/collections/Stock Investment Assistant API Copy/api/users/{userId}/profile/.resources/Update an existing user's profile.resources/examples/User not found.example.yaml
+docs/postman/collections/Stock Investment Assistant API Copy/api/users/{userId}/profile/.resources/Update an existing user's profile.resources/examples/User service unavailable.example.yaml
+docs/postman/globals/workspace.globals.yaml
+docs/.postman/resources.yaml
+.specify/init-options.json
+.specify/integration.json
