@@ -1,0 +1,388 @@
+{
+  "workflow": "speckit",
+  "specName": "Tool System Integration and Verification",
+  "branch": "feature/tool-integration-and-verification",
+  "currentStep": "implement",
+  "status": "completed",
+  "history": [
+    {
+      "step": "specify",
+      "substep": null,
+      "kind": "start",
+      "by": "extension",
+      "at": "2026-07-15T08:41:02.743Z"
+    },
+    {
+      "step": "specify",
+      "substep": null,
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-07-15T08:42:39.771Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-07-15T09:16:25.172Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T005a",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-07-15T09:35:47.106Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T005b",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-07-15T09:36:29.719Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T005c",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-07-15T09:36:52.186Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T005d",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-07-15T09:41:18.056Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T005e",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-07-15T09:41:33.318Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T005g",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-07-15T09:41:33.675Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T005h",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-07-15T09:41:39.175Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T006",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-07-15T09:41:56.107Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T007",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-07-15T09:41:58.017Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T008",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-07-15T09:41:58.281Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T013",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-07-15T09:41:58.565Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T017",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-07-15T09:41:58.903Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T021",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-07-15T09:42:04.761Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T026",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-07-15T09:42:05.123Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T028",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-07-15T09:42:05.526Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T033",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-07-15T09:42:18.811Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T046",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-07-15T09:42:19.878Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T047",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-07-15T09:42:20.135Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T049",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-07-15T09:42:23.579Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T050",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-07-15T09:42:34.089Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "kind": "start",
+      "by": "ai",
+      "at": "2026-07-15T09:43:48.971Z"
+    }
+  ],
+  "last_action": "all tasks done — executing mark-complete",
+  "coverage": {
+    "TSIV-FR-001": {
+      "title": "The feature MUST verify integrated behavior across the verified M2B.1, M2B.2, and M2B.3 tool-system baselines without redefining those predecessor feature scopes."
+    },
+    "TSIV-FR-019": {
+      "title": "Verify all seven provider classes produce correct admission, fallback, and degraded-state behavior per their architectural authority level"
+    },
+    "TSIV-FR-020": {
+      "title": "Verify tool risk class declaration, gateway enforcement, and prompt policy cannot reclassify below registry-declared class"
+    },
+    "TSIV-FR-021": {
+      "title": "Verify raw provider payloads, chart widgets, tool descriptors, and document instructions not injected into prompt assembly"
+    },
+    "TSIV-FR-022": {
+      "title": "Verify StockSymbolTool separated from live market-data retrieval"
+    },
+    "TSIV-FR-023": {
+      "title": "Verify ToolGateway does not contain provider-specific parsing logic"
+    },
+    "TSIV-FR-024": {
+      "title": "Verify ToolRegistry remains the authoritative inventory boundary"
+    },
+    "TSIV-FR-025": {
+      "title": "Verify STM checkpoints and conversation stores do not retain market facts"
+    }
+  },
+  "size": "normal",
+  "scopeSignal": null,
+  "projectedFiles": 18,
+  "projectedTasks": 25,
+  "intent": "Integrated verification of M2B.1, M2B.2, and M2B.3 tool-system capabilities — ensuring descriptors, route filtering, gateway admission, provider policy, normalized outputs, TradingView provenance, and Vietnamese/mixed-language routing work together as one coherent agent capability set",
+  "expectations": [
+    "No public REST/SSE/Socket.IO/OpenAPI contract changes",
+    "No generic web fetch, reporting persistence, remote/MCP-style admission, production symbol-store writes, or production provider enablement",
+    "No second agent runtime or separate gateway service",
+    "No full report composition or persistence"
+  ],
+  "cross_review_complete": "2026-07-15",
+  "cross_review_findings": "3 anchor fixes, 1 NFR/CON anchor expansion, 1 risk-class clarification, 1 constitution check added",
+  "currentTask": "T050",
+  "task_summaries": {
+    "T005a": {
+      "status": "DONE",
+      "did": "Verified runtime dependencies: docker-compose.yml, config.yaml, .env all present",
+      "files": [
+        "docker-compose.yml",
+        "config/config.yaml",
+        ".env"
+      ]
+    },
+    "T005b": {
+      "status": "DONE",
+      "did": "Started MongoDB and Redis containers, both healthy",
+      "files": [
+        "docker-compose.yml"
+      ]
+    },
+    "T005c": {
+      "status": "DONE",
+      "did": "DB migration complete: all collections, indexes, and schema validations created",
+      "files": [
+        "src/data/migration/db_setup.py"
+      ]
+    },
+    "T005d": {
+      "status": "DONE",
+      "did": "Started API server, verified startup",
+      "files": [
+        "src/main.py"
+      ]
+    },
+    "T005e": {
+      "status": "DONE",
+      "did": "Health endpoint GET /api/health returns 200 {status:healthy}",
+      "files": [
+        "src/main.py"
+      ]
+    },
+    "T005g": {
+      "status": "DONE",
+      "did": "Verified tool system active via config endpoint",
+      "files": [
+        "src/main.py",
+        "src/core/stock_assistant_agent.py"
+      ]
+    },
+    "T005h": {
+      "status": "DONE",
+      "did": "Server stopped cleanly, no orphaned processes",
+      "files": [
+        "docker-compose.yml"
+      ]
+    },
+    "T006": {
+      "status": "DONE",
+      "did": "Created integration test module with 61 tests across 7 classes",
+      "files": [
+        "tests/test_tool_system_integration.py"
+      ]
+    },
+    "T007": {
+      "status": "DONE",
+      "did": "Added 12 integrated readiness scenarios covering full pipeline",
+      "files": [
+        "tests/fixtures/integration/scenarios.py"
+      ]
+    },
+    "T008": {
+      "status": "DONE",
+      "did": "Added 2 degraded gateway path scenarios",
+      "files": [
+        "tests/fixtures/integration/scenarios.py"
+      ]
+    },
+    "T013": {
+      "status": "DONE",
+      "did": "Added evidence audit tests for source attribution completeness",
+      "files": [
+        "tests/test_tool_system_integration.py"
+      ]
+    },
+    "T017": {
+      "status": "DONE",
+      "did": "Added public response safety and credential leak tests",
+      "files": [
+        "tests/test_tool_system_integration.py"
+      ]
+    },
+    "T021": {
+      "status": "DONE",
+      "did": "Added route regression tests for all expected route categories",
+      "files": [
+        "tests/test_tool_system_integration.py"
+      ]
+    },
+    "T026": {
+      "status": "DONE",
+      "did": "Added route-tool exposure validation tests",
+      "files": [
+        "tests/test_tool_system_integration.py"
+      ]
+    },
+    "T028": {
+      "status": "DONE",
+      "did": "Added TradingView VisualizationProvenance classification tests",
+      "files": [
+        "tests/test_tool_system_integration.py"
+      ]
+    },
+    "T033": {
+      "status": "DONE",
+      "did": "Verified all 7 provider classes, 4 risk classes, prompt safety, symbol separation, gateway purity, registry integrity, STM evidence freedom",
+      "files": [
+        "tests/test_tool_system_integration.py",
+        "tests/fixtures/integration/provider_classes.py",
+        "tests/fixtures/integration/boundary_cases.py"
+      ]
+    },
+    "T046": {
+      "status": "DONE",
+      "did": "Integration test module: 61/61 scenarios pass",
+      "files": [
+        "tests/test_tool_system_integration.py"
+      ]
+    },
+    "T047": {
+      "status": "DONE",
+      "did": "Scope boundaries verified: single runtime, no API changes, no deferred features enabled",
+      "files": [
+        "tests/test_tool_system_integration.py"
+      ]
+    },
+    "T049": {
+      "status": "DONE",
+      "did": "OpenAPI validated: no integration-verification endpoints, 21 paths unchanged",
+      "files": [
+        "docs/openapi.yaml"
+      ]
+    },
+    "T050": {
+      "status": "DONE",
+      "did": "Imports validated: no relative imports, all use core.* or tests.*",
+      "files": [
+        "tests/test_tool_system_integration.py"
+      ]
+    }
+  },
+  "last_test_result": "168 passed (107 M2B + 61 integration)",
+  "last_coverage": "75.58%",
+  "last_sync_gate": "PASS"
+}
