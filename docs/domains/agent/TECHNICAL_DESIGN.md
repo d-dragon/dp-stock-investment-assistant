@@ -1,6 +1,6 @@
 # Agent Domain — Technical Design
 
-> **Status**: Scaffolded from current agent architecture material and ready for iterative refinement.
+> **Status**: Active — tool-system realization updated to reflect delivered implementation evidence. Prompt system, STM, and routing sections remain current from earlier M1/M2/STM implementations.
 > **Standards Stance**: Aligned design practice
 > **Technology Stack**: LangGraph 0.2.62+, LangChain, OpenAI SDK, semantic-router, MongoDB, Redis
 > **Companion Documents**: [ARCHITECTURE_DESIGN.md](./ARCHITECTURE_DESIGN.md), [SOFTWARE_REQUIREMENTS_SPECIFICATION.md](./SOFTWARE_REQUIREMENTS_SPECIFICATION.md), [SRS_SPEC_TRACEABILITY.md](./SRS_SPEC_TRACEABILITY.md), [AGENT_MEMORY_TECHNICAL_DESIGN.md](./AGENT_MEMORY_TECHNICAL_DESIGN.md), [PROMPT_SYSTEM_RESEARCH_PROPOSAL.md](./PROMPT_SYSTEM_RESEARCH_PROPOSAL.md), [TOOLS_RESEARCH_AND_PROPOSAL.md](./TOOLS_RESEARCH_AND_PROPOSAL.md), [spec-sync-status.md](../../../specs/spec-sync-status.md), [ADR-AGENT-001-LAYERED-LLM-ARCHITECTURE.md](./DECISIONS/ADR-AGENT-001-LAYERED-LLM-ARCHITECTURE.md), [ADR-AGENT-002-SKILLS-PATTERN-PROMPT-COMPOSITION.md](./DECISIONS/ADR-AGENT-002-SKILLS-PATTERN-PROMPT-COMPOSITION.md), [ADR-AGENT-003-EXTERNALIZE-VERSION-PROMPT-ASSETS.md](./DECISIONS/ADR-AGENT-003-EXTERNALIZE-VERSION-PROMPT-ASSETS.md), [ADR-AGENT-004-THIN-TOOL-GATEWAY-AND-NORMALIZED-TOOL-CONTEXT.md](./DECISIONS/ADR-AGENT-004-THIN-TOOL-GATEWAY-AND-NORMALIZED-TOOL-CONTEXT.md)
@@ -12,7 +12,7 @@
 | Project | DP Stock Investment Assistant |
 | Domain | Agent |
 | Focus | Technical realization of the LangChain ReAct agent domain, including orchestration, memory, prompt composition, and fallback behavior |
-| Date | 2026-05-27 |
+| Date | 2026-07-16 |
 | Status | Active working scaffold |
 | Audience | Engineering, architecture, agent maintainers, and reviewers |
 
@@ -112,7 +112,7 @@ src/core/
 ├── grok_model_client.py        # Grok (xAI) implementation
 ├── data_manager.py             # Yahoo Finance data fetching
 └── tools/
-    ├── base.py                 # CachingTool base class
+    ├── base.py                 # AgentTool base class (was CachingTool)
     ├── registry.py             # ToolRegistry singleton
     ├── stock_symbol.py         # Stock lookup tool
     ├── tradingview.py          # TradingView placeholder (Phase 2)
@@ -217,19 +217,19 @@ flowchart LR
 	Factory -->|"model inference interface"| Providers["OpenAIModelClient / GrokModelClient"]
 ```
 
-Phase 2B keeps this current runtime shape and adds a target tool-system overlay rather than a second agent runtime. The target path is:
+Phase 2B keeps this current runtime shape and adds a tool-system overlay rather than a second agent runtime. The implemented path is:
 
 ```mermaid
 flowchart LR
 	Agent["StockAssistantAgent"]
 	Router["stock_query_router\nroute + locale context"]
-	Surface["ToolSurfaceBuilder\ntarget pre-model exposure"]
-	ReAct["LangGraph ReAct runtime\ncurrent single agent"]
-	Gateway["ToolGateway\ntarget in-process admission"]
-	Registry["ToolRegistry\ncurrent inventory"]
-	Tool["Current CachingTool /\nTarget AgentTool"]
-	Output["NormalizedOutput\ntarget result classification"]
-	Pack["ToolContextPack\ntarget request-scoped context"]
+	Surface["ToolSurfaceBuilder\npre-model exposure"]
+	ReAct["LangGraph ReAct runtime"]
+	Gateway["ToolGateway\nin-process admission"]
+	Registry["ToolRegistry"]
+	Tool["AgentTool\ndescriptor-backed cache-aware tools"]
+	Output["NormalizedOutput\nresult classification"]
+	Pack["ToolContextPack\nrequest-scoped context"]
 
 	Agent --> Router --> Surface
 	Registry -->|"inventory + descriptors"| Surface
@@ -237,7 +237,7 @@ flowchart LR
 	ReAct -->|"selected tool call"| Gateway --> Registry --> Tool --> Output --> Pack --> Agent
 ```
 
-This overlay is target-state Phase 2B design. It does not claim `ToolSurfaceBuilder`, `ToolGateway`, `AgentTool`, provider adapters, normalizers, or `ToolContextPack` exist in the current runtime.
+This overlay includes descriptor inventory, route-filtered surface, gateway admission, provider policy, normalized outputs, `ToolContextPack`, internal symbol-store lookup, Vietnam market-data tools, and TradingView visualization provenance.
 
 The current realization of those canonical interfaces is:
 
@@ -251,9 +251,9 @@ The current realization of those canonical interfaces is:
 | Intent classification interface | The runtime consults `stock_query_router` as the query classification boundary, keeping intent selection separate from provider binding and tool execution | `src/core/stock_query_router.py`, runtime routing flow |
 | Behavioral policy interface | `PromptAssetLoader` (M1) resolves versioned assets in the current runtime; `PromptAssembler` (M2) is implemented and tested but requires explicit runtime injection plus `prompts.route_contexts.enabled=true`; `ResponseGuardrailMiddleware` remains planned | `StockAssistantAgent.REACT_SYSTEM_PROMPT` (legacy fallback), `PromptAssetLoader`, `PromptAssembler`, section 3.5 |
 | Provider selection interface | The runtime uses `ModelClientFactory` to resolve provider/model clients and fallback ordering without embedding provider construction logic into route or service code | `ModelClientFactory.get_client()`, `ModelClientFactory.get_fallback_sequence()`, `StockAssistantAgent._select_client()` |
-| Tool invocation interface | The runtime materializes enabled tools from `ToolRegistry`, then passes that governed tool surface into the LangGraph ReAct agent | `get_tool_registry()`, `ToolRegistry.get_enabled_tools()`, `StockAssistantAgent._initialize_tools()`, `_build_agent_executor()` |
+| Tool invocation interface | The runtime materializes a route-filtered tool surface via `ToolSurfaceBuilder`, passes it to the LangGraph ReAct agent, and validates selected calls through `ToolGateway` before registry-backed execution. Normalized outputs are assembled into `ToolContextPack` for prompt input. The full tool invocation pipeline spans descriptors, surface, gateway, provider policy, normalization, context, market-data tools, and visualization provenance. | `get_tool_registry()`, `ToolRegistry.get_enabled_tools()`, `ToolSurfaceBuilder.build_surface()`, `ToolGateway.execute()`, `StockAssistantAgent._initialize_tools()`, `_build_agent_executor()`, `src/core/tools/descriptors.py`, `src/core/tools/surface.py`, `src/core/tools/gateway.py`, `src/core/tools/provider_policy.py`, `src/core/tools/normalization.py`, `src/core/tools/context.py`, `src/core/tools/market_data.py`, `src/core/tools/tradingview_visualization.py` |
 | Conversational state interface | `APIServer` injects the LangGraph checkpointer, and the runtime binds `conversation_id` into `configurable.thread_id` during invoke so checkpoints stay conversation-scoped | `create_checkpointer()`, `APIServer.__init__()`, `process_query_structured()`, `_process_with_react()` / streaming invoke path |
-| Cache interaction interface | Cache-aware tools delegate lookup and write-through behavior to `CacheBackend` and Redis without making cache state part of the agent-facing reasoning contract | `CachingTool`, `CacheBackend`, `StockSymbolTool`, `ReportingTool` |
+| Cache interaction interface | Cache-aware tools delegate lookup and write-through behavior to `CacheBackend` and Redis without making cache state part of the agent-facing reasoning contract | `AgentTool`, `CacheBackend`, `StockSymbolTool`, `ReportingTool` |
 | Market data integration interface | Tool implementations invoke `DataManager` as the outbound data-access boundary to Yahoo Finance, keeping all market data retrieval behind the tooling surface | `src/core/data_manager.py`, `DataManager`, `StockSymbolTool` |
 | Model inference interface | Provider-specific client classes encapsulate the outbound call contract to OpenAI or Grok once the factory has selected the provider/model binding | `OpenAIModelClient`, `GrokModelClient`, `BaseModelClient` |
 
@@ -263,72 +263,70 @@ This split keeps the architecture package disciplined. The architecture descript
 
 Refs: [ARCHITECTURE_DESIGN.md section 4.1.1a](./ARCHITECTURE_DESIGN.md#411a-external-and-internal-interface-diagram-architecture-level); [ARCHITECTURE_DESIGN.md section 4.2.2a](./ARCHITECTURE_DESIGN.md#422a-logical-component-interface-view); [ADR-004](./DECISIONS/ADR-AGENT-004-THIN-TOOL-GATEWAY-AND-NORMALIZED-TOOL-CONTEXT.md); SRS FR-2.4-FR-2.11 and AC-9; `src/services/protocols.py`; `src/services/factory.py`; `src/data/repositories/conversation_repository.py`.
 
-### 3.2 Tool System Realization and Target Gateway Flow
+### 3.2 Tool System Realization and Implemented Gateway Flow
 
-Tool invocation currently stays behind the registry boundary. Cache-aware tools decide whether a request can be served from Redis-backed cache before executing their data-access path, and market-data retrieval remains a tool-owned outbound concern rather than an agent memory concern.
-
-The Phase 2B target keeps that current runtime path, then adds a thin in-process exposure and admission layer around it. `ToolSurfaceBuilder` shapes the model-visible tool surface before ReAct invocation; `ToolGateway` validates the selected call after ReAct tool selection; provider selection, normalization, and `ToolContextPack` assembly stay below model-visible tool names.
+Tool invocation passes through the implemented tool gateway infrastructure. `ToolSurfaceBuilder` shapes the model-visible tool surface before ReAct invocation; `ToolGateway` validates the selected call after ReAct tool selection; provider selection, normalization, and `ToolContextPack` assembly operate below model-visible tool names. Internal symbol-store lookup, Vietnam-first market-data tools, and TradingView visualization provenance are available as concrete capabilities behind the same gateway boundary.
 
 ```mermaid
 flowchart TD
 	Agent["StockAssistantAgent"]
-	Route["stock_query_router\ncurrent route classification"]
-	Surface["ToolSurfaceBuilder\ntarget route-filtered exposure"]
-	ReAct["LangGraph ReAct runtime\ncurrent single agent"]
-	Gateway["ToolGateway\ntarget admission boundary"]
-	Registry["ToolRegistry\ncurrent inventory"]
-	Tool["Current CachingTool /\nTarget AgentTool"]
-	Cache["CacheBackend / Redis\ncurrent cache surface"]
-	CurrentData["DataManager + repositories\ncurrent data path"]
-	TargetOutput["NormalizedOutput + ToolContextPack\ntarget prompt input"]
+	Route["stock_query_router\nroute classification"]
+	Surface["ToolSurfaceBuilder\nroute-filtered exposure"]
+	ReAct["LangGraph ReAct runtime"]
+	Gateway["ToolGateway\nadmission boundary"]
+	Registry["ToolRegistry\ninventory"]
+	Tool["AgentTool + evolved tools\n(descriptor-backed)"]
+	Cache["CacheBackend / Redis"]
+	DataSources["DataManager + SymbolRepository\n+ Vietnam providers"]
+	NormalizedOutput["NormalizedOutput + ToolContextPack"]
 
 	Agent --> Route --> Surface
 	Registry -->|"inventory + descriptors"| Surface
 	Surface --> ReAct
 	ReAct -->|"selected tool call"| Gateway --> Registry --> Tool
 	Tool --> Cache
-	Tool --> CurrentData
-	Tool --> TargetOutput --> Agent
+	Tool --> DataSources
+	Tool --> NormalizedOutput --> Agent
 ```
 
-Refs: SRS FR-2.1-FR-2.5; [ADR-004](./DECISIONS/ADR-AGENT-004-THIN-TOOL-GATEWAY-AND-NORMALIZED-TOOL-CONTEXT.md); [ARCHITECTURE_DESIGN.md section 4.3.4](./ARCHITECTURE_DESIGN.md#434-tool-provider-selection-and-fallback-view); `src/core/tools/base.py`; `src/core/tools/registry.py`; `src/core/tools/stock_symbol.py`; `src/core/tools/reporting.py`; `src/core/tools/tradingview.py`; `src/core/data_manager.py`; `src/utils/cache.py`; `tests/test_tools.py`.
+Refs: SRS FR-2.1-FR-2.5; [ADR-004](./DECISIONS/ADR-AGENT-004-THIN-TOOL-GATEWAY-AND-NORMALIZED-TOOL-CONTEXT.md); [ARCHITECTURE_DESIGN.md section 4.3.4](./ARCHITECTURE_DESIGN.md#434-tool-provider-selection-and-fallback-view); `src/core/tools/descriptors.py`, `src/core/tools/surface.py`, `src/core/tools/gateway.py`, `src/core/tools/provider_policy.py`, `src/core/tools/normalization.py`, `src/core/tools/context.py`, `src/core/tools/market_data.py`, `src/core/tools/tradingview_visualization.py`, `src/core/tools/stock_symbol.py`; `tests/test_tool_gateway_m2b1.py`, `tests/test_stock_symbol_m2b2.py`, `tests/test_tool_normalization_m2b2.py`, `tests/test_market_data_tools.py`.
 
-#### 3.2.1 Current-to-Target Tool Boundary
+#### 3.2.1 Current Tool Boundary Implementation
 
-| Area | Current State | Target Phase 2B State | Future / Not Yet Admitted |
-|------|---------------|-----------------------|----------------------------|
-| Agent-visible tool surface | `StockAssistantAgent` builds the ReAct agent from `ToolRegistry.get_enabled_tools()` | `ToolSurfaceBuilder` builds a compact route-filtered model-visible tool list before ReAct invocation | Remote/MCP tool admission only after descriptor integrity and operational need exist |
-| Tool execution base | `CachingTool` subclasses provide LangChain-compatible execution and cache write-through | `AgentTool` becomes the target architectural name for descriptor-backed, cache-aware tool execution while preserving current behavior | Full rename or wrapper is implementation-spec work |
-| Execution admission | Tool selection is governed primarily by registry enablement and LangChain tool schema | Thin in-process `ToolGateway.execute(route, tool_name, args)` validates route, arguments, risk, license, freshness, timeout, descriptor integrity, and provider state | High-risk mutation paths require explicit authorization and confirmation policy |
-| Provider access | `StockSymbolTool` can call `DataManager` for Yahoo-backed live data and fall back to `SymbolRepository` | Provider choice moves below tools through `ProviderSelectionPolicy` and provider adapters; Vietnam-first providers are target for market-data tools | Generic web fetch remains deny-by-default and only normalized evidence when admitted |
-| Symbol data ownership | `StockSymbolTool` mixes live price lookup and repository metadata fallback | `StockSymbolTool` targets in-system symbol lookup, normalization, aliases, coverage, tags, and internal metadata through a symbol-store boundary | Symbol-store writes remain disabled until mutation policy and `MutationReceipt` behavior exist |
-| Tool outputs | Raw dict-like tool results return to the agent loop | Results are wrapped or normalized into admitted output kinds and assembled into request-scoped `ToolContextPack` | `ToolContextPack` is not persisted wholesale as memory or market truth |
-| TradingView | Placeholder tool raises `NotImplementedError` | `TradingViewTool` returns chart/widget/deep-link payloads as `VisualizationProvenance` | TradingView numeric values are not evidence unless a future approved policy admits them |
-| Reporting | Scaffold returns placeholder markdown | `ReportingTool` composes from `ToolContextPack`, visualization provenance, generated artifacts, warnings, and degraded states | Direct provider scraping from reports remains out of bounds |
+| Area | Current State | Future / Not Yet Admitted |
+|------|----------------------------------------|----------------------------|
+| Agent-visible tool surface | `ToolSurfaceBuilder` builds a compact route-filtered model-visible tool list before ReAct invocation | Remote/MCP tool admission only after descriptor integrity and operational need exist |
+| Tool execution base | `AgentTool` subclasses provide LangChain-compatible execution and cache write-through; descriptor terminology is integrated alongside tool implementation | — |
+| Execution admission | Thin in-process `ToolGateway.execute(route, tool_name, args)` validates route, arguments, risk, license, freshness, timeout, descriptor integrity, and provider state | High-risk mutation paths require explicit authorization and confirmation policy |
+| Provider access | Provider choice moves below tools through `ProviderSelectionPolicy` and provider adapters; Vietnam-first providers implemented for market-data tools | Generic web fetch remains deny-by-default and only normalized evidence when admitted |
+| Symbol data ownership | `StockSymbolTool` uses internal symbol-store lookup, normalization, aliases, coverage, tags, and stored metadata through a symbol-store boundary | Symbol-store writes remain disabled until mutation policy and `MutationReceipt` behavior exist |
+| Tool outputs | Results are wrapped or normalized into admitted output kinds and assembled into request-scoped `ToolContextPack` | `ToolContextPack` is not persisted wholesale as memory or market truth |
+| TradingView | `TradingViewTool` returns chart/widget/deep-link payloads as `VisualizationProvenance` | TradingView numeric values are not evidence unless a future approved policy admits them |
+| Reporting | Scaffold returns placeholder markdown | Report composition from `ToolContextPack`, visualization provenance, generated artifacts, warnings, and degraded states — pending implementation |
 
 Refs: SRS FR-2.4-FR-2.11, AC-9, IR-3, CON-6-CON-10; [PHASE_2_AGENT_ENHANCEMENT_ROADMAP.md section 2B](./PHASE_2_AGENT_ENHANCEMENT_ROADMAP.md#phase-2b-enhanced-tool-system-feature-implementations); [ADR-004](./DECISIONS/ADR-AGENT-004-THIN-TOOL-GATEWAY-AND-NORMALIZED-TOOL-CONTEXT.md); [SRS_SPEC_TRACEABILITY.md](./SRS_SPEC_TRACEABILITY.md); `src/core/tools`.
 
-#### 3.2.2 Target Phase 2B Runtime Flow
+#### 3.2.2 Implemented Runtime Flow
 
-The target flow is a logical in-process realization path. It preserves the current LangChain/LangGraph ReAct runtime and registry-backed execution while adding policy, provider, normalization, and context boundaries.
+The implemented flow preserves the LangChain/LangGraph ReAct runtime and registry-backed execution while adding policy, provider, normalization, context, Vietnam market-data, and TradingView visualization boundaries.
 
 ```mermaid
 flowchart TD
 	Query["User query"] --> Route["stock_query_router\nroute + confidence"]
 	Route --> Surface["ToolSurfaceBuilder\nroute-filtered tool surface"]
 	Registry -->|"inventory + descriptors"| Surface
-	Surface --> ReAct["LangGraph ReAct runtime\nsingle agent"]
+	Surface --> ReAct["LangGraph ReAct runtime"]
 	ReAct -->|"selected tool call"| Gateway["ToolGateway.execute(route, tool_name, args)"]
 	Gateway --> Admission{"Admission passes?"}
 	Admission -- "No" --> Degraded["DegradedState\nblocked / stale / license / invalid"]
-	Admission -- "Yes" --> Registry["ToolRegistry\ncurrent inventory"]
-	Registry --> AgentTool["Current CachingTool /\nTarget AgentTool"]
+	Admission -- "Yes" --> Registry["ToolRegistry\ninventory"]
+	Registry --> AgentTool["AgentTool + evolved tools\n(descriptor-backed)"]
 	AgentTool --> InSystem["In-system records\nsymbol store / snapshots"]
-	AgentTool --> ProviderPolicy["ProviderSelectionPolicy\nmarket-data tools only"]
-	ProviderPolicy --> Adapter["ProviderAdapter\nVietnam-native / official / licensed / fallback"]
-	AgentTool --> Viz["Visualization payload\nTradingView"]
-	AgentTool --> Artifact["Generated artifact / report section"]
-	InSystem --> Normalizer["EvidenceNormalizer\noutput kind + source metadata"]
+	AgentTool --> ProviderPolicy["ProviderSelectionPolicy\nmarket-data tools"]
+	ProviderPolicy --> Adapter["ProviderAdapter\nVietnam-first / official / licensed / fallback"]
+	AgentTool --> Viz["Visualization provenance\nTradingView"]
+	AgentTool --> Artifact["Generated artifact / report section\n(scaffold)"]
+	InSystem --> Normalizer["Normalizer\noutput kind + source metadata"]
 	Adapter --> Normalizer
 	Viz --> Normalizer
 	Artifact --> Normalizer
@@ -343,6 +341,7 @@ Runtime invariants:
 2. Raw provider payloads, raw web content, and page instructions do not enter prompt context.
 3. Market facts carry source, timestamp, exchange, currency, freshness, license posture, and degraded-state warnings when applicable.
 4. Cache hits preserve freshness and source metadata rather than hiding stale or license-unclear data.
+5. Vietnam market-data tools and TradingView visualization provenance are model-visible only through the route-filtered surface and gateway.
 
 ##### Tool Call Persistence Decision Flow
 
@@ -390,51 +389,51 @@ sequenceDiagram
 
 #### 3.2.3 Tool and Adapter Responsibility Split
 
-| Model-Visible Tool Family | Target Responsibility | Internal Adapter / Provider Class | Boundary Rule |
-|---------------------------|-----------------------|-----------------------------------|---------------|
-| `StockSymbolTool` | In-system symbol lookup, normalization, aliases, exchange/currency identity, coverage, tags, and stored metadata | `InternalSymbolStoreAdapter`, `SymbolRepository`, optional stored-snapshot adapter | No Yahoo/DataManager ownership for target live market data |
+| Model-Visible Tool Family | Delivered Responsibility | Internal Adapter / Provider Class | Boundary Rule |
+|---------------------------|-------------------------|-----------------------------------|---------------|
+| `StockSymbolTool` | In-system symbol lookup, normalization, aliases, exchange/currency identity, coverage, tags, and stored metadata | `InternalSymbolStoreAdapter`, `SymbolRepository`, optional stored-snapshot adapter | No Yahoo/DataManager ownership; live quote/history/fundamentals moved to market-data tools |
 | Market-data tools | Quotes, history, fundamentals, market breadth, flow, disclosures, and corporate actions | Vietnam-native, official exchange/depository, licensed commercial, public-web, wrapper/prototype, and international-fallback adapters | Provider order and fallback are internal policy, not model-visible choices |
 | `TradingViewTool` | Chart URLs, widget payloads, symbol validation, ticker tape, heatmap/screener payloads where supported | TradingView visualization adapter | Returns `VisualizationProvenance`; not canonical evidence by default |
-| `ReportingTool` | Report composition and generated artifact metadata | `ToolContextPack`, artifact metadata store, report storage boundary | Consumes normalized inputs; does not fetch or scrape providers directly |
-| `GenericWebFetchTool` | Allowlisted public-web evidence retrieval when concrete tools cannot cover a source | Generic web fetch policy, parser/extractor, citation normalizer | Deny-by-default and produces `EvidenceSnippet` or `EvidenceDocument` only |
+| `ReportingTool` | Report composition and generated artifact metadata — scaffold only | `ToolContextPack`, artifact metadata store, report storage boundary | Consumes normalized inputs; does not fetch or scrape providers directly |
+| `GenericWebFetchTool` | Allowlisted public-web evidence retrieval when concrete tools cannot cover a source | Generic web fetch policy, parser/extractor, citation normalizer | Deny-by-default and produces `EvidenceSnippet` or `EvidenceDocument` only — pending implementation |
 
-Refs: SRS FR-2.6-FR-2.11, IR-3; [ARCHITECTURE_DESIGN.md section 4.3.4](./ARCHITECTURE_DESIGN.md#434-tool-provider-selection-and-fallback-view); [TOOLS_RESEARCH_AND_PROPOSAL.md](./TOOLS_RESEARCH_AND_PROPOSAL.md); `src/core/tools/stock_symbol.py`; `src/core/tools/tradingview.py`; `src/core/tools/reporting.py`.
+Refs: SRS FR-2.6-FR-2.11, IR-3; [ARCHITECTURE_DESIGN.md section 4.3.4](./ARCHITECTURE_DESIGN.md#434-tool-provider-selection-and-fallback-view); [TOOLS_RESEARCH_AND_PROPOSAL.md](./TOOLS_RESEARCH_AND_PROPOSAL.md); `src/core/tools/stock_symbol.py`; `src/core/tools/tradingview.py`; `src/core/tools/market_data.py`; `src/core/tools/reporting.py`.
 
-#### 3.2.4 Target Tool Contract and Failure Realization
+#### 3.2.4 Implemented Tool Contract and Failure Realization
 
-The following tables describe target realization ownership only. They do not replace SRS `IR-3`, executable contracts, or implementation specs.
+The following tables describe the implemented contracts.
 
-| Target Contract | Target Runtime Owner | Validation / Assembly Point | Persistence and Authority Rule |
-|-----------------|----------------------|-----------------------------|--------------------------------|
-| `ToolCapabilityDescriptor` | `ToolSurfaceBuilder` | Before pre-model tool exposure | Model-visible only; no credentials, provider fallback, license policy, or parser limits |
-| `ToolPolicyDescriptor` | `ToolGateway` | Before execution admission | Internal policy only; traced by descriptor version or integrity marker |
-| `ProviderAdapterDescriptor` | `ProviderSelectionPolicy` | Before provider-backed adapter execution | Hidden from the model; carries provider class, license posture, freshness, and credential owner |
-| `ProviderSelectionPolicy` | Provider-backed `AgentTool` families | Provider order, fallback, market-session, freshness, timeout, and fail-closed checks | No admissible provider returns `DegradedState`; provider choice is not prompt-controlled |
-| `ToolExecutionEnvelope` | `ToolGateway` | Around every governed tool call | Request-scoped trace, admission outcome, cache/freshness status, warnings, and degraded reason |
-| `NormalizedOutput` | `EvidenceNormalizer` | After tool execution and before prompt assembly | Only admitted output kinds enter `ToolContextPack` |
-| `ToolContextPack` | Prompt assembly boundary | After normalization and before LLM context assembly | Request-scoped data-only context; not persisted wholesale as memory or market truth |
-| `GenericWebFetchPolicy` | `GenericWebFetchTool` and parser adapter | Before fetch and after extraction | Deny-by-default; raw HTML, PDF bytes, scripts, hidden text, and page instructions stay outside prompt context |
-| `MutationReceipt` | Mutation policy boundary | After approved `workflow_mutation` / `internal_state_mutation` execution | Retained as audit metadata for approved mutations; unauthorized mutations are blocked or degraded |
-| `ArtifactMetadata` | `ReportingTool` and artifact storage boundary | When report/export/document/chart artifacts are retained | Stores URI/reference, retention class, checksum where available, and source lineage |
+| Contract | Runtime Owner | Validation / Assembly Point | Persistence and Authority Rule | Implementation |
+|----------|---------------|-----------------------------|--------------------------------|----------------|
+| `ToolCapabilityDescriptor` | `ToolSurfaceBuilder` | Before pre-model tool exposure | Model-visible only; no credentials, provider fallback, license policy, or parser limits | `src/core/tools/descriptors.py` |
+| `ToolPolicyDescriptor` | `ToolGateway` | Before execution admission | Internal policy only; traced by descriptor version or integrity marker | `src/core/tools/descriptors.py` |
+| `ProviderAdapterDescriptor` | `ProviderSelectionPolicy` | Before provider-backed adapter execution | Hidden from the model; carries provider class, license posture, freshness, and credential owner | `src/core/tools/provider_policy.py` |
+| `ProviderSelectionPolicy` | Provider-backed `AgentTool` families | Provider order, fallback, market-session, freshness, timeout, and fail-closed checks | No admissible provider returns `DegradedState`; provider choice is not prompt-controlled | `src/core/tools/provider_policy.py` |
+| `ToolExecutionEnvelope` | `ToolGateway` | Around every governed tool call | Request-scoped trace, admission outcome, cache/freshness status, warnings, and degraded reason | `src/core/tools/gateway.py` |
+| `NormalizedOutput` | Normalizer | After tool execution and before prompt assembly | Only admitted output kinds enter `ToolContextPack` | `src/core/tools/normalization.py` |
+| `ToolContextPack` | Prompt assembly boundary | After normalization and before LLM context assembly | Request-scoped data-only context; not persisted wholesale as memory or market truth | `src/core/tools/context.py` |
+| `GenericWebFetchPolicy` | `GenericWebFetchTool` and parser adapter | Before fetch and after extraction | Deny-by-default; raw HTML, PDF bytes, scripts, hidden text, and page instructions stay outside prompt context | Pending implementation |
+| `MutationReceipt` | Mutation policy boundary | After approved `workflow_mutation` / `internal_state_mutation` execution | Retained as audit metadata for approved mutations; unauthorized mutations are blocked or degraded | `src/core/tools/mutation_receipts.py` (disabled by default) |
+| `ArtifactMetadata` | `ReportingTool` and artifact storage boundary | When report/export/document/chart artifacts are retained | Stores URI/reference, retention class, checksum where available, and source lineage | Not yet implemented |
 
-| Failure / Guard | Target Detection Point | Target Result |
-|-----------------|------------------------|---------------|
-| Route-tool mismatch or disallowed risk class | `ToolSurfaceBuilder` before exposure; `ToolGateway` before execution | Tool is not exposed, or selected call returns `DegradedState` |
-| Invalid or missing tool arguments | `ToolGateway` schema and admission validation | Execution is blocked with validation warning and `DegradedState` |
-| Descriptor drift, tampering, or unapproved remote descriptor | `ToolSurfaceBuilder` and `ToolGateway` descriptor-integrity check | Tool is not exposed or executed; trace records descriptor version/hash mismatch |
-| License-unclear provider or unsupported credential scope | `ProviderSelectionPolicy` | Fail closed with `DegradedState`; no silent provider substitution |
-| Stale cache or stale provider data | `AgentTool` cache path and `ProviderSelectionPolicy` freshness check | Refresh from admissible provider, or return stale-data `DegradedState` with source metadata |
-| Provider outage, timeout, or missing fields | `ProviderAdapter` and `ToolGateway` timeout/error boundary | Try admitted fallback provider when available; otherwise return degraded provider state |
-| Raw web prompt-injection text, parser limit, or blocked domain | `GenericWebFetchTool`, parser adapter, and normalizer | Quarantine page instructions; return normalized snippets/documents or `DegradedState` only |
-| TradingView numeric fact used as evidence | `EvidenceNormalizer` and prompt assembly boundary | Classify as `VisualizationProvenance`; final numeric facts must come from approved evidence or computation tools |
-| Unauthorized symbol-store mutation | `ToolGateway` and mutation policy boundary | Block or degrade; no durable mutation occurs without authorization, confirmation, and audit metadata |
-| Report section lacks source lineage | `ReportingTool` and artifact metadata boundary | Surface warning/degraded state; retained report artifacts preserve lineage for sourced sections |
+| Failure / Guard | Detection Point | Result | Implementation |
+|-----------------|-----------------|--------|----------------|
+| Route-tool mismatch or disallowed risk class | `ToolSurfaceBuilder` before exposure; `ToolGateway` before execution | Tool is not exposed, or selected call returns `DegradedState` | `src/core/tools/surface.py`, `src/core/tools/gateway.py` |
+| Invalid or missing tool arguments | `ToolGateway` schema and admission validation | Execution is blocked with validation warning and `DegradedState` | `src/core/tools/gateway.py` |
+| Descriptor drift, tampering, or unapproved remote descriptor | `ToolSurfaceBuilder` and `ToolGateway` descriptor-integrity check | Tool is not exposed or executed; trace records descriptor version/hash mismatch | `src/core/tools/descriptors.py` |
+| License-unclear provider or unsupported credential scope | `ProviderSelectionPolicy` | Fail closed with `DegradedState`; no silent provider substitution | `src/core/tools/provider_policy.py` |
+| Stale cache or stale provider data | `AgentTool` cache path and `ProviderSelectionPolicy` freshness check | Refresh from admissible provider, or return stale-data `DegradedState` with source metadata | `src/core/tools/provider_policy.py`, `src/core/tools/normalization.py` |
+| Provider outage, timeout, or missing fields | `ProviderAdapter` and `ToolGateway` timeout/error boundary | Try admitted fallback provider when available; otherwise return degraded provider state | Implemented |
+| TradingView numeric fact used as evidence | Normalizer and prompt assembly boundary | Classify as `VisualizationProvenance`; final numeric facts must come from approved evidence or computation tools | `src/core/tools/tradingview_visualization.py` |
+| Unauthorized symbol-store mutation | `ToolGateway` and mutation policy boundary | Block or degrade; no durable mutation occurs without authorization, confirmation, and audit metadata | `src/core/tools/mutation_receipts.py` (disabled by default) |
+| Raw web prompt-injection text, parser limit, or blocked domain | `GenericWebFetchTool`, parser adapter, and normalizer | Quarantine page instructions; return normalized snippets/documents or `DegradedState` only | Pending implementation |
+| Report section lacks source lineage | `ReportingTool` and artifact metadata boundary | Surface warning/degraded state; retained report artifacts preserve lineage for sourced sections | Not yet implemented |
 
 Refs: SRS IR-3, FR-2.4-FR-2.11, AC-9, CON-6-CON-10; [ADR-004](./DECISIONS/ADR-AGENT-004-THIN-TOOL-GATEWAY-AND-NORMALIZED-TOOL-CONTEXT.md); [ARCHITECTURE_DESIGN.md section 4.3.4](./ARCHITECTURE_DESIGN.md#434-tool-provider-selection-and-fallback-view); [PHASE_2_AGENT_ENHANCEMENT_ROADMAP.md section 2B](./PHASE_2_AGENT_ENHANCEMENT_ROADMAP.md#phase-2b-enhanced-tool-system-feature-implementations).
 
 #### 3.2.5 Tool Data Model and Persistent Storage Realization
 
-The tool-system data model is a target-state realization view. It uses current MongoDB schemas and filesystem export behavior as anchors, but it does not claim that the target tool metadata collections, artifact paths, or schema overlays are implemented. Executable MongoDB schemas, migrations, and repository classes remain future implementation-spec work.
+The tool-system data model is realized with implemented descriptors, provider policy, normalized outputs, and request-scoped `ToolContextPack`. The target tool metadata collections (tool artifacts, mutation receipts, execution traces) remain design proposals that should be implemented only after a concrete implementation spec defines MongoDB schemas, migrations, repositories, and indexes. Current MongoDB schemas and filesystem export behavior serve as anchors for those future extensions.
 
 ```mermaid
 flowchart LR
@@ -473,7 +472,7 @@ This C4-style storage view is a target realization diagram. It shows component o
 flowchart LR
 	subgraph Runtime["Agent Tool Runtime"]
 		Gateway["ToolGateway\ntarget in-process policy"]
-		Tool["AgentTool\ncurrent CachingTool-compatible execution"]
+		Tool["AgentTool\ncache-aware execution"]
 		Policy["ProviderSelectionPolicy\ntarget provider order"]
 		Adapter["ProviderAdapter\ntarget source integration"]
 		Normalizer["EvidenceNormalizer\ntarget output classification"]
@@ -680,7 +679,7 @@ Filesystem rules:
 
 Refs: SRS FR-2.5, FR-2.10, FR-2.11, IR-3, AC-9, CON-9, CON-10; [ARCHITECTURE_DESIGN.md section 4.4.2](./ARCHITECTURE_DESIGN.md#442-state-and-evidence-allocation-boundaries); [TOOLS_RESEARCH_AND_PROPOSAL.md](./TOOLS_RESEARCH_AND_PROPOSAL.md); `src/data/schema/symbols_schema.py`; `src/data/schema/market_data_schema.py`; `src/data/schema/market_snapshots_schema.py`; `src/data/schema/reports_schema.py`; `src/data/schema/investment_reports_schema.py`; `src/data/schema/conversations_schema.py`; `src/data/schema/agent_checkpoints_schema.py`; `src/data/schema/schema_manager.py`; `src/export/report_exporter.py`; `config/config.yaml`.
 
-#### CachingTool Base Class
+#### AgentTool Base Class
 
 **Location**: `src/core/tools/base.py`
 
@@ -694,7 +693,7 @@ Refs: SRS FR-2.5, FR-2.10, FR-2.11, IR-3, AC-9, CON-9, CON-10; [ARCHITECTURE_DES
 **Key Features**:
 
 ```python
-class CachingTool(BaseTool):
+class AgentTool(BaseTool):
     cache_ttl_seconds: int = 60
     enable_cache: bool = True
 
@@ -749,9 +748,9 @@ The runtime should expose tool risk as first-class control metadata so prompt po
 
 | Risk Class | Current Technical Meaning | Registry / Runtime Requirement | Current Status |
 |------------|---------------------------|-------------------------------|----------------|
-| `read_only_evidence` | Fetches data without mutating durable state | Registry records class; runtime validates arguments and preserves provenance in traces | Supported target for current baseline |
-| `bounded_transformation` | Computes or reformats governed inputs without mutating durable state | Registry records class; runtime validates input and output schema before results re-enter prompt assembly | Supported target for current baseline |
-| `workflow_mutation` | Changes repo-owned or user-owned durable state | Requires service-owned authorization, approval-capable workflow hooks, and audit metadata before enablement | Future only |
+| `read_only_evidence` | Fetches data without mutating durable state | Registry records class; runtime validates arguments and preserves provenance in traces | ✅ Implemented — descriptors and gateway enforce risk-class admission |
+| `bounded_transformation` | Computes or reformats governed inputs without mutating durable state | Registry records class; runtime validates input and output schema before results re-enter prompt assembly | ✅ Implemented — descriptors and gateway enforce risk-class admission |
+| `workflow_mutation` | Changes repo-owned or user-owned durable state | Requires service-owned authorization, approval-capable workflow hooks, and audit metadata before enablement | Future only — mutation receipt structure defined, writes disabled by default |
 | `external_side_effect` | Writes to third-party systems or triggers real-world actions | Requires explicit allowlisting, human approval, and fail-closed defaults before enablement | Not admitted in the current baseline |
 
 Runtime rules:
@@ -1490,48 +1489,48 @@ Refs: [TOOLS_RESEARCH_AND_PROPOSAL.md](./TOOLS_RESEARCH_AND_PROPOSAL.md); [TOOLS
 
 #### Phase 2B Tool-System Extension Path
 
-| Area | Current State | Target Phase 2B Realization |
-|------|---------------|-----------------------------|
-| Tool abstraction | `CachingTool` is the implemented LangChain-compatible base class | `AgentTool` becomes the target architectural name for cache-aware, descriptor-backed tool execution |
-| Tool exposure | ReAct receives all currently enabled registry tools | `ToolSurfaceBuilder` exposes only route-eligible, enabled, policy-admitted tools before model invocation |
-| Execution policy | Registry enablement and tool schema are the main execution controls | Thin in-process `ToolGateway` performs admission, trace, degraded-state, and post-execution validation around registry-backed execution |
-| Provider selection | Current `StockSymbolTool` can call `DataManager` for Yahoo-backed live data | `ProviderSelectionPolicy` chooses provider order, fallback, freshness, licensing, and degraded-state behavior below model-visible tools |
-| Output handling | Tool outputs are raw dict-like payloads returned to the agent loop | Tool results are normalized into output kinds and assembled into request-scoped `ToolContextPack` inputs |
-| Data retention | Cache and repositories hold implementation-specific data | Retained reports, artifacts, snapshots, mutation receipts, and traces preserve source lineage; `ToolContextPack` is not persisted wholesale |
+| Area | Current State | Remaining / Future |
+|------|---------------------------|--------------------|
+| Tool abstraction | `AgentTool` is the implemented base class for cache-aware, descriptor-backed tool execution | — |
+| Tool exposure | `ToolSurfaceBuilder` exposes route-eligible, enabled, policy-admitted tools before model invocation | — |
+| Execution policy | Thin in-process `ToolGateway` performs admission, trace, degraded-state, and post-execution validation around registry-backed execution | — |
+| Provider selection | `ProviderSelectionPolicy` chooses provider order, fallback, freshness, licensing, and degraded-state behavior below model-visible tools | Production provider enablement and licensing hardening remain governed future work |
+| Output handling | Tool results are normalized into output kinds and assembled into request-scoped `ToolContextPack` inputs | — |
+| Data retention | Cache and repositories hold implementation-specific data; retained derivatives preserve source lineage | Report persistence, artifact metadata collections, and production tracing remain deferred |
+| Vietnam market data | `VietnamMarketDataTool` delivers quote/history/OHLCV/indicators/fundamentals/breadth/flow/disclosures/corporate-actions | Live production provider enablement and licensing hardening |
+| TradingView | `TradingViewTool` returns chart/widget/deep-link payloads as `VisualizationProvenance` | TradingView values remain not canonical evidence unless a future policy admits them |
 
-#### `StockSymbolTool` Target Direction
+#### StockSymbolTool Current Direction
 
-The current `StockSymbolTool` uses `DataManager` for Yahoo-backed live data and falls back to `SymbolRepository` for stored metadata. That remains the current implementation fact.
-
-The target Phase 2B direction is different: `StockSymbolTool` becomes the in-system symbol data tool. It should focus on lookup, search, normalization, canonical symbol identity, exchange/currency metadata, aliases, identifiers, coverage, tags, and stored symbol snapshots through an internal symbol-store boundary. Live quote, history, and fundamental retrieval move to separate market-data tools and provider adapters.
+`StockSymbolTool` uses the internal symbol-store boundary via `InternalSymbolStoreAdapter` over `SymbolRepository` for lookup, search, normalization, canonical symbol identity, exchange/currency metadata, aliases, identifiers, coverage, tags, and stored symbol snapshots. Live quote, history, and fundamental retrieval are owned by `VietnamMarketDataTool`.
 
 ```mermaid
 flowchart LR
 	User["Symbol prompt\nFPT / HOSE:FPT / HNX:SHS"]
-	Tool["StockSymbolTool\ntarget in-system symbol tool"]
-	Adapter["InternalSymbolStoreAdapter\ntarget"]
-	Repo["SymbolRepository / symbols collection\ncurrent persistence boundary"]
-	Market["Market-data tools\ntarget quote / history / fundamentals"]
+	Tool["StockSymbolTool\nin-system symbol tool"]
+	Adapter["InternalSymbolStoreAdapter"]
+	Repo["SymbolRepository / symbols collection\npersistence boundary"]
+	Market["VietnamMarketDataTool\nquote / history / fundamentals"]
 
 	User --> Tool --> Adapter --> Repo
-	Tool -. "does not own target live market data" .-> Market
+	Tool -.-> Market
 ```
 
-Target rules:
+Implemented rules:
 
 1. Yahoo/YahooFinance/DataManager is not the target adapter path for the evolved `StockSymbolTool`.
-2. Yahoo and Alpha Vantage may remain international fallback or cross-market comparison providers for external market-data tools when admitted by provider policy.
+2. Yahoo and Alpha Vantage remain international fallback or cross-market comparison providers for external market-data tools when admitted by provider policy.
 3. Symbol-store write actions remain disabled until classified as `workflow_mutation` with `internal_state_mutation`, authorization/confirmation policy, and `MutationReceipt` output.
 
-#### TradingView Target Direction
+#### TradingView Current Direction
 
-`TradingViewTool` is currently a placeholder that raises `NotImplementedError`. In Phase 2B it should generate chart URLs, widget payloads, deep links, ticker-tape payloads, symbol-overview payloads, and heatmap/screener payloads where supported.
-
-TradingView output is `VisualizationProvenance`, not canonical market evidence. Numeric market facts in final answers must come from approved evidence or computation tools unless a future policy explicitly admits a TradingView data category as evidence.
+`TradingViewTool` returns `VisualizationProvenance` for advanced charts, widgets, deep links, symbol validation, ticker tape, heatmaps, and screeners. TradingView output is `VisualizationProvenance`, not canonical market evidence. Numeric market facts in final answers must come from approved evidence or computation tools unless a future policy explicitly admits a TradingView data category as evidence.
 
 #### Reporting Target Direction
 
-`ReportingTool` is currently a scaffold that returns placeholder markdown. In Phase 2B it should compose reports from `ToolContextPack`, `VisualizationProvenance`, `GeneratedArtifact`, warnings, degraded states, and source-attributed facts/snippets/documents.
+> **Status**: Scaffold — reporting persistence and composition remain pending implementation.
+
+`ReportingTool` is currently a scaffold that returns placeholder markdown. In a later phase it should compose reports from `ToolContextPack`, `VisualizationProvenance`, `GeneratedArtifact`, warnings, degraded states, and source-attributed facts/snippets/documents.
 
 Report generation should preserve source lineage for retained report metadata or exported artifacts. It should not scrape providers directly or use unsourced generated analysis as market truth.
 
@@ -1541,17 +1540,15 @@ Persistent report outputs should use MongoDB metadata plus filesystem artifact c
 
 #### Single-Runtime Tool Specialization
 
-**Current**: one LangChain/LangGraph ReAct agent handles all query routes.
-
-**Near-term target**: keep the single runtime and specialize behavior through route classification, prompt skills, route-filtered tool exposure, gateway admission, and normalized tool context.
+**Current**: one LangChain/LangGraph ReAct agent handles all query routes, specialized through route classification, prompt skills, route-filtered tool exposure (`ToolSurfaceBuilder`), gateway admission (`ToolGateway`), provider policy (`ProviderSelectionPolicy`), normalized tool context (`ToolContextPack`), Vietnam market-data tools, and TradingView visualization provenance.
 
 ```mermaid
 flowchart TD
 	Route["stock_query_router\nstatic route taxonomy"]
 	Prompt["PromptAssembler\nimplemented / gated route skills"]
-	Surface["ToolSurfaceBuilder\ntarget route-filtered tools"]
+	Surface["ToolSurfaceBuilder\nroute-filtered tool surface"]
 	ReAct["Single ReAct runtime"]
-	Context["ToolContextPack\ntarget normalized context"]
+	Context["ToolContextPack\nnormalized context"]
 
 	Route --> Prompt
 	Route --> Surface
@@ -1560,7 +1557,7 @@ flowchart TD
 	ReAct --> Context
 ```
 
-Multi-agent orchestration remains future exploration only. It should not be introduced for Phase 2B unless tool, prompt, memory, and data boundaries diverge enough to justify a second runtime.
+Multi-agent orchestration remains future exploration only. It should not be introduced until tool, prompt, memory, and data boundaries diverge enough to justify a second runtime.
 
 #### Structured Output Mode
 
@@ -1651,7 +1648,7 @@ The ADR decisions are realized in phases so memory, retrieval, prompt policy, an
 |------|--------------------|---------------|
 | 1 | Conversation-scoped STM and checkpoint lifecycle | Implemented |
 | 2 | Prompt externalization and composable skills | M1 implemented; M2 implemented / gated |
-| 2B | Tool gateway, provider adapters, normalized tool context, and Vietnam-first data coverage | Target / planned; clarified in SRS v2.8, Phase 2B roadmap, ADR-004, and traceability docs; no implementation spec yet |
+| 2B | Tool gateway, provider adapters, normalized tool context, and Vietnam-first data coverage | Implemented — tool surface, gateway, descriptors, provider policy, normalized outputs, `ToolContextPack`, symbol-store, market-data tools, and TradingView visualization |
 | 3 | Intent-specific retrieval and evidence wiring | Planned / partial by tool path |
 | 4 | Fine-tuning for structure and tone | Planned |
 | 5 | Guardrail observability, streaming guardrails, and experiment controls | Planned |
@@ -1667,23 +1664,23 @@ Refs: [PHASE_2_AGENT_ENHANCEMENT_ROADMAP.md](./PHASE_2_AGENT_ENHANCEMENT_ROADMAP
 | **Factory** | `ModelClientFactory` | Create provider-specific clients |
 | **Factory** | `create_checkpointer()` | Create MongoDBSaver or None based on config |
 | **Singleton** | `ToolRegistry` | Centralized tool management |
-| **Template Method** | `CachingTool._execute()` | Define tool execution skeleton |
+| **Template Method** | `AgentTool._execute()` | Define tool execution skeleton |
 | **Strategy** | `BaseModelClient` subclasses | Interchangeable model providers |
 | **Adapter** | `langchain_adapter.py` | Bridge external prompts to LangChain |
-| **Decorator** | `CachingTool._cached_run()` | Add caching to tool execution |
+| **Decorator** | `AgentTool._cached_run()` | Add caching to tool execution |
 | **Registry** | `ToolRegistry` | Dynamic component registration |
 | **Immutable Config** | `MemoryConfig` | Frozen dataclass with fail-fast validation |
 | **Repository** | `ConversationRepository` | Data access for conversations collection |
 | **Asset Loader** | `PromptAssetLoader` | Discover, validate, cache, and fall back for versioned prompt files (M1 implemented) |
 | **Composer** | `PromptAssembler` | Compose route skills plus the role prompt by route classification (M2 implemented / gated in default runtime) |
 | **Middleware** | `ResponseGuardrailMiddleware` | Post-process agent output for behavioral compliance (planned) |
-| **Facade / Gateway** | `ToolGateway` | Target in-process policy boundary around registry-backed tool execution |
-| **Builder** | `ToolSurfaceBuilder` | Target pre-model route-filtered tool surface construction |
-| **Policy** | `ProviderSelectionPolicy` | Target provider ordering, fallback, licensing, freshness, and degraded-state mapping below tools |
-| **Adapter** | `ProviderAdapter` family | Target provider-specific integration boundary hidden from model-visible tools |
-| **Normalizer** | Evidence/output normalizer | Target conversion from adapter/tool output to normalized output kinds |
-| **Context Object** | `ToolContextPack` | Target request-scoped normalized tool context passed toward prompt assembly |
-| **Descriptor** | Tool and provider descriptors | Target model-visible capability metadata and internal policy metadata |
+| **Facade / Gateway** | `ToolGateway` | In-process policy boundary around registry-backed tool execution |
+| **Builder** | `ToolSurfaceBuilder` | Pre-model route-filtered tool surface construction |
+| **Policy** | `ProviderSelectionPolicy` | Provider ordering, fallback, licensing, freshness, and degraded-state mapping below tools |
+| **Adapter** | `ProviderAdapter` family | Provider-specific integration boundary hidden from model-visible tools |
+| **Normalizer** | Evidence/output normalizer | Conversion from adapter/tool output to normalized output kinds |
+| **Context Object** | `ToolContextPack` | Request-scoped normalized tool context passed toward prompt assembly |
+| **Descriptor** | Tool and provider descriptors | Model-visible capability metadata and internal policy metadata |
 
 ### 5.2 Software Stack
 
@@ -1737,19 +1734,12 @@ BaseModelClient (ABC)
 
 Current tool hierarchy:
 
-CachingTool (BaseTool)
+AgentTool (BaseTool)
 +-- StockSymbolTool
 +-- ReportingTool
-+-- TradingViewTool (placeholder)
-
-Target Phase 2B tool boundary:
-
-AgentTool (target architectural name; may wrap or rename CachingTool)
-+-- StockSymbolTool (target internal symbol-store tool)
-+-- MarketDataTool family (target quote / history / fundamentals)
-+-- TradingViewTool (target VisualizationProvenance producer)
-+-- ReportingTool (target ToolContextPack report composer)
-+-- GenericWebFetchTool (target deny-by-default evidence fallback)
++-- TradingViewTool
++-- VietnamMarketDataTool
++-- GenericWebFetchTool (deny-by-default evidence fallback)
 
 AgentResponse (frozen dataclass)
 +-- .success() classmethod
@@ -1935,6 +1925,7 @@ AgentResponse.fallback(content, provider, model, **kwargs)
 | 0.9 | 2026-05-27 | GitHub Copilot | Added planned streaming guardrail behavior, localized `prompts.*` control-plane design, and a component-level verification matrix to section 3.5 |
 | 0.10 | 2026-05-27 | GitHub Copilot | Simplified section 3.5 into diagram-first technical-design views for the prompt realization stack, component interfaces, call flow, data flow, logical model, degradation behavior, and config surface |
 | 0.11 | 2026-06-24 | Codex | Synchronized prompt-system technical design with verified M1/M2 implementation evidence; separated current, gated, target, and planned prompt-system behavior |
+| 0.12 | 2026-07-16 | System | Updated tool-system technical design to reflect delivered implementation: section 3.2 renamed from "Target Gateway Flow" to "Implemented Gateway Flow", current-to-target boundary table replaced with current implementation table, target runtime flow updated to implemented flow, contracts/persistence/failure tables updated with implementation status columns and source paths, Phase 2B extension path table updated to current state, StockSymbolTool/TradingViewTool direction sections promoted from target to current, tool risk realization updated, and single-runtime specialization description synchronized with delivered tool surface/gateway/provider/normalization/Vietnam-market/TradingView capabilities |
 | 0.12 | 2026-06-25 | Codex | Added authority and evidence cross-reference map, realization diagrams, compact `Refs:` blocks, and source/spec/test relationship tracing |
 | 0.13 | 2026-06-25 | Codex | Aligned tool-system technical design with Phase 2B roadmap, SRS FR-2.4-FR-2.11, ADR-004, and current source-state boundaries |
 | 0.14 | 2026-06-25 | Codex | Refined Phase 2B tool-system realization with split pre-model/execution flow, target contract ownership, and degraded-state failure mapping |
