@@ -251,7 +251,6 @@ class StockAssistantAgent:
             )
             self._prompt_content = (...)  # read resolved asset from disk
 ```
-
 #### Dependencies
 
 - Existing `PromptBuilder` pattern in `langchain_adapter.py` as migration source material, not final authority
@@ -274,73 +273,72 @@ class StockAssistantAgent:
 
 ### 2A.3 Structured Outputs
 
-**Objective**: Guarantee JSON schema responses from the agent for consistent API contracts and frontend parsing.
+**Objective**: Guarantee JSON schema responses from the agent for consistent API contracts, typed frontend parsing, and strict output boundary validation without sacrificing ReAct reasoning latency.
 
-#### Current State
+> **Delivery Status (2026-07-20):** Milestone `SO.M1` (Schema & Response Tool Integration) has been evaluated as sufficient to fulfill all core requirements natively. Milestone `SO.M2` (StateGraph Migration) is deferred as an optional future optimization.
+> **Technical Analysis Reference**: Comprehensive technical evaluation and migration analysis are documented in the [Structured Output Technical Analysis Report](../../research/structured_output_technical_analysis.md) and [StateGraph Migration Analysis Report](../../research/stategraph_migration_analysis.md).
 
-- Agent returns unstructured text responses
-- Frontend must parse freeform text
-- No validation of response structure
-- `AgentResponse` dataclass exists but content is unstructured string
+#### 2A.3.1 Structured Outputs Goals, Boundaries, and Gates
 
-#### Target State
+**Target Direction**
+- Enforce schema validation at the agent's output boundary using route-specific Response Tools (`submit_final_response`) via [Option B (Custom Response Tool Pattern)](../../research/structured_output_technical_analysis.md#32-option-b-custom-response-tool-pattern-submit_final_response).
+- Maintain 0% overhead on prompt tokens by achieving single-turn tool calling ([see Token Cost Analysis](../../research/structured_output_technical_analysis.md#322-scoring--detailed-arguments)).
+- Retain `create_agent` as the primary constructor for Milestone `SO.M1`, as it fully supports standard tool-calling and response extraction ([see Baseline Execution Mechanics](../../research/structured_output_technical_analysis.md#732-execution-mechanics-without-milestone-2)).
+- Implement an out-of-band fallback using `model.with_structured_output` via [Option C (Two-Stage Post-Processing Formatter)](../../research/structured_output_technical_analysis.md#33-option-c-two-stage-service-layer-post-processing-formatter) for models that fail standard tool calling.
+- Exclude `StateGraph` migration from the immediate critical path; treat it as a deferred optimization (`SO.M2`) for future multi-agent orchestration or advanced self-repair loops ([see StateGraph Decision Framework](../../research/stategraph_migration_analysis.md#62-is-it-worth-doing-the-migration-roi--decision-framework)).
+- Evaluated against [Option A (Native response_format)](../../research/structured_output_technical_analysis.md#31-option-a-native-response_format-via-agent-factory), which was rejected due to high token overhead from secondary LLM formatting calls on full message history.
 
-- Agent uses `with_structured_output()` for typed responses
-- Response schemas defined with Pydantic models
-- Validation at agent output boundary
-- Fallback to text for unexpected formats
+**Promotion Gates**
 
-#### Work Items
+| Milestone | Gate | Required Before | Pass Condition | Technical Reference |
+|---|------|-----------------|----------------|-------------------|
+| `SO.M1` | Schema Definition Gate | Integrating Response Tools | Pydantic v2 schemas (`StockAnalysisResponse`, etc.) and `AgentStructuredOutput` union are defined | [Structured Output Analysis §7.2.1](../../research/structured_output_technical_analysis.md#721-milestone-1-schema-and-response-tool-integration-baseline-integration) |
+| `SO.M1` | Tool Router Gate | Activating Response Tools | Route-specific response tools are injected by `ToolSurfaceBuilder` | [Structured Output Analysis §3.2](../../research/structured_output_technical_analysis.md#32-option-b-custom-response-tool-pattern-submit_final_response) |
+| `SO.M1` | Fallback Resilience Gate | Production deployment | Option C fallback formatter is tested and handles unstructured model output | [Structured Output Analysis §3.3](../../research/structured_output_technical_analysis.md#33-option-c-two-stage-service-layer-post-processing-formatter) |
+| `SO.M2` | Checkpointer Compatibility Gate | StateGraph Migration (`SO.M2`) | Checkpoint state shapes match; MongoDB legacy records are sanitized before adding new graph keys | [StateGraph Migration Analysis §4.3](../../research/stategraph_migration_analysis.md#4-target-stategraph-architecture--implementation-blueprint) |
 
-1. **Define Response Schemas**
-   - Create Pydantic models for each response type (analysis, recommendation, error)
-   - Add JSON schema generation for frontend contracts
+**Success Criteria**
+- 100% of route requests yield a valid `AgentStructuredOutput` or a controlled `PARTIAL` status.
+- Zero extra LLM calls needed for formatting in the happy path ([Option B](../../research/structured_output_technical_analysis.md#32-option-b-custom-response-tool-pattern-submit_final_response)).
+- Typed JSON structures available to the frontend.
+- API Parity between backend output and OpenAPI spec ([see Transport Parity](../../research/structured_output_technical_analysis.md#721-milestone-1-schema-and-response-tool-integration-baseline-integration)).
 
-2. **Integrate Structured Output**
-   - Use `model.with_structured_output(ResponseSchema)` for final answers
-   - Implement response router based on query type
+#### 2A.3.2 Execution Backlog Mirror
 
-3. **Add Validation Layer**
-   - Validate agent output against schema
-   - Graceful fallback for malformed responses
-   - Log schema violations for debugging
+> Detailed context remains in [structured_output_technical_analysis.md](../../research/structured_output_technical_analysis.md) and [stategraph_migration_analysis.md](../../research/stategraph_migration_analysis.md).
 
-4. **Update API Contracts**
-   - Update OpenAPI spec with new response schemas
-   - Document response types for frontend team
+| Order | Backlog ID | Priority | Milestone | Depends On | Status | Roadmap Outcome |
+|---|---|---|---|---|---|---|
+| 1 | `SO-01` | P1 | `SO.M1` | None | ⬜ Pending | Define target Pydantic v2 sub-schemas and polymorphic union in `types.py` ([see 7.2.1](../../research/structured_output_technical_analysis.md#721-milestone-1-schema-and-response-tool-integration-baseline-integration)) |
+| 2 | `SO-02` | P1 | `SO.M1` | `SO-01` | ⬜ Pending | Implement route-adapted response tools (`submit_stock_analysis`, etc.) with `return_direct=True` ([see Option B](../../research/structured_output_technical_analysis.md#32-option-b-custom-response-tool-pattern-submit_final_response)) |
+| 3 | `SO-03` | P1 | `SO.M1` | `SO-02` | ⬜ Pending | Integrate response tools into `ToolGateway` admission and `ToolSurfaceBuilder` routing ([see Gateway Admission](../../research/structured_output_technical_analysis.md#322-scoring--detailed-arguments)) |
+| 4 | `SO-04` | P1 | `SO.M1` | `SO-03` | ⬜ Pending | Update REST API and Socket.IO to extract tool arguments and stream `structured_response` SSE frames ([see Transport Parity](../../research/structured_output_technical_analysis.md#721-milestone-1-schema-and-response-tool-integration-baseline-integration)) |
+| 5 | `SO-05` | P1 | `SO.M1` | `SO-04` | ⬜ Pending | Implement Option C post-processor fallback `_extract_structured_response()` for model non-compliance ([see Option C](../../research/structured_output_technical_analysis.md#33-option-c-two-stage-service-layer-post-processing-formatter)) |
+| 6 | `SO-06` | P3 | `SO.M2` | `SO-04` | ⏸️ Deferred | Migrate `create_agent` to custom `StateGraph` for low-level graph state control ([see StateGraph Analysis](../../research/stategraph_migration_analysis.md#4-target-stategraph-architecture--implementation-blueprint)) |
+| 7 | `SO-07` | P3 | `SO.M2` | `SO-06` | ⏸️ Deferred | Introduce conditional transition nodes for in-graph validation and self-repair loops ([see Risk Register](../../research/structured_output_technical_analysis.md#8-risk-register--technical-pitfalls)) |
 
-#### Implementation Pattern
+#### 2A.3.3 Work Items by Milestone
 
-```python
-from pydantic import BaseModel, Field
-from typing import Literal, Optional, List
+##### Milestone SO.M1: Schema and Response Tool Integration (Current Focus)
+- **Implement Response Schemas**: Build `StockAnalysisResponse`, `RecommendationResponse`, `GeneralChatResponse`.
+- **Response Tool Pattern**: Use [Option B (Custom Response Tool)](../../research/structured_output_technical_analysis.md#32-option-b-custom-response-tool-pattern-submit_final_response) to guarantee 0% token overhead.
+- **Service-Layer Fallback**: Implement [Option C (Post-Processing Formatter)](../../research/structured_output_technical_analysis.md#33-option-c-two-stage-service-layer-post-processing-formatter) as a safety net.
+- **Result Extraction**: Parse JSON tool arguments directly in the agent loop ([see Execution Mechanics](../../research/structured_output_technical_analysis.md#732-execution-mechanics-without-milestone-2)).
+- **Sufficiency**: As verified in research, `SO.M1` achieves 100% of the core business goals, model agnosticism, and typed API contracts natively ([see 7.3.1 Sufficiency Analysis](../../research/structured_output_technical_analysis.md#731-full-value-achievement-in-milestone-1)).
 
-class StockAnalysisResponse(BaseModel):
-    """Structured response for stock analysis queries."""
-    symbol: str = Field(description="Stock ticker symbol")
-    analysis_type: Literal["technical", "fundamental", "sentiment"]
-    summary: str = Field(description="Brief analysis summary")
-    metrics: dict = Field(default_factory=dict)
-    recommendation: Optional[str] = None
-    confidence: float = Field(ge=0, le=1)
-    sources: List[str] = Field(default_factory=list)
+##### Milestone SO.M2: Custom Graph State Optimization (Deferred)
+- **StateGraph Migration**: Convert `create_agent` wrapper to custom compiled `StateGraph` ([see Blueprint](../../research/stategraph_migration_analysis.md#4-target-stategraph-architecture--implementation-blueprint)).
+- **In-Graph Validation**: Move tool argument extraction and validation into a graph transition node ([see Architectural Evaluation](../../research/stategraph_migration_analysis.md#2-architectural-impact-analysis)).
+- *Note: As established in the StateGraph Migration Analysis, this milestone is deferred and serves only as an optional runway for future multi-agent routing ([see Decision Framework](../../research/stategraph_migration_analysis.md#62-is-it-worth-doing-the-migration-roi--decision-framework)).*
 
-# Usage in agent
-structured_model = self.model.with_structured_output(StockAnalysisResponse)
-```
+#### 2A.3.4 Dependencies & Official References
 
-#### Dependencies
+- **Pydantic v2**: (Existing `pydantic==2.11.7`) for schema definition and runtime validation.
+- **LangChain / LangGraph core**: (Existing `langchain.agents` and `langgraph>=0.2.62`) supporting `create_agent`.
+- **Official Documentation Proofs**:
+  - [LangChain Official Agents Guide](https://docs.langchain.com/oss/python/langchain/agents) — ReAct loop mechanics and tool message preservation.
+  - [LangChain Official Structured Output Guide](https://docs.langchain.com/oss/python/langchain/structured-output) — Response tool argument extraction patterns.
 
-- Pydantic v2 (existing)
-- OpenAI function calling support (existing)
-- OpenAPI spec updates
-
-#### Success Criteria
-
-- 100% of analysis responses conform to schema
-- Frontend can rely on typed response structure
-- Schema violations logged with context
-- API documentation reflects new contracts
 
 ---
 

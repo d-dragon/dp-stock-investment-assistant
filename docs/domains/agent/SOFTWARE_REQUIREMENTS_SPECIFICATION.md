@@ -1,8 +1,8 @@
 # Stock Investment Assistant Agent — Software Requirements Specification
 
-> **Document Version**: 2.8
+> **Document Version**: 2.9  
 > **Created**: January 22, 2026  
-> **Last Updated**: June 18, 2026
+> **Last Updated**: July 21, 2026  
 > **Status**: Active  
 > **Scope**: LangChain-based AI Agent for Stock Investment Assistant  
 ## Related Documents
@@ -14,13 +14,16 @@ This specification builds upon and references several architectural and design d
 | [AGENT_ARCHITECTURE_DECISION_RECORDS.md](./DECISIONS/AGENT_ARCHITECTURE_DECISION_RECORDS.md) | Architectural decisions for LTM/STM, RAG, fine-tuning strategy, and memory separation | Design foundations for FR-3 (Memory System) |
 | [ARCHITECTURE_DESIGN.md](./ARCHITECTURE_DESIGN.md) | Comprehensive agent architecture overview, component deep dive, data flow, and Phase 2 improvements | Implementation guidance for FR-1, FR-2, FR-4 |
 | [LANGCHAIN_AGENT_HOWTO.md](./LANGCHAIN_AGENT_HOWTO.md) | Complete guide to ReAct pattern, semantic routing, tool system, and operations | Operational reference for agent deployment and usage |
-| [PHASE_2_AGENT_ENHANCEMENT_ROADMAP.md](./PHASE_2_AGENT_ENHANCEMENT_ROADMAP.md) | Future enhancement roadmap including conversation-scoped STM evolution, future LTM personalization, prompt-system rollout, and observability | Planning and sequencing for P2 requirements beyond current release; does not redefine SRS thresholds |
+| [PHASE_2_AGENT_ENHANCEMENT_ROADMAP.md](./PHASE_2_AGENT_ENHANCEMENT_ROADMAP.md) | Future enhancement roadmap including conversation-scoped STM evolution, prompt-system rollout, and Section 2A.3 Structured Outputs | Planning and sequencing for P2 requirements; Section 2A.3 defines SO.M1/SO.M2 milestones |
 | [AGENT_MEMORY_TECHNICAL_DESIGN.md](./AGENT_MEMORY_TECHNICAL_DESIGN.md) | Detailed technical design for conversation-scoped STM, session-context boundaries, checkpointing, and summarization | Implementation guidance supporting FR-3 (Memory System) |
 | [AGENTIC_APP_WITH_STM_INTEGRATION_ROADMAP.md](../../High-level%20Design/AGENTIC_APP_WITH_STM_INTEGRATION_ROADMAP.md) | Technical roadmap for workspace-session-conversation hierarchy and STM integration | Roadmap for FR-5.3–5.5, FR-7 (management, consistency, migration) |
 | [SRS_SPEC_TRACEABILITY.md](./SRS_SPEC_TRACEABILITY.md) | Bidirectional trace between SRS items and spec-kit feature artifacts | Companion delivery trace for implementation coverage and sync status |
 | [PROMPT_SYSTEM_RESEARCH_PROPOSAL.md](./PROMPT_SYSTEM_RESEARCH_PROPOSAL.md) | Prompt system research, design patterns, release gates, and implementation roadmap | Research foundation and target-design authority for FR-1.4.5–1.4.16, FR-1.5, NFR-5.2.5–5.2.11, NFR-6.2.3 |
 | [PROMPT_SYSTEM_BENCHMARK_REVIEW.md](./PROMPT_SYSTEM_BENCHMARK_REVIEW.md) | External benchmark review of prompt-governance design against vendor and framework guidance | External validation reference for FR-1.4.10–1.4.16, FR-1.5.6, AC-8.5–8.11 |
 | [TOOLS_RESEARCH_AND_PROPOSAL.md](./TOOLS_RESEARCH_AND_PROPOSAL.md) | Tool-system research and proposal covering Tool Gateway, Vietnam-market providers, provider adapters, normalized tool context, TradingView visualization, and generic web evidence | Research/design input for FR-2 and AC-9; does not override SRS requirements |
+| [structured_output_technical_analysis.md](../../research/structured_output_technical_analysis.md) | Technical analysis evaluating structured output strategies (Option A/B/C), Pydantic schemas, and token costs | Research authority for FR-1.2.5–1.2.9, AC-10 |
+| [stategraph_migration_analysis.md](../../research/stategraph_migration_analysis.md) | Architectural analysis evaluating `create_agent` vs `StateGraph` migration, ROI, checkpointer compatibility, and risks | Architectural authority for SO.M2 graph migration and state channels |
+| [structured_output_review_report.md](../../research/structured_output_review_report.md) | Architectural review report validating structured output design against ARCHITECTURE_DESIGN.md and codebase contracts | Governance validation for RiskClass.BOUNDED_NON_MUTATING and guardrail separation |
 
 
 
@@ -161,10 +164,14 @@ Priority levels:
 | ID | Title | Description | Precondition | Expected Output | Priority |
 |----|-------|-------------|--------------|-----------------|----------|
 | FR-1.2.1 | **Natural Language Input** | Agent accepts free-form text queries in natural language | — | Any grammatically reasonable query is processed without format errors | P0 |
-| FR-1.2.2 | **Structured Response** | Agent returns responses with consistent structure | Query processed | Response contains: content, model used, status, tools invoked, token count | P0 |
+| FR-1.2.2 | **Structured Response Envelope** | Agent returns responses within a standardized response envelope | Query processed | Response contains: content, provider, model, status, tool_calls, token_usage, and `structured_content` (`Optional[AgentStructuredOutput]`) | P0 |
 | FR-1.2.3 | **Synchronous Processing** | Agent can process queries and return complete response | Non-streaming request | Complete response returned within timeout (see NFR-1.1) | P0 |
 | FR-1.2.4 | **Streaming Processing** | Agent can deliver response incrementally as it's generated | Streaming request | First token delivered within 2 seconds; continuous delivery until complete | P0 |
-| FR-1.2.5 | **Structured Output Mode** | Agent can return responses in a predefined schema | Schema specified in request | Response validates against provided schema (100% compliance) | P1 |
+| FR-1.2.5 | **Structured Output Subsystem** | Agent SHALL enforce schema validation at its output boundary using the Route-Adapted Custom Response Tool Pattern as primary mechanism and Two-Stage Post-Processing Formatter as fallback | Query classified by route | Response validates against target Pydantic schema with 0% extra prompt token overhead in the primary single-turn tool calling path | P0 |
+| FR-1.2.6 | **Polymorphic Response Schemas** | System SHALL define discriminated Pydantic v2 sub-schemas (`StockAnalysisResponse`, `RecommendationResponse`, `GeneralChatResponse`, `ErrorResponse`) unified under `AgentStructuredOutput` | Route surface built | Dynamic schema matching the classified query route is bound to the invocation surface | P0 |
+| FR-1.2.7 | **Response Tool Gateway Admission** | Route-adapted response tools (`submit_stock_analysis`, etc.) SHALL be registered under `RiskClass.BOUNDED_NON_MUTATING` and pass through `ToolGateway.execute()` for envelope assembly and trace logging | Response tool invoked | Execution passes gateway admission checks and emits `ToolExecutionEnvelope` without bypassing gateway security controls | P1 |
+| FR-1.2.8 | **Post-Processing Fallback Formatter** | When a model fails to call a response tool and outputs plain markdown text, the system SHALL execute a two-stage post-processing formatter via `model.with_structured_output()` | Model emits plain text response | Unstructured markdown is transparently converted to valid `AgentStructuredOutput` without crashing execution | P1 |
+| FR-1.2.9 | **Structured Output Graceful Degradation** | When both Response Tool argument parsing and post-processing fallback validation fail, the system SHALL return `ResponseStatus.PARTIAL` | Validation failure occurs | Raw markdown text is preserved in `content`, `status` is set to `PARTIAL`, and validation error details are recorded in trace metadata | P0 |
 
 #### FR-1.3 Model Selection
 
@@ -977,6 +984,17 @@ Future LTM requirements in this section complement session context and STM. They
 | AC-9.16 | Vietnamese and mixed-language prompts for price, chart, fundamentals, disclosures, market breadth, foreign flow, and reports route to expected tool families | Route evaluation dataset |
 | AC-9.17 | Tool-backed answers and reports block or conservatively rewrite unsourced recommendations, guaranteed-return language, hype language, and unsupported certainty | Finance-safety regression test |
 
+### AC-10: Structured Output Subsystem
+
+| ID | Criterion | Verification |
+|----|-----------|--------------|
+| AC-10.1 | 100% of route-matched query requests yield a valid `AgentStructuredOutput` (or a controlled `ResponseStatus.PARTIAL` status on validation failure) | Schema compliance integration test |
+| AC-10.2 | Primary happy path using Route-Adapted Custom Response Tool Pattern executes in single-turn with 0% extra prompt input token overhead | Token usage audit + benchmark test |
+| AC-10.3 | Route-adapted response tools (`submit_stock_analysis`, etc.) pass through `ToolGateway.execute()` under `RiskClass.BOUNDED_NON_MUTATING` and emit `ToolExecutionEnvelope` | Gateway admission unit + integration test |
+| AC-10.4 | Two-Stage Service-Layer Post-Processing Formatter automatically activates when response tool is omitted or plain markdown text is output, returning validated schema | Fallback resilience integration test |
+| AC-10.5 | Schema validation failures or post-processing fallback failures emit `ResponseStatus.PARTIAL` without crashing execution thread or losing raw text content | Fault-injection & error semantics test |
+| AC-10.6 | SSE real-time streaming suppresses raw JSON tool argument tokens from natural language stream and emits a discrete `structured_completion` event frame | Streaming transport integration test |
+
 ---
 
 ## 6. Traceability Matrix
@@ -1048,6 +1066,12 @@ This section maps acceptance criteria (AC-*) to the functional and non-functiona
 | AC-9.15 | FR-2.11.5, FR-2.11.6, NFR-5.2.15 |
 | AC-9.16 | FR-2.6.6, FR-4.1.3 |
 | AC-9.17 | FR-1.5.1, FR-1.5.3, FR-2.10.4 |
+| AC-10.1 | FR-1.2.5, FR-1.2.6 |
+| AC-10.2 | FR-1.2.5 |
+| AC-10.3 | FR-1.2.7, FR-2.4.4 |
+| AC-10.4 | FR-1.2.8 |
+| AC-10.5 | FR-1.2.9, ERR-1.4 |
+| AC-10.6 | FR-6.1.3 |
 
 ---
 
@@ -1070,6 +1094,7 @@ This section maps acceptance criteria (AC-*) to the functional and non-functiona
 | IR-1.11 | List responses SHALL include pagination metadata (total count, page/cursor info) and SHALL support query parameters for filtering by status |
 | IR-1.12 | Archive action endpoints SHALL use POST method (e.g., `POST /api/conversations/{id}/archive`) rather than DELETE, to distinguish archive-over-delete semantics |
 | IR-1.13 | Management API responses SHALL include `workspace_id`, `session_id`, and `conversation_id` in resource payloads to support client-side hierarchy navigation |
+| IR-1.14 | Structured response payloads returned by `/api/chat` and `/api/query` SHALL populate `structured_content` containing a validated `AgentStructuredOutput` object matching the classified route |
 
 ### IR-2 WebSocket Contract
 
@@ -1095,6 +1120,7 @@ This section maps acceptance criteria (AC-*) to the functional and non-functiona
 | IR-3.8 | `GenericWebFetchPolicy` SHALL include domain allowlist, rate limits, render mode, extraction mode, parser limits, maximum content size, freshness policy, license posture, and prompt-injection quarantine behavior |
 | IR-3.9 | `MutationReceipt` SHALL include mutation ID, target record, action, before/after summary, actor/route, approval status, audit metadata, timestamp, and result |
 | IR-3.10 | `ArtifactMetadata` SHALL include artifact ID, artifact type, URI/reference, source lineage, generated-by, created timestamp, checksum/hash where available, and retention class |
+| IR-3.11 | Route-adapted Response Tools (`submit_stock_analysis`, etc.) SHALL define their output contracts as discriminated Pydantic v2 schemas and SHALL register under `RiskClass.BOUNDED_NON_MUTATING` for gateway execution admission |
 
 ---
 
@@ -1107,6 +1133,7 @@ This section maps acceptance criteria (AC-*) to the functional and non-functiona
 | ERR-1.1 | All non-streaming API error responses SHALL be JSON and SHALL include: `error.code`, `error.message`, and `error.correlation_id` |
 | ERR-1.2 | Error messages returned to clients SHALL be user-friendly and SHALL NOT expose internal stack traces or secrets |
 | ERR-1.3 | Errors SHALL use appropriate HTTP status codes (e.g., 400 validation error, 401/403 auth error, 404 not found, 429 rate limit, 500 internal error, 503 dependency unavailable) |
+| ERR-1.4 | When structured output schema validation or fallback parsing fails, the system SHALL return `ResponseStatus.PARTIAL` in the response envelope, preserve raw markdown in `content`, and record schema error details in trace metadata |
 
 ### ERR-2 Streaming Errors and Cancellation
 
@@ -1200,6 +1227,8 @@ This section maps acceptance criteria (AC-*) to the functional and non-functiona
 | 2.6 | 2026-05-21 | System | Formalized prompt-governance P1 follow-ups from the benchmark review. Added FR-1.4.14–1.4.16 (tool-risk envelope enforcement, locale-parity promotion control, prompt-segment classification and reuse), NFR-5.2.10–5.2.11 (locale and tool-risk trace metadata), and AC-8.9–8.11 (tool-risk, locale-parity, and segment-class verification). |
 | 2.7 | 2026-05-22 | System | Synchronized prompt-governance document authority across the proposal, benchmark review, roadmap, and reverse trace. Clarified that AC-8 release-gate thresholds remain normative in the SRS while the roadmap carries sequencing only. |
 | 2.8 | 2026-06-18 | System | Propagated tool-system proposal into SRS requirements. Added Tool Gateway, AgentTool, route-filtered tool exposure, Vietnam-market coverage, provider selection, normalized outputs, ToolContextPack, TradingView visualization provenance, generic web evidence controls, report source discipline, tool data integrity, mutation receipts, AC-9, IR-3, provider constraints, and source-lineage requirements. |
+| 2.9 | 2026-07-21 | System | Integrated Structured Output Subsystem into SRS requirements. Updated FR-1.2.2 and FR-1.2.5; added FR-1.2.6–1.2.9 (Polymorphic Response Schemas, Response Tool Gateway Admission under RiskClass.BOUNDED_NON_MUTATING, Two-Stage Post-Processing Fallback Formatter, Graceful Degradation & PARTIAL status). Added AC-10 (Structured Output Subsystem acceptance criteria), IR-1.14 (Structured API payload contract), IR-3.11 (Response Tool schema registration), ERR-1.4 (Structured output error semantics), and updated Section 6 Traceability Matrix. References: structured_output_technical_analysis.md, stategraph_migration_analysis.md, structured_output_review_report.md. |
+
 ---
 
 *End of Requirements Document*
