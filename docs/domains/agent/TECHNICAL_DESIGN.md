@@ -47,6 +47,7 @@ This document covers the technical realization of:
 - Model selection and provider fallback
 - Conversation-scoped STM and checkpointing
 - Prompt composition and prompt asset evolution
+- Structured Output Subsystem contract validation, Pydantic schemas, route-adapted response tools, two-stage fallback formatting, transport serialization (OpenAPI / REST / WebSockets), and StateGraph migration strategy
 - Runtime interaction flows, configuration, and extension points
 
 ### 1.2 Out of Scope
@@ -80,7 +81,7 @@ flowchart LR
 	Tests --> TechDesign
 ```
 
-Refs: [SOFTWARE_REQUIREMENTS_SPECIFICATION.md](./SOFTWARE_REQUIREMENTS_SPECIFICATION.md); [ARCHITECTURE_DESIGN.md](./ARCHITECTURE_DESIGN.md); [ADR index](./DECISIONS/AGENT_ARCHITECTURE_DECISION_RECORDS.md); [spec-sync-status.md](../../../specs/spec-sync-status.md); `src/`; `tests/`.
+Refs: [SOFTWARE_REQUIREMENTS_SPECIFICATION.md](./SOFTWARE_REQUIREMENTS_SPECIFICATION.md); [ARCHITECTURE_DESIGN.md](./ARCHITECTURE_DESIGN.md); [ADR index](./DECISIONS/AGENT_ARCHITECTURE_DECISION_RECORDS.md); [spec-sync-status.md](../../../specs/spec-sync-status.md); [docs/openapi.yaml](../openapi.yaml); `src/`; `tests/`.
 
 ### 2.1 Key Characteristics
 
@@ -92,9 +93,10 @@ Refs: [SOFTWARE_REQUIREMENTS_SPECIFICATION.md](./SOFTWARE_REQUIREMENTS_SPECIFICA
 | Tool System | Registry-based with caching support |
 | Memory | Service-owned session context and lifecycle metadata, LangGraph `MongoDBSaver` for conversation-scoped STM, and a planned future LTM personalization boundary |
 | Semantic Router | `semantic-router` library with OpenAI/HuggingFace encoders |
-| Response Types | Structured (`AgentResponse`) with immutable dataclasses |
+| Response Types | Structured (`AgentResponse`) containing raw text markdown and typed polymorphic payloads (`structured_content: Optional[AgentStructuredOutput]`) via route-adapted response tools and two-stage service-layer fallback formatting |
+| API Contracts | Executable OpenAPI 3.1 contract ([docs/openapi.yaml](../openapi.yaml)) defining `ChatResponse` envelope, REST (`POST /api/chat`), and Socket.IO `chat_message` serialization |
 
-Refs: SRS FR-1, FR-2, FR-3, FR-4, FR-5, FR-6; [ARCHITECTURE_DESIGN.md section 4](./ARCHITECTURE_DESIGN.md#4-architecture-views); ADR-001 through ADR-004.
+Refs: SRS FR-1, FR-2, FR-3, FR-4, FR-5, FR-6; [ARCHITECTURE_DESIGN.md section 4](./ARCHITECTURE_DESIGN.md#4-architecture-views); ADR-001 through ADR-005.
 
 ### 2.2 Source Layout
 
@@ -104,7 +106,7 @@ src/core/
 ├── langgraph_bootstrap.py      # LangGraph agent builder + MongoDBSaver checkpointer factory
 ├── stock_query_router.py       # Semantic router for query classification
 ├── routes.py                   # Route definitions and utterances
-├── types.py                    # Core types: AgentResponse, ToolCall, TokenUsage
+├── types.py                    # Core types: AgentResponse, AgentStructuredOutput, ResponseStatus, TokenUsage
 ├── langchain_adapter.py        # Prompt building with external file support
 ├── model_factory.py            # Factory pattern for model clients
 ├── base_model_client.py        # Abstract base for providers
@@ -114,6 +116,7 @@ src/core/
 └── tools/
     ├── base.py                 # AgentTool base class (was CachingTool)
     ├── registry.py             # ToolRegistry singleton
+    ├── response_tools.py       # [Planned] Route-adapted response tools (submit_stock_analysis, etc.)
     ├── stock_symbol.py         # Stock lookup tool
     ├── tradingview.py          # TradingView placeholder (Phase 2)
     └── reporting.py            # Report generation tool
@@ -128,11 +131,18 @@ src/services/
 ├── chat_service.py             # Chat orchestration, archive guard, metadata sync (REST path)
 └── conversation_service.py     # ConversationService (lifecycle, management APIs, metadata helpers)
 
+src/web/
+├── routes/ai_chat_routes.py    # REST chat API (POST /api/chat) with AgentResponse payload serialization
+└── sockets/chat_events.py      # Socket.IO chat_message handler emitting structured response payloads
+
 src/prompts/
 ├── analysis_prompt.j2
 ├── generic_query.j2
 ├── system_stock_assistant-vn.txt
 └── system_stock_assistant.txt
+
+docs/
+└── openapi.yaml                # Executable OpenAPI 3.1 contract with ChatResponse & AgentStructuredOutput schemas
 ```
 
 Current prompt-system implementation also includes the M1/M2 prompt compiler modules under `src/core/`: `prompt_types.py`, `prompt_asset_loader.py`, and `prompt_assembler.py`. The implemented prompt asset layout includes `src/prompts/system/react_analyst.md` and route-skill assets under `src/prompts/skills/routes/*.md`; legacy template/text assets remain present during the transition window.
@@ -166,35 +176,42 @@ Refs: [ADR-002](./DECISIONS/ADR-AGENT-002-SKILLS-PATTERN-PROMPT-COMPOSITION.md);
 
 1. Initialize ReAct agent with enabled tools and optional checkpointer
 2. Process queries via LangGraph or legacy path
-3. Support streaming with `astream_events()`
-4. Handle provider fallback orchestration
-5. Expose model configuration APIs
-6. Manage conversation-aware STM routing via `conversation_id`; parent session context is handled outside the agent in service and management layers
+3. Execute structured query extraction (`process_query_structured()`) by binding route-adapted response tools (`submit_stock_analysis`, etc.) and delegating out-of-band fallback formatting to `ChatService`
+4. Support streaming with `astream_events()` with raw JSON tool argument streaming suppression
+5. Handle provider fallback orchestration
+6. Expose model configuration APIs
+7. Manage conversation-aware STM routing via `conversation_id`; parent session context is handled outside the agent in service and management layers
 
 **Key Methods**:
 
 | Method | Description |
 |--------|-------------|
-| `process_query(query, *, conversation_id)` | Synchronous query processing with optional conversation-scoped memory |
-| `process_query_streaming(query, *, conversation_id)` | Generator-based streaming with optional conversation-scoped memory |
-| `process_query_structured(query, *, conversation_id)` | Returns `AgentResponse` with metadata |
+| `process_query(query, *, conversation_id)` | Synchronous query processing with optional conversation-scoped memory returning markdown string |
+| `process_query_streaming(query, *, conversation_id)` | Generator-based streaming with optional conversation-scoped memory and tool argument token filtering |
+| `process_query_structured(query, *, conversation_id)` | Returns `AgentResponse` envelope containing raw narrative markdown text (`content`), typed payload (`structured_content: Optional[AgentStructuredOutput]`), and execution status (`ResponseStatus`) |
 | `set_default_model(provider, name)` | Update active model |
 | `run_interactive()` | CLI REPL mode |
 
-**Constructor behavior**:
+**Constructor & Structured Execution behavior**:
 
 The constructor accepts an optional `checkpointer` parameter injected by `APIServer`. When a checkpointer is present and `conversation_id` is provided, the agent includes `{"configurable": {"thread_id": conversation_id}}` in the invoke config so LangGraph automatically loads and saves conversation state.
+
+During `process_query_structured()` execution:
+1. `_classify_tool_route()` determines the active `StockQueryRoute`.
+2. `_build_tool_surface_for_query()` constructs a route-filtered tool surface containing evidence tools plus the single matching control-plane response tool (`submit_stock_analysis` for data routes, `submit_recommendation` for idea/portfolio routes, `submit_general_chat` for chat routes).
+3. If the model invokes the response tool, `return_direct=True` immediately completes the turn (0% extra tokens) and `AgentResponse.structured_content` is populated from the tool argument dictionary.
+4. If the model emits plain text without invoking the response tool, `process_query_structured()` triggers the service-layer two-stage fallback formatter (`_extract_structured_response()`), setting `status = ResponseStatus.PARTIAL` if fallback extraction is degraded (`ERR-1.4`).
 
 **Hierarchy behavior**:
 
 - LangGraph checkpoints store thread-specific reasoning state without leaking STM across sibling conversations.
 - Conversation lifecycle metadata, archive status, and per-turn counters remain outside the checkpoint store in service and repository surfaces.
 - The REST chat path uses `ChatService` to reject archived conversations and record per-turn metadata non-blocking.
-- The Socket.IO path validates `conversation_id` and preserves it through to the agent, but currently bypasses `ChatService` lifecycle and metadata helpers.
+- The Socket.IO path validates `conversation_id` and preserves it through to the agent, emitting `structured_content` in `chat_response` events.
 - Workspace/session/conversation ownership and lifecycle validation live in the management APIs and services, not inside `StockAssistantAgent` itself.
 - Session-context resolution helpers exist in `ChatService` and `ConversationService`; merged context is resolved at query time in service helpers, but prompt-level injection of that merged context is still follow-up work.
 
-Refs: SRS FR-1.1, FR-1.2, FR-3.1, FR-3.2, FR-5.1, FR-5.2; [ARCHITECTURE_DESIGN.md section 4.3.1](./ARCHITECTURE_DESIGN.md#431-primary-query-processing-flow); `src/core/stock_assistant_agent.py`; `src/web/api_server.py`; `src/services/chat_service.py`; `src/web/routes/ai_chat_routes.py`; `src/web/sockets/chat_events.py`; `tests/test_agent.py`; `tests/test_chat_service.py`; `tests/test_chat_routes.py`.
+Refs: SRS FR-1.1, FR-1.2.5–1.2.9, FR-3.1, FR-3.2, FR-5.1, FR-5.2, AC-10; [ARCHITECTURE_DESIGN.md section 4.3.1](./ARCHITECTURE_DESIGN.md#431-primary-query-processing-flow); [ADR-AGENT-005](./DECISIONS/ADR-AGENT-005-STRUCTURED-OUTPUT-BOUNDARY-AND-RESPONSE-TOOL-PATTERN.md); `src/core/stock_assistant_agent.py`; `src/web/api_server.py`; `src/services/chat_service.py`; `src/web/routes/ai_chat_routes.py`; `src/web/sockets/chat_events.py`; `tests/test_agent.py`; `tests/test_chat_service.py`; `tests/test_chat_routes.py`.
 
 #### 3.1.1 Mirror — Component Interface Diagram
 
@@ -744,12 +761,12 @@ class AgentTool(BaseTool):
 
 #### Tool Risk Realization
 
-The runtime should expose tool risk as first-class control metadata so prompt policy, tool guardrails, and future approval hooks share one vocabulary instead of ad hoc per-tool assumptions.
+The runtime exposes tool risk as first-class control metadata so prompt policy, tool guardrails, and future approval hooks share one vocabulary instead of ad hoc per-tool assumptions.
 
 | Risk Class | Current Technical Meaning | Registry / Runtime Requirement | Current Status |
 |------------|---------------------------|-------------------------------|----------------|
-| `read_only_evidence` | Fetches data without mutating durable state | Registry records class; runtime validates arguments and preserves provenance in traces | ✅ Implemented — descriptors and gateway enforce risk-class admission |
-| `bounded_transformation` | Computes or reformats governed inputs without mutating durable state | Registry records class; runtime validates input and output schema before results re-enter prompt assembly | ✅ Implemented — descriptors and gateway enforce risk-class admission |
+| `read_only_evidence` | Fetches data without mutating durable state | Registry records class; runtime validates arguments and preserves provenance in traces | ✅ Implemented — descriptors and gateway enforce risk-class admission for evidence tools (`VietnamMarketDataTool`, `StockSymbolTool`, etc.) |
+| `bounded_transformation` / `RiskClass.BOUNDED_NON_MUTATING` | Computes or reformats governed inputs without mutating durable state | Registry records class; runtime validates input/output schema before results re-enter prompt assembly or complete execution | ✅ Implemented — descriptors and gateway enforce risk-class admission for control-plane response tools (`submit_stock_analysis`, `submit_recommendation`, `submit_general_chat`) with `return_direct=True` |
 | `workflow_mutation` | Changes repo-owned or user-owned durable state | Requires service-owned authorization, approval-capable workflow hooks, and audit metadata before enablement | Future only — mutation receipt structure defined, writes disabled by default |
 | `external_side_effect` | Writes to third-party systems or triggers real-world actions | Requires explicit allowlisting, human approval, and fail-closed defaults before enablement | Not admitted in the current baseline |
 
@@ -757,9 +774,10 @@ Runtime rules:
 
 1. `ToolRegistry.get_enabled_tools()` should filter by both enablement and the strongest risk class admitted by the selected prompt asset.
 2. Prompt-facing tool policy may narrow exposure but must not reclassify a tool below the registry-declared risk class.
-3. Any runtime path that exercises a class above `bounded_transformation` must emit approval-state and `tool_risk_class` metadata for tracing and audit.
+3. Control-plane route response tools (`submit_stock_analysis`, etc.) execute under codebase enum `RiskClass.BOUNDED_NON_MUTATING` (`bounded_transformation` category) with `return_direct=True` (0% extra tokens), passing through `ToolGateway.execute()` for envelope assembly and trace logging.
+4. Any runtime path that exercises a class above `bounded_transformation` must emit approval-state and `tool_risk_class` metadata for tracing and audit.
 
-Refs: [ADR-004](./DECISIONS/ADR-AGENT-004-THIN-TOOL-GATEWAY-AND-NORMALIZED-TOOL-CONTEXT.md); [TOOLS_RESEARCH_AND_PROPOSAL.md](./TOOLS_RESEARCH_AND_PROPOSAL.md); [TOOLS_ARCHITECTURE_BENCHMARK_REVIEW.md](./TOOLS_ARCHITECTURE_BENCHMARK_REVIEW.md); SRS FR-1.4.14 and FR-1.5.6; `tests/security/test_operator_tooling_boundaries.py`.
+Refs: [ADR-004](./DECISIONS/ADR-AGENT-004-THIN-TOOL-GATEWAY-AND-NORMALIZED-TOOL-CONTEXT.md); [ADR-AGENT-005](./DECISIONS/ADR-AGENT-005-STRUCTURED-OUTPUT-BOUNDARY-AND-RESPONSE-TOOL-PATTERN.md); [TOOLS_RESEARCH_AND_PROPOSAL.md](./TOOLS_RESEARCH_AND_PROPOSAL.md); [TOOLS_ARCHITECTURE_BENCHMARK_REVIEW.md](./TOOLS_ARCHITECTURE_BENCHMARK_REVIEW.md); SRS FR-1.2.6, FR-1.4.14, and FR-1.5.6; `tests/security/test_operator_tooling_boundaries.py`.
 
 ### 3.3 Memory Architecture and Lifecycle
 
@@ -785,7 +803,7 @@ Refs: [ADR-004](./DECISIONS/ADR-AGENT-004-THIN-TOOL-GATEWAY-AND-NORMALIZED-TOOL-
 | Hierarchy Model | `workspace -> session -> conversation`, where the session owns reusable business context and the conversation owns STM |
 | Dual Collections | `agent_checkpoints` (LangGraph-owned runtime state) + `conversations` (app-managed lifecycle metadata) |
 | Backward Compatibility | `conversation_id` is optional — omitting preserves stateless single-turn behavior |
-| Memory Scope | Stores conversation text only; never stores prices, ratios, or tool outputs |
+| Memory Scope | Stores conversation text and evidence tool messages; typed `AgentStructuredOutput` JSON payloads are **explicitly excluded** from checkpointer serialization to avoid schema bloat |
 | Current lifecycle behavior | `active` and `archived` are current-state service controls; `summarized` remains schema-supported but not universally active runtime flow |
 | Transport parity | REST uses `ChatService` lifecycle and metadata helpers; Socket.IO currently bypasses them |
 | Session-context timing | Resolved at query time in service helpers via conversation-to-session lookup; not yet injected into the prompt path |
@@ -803,6 +821,7 @@ The current runtime keeps checkpoint state and business metadata in separate sto
 | Concern | Authoritative Surface | Supporting Surface | Current Behavior |
 |---------|-----------------------|--------------------|------------------|
 | Recoverable conversation execution state | `agent_checkpoints` via LangGraph `MongoDBSaver` | `conversation_id -> thread_id` mapping from app surfaces | The runtime binds `conversation_id` into `configurable.thread_id` and lets LangGraph load and save thread state |
+| Structured output state hygiene | Envelope attachment at output contract boundary | `AgentResponse.structured_content` payload | Typed `AgentStructuredOutput` JSON payloads are **explicitly excluded** from `MongoDBSaver` checkpointer serialization (`FR-1.2.8`) |
 | Archive status, ownership, and per-turn metadata | `conversations` plus service-layer helpers | Checkpoints may indirectly reflect message history only | Archive guards and metadata recording live outside the checkpoint store |
 | Reusable parent business context | Session service plus conversation-linked `session_id` | Conversation `context_overrides` | `ChatService._load_conversation_context()` resolves merged context at query time |
 | Stateless fallback | No STM store required | None | Requests without `conversation_id` preserve the single-turn path |
@@ -886,20 +905,20 @@ class ModelClientFactory:
 
 #### Semantic Router for Query Classification
 
-**Decision**: Use `semantic-router` with OpenAI embeddings and HuggingFace fallback for intent classification.
+**Decision**: Use `semantic-router` with OpenAI embeddings and HuggingFace fallback for intent classification, mapping classified routes to route-adapted control-plane response tools and Pydantic response schemas.
 
-**Route Categories**:
+**Route & Response Schema Mapping**:
 
-| Route | Description | Example Queries |
-|-------|-------------|-----------------|
-| `PRICE_CHECK` | Current prices, quotes, market cap | "What is AAPL trading at?" |
-| `NEWS_ANALYSIS` | Headlines, earnings, market events | "Latest news on Tesla" |
-| `PORTFOLIO` | Holdings, P&L, allocation | "Show my portfolio value" |
-| `TECHNICAL_ANALYSIS` | Charts, MACD, RSI, patterns | "Show RSI for NVDA" |
-| `FUNDAMENTALS` | P/E, P/B, DCF, financial ratios | "What's Apple's P/E ratio?" |
-| `IDEAS` | Stock picks, investment strategies | "Recommend growth stocks" |
-| `MARKET_WATCH` | Index updates, sector performance | "How is VN-Index doing?" |
-| `GENERAL_CHAT` | Fallback for unmatched queries | "Hello, how are you?" |
+| Route | Description | Example Queries | Response Tool | Structured Output Schema |
+|-------|-------------|-----------------|---------------|--------------------------|
+| `PRICE_CHECK` | Current prices, quotes, market cap | "What is AAPL trading at?" | `submit_stock_analysis` | `StockAnalysisResponse` |
+| `NEWS_ANALYSIS` | Headlines, earnings, market events | "Latest news on Tesla" | `submit_general_chat` | `GeneralChatResponse` |
+| `PORTFOLIO` | Holdings, P&L, allocation | "Show my portfolio value" | `submit_recommendation` | `RecommendationResponse` |
+| `TECHNICAL_ANALYSIS` | Charts, MACD, RSI, patterns | "Show RSI for NVDA" | `submit_stock_analysis` | `StockAnalysisResponse` |
+| `FUNDAMENTALS` | P/E, P/B, DCF, financial ratios | "What's Apple's P/E ratio?" | `submit_stock_analysis` | `StockAnalysisResponse` |
+| `IDEAS` | Stock picks, investment strategies | "Recommend growth stocks" | `submit_recommendation` | `RecommendationResponse` |
+| `MARKET_WATCH` | Index updates, sector performance | "How is VN-Index doing?" | `submit_general_chat` | `GeneralChatResponse` |
+| `GENERAL_CHAT` | Fallback for unmatched queries | "Hello, how are you?" | `submit_general_chat` | `GeneralChatResponse` |
 
 **Configuration**:
 
@@ -933,17 +952,16 @@ Refs: [ADR-001](./DECISIONS/ADR-AGENT-001-LAYERED-LLM-ARCHITECTURE.md); SRS FR-1
 
 #### Immutable Response Types
 
-**Decision**: Use frozen dataclasses for all response types.
+**Decision**: Use immutable Pydantic v2 models for response types across REST and Socket.IO transport boundaries.
 
 ```python
-@dataclass(frozen=True)
-class AgentResponse:
-		content: str
-		provider: str
-		model: str
-		status: ResponseStatus = ResponseStatus.SUCCESS
-		tool_calls: tuple[ToolCall, ...] = field(default_factory=tuple)
-		token_usage: TokenUsage = field(default_factory=TokenUsage)
+class AgentResponse(BaseModel):
+		content: str                                    # Raw markdown narrative text
+		structured_content: Optional[AgentStructuredOutput] = None  # Typed JSON payload (StockAnalysisResponse, etc.)
+		status: ResponseStatus = ResponseStatus.SUCCESS # Execution & validation status (SUCCESS, PARTIAL, FAILED)
+		provider: str                                   # Active LLM provider
+		model: str                                      # Active LLM model
+		metadata: Dict = Field(default_factory=dict)    # Tracing & tool call metadata
 ```
 
 #### Dual Execution Mode (ReAct + Legacy Fallback)
@@ -1216,7 +1234,7 @@ flowchart TB
 - Higher-authority policy wins from top to bottom in this stack.
 - Baseline fallback remains a lineage rule carried by metadata and loader policy.
 - Standalone shared policy and always-active skills are target evolution, not current M2 runtime facts.
-- The output contract may shape structure, but it must not override earlier policy or evidence constraints.
+- The output contract (7) specifies response structure via route-adapted response tools (`submit_stock_analysis`, etc. per [Section 3.8.3](#383-control-plane-route-adapted-custom-response-tools-srccoretoolsresponse_toolspy)), but must not override earlier policy, safety, or evidence constraints.
 
 #### 3.5.4 Static and Dynamic Segment Realization
 
@@ -1308,7 +1326,8 @@ Prompt behavior should remain observable runtime metadata rather than hidden imp
 
 - current M1 response metadata: `prompt_version`, `prompt_variant`, `prompt_selection_mode`, `fallback_used`, `degraded_reason` when applicable, `model_provider`, and `model_name`;
 - implemented/gated M2 metadata: `route`, `route_skill_used`, `selected_skills`, `missing_route_skills`, and `dropped_dynamic_fields` when `CompiledPrompt` is active;
-- target prompt-governance metadata: `prompt_locale`, `parity_group`, effective tool-risk class, and final `guardrail_outcome`.
+- structured output telemetry metadata: `structured_output_status` (`SUCCESS`, `PARTIAL`, `FAILED`), `response_tool_used` (`submit_stock_analysis`, etc.), `fallback_formatter_used` (`true`/`false`), and `schema_version` (`v1`);
+- target prompt-governance metadata: `prompt_locale`, `parity_group`, effective tool-risk class (`RiskClass.BOUNDED_NON_MUTATING`), and final `guardrail_outcome`.
 
 The following target flow shows how preferred selection, locale fallback, route-skill degradation, and final guardrail outcomes converge on traceable response states. Current M1/M2 verification covers baseline fallback, prompt identity, route-skill degradation, and dropped dynamic fields; locale parity and guardrail outcome enforcement remain planned.
 
@@ -1479,6 +1498,372 @@ flowchart TD
 
 Future LTM, when introduced, should enrich the assembly step as optional cross-conversation personalization rather than replacing session context, STM, or evidence retrieval.
 
+### 3.8 Structured Output Subsystem Realization
+
+> **Status:** `[Planned]` realization under SRS FR-1.2.5–1.2.9, AC-10.1–10.6, IR-1.14, IR-3.11, ERR-1.4, ADR-AGENT-005, and Phase 2 Enhancement Roadmap §2A.3.
+
+#### 3.8.1 Subsystem Architecture & Responsibility
+
+The Structured Output Subsystem translates unstructured reasoning into machine-readable JSON payloads (`AgentStructuredOutput`) attached to the `AgentResponse` envelope. It uses a primary **Route-Adapted Custom Response Tool Pattern** (0% extra prompt token overhead) with a secondary **Two-Stage Service-Layer Post-Processing Formatter** fallback.
+
+```mermaid
+flowchart TD
+  Query["User Query"] --> Router["Semantic Router<br/>(stock_query_router)"]
+  Router --> Surface["ToolSurfaceBuilder<br/>(exposed evidence tools + route response tool)"]
+  Surface --> ReAct["StockAssistantAgent<br/>(LangChain ReAct runtime)"]
+  ReAct --> Extraction{"Response Tool Called?"}
+  Extraction -->|"Yes (Primary: 0% extra tokens)"| ParseTool["Parse Response Tool Args<br/>(submit_stock_analysis / submit_...)"]
+  Extraction -->|"No (Fallback: Plain text)"| Formatter["Two-Stage Service-Layer Formatter<br/>(model.with_structured_output)"]
+  ParseTool --> Envelope["AgentResponse Envelope<br/>(content + structured_content + status)"]
+  Formatter --> Envelope
+  Envelope --> Transport["Transport Edge Serialization<br/>(OpenAPI 3.1 ChatResponse / REST / Socket.IO)"]
+```
+
+##### Primary Execution Flow (Route-Adapted Response Tool Path — 0% Extra Tokens)
+
+In the primary execution path, the model outputs structured arguments as function parameters to the route response tool (`submit_stock_analysis`, etc.) during its final ReAct reasoning step. Setting `return_direct=True` terminates the loop immediately without a secondary LLM call:
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant Client as REST / Socket.IO Edge
+    participant Service as ChatService
+    participant Agent as "StockAssistantAgent (process_query_structured)"
+    participant Router as StockQueryRouter
+    participant Surface as ToolSurfaceBuilder
+    participant Gateway as ToolGateway
+    participant Model as LLM Client
+
+    Client->>Service: process_chat_query_structured(query, conversation_id)
+    Service->>Agent: process_query_structured(query, conversation_id)
+    Agent->>Router: classify_route(query) -> route (e.g. FUNDAMENTALS)
+    Agent->>Surface: build_surface(route) -> Domain Tools + submit_stock_analysis
+
+    loop ReAct Evidence Reasoning Loop
+        Agent->>Model: Prompt + Tools (Domain Tools + Response Tool)
+        Model-->>Agent: AIMessage(tool_calls=[VietnamMarketDataTool])
+        Agent->>Gateway: execute(VietnamMarketDataTool)
+        Gateway-->>Agent: ToolMessage(financial_data)
+    end
+
+    Model-->>Agent: AIMessage(tool_calls=[submit_stock_analysis(summary=..., sentiment="bullish")])
+    Agent->>Gateway: execute(submit_stock_analysis)
+    Gateway-->>Agent: ToolExecutionEnvelope (return_direct=True -> TERMINATE LOOP)
+
+    Note over Agent: Primary Output Contract Boundary
+    Agent->>Agent: Parse submit_stock_analysis args -> StockAnalysisResponse (Pydantic v2)
+    Agent-->>Service: AgentResponse(content=..., structured_content=StockAnalysisResponse, status=SUCCESS)
+    Service-->>Client: Typed JSON Response Frame (0% Extra Token Overhead)
+```
+
+##### Fallback Execution Flow (Two-Stage Post-Processing Formatter Path)
+
+When smaller open-source models or local models fail to invoke the registered route response tool and reply in plain markdown text, `process_query_structured()` transparently triggers the out-of-band post-processing fallback formatter:
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant Client as REST / Socket.IO Edge
+    participant Service as ChatService
+    participant Agent as "StockAssistantAgent (process_query_structured)"
+    participant Model as LLM Client
+    participant Formatter as "Fallback Formatter (model.with_structured_output)"
+
+    Client->>Service: process_chat_query_structured(query, conversation_id)
+    Service->>Agent: process_query_structured(query, conversation_id)
+
+    loop ReAct Reasoning Loop
+        Agent->>Model: Prompt + Tools
+        Model-->>Agent: AIMessage(tool_calls=[VietnamMarketDataTool])
+        Agent->>Agent: Execute tool & append ToolMessage
+    end
+
+    Model-->>Agent: AIMessage(content="HSG shows strong fundamentals...")
+
+    Note over Agent: Out-of-Band Tool Omission Detection
+    Agent->>Agent: Inspect messages -> No submit_* tool call found!
+
+    Agent->>Formatter: _extract_structured_response(raw_text, target_schema=StockAnalysisResponse)
+    Formatter->>Model: with_structured_output(StockAnalysisResponse) on raw_text (~500 tokens)
+
+    alt Extraction Succeeds
+        Model-->>Formatter: Validated StockAnalysisResponse payload
+        Formatter-->>Agent: StockAnalysisResponse
+        Agent-->>Service: AgentResponse(content=raw_text, structured_content=StockAnalysisResponse, status=PARTIAL)
+    else Extraction Fails / ValidationError
+        Formatter-->>Agent: ValidationError / Timeout
+        Agent-->>Service: AgentResponse(content=raw_text, structured_content=None, status=PARTIAL)
+    end
+
+    Service-->>Client: AgentResponse Frame (Graceful Degradation ERR-1.4)
+```
+
+Refs: SRS FR-1.2.5, FR-1.2.6, ERR-1.4; [ARCHITECTURE_DESIGN.md section 4.3.1](./ARCHITECTURE_DESIGN.md#431-primary-query-processing-flow); [ADR-AGENT-005](./DECISIONS/ADR-AGENT-005-STRUCTURED-OUTPUT-BOUNDARY-AND-RESPONSE-TOOL-PATTERN.md); [structured_output_technical_analysis.md §3, §7.3](../research/structured_output_technical_analysis.md); `src/core/stock_assistant_agent.py`; `src/services/chat_service.py`; `src/core/types.py`.
+
+#### 3.8.2 Polymorphic Response Schemas (`src/core/types.py`)
+
+Response payloads inherit from `AgentStructuredOutput` (Pydantic v2 `BaseModel`) with schema versioning and semantic route discrimination:
+
+| Schema Class | Parent Class | Target Route / Context | Core Payload Fields |
+|--------------|--------------|------------------------|---------------------|
+| `AgentStructuredOutput` | `BaseModel` | Base Polymorphic Type | `schema_version: str = "v1"`, `route_kind: StockQueryRoute`, `timestamp: datetime` |
+| `StockAnalysisResponse` | `AgentStructuredOutput` | `FUNDAMENTALS`, `TECHNICAL_ANALYSIS`, `PRICE_CHECK` | `symbol: str`, `company_name: str`, `valuation_summary: str`, `key_metrics: Dict`, `risk_level: str`, `evidence_sources: List[str]` |
+| `RecommendationResponse` | `AgentStructuredOutput` | `IDEAS`, `PORTFOLIO` | `action: str` (BUY/HOLD/SELL/WATCH), `target_price_range: Dict`, `time_horizon: str`, `rationale: List[str]`, `disclaimers: List[str]` |
+| `GeneralChatResponse` | `AgentStructuredOutput` | `GENERAL_CHAT`, `MARKET_WATCH`, `NEWS_ANALYSIS` | `topic: str`, `summary: str`, `follow_up_suggestions: List[str]` |
+
+Envelope structures:
+- `AgentResponse`: contains `content: str` (raw markdown text), `structured_content: Optional[AgentStructuredOutput]` (parsed typed JSON), `status: ResponseStatus`, and `metadata: Dict`.
+- `ResponseStatus`: enum with values `SUCCESS` (0% error, fully validated), `PARTIAL` (degraded fallback, partial parse), `FAILED` (unparseable error payload).
+
+Refs: SRS FR-1.2.5, AC-10.1; [structured_output_technical_analysis.md §6](../research/structured_output_technical_analysis.md); `src/core/types.py`.
+
+#### 3.8.3 Control-Plane Route-Adapted Custom Response Tools (`src/core/tools/response_tools.py`)
+
+Control-plane response tools function as direct output contract boundaries registered in `ToolRegistry` and admitted under codebase enum `RiskClass.BOUNDED_NON_MUTATING` (`bounded_transformation` architectural category):
+
+| Response Tool Name | Schema Parameter | Execution Semantics | Risk Admission |
+|-------------------|------------------|---------------------|----------------|
+| `submit_stock_analysis` | `StockAnalysisResponse` | `return_direct=True` (0% extra tokens, immediate completion) | `RiskClass.BOUNDED_NON_MUTATING` |
+| `submit_recommendation` | `RecommendationResponse` | `return_direct=True` (0% extra tokens, immediate completion) | `RiskClass.BOUNDED_NON_MUTATING` |
+| `submit_general_chat` | `GeneralChatResponse` | `return_direct=True` (0% extra tokens, immediate completion) | `RiskClass.BOUNDED_NON_MUTATING` |
+
+Runtime Filtering: `ToolSurfaceBuilder` exposes evidence tools plus *only* the matching route response tool for the active turn, preventing schema confusion or tool misuse.
+
+Refs: SRS FR-1.2.6, AC-10.2; [ADR-AGENT-005](./DECISIONS/ADR-AGENT-005-STRUCTURED-OUTPUT-BOUNDARY-AND-RESPONSE-TOOL-PATTERN.md); `src/core/tools/response_tools.py`; `src/core/tools/surface.py`.
+
+#### 3.8.4 Two-Stage Service-Layer Post-Processing Formatter
+
+When the LLM completes its ReAct reasoning loop without calling the registered route response tool, `StockAssistantAgent.process_query_structured()` triggers the out-of-band post-processing fallback formatter:
+
+1. **Stage 1**: Read raw text response from ReAct message history (~500 tokens).
+2. **Stage 2**: Execute out-of-band extraction via `model.with_structured_output(target_schema)` in `ChatService` or runtime helper.
+3. **Graceful Degradation**: If out-of-band extraction fails or times out, return raw text in `AgentResponse.content`, set `structured_content = None`, and assign `status = ResponseStatus.PARTIAL` (`ERR-1.4`).
+
+Refs: SRS FR-1.2.7, ERR-1.4, AC-10.4; [ARCHITECTURE_DESIGN.md section 4.8.4](./ARCHITECTURE_DESIGN.md#484-output-contract-boundary); `src/services/chat_service.py`.
+
+#### 3.8.5 STM Checkpointer State Hygiene
+
+LangGraph checkpointer (`MongoDBSaver`) persists short-term memory (STM) across conversational turns:
+
+- **Checkpointer State**: Stores raw `BaseMessage` history (user text, AI text, evidence tool calls, tool outputs) to preserve reasoning context.
+- **Exclusion Rule**: `AgentStructuredOutput` JSON payloads are **explicitly excluded** from `MongoDBSaver` checkpointer serialization. Structured payloads are parsed per-turn at the output contract boundary and attached to `AgentResponse`, avoiding checkpointer schema drift and state bloat.
+
+Refs: SRS FR-1.2.8, AC-10.5; [ARCHITECTURE_DESIGN.md section 4.4.2](./ARCHITECTURE_DESIGN.md#442-typed-payload-allocation); `src/core/langgraph_bootstrap.py`.
+
+##### StateGraph Migration & In-Graph Self-Repair Workflow (`[Future]`)
+
+In Milestone 2, the engine foundation evolves from factory-wrapped `create_agent` to a custom compiled `StateGraph` in `src/core/langgraph_bootstrap.py`. When a model calls a route response tool, a custom conditional transition node intercepts the tool call, validates the Pydantic schema, writes directly to `state["structured_response"]`, and short-circuits execution directly to `END`:
+
+```mermaid
+flowchart TD
+    subgraph SG["Milestone 2: Custom StateGraph Engine Architecture"]
+        START([START Node]) --> Router["Route Classification & Surface Builder"]
+        Router --> AgentNode["Agent Reasoning Node<br/>(LLM Invocation)"]
+
+        AgentNode --> Cond{"Tool Call Type?"}
+
+        Cond -->|"Domain Tool Call<br/>(VietnamMarketDataTool)"| ToolNode["Tool Execution Node<br/>(Appends ToolMessage)"]
+        ToolNode --> AgentNode
+
+        Cond -->|"Response Tool Call<br/>(submit_stock_analysis)"| Interceptor{"Pydantic Schema<br/>Validation Check"}
+
+        Interceptor -->|"Valid Schema (100% Success)"| WriteState["Write Pydantic Payload to<br/>state['structured_response']"]
+        WriteState --> END([END Node - Short Circuit])
+
+        Interceptor -->|"Validation Error<br/>(retry_count < 2)"| RepairNode["Self-Repair Loop Node<br/>(Appends Error ToolMessage & Increments Retries)"]
+        RepairNode --> AgentNode
+
+        Interceptor -->|"Exhausted Retries<br/>(retry_count >= 2)"| FallbackNode["Service-Layer Formatter Fallback<br/>(model.with_structured_output)"]
+        FallbackNode --> END
+
+        Cond -->|"No Tool Call<br/>(Plain Text Response)"| FallbackNode
+    end
+```
+
+Refs: SRS AC-10.6; [ADR-AGENT-005](./DECISIONS/ADR-AGENT-005-STRUCTURED-OUTPUT-BOUNDARY-AND-RESPONSE-TOOL-PATTERN.md); [PHASE_2_AGENT_ENHANCEMENT_ROADMAP.md §2A.3](./PHASE_2_AGENT_ENHANCEMENT_ROADMAP.md); [stategraph_migration_analysis.md](../research/stategraph_migration_analysis.md); [structured_output_technical_analysis.md §7.2.2](../research/structured_output_technical_analysis.md).
+
+#### 3.8.7 OpenAPI Contract & Transport Edge Serialization
+
+The executable OpenAPI 3.1 contract ([docs/openapi.yaml](../openapi.yaml)) governs structured output serialization across REST and WebSocket transport edges:
+
+```mermaid
+flowchart LR
+  Agent["StockAssistantAgent<br/>process_query_structured()"] --> Service["ChatService<br/>execute_chat_turn()"]
+  Service --> REST["REST Edge<br/>POST /api/chat<br/>(ai_chat_routes.py)"]
+  Service --> Socket["WebSocket Edge<br/>chat_message event<br/>(chat_events.py)"]
+  REST --> Contract["OpenAPI 3.1 Contract<br/>ChatResponse schema<br/>(docs/openapi.yaml)"]
+  Socket --> Contract
+  Contract --> TSClient["Frontend TS Contracts<br/>(openapi-typescript)"]
+```
+
+##### Dual-Stream Streaming & Raw JSON Token Suppression Rules
+
+1. **Raw JSON Token Suppression**: During real-time streaming (`astream_events` / SSE / WebSocket), raw JSON syntax tokens generated during response tool argument invocation (`submit_stock_analysis`) are **filtered out of the text stream**, preventing raw JSON syntax fragments from rendering in natural language chat bubbles.
+2. **Discrete Event Frame Emission**: Upon turn completion, transport edge handlers emit a discrete `structured_completion` event frame (SSE) or `structured_content` payload (`chat_response` WebSocket event) containing the parsed `AgentStructuredOutput` object for UI widget rendering (charts, risk badges, target price cards).
+3. **OpenAPI Contract Alignment**: `docs/openapi.yaml` updates `ChatResponse` component schema to include `structured_content` and `status`, enabling frontend TypeScript contract generation via `openapi-typescript` ([adr-frontend-002](../frontend/adr-frontend-002-modernize-frontend-foundation.md)).
+
+Refs: SRS IR-1.14, IR-3.11; [docs/openapi.yaml](../openapi.yaml); `src/web/routes/ai_chat_routes.py`; `src/web/sockets/chat_events.py`; [adr-frontend-002](../frontend/adr-frontend-002-modernize-frontend-foundation.md).
+
+#### 3.8.8 Technical Pitfalls, Drawbacks, and Mitigations
+
+The subsystem realization incorporates 5 explicit technical mitigations ([structured_output_technical_analysis.md §5.3](../research/structured_output_technical_analysis.md)):
+
+| Pitfall / Drawback | Root Cause | System Impact | Realization Mitigation |
+|-------------------|------------|---------------|------------------------|
+| **Premature Response Tool Execution** | LLM invokes `submit_stock_analysis` on turn 1 before calling evidence tools. | Generates hallucinated structured payload without fetching market facts. | Enforce system prompt rules ("Do not invoke response tools before evidence tools") + runtime validation checking evidence tool execution before admitting response tools on data routes. |
+| **Model Non-Compliance (Tool Bypassing)** | Small open-source or local LLMs reply in raw markdown text without calling response tool. | `structured_content` is `None` in agent result. | Automatic fallback to Option C (`_extract_structured_response()`) via `model.with_structured_output()`. |
+| **Self-Repair Loop Deadlocks** | Model emits invalid arguments repeatedly (e.g. `confidence=1.5`). | Excessive token consumption and infinite loop. | Enforce strict `max_structured_retries = 2` limit in graph transition nodes; fallback to Option C on exhaustion. |
+| **Schema Verbosity in System Prompts** | Overly complex Pydantic schemas produce large function schemas. | Inflates prompt token overhead on every turn. | Keep response schemas lean (max 6-8 core fields), avoiding deeply nested structures. |
+| **Raw JSON Token Streaming Leakage** | `astream_events` streams raw JSON tool argument tokens into text stream. | Frontend chat bubble displays raw JSON syntax fragments. | Transport edge suppresses tool argument streaming tokens and emits discrete `structured_completion` event frame upon turn completion. |
+
+Refs: [structured_output_technical_analysis.md §5.3, §8](../research/structured_output_technical_analysis.md); `src/core/stock_assistant_agent.py`; `src/web/routes/ai_chat_routes.py`.
+
+#### 3.8.9 Persistent Data Schema & MongoDB Realization
+
+The persistent data storage architecture decouples conversation-scoped short-term memory (STM) in `agent_checkpoints` from durable conversation lifecycle metadata in `conversations`.
+
+```mermaid
+erDiagram
+    CONVERSATION_COLLECTION ||--|{ TURN_METADATA : contains
+    CONVERSATION_COLLECTION ||--|| CHECKPOINT_COLLECTION : maps_by_thread_id
+
+    CONVERSATION_COLLECTION {
+        string _id PK
+        string conversation_id UK
+        string user_id
+        string status
+        datetime created_at
+        datetime updated_at
+    }
+
+    TURN_METADATA {
+        string route_kind
+        string response_tool_used
+        string structured_status
+        string schema_version
+        object last_structured_output
+    }
+
+    CHECKPOINT_COLLECTION {
+        string _id PK
+        string thread_id FK
+        string checkpoint_id
+        array messages_raw
+        string payload_exclusion_rule "AgentStructuredOutput payloads explicitly EXCLUDED"
+    }
+```
+
+##### 1. `conversations` Collection Document Schema (`src/data/repositories/conversation_repository.py`)
+
+Turn metadata documents persist light structured summary frames inside the `conversations` MongoDB collection without polluting short-term memory checkpointer state:
+
+```json
+{
+  "_id": { "$oid": "6699a1b2c3d4e5f6a7b8c9d0" },
+  "conversation_id": "conv_8892a14b",
+  "user_id": "user_4491",
+  "status": "active",
+  "created_at": { "$date": "2026-07-22T09:00:00.000Z" },
+  "updated_at": { "$date": "2026-07-22T10:15:30.000Z" },
+  "last_turn_metadata": {
+    "prompt_version": "v2.1",
+    "route_kind": "stock_analysis",
+    "response_tool_used": "submit_stock_analysis",
+    "structured_status": "success",
+    "schema_version": "v1",
+    "fallback_formatter_used": false,
+    "last_structured_output": {
+      "schema_version": "v1",
+      "route_kind": "stock_analysis",
+      "symbol": "HSG",
+      "company_name": "Hoa Sen Group",
+      "summary": "HSG displays strong bullish momentum supported by rising steel margins.",
+      "sentiment": "bullish",
+      "confidence": 0.88,
+      "tickers_analyzed": ["HSG", "NKG"],
+      "data_points": [
+        { "label": "RSI (14)", "value": "62.4", "source": "VietnamMarketDataTool" },
+        { "label": "P/E Ratio", "value": "11.2", "source": "VietnamMarketDataTool" }
+      ],
+      "risks": ["Global steel price volatility", "Import tariff adjustments"],
+      "evidence_sources": ["vnstock", "TradingView"],
+      "disclaimer": "This is not financial advice."
+    }
+  }
+}
+```
+
+##### 2. `agent_checkpoints` Collection BSON Schema & Payload Exclusion Hygiene (`src/core/langgraph_bootstrap.py`)
+
+LangGraph's `MongoDBSaver` manages recoverable execution state in `agent_checkpoints`. Heavy Pydantic `AgentStructuredOutput` JSON objects are **strictly excluded** from checkpointer state channels to prevent state corruption, schema drift, and MongoDB document bloat (`FR-1.2.8`):
+
+```json
+{
+  "_id": { "$oid": "6699b2c3d4e5f6a7b8c9d0e1" },
+  "thread_id": "conv_8892a14b",
+  "checkpoint_ns": "",
+  "checkpoint_id": "1ef462a9-8b12-6f20-8001",
+  "parent_checkpoint_id": "1ef462a8-7a01-6e10-8000",
+  "type": "checkpoint",
+  "checkpoint": {
+    "v": 1,
+    "id": "1ef462a9-8b12-6f20-8001",
+    "ts": "2026-07-22T10:15:30.000Z",
+    "channel_values": {
+      "messages": [
+        { "type": "human", "content": "Danh gia ma co phieu HSG" },
+        { "type": "ai", "content": "", "tool_calls": [{ "name": "VietnamMarketDataTool", "args": { "symbol": "HSG" } }] },
+        { "type": "tool", "content": "{'quote': {'symbol': 'HSG', 'price': 23500...}}" },
+        { "type": "ai", "content": "", "tool_calls": [{ "name": "submit_stock_analysis", "args": { "symbol": "HSG", "sentiment": "bullish" } }] }
+      ]
+    },
+    "channel_versions": { "messages": 4 },
+    "versions_seen": { "__start__": { "messages": 1 } }
+  },
+  "metadata": {
+    "source": "loop",
+    "step": 2,
+    "writes": { "messages": [{ "type": "ai", "content": "" }] },
+    "note": "EXCLUSION_RULE: AgentStructuredOutput payload is EXCLUDED from channel_values"
+  }
+}
+```
+
+Refs: SRS FR-1.2.8, AC-10.5; [ARCHITECTURE_DESIGN.md section 4.4.2](./ARCHITECTURE_DESIGN.md#442-typed-payload-allocation); `src/core/langgraph_bootstrap.py`; `src/data/repositories/conversation_repository.py`.
+
+#### 3.8.10 Database Migration & Backward Compatibility Strategy
+
+##### 1. Recommended MongoDB Index Definitions
+
+To ensure high-performance query execution across analytics and conversation management endpoints, the following compound indexes are required on `conversations`:
+
+```javascript
+// Index for query filtering by structured output status and date
+db.conversations.createIndex(
+  { "last_turn_metadata.structured_status": 1, "updated_at": -1 },
+  { name: "idx_conversations_structured_status_updated" }
+);
+
+// Index for route analytics and performance monitoring
+db.conversations.createIndex(
+  { "last_turn_metadata.route_kind": 1, "last_turn_metadata.schema_version": 1 },
+  { name: "idx_conversations_route_schema_version" }
+);
+```
+
+##### 2. Zero-Downtime Migration & Schema Compatibility Matrix
+
+Existing conversation documents created prior to Milestone 1 lack `last_turn_metadata.structured_status`. The runtime enforces zero-downtime backward compatibility without requiring forced offline database migrations:
+
+| Client Request Type | Stored Conversation State | Runtime Serialization Behavior | Response `status` |
+|---------------------|---------------------------|--------------------------------|-------------------|
+| Legacy Unstructured Turn | Document missing `last_turn_metadata` | `AgentResponse(content=text, structured_content=None)` | `ResponseStatus.SUCCESS` |
+| Primary Response Tool Turn | Document with valid `last_turn_metadata` | `AgentResponse(content=text, structured_content=StockAnalysisResponse)` | `ResponseStatus.SUCCESS` |
+| Degraded Formatter Turn | Fallback formatter failed or timed out | `AgentResponse(content=text, structured_content=None)` | `ResponseStatus.PARTIAL` |
+| Unparseable Error Turn | Schema parsing exception | `AgentResponse(content=text, structured_content=None)` | `ResponseStatus.FAILED` |
+
+Refs: SRS ERR-1.4, AC-10.4; [structured_output_technical_analysis.md §7.3, §8](../research/structured_output_technical_analysis.md); `src/data/repositories/conversation_repository.py`; `src/services/chat_service.py`.
+
 ## 4. Engineering Constraints and Extension Paths
 
 ### 4.1 Tool and Reporting Enhancements
@@ -1559,20 +1944,11 @@ flowchart TD
 
 Multi-agent orchestration remains future exploration only. It should not be introduced until tool, prompt, memory, and data boundaries diverge enough to justify a second runtime.
 
-#### Structured Output Mode
+#### Structured Output Realization
 
-```python
-from langchain_core.output_parsers import JsonOutputParser
+The agent domain uses **Route-Adapted Custom Response Tools** (`submit_stock_analysis`, `submit_recommendation`, `submit_general_chat`) registered under `RiskClass.BOUNDED_NON_MUTATING` with `return_direct=True` (0% extra prompt token overhead) as the primary output contract boundary, backed by a **Two-Stage Service-Layer Post-Processing Formatter** fallback. Detailed Pydantic schemas (`AgentStructuredOutput`), checkpointer hygiene, transport serialization, and StateGraph migration strategy are specified in [Section 3.8 Structured Output Subsystem Realization](#38-structured-output-subsystem-realization).
 
-class StockPriceResponse(BaseModel):
-		symbol: str
-		current_price: float
-		change_percent: float
-		volume: int
-		analysis: str
-
-parser = JsonOutputParser(pydantic_object=StockPriceResponse)
-```
+Refs: SRS FR-1.2.5–1.2.9, AC-10.1–10.6; [ADR-AGENT-005](./DECISIONS/ADR-AGENT-005-STRUCTURED-OUTPUT-BOUNDARY-AND-RESPONSE-TOOL-PATTERN.md); [Section 3.8](#38-structured-output-subsystem-realization); `src/core/types.py`; `src/core/tools/response_tools.py`.
 
 #### Semantic Router Enhancements
 
@@ -1648,12 +2024,14 @@ The ADR decisions are realized in phases so memory, retrieval, prompt policy, an
 |------|--------------------|---------------|
 | 1 | Conversation-scoped STM and checkpoint lifecycle | Implemented |
 | 2 | Prompt externalization and composable skills | M1 implemented; M2 implemented / gated |
+| 2A (SO.M1) | Structured Output Subsystem — route-adapted custom response tools (`return_direct=True`) + service fallback formatter | Planned per Phase 2 Roadmap §2A.3, ADR-005, and SRS FR-1.2.5–1.2.9 |
+| 2A (SO.M2) | Custom `StateGraph` optimization — state channel interceptor and in-graph self-repair loop | Future state per Phase 2 Roadmap §2A.3 |
 | 2B | Tool gateway, provider adapters, normalized tool context, and Vietnam-first data coverage | Implemented — tool surface, gateway, descriptors, provider policy, normalized outputs, `ToolContextPack`, symbol-store, market-data tools, and TradingView visualization |
 | 3 | Intent-specific retrieval and evidence wiring | Planned / partial by tool path |
 | 4 | Fine-tuning for structure and tone | Planned |
 | 5 | Guardrail observability, streaming guardrails, and experiment controls | Planned |
 
-Refs: [PHASE_2_AGENT_ENHANCEMENT_ROADMAP.md](./PHASE_2_AGENT_ENHANCEMENT_ROADMAP.md); [PROMPT_SYSTEM_RESEARCH_PROPOSAL.md](./PROMPT_SYSTEM_RESEARCH_PROPOSAL.md); [TOOLS_RESEARCH_AND_PROPOSAL.md](./TOOLS_RESEARCH_AND_PROPOSAL.md); [spec-sync-status.md](../../../specs/spec-sync-status.md).
+Refs: [PHASE_2_AGENT_ENHANCEMENT_ROADMAP.md](./PHASE_2_AGENT_ENHANCEMENT_ROADMAP.md); [ADR-AGENT-005](./DECISIONS/ADR-AGENT-005-STRUCTURED-OUTPUT-BOUNDARY-AND-RESPONSE-TOOL-PATTERN.md); [PROMPT_SYSTEM_RESEARCH_PROPOSAL.md](./PROMPT_SYSTEM_RESEARCH_PROPOSAL.md); [TOOLS_RESEARCH_AND_PROPOSAL.md](./TOOLS_RESEARCH_AND_PROPOSAL.md); [spec-sync-status.md](../../../specs/spec-sync-status.md).
 
 ## 5. Supporting Patterns, Stacks, and Relationships
 
@@ -1681,6 +2059,8 @@ Refs: [PHASE_2_AGENT_ENHANCEMENT_ROADMAP.md](./PHASE_2_AGENT_ENHANCEMENT_ROADMAP
 | **Normalizer** | Evidence/output normalizer | Conversion from adapter/tool output to normalized output kinds |
 | **Context Object** | `ToolContextPack` | Request-scoped normalized tool context passed toward prompt assembly |
 | **Descriptor** | Tool and provider descriptors | Model-visible capability metadata and internal policy metadata |
+| **Command / Strategy** | Route response tools (`submit_*`) | Control-plane output contract boundaries with `return_direct=True` (0% extra tokens) |
+| **Discriminated Union** | `AgentStructuredOutput` subclasses | Polymorphic Pydantic response schemas keyed by `route_kind` |
 
 ### 5.2 Software Stack
 
@@ -1740,11 +2120,27 @@ AgentTool (BaseTool)
 +-- TradingViewTool
 +-- VietnamMarketDataTool
 +-- GenericWebFetchTool (deny-by-default evidence fallback)
++-- submit_stock_analysis (control-plane response tool, return_direct=True)
++-- submit_recommendation (control-plane response tool, return_direct=True)
++-- submit_general_chat (control-plane response tool, return_direct=True)
 
-AgentResponse (frozen dataclass)
-+-- .success() classmethod
-+-- .error() classmethod
-+-- .fallback() classmethod
+AgentStructuredOutput (BaseModel)
++-- StockAnalysisResponse (route_kind="stock_analysis")
++-- RecommendationResponse (route_kind="recommendation")
++-- GeneralChatResponse (route_kind="general_chat")
+
+ResponseStatus (str, Enum)
++-- SUCCESS ("success")
++-- PARTIAL ("partial")
++-- FAILED ("failed")
+
+AgentResponse (BaseModel)
++-- content: str
++-- structured_content: Optional[AgentStructuredOutput]
++-- status: ResponseStatus
++-- provider: str
++-- model: str
++-- metadata: Dict
 ```
 
 ### 5.4 Key File Relationships
@@ -1755,11 +2151,26 @@ Refs: `src/core`; `src/services`; `src/web`; `src/data`; `src/utils`; `specs/spe
 
 ```text
 stock_assistant_agent.py
-		imports: types.py (AgentResponse, ToolCall)
+		imports: types.py (AgentResponse, AgentStructuredOutput, ResponseStatus, ToolCall)
 		imports: model_factory.py (ModelClientFactory)
 		imports: langchain_adapter.py (build_prompt)
 		imports: tools/registry.py (ToolRegistry)
+		imports: tools/response_tools.py (submit_stock_analysis, submit_recommendation, submit_general_chat)
 		receives: checkpointer via constructor injection
+
+ai_chat_routes.py
+		imports: services/chat_service.py (ChatService)
+		imports: core/types.py (AgentResponse, ResponseStatus)
+		serializes: AgentResponse.structured_content into HTTP 200 OK JSON (POST /api/chat)
+
+chat_events.py
+		imports: services/chat_service.py (ChatService)
+		imports: core/types.py (AgentResponse)
+		emits: structured_content payload in WebSocket chat_response event
+
+docs/openapi.yaml
+		defines: ChatResponse schema with structured_content ($ref: AgentStructuredOutput) & status
+		governs: frontend openapi-typescript contract generation
 
 langgraph_bootstrap.py
 		imports: langgraph.checkpoint.mongodb (MongoDBSaver)
@@ -1899,14 +2310,22 @@ langchain:
 ### 6.2 Type Definitions Quick Reference
 
 ```python
-SUCCESS = "success"
-FALLBACK = "fallback"
-ERROR = "error"
-PARTIAL = "partial"
+from enum import Enum
+from pydantic import BaseModel, Field
+from typing import Optional, Dict
 
-AgentResponse.success(content, provider, model, **kwargs)
-AgentResponse.error(message, provider, model)
-AgentResponse.fallback(content, provider, model, **kwargs)
+class ResponseStatus(str, Enum):
+    SUCCESS = "success"  # Fully validated output schema
+    PARTIAL = "partial"  # Degraded fallback or unparsed text fallback
+    FAILED = "failed"    # Schema parsing failure or unrecoverable error
+
+class AgentResponse(BaseModel):
+    content: str                                    # Narrative markdown text
+    structured_content: Optional[AgentStructuredOutput] = None # Parsed polymorphic JSON payload
+    status: ResponseStatus = ResponseStatus.SUCCESS # Envelope execution status
+    provider: str                                   # Active LLM provider
+    model: str                                      # Active LLM model
+    metadata: Dict = Field(default_factory=dict)    # Tracing & tool call metadata
 ```
 
 ## 7. Revision History
@@ -1931,3 +2350,4 @@ AgentResponse.fallback(content, provider, model, **kwargs)
 | 0.14 | 2026-06-25 | Codex | Refined Phase 2B tool-system realization with split pre-model/execution flow, target contract ownership, and degraded-state failure mapping |
 | 0.15 | 2026-06-25 | Codex | Added tool-system persistent data model and storage design covering MongoDB metadata, filesystem artifacts, target schema contracts, and source-lineage rules |
 | 0.16 | 2026-06-25 | Codex | Added tool-system persistence decision, storage-stack, and collection/schema diagrams for Phase 2B data-model realization |
+| 0.17 | 2026-07-22 | Gemini | Realized Structured Output Subsystem (`[Planned]` state): added section 3.8 covering polymorphic Pydantic schemas (`AgentStructuredOutput`), control-plane route-adapted response tools (`RiskClass.BOUNDED_NON_MUTATING` with `return_direct=True`), two-stage fallback formatting, checkpointer exclusion hygiene, transport serialization (`docs/openapi.yaml`, REST `POST /api/chat`, Socket.IO `chat_message`), and StateGraph migration strategy per SRS v2.9 (FR-1.2.5–1.2.9, AC-10), ADR-005, and Phase 2 Roadmap §2A.3. Full-spectrum Structured Output Subsystem synchronization across Technical Design: updated section 3.1 (`StockAssistantAgent.process_query_structured` delegation flow), section 3.2.4 (control-plane response tool `RiskClass.BOUNDED_NON_MUTATING` classification), section 3.3.1 (checkpointer memory state hygiene excluding typed JSON payloads from STM), section 3.4 (semantic route-to-schema 1-to-1 mapping matrix and Pydantic `AgentResponse` envelope), section 3.5.3 & 3.5.7 (output contract boundary reference and structured output telemetry metadata), section 4.4 (Phase 2A roadmap delivery sequencing), section 5.1 & 5.3 & 5.4 (Command/Strategy and Discriminated Union patterns, Pydantic class hierarchy, key file relationships), and section 6.2 (`ResponseStatus` enum quick reference) per SRS v2.9, ADR-005, and ARCHITECTURE_DESIGN.md |
