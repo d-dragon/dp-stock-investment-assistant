@@ -107,9 +107,17 @@ def create_chat_blueprint(context: "APIRouteContext") -> Blueprint:
 
             logger.info(f"Chat request: {user_message[:50]}..." + 
                        (f" conversation={conversation_id}" if conversation_id else ""))
-            result = chat_service.process_chat_query(
-                user_message, provider_override=provider_override, conversation_id=conversation_id
-            )
+            
+            # Support structured output response processing (FR-1.2.5 / IR-3.11 / T012)
+            if data.get('structured') or request.args.get('structured', '').lower() in ('true', '1'):
+                agent_resp = chat_service.process_chat_query_structured(
+                    user_message, provider_override=provider_override, conversation_id=conversation_id
+                )
+                result = agent_resp.to_dict()
+            else:
+                result = chat_service.process_chat_query(
+                    user_message, provider_override=provider_override, conversation_id=conversation_id
+                )
             
             if conversation_id:
                 result['conversation_id'] = conversation_id

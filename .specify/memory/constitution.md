@@ -1,30 +1,30 @@
 <!--
 SYNC IMPACT REPORT
 ==================
-Version Change: 2.4.0 -> 2.5.0 (MINOR)
-Bump Rationale: Added explicit Vietnam market-data and visualization evidence gates aligned to
-  the M2B.3 specification, ARCHITECTURE_DESIGN.md, TECHNICAL_DESIGN.md, and SRS v2.8. Existing
-  principles remain intact; the amendment materially expands source attribution, freshness,
-  TradingView non-evidence, provider production posture, and Vietnamese/mixed-language route
-  evaluation governance for provider-backed market-data work.
+Version Change: 2.5.0 -> 2.6.0 (MINOR)
+Bump Rationale: Added explicit Structured Output Subsystem governance, Route-Adapted Custom Response
+  Tool rules, Two-Stage Fallback Formatter constraints, checkpointer payload exclusion hygiene, and
+  transport edge streaming suppression rules based on ADR-AGENT-005, ARCHITECTURE_DESIGN.md,
+  TECHNICAL_DESIGN.md v1.2, and SRS v2.9 (FR-1.2.5–1.2.9, AC-10).
 
 Modified Principles:
-- Evidence-Grounded Financial Intelligence -> Evidence-Grounded Financial Intelligence
-  (expanded with answer-level market-fact attribution, freshness, license posture, and
-  TradingView non-evidence rules)
+- Layered Boundaries and Explicit Ownership -> Layered Boundaries and Explicit Ownership
+  (expanded with checkpointer payload exclusion hygiene rule excluding AgentStructuredOutput from STM)
+- Prompts, Memory, and Fine-Tuning Control Behavior, Not Truth -> Prompts, Memory, and Fine-Tuning
+  Control Behavior, Not Truth (expanded with explicit separation between Output Contract Schema
+  Validation and ResponseGuardrailMiddleware behavioral enforcement)
 - Deterministic Tools and Contracted Interfaces -> Deterministic Tools and Contracted Interfaces
-  (expanded with provider-backed market-data production gates and visualization provenance
-  constraints)
+  (expanded with control-plane response tool admission under RiskClass.BOUNDED_NON_MUTATING and
+  return_direct=True)
 
 Added Sections:
-- Vietnam Market Data and Visualization Evidence Gates
+- Structured Output Subsystem and Response Tool Governance
 
 Removed Sections:
 - None
 
 Template Consistency Check:
-- .specify/templates/plan-template.md: checked; no structural change required because
-  Constitution Check remains constitution-derived
+- .specify/templates/plan-template.md: checked; no structural change required
 - .specify/templates/spec-template.md: checked; no structural change required
 - .specify/templates/tasks-template.md: checked; no structural change required
 - .specify/templates/checklist-template.md: checked; no structural change required
@@ -70,9 +70,11 @@ surface rather than through ad-hoc reach-through. Service orchestration owns lif
 ownership, archive guards, and reusable session context; the agent runtime consumes those
 controls and MUST NOT absorb them. The checkpointer owns conversation-scoped STM only and MUST
 NOT become authority for lifecycle metadata, ownership, session context, retained artifacts, or
-market evidence. Rationale: the current codebase already depends on blueprint, service,
-repository, factory, and checkpointer boundaries, and preserving those seams keeps change
-reviewable and testable.
+market evidence. Typed JSON response payloads (`AgentStructuredOutput`) MUST be explicitly excluded
+from conversation-scoped STM checkpointer serialization (`agent_checkpoints`) to prevent state
+corruption, schema drift, and database bloat (`FR-1.2.8`). Rationale: the current codebase already
+depends on blueprint, service, repository, factory, and checkpointer boundaries, and preserving
+those seams keeps change reviewable and testable.
 
 ### III. Evidence-Grounded Financial Intelligence
 Financial outputs MUST be grounded in approved external sources, governed internal data stores,
@@ -91,7 +93,10 @@ personalization, but they MUST NOT become hidden fact stores. Memory retains pre
 session context only; retrieval retains sourced documents; fine-tuning reinforces format or tone
 rather than factual content. Prompt behavior MUST preserve explicit status labels: the current
 baseline, implemented or gated M1/M2 prompt assets and route skills, planned guardrail
-middleware, and future experiment controls are different authority states. Rationale: the
+middleware, and future experiment controls are different authority states. Output contract schema
+validation (parsing typed JSON into `AgentResponse.structured_content`) MUST remain strictly
+separated from behavioral policy enforcement (`ResponseGuardrailMiddleware`), ensuring contract
+parsing does not swallow or substitute behavioral guardrail failures. Rationale: the
 repository's current prompt-system and memory work assumes this separation, and governance must
 keep implemented, gated, planned, and future behavior explicit.
 
@@ -101,12 +106,15 @@ backed cache-aware tools MUST be labeled separately from target Phase 2B boundar
 route-filtered exposure, `ToolSurfaceBuilder`, `ToolGateway`, provider policy, normalized
 outputs, and `ToolContextPack` until authority documents and implementation evidence promote
 them. Agent tools MUST be exposed through route-filtered, policy-admitted surfaces rather than
-broad provider lists when that target boundary is in scope. Provider-specific fetching,
-parsing, licensing, freshness, fallback, and health behavior MUST stay behind deterministic
-provider policies and adapters. Tool results MUST be normalized into typed, source-attributed,
-freshness-aware, warning-aware context before entering prompt assembly. Public interfaces such
-as REST endpoints, streaming responses, WebSocket events, and machine-readable contracts MUST
-remain explicit, version-aware, and synchronized with implementation. Provider-backed
+broad provider lists when that target boundary is in scope. Control-plane custom response tools
+(`submit_stock_analysis`, `submit_recommendation`, `submit_general_chat`) MUST be registered in
+`ToolRegistry` under codebase enum `RiskClass.BOUNDED_NON_MUTATING` with `return_direct=True` (0%
+extra token overhead) to act as direct output contract boundaries (`ADR-AGENT-005`). Provider-specific
+fetching, parsing, licensing, freshness, fallback, and health behavior MUST stay behind
+deterministic provider policies and adapters. Tool results MUST be normalized into typed,
+source-attributed, freshness-aware, warning-aware context before entering prompt assembly. Public
+interfaces such as REST endpoints, streaming responses, WebSocket events, and machine-readable
+contracts MUST remain explicit, version-aware, and synchronized with implementation. Provider-backed
 market-data tools MUST pass source-attribution, freshness, license-posture, cache, and
 degraded-state gates before production use, and visualization-only tools MUST remain outside
 canonical evidence paths unless governed policy explicitly admits them. Rationale: the project
@@ -434,6 +442,34 @@ TradingView visualization, provider-backed traces, or Vietnamese/mixed-language 
    Vietnamese and mixed-language route fixtures, expected tool-family mappings, ambiguity handling,
    and route-tool precision/recall or equivalent acceptance targets before verification.
 
+#### Structured Output Subsystem and Response Tool Governance
+
+These rules govern all machine-readable structured JSON output generation, route response tools,
+fallback post-processing formatters, checkpointer state hygiene, and transport edge serialization.
+
+1. **Route-Adapted Custom Response Tools as Primary Strategy.** Structured output generation MUST
+   prefer route-adapted control-plane response tools (`submit_stock_analysis`, `submit_recommendation`,
+   `submit_general_chat`) registered in `ToolRegistry` under codebase enum `RiskClass.BOUNDED_NON_MUTATING`
+   with `return_direct=True`. Response tools MUST be injected dynamically per route by `ToolSurfaceBuilder`
+   to achieve **0% extra prompt token overhead** during single-turn ReAct reasoning (`ADR-AGENT-005`).
+2. **Two-Stage Service-Layer Fallback Formatter.** When LLM models omit response tool calls and output
+   plain markdown text, `StockAssistantAgent.process_query_structured()` MUST transparently trigger an
+   out-of-band post-processing fallback call (`model.with_structured_output()`) in `ChatService`.
+3. **Graceful Degradation and PARTIAL Status.** Malformed or unparseable structured extractions MUST
+   fail gracefully into `ResponseStatus.PARTIAL` with raw text preserved in `AgentResponse.content`,
+   preventing active conversation thread crashes or unhandled exceptions (`ERR-1.4`).
+4. **STM Checkpointer Payload Exclusion Hygiene.** LangGraph `MongoDBSaver` checkpointer state
+   (`agent_checkpoints`) MUST NOT serialize heavy Pydantic `AgentStructuredOutput` JSON objects. Typed
+   structured payloads MUST be attached to `AgentResponse` at the output contract boundary only,
+   protecting checkpointer state from schema drift and MongoDB document bloat (`FR-1.2.8`).
+5. **Phased Architecture Strategy.** All functional structured output requirements (`FR-1.2.5`–`FR-1.2.9`,
+   `AC-10`) MUST be fulfilled on the factory-wrapped `create_agent` ReAct baseline (`SO.M1`) before custom
+   compiled `StateGraph` nodes and in-graph self-repair loops (`SO.M2`) are promoted to current runtime
+   behavior.
+6. **Transport Edge Token Suppression and Discrete Frame Emission.** Streaming edges (REST SSE and
+   WebSocket) MUST filter raw JSON tool argument streaming tokens out of natural language chat bubbles and
+   emit a discrete `structured_completion` event frame upon turn completion (`IR-1.14`, `IR-3.11`).
+
 #### Mutation, Remote Tools, and Security
 
 1. State-changing tools, including future symbol-store upserts, coverage updates, alias merges,
@@ -606,4 +642,4 @@ specific concern MUST then be reconciled across dependent artifacts.
 - **MINOR**: New articles, principles, or materially expanded guidance
 - **PATCH**: Clarifications, typo fixes, non-semantic refinements
 
-**Version**: 2.5.0 | **Ratified**: 2026-01-27 | **Last Amended**: 2026-07-07
+**Version**: 2.6.0 | **Ratified**: 2026-01-27 | **Last Amended**: 2026-07-22

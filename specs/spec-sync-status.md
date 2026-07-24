@@ -1,15 +1,15 @@
 # Spec Sync Status
 
 > **Document Version**: 1.19
-> **Generated**: 2026-07-15 10:01:38Z
+> **Generated**: 2026-07-24 03:15:28Z
 > **Status**: Active
 > **Traceability Manifest Version**: 1
 
 ## Baseline
 
 - SRS: [docs/domains/agent/SOFTWARE_REQUIREMENTS_SPECIFICATION.md](../docs/domains/agent/SOFTWARE_REQUIREMENTS_SPECIFICATION.md)
-- SRS version: `2.8`
-- SRS last updated: `2026-06-18`
+- SRS version: `2.9`
+- SRS last updated: `2026-07-22`
 
 ## Summary
 
@@ -25,6 +25,7 @@
 | [tool-system-m2b.2](tool-system-m2b.2/spec.md#governance-context-mandatory) | `mapped` | `partial` | `verified` | `current` | `105/105` |
 | [tool-system-m2b.3](tool-system-m2b.3/spec.md#governance-context-mandatory) | `mapped` | `partial` | `verified` | `current` | `128/128` |
 | [002-tool-system-integration-verification](002-tool-system-integration-verification/spec.md#governance-context-mandatory) | `mapped` | `partial` | `verified` | `current` | `58/58` |
+| [003-agent-structured-outputs](003-agent-structured-outputs/spec.md#governance-context-mandatory) | `mapped` | `full` | `implemented` | `current` | `18/18` |
 
 ## Revision History
 
@@ -266,6 +267,19 @@
 - spec.md status field: `Verified`
 - Task completion: `58/58`
 - Linked SRS items: `FR-2.4.1, FR-2.4.2, FR-2.4.3, FR-2.4.4, FR-2.4.5, FR-2.4.6, FR-2.5.1, FR-2.5.2, FR-2.5.3, FR-2.5.4, FR-2.5.5, FR-2.6.1, FR-2.6.2, FR-2.6.3, FR-2.6.4, FR-2.6.5, FR-2.6.6, FR-2.7.1, FR-2.7.2, FR-2.7.3, FR-2.7.4, FR-2.7.5, FR-2.8.1, FR-2.8.2, FR-2.8.3, FR-2.8.4, FR-4.1.3, NFR-2.3.5, NFR-5.2.12, NFR-5.2.13, NFR-5.3.8, NFR-6.1.3, NFR-6.1.4, CON-6, CON-7, CON-9, CON-10, AC-9.1, AC-9.2, AC-9.3, AC-9.4, AC-9.5, AC-9.6, AC-9.7, AC-9.8, AC-9.9, AC-9.10, AC-9.11, AC-9.14, AC-9.16, AC-9.17`
+
+## 003-agent-structured-outputs
+
+- Title: Agent Structured Outputs & Route-Adapted Response Tools
+- Path: [specs/003-agent-structured-outputs](003-agent-structured-outputs/spec.md#governance-context-mandatory)
+- Mapping status: `mapped`
+- Coverage status: `full`
+- Derived status: `implemented`
+- Sync status: `current`
+- Sync gate enforced: `yes`
+- spec.md status field: `Implemented`
+- Task completion: `18/18`
+- Linked SRS items: `FR-1.2.5, FR-1.2.6, FR-1.2.7, FR-1.2.8, FR-1.2.9, AC-10.1, AC-10.2, AC-10.3, AC-10.4, AC-10.5, AC-10.6, IR-1.14, IR-3.11, ERR-1.4`
 
 ## Status Semantics
 

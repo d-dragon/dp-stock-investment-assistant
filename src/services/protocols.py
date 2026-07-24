@@ -211,6 +211,7 @@ class ConversationProvider(Protocol):
         *,
         tokens_used: int = 0,
         symbols: Optional[List[str]] = None,
+        turn_metadata: Optional[Dict[str, Any]] = None,
     ) -> None:
         """Record per-turn metadata after agent response (FR-D02/FR-D03).
         

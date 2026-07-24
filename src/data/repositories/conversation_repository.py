@@ -702,6 +702,7 @@ class ConversationRepository(MongoGenericRepository):
         token_delta: int = 0,
         last_activity_at: Optional[datetime] = None,
         focused_symbols: Optional[List[str]] = None,
+        turn_metadata: Optional[Dict[str, Any]] = None,
     ) -> Optional[Dict[str, Any]]:
         """Atomic metadata update using $inc and $set.
 
@@ -728,6 +729,7 @@ class ConversationRepository(MongoGenericRepository):
             update: Dict[str, Any] = {}
             inc_ops: Dict[str, int] = {}
             set_ops: Dict[str, Any] = {"updated_at": self._get_current_timestamp()}
+            push_ops: Dict[str, Any] = {}
 
             if message_count_delta:
                 inc_ops["message_count"] = message_count_delta
@@ -737,11 +739,16 @@ class ConversationRepository(MongoGenericRepository):
                 set_ops["last_activity_at"] = last_activity_at
             if focused_symbols is not None:
                 set_ops["metadata.focused_symbols"] = focused_symbols
+            if turn_metadata is not None:
+                set_ops["last_turn_metadata"] = turn_metadata
+                push_ops["turns"] = turn_metadata
 
             if inc_ops:
                 update["$inc"] = inc_ops
             if set_ops:
                 update["$set"] = set_ops
+            if push_ops:
+                update["$push"] = push_ops
 
             if not update:
                 return self.collection.find_one({"conversation_id": conversation_id})
