@@ -29,7 +29,7 @@ class StockQueryRoute(str, Enum):
 
 class StockAnalysisResponse(BaseModel):
     """Structured response for stock fundamental & technical analysis."""
-    route_kind: str = Field(default="FUNDAMENTALS", description="Discriminator field identifying route kind")
+    route_kind: StockQueryRoute = Field(default=StockQueryRoute.FUNDAMENTALS, description="Discriminator field identifying route kind")
     symbol: str = Field(..., description="Target stock ticker symbol (e.g., AAPL, FPT)")
     summary: str = Field(..., description="High-level analytical summary")
     sentiment: str = Field(default="NEUTRAL", description="Market sentiment (BULLISH, BEARISH, NEUTRAL)")
@@ -39,7 +39,7 @@ class StockAnalysisResponse(BaseModel):
 
 class RecommendationResponse(BaseModel):
     """Structured response for stock investment ideas & recommendations."""
-    route_kind: str = Field(default="IDEAS", description="Discriminator field identifying route kind")
+    route_kind: StockQueryRoute = Field(default=StockQueryRoute.IDEAS, description="Discriminator field identifying route kind")
     recommendation: str = Field(..., description="Actionable recommendation (BUY, SELL, HOLD, WATCH)")
     time_horizon: str = Field(default="MEDIUM_TERM", description="Target investment horizon (SHORT_TERM, MEDIUM_TERM, LONG_TERM)")
     thesis: str = Field(..., description="Core investment rationale and thesis")
@@ -49,7 +49,7 @@ class RecommendationResponse(BaseModel):
 
 class GeneralChatResponse(BaseModel):
     """Structured response for general chat & market commentary."""
-    route_kind: str = Field(default="GENERAL_CHAT", description="Discriminator field identifying route kind")
+    route_kind: StockQueryRoute = Field(default=StockQueryRoute.GENERAL_CHAT, description="Discriminator field identifying route kind")
     message: str = Field(..., description="Natural language response text")
     topics_covered: List[str] = Field(default_factory=list, description="Key discussion topics identified")
     follow_up_suggestions: List[str] = Field(default_factory=list, description="Suggested follow-up queries for the user")
@@ -57,7 +57,7 @@ class GeneralChatResponse(BaseModel):
 
 class ErrorResponse(BaseModel):
     """Structured response for error & fallback degradation states."""
-    route_kind: str = Field(default="ERROR", description="Discriminator field identifying error route kind")
+    route_kind: str = Field(default="ERROR", description="Discriminator field identifying error route kind (not in StockQueryRoute enum)")
     error_code: str = Field(..., description="Categorized error identifier")
     description: str = Field(..., description="Human-readable error or degradation details")
     degraded_mode: bool = Field(default=True, description="Indicates if system operated in degraded partial mode")
@@ -79,13 +79,15 @@ class ResponseStatus(Enum):
     Values:
         SUCCESS: Query processed successfully with primary model
         FALLBACK: Query processed using fallback model after primary failed
-        ERROR: Query processing failed completely
-        PARTIAL: Query partially processed (e.g., some tools failed)
+        ERROR: Query processing failed completely (system exception)
+        PARTIAL: Query partially processed (e.g., structured extraction degraded)
+        FAILED: Output contract validation failed completely
     """
     SUCCESS = "success"
     FALLBACK = "fallback"
     ERROR = "error"
     PARTIAL = "partial"
+    FAILED = "failed"
 
 
 @dataclass(frozen=True)

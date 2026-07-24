@@ -129,12 +129,12 @@ As a system developer, I want heavy typed JSON payloads explicitly excluded from
 
 ### Key Entities *(include if feature involves data)*
 
-- **`AgentStructuredOutput`**: Polymorphic base Pydantic v2 model defining common metadata (`schema_version: str = "v1"`, `route_kind: StockQueryRoute`, `timestamp: datetime`).
-- **`StockAnalysisResponse`**: Specialized structured output model for `FUNDAMENTALS`, `TECHNICAL_ANALYSIS`, and `PRICE_CHECK` routes containing `symbol`, `company_name`, `summary`, `sentiment`, `confidence`, `data_points`, `risks`, and `evidence_sources`.
-- **`RecommendationResponse`**: Specialized structured output model for `IDEAS` and `PORTFOLIO` routes containing `action` (BUY/HOLD/SELL/WATCH), `target_price_range`, `time_horizon`, `rationale`, and `disclaimers`.
-- **`GeneralChatResponse`**: Specialized structured output model for `GENERAL_CHAT`, `MARKET_WATCH`, and `NEWS_ANALYSIS` routes containing `topic`, `summary`, and `follow_up_suggestions`.
+- **`AgentStructuredOutput`**: Union type alias over domain Pydantic v2 schemas (`StockAnalysisResponse`, `RecommendationResponse`, `GeneralChatResponse`, `ErrorResponse`), each with `route_kind: StockQueryRoute` as the discriminator field.
+- **`StockAnalysisResponse`**: Specialized structured output model for `FUNDAMENTALS`, `TECHNICAL_ANALYSIS`, and `PRICE_CHECK` routes containing `symbol`, `summary`, `sentiment`, `key_metrics` (Dict), and `citations` (List).
+- **`RecommendationResponse`**: Specialized structured output model for `IDEAS` and `PORTFOLIO` routes containing `recommendation` (BUY/HOLD/SELL/WATCH), `time_horizon`, `thesis`, `risk_factors`, and `disclaimer`.
+- **`GeneralChatResponse`**: Specialized structured output model for `GENERAL_CHAT`, `MARKET_WATCH`, and `NEWS_ANALYSIS` routes containing `message`, `topics_covered`, and `follow_up_suggestions`.
 - **`AgentResponse`**: Core envelope containing `content: str`, `structured_content: Optional[AgentStructuredOutput]`, `status: ResponseStatus`, and `metadata: Dict`.
-- **`ResponseStatus`**: Enum distinguishing output contract validation states (`SUCCESS`, `PARTIAL`, `FAILED`).
+- **`ResponseStatus`**: Enum distinguishing output contract validation states (`SUCCESS`, `FALLBACK`, `ERROR`, `PARTIAL`, `FAILED`).
 
 ---
 

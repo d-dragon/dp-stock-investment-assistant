@@ -41,18 +41,19 @@ class StockQueryRoute(str, Enum):
 
 ---
 
-### Polymorphic Base Schema
+### Union Type Alias (no shared base class)
+
+Each domain response model is a standalone `pydantic.BaseModel` with its own `route_kind` discriminator field typed as `StockQueryRoute` enum. The combined type is expressed as a `Union` type alias — not an inheritance hierarchy.
 
 ```python
-from datetime import datetime, timezone
-from typing import Any, Dict, List, Optional, Union
-from pydantic import BaseModel, Field
+from typing import Union
 
-class AgentStructuredOutput(BaseModel):
-    """Polymorphic base model for machine-readable agent structured responses."""
-    schema_version: str = Field(default="v1", description="Schema version identifier")
-    route_kind: StockQueryRoute = Field(..., description="Classified route kind")
-    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc), description="Generation UTC timestamp")
+AgentStructuredOutput = Union[
+    StockAnalysisResponse,
+    RecommendationResponse,
+    GeneralChatResponse,
+    ErrorResponse,
+]
 ```
 
 ---
@@ -62,67 +63,69 @@ class AgentStructuredOutput(BaseModel):
 #### 1. `StockAnalysisResponse` (Routes: `FUNDAMENTALS`, `TECHNICAL_ANALYSIS`, `PRICE_CHECK`)
 
 ```python
-class DataPoint(BaseModel):
-    metric: str = Field(..., description="Metric name, e.g. P/E, RSI, Revenue Growth")
-    value: str = Field(..., description="Formatted string value")
-    period: Optional[str] = Field(None, description="Time period, e.g. Q2 2026, 1Y")
-    provenance_source: Optional[str] = Field(None, description="Source provider")
-
-class StockAnalysisResponse(AgentStructuredOutput):
-    """Structured response for stock technical, fundamental, and price queries."""
-    route_kind: StockQueryRoute = StockQueryRoute.TECHNICAL_ANALYSIS
-    symbol: str = Field(..., description="Stock symbol in uppercase, e.g. HSG, VNM, FPT")
-    company_name: Optional[str] = Field(None, description="Company name")
-    summary: str = Field(..., description="Concise analytical summary")
-    sentiment: str = Field(..., description="BULLISH, BEARISH, or NEUTRAL")
-    confidence: float = Field(..., ge=0.0, le=1.0, description="Confidence score")
-    key_metrics: List[DataPoint] = Field(default_factory=list, description="Extracted metric data points")
-    risks: List[str] = Field(default_factory=list, description="Identified risk factors")
-    evidence_sources: List[str] = Field(default_factory=list, description="Sourced evidence citations")
+class StockAnalysisResponse(BaseModel):
+    """Structured response for stock fundamental & technical analysis."""
+    route_kind: StockQueryRoute = Field(default=StockQueryRoute.FUNDAMENTALS, description="Discriminator field identifying route kind")
+    symbol: str = Field(..., description="Target stock ticker symbol (e.g., AAPL, FPT)")
+    summary: str = Field(..., description="High-level analytical summary")
+    sentiment: str = Field(default="NEUTRAL", description="Market sentiment (BULLISH, BEARISH, NEUTRAL)")
+    key_metrics: Dict[str, Any] = Field(default_factory=dict, description="Key fundamental/technical metrics")
+    citations: List[str] = Field(default_factory=list, description="Data provider citations and source references")
 ```
 
 #### 2. `RecommendationResponse` (Routes: `IDEAS`, `PORTFOLIO`)
 
 ```python
-class RecommendationResponse(AgentStructuredOutput):
-    """Structured response for stock ideas and portfolio recommendations."""
-    route_kind: StockQueryRoute = StockQueryRoute.IDEAS
-    symbols: List[str] = Field(..., description="Target stock symbols")
-    action: str = Field(..., description="BUY, HOLD, SELL, WATCH, or ACCUMULATE")
-    target_price_range: Optional[str] = Field(None, description="Target price range, e.g. 24,000 - 26,000 VND")
-    time_horizon: str = Field(..., description="SHORT_TERM, MEDIUM_TERM, or LONG_TERM")
-    rationale: str = Field(..., description="Strategic investment rationale")
-    disclaimers: List[str] = Field(default_factory=list, description="Financial safety disclaimers")
+class RecommendationResponse(BaseModel):
+    """Structured response for stock investment ideas & recommendations."""
+    route_kind: StockQueryRoute = Field(default=StockQueryRoute.IDEAS, description="Discriminator field identifying route kind")
+    recommendation: str = Field(..., description="Actionable recommendation (BUY, SELL, HOLD, WATCH)")
+    time_horizon: str = Field(default="MEDIUM_TERM", description="Target investment horizon (SHORT_TERM, MEDIUM_TERM, LONG_TERM)")
+    thesis: str = Field(..., description="Core investment rationale and thesis")
+    risk_factors: List[str] = Field(default_factory=list, description="Primary risk factors to monitor")
+    disclaimer: str = Field(default="Not financial advice. For informational purposes only.", description="Mandatory financial disclosure")
 ```
 
 #### 3. `GeneralChatResponse` (Routes: `GENERAL_CHAT`, `MARKET_WATCH`, `NEWS_ANALYSIS`)
 
 ```python
-class GeneralChatResponse(AgentStructuredOutput):
-    """Structured response for general market chat and macro news queries."""
-    route_kind: StockQueryRoute = StockQueryRoute.GENERAL_CHAT
-    topic: str = Field(..., description="Main topic or market sector discussed")
-    summary: str = Field(..., description="Conversational summary")
-    follow_up_suggestions: List[str] = Field(default_factory=list, description="Suggested follow-up questions")
+class GeneralChatResponse(BaseModel):
+    """Structured response for general chat & market commentary."""
+    route_kind: StockQueryRoute = Field(default=StockQueryRoute.GENERAL_CHAT, description="Discriminator field identifying route kind")
+    message: str = Field(..., description="Natural language response text")
+    topics_covered: List[str] = Field(default_factory=list, description="Key discussion topics identified")
+    follow_up_suggestions: List[str] = Field(default_factory=list, description="Suggested follow-up queries for the user")
+```
+
+#### 4. `ErrorResponse` (Fallback & Degradation States)
+
+```python
+class ErrorResponse(BaseModel):
+    """Structured response for error & fallback degradation states."""
+    route_kind: str = Field(default="ERROR", description="Discriminator field identifying error route kind (not in StockQueryRoute enum)")
+    error_code: str = Field(..., description="Categorized error identifier")
+    description: str = Field(..., description="Human-readable error or degradation details")
+    degraded_mode: bool = Field(default=True, description="Indicates if system operated in degraded partial mode")
 ```
 
 ---
 
-### Discriminated Union & Envelope Schema
+### Envelope Schema
 
 ```python
-AgentStructuredContent = Union[
-    StockAnalysisResponse,
-    RecommendationResponse,
-    GeneralChatResponse,
-]
-
-class AgentResponse(BaseModel):
+@dataclass(frozen=True)
+class AgentResponse:
     """Core envelope returned by StockAssistantAgent and ChatService."""
-    content: str = Field(..., description="Natural language markdown response text")
-    structured_content: Optional[AgentStructuredContent] = Field(None, description="Typed machine-readable JSON payload")
-    status: ResponseStatus = Field(default=ResponseStatus.SUCCESS, description="Contract validation status")
-    metadata: Dict[str, Any] = Field(default_factory=dict, description="Turn execution metadata (tokens, latency, route)")
+    content: str
+    provider: str
+    model: str
+    status: ResponseStatus = ResponseStatus.SUCCESS
+    tool_calls: tuple[ToolCall, ...] = ()
+    token_usage: TokenUsage = TokenUsage()
+    cached: bool = False
+    error_message: Optional[str] = None
+    metadata: Dict[str, Any] = field(default_factory=dict)
+    structured_content: Optional[AgentStructuredOutput] = None
 ```
 
 ---

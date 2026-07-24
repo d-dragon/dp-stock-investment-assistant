@@ -886,11 +886,39 @@ If you don't have a tool for a specific request, provide helpful general guidanc
                             "trace_record": latest_trace,
                         })()))
 
-                # If no response tool was fired, evaluate fallback degradation
+                # If no response tool was fired, evaluate fallback degradation (FR-1.2.7 / AC-10.4)
                 status = ResponseStatus.SUCCESS
                 if structured_payload is None and content:
-                    # Mark partial degradation if direct response tool wasn't invoked
-                    status = ResponseStatus.PARTIAL
+                    # Attempt two-stage service-layer fallback formatter inline
+                    try:
+                        from .types import GeneralChatResponse as FallbackSchema
+                        config_fb_timeout = self.config.get("agent", {}).get(
+                            "structured_output", {}
+                        ).get("fallback_timeout_seconds", 10.0)
+                        fb_client = client
+                        if fb_client and hasattr(fb_client, "with_structured_output"):
+                            fb_model = fb_client.with_structured_output(FallbackSchema)
+                            fb_payload = fb_model.invoke(content)
+                            # Only accept payload if it looks like a valid structured output
+                            if fb_payload is not None and hasattr(fb_payload, "route_kind"):
+                                structured_payload = fb_payload
+                                status = ResponseStatus.SUCCESS
+                            else:
+                                status = ResponseStatus.PARTIAL
+                        else:
+                            status = ResponseStatus.PARTIAL
+                    except Exception as fb_err:
+                        self.logger.warning(
+                            "Fallback extraction failed for query=%s: %s",
+                            query[:50], fb_err,
+                        )
+                        from .types import ErrorResponse
+                        structured_payload = ErrorResponse(
+                            error_code="FALLBACK_EXTRACTION_FAILED",
+                            description=f"Fallback extraction failed: {fb_err}",
+                            degraded_mode=True,
+                        )
+                        status = ResponseStatus.PARTIAL
 
                 return AgentResponse(
                     content=content or (str(structured_payload) if structured_payload else ""),
