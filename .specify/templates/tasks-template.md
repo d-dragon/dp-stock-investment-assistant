@@ -26,16 +26,6 @@ description: "Task list template for feature implementation"
 - **Mobile**: `api/src/`, `ios/src/` or `android/src/`
 - Paths shown below assume single project - adjust based on plan.md structure
 
-## Governance Task Requirements
-
-Generated tasks MUST include exact file paths for all governance work that applies to the feature:
-
-- Update `specs/spec-traceability.yaml` when SRS scope, evidence paths, coverage status, or lifecycle status changes.
-- Update public contracts when behavior changes. The current REST contract authority is `docs/openapi.yaml` until a governed migration changes that path.
-- Add or update long-lived docs only for stable knowledge that belongs in `docs/`, and cite exact target anchors.
-- Regenerate sync reports with `python scripts/sync_spec_status.py --gate` after traceability or feature status changes.
-- Validate anchor-level references used by spec, plan, tasks, docs, and contract links.
-
 <!--
   ============================================================================
   IMPORTANT: The tasks below are SAMPLE TASKS for illustration purposes only.
@@ -167,11 +157,6 @@ Examples of foundational tasks (adjust based on your project):
 - [ ] TXXX [P] Additional unit tests (if requested) in tests/unit/
 - [ ] TXXX Security hardening
 - [ ] TXXX Run quickstart.md validation
-- [ ] TXXX Update `specs/spec-traceability.yaml` with final SRS mappings, coverage status, evidence paths, and lifecycle status
-- [ ] TXXX [P] Update affected long-lived docs in `docs/` with exact section anchors, if this feature promotes stable knowledge
-- [ ] TXXX [P] Update `docs/openapi.yaml` or feature contract files if public API behavior, payloads, or compatibility obligations changed
-- [ ] TXXX Run `python scripts/sync_spec_status.py --gate` and commit regenerated `specs/spec-sync-status.md` plus reverse traceability output
-- [ ] TXXX Validate Markdown links and anchor references touched by this feature
 
 ---
 

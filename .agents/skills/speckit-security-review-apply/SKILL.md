@@ -107,8 +107,8 @@ When the optimizer is disabled or unavailable, you **MUST** read these files exp
 - `data-model.md`
 - `contracts/`
 - `quickstart.md`
-- `docs/memory/INDEX.md`
-- `docs/memory/`
+- `.specify/extensions/security-review/docs/memory/INDEX.md`
+- `.specify/extensions/security-review/docs/memory/`
 - `specs/<feature>/memory.md`
 - `specs/<feature>/memory-synthesis.md`
 - `.github/copilot-instructions.md`

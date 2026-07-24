@@ -164,7 +164,7 @@ This check runs only once on first invocation. It does NOT block the workflow (e
 
 ### Step 1: Discover the feature directory
 
-Run `.specify/scripts/powershell/check-prerequisites.ps1 -Json -PathsOnly` from the repo root to get the feature directory paths as JSON. Parse the output to get `FEATURE_DIR`.
+Run `.specify/extensions/fleet/scripts/powershell/check-prerequisites.ps1 -Json -PathsOnly` from the repo root to get the feature directory paths as JSON. Parse the output to get `FEATURE_DIR`.
 
 If the script fails (e.g., not on a feature branch):
 - If `FEATURE_DESCRIPTION` was provided in `$ARGUMENTS`, proceed directly to Phase 1 -- pass the description to `speckit.specify` and it will create the feature directory.

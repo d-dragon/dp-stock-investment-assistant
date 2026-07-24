@@ -18,6 +18,12 @@
           "speckit.understanding",
           "speckit.understanding.validate",
           "speckit.understanding.energy"
+        ],
+        "agy": [
+          "speckit.understanding.scan",
+          "speckit.understanding",
+          "speckit.understanding.validate",
+          "speckit.understanding.energy"
         ]
       },
       "installed_at": "2026-03-16T04:12:21.870110+00:00"
@@ -34,6 +40,10 @@
           "speckit.verify-tasks"
         ],
         "codex": [
+          "speckit.verify-tasks.run",
+          "speckit.verify-tasks"
+        ],
+        "agy": [
           "speckit.verify-tasks.run",
           "speckit.verify-tasks"
         ]
@@ -56,6 +66,14 @@
           "speckit.validate"
         ],
         "codex": [
+          "speckit.speckit-utils.resume",
+          "speckit.resume",
+          "speckit.speckit-utils.doctor",
+          "speckit.doctor",
+          "speckit.speckit-utils.validate",
+          "speckit.validate"
+        ],
+        "agy": [
           "speckit.speckit-utils.resume",
           "speckit.resume",
           "speckit.speckit-utils.doctor",
@@ -86,6 +104,13 @@
           "speckit.git.remote",
           "speckit.git.initialize",
           "speckit.git.commit"
+        ],
+        "agy": [
+          "speckit.git.feature",
+          "speckit.git.validate",
+          "speckit.git.remote",
+          "speckit.git.initialize",
+          "speckit.git.commit"
         ]
       },
       "registered_skills": [],
@@ -105,6 +130,10 @@
         "codex": [
           "speckit.fleet.run",
           "speckit.fleet.review"
+        ],
+        "agy": [
+          "speckit.fleet.run",
+          "speckit.fleet.review"
         ]
       },
       "registered_skills": [],
@@ -122,6 +151,9 @@
         ],
         "codex": [
           "speckit.verify.run"
+        ],
+        "agy": [
+          "speckit.verify.run"
         ]
       },
       "registered_skills": [],
@@ -138,6 +170,9 @@
           "speckit.memory-loader.load"
         ],
         "codex": [
+          "speckit.memory-loader.load"
+        ],
+        "agy": [
           "speckit.memory-loader.load"
         ]
       },
@@ -158,6 +193,10 @@
         "codex": [
           "speckit.arch.generate",
           "speckit.arch.reverse"
+        ],
+        "agy": [
+          "speckit.arch.generate",
+          "speckit.arch.reverse"
         ]
       },
       "registered_skills": [],
@@ -174,6 +213,9 @@
           "speckit.agent-context.update"
         ],
         "codex": [
+          "speckit.agent-context.update"
+        ],
+        "agy": [
           "speckit.agent-context.update"
         ]
       },

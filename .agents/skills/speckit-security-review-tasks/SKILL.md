@@ -95,8 +95,8 @@ When the optimizer is disabled or unavailable, you **MUST** read these files exp
 - `spec.md`
 - `research.md`
 - `data-model.md`
-- `docs/memory/INDEX.md`
-- `docs/memory/`
+- `.specify/extensions/security-review/docs/memory/INDEX.md`
+- `.specify/extensions/security-review/docs/memory/`
 - `.specify/memory/security_constitution.md`
 - `contracts/`
 - `quickstart.md`
@@ -189,7 +189,7 @@ After providing the report, finalize with:
 
 ## Memory Hub INDEX.md Row
 
-After the report, output the following proposed routing row for the user to paste into their `docs/memory/INDEX.md`. This enables LLM-based filtering without loading the full document.
+After the report, output the following proposed routing row for the user to paste into their `.specify/extensions/security-review/docs/memory/INDEX.md`. This enables LLM-based filtering without loading the full document.
 
 ```text
 | <relative path where this doc is saved> | tasks | <assessment_date> | <overall_risk> | C:<critical_count> H:<high_count> M:<medium_count> L:<low_count> | <owasp_categories comma-separated> |
@@ -198,7 +198,7 @@ After the report, output the following proposed routing row for the user to past
 Example:
 
 ```text
-| docs/security-reviews/2026-05-07-auth-tasks.md | tasks | 2026-05-07 | MODERATE | C:0 H:1 M:2 L:1 | A01,A07 |
+| .specify/extensions/security-review/docs/security-reviews/2026-05-07-auth-tasks.md | tasks | 2026-05-07 | MODERATE | C:0 H:1 M:2 L:1 | A01,A07 |
 ```
 
-See `docs/field-registry.md` in the security-review-extension for the full INDEX.md table format and SQLite Phase 1 column mapping.
+See `.specify/extensions/security-review/docs/field-registry.md` in the security-review-extension for the full INDEX.md table format and SQLite Phase 1 column mapping.

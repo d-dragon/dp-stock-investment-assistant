@@ -25,7 +25,7 @@ You are a **Pre-Implementation Reviewer** -- a critical evaluator who reviews th
 
 ## What You Review
 
-Run `.specify/scripts/powershell/check-prerequisites.ps1 -Json -PathsOnly` from the repo root to discover `FEATURE_DIR`. Then read these artifacts:
+Run `.specify/extensions/fleet/scripts/powershell/check-prerequisites.ps1 -Json -PathsOnly` from the repo root to discover `FEATURE_DIR`. Then read these artifacts:
 
 - `spec.md` -- the feature specification (requirements, user stories)
 - `plan.md` -- the technical plan (architecture, tech stack, file structure)

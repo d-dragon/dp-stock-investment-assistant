@@ -35,7 +35,7 @@ The workflow writes:
 ## Operating Boundaries
 
 - Write only the seven files listed above.
-- Do not modify source code, README files, project documentation, package files, configuration, tests, deployment files, `.specify/memory/uc.md`, `.specify/memory/constitution.md`, feature specs, plans, tasks, root `docs/`, deployment manifests, or runbooks.
+- Do not modify source code, README files, project documentation, package files, configuration, tests, deployment files, `.specify/memory/uc.md`, `.specify/memory/constitution.md`, feature specs, plans, tasks, root `.specify/extensions/arch/docs/`, deployment manifests, or runbooks.
 - Stay at abstract architecture-design level.
 - Do not write concrete classes, files, functions, endpoints, DTO fields, database table fields, framework selections, library choices, UI component details, deployment manifests, task breakdowns, test strategy, validation anchors, code notes, deployment scripts, or runbooks into the architecture views.
 - If evidence is insufficient, record a specific gap in the repo facts file and affected view instead of inventing business facts, actors, use cases, components, interfaces, modules, deployment units, or numeric metrics.
@@ -114,7 +114,7 @@ Repository-first content must not be copied verbatim into architecture views. Th
 
 ## Confidence
 
-- `High`: multiple independent sources agree, or docs/tests and code entry points agree.
+- `High`: multiple independent sources agree, or .specify/extensions/arch/docs/tests and code entry points agree.
 - `Medium`: one strong source is present, such as clear configuration, entry point, route declaration, or behavior test.
 - `Low`: naming, directory structure, isolated code, or Git history suggests a fact but lacks behavior evidence.
 
