@@ -276,6 +276,7 @@ class ConversationService(BaseService):
         *,
         tokens_used: int = 0,
         symbols: Optional[List[str]] = None,
+        turn_metadata: Optional[Dict[str, Any]] = None,
     ) -> None:
         """Record metadata after a chat message is processed.
 
@@ -289,6 +290,7 @@ class ConversationService(BaseService):
                 token_delta=tokens_used,
                 last_activity_at=datetime.now(timezone.utc),
                 focused_symbols=symbols,
+                turn_metadata=turn_metadata,
             )
         except Exception as e:
             self.logger.warning(

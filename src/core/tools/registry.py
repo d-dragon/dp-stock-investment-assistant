@@ -255,3 +255,30 @@ def reset_tool_registry() -> None:
     if _registry_instance is not None:
         _registry_instance.clear()
     _registry_instance = None
+
+
+def register_response_tools(registry: Optional[ToolRegistry] = None) -> ToolRegistry:
+    """Register control-plane response tools in the registry.
+    
+    Registers submit_stock_analysis, submit_recommendation, and submit_general_chat
+    under RiskClass.BOUNDED_NON_MUTATING with return_direct=True.
+    
+    Args:
+        registry: Target ToolRegistry instance (defaults to singleton instance)
+        
+    Returns:
+        Populated ToolRegistry instance
+    """
+    from .response_tools import (
+        SubmitStockAnalysisTool,
+        SubmitRecommendationTool,
+        SubmitGeneralChatTool,
+    )
+
+    reg = registry or get_tool_registry()
+    for tool_cls in (SubmitStockAnalysisTool, SubmitRecommendationTool, SubmitGeneralChatTool):
+        tool_instance = tool_cls()
+        if tool_instance.name not in reg:
+            reg.register(tool_instance, enabled=True, replace=True)
+    return reg
+

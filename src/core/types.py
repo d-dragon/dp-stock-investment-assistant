@@ -11,7 +11,64 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Union
+from pydantic import BaseModel, Field
+
+
+class StockQueryRoute(str, Enum):
+    """Stock query routes recognized by semantic router."""
+    FUNDAMENTALS = "FUNDAMENTALS"
+    TECHNICAL_ANALYSIS = "TECHNICAL_ANALYSIS"
+    PRICE_CHECK = "PRICE_CHECK"
+    IDEAS = "IDEAS"
+    PORTFOLIO = "PORTFOLIO"
+    GENERAL_CHAT = "GENERAL_CHAT"
+    MARKET_WATCH = "MARKET_WATCH"
+    NEWS_ANALYSIS = "NEWS_ANALYSIS"
+
+
+class StockAnalysisResponse(BaseModel):
+    """Structured response for stock fundamental & technical analysis."""
+    route_kind: str = Field(default="FUNDAMENTALS", description="Discriminator field identifying route kind")
+    symbol: str = Field(..., description="Target stock ticker symbol (e.g., AAPL, FPT)")
+    summary: str = Field(..., description="High-level analytical summary")
+    sentiment: str = Field(default="NEUTRAL", description="Market sentiment (BULLISH, BEARISH, NEUTRAL)")
+    key_metrics: Dict[str, Any] = Field(default_factory=dict, description="Key fundamental/technical metrics")
+    citations: List[str] = Field(default_factory=list, description="Data provider citations and source references")
+
+
+class RecommendationResponse(BaseModel):
+    """Structured response for stock investment ideas & recommendations."""
+    route_kind: str = Field(default="IDEAS", description="Discriminator field identifying route kind")
+    recommendation: str = Field(..., description="Actionable recommendation (BUY, SELL, HOLD, WATCH)")
+    time_horizon: str = Field(default="MEDIUM_TERM", description="Target investment horizon (SHORT_TERM, MEDIUM_TERM, LONG_TERM)")
+    thesis: str = Field(..., description="Core investment rationale and thesis")
+    risk_factors: List[str] = Field(default_factory=list, description="Primary risk factors to monitor")
+    disclaimer: str = Field(default="Not financial advice. For informational purposes only.", description="Mandatory financial disclosure")
+
+
+class GeneralChatResponse(BaseModel):
+    """Structured response for general chat & market commentary."""
+    route_kind: str = Field(default="GENERAL_CHAT", description="Discriminator field identifying route kind")
+    message: str = Field(..., description="Natural language response text")
+    topics_covered: List[str] = Field(default_factory=list, description="Key discussion topics identified")
+    follow_up_suggestions: List[str] = Field(default_factory=list, description="Suggested follow-up queries for the user")
+
+
+class ErrorResponse(BaseModel):
+    """Structured response for error & fallback degradation states."""
+    route_kind: str = Field(default="ERROR", description="Discriminator field identifying error route kind")
+    error_code: str = Field(..., description="Categorized error identifier")
+    description: str = Field(..., description="Human-readable error or degradation details")
+    degraded_mode: bool = Field(default=True, description="Indicates if system operated in degraded partial mode")
+
+
+AgentStructuredOutput = Union[
+    StockAnalysisResponse,
+    RecommendationResponse,
+    GeneralChatResponse,
+    ErrorResponse,
+]
 
 
 class ResponseStatus(Enum):
@@ -102,6 +159,7 @@ class AgentResponse:
         cached: Whether the entire response was served from cache
         error_message: Error details if status is ERROR
         metadata: Additional provider-specific metadata
+        structured_content: Polymorphic structured JSON payload (AgentStructuredOutput)
     
     Example:
         >>> response = AgentResponse(
@@ -122,6 +180,7 @@ class AgentResponse:
     cached: bool = False
     error_message: Optional[str] = None
     metadata: Dict[str, Any] = field(default_factory=dict)
+    structured_content: Optional[AgentStructuredOutput] = None
     
     def __post_init__(self):
         """Ensure tool_calls is always a tuple for immutability."""
@@ -229,11 +288,19 @@ class AgentResponse:
         Returns:
             Dictionary representation of the response
         """
+        sc_dict = None
+        if self.structured_content is not None:
+            if hasattr(self.structured_content, "model_dump"):
+                sc_dict = self.structured_content.model_dump()
+            elif isinstance(self.structured_content, dict):
+                sc_dict = self.structured_content
+
         return {
             "content": self.content,
             "provider": self.provider,
             "model": self.model,
             "status": self.status.value,
+            "structured_content": sc_dict,
             "tool_calls": [
                 {
                     "name": tc.name,
@@ -258,3 +325,4 @@ class AgentResponse:
 # Type alias for streaming responses
 StreamingAgentResponse = tuple[AgentResponse, List[str]]
 """Tuple of (final_response, list_of_chunks) for streaming operations."""
+

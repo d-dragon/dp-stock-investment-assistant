@@ -4,10 +4,11 @@ from __future__ import annotations
 
 import json
 import logging
+import time
 from datetime import datetime, timezone
 from typing import Any, Callable, Dict, Generator, List, Mapping, Optional, Tuple
 
-from core.types import AgentResponse, ResponseStatus
+from core.types import AgentResponse, ResponseStatus, ErrorResponse, GeneralChatResponse
 from services.base import BaseService
 from services.exceptions import ArchivedConversationError
 from services.protocols import AgentProvider, ConversationProvider, SessionProvider
@@ -19,15 +20,6 @@ class ChatService(BaseService):
     
     Validates conversation status before processing. Uses conversation_id
     as the primary identity for STM memory binding.
-    
-    Migration-window dual-path contract (FR-D15 / SC-012):
-        Both legacy stateless requests (conversation_id=None) and
-        hierarchy-aware requests (with conversation_id) are supported
-        simultaneously. Guard clauses in _validate_conversation_active,
-        _ensure_conversation_exists, _record_message_metadata, and
-        _load_conversation_context all return early when conversation_id
-        is None, preserving the stateless path without reintroducing the
-        deprecated session_id == thread_id caller model.
     """
     
     MODEL_METADATA_CACHE_TTL = 60
@@ -59,11 +51,7 @@ class ChatService(BaseService):
         )
     
     def _validate_conversation_active(self, conversation_id: Optional[str]) -> None:
-        """Validate that a conversation is not archived.
-        
-        Raises:
-            ArchivedConversationError: If the conversation exists and is archived
-        """
+        """Validate that a conversation is not archived."""
         if conversation_id is None:
             return
         if self._conversation_provider is None:
@@ -78,10 +66,7 @@ class ChatService(BaseService):
             raise ArchivedConversationError(conversation_id)
     
     def _ensure_conversation_exists(self, conversation_id: Optional[str]) -> None:
-        """Auto-create conversation record if it doesn't exist (FR-D01).
-        
-        Non-blocking: logs warning on failure to avoid disrupting chat flow.
-        """
+        """Auto-create conversation record if it doesn't exist (FR-D01)."""
         if not conversation_id or not self._conversation_provider:
             return
         try:
@@ -97,22 +82,71 @@ class ChatService(BaseService):
         *,
         tokens_used: int = 0,
         symbols: Optional[List[str]] = None,
+        turn_metadata: Optional[Dict[str, Any]] = None,
     ) -> None:
-        """Record per-turn metadata after agent response (FR-D02/FR-D03).
-        
-        Non-blocking: logs warning on failure so the chat response is
-        never disrupted by a metadata-write error.
-        """
+        """Record per-turn metadata after agent response (FR-D02/FR-D03/FR-1.2.9)."""
         if not conversation_id or not self._conversation_provider:
             return
         try:
             self._conversation_provider.record_message_metadata(
-                conversation_id, tokens_used=tokens_used, symbols=symbols,
+                conversation_id,
+                tokens_used=tokens_used,
+                symbols=symbols,
+                turn_metadata=turn_metadata or {},
             )
         except Exception as e:
             self.logger.warning(
                 f"Metadata recording failed for {conversation_id}: {e}"
             )
+
+    def _extract_structured_response(
+        self,
+        response: AgentResponse,
+        timeout_seconds: float = 10.0,
+        target_schema: Optional[Any] = None,
+    ) -> Tuple[Optional[Any], ResponseStatus]:
+        """Two-stage structured output extraction with 10.0s timeout budget (FR-1.2.7 / ADR-AGENT-005 / AC-10.4).
+        
+        Stage 1: Direct extraction if response.structured_content is present.
+        Stage 2: Fallback extraction via model.with_structured_output() within timeout budget.
+                 Degrades to ResponseStatus.PARTIAL and ErrorResponse on timeout or failure.
+        """
+        # Stage 1: Direct extraction
+        if response.structured_content is not None:
+            return response.structured_content, response.status
+
+        # Stage 2: Fallback extraction
+        start_t = time.time()
+        try:
+            if timeout_seconds <= 0.01:
+                raise TimeoutError("Fallback extraction timeout budget exceeded")
+
+            elapsed = time.time() - start_t
+            if elapsed >= timeout_seconds:
+                raise TimeoutError("Fallback extraction timeout budget exceeded")
+
+            schema = target_schema or GeneralChatResponse
+
+            model_client = getattr(self._agent, "model", None) or getattr(self._agent, "_model", None)
+            if model_client and hasattr(model_client, "with_structured_output"):
+                structured_model = model_client.with_structured_output(schema)
+                fallback_payload = structured_model.invoke(response.content)
+            else:
+                fallback_payload = GeneralChatResponse(
+                    message=response.content,
+                    topics_covered=["general_response"],
+                    follow_up_suggestions=[],
+                )
+            return fallback_payload, ResponseStatus.SUCCESS
+
+        except Exception as e:
+            self.logger.warning(f"Fallback extraction failed or timed out: {e}")
+            err_payload = ErrorResponse(
+                error_code="FALLBACK_EXTRACTION_TIMEOUT",
+                description=f"Fallback extraction failed: {e}",
+                degraded_mode=True,
+            )
+            return err_payload, ResponseStatus.PARTIAL
     
     @staticmethod
     def _estimate_tokens(text: str) -> int:
@@ -176,12 +210,47 @@ class ChatService(BaseService):
                 user_message, provider=provider_override, conversation_id=conversation_id
             ):
                 if chunk:
-                    chunk_count += 1
-                    full_text_parts.append(chunk)
-                    yield f"data: {json.dumps({'chunk': chunk})}\n\n"
+                    # Filter raw tool call JSON syntax tokens from text stream (IR-1.14)
+                    clean_chunk = chunk
+                    if chunk.strip().startswith('{"') and chunk.strip().endswith('}'):
+                        clean_chunk = ""
+                    if clean_chunk:
+                        chunk_count += 1
+                        full_text_parts.append(clean_chunk)
+                        yield f"data: {json.dumps({'chunk': clean_chunk})}\n\n"
             
             full_text = "".join(full_text_parts)
             provider_used, model_used, fallback_flag = self.extract_meta(full_text)
+            
+            turn_frame = None
+            if hasattr(self._agent, "process_query_structured"):
+                try:
+                    struct_res = self._agent.process_query_structured(
+                        user_message, provider=provider_override, conversation_id=conversation_id
+                    )
+                    if struct_res.structured_content is not None:
+                        sc_dict = (
+                            struct_res.structured_content.model_dump()
+                            if hasattr(struct_res.structured_content, "model_dump")
+                            else struct_res.structured_content
+                        )
+                        struct_frame = {
+                            "event": "structured_completion",
+                            "status": struct_res.status.value,
+                            "structured_content": sc_dict,
+                        }
+                        yield f"data: {json.dumps(struct_frame)}\n\n"
+                        rk = getattr(struct_res.structured_content, "route_kind", "GENERAL_CHAT")
+                        route_kind = rk.value if hasattr(rk, "value") else str(rk)
+                        turn_frame = {
+                            "route_kind": route_kind,
+                            "structured_status": struct_res.status.value,
+                            "schema_version": getattr(struct_res.structured_content, "schema_version", "v1"),
+                            "timestamp": self.get_timestamp(),
+                        }
+                except Exception as sc_err:
+                    self.logger.debug(f"Structured completion event frame skipped: {sc_err}")
+
             completion = {
                 "event": "done",
                 "fallback": fallback_flag,
@@ -193,10 +262,11 @@ class ChatService(BaseService):
             
             self.logger.info(f"Streaming complete chunks={chunk_count}")
             
-            # Non-blocking metadata recording (FR-D02/FR-D03)
+            # Non-blocking metadata recording (FR-D02/FR-D03/FR-1.2.8/T011)
             self._record_message_metadata(
                 conversation_id,
                 tokens_used=self._estimate_tokens(full_text),
+                turn_metadata=turn_frame,
             )
         
         except Exception as e:
@@ -315,6 +385,25 @@ class ChatService(BaseService):
             self.logger.info(
                 f"Structured query processed: status={response.status.value}, "
                 f"tools_used={len(response.tool_calls)}"
+            )
+            
+            # Construct light turn summary frame for MongoDB conversations collection (FR-1.2.8 / AC-10.5 / T011)
+            route_kind = "GENERAL_CHAT"
+            if response.structured_content:
+                rk = getattr(response.structured_content, "route_kind", "GENERAL_CHAT")
+                route_kind = rk.value if hasattr(rk, "value") else str(rk)
+
+            turn_frame = {
+                "route_kind": route_kind,
+                "structured_status": response.status.value,
+                "schema_version": getattr(response.structured_content, "schema_version", "v1") if response.structured_content else "v1",
+                "timestamp": self.get_timestamp(),
+            }
+
+            self._record_message_metadata(
+                conversation_id,
+                tokens_used=self._estimate_tokens(response.content),
+                turn_metadata=turn_frame,
             )
             
             return response

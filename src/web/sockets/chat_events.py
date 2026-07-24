@@ -73,9 +73,30 @@ def register_chat_events(context: SocketIOContext) -> None:
                     return
 
             logger.debug(f"Processing chat message with conversation_id={conversation_id}")
-            raw_response = agent.process_query(message, provider=provider_override, conversation_id=conversation_id)
-            provider_used, model_used, fallback_flag = extract_meta(raw_response)
-            response_clean = strip_fallback_prefix(raw_response)
+            
+            # Use process_query_structured directly instead of double-processing (T012/US3)
+            if hasattr(agent, "process_query_structured"):
+                struct_res = agent.process_query_structured(message, provider=provider_override, conversation_id=conversation_id)
+                response_clean = struct_res.content
+                provider_used = struct_res.provider
+                model_used = struct_res.model
+                fallback_flag = (struct_res.status.name != "SUCCESS")
+                
+                # Emit discrete structured_completion event frame (T012/US3)
+                if struct_res.structured_content is not None:
+                    try:
+                        sc_dict = struct_res.structured_content.model_dump() if hasattr(struct_res.structured_content, "model_dump") else struct_res.structured_content
+                        emit('structured_completion', {
+                            'status': struct_res.status.value,
+                            'structured_content': sc_dict,
+                            'conversation_id': conversation_id
+                        })
+                    except Exception as sc_exc:
+                        logger.debug(f"Structured content extraction for socket event skipped: {sc_exc}")
+            else:
+                raw_response = agent.process_query(message, provider=provider_override, conversation_id=conversation_id)
+                provider_used, model_used, fallback_flag = extract_meta(raw_response)
+                response_clean = strip_fallback_prefix(raw_response)
 
             response_data = {
                 'response': response_clean,
@@ -84,7 +105,7 @@ def register_chat_events(context: SocketIOContext) -> None:
                 'fallback': fallback_flag,
                 'timestamp': get_timestamp()
             }
-            
+
             # Echo conversation_id back if provided
             if conversation_id:
                 response_data['conversation_id'] = conversation_id

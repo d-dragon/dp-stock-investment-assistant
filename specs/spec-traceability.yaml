@@ -148,8 +148,8 @@ reports:
 
 srs:
   path: docs/domains/agent/SOFTWARE_REQUIREMENTS_SPECIFICATION.md
-  version: "2.8"
-  last_updated: 2026-06-18
+  version: "2.9"
+  last_updated: 2026-07-22
 
 status_rules:
   analyzed:
@@ -183,7 +183,7 @@ features:
       synchronized_documents:
         - specs/agent-session-with-stm-wiring/spec.md
     srs_mapping:
-      baseline_version: "2.8"
+      baseline_version: "2.9"
       coverage_status: partial
       mapped_srs_items:
         - FR-3.1.1
@@ -387,7 +387,7 @@ features:
         - specs/stm-phase-cde/quickstart.md
         - specs/stm-phase-cde/review.md
     srs_mapping:
-      baseline_version: "2.8"
+      baseline_version: "2.9"
       coverage_status: partial
       mapped_srs_items:
         - FR-3.1.3
@@ -649,7 +649,7 @@ features:
       source_of_truth: derived
       gate_enforced: true
     srs_mapping:
-      baseline_version: "2.8"
+      baseline_version: "2.9"
       coverage_status: partial
       mapped_srs_items:
         - FR-3.1.1
@@ -708,7 +708,7 @@ features:
         - specs/prompt-system-milestone1/verify-tasks-report.md
         - specs/prompt-system-milestone1/review.md
     srs_mapping:
-      baseline_version: "2.8"
+      baseline_version: "2.9"
       coverage_status: partial
       mapped_srs_items:
         - FR-1.4.5
@@ -786,7 +786,7 @@ features:
         - specs/prompt-system-milestone2/contracts/prompt-assembler-interface.md
         - specs/prompt-system-milestone2/contracts/route-skill-asset-schema.md
     srs_mapping:
-      baseline_version: "2.8"
+      baseline_version: "2.9"
       coverage_status: partial
       mapped_srs_items:
         - FR-1.4.7
@@ -841,7 +841,7 @@ features:
         - specs/tool-system-implementation-m2b.1/tasks.md
         - specs/tool-system-implementation-m2b.1/review.md
     srs_mapping:
-      baseline_version: "2.8"
+      baseline_version: "2.9"
       coverage_status: partial
       mapped_srs_items:
         - FR-2.4.1
@@ -993,7 +993,7 @@ features:
         - specs/tool-system-m2b.2/verify-tasks-report.md
         - specs/tool-system-m2b.2/.verify-done
     srs_mapping:
-      baseline_version: "2.8"
+      baseline_version: "2.9"
       coverage_status: partial
       mapped_srs_items:
         - FR-2.5.1
@@ -1180,7 +1180,7 @@ features:
         - specs/tool-system-m2b.3/verify-tasks-report.md
         - specs/tool-system-m2b.3/.verify-done
     srs_mapping:
-      baseline_version: "2.8"
+      baseline_version: "2.9"
       coverage_status: partial
       mapped_srs_items:
         - FR-2.6.2
@@ -1352,7 +1352,7 @@ features:
         - specs/002-tool-system-integration-verification/tasks.md
         - specs/002-tool-system-integration-verification/review.md
     srs_mapping:
-      baseline_version: "2.8"
+      baseline_version: "2.9"
       coverage_status: partial
       mapped_functional_groups:
         - "Tool System Architecture and Contracts"
@@ -1435,3 +1435,111 @@ features:
           label: Provider class verification fixtures
         - path: tests/fixtures/integration/boundary_cases.py
           label: Architecture boundary test cases
+
+  - feature_id: 003-agent-structured-outputs
+    feature_title: Agent Structured Outputs & Route-Adapted Response Tools
+    feature_path: specs/003-agent-structured-outputs
+    reference_document: specs/003-agent-structured-outputs/spec.md
+    reference_anchor: governance-context-mandatory
+    mapping_status: mapped
+    feature_kind: implementation-feature
+    status_sync:
+      source_of_truth: derived
+      gate_enforced: true
+      synchronized_documents:
+        - specs/003-agent-structured-outputs/spec.md
+        - specs/003-agent-structured-outputs/plan.md
+        - specs/003-agent-structured-outputs/tasks.md
+        - specs/003-agent-structured-outputs/checklists/requirements.md
+        - specs/003-agent-structured-outputs/research.md
+        - specs/003-agent-structured-outputs/data-model.md
+        - specs/003-agent-structured-outputs/quickstart.md
+        - specs/003-agent-structured-outputs/contracts/openapi-chat-response.yaml
+    srs_mapping:
+      baseline_version: "2.9"
+      coverage_status: full
+      mapped_srs_items:
+        - FR-1.2.5
+        - FR-1.2.6
+        - FR-1.2.7
+        - FR-1.2.8
+        - FR-1.2.9
+        - AC-10.1
+        - AC-10.2
+        - AC-10.3
+        - AC-10.4
+        - AC-10.5
+        - AC-10.6
+        - IR-1.14
+        - IR-3.11
+        - ERR-1.4
+      mapped_functional_groups:
+        - group: FR-1.2
+          coverage: full
+          includes:
+            - FR-1.2.5
+            - FR-1.2.6
+            - FR-1.2.7
+            - FR-1.2.8
+            - FR-1.2.9
+      mapped_acceptance_criteria:
+        - AC-10.1
+        - AC-10.2
+        - AC-10.3
+        - AC-10.4
+        - AC-10.5
+        - AC-10.6
+      sync_notes:
+        - Feature scope covers Agent Structured Outputs, Route-Adapted Response Tools (ADR-AGENT-005), Two-Stage Fallback Formatter, Checkpointer Payload Exclusion Hygiene, and Transport Edge Serialization.
+        - Evaluated against SRS v2.9 on 2026-07-23.
+    lifecycle:
+      status: completed
+      current_step: implement
+    evidence_paths:
+      - path: specs/003-agent-structured-outputs/spec.md
+        label: Feature specification
+        anchor: governance-context-mandatory
+      - path: specs/003-agent-structured-outputs/spec.md
+        label: Requirements and success criteria
+        anchor: requirements-mandatory
+      - path: specs/003-agent-structured-outputs/plan.md
+        label: Implementation plan
+        anchor: governance-and-traceability-context
+      - path: specs/003-agent-structured-outputs/research.md
+        label: Phase 0 research
+      - path: specs/003-agent-structured-outputs/data-model.md
+        label: Data model
+      - path: specs/003-agent-structured-outputs/quickstart.md
+        label: Quickstart verification guide
+      - path: specs/003-agent-structured-outputs/contracts/openapi-chat-response.yaml
+        label: OpenAPI contract additions
+      - path: specs/003-agent-structured-outputs/checklists/requirements.md
+        label: Requirements quality checklist
+      - path: specs/003-agent-structured-outputs/tasks.md
+        label: Implementation tasks
+      - path: specs/003-agent-structured-outputs/review.md
+        label: Implementation review and verification evidence
+      - path: src/core/types.py
+        label: Core Pydantic structured output schemas and AgentResponse envelope
+      - path: src/core/tools/response_tools.py
+        label: Control-plane response tools (ADR-AGENT-005)
+      - path: src/core/stock_assistant_agent.py
+        label: Route tool surface binding and direct payload extraction
+      - path: src/services/chat_service.py
+        label: Two-stage fallback extraction and metadata recording
+      - path: src/web/routes/ai_chat_routes.py
+        label: Transport edge structured payload injection
+      - path: src/web/sockets/chat_events.py
+        label: WebSocket structured event emission
+      - path: docs/openapi.yaml
+        label: OpenAPI schema integration
+      - path: docs/domains/agent/TECHNICAL_DESIGN.md
+        label: Agent architecture design updates
+      - path: tests/unit/test_structured_output.py
+        label: Unit tests for schemas and response tools
+      - path: tests/unit/test_fallback_formatter.py
+        label: Unit tests for fallback formatter and timeout budget
+      - path: tests/integration/test_chat_structured_flow.py
+        label: Integration tests for checkpointer hygiene and transport streaming
+
+

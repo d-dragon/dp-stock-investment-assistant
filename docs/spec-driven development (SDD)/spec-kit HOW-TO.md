@@ -645,7 +645,7 @@ The installed `speckit` workflow currently executes 14 concrete steps, including
    - **Cross-Reference Prompt Hint**:
      > *Prompt Hint*: "Validate task mappings: 'Check that every task in `tasks.md` maps directly back to a specification requirement and matches the active status gates in [spec-traceability.yaml](../../specs/spec-traceability.yaml).'"
 
-10. **`speckit.analyze`**: Run cross-artifact consistency analysis across the specification, plan, and task set.
+10. **`speckit.analyze`**: Run cross-artifact consistency analysis across the related long-lived documents, specification, plan, and task set.
     - **Mapped Long-Lived Documents**:
       - [constitution.md](../../.specify/memory/constitution.md)
     - **Cross-Reference Prompt Hint**:

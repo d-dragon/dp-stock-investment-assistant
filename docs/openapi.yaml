@@ -2245,9 +2245,187 @@ components:
           example: "550e8400-e29b-41d4-a716-446655440000"
       required: [message]
 
+    ResponseStatus:
+      type: string
+      enum:
+        - SUCCESS
+        - PARTIAL
+        - FAILED
+      description: Output contract validation status for structured response extractions
+
+    StockQueryRoute:
+      type: string
+      enum:
+        - FUNDAMENTALS
+        - TECHNICAL_ANALYSIS
+        - PRICE_CHECK
+        - IDEAS
+        - PORTFOLIO
+        - GENERAL_CHAT
+        - MARKET_WATCH
+        - NEWS_ANALYSIS
+      description: Classified domain query route
+
+    DataPoint:
+      type: object
+      required:
+        - metric
+        - value
+      properties:
+        metric:
+          type: string
+          example: "P/E Ratio"
+        value:
+          type: string
+          example: "12.5"
+        period:
+          type: string
+          nullable: true
+          example: "Q2 2026"
+        provenance_source:
+          type: string
+          nullable: true
+          example: "SSI Securities"
+
+    StockAnalysisResponse:
+      type: object
+      required:
+        - schema_version
+        - route_kind
+        - timestamp
+        - symbol
+        - summary
+        - sentiment
+        - confidence
+      properties:
+        schema_version:
+          type: string
+          default: "v1"
+        route_kind:
+          $ref: '#/components/schemas/StockQueryRoute'
+        timestamp:
+          type: string
+          format: date-time
+        symbol:
+          type: string
+          example: "HSG"
+        company_name:
+          type: string
+          nullable: true
+          example: "Hoa Sen Group"
+        summary:
+          type: string
+        sentiment:
+          type: string
+          enum: [BULLISH, BEARISH, NEUTRAL]
+        confidence:
+          type: number
+          format: float
+          minimum: 0.0
+          maximum: 1.0
+        key_metrics:
+          type: array
+          items:
+            $ref: '#/components/schemas/DataPoint'
+        risks:
+          type: array
+          items:
+            type: string
+        evidence_sources:
+          type: array
+          items:
+            type: string
+
+    RecommendationResponse:
+      type: object
+      required:
+        - schema_version
+        - route_kind
+        - timestamp
+        - symbols
+        - action
+        - time_horizon
+        - rationale
+      properties:
+        schema_version:
+          type: string
+          default: "v1"
+        route_kind:
+          $ref: '#/components/schemas/StockQueryRoute'
+        timestamp:
+          type: string
+          format: date-time
+        symbols:
+          type: array
+          items:
+            type: string
+        action:
+          type: string
+          enum: [BUY, HOLD, SELL, WATCH, ACCUMULATE]
+        target_price_range:
+          type: string
+          nullable: true
+        time_horizon:
+          type: string
+          enum: [SHORT_TERM, MEDIUM_TERM, LONG_TERM]
+        rationale:
+          type: string
+        disclaimers:
+          type: array
+          items:
+            type: string
+
+    GeneralChatResponse:
+      type: object
+      required:
+        - schema_version
+        - route_kind
+        - timestamp
+        - topic
+        - summary
+      properties:
+        schema_version:
+          type: string
+          default: "v1"
+        route_kind:
+          $ref: '#/components/schemas/StockQueryRoute'
+        timestamp:
+          type: string
+          format: date-time
+        topic:
+          type: string
+        summary:
+          type: string
+        follow_up_suggestions:
+          type: array
+          items:
+            type: string
+
+    AgentStructuredOutput:
+      oneOf:
+        - $ref: '#/components/schemas/StockAnalysisResponse'
+        - $ref: '#/components/schemas/RecommendationResponse'
+        - $ref: '#/components/schemas/GeneralChatResponse'
+      discriminator:
+        propertyName: route_kind
+
     ChatResponse:
       type: object
       properties:
+        content:
+          type: string
+          description: Natural language markdown response text
+        structured_content:
+          oneOf:
+            - $ref: '#/components/schemas/AgentStructuredOutput'
+            - type: "null"
+          description: Typed machine-readable JSON payload
+        status:
+          $ref: '#/components/schemas/ResponseStatus'
+        metadata:
+          type: object
+          additionalProperties: true
+          description: Execution metadata (tokens, route, latency)
         response:
           type: string
           description: Model response text (non-streaming).
@@ -2270,7 +2448,7 @@ components:
           description: Echoed conversation_id if provided in request. Confirms conversation context is active.
         conversation:
           $ref: '#/components/schemas/ConversationStatus'
-      required: [response, provider, model, fallback, timestamp]
+      required: [content, status, response, provider, model, fallback, timestamp]
 
     ConfigResponse:
       type: object

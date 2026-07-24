@@ -499,11 +499,27 @@ If you don't have a tool for a specific request, provide helpful general guidanc
             except Exception as e:
                 self.logger.warning(f"Failed to initialize TradingViewTool: {e}")
             
+            # Initialize and register control-plane response tools (ADR-AGENT-005)
+            try:
+                from .tools.registry import register_response_tools
+                register_response_tools(self._tool_registry)
+            except Exception as e:
+                self.logger.warning(f"Failed to register response tools: {e}")
+
             enabled_count = len(self._tool_registry.get_enabled_tools())
             self.logger.info(f"Tools initialized: {enabled_count} enabled, {len(self._tool_registry)} total")
             
         except Exception as e:
             self.logger.error(f"Failed to initialize tools: {e}", exc_info=True)
+
+    def _get_response_tool_name_for_route(self, route: StockQueryRoute) -> str:
+        """Map classified query route to control-plane response tool name."""
+        if route in (StockQueryRoute.FUNDAMENTALS, StockQueryRoute.TECHNICAL_ANALYSIS, StockQueryRoute.PRICE_CHECK):
+            return "submit_stock_analysis"
+        elif route in (StockQueryRoute.IDEAS, StockQueryRoute.PORTFOLIO):
+            return "submit_recommendation"
+        else:
+            return "submit_general_chat"
     
     def _build_agent_executor(self, tools: Optional[List[Any]] = None):
         """Build LangGraph ReAct agent.
@@ -600,7 +616,7 @@ If you don't have a tool for a specific request, provide helpful general guidanc
         return surface
 
     def _build_executor_for_query(self, query: str):
-        """Build a per-turn executor with only gateway-admitted wrappers."""
+        """Build a per-turn executor with gateway tools and route response tool."""
 
         surface = self._build_tool_surface_for_query(query)
         wrapped_tools = list(
@@ -609,6 +625,13 @@ If you don't have a tool for a specific request, provide helpful general guidanc
                 surface=surface,
             )
         )
+        
+        # Inject matching control-plane response tool if registered
+        resp_tool_name = self._get_response_tool_name_for_route(surface.route)
+        resp_tool = self._tool_registry.get(resp_tool_name)
+        if resp_tool and not any(getattr(t, "name", "") == resp_tool_name for t in wrapped_tools):
+            wrapped_tools.append(resp_tool)
+
         if not wrapped_tools:
             self.logger.info(
                 "M2B.1 tool surface for route=%s exposed no tools",
@@ -781,7 +804,8 @@ If you don't have a tool for a specific request, provide helpful general guidanc
     ) -> AgentResponse:
         """Process a query and return structured AgentResponse.
         
-        Returns full response with metadata, status, tool calls, and token usage.
+        Returns full response with metadata, status, tool calls, token usage,
+        and polymorphic structured_content payload (AgentStructuredOutput).
         
         Args:
             query: User query to process
@@ -789,10 +813,11 @@ If you don't have a tool for a specific request, provide helpful general guidanc
             conversation_id: Conversation ID for STM memory (UUID v4).
             
         Returns:
-            AgentResponse with content and metadata
+            AgentResponse with content, metadata, and structured_content
         """
         start_time = time.time()
         tool_calls: List[ToolCall] = []
+        structured_payload: Optional[Any] = None
         
         try:
             turn_executor = self._build_executor_for_query(query)
@@ -808,19 +833,28 @@ If you don't have a tool for a specific request, provide helpful general guidanc
                     config=invoke_config,
                 )
                 
-                # Extract tool calls from messages
+                # Extract tool calls and response payloads from messages
                 messages = result.get("messages", [])
                 content = ""
                 
                 for msg in messages:
                     # Tool messages contain tool call results
                     if hasattr(msg, 'type') and msg.type == 'tool':
+                        t_name = getattr(msg, 'name', 'unknown')
                         tool_calls.append(ToolCall(
-                            name=getattr(msg, 'name', 'unknown'),
-                            input={"query": query},  # Simplified - actual input not preserved
+                            name=t_name,
+                            input={"query": query},
                             output=str(msg.content) if hasattr(msg, 'content') else "",
                             execution_time_ms=None,
                         ))
+                        # Inspect for direct Pydantic response payload
+                        artifact = getattr(msg, 'artifact', None)
+                        if artifact is not None and hasattr(artifact, 'route_kind'):
+                            structured_payload = artifact
+                        elif hasattr(msg, 'content'):
+                            raw_c = msg.content
+                            if hasattr(raw_c, 'route_kind'):
+                                structured_payload = raw_c
                     # Get final AI response
                     elif isinstance(msg, AIMessage) and msg.content:
                         content = msg.content
@@ -852,12 +886,20 @@ If you don't have a tool for a specific request, provide helpful general guidanc
                             "trace_record": latest_trace,
                         })()))
 
-                return AgentResponse.success(
-                    content=content,
+                # If no response tool was fired, evaluate fallback degradation
+                status = ResponseStatus.SUCCESS
+                if structured_payload is None and content:
+                    # Mark partial degradation if direct response tool wasn't invoked
+                    status = ResponseStatus.PARTIAL
+
+                return AgentResponse(
+                    content=content or (str(structured_payload) if structured_payload else ""),
                     provider=client.provider,
                     model=client.model_name,
+                    status=status,
                     tool_calls=tuple(tool_calls),
                     metadata=metadata,
+                    structured_content=structured_payload,
                 )
             
             # Fallback to legacy
@@ -873,10 +915,19 @@ If you don't have a tool for a specific request, provide helpful general guidanc
         except Exception as e:
             self.logger.error(f"Structured query error: {e}")
             client = self._select_client(provider)
-            return AgentResponse.error(
-                message=str(e),
+            from .types import ErrorResponse
+            err_payload = ErrorResponse(
+                error_code="QUERY_PROCESSING_ERROR",
+                description=str(e),
+                degraded_mode=True,
+            )
+            return AgentResponse(
+                content=str(e),
                 provider=client.provider if client else "unknown",
                 model=client.model_name if client else "unknown",
+                status=ResponseStatus.PARTIAL,
+                error_message=str(e),
+                structured_content=err_payload,
             )
     
     # -------- ReAct Processing --------

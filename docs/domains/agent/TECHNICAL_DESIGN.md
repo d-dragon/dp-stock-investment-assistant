@@ -116,7 +116,7 @@ src/core/
 └── tools/
     ├── base.py                 # AgentTool base class (was CachingTool)
     ├── registry.py             # ToolRegistry singleton
-    ├── response_tools.py       # [Planned] Route-adapted response tools (submit_stock_analysis, etc.)
+    ├── response_tools.py       # [Implemented] Route-adapted response tools (submit_stock_analysis, etc.)
     ├── stock_symbol.py         # Stock lookup tool
     ├── tradingview.py          # TradingView placeholder (Phase 2)
     └── reporting.py            # Report generation tool
