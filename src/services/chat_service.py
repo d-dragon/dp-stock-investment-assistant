@@ -99,6 +99,62 @@ class ChatService(BaseService):
                 f"Metadata recording failed for {conversation_id}: {e}"
             )
 
+    @staticmethod
+    def _filter_json_tool_token(chunk: str, fragment_buffer: str = "") -> Optional[Union[str, Tuple[str, str]]]:
+        """Filter raw JSON tool argument tokens from streaming text chunks (IR-1.14).
+        
+        Handles multi-chunk boundaries where a JSON object is split across chunks.
+        
+        Args:
+            chunk: Current streaming text chunk.
+            fragment_buffer: Accumulated JSON fragment from previous chunks.
+            
+        Returns:
+            - None if the chunk is being buffered (JSON fragment pending).
+            - Empty string "" if the chunk alone is a complete JSON tool token to suppress.
+            - Tuple (flush, remaining) if buffer flush needed.
+            - Plain chunk string if it's clean text.
+        """
+        stripped = chunk.strip()
+        combined = (fragment_buffer + chunk).strip()
+
+        # Check if combined buffer+chunk forms a parseable JSON object
+        if combined.startswith("{") and combined.endswith("}"):
+            try:
+                json.loads(combined)
+                # Valid complete JSON object — suppress entirely
+                return ""
+            except (json.JSONDecodeError, ValueError):
+                pass
+
+        # Check if chunk alone is a complete JSON object
+        if stripped.startswith("{") and stripped.endswith("}"):
+            try:
+                json.loads(stripped)
+                return ""
+            except (json.JSONDecodeError, ValueError):
+                pass
+
+        # Check if we're in a JSON fragment: chunk starts with JSON-ish content
+        if fragment_buffer:
+            # We have a pending fragment — check if current chunk closes it
+            if stripped.endswith("}"):
+                # Try combined as JSON
+                try:
+                    json.loads(combined)
+                    return ""  # Complete tool call — suppress
+                except (json.JSONDecodeError, ValueError):
+                    pass
+            # Still not a complete JSON — keep buffering
+            return None
+
+        # Start of a potential JSON fragment
+        if stripped.startswith("{") and not stripped.endswith("}"):
+            return None  # Buffer it
+
+        # Clean text — pass through
+        return chunk
+
     def _extract_structured_response(
         self,
         response: AgentResponse,
@@ -206,18 +262,41 @@ class ChatService(BaseService):
             
             chunk_count = 0
             full_text_parts = []
+            json_fragment_buffer = ""  # Multi-chunk JSON tool argument fragment buffer
             for chunk in self._agent.process_query_streaming(
                 user_message, provider=provider_override, conversation_id=conversation_id
             ):
                 if chunk:
-                    # Filter raw tool call JSON syntax tokens from text stream (IR-1.14)
-                    clean_chunk = chunk
-                    if chunk.strip().startswith('{"') and chunk.strip().endswith('}'):
-                        clean_chunk = ""
+                    clean_chunk = self._filter_json_tool_token(chunk, json_fragment_buffer)
+                    # If the filter returned None, it buffered a fragment — skip emission
+                    if clean_chunk is None:
+                        json_fragment_buffer += chunk
+                        continue
+                    # If the filter returned a flush string, emit any recovered text first
+                    if isinstance(clean_chunk, tuple):
+                        flush_text, filtered_main = clean_chunk
+                        if flush_text:
+                            chunk_count += 1
+                            full_text_parts.append(flush_text)
+                            yield f"data: {json.dumps({'chunk': flush_text})}\n\n"
+                        clean_chunk = filtered_main
+                    json_fragment_buffer = ""
                     if clean_chunk:
                         chunk_count += 1
                         full_text_parts.append(clean_chunk)
                         yield f"data: {json.dumps({'chunk': clean_chunk})}\n\n"
+            # Flush any remaining JSON fragment buffer at end of stream
+            if json_fragment_buffer:
+                cleaned = json_fragment_buffer.strip()
+                try:
+                    json.loads(cleaned)
+                    # Was a valid JSON tool call — suppress silently
+                except (json.JSONDecodeError, ValueError):
+                    # Not valid JSON — emit as plain text
+                    if cleaned:
+                        chunk_count += 1
+                        full_text_parts.append(cleaned)
+                        yield f"data: {json.dumps({'chunk': cleaned})}\n\n"
             
             full_text = "".join(full_text_parts)
             provider_used, model_used, fallback_flag = self.extract_meta(full_text)

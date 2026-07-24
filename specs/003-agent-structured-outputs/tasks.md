@@ -107,6 +107,19 @@ Generated tasks MUST include exact file paths for all governance work that appli
 
 ---
 
+## Phase 7: Convergence
+
+**Purpose**: Close gaps identified during post-implementation convergence assessment — the fallback formatter is not wired into production paths, and Pydantic model/contract schemas diverge from the spec and data model.
+
+- [x] T019 Wire `ChatService._extract_structured_response()` into the fallback degradation path in `StockAssistantAgent.process_query_structured()` so that when the model emits plain text without calling a response tool, the service-layer formatter (`model.with_structured_output()`) is invoked before returning `ResponseStatus.PARTIAL` per FR-004/FR-1.2.7/AC-10.4 (missing)
+- [x] T020 Align `ResponseStatus` enum between `src/core/types.py` and `docs/openapi.yaml` — add `FAILED` value to code enum and document `FALLBACK`/`ERROR` in OpenAPI contract to eliminate bidirectional schema mismatch per FR-001 (contradicts)
+- [x] T021 Reconcile `AgentStructuredOutput` implementation in `src/core/types.py` with data-model.md: add shared base Pydantic model with `schema_version`, `route_kind` (`StockQueryRoute` enum), `timestamp` fields, or update data-model.md to reflect the Union pattern used (contradicts)
+- [x] T022 Reconcile `GeneralChatResponse` field naming between `src/core/types.py` (`message`, `topics_covered`) and spec/data-model.md (`topic`, `summary`) — align one direction with tests per data-model.md §1.3 (contradicts)
+- [x] T023 Reconcile `RecommendationResponse` field naming between `src/core/types.py` (`recommendation`, `thesis`) and spec/data-model.md (`action`, `rationale`) — align one direction with tests per data-model.md §1.3 (contradicts)
+- [x] T024 Improve SSE JSON tool argument token filtering in `ChatService.stream_chat_response()` at `src/services/chat_service.py` to handle multi-chunk streaming boundary cases and avoid false positives on legitimate text per FR-008/IR-1.14 (partial)
+
+---
+
 ## Dependencies & Execution Order
 
 ### Phase Dependencies

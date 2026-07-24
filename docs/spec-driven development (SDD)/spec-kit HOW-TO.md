@@ -679,11 +679,19 @@ The installed `speckit` workflow currently executes 14 concrete steps, including
     - **Cross-Reference Prompt Hint**:
       > *Prompt Hint*: "Run verification: 'Verify implementation compliance with [constitution.md](../../.specify/memory/constitution.md) principles and confirm test results conform to evidence policies in [VERIFICATION_AND_TRACEABILITY_STRATEGY.md](../testing/VERIFICATION_AND_TRACEABILITY_STRATEGY.md).'"
 
+15. **`speckit.converge`**: Reconcile the verified implementation with the specification artifacts to identify drift, document deviations, and update spec artifacts to match the actual implementation state before the feature moves to maintenance. This step produces a convergence report that records what changed, what matches, and what was intentionally excluded.
+    - **Mapped Long-Lived Documents**:
+      - [constitution.md](../../.specify/memory/constitution.md)
+      - Feature spec artifacts (e.g. `specs/<feature>/spec.md`, `specs/<feature>/plan.md`)
+      - [VERIFICATION_AND_TRACEABILITY_STRATEGY.md](../testing/VERIFICATION_AND_TRACEABILITY_STRATEGY.md)
+    - **Cross-Reference Prompt Hint**:
+      > *Prompt Hint*: "Converge artifacts: 'Compare the verified implementation in `src/` against the feature specification in `spec.md`. Document any behavioral drift, update the spec to reflect actual implementation decisions, and produce a convergence report recording what changed, what matches, and what was intentionally excluded.'"
+
 **Document-Spec Sync Gates**: Run `speckit.doc-sync.gate` at three hard checkpoints around delivery. After `speckit.plan`, the gate validates planned SRS mappings, baseline version, lifecycle status, and evidence paths before task generation. After `speckit.implement`, it refreshes forward and reverse reports from implementation evidence before verification. After `speckit.verify.run`, it is the final closeout gate before a feature can be treated as `Verified`. The command surface is `speckit.doc-sync.gate`, and the canonical executable operation remains `python scripts/sync_spec_status.py --gate`.
 
 #### 3.3.5 Synchronization and Maintenance
 
-15. **Test and Traceability Refresh**: Run project test suites and update [spec-traceability.yaml](../../specs/spec-traceability.yaml) whenever delivered scope changes.
+16. **Test and Traceability Refresh**: Run project test suites and update [spec-traceability.yaml](../../specs/spec-traceability.yaml) whenever delivered scope changes.
     - **Mapped Long-Lived Documents**:
       - [spec-traceability.yaml](../../specs/spec-traceability.yaml)
       - [spec-sync-status.md](../../specs/spec-sync-status.md)
@@ -691,13 +699,13 @@ The installed `speckit` workflow currently executes 14 concrete steps, including
     - **Cross-Reference Prompt Hint**:
       > *Prompt Hint*: "Refresh traceability manifests: 'Execute the project's test suite and compile evidence links. Update [spec-traceability.yaml](../../specs/spec-traceability.yaml) status to `verified`, then run `python scripts/sync_spec_status.py --gate` to regenerate [spec-sync-status.md](../../specs/spec-sync-status.md) and [SRS_SPEC_TRACEABILITY.md](../domains/agent/SRS_SPEC_TRACEABILITY.md).'"
 
-16. **Maintenance Update**: Keep governed feature artifacts current after delivery, including plan, review, status, and operational notes when behavior evolves.
+17. **Maintenance Update**: Keep governed feature artifacts current after delivery, including plan, review, status, and operational notes when behavior evolves.
     - **Mapped Long-Lived Documents**:
       - Feature spec artifacts (e.g. `specs/<feature>/spec.md`, `specs/<feature>/plan.md`)
     - **Cross-Reference Prompt Hint**:
       > *Prompt Hint*: "Synchronize specifications: 'Review code commits since the last deployment. Update specifications under [specs/](../../specs/) so that current behavior and acceptance criteria reflect the exact state of the production codebase.'"
 
-17. **Implementation, Specs, and Technical Documentation Synchronization**: Keep code, governed specs, technical documentation, and external contracts such as [openapi.yaml](../openapi.yaml) synchronized over time.
+18. **Implementation, Specs, and Technical Documentation Synchronization**: Keep code, governed specs, technical documentation, and external contracts such as [openapi.yaml](../openapi.yaml) synchronized over time.
     - **Mapped Long-Lived Documents**:
       - [openapi.yaml](../openapi.yaml)
       - [SYSTEM_REQUIREMENTS_SPECIFICATION.md](../system/SYSTEM_REQUIREMENTS_SPECIFICATION.md)
@@ -715,13 +723,13 @@ The installed `speckit` workflow currently executes 14 concrete steps, including
 
 This section presents four workflow views: where the 18 steps sit inside the SDLC loop, where repository hooks and gates attach, which project artifacts move through the governed delivery flow, and how the project-owned feature-delivery workflow executes.
 
-#### 3.4.1 18-Step Placement in the SDLC Loop
+#### 3.4.1 19-Step Placement in the SDLC Loop
 
-The diagram below displays the sequential mapping of the 18 SDD steps grouped within their corresponding SDLC phases.
+The diagram below displays the sequential mapping of the 19 SDD steps grouped within their corresponding SDLC phases.
 
 ```mermaid
 flowchart TB
-  %% 18-Step placement in SDLC Loop
+  %% 19-Step placement in SDLC Loop
   subgraph F0["📍 Requirements and Architecture"]
     S0["0 · Requirements Baseline"] --> S1["1 · Architecture and Operational Design"]
   end
@@ -740,18 +748,19 @@ flowchart TB
   subgraph F3["⚙️ Delivery and Verification"]
     S12["12 · speckit.implement"] --> S13["13 · speckit.verify-tasks.run"]
     S13 --> S14["14 · speckit.verify.run"]
+    S14 --> S15["15 · speckit.converge"]
   end
 
   subgraph F4["🔗 Synchronization and Maintenance"]
-    S15["15 · tests and traceability refresh"] --> S16["16 · maintenance update"]
-    S16 --> S17["17 · docs and contract sync"]
+    S16["16 · tests and traceability refresh"] --> S17["17 · maintenance update"]
+    S17 --> S18["18 · docs and contract sync"]
   end
 
   S1 --> S2
   S5 --> S6
   S11 --> S12
-  S14 --> S15
-  S17 --> S0
+  S15 --> S16
+  S18 --> S0
 
   %% Legend Subgraph
   subgraph Legend ["Visual Legend"]
@@ -767,9 +776,9 @@ flowchart TB
   classDef sync fill:#ECFDF5,stroke:#10B981,stroke-width:2px,color:#064E3B;
 
   class S0,S1,L_F0 neutral;
-  class S2,S3,S4,S5,S8,S12,L_F1 core;
+  class S2,S3,S4,S5,S8,S12,S15,L_F1 core;
   class S6,S7,S9,S10,S11,S13,S14,L_F2 gate;
-  class S15,S16,S17,L_F4 sync;
+  class S16,S17,S18,L_F4 sync;
 ```
 
 #### 3.4.2 Hook and Gate Overlay
@@ -1084,7 +1093,7 @@ The repository still contains older lifecycle terminology in some places. Use th
 | `speckit.verify` | `speckit.verify.run` |
 | `speckit.verify-tasks` | `speckit.verify-tasks.run` |
 | `speckit.sync` or `speckit.sync.analyze` | not installed/enabled today; use `speckit.doc-sync.gate` / `python scripts/sync_spec_status.py --gate` plus manual or skill-assisted doc promotion |
-| `speckit.converge` | official upstream convergence concept, upgrade-gated here until the CLI and local managed prompts/skills expose it; current closeout is `speckit.verify-tasks.run`, `speckit.verify.run`, final document/spec sync gate, and documentation promotion |
+| `speckit.converge` | step 15 in this repository's delivery workflow, runs after `speckit.verify.run` to reconcile verified implementation with specification artifacts before synchronization and maintenance |
 | `speckit.tests` | repository test execution plus traceability refresh, not a single core Spec Kit command |
 | `speckit.maintain` | maintenance stage name, not a single installed core command |
 
