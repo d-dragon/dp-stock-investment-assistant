@@ -1,15 +1,11 @@
 ---
-description: Create or update the project constitution from interactive or provided
-  principle inputs, ensuring all dependent templates stay in sync.
+description: Create or update the project constitution from interactive or provided principle inputs, ensuring all dependent templates stay in sync.
 handoffs:
-- label: Build Specification
-  agent: speckit.specify
-  prompt: Implement the feature specification based on the updated constitution. I
-    want to build...
+  - label: Build Specification
+    agent: speckit.specify
+    prompt: Implement the feature specification based on the updated constitution. I want to build...
 ---
 
-
-<!-- Source: companion-standard -->
 ## User Input
 
 ```text
@@ -17,6 +13,25 @@ $ARGUMENTS
 ```
 
 You **MUST** consider the user input before proceeding (if not empty).
+
+## Scope Guard
+
+This command's own work is limited to updating the project constitution and propagating
+constitution-driven changes to the dependent artifacts identified in this command.
+
+- Classify every part of the user input as either constitution content or a separate,
+  non-governance intent.
+- If the input includes feature implementation, code generation, refactoring, building, or
+  deployment requests, you **MUST NOT** execute them. Extract them as deferred intents instead.
+- You **MUST NOT** create, modify, or delete application source files, feature routes,
+  components, tests, deployment files, or other artifacts unrelated to the constitution
+  workflow and its required propagation.
+- If it is unclear whether an instruction is constitution content, ask for clarification before
+  making changes.
+- After completing the constitution update, include a `Next Actions` section for each deferred
+  intent. List the original intent and suggest the appropriate follow-up Spec Kit command, such
+  as `/speckit.specify`, without invoking it.
+- If there are no non-governance intents, omit the `Next Actions` section.
 
 ## Pre-Execution Checks
 
@@ -50,6 +65,7 @@ You **MUST** consider the user input before proceeding (if not empty).
 
     Wait for the result of the hook command before proceeding to the Outline.
     ```
+    After emitting the block above you MUST actually invoke the hook and wait for it to finish before continuing. Run it the same way you would run the command yourself in this agent/session (the invocation may differ from the literal `{command}` id shown above, e.g. a skills-mode agent runs it as `/skill:speckit-...` or `$speckit-...`). Emitting the block alone does not run the hook.
 - If no hooks are registered or `.specify/extensions.yml` does not exist, skip silently
 
 ## Outline
@@ -84,7 +100,7 @@ Follow this execution flow:
    - Read `.specify/templates/plan-template.md` and ensure any "Constitution Check" or rules align with updated principles.
    - Read `.specify/templates/spec-template.md` for scope/requirements alignment—update if constitution adds/removes mandatory sections or constraints.
    - Read `.specify/templates/tasks-template.md` and ensure task categorization reflects new or removed principle-driven task types (e.g., observability, versioning, testing discipline).
-   - Read each command file in `.specify/templates/commands/*.md` (including this one) to verify no outdated references (agent-specific names like CLAUDE only) remain when generic guidance is required.
+   - Read each installed Spec Kit command file for your agent (including this one) — named `speckit.*` or `speckit-*` (dot or hyphen depending on the agent), or laid out as `speckit-<name>/SKILL.md` for skills-based integrations, e.g. in `.github/agents/`, `.github/skills/`, `.claude/skills/`, or your agent's equivalent commands directory — to verify no outdated references (CLAUDE-only or other agent-specific names) remain when generic guidance is required.
    - Read any runtime guidance docs (e.g., `README.md`, `docs/quickstart.md`, or agent-specific guidance files if present). Update references to principles changed.
 
 5. Produce a Sync Impact Report (prepend as an HTML comment at top of the constitution file after update):
@@ -107,6 +123,7 @@ Follow this execution flow:
    - New version and bump rationale.
    - Any files flagged for manual follow-up.
    - Suggested commit message (e.g., `docs: amend constitution to vX.Y.Z (principle additions + governance update)`).
+   - A `Next Actions` section for any deferred non-governance intents.
 
 Formatting & Style Requirements:
 
@@ -151,43 +168,5 @@ Check if `.specify/extensions.yml` exists in the project root.
     Executing: `/{command}`
     EXECUTE_COMMAND: {command}
     ```
+    After emitting the block above you MUST actually invoke the hook and wait for it to finish before continuing. Run it the same way you would run the command yourself in this agent/session (the invocation may differ from the literal `{command}` id shown above, e.g. a skills-mode agent runs it as `/skill:speckit-...` or `$speckit-...`). Emitting the block alone does not run the hook.
 - If no hooks are registered or `.specify/extensions.yml` does not exist, skip silently
-
-
-<!-- speckit-companion:part timing -->
-## Timing — keep `.spec-context.json` honest
-
-These rules apply to every Companion profile command. The extension records lifecycle timing with its own scripts wherever it can; these rules keep anything you append consistent with that and accurate for any dispatcher (terminal, IDE chat, or the GUI). The model is **finish-only**: each task and each substep records a *single* finish event, and its duration is the gap to the previous finish (or the step's start). Never a `start`+`complete` pair for a task or substep — a pair stamped at one instant is what produces `0s` ticks and bursts.
-
-- **Never hand-edit `.spec-context.json`.** Record every finish by **running the writer script**, never by editing the JSON file yourself — a hand-authored edit is what corrupts the file (a duplicated `status` key). The script stamps the real clock, writes atomically, and is idempotent. The commands below are the only way you touch timing.
-- **Self-close — but not specify or implement.** When your own work for **plan, tasks, clarify, or analyze** ends, record the step finish (feature dir from `.specify/feature.json`):
-
-  ```bash
-  python3 .specify/extensions/companion/scripts/write-context.py --feature-dir <feature_dir> --step <this step> --finish --by ai
-  ```
-
-  `--finish` appends a single step-level complete and touches **nothing else** (it leaves `status`/`currentStep` to the lifecycle hooks). Do NOT self-close **specify** or **implement**: the extension closes those itself (specify from its own command, implement from the end-of-step hook), so an `ai` complete there would duplicate it.
-- **Substeps — one finish each, via the script.** For each substep boundary (plan: `research`, `design`; tasks: `generate`), the moment that substep ends, run:
-
-  ```bash
-  python3 .specify/extensions/companion/scripts/write-context.py --feature-dir <feature_dir> --step <step> --substep <name> --finish --by ai
-  ```
-
-  One call per substep, each stamped with its own real clock at the moment it finishes — never two substeps in one batch, never a separate `start`. The delta between consecutive finishes is each substep's duration.
-- **Implement — finishing a task *is* logging it (finish-only).** Recording a task's finish is the **closing action of that task**, done the instant its work is complete and before you start the next one — not a bookkeeping pass you batch at the end of a phase. The closing action is a single append (feature dir from `.specify/feature.json`):
-
-  ```bash
-  python3 .specify/extensions/companion/scripts/write-context.py --feature-dir <feature_dir> --task <TaskID> --kind complete --by ai --did "<one-line summary of what this task did>" --files "<comma,separated,files,touched>" --append
-  ```
-
-  `--append` writes **one line** to `.spec-context.events.jsonl` and does **not** read or rewrite the shared `.spec-context.json`, so it never hits the "read the file first" retry and **parallel workers can each append their own finish at the same time without contending** — the line carries its own real timestamp (`date -u` is stamped by the script). The `--did`/`--files` flags ride along so the Activity panel's Tasks card is populated from the script. **Do NOT hand-edit the `- [ ]` checkbox in `tasks.md`** — the script owns it: materialize flips it to `- [x]` from your appended finish, so a fanned-out subagent only appends and never touches the shared `tasks.md`. Do NOT hand-author per-task JSON and do NOT write a per-task `start`.
-
-  Then **fold the appended lines into `.spec-context.json`** — run this once per wave (after the wave reconciles) and again when the step ends:
-
-  ```bash
-  python3 .specify/extensions/companion/scripts/write-context.py --feature-dir <feature_dir> --materialize
-  ```
-
-  `--materialize` is the one read-modify-write: it folds the finishes into the panel **and checks off the matching `tasks.md` boxes** for every journaled task, idempotently (re-folding never double-counts), so running it per wave keeps the GUI current without re-serializing the work. The end-of-step hook is a backstop that materializes anything you didn't fold and fills any task you didn't journal. What's trustworthy here is the **per-task summary** (`did`/`files`) and the order tasks completed, plus the **step-level** start→complete span, which the scripts stamp exactly. The per-task *timestamps* are best-effort — a single agent logs a task right after building it, so they reflect when you recorded it, not a precisely measured duration; that's fine, the summaries are the point. Still, record each finish **as you go, wave by wave** rather than dumping every task at the very end — a per-wave cadence keeps the panel live and the ordering true.
-- **Never write the next step's start.** Only the next command appends the next step's start entry; writing it here makes the viewer render a phantom "Generating <next>…".
-<!-- /speckit-companion:part timing -->

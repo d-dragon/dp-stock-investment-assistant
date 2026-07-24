@@ -109,8 +109,8 @@ When the optimizer is disabled or unavailable, you **MUST** read these files exp
 - `data-model.md`
 - `contracts/`
 - `quickstart.md`
-- `docs/memory/INDEX.md`
-- `docs/memory/`
+- `.specify/extensions/security-review/docs/memory/INDEX.md`
+- `.specify/extensions/security-review/docs/memory/`
 - `specs/<feature>/memory.md`
 - `specs/<feature>/memory-synthesis.md`
 - `.github/copilot-instructions.md`
@@ -238,7 +238,7 @@ Each new task should stay compatible with the Spec-Kit task style used by the re
 
 ## Memory Hub INDEX.md Row
 
-After the follow-up plan, output the following proposed routing row for the user to paste into their `docs/memory/INDEX.md`. This enables LLM-based filtering without loading the full document.
+After the follow-up plan, output the following proposed routing row for the user to paste into their `.specify/extensions/security-review/docs/memory/INDEX.md`. This enables LLM-based filtering without loading the full document.
 
 ```text
 | <relative path where this doc is saved> | followup | <assessment_date> | <overall_risk> | C:<critical_count> H:<high_count> M:<medium_count> L:<low_count> | <owasp_categories comma-separated> |
@@ -247,7 +247,7 @@ After the follow-up plan, output the following proposed routing row for the user
 Example:
 
 ```text
-| docs/security-reviews/2026-05-07-auth-followup.md | followup | 2026-05-07 | HIGH | C:2 H:4 M:6 L:4 | A01,A05,A07 |
+| .specify/extensions/security-review/docs/security-reviews/2026-05-07-auth-followup.md | followup | 2026-05-07 | HIGH | C:2 H:4 M:6 L:4 | A01,A05,A07 |
 ```
 
-See `docs/field-registry.md` in the security-review-extension for the full INDEX.md table format and SQLite Phase 1 column mapping.
+See `.specify/extensions/security-review/docs/field-registry.md` in the security-review-extension for the full INDEX.md table format and SQLite Phase 1 column mapping.

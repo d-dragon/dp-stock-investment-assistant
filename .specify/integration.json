@@ -1,9 +1,10 @@
 {
-  "version": "0.12.0",
+  "version": "0.14.1",
   "integration_state_schema": 1,
   "installed_integrations": [
     "copilot",
-    "codex"
+    "codex",
+    "agy"
   ],
   "integration_settings": {
     "copilot": {
@@ -11,6 +12,10 @@
       "invoke_separator": "."
     },
     "codex": {
+      "script": "ps",
+      "invoke_separator": "-"
+    },
+    "agy": {
       "script": "ps",
       "invoke_separator": "-"
     }

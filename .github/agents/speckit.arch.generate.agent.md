@@ -37,7 +37,7 @@ The six artifacts are the authoritative architecture design source. They preserv
 - Write only the six architecture artifacts listed above.
 - Setup may create `.specify/memory/architecture-repo-facts.md` as a placeholder for reverse workflow compatibility, but generate must not load, populate, or update it.
 - If `.specify/memory/uc.md` exists, read it only as supporting reference, not as a hard prerequisite or sole source of truth.
-- Do not modify `.specify/memory/uc.md`, `.specify/memory/constitution.md`, feature specs, plans, tasks, source code, tests, or root `docs/`.
+- Do not modify `.specify/memory/uc.md`, `.specify/memory/constitution.md`, feature specs, plans, tasks, source code, tests, or root `.specify/extensions/arch/docs/`.
 - Stay at abstract architecture-design level.
 - Do not write concrete classes, files, functions, endpoints, DTO fields, database tables, framework selections, library choices, UI component details, deployment manifests, task breakdowns, test strategy, validation anchors, code notes, deployment scripts, or runbooks.
 - If evidence is insufficient, record a specific gap in the affected view instead of inventing business facts, components, interfaces, modules, deployment units, or numeric metrics.

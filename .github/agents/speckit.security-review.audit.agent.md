@@ -98,8 +98,8 @@ When `.specify/extensions/memory-md/config.yml` has `optimizer.enabled: true` an
 
 When the optimizer is disabled or unavailable, you **MUST** read these files explicitly using your file-reading tools (absolute or relative paths). Do not rely solely on workspace search or semantic indexers, as these files are often in `.gitignore`:
 
-- `docs/memory/INDEX.md` (Read this first to identify relevant source sections)
-- `docs/memory/` for durable repository memory (Read only the sections identified in the index)
+- `.specify/extensions/security-review/docs/memory/INDEX.md` (Read this first to identify relevant source sections)
+- `.specify/extensions/security-review/docs/memory/` for durable repository memory (Read only the sections identified in the index)
 - `.specify/memory/security_constitution.md` for project-wide security rules and standards
 - `specs/<feature>/memory.md` for active feature memory
 - `specs/<feature>/memory-synthesis.md` for the concise working summary
@@ -786,7 +786,7 @@ These tasks should be ready to import into Spec-Kit's task tracking system.
 
 ## Memory Hub INDEX.md Row
 
-After the report, output the following proposed routing row for the user to paste into their `docs/memory/INDEX.md`. This enables LLM-based filtering without loading the full document.
+After the report, output the following proposed routing row for the user to paste into their `.specify/extensions/security-review/docs/memory/INDEX.md`. This enables LLM-based filtering without loading the full document.
 
 ```text
 | <relative path where this doc is saved> | audit | <assessment_date> | <overall_risk> | C:<critical_count> H:<high_count> M:<medium_count> L:<low_count> | <owasp_categories comma-separated> |
@@ -795,10 +795,10 @@ After the report, output the following proposed routing row for the user to past
 Example:
 
 ```text
-| docs/security-reviews/2026-05-07-api.md | audit | 2026-05-07 | HIGH | C:2 H:4 M:6 L:4 | A01,A05,A07 |
+| .specify/extensions/security-review/docs/security-reviews/2026-05-07-api.md | audit | 2026-05-07 | HIGH | C:2 H:4 M:6 L:4 | A01,A05,A07 |
 ```
 
-See `docs/field-registry.md` in the security-review-extension for the full INDEX.md table format and SQLite Phase 1 column mapping.
+See `.specify/extensions/security-review/docs/field-registry.md` in the security-review-extension for the full INDEX.md table format and SQLite Phase 1 column mapping.
 
 ---
 

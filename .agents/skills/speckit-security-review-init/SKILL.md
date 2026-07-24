@@ -18,7 +18,7 @@ The Security Constitution is the "source of truth" for all security audits. It d
 Check for the existence of:
 
 * `.specify/memory/security_constitution.md`
-* `constitution.md` (root, `.specify/memory/`, or `docs/memory/`)
+* `constitution.md` (root, `.specify/memory/`, or `.specify/extensions/security-review/docs/memory/`)
 
 ### If `security_constitution.md` exists:
 

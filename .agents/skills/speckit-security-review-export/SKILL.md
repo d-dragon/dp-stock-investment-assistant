@@ -23,7 +23,7 @@ Synthesize one or more security review reports, follow-up plans, or finding list
 Read and analyze the following artifacts when present:
 
 - **Source Findings**: The latest security review report(s) or findings provided in `$ARGUMENTS`.
-- **Durable Context**: `.specify/memory/security_constitution.md` and `docs/memory/`.
+- **Durable Context**: `.specify/memory/security_constitution.md` and `.specify/extensions/security-review/docs/memory/`.
 - **Implementation Context**: `plan.md`, `tasks.md`, and relevant `spec.md` files.
 
 ### Optimizer-Aware Flow

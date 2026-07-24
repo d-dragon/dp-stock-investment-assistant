@@ -102,8 +102,8 @@ This command is the right fit for a branch, pull request, or merge request diff.
 
       When the optimizer is disabled or unavailable, you **MUST** read these files explicitly using your file-reading tools (absolute or relative paths). Do not rely solely on workspace search or semantic indexers, as these files are often in `.gitignore`:
 
-      - `docs/memory/INDEX.md`
-      - `docs/memory/`
+      - `.specify/extensions/security-review/docs/memory/INDEX.md`
+      - `.specify/extensions/security-review/docs/memory/`
       - `.specify/memory/security_constitution.md`
       - `specs/<feature>/memory.md`
       - `specs/<feature>/memory-synthesis.md`
@@ -196,7 +196,7 @@ Base:   <base>
 
 ## Memory Hub INDEX.md Row
 
-After the report, output the following proposed routing row for the user to paste into their `docs/memory/INDEX.md`. This enables LLM-based filtering without loading the full document.
+After the report, output the following proposed routing row for the user to paste into their `.specify/extensions/security-review/docs/memory/INDEX.md`. This enables LLM-based filtering without loading the full document.
 
 ```text
 | <relative path where this doc is saved> | branch | <assessment_date> | <overall_risk> | C:<critical_count> H:<high_count> M:<medium_count> L:<low_count> | <owasp_categories comma-separated> |
@@ -205,7 +205,7 @@ After the report, output the following proposed routing row for the user to past
 Example:
 
 ```text
-| docs/security-reviews/2026-05-07-feature-auth.md | branch | 2026-05-07 | HIGH | C:1 H:2 M:1 L:0 | A05,A07 |
+| .specify/extensions/security-review/docs/security-reviews/2026-05-07-feature-auth.md | branch | 2026-05-07 | HIGH | C:1 H:2 M:1 L:0 | A05,A07 |
 ```
 
-See `docs/field-registry.md` in the security-review-extension for the full INDEX.md table format and SQLite Phase 1 column mapping.
+See `.specify/extensions/security-review/docs/field-registry.md` in the security-review-extension for the full INDEX.md table format and SQLite Phase 1 column mapping.

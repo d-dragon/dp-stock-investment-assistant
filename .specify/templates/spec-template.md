@@ -8,26 +8,6 @@
 
 **Input**: User description: "$ARGUMENTS"
 
-## Governance Context *(mandatory)*
-
-<!--
-  ACTION REQUIRED: Ground this feature in repository authority before writing user stories.
-  Use exact file paths and anchor-level references where possible. If a required source
-  does not exist, state "N/A" and explain why.
--->
-
-**Source Requirements**: [SRS/system/domain requirement IDs and links, e.g., `FR-1.2.3` in `docs/domains/agent/SOFTWARE_REQUIREMENTS_SPECIFICATION.md#...`]
-
-**Authoritative Inputs**: [Constitution, architecture, technical design, ADR, roadmap, research, contract, or runbook references with anchors]
-
-**Traceability Target**: [Feature entry to add/update in `specs/spec-traceability.yaml`, including expected `mapped_srs_items`, functional groups, and coverage status]
-
-**Sync Targets**: [Long-lived docs, contracts, traceability reports, or runbooks that must be updated if this feature changes behavior]
-
-**Contract Impact**: [N/A, or exact executable contract paths such as `docs/openapi.yaml` or `specs/<feature>/contracts/...` that must change]
-
-**Lifecycle Status Rule**: [Expected starting status and promotion path: Draft -> Clarified -> Planned -> Implemented -> Verified, Backfilled, or Superseded]
-
 ## User Scenarios & Testing *(mandatory)*
 
 <!--
