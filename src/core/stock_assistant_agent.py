@@ -681,12 +681,22 @@ If you don't have a tool for a specific request, provide helpful general guidanc
     
     # -------- Public API (Compatible with StockAgent interface) --------
     
-    def run_interactive(self) -> None:
-        """Run interactive command-line session."""
+    def run_interactive(self, *, conversation_id: Optional[str] = None) -> None:
+        """Run interactive command-line session.
+
+        Args:
+            conversation_id: Optional UUID v4 for conversation-aware memory.
+                        If provided, reused across all turns in this session.
+        """
         self.logger.info("Starting interactive session...")
         print("Welcome to DP Stock-Investment Assistant!")
         print("Type 'quit' or 'exit' to end the session.")
         print("Type 'help' for available commands.\n")
+
+        cid = conversation_id
+        if cid:
+            print(f"Conversation ID: {cid}")
+        print()
         
         while True:
             try:
@@ -697,7 +707,7 @@ If you don't have a tool for a specific request, provide helpful general guidanc
                 elif user_input.lower() == "help":
                     self._show_help()
                 elif user_input:
-                    response = self.process_query(user_input)
+                    response = self.process_query(user_input, conversation_id=cid)
                     print(f"\nAssistant: {response}\n")
             except KeyboardInterrupt:
                 print("\nGoodbye!")

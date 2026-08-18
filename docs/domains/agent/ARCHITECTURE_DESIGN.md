@@ -99,6 +99,7 @@ This architecture description does not replace:
 | [ADR-AGENT-002-SKILLS-PATTERN-PROMPT-COMPOSITION.md](./DECISIONS/ADR-AGENT-002-SKILLS-PATTERN-PROMPT-COMPOSITION.md) | Prompt skills composition decision |
 | [ADR-AGENT-003-EXTERNALIZE-VERSION-PROMPT-ASSETS.md](./DECISIONS/ADR-AGENT-003-EXTERNALIZE-VERSION-PROMPT-ASSETS.md) | Externalized prompt asset decision |
 | [ADR-AGENT-004-THIN-TOOL-GATEWAY-AND-NORMALIZED-TOOL-CONTEXT.md](./DECISIONS/ADR-AGENT-004-THIN-TOOL-GATEWAY-AND-NORMALIZED-TOOL-CONTEXT.md) | Proposed tool gateway, provider policy, and normalized tool context decision |
+| [ADR-AGENT-005-STRUCTURED-OUTPUT-BOUNDARY-AND-RESPONSE-TOOL-PATTERN.md](./DECISIONS/ADR-AGENT-005-STRUCTURED-OUTPUT-BOUNDARY-AND-RESPONSE-TOOL-PATTERN.md) | Accepted route-adapted response tool pattern and structured output strategy decision |
 
 ---
 
@@ -360,7 +361,7 @@ This interface view makes three architectural boundaries explicit that are easy 
 | Building Block | Responsibility |
 |----------------|----------------|
 | `[Implemented]` [stock_assistant_agent.py](../../../src/core/stock_assistant_agent.py) | Main ReAct runtime and conversation-aware agent entry points |
-| `[Planned]` Structured Output Subsystem | Governs route-adapted response tools, Pydantic polymorphic response schemas, and two-stage service-layer fallback formatting |
+| `[Implemented]` Structured Output Subsystem | Governs route-adapted response tools, Pydantic polymorphic response schemas (`StockAnalysisResponse`, `RecommendationResponse`, `GeneralChatResponse`), two-stage fallback formatting, and multi-chunk SSE token stream filtering |
 | `[Implemented]` [langgraph_bootstrap.py](../../../src/core/langgraph_bootstrap.py) | STM infrastructure boundary, including checkpointer creation and conversation-scoped checkpoint wiring |
 | `[Implemented]` [stock_query_router.py](../../../src/core/stock_query_router.py) | Semantic route classification |
 | `[Implemented]` [model_factory.py](../../../src/core/model_factory.py) and provider clients | Provider and model selection with cached client construction |
@@ -378,7 +379,7 @@ These building blocks are separated so that reasoning orchestration, session con
 | Logical Concern | Primary Owner | Architectural Boundary |
 |-----------------|---------------|------------------------|
 | Reasoning, tool selection, and STM binding | `[Implemented]` [StockAssistantAgent](../../../src/core/stock_assistant_agent.py) | Binds `conversation_id -> thread_id` into conversation-scoped runtime state but does not own lifecycle authority, session context, or checkpoint persistence policy |
-| Structured output extraction and contract validation | `[Planned]` StockAssistantAgent / Response Tools / Formatter | Enforces route-adapted response tool extraction, Pydantic schema validation, two-stage fallback, and graceful degradation (`ResponseStatus.PARTIAL`) |
+| Structured output extraction and contract validation | `[Implemented]` StockAssistantAgent / Response Tools / Formatter | Enforces route-adapted response tool extraction, Pydantic schema validation, two-stage fallback, multi-chunk SSE token stream filtering, checkpointer payload exclusion, and graceful degradation (`ResponseStatus.PARTIAL` / `FAILED`) |
 | STM persistence infrastructure | `[Implemented]` [langgraph_bootstrap.py](../../../src/core/langgraph_bootstrap.py) plus LangGraph checkpointer boundary | Preserves recoverable thread-local runtime state only; not a source of truth for archive policy, ownership, or metadata; excludes structured JSON payloads to prevent checkpointer schema drift |
 | Semantic route classification | `[Implemented]` [stock_query_router.py](../../../src/core/stock_query_router.py) | Classifies requests but does not execute tools or persist state |
 | Provider and model selection | `[Implemented]` [ModelClientFactory](../../../src/core/model_factory.py) and provider clients | Isolates provider-specific concerns from routes and services |
@@ -468,7 +469,7 @@ The agent domain uses a layered architecture so personalization, session context
 | Intent Routing | Implemented | Classify requests so the runtime selects the right tools, retrieval path, and response behavior | Classification layer only; does not own persistence, tool execution, or lifecycle rules |
 | Retrieval-Augmented Generation (RAG) | Planned architecture; partial evidence support via tools today | Supply sourced evidence for domain-specific reasoning | Evidence layer only; stores retrieved source content, not user preferences or model-authored conclusions |
 | Prompting and Guardrails | Implemented baseline; planned compiler expansion | Control behavior, disclosure, and response framing | Policy layer only; governs how the model behaves, not where domain truth is stored |
-| Structured Output Envelope | Planned | Parse, validate, and shape typed JSON data for frontend rendering | Contract layer only; parses route-adapted response tools or fallback formats into `AgentStructuredOutput` polymorphic payloads |
+| Structured Output Envelope | Implemented | Parse, validate, and shape typed JSON data for frontend rendering | Contract layer only; parses route-adapted response tools or fallback formats into `AgentStructuredOutput` polymorphic payloads |
 | Tools and Deterministic Computation | Implemented | Fetch data and compute auditable metrics | Computation layer only; performs data retrieval and calculations that the LLM then interprets |
 | Fine-Tuning | Future | Enforce reasoning structure and tone for selected workflows | Behavior-shaping layer only; does not function as a knowledge store |
 
@@ -875,6 +876,7 @@ src/core/
     ├── base.py                 # AgentTool base class (was CachingTool)
     ├── registry.py             # ToolRegistry singleton
     ├── stock_symbol.py         # Stock lookup tool
+    ├── response_tools.py       # Control-plane route-adapted response tools (submit_stock_analysis, etc.)
     ├── tradingview.py          # TradingView placeholder (Phase 2)
     └── reporting.py            # Report generation tool
 
@@ -1330,6 +1332,7 @@ Prompt observability is an architectural requirement because prompt behavior is 
 | Externalized prompt assets and prompt versioning | [ADR-AGENT-003-EXTERNALIZE-VERSION-PROMPT-ASSETS.md](./DECISIONS/ADR-AGENT-003-EXTERNALIZE-VERSION-PROMPT-ASSETS.md) |
 | Tool gateway, provider policy, and normalized tool context | [ADR-AGENT-004-THIN-TOOL-GATEWAY-AND-NORMALIZED-TOOL-CONTEXT.md](./DECISIONS/ADR-AGENT-004-THIN-TOOL-GATEWAY-AND-NORMALIZED-TOOL-CONTEXT.md) |
 | Conversation hierarchy, checkpoints, and runtime reconciliation | [AGENT_MEMORY_TECHNICAL_DESIGN.md](./AGENT_MEMORY_TECHNICAL_DESIGN.md) |
+| Route-adapted response tool pattern and agent structured output boundary | [ADR-AGENT-005-STRUCTURED-OUTPUT-BOUNDARY-AND-RESPONSE-TOOL-PATTERN.md](./DECISIONS/ADR-AGENT-005-STRUCTURED-OUTPUT-BOUNDARY-AND-RESPONSE-TOOL-PATTERN.md) |
 | Prompt-system design research and rollout path | [PROMPT_SYSTEM_RESEARCH_PROPOSAL.md](./PROMPT_SYSTEM_RESEARCH_PROPOSAL.md) |
 
 Tool-system requirements remain governed by [SOFTWARE_REQUIREMENTS_SPECIFICATION.md](./SOFTWARE_REQUIREMENTS_SPECIFICATION.md), especially `FR-2.4` through `FR-2.11`, `AC-9`, `IR-3`, and the related constraints for provider licensing, TradingView authority, generic web fetching, market-fact attribution, and `ToolContextPack` persistence. This architecture document names the boundary and authority relationships; it does not redefine the requirement tables or executable contracts.
@@ -1400,6 +1403,7 @@ Reviewer checklist:
 | [ADR-AGENT-002-SKILLS-PATTERN-PROMPT-COMPOSITION.md](./DECISIONS/ADR-AGENT-002-SKILLS-PATTERN-PROMPT-COMPOSITION.md) | **Proposed** | Governs the composable skills model used in the prompt architecture view |
 | [ADR-AGENT-003-EXTERNALIZE-VERSION-PROMPT-ASSETS.md](./DECISIONS/ADR-AGENT-003-EXTERNALIZE-VERSION-PROMPT-ASSETS.md) | **Proposed** | Governs the move from hardcoded prompts to versioned external assets |
 | [ADR-AGENT-004-THIN-TOOL-GATEWAY-AND-NORMALIZED-TOOL-CONTEXT.md](./DECISIONS/ADR-AGENT-004-THIN-TOOL-GATEWAY-AND-NORMALIZED-TOOL-CONTEXT.md) | **Proposed** | Governs the thin gateway, provider policy, normalized context, generic web trust, and tool data-retention boundary |
+| [ADR-AGENT-005-STRUCTURED-OUTPUT-BOUNDARY-AND-RESPONSE-TOOL-PATTERN.md](./DECISIONS/ADR-AGENT-005-STRUCTURED-OUTPUT-BOUNDARY-AND-RESPONSE-TOOL-PATTERN.md) | **Accepted** | Governs route-adapted response tools, Pydantic polymorphic response schemas, 0% extra token single-turn ReAct execution, two-stage fallback formatting, and checkpointer payload exclusion |
 
 #### 6.1.1 Architectural Hard Rules (from ADR-001 Hard Rules)
 
@@ -1517,4 +1521,5 @@ The detailed extension catalog, example snippets, configuration candidates, and 
 | 1.1 | 2026-05-21 | GitHub Copilot | Added architectural tool-risk classes plus prompt-segment and locale-governance boundaries so approval posture, static-versus-dynamic segment treatment, and locale parity remain explicit as the prompt system evolves |
 | 1.2 | 2026-06-22 | Codex | Promoted Phase 2B tool-system boundaries into architecture views: thin in-process Tool Gateway, route-filtered tool surface, provider-adapter policy, normalized tool context, Vietnam-first provider posture, TradingView visualization provenance, generic web trust controls, and current-versus-target tool terminology |
 | 1.3 | 2026-07-16 | System | Updated Phase 2B tool-system labeling from `[Target]` to `[Implemented]` across logical building blocks, responsibility boundaries, terminology evolution, and consistency checklist. Updated tool gateway section 4.8.5a with implementation status column. Updated Section 7.1 tooling evolution table with delivered current state. Updated key characteristics and process flow to reflect current integrated gateway/normalization/Vietnam-market/TradingView implementation state |
+| 1.4 | 2026-07-29 | System | Updated Structured Output Subsystem labeling from `[Planned]` to `[Implemented]` across logical building blocks, responsibility boundaries, layered architecture, source layout, and ADR decision tables following feature 003 delivery (commits `69fd5c68`, `74eb20e6`). Updated ADR-005 status to `Accepted`. Documented multi-chunk SSE stream token filtering and checkpointer payload exclusion hygiene |
 

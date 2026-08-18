@@ -4,6 +4,7 @@ import json
 import os
 import time
 from typing import Any, Dict, Optional, Tuple
+from utils.service_utils import normalize_document
 
 try:
     import redis  # type: ignore
@@ -138,10 +139,25 @@ class CacheBackend:
             return None
 
     def set_json(self, key: str, value: Dict[str, Any], *, ttl_seconds: Optional[int] = None) -> None:
+        # Try direct JSON dump first; if that fails, attempt to normalize common
+        # non-serializable types (ObjectId, datetime) via `normalize_document`.
         try:
             payload = json.dumps(value)
+        except TypeError:
+            try:
+                normalized = normalize_document(value)
+                payload = json.dumps(normalized)
+            except Exception:
+                # Last-resort: use default=str to coerce unknown types to strings
+                try:
+                    payload = json.dumps(value, default=str)
+                except Exception as exc:
+                    if self._logger:
+                        self._logger.debug(f"Cache set_json encode failed key={key} reason={exc}")
+                    raise
         except Exception as exc:
             if self._logger:
                 self._logger.debug(f"Cache set_json encode failed key={key} reason={exc}")
             raise
+
         self.set(key, payload, ttl_seconds=ttl_seconds)

@@ -6,7 +6,7 @@
 |-------|-------|
 | **ADR ID** | ADR-AGENT-005 |
 | **Title** | Adopt Route-Adapted Custom Response Tool Pattern and Phased Architecture Strategy for Agent Structured Outputs |
-| **Status** | Proposed |
+| **Status** | Accepted |
 | **Date** | 2026-07-21 |
 | **Authors** | System & Architecture Team |
 | **Domain** | Agent Subsystem / Structured Output & Runtime Execution |
