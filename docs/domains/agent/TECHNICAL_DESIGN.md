@@ -1,9 +1,9 @@
 # Agent Domain — Technical Design
 
-> **Status**: Active — tool-system realization updated to reflect delivered implementation evidence. Prompt system, STM, and routing sections remain current from earlier M1/M2/STM implementations.
+> **Status**: Active — tool-system and structured output subsystem realizations updated to reflect delivered implementation evidence. Prompt system, STM, and routing sections remain current from earlier M1/M2/STM implementations.
 > **Standards Stance**: Aligned design practice
 > **Technology Stack**: LangGraph 0.2.62+, LangChain, OpenAI SDK, semantic-router, MongoDB, Redis
-> **Companion Documents**: [ARCHITECTURE_DESIGN.md](./ARCHITECTURE_DESIGN.md), [SOFTWARE_REQUIREMENTS_SPECIFICATION.md](./SOFTWARE_REQUIREMENTS_SPECIFICATION.md), [SRS_SPEC_TRACEABILITY.md](./SRS_SPEC_TRACEABILITY.md), [AGENT_MEMORY_TECHNICAL_DESIGN.md](./AGENT_MEMORY_TECHNICAL_DESIGN.md), [PROMPT_SYSTEM_RESEARCH_PROPOSAL.md](./PROMPT_SYSTEM_RESEARCH_PROPOSAL.md), [TOOLS_RESEARCH_AND_PROPOSAL.md](./TOOLS_RESEARCH_AND_PROPOSAL.md), [spec-sync-status.md](../../../specs/spec-sync-status.md), [ADR-AGENT-001-LAYERED-LLM-ARCHITECTURE.md](./DECISIONS/ADR-AGENT-001-LAYERED-LLM-ARCHITECTURE.md), [ADR-AGENT-002-SKILLS-PATTERN-PROMPT-COMPOSITION.md](./DECISIONS/ADR-AGENT-002-SKILLS-PATTERN-PROMPT-COMPOSITION.md), [ADR-AGENT-003-EXTERNALIZE-VERSION-PROMPT-ASSETS.md](./DECISIONS/ADR-AGENT-003-EXTERNALIZE-VERSION-PROMPT-ASSETS.md), [ADR-AGENT-004-THIN-TOOL-GATEWAY-AND-NORMALIZED-TOOL-CONTEXT.md](./DECISIONS/ADR-AGENT-004-THIN-TOOL-GATEWAY-AND-NORMALIZED-TOOL-CONTEXT.md)
+> **Companion Documents**: [ARCHITECTURE_DESIGN.md](./ARCHITECTURE_DESIGN.md), [SOFTWARE_REQUIREMENTS_SPECIFICATION.md](./SOFTWARE_REQUIREMENTS_SPECIFICATION.md), [SRS_SPEC_TRACEABILITY.md](./SRS_SPEC_TRACEABILITY.md), [AGENT_MEMORY_TECHNICAL_DESIGN.md](./AGENT_MEMORY_TECHNICAL_DESIGN.md), [PROMPT_SYSTEM_RESEARCH_PROPOSAL.md](./PROMPT_SYSTEM_RESEARCH_PROPOSAL.md), [TOOLS_RESEARCH_AND_PROPOSAL.md](./TOOLS_RESEARCH_AND_PROPOSAL.md), [spec-sync-status.md](../../../specs/spec-sync-status.md), [ADR-AGENT-001-LAYERED-LLM-ARCHITECTURE.md](./DECISIONS/ADR-AGENT-001-LAYERED-LLM-ARCHITECTURE.md), [ADR-AGENT-002-SKILLS-PATTERN-PROMPT-COMPOSITION.md](./DECISIONS/ADR-AGENT-002-SKILLS-PATTERN-PROMPT-COMPOSITION.md), [ADR-AGENT-003-EXTERNALIZE-VERSION-PROMPT-ASSETS.md](./DECISIONS/ADR-AGENT-003-EXTERNALIZE-VERSION-PROMPT-ASSETS.md), [ADR-AGENT-004-THIN-TOOL-GATEWAY-AND-NORMALIZED-TOOL-CONTEXT.md](./DECISIONS/ADR-AGENT-004-THIN-TOOL-GATEWAY-AND-NORMALIZED-TOOL-CONTEXT.md), [ADR-AGENT-005-STRUCTURED-OUTPUT-BOUNDARY-AND-RESPONSE-TOOL-PATTERN.md](./DECISIONS/ADR-AGENT-005-STRUCTURED-OUTPUT-BOUNDARY-AND-RESPONSE-TOOL-PATTERN.md)
 
 ## Document Control
 
@@ -11,8 +11,8 @@
 |-------|-------|
 | Project | DP Stock Investment Assistant |
 | Domain | Agent |
-| Focus | Technical realization of the LangChain ReAct agent domain, including orchestration, memory, prompt composition, and fallback behavior |
-| Date | 2026-07-16 |
+| Focus | Technical realization of the LangChain ReAct agent domain, including orchestration, memory, prompt composition, structured output subsystem, and fallback behavior |
+| Date | 2026-07-29 |
 | Status | Active working scaffold |
 | Audience | Engineering, architecture, agent maintainers, and reviewers |
 
@@ -1500,7 +1500,7 @@ Future LTM, when introduced, should enrich the assembly step as optional cross-c
 
 ### 3.8 Structured Output Subsystem Realization
 
-> **Status:** `[Planned]` realization under SRS FR-1.2.5–1.2.9, AC-10.1–10.6, IR-1.14, IR-3.11, ERR-1.4, ADR-AGENT-005, and Phase 2 Enhancement Roadmap §2A.3.
+> **Status:** `[Implemented]` realization under SRS FR-1.2.5–1.2.9, AC-10.1–10.6, IR-1.14, IR-3.11, ERR-1.4, accepted ADR-AGENT-005, and Phase 2 Enhancement Roadmap §2A.3. Verified by delivered feature `003-agent-structured-outputs` (commits `69fd5c68`, `74eb20e6`).
 
 #### 3.8.1 Subsystem Architecture & Responsibility
 
@@ -1633,11 +1633,13 @@ Refs: SRS FR-1.2.6, AC-10.2; [ADR-AGENT-005](./DECISIONS/ADR-AGENT-005-STRUCTURE
 
 #### 3.8.4 Two-Stage Service-Layer Post-Processing Formatter
 
+**Status**: `[Implemented]` in `ChatService._extract_structured_response()`.
+
 When the LLM completes its ReAct reasoning loop without calling the registered route response tool, `StockAssistantAgent.process_query_structured()` triggers the out-of-band post-processing fallback formatter:
 
 1. **Stage 1**: Read raw text response from ReAct message history (~500 tokens).
-2. **Stage 2**: Execute out-of-band extraction via `model.with_structured_output(target_schema)` in `ChatService` or runtime helper.
-3. **Graceful Degradation**: If out-of-band extraction fails or times out, return raw text in `AgentResponse.content`, set `structured_content = None`, and assign `status = ResponseStatus.PARTIAL` (`ERR-1.4`).
+2. **Stage 2**: Execute out-of-band extraction via `model.with_structured_output(target_schema)` in `ChatService` or runtime helper with a configurable default timeout (`agent.structured_output.fallback_timeout_seconds: 10.0`).
+3. **Graceful Degradation**: If out-of-band extraction fails or times out due to invalid syntax, return raw text in `AgentResponse.content`, set `structured_content = None`, and assign `status = ResponseStatus.PARTIAL` (`ERR-1.4`).
 
 Refs: SRS FR-1.2.7, ERR-1.4, AC-10.4; [ARCHITECTURE_DESIGN.md section 4.8.4](./ARCHITECTURE_DESIGN.md#484-output-contract-boundary); `src/services/chat_service.py`.
 
@@ -1698,9 +1700,9 @@ flowchart LR
 
 ##### Dual-Stream Streaming & Raw JSON Token Suppression Rules
 
-1. **Raw JSON Token Suppression**: During real-time streaming (`astream_events` / SSE / WebSocket), raw JSON syntax tokens generated during response tool argument invocation (`submit_stock_analysis`) are **filtered out of the text stream**, preventing raw JSON syntax fragments from rendering in natural language chat bubbles.
+1. **Raw JSON Token Suppression**: During real-time streaming (`astream_events` / SSE / WebSocket), raw JSON syntax tokens generated during response tool argument invocation (`submit_stock_analysis`) are buffered and suppressed across chunk boundaries by `ChatService._filter_json_tool_token()`, preventing raw JSON syntax fragments from rendering in natural language chat bubbles.
 2. **Discrete Event Frame Emission**: Upon turn completion, transport edge handlers emit a discrete `structured_completion` event frame (SSE) or `structured_content` payload (`chat_response` WebSocket event) containing the parsed `AgentStructuredOutput` object for UI widget rendering (charts, risk badges, target price cards).
-3. **OpenAPI Contract Alignment**: `docs/openapi.yaml` updates `ChatResponse` component schema to include `structured_content` and `status`, enabling frontend TypeScript contract generation via `openapi-typescript` ([adr-frontend-002](../frontend/adr-frontend-002-modernize-frontend-foundation.md)).
+3. **OpenAPI Contract Alignment**: `docs/openapi.yaml` updates `ChatResponse` component schema to include `structured_content` and `status` (`SUCCESS`, `PARTIAL`, `FAILED`), enabling frontend TypeScript contract generation via `openapi-typescript` ([adr-frontend-002](../frontend/adr-frontend-002-modernize-frontend-foundation.md)).
 
 Refs: SRS IR-1.14, IR-3.11; [docs/openapi.yaml](../openapi.yaml); `src/web/routes/ai_chat_routes.py`; `src/web/sockets/chat_events.py`; [adr-frontend-002](../frontend/adr-frontend-002-modernize-frontend-foundation.md).
 
@@ -2024,7 +2026,7 @@ The ADR decisions are realized in phases so memory, retrieval, prompt policy, an
 |------|--------------------|---------------|
 | 1 | Conversation-scoped STM and checkpoint lifecycle | Implemented |
 | 2 | Prompt externalization and composable skills | M1 implemented; M2 implemented / gated |
-| 2A (SO.M1) | Structured Output Subsystem — route-adapted custom response tools (`return_direct=True`) + service fallback formatter | Planned per Phase 2 Roadmap §2A.3, ADR-005, and SRS FR-1.2.5–1.2.9 |
+| 2A (SO.M1) | Structured Output Subsystem — route-adapted custom response tools (`return_direct=True`) + service fallback formatter | Implemented — delivered via feature `003-agent-structured-outputs` (commits `69fd5c68`, `74eb20e6`) per accepted ADR-005 and SRS FR-1.2.5–1.2.9 |
 | 2A (SO.M2) | Custom `StateGraph` optimization — state channel interceptor and in-graph self-repair loop | Future state per Phase 2 Roadmap §2A.3 |
 | 2B | Tool gateway, provider adapters, normalized tool context, and Vietnam-first data coverage | Implemented — tool surface, gateway, descriptors, provider policy, normalized outputs, `ToolContextPack`, symbol-store, market-data tools, and TradingView visualization |
 | 3 | Intent-specific retrieval and evidence wiring | Planned / partial by tool path |
@@ -2351,3 +2353,4 @@ class AgentResponse(BaseModel):
 | 0.15 | 2026-06-25 | Codex | Added tool-system persistent data model and storage design covering MongoDB metadata, filesystem artifacts, target schema contracts, and source-lineage rules |
 | 0.16 | 2026-06-25 | Codex | Added tool-system persistence decision, storage-stack, and collection/schema diagrams for Phase 2B data-model realization |
 | 0.17 | 2026-07-22 | Gemini | Realized Structured Output Subsystem (`[Planned]` state): added section 3.8 covering polymorphic Pydantic schemas (`AgentStructuredOutput`), control-plane route-adapted response tools (`RiskClass.BOUNDED_NON_MUTATING` with `return_direct=True`), two-stage fallback formatting, checkpointer exclusion hygiene, transport serialization (`docs/openapi.yaml`, REST `POST /api/chat`, Socket.IO `chat_message`), and StateGraph migration strategy per SRS v2.9 (FR-1.2.5–1.2.9, AC-10), ADR-005, and Phase 2 Roadmap §2A.3. Full-spectrum Structured Output Subsystem synchronization across Technical Design: updated section 3.1 (`StockAssistantAgent.process_query_structured` delegation flow), section 3.2.4 (control-plane response tool `RiskClass.BOUNDED_NON_MUTATING` classification), section 3.3.1 (checkpointer memory state hygiene excluding typed JSON payloads from STM), section 3.4 (semantic route-to-schema 1-to-1 mapping matrix and Pydantic `AgentResponse` envelope), section 3.5.3 & 3.5.7 (output contract boundary reference and structured output telemetry metadata), section 4.4 (Phase 2A roadmap delivery sequencing), section 5.1 & 5.3 & 5.4 (Command/Strategy and Discriminated Union patterns, Pydantic class hierarchy, key file relationships), and section 6.2 (`ResponseStatus` enum quick reference) per SRS v2.9, ADR-005, and ARCHITECTURE_DESIGN.md |
+| 0.18 | 2026-07-29 | System | Updated Structured Output Subsystem realization from `[Planned]` to `[Implemented]` across Document Control, section 3.8 status tag, section 3.8.4 post-processing fallback formatter timeout configuration (10.0s), section 3.8.7 multi-chunk SSE stream token filtering (`ChatService._filter_json_tool_token`), section 4.4 delivery sequencing, and companion document references following feature `003-agent-structured-outputs` delivery (commits `69fd5c68`, `74eb20e6`) and accepted ADR-005. |

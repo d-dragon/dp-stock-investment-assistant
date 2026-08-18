@@ -14,7 +14,7 @@ info:
     
     
     **Changes (v1.4.0)**:
-    - Full API surface reconciliation (T030): openapi.yaml now documents all 26 registered endpoints
+    - Full API surface reconciliation: openapi.yaml now documents all 26 registered endpoints
     - Migrated chat identity field from `session_id` to `conversation_id` to align with runtime code
     - Removed `session_id` field from ChatRequest/ChatResponse schemas (not implemented in code)
     - Removed ghost endpoint GET /api/sessions/{session_id}/conversation (never implemented)

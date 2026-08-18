@@ -2,14 +2,16 @@
 Main entry point for the DP Stock-Investment Assistant.
 """
 
+import logging
+import sys
+import argparse
+import uuid
+
 from core.stock_assistant_agent import StockAssistantAgent
 from core.data_manager import DataManager
 from core.langgraph_bootstrap import create_checkpointer
 from utils.config_loader import ConfigLoader
 from web.api_server import APIServer
-import logging
-import sys
-import argparse
 
 
 def setup_logging(level="INFO"):
@@ -76,7 +78,21 @@ def main():
                 data_manager = DataManager(config)
                 checkpointer = create_checkpointer(config)
                 agent = StockAssistantAgent(config, data_manager, checkpointer=checkpointer)
-                agent.run_interactive()
+
+                # Conversation-aware memory setup
+                print("\n=== Conversation Memory Setup ===")
+                user_cid = input(
+                    "Enter conversation_id (UUID v4) or press Enter to auto-generate: "
+                ).strip()
+                if user_cid:
+                    conversation_id = user_cid
+                    print(f"Using provided conversation_id: {conversation_id}")
+                else:
+                    conversation_id = str(uuid.uuid4())
+                    print(f"Auto-generated conversation_id: {conversation_id}")
+                print("==================================\n")
+
+                agent.run_interactive(conversation_id=conversation_id)
             else:
                 # Run only web server
                 server.run(host=args.host, port=args.port, debug=True)
@@ -87,7 +103,21 @@ def main():
             data_manager = DataManager(config)
             checkpointer = create_checkpointer(config)
             agent = StockAssistantAgent(config, data_manager, checkpointer=checkpointer)
-            agent.run_interactive()
+
+            # Conversation-aware memory setup
+            print("\n=== Conversation Memory Setup ===")
+            user_cid = input(
+                "Enter conversation_id (UUID v4) or press Enter to auto-generate: "
+            ).strip()
+            if user_cid:
+                conversation_id = user_cid
+                print(f"Using provided conversation_id: {conversation_id}")
+            else:
+                conversation_id = str(uuid.uuid4())
+                print(f"Auto-generated conversation_id: {conversation_id}")
+            print("==================================\n")
+
+            agent.run_interactive(conversation_id=conversation_id)
         
     except Exception as e:
         logging.error(f"Error starting application: {e}")
