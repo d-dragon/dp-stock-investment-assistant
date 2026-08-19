@@ -1,6 +1,6 @@
 ---
 name: research-to-architecture-adr
-description: Support high-level project architecture work from research, proposals, benchmark reports, specs, source evidence, and side-chat synthesis. Use when Codex needs to brainstorm architecture solution options, review architecture design work, convert non-authoritative research into architecture updates and ADR candidates, produce architecture impact maps, decide ADR boundaries, route lower-level realization work to $technical-design-manager, update an ADR index, or run consistency review across architecture, SRS, roadmap, technical design, contracts, specs, source code, and traceability.
+description: Support high-level project architecture work from research, proposals, benchmark reports, specs, source evidence, and side-chat synthesis. Use when Programming Agents like Codex, Antigravity, Copilot, Cursor, Claude, or any other AI tools/assistants needs to brainstorm architecture solution options, review architecture design work, convert non-authoritative research into architecture updates and ADR candidates, produce architecture impact maps, decide ADR boundaries, route lower-level realization work to $technical-design-manager, update an ADR index, or run consistency review across architecture, SRS, roadmap, technical design, contracts, specs, source code, and traceability.
 ---
 
 # Research to Architecture ADR
@@ -25,6 +25,8 @@ For reusable tables and report templates, read `references/propagation-workflow.
 - Inspect governing documents before editing or reviewing: SRS, architecture design, technical design, roadmap, ADR index and existing ADRs, executable contracts, relevant specs, source evidence, tests, and traceability files when relevant.
 - Read only relevant sections after heading or search inspection unless full-document context is needed.
 - Use the project methodology first, with ISO 42010-aligned viewpoints, C4-style diagrams, arc42-style section routing, and ADR practice as supporting heuristics. Do not claim formal standards conformance unless the target document already does.
+- Always use the web search tool to find relevant information, because web search is allowed, and it is encouraged to use it to find relevant information.
+- Do web search and AI chat tools when needed to extend and strengthen domain knowledge, but only after fully understanding the governing documents and the project methodology.
 - For brainstorming and review tasks, produce options, tradeoffs, risks, and feedback without editing unless the user asks for updates.
 - Always produce a visible impact map before mutating long-lived docs unless the user already supplied an equivalent map.
 - Promote each stable claim to the smallest owning artifact:
@@ -38,6 +40,8 @@ For reusable tables and report templates, read `references/propagation-workflow.
 - Do not edit SRS, roadmap, technical design, contracts, specs, source code, tests, or traceability unless the user explicitly includes them as targets.
 - Ask the user before creating new ADRs when multiple plausible decision boundaries exist.
 - When content is out of architecture/ADR scope, route it to the correct owner and report the follow-up rather than forcing it into architecture prose.
+- Use visualization methods such as Mermaid diagrams to make the architecture design easier to understand and maintain. The diagrams should be consistent with the project methodology.
+- Must embedded citations, referenced web pages and search results in the content as references section when useing web search tool and other tools. That give evidence and support the claims.
 - Respect the active collaboration mode. If the environment is plan-only, produce a decision-complete plan instead of editing.
 
 ## Out of Scope and Companion Routing
@@ -54,6 +58,7 @@ For reusable tables and report templates, read `references/propagation-workflow.
 
 1. **Load context**
    - Identify the task mode: brainstorm, review, promote, architecture update, ADR, consistency check, or mixed.
+   - Read user input documents, links ,etc. that provide context and instructions.
    - Read the proposal/research/spec/source input relevant to that mode.
    - Read the target architecture document and relevant existing sections.
    - Read the ADR index and nearby ADRs for naming, status, traceability, and style.
