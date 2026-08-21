@@ -1,4 +1,4 @@
-# Project Documentation Architecture and Spec-Driven Development Strategy
+# Project Documentation and Specification with Spec-Driven Development Strategy
 
 ## Document Control
 
@@ -6,28 +6,30 @@
 |-------|-------|
 | Project | DP Stock Investment Assistant |
 | Domain | Documentation architecture, requirements engineering, and specification governance |
-| Focus | Spec-driven development strategy integrating system SRS, SDD lifecycle, constitution governance, and automated traceability for a multi-layer, multi-domain system |
-| Date | 2026-04-01 |
-| Status | Draft for planning and documentation-generation follow-up |
-| Audience | Engineering, architecture, product, platform, and technical documentation maintainers |
+| Focus | Harmonized documentation architecture synthesizing **arc42 (12-section structural blueprint)**, **C4 Model (visual zoom hierarchy)**, **ISO/IEC/IEEE 42010 (architecture meta-standard)**, and **Spec-Driven Development (SDD)** for a multi-layer, multi-domain financial agent system |
+| Date | 2026-08-20 |
+| Status | Target-state architecture & methodology baseline |
+| Audience | Engineering, architecture, product, quant/trader, platform, and technical documentation maintainers |
 
 ## 1. Executive Summary
 
-This document proposes a target-state documentation architecture for the DP Stock Investment Assistant repository, integrated with the project's **Spec-Driven Development (SDD)** methodology as the primary delivery and documentation governance engine.
+This document proposes a target-state documentation architecture for the DP Stock Investment Assistant repository, integrating a **tripartite architecture framework (ISO/IEC/IEEE 42010 + arc42 + C4 Model)** with the project's **Spec-Driven Development (SDD)** methodology as the primary delivery and documentation governance engine.
 
-The project is already a multi-layer, multi-domain system with distinct frontend, API, agent, service, data, and infrastructure concerns. The current repository contains strong documentation assets and an established SDD practice with constitution governance, automated traceability, and a quality gate chain through spec-kit extensions.
+The project is a multi-layer, multi-domain system with distinct frontend, API gateway, agent reasoning (LangGraph), service orchestration, data persistence, and cloud infrastructure concerns. The current repository contains strong documentation assets and an established SDD practice with constitution governance, automated traceability, and a quality gate chain through spec-kit extensions.
 
-The current recommendation is:
+The core architecture documentation strategy is:
 
 - adopt **Spec-Driven Development as the central methodology** for how requirements flow from stable system-level definitions through feature delivery to verified implementation
-- adopt a **hybrid, domain-oriented documentation model** with one master system SRS as the upstream requirement pool, whole-system architecture documents, and domain-owned realization documents under `docs/domains/`
+- adopt an **arc42-structured hybrid documentation model** distributed across 4 directors (`docs/system/`, `docs/architecture/`, `docs/domains/`, and `specs/`), providing a complete 12-section architectural canvas without document bloat
+- anchor static and dynamic visual modeling in the **C4 Model zoom hierarchy (Levels 1–4)** and **UML/DSL/BPMN notations** applied in their correspondingly relevant documents
+- apply **ISO/IEC/IEEE 42010** as the meta-standard governing Stakeholders, Concerns, Viewpoints, Views, and Decision Rationale (ADRs)
 - retain the **Constitution** (`.specify/memory/constitution.md`) as the non-negotiable governance layer that all feature specs, plans, and implementations must satisfy
-- keep **ADRs** as decision records rather than requirement documents
+- keep **ADRs** (`docs/architecture/DECISIONS/` and `docs/domains/*/DECISIONS/`) as decision records rather than requirement documents
 - keep **OpenAPI** and other contract artifacts as executable interface sources of truth rather than duplicating them in prose
-- keep **feature specs** under `specs/` as delivery-scoped realization artifacts linked back to approved requirement IDs, following the 18-step SDD lifecycle
-- maintain **automated traceability** through `spec-traceability.yaml`, `sync_spec_status.py`, and any future governed sync extension adoption to detect and resolve drift
+- keep **feature specs** under `specs/` as delivery-scoped realization artifacts linked back to approved requirement IDs, following the 18-step SDD lifecycle, and acting as local arc42 deltas during development
+- maintain **automated traceability** through `spec-traceability.yaml`, `sync_spec_status.py`, and governed doc promotion gates to prevent documentation drift
 
-This proposal is intentionally designed to be the next-step input for generating the future project documentation set. It does not attempt to rewrite the current document corpus. Instead, it defines the target structure, the SDD lifecycle integration, the governance model, and the document boundaries needed to guide the next documentation-generation phase.
+This proposal defines the target structure, the SDD lifecycle integration, the arc42/C4 mapping, the governance model, and the document boundaries needed to guide long-term engineering execution.
 
 ## 2. Problem Statement
 
@@ -143,6 +145,53 @@ The target documentation architecture should follow these principles:
 8. **Constitution compliance**: all documentation artifacts must satisfy the constraints defined in the project constitution
 9. **Automated drift detection**: documentation currency is maintained through tooling, not manual discipline alone
 
+### 5.5 Tripartite Architecture Framework: ISO 42010, arc42, and C4 Model
+
+To achieve systematic architecture documentation without monolithic bloat, the repository synthesizes three standards:
+
+```
+                      ┌────────────────────────────────────────┐
+                      │          ISO/IEC/IEEE 42010            │
+                      │  (Meta-Model, Stakeholders & Concerns) │
+                      └───────────────────┬────────────────────┘
+                                          │  governs & justifies
+                                          ▼
+                      ┌────────────────────────────────────────┐
+                      │              arc42 Canvas              │
+                      │  (12-Section Structural Blueprint)     │
+                      └───────────────────┬────────────────────┘
+                                          │  visually expressed by
+                                          ▼
+                      ┌────────────────────────────────────────┐
+                      │               C4 Model (+ UML/PlantUML)                 │
+                      │  (Visual Zoom Hierarchy: L1 ➔ L4)      │
+                      └────────────────────────────────────────┘
+```
+
+1. **ISO/IEC/IEEE 42010 (The Meta-Standard):** Establishes the ontology of software architecture. It dictates that every architecture description must address identified **Stakeholders** (Investors, Quant Analysts, Developers, Security, DevOps) and their specific **Concerns** through dedicated **Architecture Viewpoints** and **Architecture Views**, underpinned by recorded **Architecture Rationale (ADRs)**.
+2. **arc42 (The Structural Canvas):** Provides the pragmatic 12-section blueprint. Instead of creating a single massive arc42 document, we distribute its 12 sections cleanly across the 4 repository layers:
+
+| arc42 Section | Section Purpose | Target Repository Location | Visual / Content Role in Project |
+|---|---|---|---|
+| **§1 Introduction & Goals** | Business context, key quality goals, primary stakeholders | `docs/system/SYSTEM_REQUIREMENTS_SPECIFICATION.md` | Primary financial assistant use cases, user roles, top business goals |
+| **§2 Architecture Constraints** | Non-negotiable technical, regulatory, organizational limits | `docs/architecture/SYSTEM_OVERVIEW_AND_BOUNDARIES.md` + `.specify/memory/constitution.md` | Golden Rules, LLM tool boundaries, market manipulation safeguards |
+| **§3 Context & Scope** | Business and technical system boundaries, external interfaces | `docs/architecture/SYSTEM_OVERVIEW_AND_BOUNDARIES.md` | **C4 Level 1 (System Context):** External financial APIs, news feeds, LLM endpoints |
+| **§4 Solution Strategy** | Fundamental architectural decisions and patterns | `docs/architecture/SYSTEM_OVERVIEW_AND_BOUNDARIES.md` (Strategy section) | Modular monolith, event-driven streaming, LangGraph multi-agent orchestration |
+| **§5 Building Block View** | Static hierarchical decomposition | **System (L1):** `docs/architecture/SYSTEM_OVERVIEW_AND_BOUNDARIES.md`<br>**Domain (L2):** `docs/domains/*/ARCHITECTURE_DESIGN.md` + `docs/domains/*/TECHNICAL_DESIGN.md` | **C4 Level 2 (Container):** Frontend, Backend, Agent Engine, Redis, MongoDB, Vector DB.<br>**C4 Level 3 (Component):** LangGraph nodes, Flask blueprints, React modules. |
+| **§6 Runtime View** | Dynamic interaction, sequence flows, workflows | `docs/architecture/RUNTIME_AND_INTEGRATION_FLOWS.md` | UML Sequence / Activity diagrams for chat streaming, agent tool loops, cache sync |
+| **§7 Deployment View** | Physical/Cloud infrastructure, environments, network | `docs/architecture/DEPLOYMENT_AND_INFRASTRUCTURE.md` | **C4 Deployment Diagram:** Container mapping, cloud VPC, Redis/Mongo clusters, CI/CD |
+| **§8 Cross-cutting Concepts** | Reusable patterns across the entire system | `docs/architecture/CROSS_CUTTING_CONCEPTS.md` | Auth/RBAC, LangGraph Memory (LTM/STM), LLM caching, structured logging, rate limits |
+| **§9 Architecture Decisions** | Architectural Decision Records (ADRs) | `docs/architecture/DECISIONS/` & `docs/domains/*/DECISIONS/` | Nygard-style ADRs capturing context, options, decision, trade-offs, consequences |
+| **§10 Quality Requirements** | Quality tree and measurable quality scenarios | `docs/system/SYSTEM_REQUIREMENTS_SPECIFICATION.md` (§6 System NFRs - ISO 25010) | Latency (<500ms TTFT for streaming), 99.9% uptime, strict precision, safety checks |
+| **§11 Risks & Technical Debt** | Known vulnerabilities, architectural trade-offs | `docs/architecture/RISKS_AND_TECHNICAL_DEBT.md` | LLM rate limits, third-party data reliability, memory drift, sync latency |
+| **§12 Glossary** | Standard domain dictionary & technical terminology | `docs/study-hub/project-documentation-and-specification-methodology.md` (§6.2 Canonical Glossary) | Precise definitions of Domain, Bounded Context, Layer, Agent State, Contracts |
+
+3. **C4 Model (The Visual Hierarchy):** Standardizes static and dynamic visuals at 4 levels of detail:
+   - **Level 1 (System Context):** High-level view showing users, external systems, and boundaries (in `SYSTEM_OVERVIEW_AND_BOUNDARIES.md`).
+   - **Level 2 (Container Diagram):** High-level deployable units, services, and datastores (in `SYSTEM_OVERVIEW_AND_BOUNDARIES.md` + `docs/domains/*/ARCHITECTURE_DESIGN.md`).
+   - **Level 3 (Component Diagram):** Internal modules, routers, agents, and stores within a domain (in `docs/domains/*/TECHNICAL_DESIGN.md`).
+   - **Level 4 (Code / Data Seams):** code in src/, interfaces, OpenAPI contracts in `docs/openapi.yaml`, and data models (in `specs/<feature-id>/data-model.md` and executable schemas), IaC/, and deployment scripts.
+
 ## 6. Standards Stance
 
 This proposal uses three standards stances so the project can be disciplined without pretending formal compliance where it does not need to.
@@ -158,10 +207,13 @@ This proposal uses three standards stances so the project can be disciplined wit
 | Standard / Practice | Recommended Use |
 |---------------------|-----------------|
 | **ISO/IEC/IEEE 29148** | Use as the primary organizing model for requirements engineering, requirement quality, and document layering |
-| **ISO/IEC/IEEE 42010** | Use as the framing model for architecture descriptions and viewpoint separation |
+| **ISO/IEC/IEEE 42010** | Use as the framing meta-standard for architecture descriptions, stakeholder concerns, viewpoints, and views |
+| **arc42 (v8+)** | Use as the 12-section structural canvas distributed across system, architecture, and domain documents |
+| **C4 Model** | Use as the primary hierarchical visual abstraction standard (Context, Container, Component, Code/Deployment) |
+| **ISO/IEC 25010** | Use as the quality characteristics classification model for arc42 §10 / SNR requirements |
 | **OpenAPI 3.1** | Use as the authoritative HTTP API contract standard |
 | **WCAG 2.2 AA** | Use as the baseline accessibility standard for UI and UX design specifications |
-| **Mermaid with selective C4, UML, and BPMN usage** | Use as the repository-default text-based diagram approach; apply document-type-specific notation limits through Section 9.3 |
+| **Multi-Modeling Notation Strategy** | Use **UML, C4, DSL/PlantUML, and BPMN** in their correspondingly relevant places, with Mermaid as the primary Markdown-diffable authoring format (Section 9.3) |
 | **ADR / Nygard-style decision records** | Use as the practice model for architecture-significant decision capture |
 | **Spec-Kit / Spec-Driven Development** | Use as the **primary delivery and governance methodology** for feature planning, implementation, verification, and documentation maintenance |
 
@@ -171,6 +223,11 @@ The terms in this glossary are the canonical vocabulary for this repository. Con
 
 | Term | Canonical Meaning | Use This For | Avoid Using For |
 |------|-------------------|--------------|-----------------|
+| **Architecture Viewpoint** | A specification of the conventions for constructing and using an architecture view to address specific stakeholder concerns (ISO 42010) | Framing system overview, runtime flows, deployment views, cross-cutting concepts | Generic synonym for personal opinion |
+| **Architecture View** | A work product expressing the architecture of a system from the perspective of a specific viewpoint (ISO 42010) | Static structure, runtime sequence, deployment topology | Loose collections of unorganized notes |
+| **arc42 Canvas** | The 12-section structural blueprint distributed across system, architecture, and domain documents | Structuring complete architectural coverage across the repository | Forcing a single monolithic 12-section doc |
+| **C4 Hierarchy** | 4-level zoom model (Context L1, Container L2, Component L3, Code L4) for visual architecture communication | Structuring visual diagrams at appropriate levels of abstraction | Mixing container and code details in one diagram |
+| **Cross-Cutting Concept** | An architectural pattern, policy, or mechanism spanning multiple domains (arc42 §8) | Memory LTM/STM, Auth, LLM caching, observability, error handling | Domain-isolated internal helpers |
 | **Domain** | A delivery ownership unit that groups related responsibilities and artifacts | Requirement allocation, document ownership, technical design scope | Naming implementation tool choices |
 | **Bounded Context** | A domain boundary with explicit semantics and responsibilities | Clarifying scope boundaries when terms overlap across domains | Generic synonym for every folder |
 | **Layer** | A technical or architectural level within a domain or service | Route/service/repository separation, presentation/business/data layering | Cross-domain ownership mapping |
@@ -189,102 +246,62 @@ The terms in this glossary are the canonical vocabulary for this repository. Con
 
 ## 7. SDD Lifecycle Integration
 
-### 7.1 The 18-Step SDD Lifecycle with Spec-Kit
+### 7.1 Overview and Authority Reference
 
-The project has established an 18-step SDD lifecycle that governs all feature delivery. This lifecycle is the mechanism through which stable requirements become verified implementations and through which long-lived documentation stays current.
+**Spec-Driven Development (SDD)** with **Spec Kit** is the central delivery and documentation governance engine in this repository. It translates business intent and system requirements into verified implementation through a governed chain of structured Markdown artifacts (`specs/<feature-id>/`), eliminating ambiguity before code is written and preserving verifiable evidence after delivery.
 
-| Step | Phase | SDD Command | Documentation Impact |
-|------|-------|-------------|---------------------|
-| 0 | Requirements | Manual | Author SR/SNR or domain FR/NFR in the appropriate SRS document |
-| 1 | Design | Manual | Author architectural and technical specifications |
-| 2 | Governance | `speckit.constitution` | Verify constitution compliance before feature work begins |
-| 3 | Specification | `speckit.specify` | Create spec.md referencing SRS IDs; update traceability registry |
-| 4 | Clarification | `speckit.clarify` | Refine ambiguous requirements; record clarifications in spec.md |
-| 5 | Planning | `speckit.plan` | Create plan.md with constitution check and technical context |
-| 6 | Health check | `speckit.doctor` | Validate project state and template integrity |
-| 7 | Quality checklist | `speckit.checklist` | Generate feature-specific quality checklist |
-| 8 | Task generation | `speckit.tasks` | Create tasks.md with user-story-organized implementation tasks |
-| 9 | Validation | `speckit.validate` | Verify spec-to-task traceability and file integrity |
-| 10 | Analysis | `speckit.analyze` | Cross-artifact consistency and quality analysis |
-| 11 | Review | `speckit.fleet.review` | Cross-model evaluation of plan and tasks before implementation |
-| 12 | Implementation | `speckit.implement` | Execute tasks; code changes aligned to spec and plan |
-| 13 | Task verification | `speckit.verify-tasks.run` | Detect phantom completions; verify code exists for every checked task |
-| 14 | Post-implementation verification | `speckit.verify.run` | Validate implementation against spec, plan, tasks, and constitution |
-| 15 | Testing and traceability | Manual + `scripts/sync_spec_status.py --gate` | Run tests; update spec-traceability.yaml with gate status and regenerate forward/reverse reports |
-| 16 | Maintenance | `scripts/sync_spec_status.py --gate` plus manual or skill-assisted promotion | Detect and resolve spec-to-code drift; backfill unspecced code when needed |
-| 17 | Documentation sync | Manual | Synchronize long-lived docs affected by the delivered feature |
+> [!IMPORTANT]
+> **Detailed Operational Guide**:
+> For the comprehensive 18-step SDD lifecycle, step-by-step CLI commands, flag references, extension integrations, troubleshooting, and persistence policies, refer to the authoritative guide:
+> ➔ **[`docs/spec-driven development (SDD)/spec-kit HOW-TO.md`](../spec-driven%20development%20%28SDD%29/spec-kit%20HOW-TO.md)**.
 
-Command-surface rule: this methodology names the current local command surfaces. Older shorthand such as `speckit.review`, `speckit.verify`, and `speckit.sync` may appear in historical notes, but new process guidance should use `speckit.fleet.review`, `speckit.verify.run`, and `scripts/sync_spec_status.py --gate`. Upstream-only concepts such as `speckit.converge` are upgrade-gated here until the CLI and local managed prompt/skill files expose them.
+### 7.2 High-Level SDLC Delivery Stages
 
-### 7.2 How SDD Connects to System Documentation
+The SDD workflow organizes feature delivery into five governed stages:
 
-The SDD lifecycle connects delivery-scoped artifacts (`specs/`) to long-lived system documentation (`docs/`) through these mechanisms:
+| Stage | Purpose | Primary Spec Kit Commands / Tools | Key Documentation & Artifact Impact |
+|---|---|---|---|
+| **1. Requirements & Governance** | Align with system requirements baseline and verify non-negotiable constitution constraints | `speckit.constitution`, SRS baselines | Sourced from `docs/system/SYSTEM_REQUIREMENTS_SPECIFICATION.md`, <br> `docs/domains/*/SOFTWARE_REQUIREMENTs_SPECIFICATION.md`, `.specify/memory/constitution.md` |
+| **2. Specification & Refinement** | Translate approved requirements into delivery-scoped feature specifications with acceptance scenarios | `speckit.specify`, `speckit.clarify`, `speckit.checklist` | Generates `specs/<feature-id>/spec.md` with explicit SRS requirement IDs and quality checklists |
+| **3. Planning & Review** | Produce technical design, constitution-checked plan, user-story tasks, and cross-model risk review | `speckit.plan`, `speckit.tasks`, `speckit.analyze`, `speckit.fleet.review` | Generates `plan.md`, `tasks.md`, `data-model.md` (C4 L4 seams), and records mappings in `specs/spec-traceability.yaml`. Governed and referenced documents like <br> `docs/architecture/`, <br> `docs/domains/*/TECHNICAL_DESIGN.md`, <br> `docs/domains/*/ARCHITECTURE_DECISIONS.md`,<br> `docs/domains/*/RISKS_AND_TECHNICAL_DEBTS.md`, <br> `docs/domains/*/ARCHITECTURE_DESIGN.md` , <br> `docs/openapi.yaml`,... |
+| **4. Implementation & Verification** | Execute code changes aligned to plan, detect phantom task completions, and verify against constitution | `speckit.implement`, `speckit.verify-tasks.run`, `speckit.verify.run` | Implements changes under `src/`; produces verification evidence and passes quality gates |
+| **5. Traceability, Promotion & Sync** | Reconcile RTM gates, detect drift, and promote stable architectural deltas into long-lived docs | `scripts/sync_spec_status.py --gate`, manual/agent-assisted doc sync | Updates `spec-traceability.yaml`, <br> `spec-sync-status.md`,<br> `openapi.yaml`,<br> `docs\domains\agent\SRS_SPEC_TRACEABILITY.md`,<br> and promotes arc42 views |
+| **6. Maintenance & Evolution** | Monitor for requirement drift, update SRS baselines, and maintain traceability | `scripts/sync_spec_status.py --gate`, manual/agent-assisted doc sync | Maintains long-lived docs and SRS baselines; ensures traceability integrity |
 
-1. **Requirement sourcing**: Step 3 (`speckit.specify`) references specific SRS requirement IDs. This creates an explicit upstream dependency from the feature spec to the system SRS.
+### 7.3 arc42 Upward Promotion Engine
 
-2. **Traceability recording**: Step 5 (`speckit.plan`) updates the `spec-traceability.yaml` registry with the SRS-to-spec mapping. The registry enforces status gates (analyzed → planned → implemented → verified).
+In this documentation architecture, delivery-scoped feature directories (`specs/<feature-id>/`) serve as **local arc42 deltas** during active development. Once a feature passes post-implementation verification, stable architectural knowledge is promoted into permanent long-lived documentation:
 
-3. **Constitution compliance verification**: Steps 2, 5, and 14 verify the feature against the project constitution. This ensures every feature respects the governance constraints without manual review of every rule.
+- **System Context & Container Topology** ➔ `docs/architecture/SYSTEM_OVERVIEW_AND_BOUNDARIES.md` (arc42 §3, §4, §5 L1)
+- **Runtime Sequence & Dynamic Workflows** ➔ `docs/architecture/RUNTIME_AND_INTEGRATION_FLOWS.md` (arc42 §6)
+- **Deployment & Cloud Infrastructure** ➔ `docs/architecture/DEPLOYMENT_AND_INFRASTRUCTURE.md` (arc42 §7)
+- **Cross-Cutting Mechanisms (Auth, Memory, Caching)** ➔ `docs/architecture/CROSS_CUTTING_CONCEPTS.md` (arc42 §8)
+- **Architectural Trade-offs & Decisions** ➔ `docs/architecture/DECISIONS/` or `docs/domains/*/DECISIONS/` (arc42 §9 / ADRs)
+- **Domain Component Internals** ➔ `docs/domains/*/TECHNICAL_DESIGN.md` (arc42 §5 L2 / C4 L3)
+- **Identified Risks & Technical Debt** ➔ `docs/architecture/RISKS_AND_TECHNICAL_DEBT.md` (arc42 §11)
+- **API Surface Changes** ➔ `docs/openapi.yaml` (Golden Rule 9)
 
-4. **Post-delivery documentation sync**: Step 17 is where the SDD lifecycle feeds back into long-lived documentation. When a feature changes API behavior, the OpenAPI contract must be updated (Constitution Golden Rule 9). When a feature introduces new architectural patterns, ADRs are created. When a feature covers new SRS territory, the traceability summary is updated.
+### 7.4 SRS as Upstream Requirement Pool & Baseline Lifecycle
 
-5. **Drift detection**: Step 16 currently uses `scripts/sync_spec_status.py --gate` for requirement-to-spec status and manual or skill-assisted review for code-to-doc drift. The `speckit.sync.*` surface is not installed/enabled today; if adopted later, it should supplement the local script rather than replace the manifest/report authority without a governed migration.
-
-### 7.3 SRS as Upstream Requirement Pool
-
-In this SDD-integrated model, the master system SRS has a specific role:
-
-- it is the **stable** requirement source, not the working artifact
-- requirements start in the SRS with an ID, statement, priority, primary owning domain, and contributing domains
-- feature specs **draw** from the SRS by referencing requirement IDs (e.g., SR-3.1.1, SNR-2.3.2, or subordinate IDs such as FR-3.1.1 where delivery scope is anchored in a domain SRS)
-- the SRS is **primarily updated** when new capability domains are identified, not on every individual feature delivery — but controlled iterative refinements such as sharpened acceptance criteria, clarified edge cases, and scope adjustments discovered during delivery may be fed back through a lightweight change-control process
-- feature delivery **proves** SRS requirements through the traceability registry, not by rewriting the SRS — though iterative refinements to individual requirement entries are expected when delivery reveals ambiguity or gaps
-- the SRS requirement entry can remain lightweight because the rich detail (rationale, acceptance scenarios, verification evidence) lives in the feature spec that delivers it
-
-This is the key distinction from a traditional SRS-centric approach: the SRS defines the requirement pool; the SDD lifecycle delivers from it and proves coverage through traceability.
-
-### 7.4 Practical SDD Best Practices for This Repository
-
-For this repository, SDD should organize documentation and specifications using a simple rule: **keep long-lived documents few, stable, and cross-feature; keep feature detail in `specs/`.**
-
-That translates into these practical operating rules:
-
-1. **Start with the requirement source, not a new document family.** If a change can be expressed by extending the master SRS, an existing domain SRS, or `openapi.yaml`, do that before proposing a new long-lived document.
-2. **Keep delivery detail in feature specs.** Acceptance scenarios, rollout notes, implementation sequencing, and evidence belong in `specs/<feature-id>/`, not in long-lived system documents.
-3. **Promote only stable knowledge.** A concept should move from a feature spec into `docs/` only when it has become reusable, cross-feature, or part of the operating model.
-4. **Prefer updating an existing document over creating a sibling.** Too many narrowly scoped documents create navigation and maintenance cost faster than they create clarity.
-5. **Use executable artifacts as the contract source of truth.** If `openapi.yaml`, code-level schemas, or test contracts already express the interface, prose should explain obligations and rationale, not restate the contract.
-6. **Create subordinate SRS documents only when the domain has sustained change pressure.** In this repository that likely means agent, frontend, and operations first; API and data should only gain separate requirement documents when repeated cross-feature obligations justify them.
-7. **Promote requirement-level content after verification, not before.** SRS documents and requirement baselines should be updated after a feature passes implementation and verification, so the requirement record reflects proven behavior rather than planned intent. However, technical design documents and ADRs may be updated earlier in the lifecycle to communicate architectural direction to concurrent work — these serve as coordination tools, not just records of what was built.
-
-#### Spec Persistence Policy
-
-The repository uses Spec Kit persistence deliberately rather than treating every generated artifact the same way.
-
-- **Living specs for active work**: while a feature is being clarified, planned, implemented, or verified, `spec.md`, `plan.md`, and `tasks.md` remain living artifacts. If implementation discovers a requirement or design issue, update the active artifacts and rerun analysis/sync before continuing.
-- **Flow-forward after verification**: once a feature directory is verified, treat it as delivery evidence. Promote stable knowledge into `docs/`, contracts, traceability, roadmap, or ADRs instead of repeatedly rewriting the historical feature directory.
-- **Flow-back only during active implementation**: updates from code back into `spec.md` or `plan.md` are allowed while the feature is active, but they must pass an analysis/sync reconciliation gate so the feature directory, tasks, traceability, and long-lived docs remain aligned.
-- **Backfill as restoration, not normal delivery**: use `Backfilled` only when restoring governance coverage for behavior that already exists. A backfilled spec must name source evidence and then move through reconciliation before it is treated like planned or implemented SDD work.
-- **Supersede instead of mutating history**: if verified behavior changes materially later, create a follow-up feature spec or governed doc update, link the old spec as superseded, and move traceability intentionally.
-
-### 7.5 SRS Lifecycle During Development
-
-The diagram below shows how the master system SRS, domain SRS documents, feature specs, implementation, verification, and documentation sync should interact during delivery.
+The master system SRS (`docs/system/SYSTEM_REQUIREMENTS_SPECIFICATION.md`) functions as the **stable upstream requirement pool**:
+- Requirements originate in the SRS with stable IDs (e.g., `SR-3.1.1`, `SNR-2.1.1`), priority, and owning domain allocations.
+- Feature specs in `specs/` draw from these IDs and provide rich delivery detail (acceptance scenarios, task sequencing, verification evidence).
+- Feature delivery proves SRS requirements through automated traceability rather than rewriting the SRS.
 
 ```mermaid
 flowchart LR
   A["Master System SRS"] --> C["Feature Spec\n(spec.md)"]
-  B["Domain SRS\nwhen justified"] --> C
+  B["Domain SRS\n(when justified)"] --> C
   C --> D["Plan + Tasks"]
   D --> E["Implementation + Tests"]
   E --> F{"Verified against spec?"}
   F -- "No" --> C
-  F -- "Yes" --> G["Documentation Sync"]
+  F -- "Yes" --> G["Documentation Sync & Promotion"]
   G --> H{"Requirement impact?"}
   H -- "None" --> I["Traceability sync only"]
-  H -- "Clarification or additive change" --> J["Minor SRS update\n+ traceability sync"]
-  H -- "Breaking change, retirement, or conflict" --> K["Change review / ADR / approval"]
-  K --> L["Major SRS update\n+ affected domain SRS sync"]
+  H -- "Clarification / Additive" --> J["Minor SRS update\n+ traceability sync"]
+  H -- "Breaking / Conflict" --> K["ADR / Governance Review"]
+  K --> L["Major SRS update\n+ domain SRS sync"]
   J --> M["Updated requirement baselines"]
   L --> M
 ```
@@ -361,121 +378,124 @@ The main tradeoff is straightforward: SDD improves traceability and governance, 
 
 ### 9.1 Target File Tree
 
-The target structure should remain intentionally lean. It should organize documents first by ownership scope, then by artifact type. In this model, the repository uses four documentation layers:
+The target structure organizes documents first by ownership scope, then by arc42 viewpoint and artifact type. In this model, the repository uses four documentation layers:
 
-1. **System** — canonical cross-domain requirements and governance
-2. **Architecture** — whole-system structure, runtime flows, and architectural decisions
-3. **Domains (Bounded Contexts)** — domain-owned realization, domain-specific constraints, and owned contracts
-4. **Specs (`specs/`)** — delivery-scoped feature artifacts created and maintained through the SDD lifecycle
+1. **System (`docs/system/`)** — canonical cross-domain requirements, quality tree (arc42 §1, §2, §10), and requirements governance
+2. **Architecture (`docs/architecture/`)** — whole-system structure, context, strategy, building blocks L1, runtime flows, deployment view, cross-cutting concepts, risks/debt, and ADRs (arc42 §3, §4, §5 L1, §6, §7, §8, §9, §11)
+3. **Domains (`docs/domains/`)** — domain-owned realization (C4 L3 Components / arc42 §5 L2), domain-specific constraints, and owned contracts
+4. **Specs (`specs/`)** — delivery-scoped feature artifacts created and maintained through the SDD lifecycle (acting as local arc42 deltas and C4 L4 code/data models)
 
 ```text
 docs/
   system/
-    REQUIREMENTS_METHOD_AND_GOVERNANCE.md
-    SYSTEM_REQUIREMENTS_SPECIFICATION.md
+    REQUIREMENTS_METHOD_AND_GOVERNANCE.md   # Requirements governance, lifecycle, change control (arc42 §2)
+    SYSTEM_REQUIREMENTS_SPECIFICATION.md    # Upstream master requirement pool + ISO 25010 Quality Scenarios (arc42 §1, §10)
 
   architecture/
-    SYSTEM_OVERVIEW_AND_BOUNDARIES.md
-    RUNTIME_AND_INTEGRATION_FLOWS.md
-    DECISIONS/
+    SYSTEM_OVERVIEW_AND_BOUNDARIES.md       # Context, scope, strategy, building block L1 (arc42 §3, §4, §5 L1 / C4 L1-L2)
+    RUNTIME_AND_INTEGRATION_FLOWS.md        # Dynamic workflows, execution loops, sequence views (arc42 §6)
+    DEPLOYMENT_AND_INFRASTRUCTURE.md        # Physical/cloud infrastructure, network, environment mapping (arc42 §7 / C4 Deployment)
+    CROSS_CUTTING_CONCEPTS.md               # Auth, Memory LTM/STM, LLM Caching, Telemetry/Logging, Rate Limits (arc42 §8)
+    RISKS_AND_TECHNICAL_DEBT.md             # Known risks, technical debt backlog, architectural trade-offs (arc42 §11)
+    DECISIONS/                              # Architectural Decision Records (ADRs) (arc42 §9 / ISO 42010 Rationale)
       ADR-0001-...
       ADR-0002-...
 
   domains/
     frontend/
-      TECHNICAL_DESIGN.md
+      TECHNICAL_DESIGN.md                   # Frontend component realization (arc42 §5 L2 / C4 L3)
       DECISIONS/
-        adr-frontend-001-modular-application.md
-        adr-frontend-002-modernize-frontend-foundation.md
+        ADR-FRONTEND-0001-MODULAR-APPLICATION.md
+        ADR-FRONTEND-0002-MODERNIZE-FRONTEND-FOUNDATION.md
 
     backend/
-      TECHNICAL_DESIGN.md
+      TECHNICAL_DESIGN.md                   # Backend service/router realization (arc42 §5 L2 / C4 L3)
       api/
         openapi.yaml
 
     agent/
-      SOFTWARE_REQUIREMENTS_SPECIFICATION.md
-      TECHNICAL_DESIGN.md
-      DECISIONS/
+      SOFTWARE_REQUIREMENTS_SPECIFICATION.md # Subordinate domain SRS (specialized AI reasoning)
+      ARCHITECTURE_DESIGN.md                 # LangGraph agent architecture, agent orchestration, tool integration (arc42 §5 L2 / C4 L3)
+      TECHNICAL_DESIGN.md                   # LangGraph graph nodes, state machine, tools (arc42 §5 L2 / C4 L3)
+      DECISIONS/                            # ADRs for agent architecture and tool orchestration (arc42 §9 / ISO 42010 Rationale)
+        ADR-AGENT-0001-...
 
     data/
-      TECHNICAL_DESIGN.md
+      TECHNICAL_DESIGN.md                   # Persistence, indexing, cache topology (arc42 §5 L2 / C4 L3)
       POLICY_AND_CONSTRAINTS.md
 
   operations/
-    OPERATIONS_AND_RELEASE_POLICY.md
-    RUNBOOKS/
+    OPERATIONS_AND_RELEASE_POLICY.md        # Release readiness, runbook policy, operational SLAs
+    RUNBOOKS/                               # Step-by-step incident, migration, and reconciliation runbooks
 
   testing/
-    VERIFICATION_AND_TRACEABILITY_STRATEGY.md
+    VERIFICATION_AND_TRACEABILITY_STRATEGY.md # Verification levels, evidence gates, test architecture
 
   study-hub/
     <analysis, proposals, research>
+  research/
+    <research, comparison studies, planning proposals>
 
 specs/
   <feature-id>/
-    spec.md
-    plan.md
-    tasks.md
-    review.md
-    data-model.md
-    contracts/
-  spec-traceability.yaml
-  spec-sync-status.md
+    spec.md                                 # Delivery-scoped requirement delta
+    plan.md                                 # Technical design delta & constitution check
+    tasks.md                                # User-story implementation tasks
+    review.md                               # Pre-implementation review evidence
+    data-model.md                           # Local data entities / C4 Level 4 Code & Seams
+    contracts/                              # Local payload & schema contracts
+  spec-traceability.yaml                    # Automated RTM mapping SRS items to specs
+  spec-sync-status.md                       # Bidirectional traceability report
 ```
-
-This is the recommended compact domain model for this repository. The important simplifications are:
-
-- the repository keeps one parent folder, `docs/domains/`, and the contents should be treated as ownership domains (bounded contexts) rather than technology stacks
-- backend remains one bounded context, with API contracts owned inside that domain rather than split into a separate top-level API tree
-- domain folders do not need symmetric document sets; each domain only grows when repeated delivery pressure justifies it
-- delivery detail stays in `specs/`, so these domain folders hold stable design and specialized obligations rather than feature-by-feature change history
-
-Current-vs-target contract note: the target tree shows backend-owned API contract placement, but the current canonical REST contract is still `docs/openapi.yaml`. Do not move or replace it until a governed migration updates every reference and validation path.
 
 ### 9.2 Purpose and Standards Stance by Document Type
 
-Each document type has both a standards stance and a notation policy. The standards stance describes how the artifact relates to external standards; Section 9.3 defines the diagram and notation rules that keep visuals consistent across the documentation set.
-
 | Document Type | Target Files | Purpose | Standards Stance |
 |---------------|--------------|---------|------------------|
-| **Master System SRS** | `docs/system/SYSTEM_REQUIREMENTS_SPECIFICATION.md` | Authoritative source for cross-domain functional, non-functional, interface, lifecycle, and maintenance requirements | **Aligned** to ISO/IEC/IEEE 29148 |
-| **Requirements Governance Guide** | `docs/system/REQUIREMENTS_METHOD_AND_GOVERNANCE.md` | Defines how requirements are authored, approved, changed, traced, and retired | **Aligned** to 29148 traceability and change-discipline principles |
-| **System Architecture Documents** | `docs/architecture/*.md` | Describe the system as a whole: boundaries, major building blocks, runtime flows, and cross-domain interactions | **Aligned** to ISO/IEC/IEEE 42010 |
-| **ADRs** | `docs/architecture/DECISIONS/` and `docs/domains/*/DECISIONS/` | Capture architecturally significant decisions and tradeoffs at system or domain scope | **Practice-Based** ADR discipline |
-| **Domain Technical Design** | `docs/domains/*/TECHNICAL_DESIGN.md` | Explains how each domain realizes the requirements allocated to it and records domain-specific constraints that do not belong in the system-level architecture documents | **Aligned** design practice |
-| **Domain-Specific Requirement Documents** | only where justified, for example `docs/domains/agent/SOFTWARE_REQUIREMENTS_SPECIFICATION.md` | Holds subordinate requirement sets only when a bounded context is independently complex, specialized, or already mature enough to need its own requirement baseline | **Aligned** subordinate SRS practice |
-| **Executable Contracts** | current canonical REST contract: `docs/openapi.yaml`; target domain-owned path after governed migration: `docs/domains/backend/api/openapi.yaml` | Defines request/response schemas, event contracts, and integration payloads without duplicating them in prose | **Conformant** to schema or contract standards |
-| **Operations Policy and Runbooks** | `docs/operations/OPERATIONS_AND_RELEASE_POLICY.md`, `docs/operations/RUNBOOKS/` | Defines supportability, release readiness, migration, reconciliation, rollback, and incident handling expectations | **Aligned** for policy; **Practice-Based** for runbooks |
-| **Verification and Traceability Strategy** | `docs/testing/VERIFICATION_AND_TRACEABILITY_STRATEGY.md` | Defines test levels, evidence expectations, and how requirements are proven through specs and tests | **Aligned** internal verification standard |
-| **Study and Analysis Documents** | `docs/study-hub/` | Holds research, comparison studies, and planning proposals that inform decisions but are not themselves long-lived authority documents | **Practice-Based** study format |
-| **Feature Specs** | `specs/<feature-id>/...` | Delivery-scoped realization documents for approved requirements | **Practice-Based** Spec-Kit workflow |
+| **Master System SRS** | `docs/system/SYSTEM_REQUIREMENTS_SPECIFICATION.md` | Authoritative source for cross-domain functional, non-functional, interface, lifecycle, and ISO 25010 quality scenarios (arc42 §1, §10) | **Aligned** to ISO/IEC/IEEE 29148 & ISO/IEC 25010 |
+| **Requirements Governance Guide** | `docs/system/REQUIREMENTS_METHOD_AND_GOVERNANCE.md` | Defines how requirements are authored, approved, changed, traced, and retired (arc42 §2 constraints) | **Aligned** to 29148 & ISO 42010 governance |
+| **System Architecture Overview** | `docs/architecture/SYSTEM_OVERVIEW_AND_BOUNDARIES.md` | Describes system context, solution strategy, and Level 1 building blocks / containers (arc42 §3, §4, §5 L1) | **Aligned** to ISO 42010 & C4 Model (L1, L2) |
+| **Runtime Flows** | `docs/architecture/RUNTIME_AND_INTEGRATION_FLOWS.md` | Dynamic interactions, sequence flows, workflows, and streaming loops (arc42 §6) | **Aligned** to arc42 §6 / UML Sequence & Activity |
+| **Deployment & Infrastructure** | `docs/architecture/DEPLOYMENT_AND_INFRASTRUCTURE.md` | Physical/cloud infrastructure, environments, container network topology, and deployment mapping (arc42 §7) | **Aligned** to arc42 §7 & C4 Deployment View |
+| **Cross-Cutting Concepts** | `docs/architecture/CROSS_CUTTING_CONCEPTS.md` | System-wide reusable mechanisms: Auth/RBAC, LangGraph Memory LTM/STM, LLM Caching, Telemetry (arc42 §8) | **Aligned** to arc42 §8 |
+| **Risks & Technical Debt** | `docs/architecture/RISKS_AND_TECHNICAL_DEBT.md` | Explicit register of known risks, trade-offs, limitations, and technical debt backlog (arc42 §11) | **Aligned** to arc42 §11 |
+| **ADRs** | `docs/architecture/DECISIONS/` & `docs/domains/*/DECISIONS/` | Capture architecturally significant decisions and trade-offs at system or domain scope (arc42 §9) | **Practice-Based** Nygard ADR discipline |
+| **Domain Technical Design** | `docs/domains/*/TECHNICAL_DESIGN.md` | Explains how each domain realizes allocated requirements (C4 L3 Components / arc42 §5 L2) | **Aligned** design practice (C4 Level 3) |
+| **Domain-Specific Requirement Documents** | only where justified, e.g. `docs/domains/agent/SOFTWARE_REQUIREMENTS_SPECIFICATION.md` | Specialized subordinate requirement sets for independently complex domains | **Aligned** subordinate SRS practice |
+| **Executable Contracts** | current: `docs/openapi.yaml`; target: `docs/domains/backend/api/openapi.yaml` | Defines request/response schemas, event contracts, and integration payloads without prose duplication | **Conformant** to OpenAPI 3.1 schema standard |
+| **Operations Policy and Runbooks** | `docs/operations/OPERATIONS_AND_RELEASE_POLICY.md`, `docs/operations/RUNBOOKS/` | Operational policies, release readiness, migration procedures, and incident handling | **Aligned** for policy; **Practice-Based** for runbooks |
+| **Verification and Traceability Strategy** | `docs/testing/VERIFICATION_AND_TRACEABILITY_STRATEGY.md` | Test levels, quality gates, evidence standards, and requirement-to-test traceability | **Aligned** internal verification standard |
+| **Feature Specs** | `specs/<feature-id>/...` | Delivery-scoped realization documents acting as local arc42 deltas during active development | **Practice-Based** Spec-Kit workflow |
 | **Traceability Registry and Reports** | `specs/spec-traceability.yaml`, `specs/spec-sync-status.md` | Maintains bidirectional requirement-to-delivery traceability | **Practice-Based** RTM-style governance |
 
-### 9.3 Diagram and Notation Standards by Document Type
+| **Study, Research, and Analysis Documents** | `docs/study-hub/` + `docs/research` | Holds research, comparison studies, and planning proposals that inform decisions but are not themselves long-lived authority documents | **Practice-Based** study format |
 
-Consistent notation reduces ambiguity, keeps Markdown-native reviews readable, and makes long-lived documents easier to compare over time. The policy below formalizes the repository's existing bias toward text-based, diffable diagrams while still allowing more specialized notations where they materially improve clarity.
+### 9.3 Diagram and Multi-Modeling Notation Standards by Document Type
 
-| Document Type | Allowed Diagram Styles | Preferred Authoring Format | Best-Fit Use Cases | Notes / Constraints |
-|---------------|------------------------|----------------------------|--------------------|---------------------|
-| **System Architecture Documents** | C4-style context, container, component, deployment, flow, sequence, and state views | **Mermaid** with C4-style structure where applicable | System boundaries, major building blocks, runtime flows, and cross-domain interactions | Prefer C4 abstractions for static architecture views; use UML-style behavior diagrams only when interaction or state semantics matter |
-| **ADRs** | Decision context sketches, option comparison visuals, and simple impact flowcharts | Markdown tables first; Mermaid only when it adds clarity | Tradeoffs, consequence summaries, and decision impact scope | Keep visuals minimal; do not move architecture description or detailed technical realization into ADRs |
-| **Domain Technical Design** | Flowcharts, sequence, state, class, ER, and interface diagrams | **Mermaid** | Domain internals, internal interfaces, persistence mapping, and realization flows | UML-style precision is acceptable when behavior, lifecycle, or interface semantics need tighter expression |
-| **Requirements and Specification Baselines** | Scope/context diagrams, lifecycle flows, allocation views, and traceability visuals | Markdown tables first; Mermaid when a visual materially improves comprehension | Requirement scope, allocation, traceability flow, and governance lifecycle | Do not duplicate executable contract schemas in prose diagrams; use visuals to explain boundaries and relationships |
-| **Feature Specs** | Lightweight flowcharts, sequence diagrams, state sketches, and local data models | **Mermaid** | Delivery-scoped scenarios, rollout paths, verification flow, and implementation coordination | When promoted into `docs/`, normalize diagrams to the target document type's notation rules |
-| **Operations Policy and Runbooks** | Flowcharts, swimlane-style flows, sequence diagrams, and BPMN process models | Mermaid by default; BPMN selectively | Release, rollback, migration, reconciliation, incident response, and approval-heavy workflows | Use BPMN only when human handoffs, approvals, or recovery paths are central to the process |
-| **Executable Contracts and Traceability Reports** | Minimal context visuals only; schema-first artifacts remain primary | OpenAPI, JSON Schema, and tables; Mermaid only for supporting context visuals | API/event contracts, payload compatibility, and mapping evidence | Machine-readable contracts remain the source of truth for structure; diagrams must not override schema definitions |
+The repository adopts a **multi-modeling notation strategy**, applying UML, C4, PlantUML/DSL, BPMN, and Mermaid in their correspondingly relevant places. Mermaid remains the primary text-based, Git-diffable authoring format in Markdown:
 
-Mermaid is the repository default because it is text-based, diffable, and already established across architecture and technical design documents. BPMN and stricter UML usage are selective tools, not the default notation for all artifacts.
+| Document Type | Primary Modeling Style | Preferred Authoring Format | Visual Level & Scope | Constraints / Guidance |
+|---------------|------------------------|----------------------------|----------------------|------------------------|
+| **System Overview & Boundaries** | **C4 Model** (Context L1 & Container L2) | Mermaid (`C4Context`, `C4Container` or stylized flowcharts) / Structurizr DSL | System boundaries, external actors, high-level containers, and major communication protocols | Zoom out; do not expose internal classes or private modules at container level |
+| **Runtime & Integration Flows** | **UML Behavioral** (Sequence, Activity, State) | Mermaid (`sequenceDiagram`, `stateDiagram-v2`) | Request/response streaming, agent tool loops, cache sync, distributed transactions | Focus on critical paths; include timeouts, error branches, and asynchronous messaging |
+| **Deployment & Infrastructure** | **C4 Deployment** / Infrastructure Topology | Mermaid (`C4Deployment` or boxed flowcharts) / PlantUML | Container mapping, cloud VPCs, database clusters, load balancers, CI/CD runners | Clearly distinguish environments (Development, Staging, Production) |
+| **Cross-Cutting Concepts** | **UML Class / Conceptual Flows** | Mermaid / Markdown tables | Memory hierarchy (LTM vs STM), Auth token lifecycle, Caching tier diagrams | Pair architectural patterns with explicit implementation rules |
+| **Domain Technical Design** | **C4 Component (L3)** + **UML Structural/Behavioral** | Mermaid (`C4Component`, `classDiagram`, `erDiagram`) / PlantUML | Domain internals, LangGraph graph nodes, Flask blueprint routing, React component tree | Detail internal interfaces, persistence schemas, and domain-local state machines |
+| **Feature Specs (`specs/`)** | **C4 Code (L4)** + Local Flowcharts | Mermaid (`flowchart`, `sequenceDiagram`, `erDiagram`) | Delivery-scoped scenarios, data model deltas (`data-model.md`), local execution flow | When promoted into `docs/`, normalize diagrams into the permanent arc42/C4 documents |
+| **Operations & Runbooks** | **BPMN 2.0 / Swimlane Flows** | Mermaid flowchart with subgraphs / BPMN | Human handoffs, multi-stage release approvals, disaster recovery, data reconciliation | Highlight decision gateways, rollback triggers, and escalation points |
+| **ADRs** | **Context Sketches & Impact Flows** | Markdown tables first; Mermaid flowcharts selectively | Decision context, option comparison trade-offs, boundary impact | Keep visuals lightweight; avoid duplicating full architecture diagrams |
+| **Executable Contracts & RTM** | **Schema-First Artifacts** | OpenAPI 3.1 YAML, JSON Schema | Machine-readable interface definitions and status matrices | Contract files are normative; supporting diagrams are purely informative |
 
-Regardless of document type, diagram visualization should follow these quality rules:
+#### Diagram Visualization Quality Rules
+
+Regardless of document type, diagram visualization must follow these quality rules:
 
 1. Precede each non-trivial diagram with a short sentence that states its scope and why the visual is needed.
-2. Label diagrams explicitly as current-state, target-state, planned-state, or transition-state when implementation status is not obvious.
-3. Prefer direct labels and consistent naming for actors, systems, boundaries, and data stores; add a legend only when repeated symbols or line styles would otherwise be ambiguous.
-4. Keep reading direction predictable and split dense visuals into multiple diagrams when crossings, node count, or mixed concerns reduce readability.
-5. Do not rely on color alone to carry meaning; essential distinctions must remain visible in labels, grouping, or captions for plain Markdown renderers and accessibility.
-6. When a single diagram cannot stay simple, pair it with a compact table or short interpretation notes instead of forcing all meaning into the visual.
+2. Label diagrams explicitly as `current-state`, `target-state`, `planned-state`, or `transition-state` when implementation status is not obvious.
+3. Use consistent naming for actors, systems, boundaries, and data stores matching the **Canonical Glossary (§6.2)**.
+4. Keep reading direction predictable (Top-to-Bottom or Left-to-Right) and split dense visuals into multiple diagrams when crossings or node counts reduce readability.
+5. Do not rely on color alone to carry meaning; essential distinctions must remain visible in text labels, groupings, or line styles for accessibility and raw Markdown rendering.
+6. When a single diagram cannot stay simple, pair it with a compact table or interpretation notes instead of forcing all meaning into the visual.
 
 ### 9.4 Functional and Non-Functional Requirements in the Domain Model
 
@@ -568,20 +588,20 @@ The master system SRS should organize functional requirements at the system leve
 - **SR-7: Administration, Support, and Operational Tooling**
 - **SR-8: Contract Exposure and Integration Compatibility**
 
-### 10.5 Recommended Non-Functional Requirement Families
+### 10.5 Recommended Non-Functional Requirement Families (arc42 §10 & ISO 25010)
 
-The master system SRS should organize non-functional requirements using families such as:
+The master system SRS should organize non-functional requirements and quality scenarios matching **arc42 §10 (Quality Requirements)** classified using **ISO/IEC 25010** quality categories:
 
-- **SNR-1: Performance and Latency**
-- **SNR-2: Availability, Resilience, and Graceful Degradation**
-- **SNR-3: Security, Privacy, and Tenant Isolation**
-- **SNR-4: Data Integrity, Consistency, and Recoverability**
-- **SNR-5: Observability and Diagnosability**
-- **SNR-6: Maintainability and Testability**
-- **SNR-7: Usability, Accessibility, and Responsive Behavior**
-- **SNR-8: Compatibility, Versioning, and Change Safety**
+- **SNR-1: Performance and Latency** (ISO 25010 Performance Efficiency — sub-500ms TTFT streaming latency, async background throughput)
+- **SNR-2: Availability, Resilience, and Graceful Degradation** (ISO 25010 Reliability — 99.9% uptime, provider fallback, circuit breakers)
+- **SNR-3: Security, Privacy, and Tenant Isolation** (ISO 25010 Security — RBAC, zero key leakage in prompt context, audit logging)
+- **SNR-4: Data Integrity, Consistency, and Recoverability** (ISO 25010 Functional Suitability & Reliability — financial precision, idempotent updates)
+- **SNR-5: Observability and Diagnosability** (ISO 25010 Maintainability — structured JSON logging, distributed trace propagation)
+- **SNR-6: Maintainability and Testability** (ISO 25010 Maintainability — modular architecture, unit/integration test coverage >80%)
+- **SNR-7: Usability, Accessibility, and Responsive Behavior** (ISO 25010 Usability — WCAG 2.2 AA compliance, responsive viewport support)
+- **SNR-8: Compatibility, Versioning, and Change Safety** (ISO 25010 Compatibility — backward-compatible OpenAPI schemas, migration safety)
 
-> **Namespace note**: `SNR-` distinguishes system-level non-functional requirements from subordinate domain SRS documents that may already use `NFR-` numbering. This mirrors the `SR-` vs `FR-` separation used for functional requirements.
+> **Namespace note**: `SNR-` distinguishes system-level non-functional requirements from subordinate domain SRS documents that may already use `NFR-` numbering. This mirrors the `SR-` vs `FR-` separation used for functional requirements. Quality scenarios and trees in `SNR-x` form the authoritative quality baseline, cross-referenced from `docs/architecture/SYSTEM_OVERVIEW_AND_BOUNDARIES.md`.
 
 ### 10.6 Requirement Entry Template (Domain-Allocated and SDD-Compatible)
 
@@ -648,16 +668,20 @@ The future documentation set should follow the boundary rules below.
 
 ### 11.2 Boundary Matrix
 
-| Document | Owns | Must Not Own |
-|----------|------|--------------|
-| **Master System SRS** | Cross-domain behavior, non-functional qualities, lifecycle obligations, and domain allocation metadata | Detailed API schemas, implementation algorithms, UI component behavior, domain-specific design detail |
-| **System Architecture Documents** | Whole-system boundaries, building blocks, runtime flows, and cross-domain interaction views | Feature backlog detail, per-domain implementation specifics, operational runbook steps |
-| **Domain Technical Design** | How one domain realizes allocated requirements, domain boundaries, internal design constraints, and domain-owned interfaces | New system requirements, organization-wide policy, detailed delivery task breakdown |
-| **Domain-Specific Requirement Documents** | Specialized subordinate requirements for a single domain when justified by maturity or complexity | Full-system ownership, duplicated cross-domain SNRs, contract payload detail already owned elsewhere |
-| **Executable Contracts** | Request/response schemas, event contracts, payload definitions, and examples | Business rationale, architectural tradeoff prose, feature planning detail |
-| **Runbooks and Operations Policy** | Support procedures, release/rollback steps, reconciliation, migration, and incident response | Requirement rationale, architecture decision content, per-feature design detail |
-| **Verification Documents** | Requirement-to-test policy, evidence expectations, release gates, and traceability rules | Feature behavior requirements, domain design internals, contract definitions |
-| **Feature Specs** | Delivery-scoped scenario definition, implementation planning, tasks, and evidence collection | Long-lived system authority, stable domain design baseline, organization-wide policy |
+| Document | arc42 & C4 Alignment | Owns | Must Not Own |
+|----------|----------------------|------|--------------|
+| **Master System SRS** (`docs/system/SYSTEM_REQUIREMENTS_SPECIFICATION.md`) | arc42 §1, §10 (ISO 29148 / ISO 25010) | Cross-domain behavior, quality scenarios (SNR-x), lifecycle obligations, domain allocation | Detailed API schemas, internal component code, domain-specific algorithms |
+| **System Architecture Overview** (`docs/architecture/SYSTEM_OVERVIEW_AND_BOUNDARIES.md`) | arc42 §3, §4, §5 L1 (C4 Level 1 & Level 2) | System context, solution strategy, Level 1 building blocks (containers), external boundaries | Low-level class designs, feature backlog detail, operational runbook steps |
+| **Runtime & Integration Flows** (`docs/architecture/RUNTIME_AND_INTEGRATION_FLOWS.md`) | arc42 §6 (UML Sequence / Activity) | Dynamic workflows, streaming loops, multi-agent communication sequences | Static class models, deployment manifests, requirements prose |
+| **Deployment & Infrastructure** (`docs/architecture/DEPLOYMENT_AND_INFRASTRUCTURE.md`) | arc42 §7 (C4 Deployment) | Cloud/Physical infrastructure, environments, container network topology, node mapping | Functional domain logic, API payload schemas, requirement statements |
+| **Cross-Cutting Concepts** (`docs/architecture/CROSS_CUTTING_CONCEPTS.md`) | arc42 §8 | System-wide reusable mechanisms (Auth/RBAC, LangGraph Memory LTM/STM, Caching, Telemetry) | Domain-local internal helpers, business logic algorithms |
+| **Risks & Technical Debt** (`docs/architecture/RISKS_AND_TECHNICAL_DEBT.md`) | arc42 §11 | Known technical debt backlog, architectural trade-offs, external risk registry | Routine bug tickets, speculative features without architectural impact |
+| **ADRs** (`docs/architecture/DECISIONS/` & `docs/domains/*/DECISIONS/`) | arc42 §9 (ISO 42010 Rationale) | Architecturally significant decisions, evaluated options, decision consequences | System requirements statements, executable interface contracts |
+| **Domain Architecture & Technical Design** (`docs/domains/*/TECHNICAL_DESIGN.md` + `docs/domains/*/ARCHITECTURE_DESIGN.md`) | arc42 §5 L2 (C4 Level 3 Component) | How one domain realizes allocated requirements, internal component interfaces, state models | New system-wide requirements, organization-wide policies, delivery task lists |
+| **Executable Contracts** (`docs/openapi.yaml`) | Formal Interface Contracts | Request/response schemas, event payloads, parameter validations, and examples | Business rationale, architectural trade-off prose, delivery scheduling |
+| **Operations Policy & Runbooks** (`docs/operations/`) | Operational Viewpoint | Release readiness, runbooks, rollback steps, data reconciliation, incident handling | Architecture decision rationale, per-feature component design |
+| **Verification Strategy** (`docs/testing/`) | Quality Assurance Viewpoint | Requirement-to-test policy, evidence expectations, release quality gates | Feature behavior requirements, domain design internals |
+| **Feature Specs** (`specs/<feature-id>/`) | Local arc42 Deltas / C4 Level 4 Code | Delivery-scoped scenarios, plan deltas, tasks, local data models (`data-model.md`), verification evidence | Long-lived system authority, stable domain design baselines |
 
 ### 11.3 Conflict Resolution Between Master and Domain SRS Documents
 
@@ -709,13 +733,16 @@ The practical goal is not to generate a complete documentation universe up front
 
 ### 12.2 Phase 1 — Establish the Minimum Viable Core
 
-Generate or stabilize only the documents that the rest of the SDD workflow depends on:
+Generate or stabilize the essential arc42 architectural documents and governance baseline that the rest of the SDD workflow depends on:
 
-1. `docs/system/REQUIREMENTS_METHOD_AND_GOVERNANCE.md` — Defines how requirements are authored, approved, changed, traced, and retired.
-2. `docs/system/SYSTEM_REQUIREMENTS_SPECIFICATION.md` — The upstream requirement pool for cross-domain requirements.
-3. `docs/architecture/SYSTEM_OVERVIEW_AND_BOUNDARIES.md` — Whole-system static view and domain boundaries.
-4. `docs/architecture/RUNTIME_AND_INTEGRATION_FLOWS.md` — Whole-system runtime flows across frontend, backend, agent, data, and operations concerns.
-5. `docs/openapi.yaml` — The current executable backend API contract; `docs/domains/backend/api/openapi.yaml` is the target location only after a governed migration.
+1. `docs/system/REQUIREMENTS_METHOD_AND_GOVERNANCE.md` — Defines how requirements are authored, approved, changed, traced, and retired (arc42 §2).
+2. `docs/system/SYSTEM_REQUIREMENTS_SPECIFICATION.md` — The upstream requirement pool for cross-domain requirements and ISO 25010 quality scenarios (arc42 §1, §10).
+3. `docs/architecture/SYSTEM_OVERVIEW_AND_BOUNDARIES.md` — Whole-system static view, context, strategy, and Level 1 building blocks / containers (arc42 §3, §4, §5 L1 / C4 L1, L2).
+4. `docs/architecture/RUNTIME_AND_INTEGRATION_FLOWS.md` — Whole-system runtime flows across frontend, backend, agent, data, and operations concerns (arc42 §6).
+5. `docs/architecture/DEPLOYMENT_AND_INFRASTRUCTURE.md` — Cloud/physical deployment view, network topologies, and container mapping (arc42 §7 / C4 Deployment).
+6. `docs/architecture/CROSS_CUTTING_CONCEPTS.md` — System-wide reusable mechanisms: Auth/RBAC, Memory LTM/STM, LLM Caching, Telemetry (arc42 §8).
+7. `docs/architecture/RISKS_AND_TECHNICAL_DEBT.md` — Technical debt register and risk management (arc42 §11).
+8. `docs/openapi.yaml` — The current executable backend API contract; `docs/domains/backend/api/openapi.yaml` is the target location only after a governed migration.
 
 **SDD integration**: Extend `spec-traceability.yaml` to support system-level requirement IDs (SR-x, SNR-x) alongside the existing domain-level IDs (FR-x, NFR-x).
 
@@ -800,3 +827,5 @@ The practical recommendation is to keep `docs/` small, keep `specs/` rich, and p
 | 0.8 | 2026-05-27 | GitHub Copilot | Added a document-type notation policy and explicit diagram visualization quality rules covering diagram scope statements, state labeling, readable flow direction, legend discipline, accessibility of meaning without color, and when to split visuals or pair them with tables |
 | 0.9 | 2026-05-28 | GitHub Copilot | Added a discoverability pointer to the documentation-focused custom agent and aligned related-document guidance with the repository's Spec Kit HOW-TO and documentation maintenance workflow |
 | 1.0 | 2026-07-01 | Codex | Aligned methodology with current local Spec Kit command surfaces, documented spec persistence policy, clarified sync-extension posture, and preserved `docs/openapi.yaml` as the current canonical contract until governed migration |
+| 1.1 | 2026-08-20 | Antigravity | Harmonized documentation architecture with **arc42 (12-section structural blueprint)**, **C4 Model (visual zoom hierarchy L1–L4)**, **ISO/IEC/IEEE 42010 (architecture meta-standard)**, and **ISO/IEC 25010** quality categories; established multi-modeling notation standards (UML, C4, PlantUML/DSL, BPMN, Mermaid); updated target file tree with dedicated `DEPLOYMENT_AND_INFRASTRUCTURE.md`, `CROSS_CUTTING_CONCEPTS.md`, and `RISKS_AND_TECHNICAL_DEBT.md`; formalized the arc42 Upward Promotion Engine from SDD feature specs. |
+| 1.2 | 2026-08-20 | Antigravity | Streamlined Section 7 (SDD Lifecycle Integration) by introducing SDD with Spec Kit as the governance engine, organizing lifecycle into 5 high-level stages, and delegating detailed 18-step execution, CLI commands, and troubleshooting to the dedicated `docs/spec-driven development (SDD)/spec-kit HOW-TO.md`. |
