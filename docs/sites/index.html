@@ -76,7 +76,7 @@
     async function loadDailySites() {
       const listEl = document.getElementById('daily-sites-list');
       try {
-        const res = await fetch('https://api.github.com/repos/d-dragon/dp-stock-investment-assistant/contents/docs/sites');
+        const res = await fetch('https://api.github.com/repos/d-dragon/dp-stock-investment-assistant/contents/docs/sites?ref=project-website-pages');
         if (!res.ok) throw new Error('Directory not found or empty');
         const files = await res.json();
         
