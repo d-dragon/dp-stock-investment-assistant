@@ -1,1 +1,139 @@
-PLACEHOLDER
+{
+  "schemaVersion": "1.0.0",
+  "id": "daily-brief-2026-09-18",
+  "type": "daily_market_brief",
+  "locale": "vi-VN",
+  "timezone": "Asia/Ho_Chi_Minh",
+  "generatedAt": "2026-09-18T16:54:00+07:00",
+  "coverage": {
+    "from": "2026-09-17T16:00:00+07:00",
+    "to": "2026-09-18T16:54:00+07:00",
+    "session": "closed"
+  },
+  "marketSession": "closed",
+  "disclaimer": "Ngu\u1ed3n c\u00f4ng khai. Kh\u00f4ng ph\u1ea3i khuy\u1ebfn ngh\u1ecb \u0111\u1ea7u t\u01b0. M\u1ed9t s\u1ed1 chu\u1ed7i 1Y \u0111\u01b0\u1ee3c n\u1ed9i suy. S\u1ed1 t\u1ef1 doanh v\u00e0 c\u00e1 nh\u00e2n ch\u01b0a t\u00e1ch \u0111\u01b0\u1ee3c th\u00ec \u0111\u1ec3 tr\u1ed1ng.",
+  "ui": {
+    "pageSizeNews": 8,
+    "defaultChartTab": "vnindex",
+    "defaultWorldSymbol": "DJI"
+  },
+  "snapshot": {
+    "quotes": [
+      {"symbol": "VNINDEX", "nameVi": "VN-Index", "assetClass": "equity_index", "price": 1815.66, "change": -7.11, "changePct": -0.39, "session": "close", "sourceId": "src-yahoo-vn"},
+      {"symbol": "HNX", "nameVi": "HNX", "assetClass": "equity_index", "price": 275.29, "change": 1.39, "changePct": 0.51, "session": "close", "sourceId": "src-stockbiz"},
+      {"symbol": "DXY", "nameVi": "DXY", "assetClass": "fx", "price": 100.36, "changePct": 0.11, "sourceId": "src-te"},
+      {"symbol": "DJI", "nameVi": "Dow Jones", "assetClass": "equity_index", "price": 51778.04, "changePct": 0.61, "sourceId": "src-yahoo-vn"},
+      {"symbol": "NDX", "nameVi": "Nasdaq", "assetClass": "equity_index", "price": 26418.3, "changePct": 1.69, "sourceId": "src-yahoo-vn"},
+      {"symbol": "SPX", "nameVi": "S&P 500", "assetClass": "equity_index", "price": 7637.76, "changePct": 1.14, "sourceId": "src-yahoo-vn"},
+      {"symbol": "NKY", "nameVi": "Nikkei", "assetClass": "equity_index", "price": 65018.95, "changePct": 1.38, "sourceId": "src-yahoo-vn"},
+      {"symbol": "HSI", "nameVi": "Hang Seng", "assetClass": "equity_index", "price": 24750.78, "changePct": 0.6, "sourceId": "src-yahoo-vn"},
+      {"symbol": "WTI", "nameVi": "WTI", "assetClass": "commodity", "price": 100.24, "changePct": -1.64, "sourceId": "src-te"},
+      {"symbol": "XAU", "nameVi": "V\u00e0ng", "assetClass": "commodity", "price": 4393.62, "changePct": 1.2, "sourceId": "src-te"},
+      {"symbol": "BTC", "nameVi": "Bitcoin", "assetClass": "crypto", "price": 77559.3, "changePct": 1.53, "sourceId": "src-yahoo-btc"},
+      {"symbol": "USDVND", "nameVi": "USD/VND TT", "assetClass": "fx", "price": 25632, "changePct": null, "sourceId": "src-nhnn"}
+    ]
+  },
+  "globalNews": [
+    {"id": "g1", "date": "2026-09-18T06:00:00+07:00", "title": "Ph\u1ed1 Wall h\u1ed3i ph\u1ee5c m\u1ea1nh nh\u1ea5t 6 tu\u1ea7n sau Fed", "summary": "Dow +0,61% l\u00ean 51.778; S&P +1,14% l\u00ean 7.637,76; Nasdaq +1,69% l\u00ean 26.418. C\u00f4ng ngh\u1ec7 d\u1eabn s\u00f3ng sau khi d\u1ea7u v\u00e0 l\u1ee3i su\u1ea5t h\u1ea1.", "impact": {"direction": "risk_on", "horizon": "days", "assets": ["DJI", "SPX", "NDX", "VNINDEX"], "text": "Risk-on h\u1ed7 tr\u1ee3 t\u00e2m l\u00fd phi\u00ean \u00c1 nh\u01b0ng VN l\u1ec7ch nh\u1ecbp v\u00ec ATC/ETF."}, "image": {"url": "https://picsum.photos/seed/ws/800/400"}, "sourceId": "src-reuters"},
+    {"id": "g2", "date": "2026-09-18T08:00:00+07:00", "title": "D\u1ea7u WTI quanh 100 USD, Brent l\u00f9i d\u01b0\u1edbi 105", "summary": "WTI ~100,2 USD (\u22121,64%). Brent quanh 102\u2013105 USD khi lo ng\u1ea1i Hormuz d\u1ecbu v\u00e0 Saudi kh\u00f4i ph\u1ee5c m\u1ed9t ph\u1ea7n \u0111\u01b0\u1eddng \u1ed1ng.", "impact": {"direction": "mixed", "horizon": "weeks", "assets": ["WTI"], "text": "D\u1ea7u h\u1ea1 gi\u1ea3m \u00e1p l\u1ef1c CPI v\u1eadn t\u1ea3i t\u1ea1i Vi\u1ec7t Nam nh\u01b0ng v\u1eabn cao h\u01a1n \u0111\u1ea7u n\u0103m."}, "image": {"url": "https://picsum.photos/seed/oil/800/400"}, "sourceId": "src-te"},
+    {"id": "g3", "date": "2026-09-18T07:00:00+07:00", "title": "SEC mi\u1ec5n tr\u1eeb 5 n\u0103m cho giao d\u1ecbch c\u1ed5 phi\u1ebfu m\u00e3 h\u00f3a", "summary": "Tokenized stocks; Circle, Robinhood, Coinbase t\u0103ng h\u01a1n 5% phi\u00ean Wall Street.", "impact": {"direction": "risk_on", "horizon": "weeks", "assets": ["BTC", "ETH"], "text": "H\u1ed7 tr\u1ee3 crypto v\u00e0 fintech, ch\u01b0a ph\u1ea3i t\u00edn hi\u1ec7u d\u00f2ng v\u1ed1n v\u00e0o VN."}, "image": {"url": "https://picsum.photos/seed/sec/800/400"}, "sourceId": "src-reuters"},
+    {"id": "g4", "date": "2026-09-18T09:00:00+07:00", "title": "BoJ t\u0103ng l\u00e3i cao nh\u1ea5t 31 n\u0103m, USDJPY quanh 157,8", "summary": "Y\u00ean y\u1ebfu h\u01a1n v\u00ec l\u00e3i Nh\u1eadt v\u1eabn th\u1ea5p so v\u1edbi trung t\u00ednh; carry c\u00f3 th\u1ec3 s\u1ed1ng l\u1ea1i.", "impact": {"direction": "mixed", "horizon": "days", "assets": ["NKY", "DXY"], "text": "Y\u00ean bi\u1ebfn \u0111\u1ed9ng c\u00f3 th\u1ec3 r\u00fat carry n\u1ebfu BoJ b\u1ea5t ng\u1edd hawkish h\u01a1n."}, "image": {"url": "https://picsum.photos/seed/boj/800/400"}, "sourceId": "src-bloomberg"},
+    {"id": "g5", "date": "2026-09-18T14:14:00+07:00", "title": "LHQ c\u00e1o bu\u1ed9c M\u1ef9 trong chi\u1ebfn d\u1ecbch Iran", "summary": "B\u00e1o c\u00e1o n\u00eau t\u1ea5n c\u00f4ng kh\u00f4ng ph\u00e2n bi\u1ec7t; xung \u0111\u1ed9t Trung \u0110\u00f4ng b\u01b0\u1edbc sang th\u00e1ng th\u1ee9 b\u1ea3y.", "impact": {"direction": "risk_off", "horizon": "weeks", "assets": ["WTI", "XAU"], "text": "Gi\u1eef premium \u0111\u1ecba ch\u00ednh tr\u1ecb tr\u00ean v\u00e0ng v\u00e0 d\u1ea7u."}, "image": {"url": "https://picsum.photos/seed/iran/800/400"}, "sourceId": "src-cafef"},
+    {"id": "g6", "date": "2026-09-18T09:16:00+07:00", "title": "Dimon: l\u1ea1m ph\u00e1t ch\u01b0a ch\u1eafc \u0111\u00e3 h\u1ebft, Fed c\u00f3 th\u1ec3 th\u1eaft ch\u1eb7t th\u00eam", "summary": "Fed v\u1eeba t\u0103ng 25 \u0111i\u1ec3m c\u01a1 b\u1ea3n l\u1ea7n \u0111\u1ea7u k\u1ec3 t\u1eeb 2023, \u0111\u01b0a fed funds l\u00ean 3,75\u20134,00%.", "impact": {"direction": "risk_off", "horizon": "weeks", "assets": ["DXY", "USDVND"], "text": "L\u00e3i USD cao k\u00e9o d\u00e0i \u00e1p l\u1ef1c t\u1ef7 gi\u00e1 v\u00e0 \u0111\u1ecbnh gi\u00e1 EM."}, "image": {"url": "https://picsum.photos/seed/fed/800/400"}, "sourceId": "src-cafef"},
+    {"id": "g7", "date": "2026-09-18T07:30:00+07:00", "title": "L\u1ee3i su\u1ea5t M\u1ef9 10Y l\u00f9i d\u01b0\u1edbi 5%, v\u00e0ng gi\u1eef tr\u00ean 4.350 USD", "summary": "10Y quanh 4,93\u20134,95%. V\u00e0ng giao ngay ~4.394 USD (+1,2% theo Trading Economics).", "impact": {"direction": "risk_on", "horizon": "intraday", "assets": ["SPX", "XAU"], "text": "L\u1ee3i su\u1ea5t h\u1ea1 h\u1ed7 tr\u1ee3 duration v\u00e0 v\u00e0ng; v\u00e0ng SJC trong n\u01b0\u1edbc c\u0169ng h\u1ed3i."}, "image": {"url": "https://picsum.photos/seed/bond/800/400"}, "sourceId": "src-te"},
+    {"id": "g8", "date": "2026-09-18T08:00:00+07:00", "title": "Nikkei +1,38%, Hang Seng +0,60%, Kospi d\u1eabn \u00c1", "summary": "Ch\u00e2u \u00c1 theo \u0111\u00e0 Wall Street v\u00e0 chip; HSI 24.750,78.", "impact": {"direction": "risk_on", "horizon": "intraday", "assets": ["NKY", "HSI"], "text": "VN l\u1ec7ch nh\u1ecbp v\u00ec ETF c\u01a1 c\u1ea5u d\u00f9 ngo\u1ea1i mua r\u00f2ng."}, "image": {"url": "https://picsum.photos/seed/asia/800/400"}, "sourceId": "src-yahoo-vn"}
+  ],
+  "vietnamNews": [
+    {"id": "v1", "date": "2026-09-18T16:18:00+07:00", "title": "VN-Index \u0111\u1ea3o chi\u1ec1u ATC, \u0111\u00f3ng 1.815,66 (\u22120,39%)", "summary": "Trong phi\u00ean t\u1eebng v\u01b0\u1ee3t 1.840 r\u1ed3i r\u01a1i d\u01b0\u1edbi tham chi\u1ebfu kho\u1ea3ng 31 \u0111i\u1ec3m khi ETF c\u01a1 c\u1ea5u. VIC gi\u1ea3m s\u00e0n k\u00e9o VHM, VPB, HDB, TCB, BID, CTG. C\u1ea3 tu\u1ea7n +20,45 \u0111i\u1ec3m (+1,14%).", "impact": {"direction": "risk_off", "horizon": "intraday", "assets": ["VNINDEX", "VIC", "VHM"], "text": "Rung l\u1eafc ATC mang t\u00ednh c\u01a1 c\u1ea5u, ch\u01b0a ph\u00e1 xu h\u01b0\u1edbng tu\u1ea7n."}, "image": {"url": "https://picsum.photos/seed/vni/800/400"}, "sourceId": "src-laodong"},
+    {"id": "v2", "date": "2026-09-18T15:31:00+07:00", "title": "Thanh kho\u1ea3n HoSE h\u01a1n 25.900 t\u1ef7, l\u1ea7n \u0111\u1ea7u g\u1ea7n 1 t\u1ef7 USD t\u1eeb cu\u1ed1i th\u00e1ng 6", "summary": "T\u0103ng kho\u1ea3ng 44% so v\u1edbi h\u00f4m tr\u01b0\u1edbc. Th\u1ecfa thu\u1eadn h\u01a1n 161 tri\u1ec7u cp, 3.915 t\u1ef7 \u0111\u1ed3ng. KLGD kho\u1ea3ng 881 tri\u1ec7u cp.", "impact": {"direction": "risk_on", "horizon": "days", "assets": ["VNINDEX"], "text": "Hi\u1ec7u \u1ee9ng n\u00e2ng h\u1ea1ng b\u1eaft \u0111\u1ea7u hi\u1ec7n tr\u00ean thanh kho\u1ea3n, h\u1ed7 tr\u1ee3 CTCK."}, "image": {"url": "https://picsum.photos/seed/liq/800/400"}, "sourceId": "src-vnexpress"},
+    {"id": "v3", "date": "2026-09-18T15:40:00+07:00", "title": "Kh\u1ed1i ngo\u1ea1i mua r\u00f2ng kho\u1ea3ng 1.262 t\u1ef7 \u2014 cao nh\u1ea5t t\u1eeb gi\u1eefa th\u00e1ng 7", "summary": "Mua m\u1ea1nh HPG, PNJ, SHB, STB, NVL (m\u1ed7i m\u00e3 tr\u00ean 200 t\u1ef7). B\u00e1n VIC, TCB, CTG, VPB, MBB.", "impact": {"direction": "risk_on", "horizon": "days", "assets": ["HPG", "PNJ", "SHB"], "text": "D\u00f2ng ETF/n\u00e2ng h\u1ea1ng \u0111\u1ea3o chi\u1ec1u r\u00f2ng nh\u01b0ng ph\u00e2n h\u00f3a m\u1ea1nh theo m\u00e3."}, "image": {"url": "https://picsum.photos/seed/nn/800/400"}, "sourceId": "src-vnexpress"},
+    {"id": "v4", "date": "2026-09-18T00:00:00+07:00", "title": "Phi\u00ean FTSE/ETF 18/9: SSI \u01b0\u1edbc mua r\u00f2ng kho\u1ea3ng 246 tri\u1ec7u USD", "summary": "ETF t\u00e1i c\u01a1 c\u1ea5u \u01b0\u1edbc mua 450 tri\u1ec7u USD, b\u00e1n 204 tri\u1ec7u USD. \u0110\u1ee3t gi\u1ea3i ng\u00e2n n\u00e2ng h\u1ea1ng \u0111\u1ea7u ti\u00ean kho\u1ea3ng 240 tri\u1ec7u USD v\u00e0o 27 m\u00e3; VPB, VHM d\u1eabn \u0111\u1ea7u.", "impact": {"direction": "mixed", "horizon": "days", "assets": ["VPB", "VHM", "FPT", "HPG"], "text": "Cung c\u1ea7u l\u1ec7ch pha trong phi\u00ean c\u01a1 c\u1ea5u; hi\u1ec7u \u1ee9ng c\u00f3 th\u1ec3 k\u00e9o sang 21/9."}, "image": {"url": "https://picsum.photos/seed/ftse/800/400"}, "sourceId": "src-cafef"},
+    {"id": "v5", "date": "2026-09-18T00:03:00+07:00", "title": "VHM b\u1ecb ngo\u1ea1i b\u00e1n r\u00f2ng m\u1ea1nh nh\u1ea5t YTD, h\u01a1n 21.000 t\u1ef7", "summary": "C\u1eb7p VIC\u2013VHM b\u1ecb b\u00e1n h\u01a1n 31.000 t\u1ef7 t\u1eeb \u0111\u1ea7u n\u0103m. HoSE YTD ngo\u1ea1i b\u00e1n r\u00f2ng h\u01a1n 90.000 t\u1ef7 d\u00f9 \u0111\u00e3 c\u00f3 quy\u1ebft \u0111\u1ecbnh n\u00e2ng h\u1ea1ng.", "impact": {"direction": "risk_off", "horizon": "months", "assets": ["VHM", "VIC"], "text": "\u00c1p l\u1ef1c bluechip B\u0110S c\u00f2n k\u00e9o d\u00e0i n\u1ebfu qu\u1ef9 ch\u1ee7 \u0111\u1ed9ng ch\u01b0a \u0111\u1ea3o chi\u1ec1u."}, "image": {"url": "https://picsum.photos/seed/vhm/800/400"}, "sourceId": "src-cafef"},
+    {"id": "v6", "date": "2026-09-18T00:03:00+07:00", "title": "VPBank t\u0103ng l\u00e3i huy \u0111\u1ed9ng t\u1edbi 1,7%/n\u0103m t\u1eeb 18/9", "summary": "\u0110\u1ed9ng th\u00e1i h\u00fat ti\u1ec1n tr\u01b0\u1edbc m\u00f9a cao \u0111i\u1ec3m t\u00edn d\u1ee5ng cu\u1ed1i n\u0103m.", "impact": {"direction": "mixed", "horizon": "weeks", "assets": ["VPB"], "text": "H\u1ed7 tr\u1ee3 thanh kho\u1ea3n ng\u00e2n h\u00e0ng, c\u00f3 th\u1ec3 n\u00e2ng chi ph\u00ed v\u1ed1n ng\u1eafn h\u1ea1n."}, "image": {"url": "https://picsum.photos/seed/bank/800/400"}, "sourceId": "src-cafef"},
+    {"id": "v7", "date": "2026-09-18T14:13:00+07:00", "title": "Ti\u1ec1n g\u1eedi d\u00e2n c\u01b0 v\u01b0\u1ee3t 11,2 tri\u1ec7u t\u1ef7", "summary": "K\u1ef7 l\u1ee5c huy \u0111\u1ed9ng; ti\u1ec1n m\u1eb7t d\u1ed3i d\u00e0o nh\u01b0ng ch\u01b0a chuy\u1ec3n h\u1ebft sang TTCK.", "impact": {"direction": "risk_on", "horizon": "months", "assets": ["VNINDEX"], "text": "Ngu\u1ed3n ti\u1ec1n n\u1ed9i c\u00f2n d\u01b0 \u0111\u1ecba n\u1ebfu l\u00e3i huy \u0111\u1ed9ng \u1ed5n \u0111\u1ecbnh."}, "image": {"url": "https://picsum.photos/seed/dep/800/400"}, "sourceId": "src-cafef"},
+    {"id": "v8", "date": "2026-09-18T11:37:00+07:00", "title": "Morgan Stanley: thanh kho\u1ea3n c\u00f3 th\u1ec3 3\u20134 t\u1ef7 USD/ng\u00e0y sau n\u00e2ng h\u1ea1ng", "summary": "N\u00e2ng h\u1ea1ng l\u00e0 n\u1ec1n t\u1ea3ng d\u00e0i h\u1ea1n ch\u1ee9 kh\u00f4ng ph\u1ea3i m\u1ed9t phi\u00ean.", "impact": {"direction": "risk_on", "horizon": "months", "assets": ["SSI", "VCI", "HCM"], "text": "K\u1ef3 v\u1ecdng thanh kho\u1ea3n CTCK n\u1ebfu room ngo\u1ea1i v\u00e0 chu k\u1ef3 ETF thu\u1eadn."}, "image": {"url": "https://picsum.photos/seed/ms/800/400"}, "sourceId": "src-cafef"},
+    {"id": "v9", "date": "2026-09-18T07:08:00+07:00", "title": "NHNN n\u1edbi room t\u00edn d\u1ee5ng resort", "summary": "Kh\u00f4ng t\u00ednh v\u00e0o h\u1ea1n m\u1ee9c B\u0110S 2026.", "impact": {"direction": "risk_on", "horizon": "quarters", "assets": ["NVL", "DXG"], "text": "H\u1ed7 tr\u1ee3 du l\u1ecbch v\u00e0 m\u1ed9t ph\u1ea7n t\u00edn d\u1ee5ng B\u0110S ngh\u1ec9 d\u01b0\u1ee1ng."}, "image": {"url": "https://picsum.photos/seed/resort/800/400"}, "sourceId": "src-cafef"},
+    {"id": "v10", "date": "2026-09-18T08:00:00+07:00", "title": "T\u1ef7 gi\u00e1 trung t\u00e2m NHNN 25.632; NHTM b\u00e1n quanh 26.200", "summary": "Vietcombank ni\u00eam y\u1ebft kho\u1ea3ng 25.795\u201326.205. DXY ~100,36.", "impact": {"direction": "neutral", "horizon": "days", "assets": ["USDVND"], "text": "VND \u1ed5n \u0111\u1ecbnh t\u01b0\u01a1ng \u0111\u1ed1i d\u00f9 Fed v\u1eeba t\u0103ng l\u00e3i."}, "image": {"url": "https://picsum.photos/seed/fx/800/400"}, "sourceId": "src-nhnn"},
+    {"id": "v11", "date": "2026-09-18T10:46:00+07:00", "title": "NYSE v\u00e0 SSI h\u1ecdp v\u1ec1 n\u00e2ng h\u1ea1ng; FTSE hi\u1ec7u l\u1ef1c t\u1eeb 21/9", "summary": "Vanguard, BlackRock hi\u1ec7n di\u1ec7n t\u1ea1i h\u1ed9i ngh\u1ecb FTSE GEIS ng\u00e0y 18/9.", "impact": {"direction": "risk_on", "horizon": "weeks", "assets": ["SSI", "VNM", "HPG"], "text": "C\u1ed9t m\u1ed1c emerging; c\u1ea7n theo d\u00f5i d\u00f2ng th\u1ee5 \u0111\u1ed9ng sau 21/9."}, "image": {"url": "https://picsum.photos/seed/nyse/800/400"}, "sourceId": "src-cafef"}
+  ],
+  "vietnamMacro": [
+    {"indicator": "CPI", "nameVi": "CPI 8/2026", "value": 4.89, "unit": "%", "sourceId": "src-nso"},
+    {"indicator": "M2", "nameVi": "M2", "value": 4.24, "unit": "%", "sourceId": "src-vietnambiz"},
+    {"indicator": "CREDIT", "nameVi": "T\u00edn d\u1ee5ng", "value": 17.7, "unit": "%", "sourceId": "src-vietnambiz"},
+    {"indicator": "FX", "nameVi": "T\u1ef7 gi\u00e1 TT", "value": 25632, "unit": "VND", "sourceId": "src-nhnn"},
+    {"indicator": "FX", "nameVi": "D\u1ef1 tr\u1eef FX", "value": 86318, "unit": "tr USD", "sourceId": "src-vietnambiz"},
+    {"indicator": "RATES", "nameVi": "LS 12T NH l\u1edbn", "value": 5.91, "unit": "%", "sourceId": "src-vietnambiz"},
+    {"indicator": "OMO", "nameVi": "ON", "value": 3.2, "unit": "%", "sourceId": "src-vietnambiz"},
+    {"indicator": "RATES", "nameVi": "T\u00e1i c\u1ea5p v\u1ed1n", "value": 4.5, "unit": "%", "sourceId": "src-vietnambiz"},
+    {"indicator": "FDI", "nameVi": "FDI gi\u1ea3i ng\u00e2n 6T", "value": 13.03, "unit": "t\u1ef7 USD", "sourceId": "src-vietnambiz"}
+  ],
+  "equityMarket": {
+    "index": {
+      "priorClose": {"date": "2026-09-17", "price": 1822.77},
+      "latest": {"date": "2026-09-18", "open": 1823.71, "high": 1841.2, "low": 1790.63, "price": 1815.66, "change": -7.11, "changePct": -0.39, "session": "close", "weekChange": 20.45, "weekChangePct": 1.14}
+    },
+    "liquidity": {"hose": {"volumeShares": 881177232, "valueVndBn": 25900, "note": "KLGD Investing.com; GTGD Lao \u0110\u1ed9ng/VnExpress h\u01a1n 25.900 t\u1ef7, t\u0103ng ~44% so v\u1edbi phi\u00ean tr\u01b0\u1edbc."}},
+    "foreign": {"buyValueVndBn": 10544.75, "sellValueVndBn": 9282.59, "netValueVndBn": 1262.16, "note": "Mua r\u00f2ng c\u00f4ng b\u1ed1 kho\u1ea3ng 1.262 t\u1ef7; chi ti\u1ebft mua/b\u00e1n gi\u1eef t\u1eeb ngu\u1ed3n phi\u00ean tr\u01b0\u1edbc khi ch\u01b0a c\u00f3 b\u1ea3ng t\u1ed5ng h\u1ee3p m\u1edbi."},
+    "proprietary": {"netValueVndBn": null, "note": "Ch\u01b0a c\u00f4ng b\u1ed1 t\u00e1ch t\u1ef1 doanh."},
+    "retail": {"netValueVndBn": null, "note": "Ch\u01b0a t\u00e1ch nh\u00e0 \u0111\u1ea7u t\u01b0 c\u00e1 nh\u00e2n."},
+    "relatedIndices": [
+      {"symbol": "VNINDEX", "price": 1815.66, "changePct": -0.39},
+      {"symbol": "HNX", "price": 275.29, "changePct": 0.51},
+      {"symbol": "UPCOM", "price": 126.4, "changePct": 0.19}
+    ]
+  },
+  "worldMarkets": {"quotes": [
+    {"symbol": "DXY", "nameVi": "DXY", "price": 100.36, "changePct": 0.11},
+    {"symbol": "DJI", "nameVi": "Dow", "price": 51778.04, "changePct": 0.61},
+    {"symbol": "NDX", "nameVi": "Nasdaq", "price": 26418.3, "changePct": 1.69},
+    {"symbol": "SPX", "nameVi": "S&P", "price": 7637.76, "changePct": 1.14},
+    {"symbol": "RUT", "nameVi": "Russell", "price": 2874.63, "changePct": 0.55},
+    {"symbol": "FTSE", "nameVi": "FTSE", "price": 10743.95, "changePct": -0.67},
+    {"symbol": "NKY", "nameVi": "Nikkei", "price": 65018.95, "changePct": 1.38},
+    {"symbol": "HSI", "nameVi": "HSI", "price": 24750.78, "changePct": 0.6}
+  ]},
+  "cryptoMarkets": {"quotes": [
+    {"symbol": "BTC", "nameVi": "Bitcoin", "price": 77559.3, "changePct": 1.53},
+    {"symbol": "ETH", "nameVi": "ETH", "price": 2488.99, "changePct": 1.71}
+  ]},
+  "companies": [
+    {"ticker": "VIC", "headline": "VIC gi\u1ea3m s\u00e0n trong ATC, ch\u00e2m ng\u00f2i \u0111\u1ea3o chi\u1ec1u ch\u1ec9 s\u1ed1", "impact": {"direction": "risk_off", "horizon": "days", "assets": ["VIC", "VHM", "VNINDEX"], "text": "\u00c1p l\u1ef1c h\u1ecd Vingroup lan sang bluechip ng\u00e2n h\u00e0ng cu\u1ed1i phi\u00ean."}, "metrics": {}, "sourceId": "src-laodong"},
+    {"ticker": "VHM", "headline": "VHM d\u1eabn \u0111\u1ea7u b\u00e1n r\u00f2ng ngo\u1ea1i YTD h\u01a1n 21.000 t\u1ef7", "impact": {"direction": "risk_off", "horizon": "months", "assets": ["VHM", "VIC"], "text": "\u00c1p l\u1ef1c \u0111\u1ecbnh gi\u00e1 B\u0110S v\u1ed1n h\u00f3a l\u1edbn d\u00f9 c\u00f3 \u01b0\u1edbc gi\u1ea3i ng\u00e2n ETF."}, "metrics": {}, "sourceId": "src-cafef"},
+    {"ticker": "HPG", "headline": "HPG n\u1eb1m nh\u00f3m ngo\u1ea1i mua r\u00f2ng tr\u00ean 200 t\u1ef7 phi\u00ean 18/9", "impact": {"direction": "risk_on", "horizon": "days", "assets": ["HPG"], "text": "D\u00f2ng th\u1ee5 \u0111\u1ed9ng/n\u00e2ng h\u1ea1ng \u1ee7ng h\u1ed9 thanh kho\u1ea3n th\u00e9p."}, "metrics": {}, "sourceId": "src-vnexpress"},
+    {"ticker": "HBC", "headline": "H\u00f2a B\u00ecnh chu\u1ea9n b\u1ecb ho\u00e1n \u0111\u1ed5i h\u01a1n 51 tri\u1ec7u cp, x\u1eed l\u00fd ~514 t\u1ef7 n\u1ee3", "impact": {"direction": "mixed", "horizon": "weeks", "assets": ["HBC"], "text": "Pha lo\u00e3ng v\u1ed1n, gi\u1ea3m n\u1ee3; t\u00e1i c\u1ea5u tr\u00fac c\u00f2n k\u00e9o d\u00e0i."}, "metrics": {"price": 3600, "changePct": -2.7}, "sourceId": "src-cafef"},
+    {"ticker": "PLX", "headline": "Petrolimex b\u00e1n h\u1ebft g\u1ea7n 23,3 tri\u1ec7u cp qu\u1ef9, thu kho\u1ea3ng 844 t\u1ef7", "impact": {"direction": "mixed", "horizon": "weeks", "assets": ["PLX"], "text": "T\u0103ng free-float; ngu\u1ed3n ti\u1ec1n v\u1ec1 c\u00f4ng ty."}, "metrics": {}, "sourceId": "src-cafef"},
+    {"ticker": "SSI", "headline": "SSI: n\u00e2ng h\u1ea1ng v\u1eabn t\u00edch c\u1ef1c, \u01b0\u1edbc ETF mua r\u00f2ng 246 tri\u1ec7u USD", "impact": {"direction": "risk_on", "horizon": "weeks", "assets": ["SSI"], "text": "CTCK h\u01b0\u1edfng l\u1ee3i thanh kho\u1ea3n n\u1ebfu d\u00f2ng th\u1ee5 \u0111\u1ed9ng duy tr\u00ec."}, "metrics": {}, "sourceId": "src-cafef"},
+    {"ticker": "STB", "headline": "STB \u0111\u01b0\u1ee3c ngo\u1ea1i mua r\u00f2ng tr\u00ean 200 t\u1ef7; b\u1ea7u th\u00eam Ph\u00f3 Ch\u1ee7 t\u1ecbch H\u0110QT", "impact": {"direction": "risk_on", "horizon": "days", "assets": ["STB"], "text": "D\u00f2ng ETF c\u1ed9ng tin qu\u1ea3n tr\u1ecb; kh\u00f4ng ph\u1ea3i khuy\u1ebfn ngh\u1ecb mua."}, "metrics": {}, "sourceId": "src-vnexpress"},
+    {"ticker": "SGT", "headline": "Kh\u1ea3o s\u00e1t data center 32MW, d\u1ef1 \u00e1n AI 3,5 t\u1ef7 USD", "impact": {"direction": "risk_on", "horizon": "months", "assets": ["SGT"], "text": "C\u00e2u chuy\u1ec7n h\u1ea1 t\u1ea7ng AI, ch\u01b0a c\u00f3 d\u00f2ng ti\u1ec1n x\u00e1c nh\u1eadn."}, "metrics": {}, "sourceId": "src-cafef"}
+  ],
+  "outlook": {
+    "watchpoints": [
+      {"text": "D\u00f2ng ETF/FTSE sau 18/9 v\u00e0 hi\u1ec7u l\u1ef1c 21/9", "impact": {"direction": "mixed", "horizon": "days", "assets": ["VNINDEX"], "text": "N\u1ebfu r\u00f2ng kh\u00f4ng \u0111\u1ee7 duy tr\u00ec sau phi\u00ean c\u01a1 c\u1ea5u, d\u1ec5 ki\u1ec3m l\u1ea1i 1.790\u20131.800."}},
+      {"text": "VIC\u2013VHM v\u00e0 nh\u00f3m ng\u00e2n h\u00e0ng v\u1ed1n h\u00f3a l\u1edbn", "impact": {"direction": "risk_off", "horizon": "days", "assets": ["VIC", "VHM"], "text": "ATC cho th\u1ea5y beta h\u1ecd Vin v\u1eabn quy\u1ebft \u0111\u1ecbnh bi\u00ean \u0111\u1ed9 ch\u1ec9 s\u1ed1."}},
+      {"text": "D\u1ea7u\u2013l\u1ee3i su\u1ea5t\u2013Fed", "impact": {"direction": "mixed", "horizon": "weeks", "assets": ["WTI", "DXY"], "text": "D\u1ea7u quanh 100 USD gi\u00fap h\u1ea1 nhi\u1ec7t k\u1ef3 v\u1ecdng l\u1ea1m ph\u00e1t, nh\u01b0ng Dimon nh\u1eafc Fed c\u00f3 th\u1ec3 t\u0103ng ti\u1ebfp."}}
+    ],
+    "levels": [
+      {"symbol": "VNINDEX", "kind": "support", "price": 1790.63, "note": "\u0110\u00e1y 18/9"},
+      {"symbol": "VNINDEX", "kind": "support", "price": 1800, "note": "V\u00f9ng t\u00e2m l\u00fd sau ATC"},
+      {"symbol": "VNINDEX", "kind": "resistance", "price": 1841.2, "note": "\u0110\u1ec9nh 18/9"},
+      {"symbol": "VNINDEX", "kind": "resistance", "price": 1830, "note": "VCBS: v\u00f9ng ki\u1ec3m tra 1.820\u20131.830"}
+    ],
+    "events": [
+      {"when": "2026-09-21", "title": "FTSE n\u00e2ng h\u1ea1ng hi\u1ec7u l\u1ef1c", "impact": {"direction": "risk_on", "horizon": "weeks", "assets": ["VNINDEX"], "text": "D\u00f2ng th\u1ee5 \u0111\u1ed9ng ch\u00ednh th\u1ee9c theo r\u1ed5 emerging."}},
+      {"when": "2026-09-18", "title": "S\u1ea3n xu\u1ea5t c\u00f4ng nghi\u1ec7p M\u1ef9 / c\u00f4ng su\u1ea5t s\u1eed d\u1ee5ng th\u00e1ng 8", "impact": {"direction": "mixed", "horizon": "intraday", "assets": ["SPX"], "text": "D\u1eef li\u1ec7u M\u1ef9 phi\u00ean \u0111\u00eam; t\u00e1c \u0111\u1ed9ng gi\u00e1n ti\u1ebfp l\u00ean \u00c1 th\u1ee9 Hai."}},
+      {"when": "2026-09-23", "title": "EIA weekly", "impact": {"direction": "mixed", "horizon": "days", "assets": ["WTI"], "text": "T\u1ed3n kho d\u1ea7u M\u1ef9."}}
+    ]
+  },
+  "series": {
+    "vnindex": {"id": "vnindex", "interpolation": "official", "points": [{"t": "2026-09-17", "v": 1822.77}, {"t": "2026-09-18", "v": 1815.66}]},
+    "dji": {"id": "dji", "interpolation": "anchored", "points": [{"t": "2025-09", "v": 42000}, {"t": "2026-08", "v": 54744}, {"t": "2026-09-17", "v": 51778.04}]},
+    "ndx": {"id": "ndx", "interpolation": "anchored", "points": [{"t": "2025-09", "v": 20000}, {"t": "2026-09-17", "v": 26418.3}]},
+    "spx": {"id": "spx", "interpolation": "anchored", "points": [{"t": "2025-09", "v": 5800}, {"t": "2026-08", "v": 7817}, {"t": "2026-09-17", "v": 7637.76}]},
+    "dxy": {"id": "dxy", "interpolation": "anchored", "points": [{"t": "2025-09", "v": 101.5}, {"t": "2026-09-18", "v": 100.36}]},
+    "nky": {"id": "nky", "interpolation": "anchored", "points": [{"t": "2025-10", "v": 44358}, {"t": "2026-09-18", "v": 65018.95}]},
+    "hsi": {"id": "hsi", "interpolation": "anchored", "points": [{"t": "2025-09", "v": 18000}, {"t": "2026-09-18", "v": 24750.78}]},
+    "btcUsd": {"id": "btcUsd", "interpolation": "official", "points": [{"t": "2026-08-28", "v": 77830}, {"t": "2026-09-18", "v": 77559.3}]},
+    "vnindexVolume5d": {"labels": ["17/09", "18/09"], "volumeMillionShares": [null, 881.18], "valueVndTn": [null, 25.9]},
+    "foreignNet5dVndBn": {"labels": ["17/09", "18/09"], "values": [-395, 1262.16]}
+  }
+}
