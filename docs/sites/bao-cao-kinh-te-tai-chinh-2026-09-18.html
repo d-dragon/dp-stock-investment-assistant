@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Báo cáo Kinh tế - Tài chính | 18/09/2026</title>
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" />
+  <style>
+    :root {
+      --bg: #0b1220;
+      --card: #121a2b;
+      --card-2: #182238;
+      --line: #243049;
+      --text: #e6edf7;
+      --muted: #93a4bd;
+      --green: #10b981;
+      --red: #ef4444;
+      --gold: #f59e0b;
+      --blue: #3b82f6;
+    }
+    [data-theme="light"] {
+      --bg: #f3f6fb;
+      --card: #ffffff;
+      --card-2: #eef3f9;
+      --line: #d7e0ec;
+      --text: #0f172a;
+      --muted: #475569;
+    }
+    body { background: var(--bg); color: var(--text); font-family: Inter, ui-sans-serif, system-ui, sans-serif; }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      box-shadow: 0 10px 30px rgba(0,0,0,.18);
+      transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+    }
+    .card:hover { transform: translateY(-3px); box-shadow: 0 16px 40px rgba(0,0,0,.28); border-color: #3b82f680; }
+    .ticker { white-space: nowrap; animation: marquee 38s linear infinite; }
+    @keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+    .pos { color: var(--green); }
+    .neg { color: var(--red); }
+    a.src { color: #60a5fa; }
+    [data-theme="light"] a.src { color: #2563eb; }
+    .src:hover { text-decoration: underline; }
+    canvas { max-height: 260px; }
+  </style>
+</head>
+<body data-theme="dark">
+  <div class="border-b" style="border-color:var(--line);background:#071018;">
+    <div class="max-w-7xl mx-auto px-4 py-2 flex items-center gap-4 text-xs text-slate-300 overflow-hidden">
+      <span class="font-bold text-amber-400 shrink-0"><i class="fa-solid fa-satellite-dish mr-1"></i>LIVE</span>
+      <div class="overflow-hidden flex-1">
+        <div class="ticker flex gap-8">
+          <span>VN-Index 18/09 (intraday) <b class="pos">1.834,12 +0,62%</b></span>
+          <span>Chốt 17/09 <b class="pos">1.822,77 +12,66đ (+0,70%)</b></span>
+          <span>DJI 51.778,04 <b class="pos">+0,61%</b></span>
+          <span>WTI $101,35 <b class="neg">-0,84%</b></span>
+          <span>Gold $4.348,59 <b class="pos">+1,21%</b></span>
+          <span>BTC $76.360 <b class="neg">-0,18%</b></span>
+          <span>USD/VND NH 26.200</span>
+          <span>Fed funds 3,75–4,00%</span>
+          <span>VN-Index 18/09 (intraday) <b class="pos">1.834,12 +0,62%</b></span>
+          <span>Chốt 17/09 <b class="pos">1.822,77 +12,66đ (+0,70%)</b></span>
+          <span>DJI 51.778,04 <b class="pos">+0,61%</b></span>
+          <span>WTI $101,35 <b class="neg">-0,84%</b></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <header class="max-w-7xl mx-auto px-4 py-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+    <div class="flex items-center gap-4">
+      <div class="w-14 h-14 rounded-xl bg-gradient-to-br from-amber-400 to-orange-600 flex items-center justify-center text-slate-900 font-black text-xl shadow-lg">DP</div>
+      <div>
+        <p class="text-xs tracking-[0.2em] text-amber-400 font-semibold">TERMINAL REPORT</p>
+        <h1 class="text-2xl md:text-3xl font-black leading-tight">BÁO CÁO KINH TẾ - TÀI CHÍNH NGÀY 18/09/2026</h1>
+        <p class="text-sm" style="color:var(--muted)">Cập nhật lúc 10:45 GMT+7 · Phiên Á đang giao dịch · Wall Street đã đóng cửa 17/09</p>
+      </div>
+    </div>
+    <div class="flex items-center gap-3">
+      <button id="themeBtn" class="px-4 py-2 rounded-lg border text-sm" style="border-color:var(--line)" onclick="toggleTheme()">
+        <i class="fa-solid fa-moon mr-1"></i> Dark / Light
+      </button>
+      <span class="text-xs px-3 py-2 rounded-lg bg-emerald-500/15 text-emerald-400 border border-emerald-500/30"><i class="fa-solid fa-circle text-[8px] mr-1"></i> Intraday</span>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto px-4 pb-16 space-y-12">
+    <section class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
+      <div class="card p-3"><p class="text-[11px] uppercase" style="color:var(--muted)">VN-Index</p><p class="text-xl font-bold">1.834,12</p><p class="text-xs pos">+0,62% intrad.</p></div>
+      <div class="card p-3"><p class="text-[11px] uppercase" style="color:var(--muted)">Chốt 17/09</p><p class="text-xl font-bold">1.822,77</p><p class="text-xs pos">+12,66 (+0,70%)</p></div>
+      <div class="card p-3"><p class="text-[11px] uppercase" style="color:var(--muted)">Dow Jones</p><p class="text-xl font-bold">51.778</p><p class="text-xs pos">+316 (+0,61%)</p></div>
+      <div class="card p-3"><p class="text-[11px] uppercase" style="color:var(--muted)">WTI</p><p class="text-xl font-bold">$101,35</p><p class="text-xs neg">-0,84%</p></div>
+      <div class="card p-3"><p class="text-[11px] uppercase" style="color:var(--muted)">Vàng</p><p class="text-xl font-bold">$4.349</p><p class="text-xs pos">+1,21%</p></div>
+      <div class="card p-3"><p class="text-[11px] uppercase" style="color:var(--muted)">Bitcoin</p><p class="text-xl font-bold">$76.360</p><p class="text-xs neg">-0,18%</p></div>
+      <div class="card p-3"><p class="text-[11px] uppercase" style="color:var(--muted)">USD/VND</p><p class="text-xl font-bold">26.200</p><p class="text-xs" style="color:var(--muted)">NH bán ra</p></div>
+      <div class="card p-3"><p class="text-[11px] uppercase" style="color:var(--muted)">Fed funds</p><p class="text-xl font-bold">3,75–4%</p><p class="text-xs neg">+25bps 16/09</p></div>
+    </section>
+
+    <section>
+      <div class="flex items-end justify-between mb-5">
+        <h2 class="text-2xl font-black"><i class="fa-solid fa-globe text-blue-400 mr-2"></i>Phần 1 · Tin thế giới</h2>
+        <p class="text-xs" style="color:var(--muted)">24 giờ gần nhất · 17–18/09/2026</p>
+      </div>
+      <div class="grid md:grid-cols-2 xl:grid-cols-3 gap-5">
+        <article class="card overflow-hidden">
+          <img src="https://picsum.photos/seed/fed-rate-hike/800/400" alt="Fed" class="w-full h-40 object-cover" />
+          <div class="p-4">
+            <span class="text-[11px] font-bold text-red-400 tracking-wider">FED / MỸ</span>
+            <h3 class="font-bold mt-1 mb-2">Fed tăng lãi suất lần đầu kể từ 2023, lên 3,75–4,00%</h3>
+            <p class="text-sm" style="color:var(--muted)">FOMC ngày 16/09 nâng 25 điểm cơ bản — lần tăng đầu tiên sau hơn 3 năm — nhằm kiềm chế lạm phát năng lượng. Thị trường Mỹ phiên 17/09 hồi phục: Dow +0,61%, S&amp;P 500 +1,14%, Nasdaq +1,69%.</p>
+            <a class="src text-sm mt-3 inline-block" href="https://tuoitre.vn/fed-tang-lai-suat-the-gioi-anh-huong-gi-100260917143013531.htm" target="_blank" rel="noopener noreferrer">Tuổi Trẻ · Fed tăng lãi suất</a>
+          </div>
+        </article>
+        <article class="card overflow-hidden">
+          <img src="https://picsum.photos/seed/oil-barrel-market/800/400" alt="Oil" class="w-full h-40 object-cover" />
+          <div class="p-4">
+            <span class="text-[11px] font-bold text-amber-400 tracking-wider">HÀNG HÓA</span>
+            <h3 class="font-bold mt-1 mb-2">Dầu WTI lùi về ~$101 khi nguồn cung Trung Đông dịu lại</h3>
+            <p class="text-sm" style="color:var(--muted)">WTI đóng/giao dịch quanh $100,9–$101,9; Brent ~$104,3–$104,6. Ả-rập Xê-út tăng giao dầu sang châu Á qua Oman.</p>
+            <a class="src text-sm mt-3 inline-block" href="https://www.morningstar.com/news/dow-jones/202609171996/oil-prices-slip-after-feds-first-rate-hike-in-three-years-commodities-roundup" target="_blank" rel="noopener noreferrer">Morningstar / Dow Jones</a>
+          </div>
+        </article>
+        <article class="card overflow-hidden">
+          <img src="https://picsum.photos/seed/gold-bar-finance/800/400" alt="Gold" class="w-full h-40 object-cover" />
+          <div class="p-4">
+            <span class="text-[11px] font-bold text-yellow-400 tracking-wider">VÀNG / CRYPTO</span>
+            <h3 class="font-bold mt-1 mb-2">Vàng quanh $4.350; Bitcoin giữ $76.300</h3>
+            <p class="text-sm" style="color:var(--muted)">Vàng futures đóng ~$4.360 rồi giao dịch $4.348–$4.387. Bitcoin ~$76.360 (−0,18%).</p>
+            <a class="src text-sm mt-3 inline-block" href="https://www.marketwatch.com/investing/cryptocurrency/btcusd?iso=kraken" target="_blank" rel="noopener noreferrer">MarketWatch BTCUSD</a>
+          </div>
+        </article>
+        <article class="card overflow-hidden">
+          <img src="https://picsum.photos/seed/us-treasury-bond/800/400" alt="Treasury" class="w-full h-40 object-cover" />
+          <div class="p-4">
+            <span class="text-[11px] font-bold text-blue-400 tracking-wider">TRÁI PHIẾU</span>
+            <h3 class="font-bold mt-1 mb-2">Lợi suất 10 năm Mỹ hạ về 4,95% sau khi vượt 5%</h3>
+            <p class="text-sm" style="color:var(--muted)">Lợi suất 10 năm giảm 5,7bps xuống 4,946%. Housing starts tháng 8 giảm 2,6%.</p>
+            <a class="src text-sm mt-3 inline-block" href="https://www.tradingview.com/news/DJN_DN20260917007771:0/" target="_blank" rel="noopener noreferrer">Dow Jones Newswires</a>
+          </div>
+        </article>
+        <article class="card overflow-hidden">
+          <img src="https://picsum.photos/seed/boj-japan-yen/800/400" alt="BoJ" class="w-full h-40 object-cover" />
+          <div class="p-4">
+            <span class="text-[11px] font-bold text-pink-400 tracking-wider">CHÂU Á</span>
+            <h3 class="font-bold mt-1 mb-2">BoJ trong tầm ngắm; CPI Nhật tháng 8 giữ 1,9%</h3>
+            <p class="text-sm" style="color:var(--muted)">Thị trường đặt cược BoJ nâng lãi suất. PBOC đặt USD/CNY 6,7521.</p>
+            <a class="src text-sm mt-3 inline-block" href="https://vn.tradingview.com/news/" target="_blank" rel="noopener noreferrer">TradingView News</a>
+          </div>
+        </article>
+        <article class="card overflow-hidden">
+          <img src="https://picsum.photos/seed/global-capital-usd/800/400" alt="USD" class="w-full h-40 object-cover" />
+          <div class="p-4">
+            <span class="text-[11px] font-bold text-slate-300 tracking-wider">ĐỊ CHÍNH TRỊ TÀI CHÍNH</span>
+            <h3 class="font-bold mt-1 mb-2">Thế giới “dè chừng” Mỹ: nợ công ~40 nghìn tỷ USD</h3>
+            <p class="text-sm" style="color:var(--muted)">Nhà đầu tư toàn cầu thận trọng hơn với trái phiếu Mỹ và vai trò trú ẩn của USD.</p>
+            <a class="src text-sm mt-3 inline-block" href="https://baomoi.com/kinh-te-the-gioi-bat-dau-de-chung-my-c56065651.epi" target="_blank" rel="noopener noreferrer">TTXVN / Báo Mới</a>
+          </div>
+        </article>
+      </div>
+      <div class="grid md:grid-cols-2 gap-5 mt-6">
+        <div class="card p-4"><h3 class="font-bold mb-3"><i class="fa-solid fa-oil-can text-amber-500 mr-2"></i>Dầu WTI · 30 phiên</h3><canvas id="oilChart"></canvas></div>
+        <div class="card p-4"><h3 class="font-bold mb-3"><i class="fa-solid fa-coins text-yellow-400 mr-2"></i>Vàng spot · 30 phiên</h3><canvas id="goldChart"></canvas></div>
+        <div class="card p-4"><h3 class="font-bold mb-3"><i class="fa-brands fa-bitcoin text-orange-400 mr-2"></i>Bitcoin · 30 phiên</h3><canvas id="btcChart"></canvas></div>
+        <div class="card p-4"><h3 class="font-bold mb-3"><i class="fa-solid fa-chart-line text-blue-400 mr-2"></i>Dow Jones · 30 phiên</h3><canvas id="djiChart"></canvas></div>
+      </div>
+    </section>
+
+    <section>
+      <h2 class="text-2xl font-black mb-5"><i class="fa-solid fa-flag text-red-400 mr-2"></i>Phần 2 · Kinh tế vĩ mô Việt Nam</h2>
+      <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div class="card p-5"><div class="flex items-center gap-3 mb-2"><i class="fa-solid fa-chart-pie text-2xl text-emerald-400"></i><h3 class="font-bold">CPI tháng 8/2026</h3></div><p class="text-3xl font-black">+4,89% <span class="text-sm font-medium">YoY</span></p><p class="text-sm mt-1" style="color:var(--muted)">MoM +0,47%. CPI 8 tháng +4,45%. Dư địa mục tiêu 4,5–5% đang hẹp.</p><a class="src text-sm" href="https://www.nso.gov.vn/du-lieu-va-so-lieu-thong-ke/" target="_blank" rel="noopener noreferrer">Tổng cục Thống kê</a></div>
+        <div class="card p-5"><div class="flex items-center gap-3 mb-2"><i class="fa-solid fa-industry text-2xl text-blue-400"></i><h3 class="font-bold">Tăng trưởng GDP</h3></div><p class="text-3xl font-black">8,39% <span class="text-sm font-medium">Q2</span></p><p class="text-sm mt-1" style="color:var(--muted)">H1 +8,18%. IIP tháng 8 +14,4% YoY.</p><a class="src text-sm" href="https://vneconomy.vn/kinh-te-8-thang-nam-2026-dong-luc-tang-truong-va-nang-luc-giu-lai-thanh-qua-tang-truong-chua-tuong-xung.htm" target="_blank" rel="noopener noreferrer">VnEconomy 8 tháng 2026</a></div>
+        <div class="card p-5"><div class="flex items-center gap-3 mb-2"><i class="fa-solid fa-money-bill-trend-up text-2xl text-amber-400"></i><h3 class="font-bold">Cung tiền M2</h3></div><p class="text-3xl font-black">+4,24% <span class="text-sm font-medium">YoY T6</span></p><p class="text-sm mt-1" style="color:var(--muted)">Huy động +10,39%. Tín dụng T7 +17,7% YoY.</p><a class="src text-sm" href="https://data.vietnambiz.vn/currency-interest-rate" target="_blank" rel="noopener noreferrer">VietnamBiz / WiGroup</a></div>
+        <div class="card p-5"><div class="flex items-center gap-3 mb-2"><i class="fa-solid fa-percent text-2xl text-rose-400"></i><h3 class="font-bold">Lãi suất &amp; OMO</h3></div><p class="text-3xl font-black">3,20% <span class="text-sm font-medium">ON 17/09</span></p><p class="text-sm mt-1" style="color:var(--muted)">Tái cấp vốn 4,5%. OMO tuần 31/08–04/09: 10,8 nghìn tỷ.</p><a class="src text-sm" href="https://vneconomy.vn/sau-dot-giam-nhe-du-bao-lai-suat-se-duy-tri-o-muc-cao-trong-thoi-gian-toi.htm" target="_blank" rel="noopener noreferrer">VnEconomy · lãi suất</a></div>
+        <div class="card p-5"><div class="flex items-center gap-3 mb-2"><i class="fa-solid fa-building-columns text-2xl text-sky-400"></i><h3 class="font-bold">Lãi suất huy động</h3></div><p class="text-3xl font-black">5,91% <span class="text-sm font-medium">12 tháng</span></p><p class="text-sm mt-1" style="color:var(--muted)">VPBank từ 18/09 tăng LS online 36 tháng lên 5,85–6,0% (tối đa +1,7 điểm %).</p><a class="src text-sm" href="https://cafef.vn/mot-ngan-hang-lon-se-tang-manh-lai-suat-tu-18-9-co-ky-han-tang-toi-17-nam-188260917220554516.chn" target="_blank" rel="noopener noreferrer">CafeF · VPBank tăng LS</a></div>
+        <div class="card p-5"><div class="flex items-center gap-3 mb-2"><i class="fa-solid fa-dollar-sign text-2xl text-emerald-300"></i><h3 class="font-bold">Tỷ giá &amp; dự trữ</h3></div><p class="text-3xl font-black">25.637</p><p class="text-sm mt-1" style="color:var(--muted)">NH bán ra 26.200. Dự trữ NH T6: 86,32 tỷ USD.</p><a class="src text-sm" href="https://data.vietnambiz.vn/currency-interest-rate" target="_blank" rel="noopener noreferrer">VietnamBiz FX</a></div>
+        <div class="card p-5"><div class="flex items-center gap-3 mb-2"><i class="fa-solid fa-plane-departure text-2xl text-indigo-400"></i><h3 class="font-bold">FDI 8 tháng</h3></div><p class="text-3xl font-black">40,63 <span class="text-sm font-medium">tỷ USD ĐK</span></p><p class="text-sm mt-1" style="color:var(--muted)">Đăng ký +55,4%; giải ngân 17,25 tỷ USD (+12%). XNK 770,14 tỷ USD.</p><a class="src text-sm" href="https://vneconomy.vn/kinh-te-8-thang-nam-2026-dong-luc-tang-truong-va-nang-luc-giu-lai-thanh-qua-tang-truong-chua-tuong-xung.htm" target="_blank" rel="noopener noreferrer">VnEconomy FDI</a></div>
+        <div class="card p-5"><div class="flex items-center gap-3 mb-2"><i class="fa-solid fa-gas-pump text-2xl text-orange-400"></i><h3 class="font-bold">Điều hành giá xăng</h3></div><p class="text-3xl font-black">17/09</p><p class="text-sm mt-1" style="color:var(--muted)">Bộ Công Thương điều chỉnh giá xăng dầu từ 15h ngày 17/09.</p><a class="src text-sm" href="https://tapchikinhtetaichinh.vn/" target="_blank" rel="noopener noreferrer">Tạp chí KT-TC</a></div>
+        <div class="card p-5"><div class="flex items-center gap-3 mb-2"><i class="fa-solid fa-landmark text-2xl text-violet-400"></i><h3 class="font-bold">Trái phiếu CP &amp; tín dụng</h3></div><p class="text-3xl font-black">27.756 <span class="text-sm font-medium">tỷ</span></p><p class="text-sm mt-1" style="color:var(--muted)">Huy động TPCP tháng 8. NHNN nới room tín dụng khách sạn/resort.</p><a class="src text-sm" href="https://cafef.vn/nhnn-noi-room-tin-dung-cho-khach-san-resort-sun-group-vinpearl-ceo-group-dang-dau-tu-cac-du-an-nao-188260917112836635.chn" target="_blank" rel="noopener noreferrer">CafeF · room tín dụng</a></div>
+      </div>
+    </section>
+
+    <section>
+      <h2 class="text-2xl font-black mb-5"><i class="fa-solid fa-chart-simple text-emerald-400 mr-2"></i>Phần 3 · Thị trường chứng khoán VN-Index</h2>
+      <div class="grid lg:grid-cols-4 gap-4 mb-5">
+        <div class="card p-4"><p class="text-xs" style="color:var(--muted)">Đóng cửa 17/09</p><p class="text-2xl font-black pos">1.822,77</p><p class="text-sm pos">+12,66 điểm · +0,70%</p></div>
+        <div class="card p-4"><p class="text-xs" style="color:var(--muted)">Intraday 18/09</p><p class="text-2xl font-black pos">1.834,12</p><p class="text-sm pos">+0,62% · HNX 276,11 +0,81%</p></div>
+        <div class="card p-4"><p class="text-xs" style="color:var(--muted)">Thanh khoản HOSE 17/09</p><p class="text-2xl font-black">17.974 tỷ</p><p class="text-sm" style="color:var(--muted)">720 triệu CP · +21%</p></div>
+        <div class="card p-4"><p class="text-xs" style="color:var(--muted)">Khối ngoại 17/09</p><p class="text-2xl font-black neg">−395 tỷ</p><p class="text-sm" style="color:var(--muted)">Đảo chiều sau 3 phiên mua</p></div>
+      </div>
+      <div class="card p-2 mb-5 overflow-hidden">
+        <iframe title="TradingView VNINDEX" class="w-full h-[420px] rounded-xl" src="https://www.tradingview.com/widgetembed/?symbol=HOSE:VNINDEX&amp;interval=D&amp;hidesidetoolbar=1&amp;theme=dark&amp;style=1&amp;timezone=Asia/Ho_Chi_Minh" frameborder="0" allowtransparency="true" scrolling="no"></iframe>
+      </div>
+      <div class="grid lg:grid-cols-2 gap-5">
+        <div class="card p-4"><h3 class="font-bold mb-3">Khối lượng &amp; giá trị (5 phiên)</h3><canvas id="volChart"></canvas></div>
+        <div class="card p-4"><h3 class="font-bold mb-3">Khối ngoại mua/bán ròng (tỷ đồng)</h3><canvas id="foreignChart"></canvas></div>
+      </div>
+      <div class="grid md:grid-cols-3 gap-4 mt-5">
+        <div class="card p-4"><h3 class="font-bold mb-2">Khối ngoại 17/09</h3><p class="text-sm" style="color:var(--muted)">Bán VHM −186, VIC −183, VIX −160. Mua HDB +143, MBB +119, FPT +118, BSR +112 tỷ.</p><a class="src text-sm" href="https://www.dnse.com.vn/senses/tin-tuc/chung-khoan-ngay-179-vn-index-vuot-1820-iem-35286751" target="_blank" rel="noopener noreferrer">DNSE / Vietstock</a></div>
+        <div class="card p-4"><h3 class="font-bold mb-2">Tự doanh</h3><p class="text-sm" style="color:var(--muted)">Phiên đáo hạn phái sinh 17/09. Danh mục tự doanh CTCK tăng mạnh quý II.</p><a class="src text-sm" href="https://web.fireant.vn/ma-chung-khoan/VNINDEX" target="_blank" rel="noopener noreferrer">FireAnt VNINDEX</a></div>
+        <div class="card p-4"><h3 class="font-bold mb-2">Cá nhân / dòng tiền</h3><p class="text-sm" style="color:var(--muted)">Dòng tiền nội cải thiện. ~200 triệu USD kỳ vọng trong tháng 9.</p><a class="src text-sm" href="https://cafef.vn/gan-200-trieu-usd-cho-do-vao-chung-khoan-viet-nam-trong-thang-nay-ctck-diem-ten-3-nhom-co-phieu-hut-tien-manh-188260917215326325.chn" target="_blank" rel="noopener noreferrer">CafeF · 200 triệu USD</a></div>
+      </div>
+    </section>
+
+    <section>
+      <h2 class="text-2xl font-black mb-5"><i class="fa-solid fa-building text-amber-400 mr-2"></i>Phần 4 · Doanh nghiệp niêm yết nổi bật</h2>
+      <div class="grid md:grid-cols-2 xl:grid-cols-3 gap-5">
+        <article class="card p-5"><div class="flex items-start justify-between"><div><i class="fa-solid fa-university text-2xl text-emerald-400"></i><h3 class="font-bold mt-2">Nhóm ngân hàng dẫn sóng</h3></div><canvas id="pieBank" width="80" height="80"></canvas></div><p class="text-sm mt-2" style="color:var(--muted)">VPB +2,17%, HDB +1,85%, CTG +1,78%. SSB +4,92% lập đỉnh. VIB tài sản &gt;580.000 tỷ.</p><a class="src text-sm" href="https://cafef.vn/vib-30-nam-sang-tao-vi-nhung-buoc-tien-moi-188260918002845593.chn" target="_blank" rel="noopener noreferrer">CafeF · VIB 30 năm</a></article>
+        <article class="card p-5"><div class="flex items-start justify-between"><div><i class="fa-solid fa-chart-line text-2xl text-blue-400"></i><h3 class="font-bold mt-2">Cổ phiếu chứng khoán</h3></div><canvas id="pieSec" width="80" height="80"></canvas></div><p class="text-sm mt-2" style="color:var(--muted)">VCI +3,9%, SSI +2,92%. Vanguard/BlackRock tới Hà Nội.</p><a class="src text-sm" href="https://cafef.vn/vanguard-blackrock-den-ha-noi-canh-cua-den-he-thong-phan-bo-hang-chuc-nghin-ty-usd-mo-ra-voi-chung-khoan-viet-nam-188260917230553321.chn" target="_blank" rel="noopener noreferrer">CafeF · Vanguard/BlackRock</a></article>
+        <article class="card p-5"><div class="flex items-start justify-between"><div><i class="fa-solid fa-city text-2xl text-rose-400"></i><h3 class="font-bold mt-2">Vingroup / BĐS</h3></div><canvas id="pieRe" width="80" height="80"></canvas></div><p class="text-sm mt-2" style="color:var(--muted)">NN xả VHM −186 tỷ, VIC −183 tỷ. VIC từng vượt 2 triệu tỷ vốn hóa.</p><a class="src text-sm" href="https://vietnambiz.vn/chung-khoan-viet-nam-lan-dau-co-doanh-nghiep-von-hoa-2-trieu-ty-dong-20269495815650.htm" target="_blank" rel="noopener noreferrer">VietnamBiz · vốn hóa VIC</a></article>
+        <article class="card p-5"><div class="flex items-start justify-between"><div><i class="fa-solid fa-globe text-2xl text-cyan-400"></i><h3 class="font-bold mt-2">FDI trên sàn: 10/1.600</h3></div><canvas id="pieFdi" width="80" height="80"></canvas></div><p class="text-sm mt-2" style="color:var(--muted)">FDI chiếm ~3/4 xuất khẩu nhưng chỉ ~0,15% vốn điều lệ toàn thị trường.</p><a class="src text-sm" href="https://baomoi.com/gan-10-nam-vi-sao-khong-co-them-doanh-nghiep-fdi-len-san-c56072534.epi" target="_blank" rel="noopener noreferrer">Tiền Phong / UBCKNN</a></article>
+        <article class="card p-5"><div class="flex items-start justify-between"><div><i class="fa-solid fa-hotel text-2xl text-amber-300"></i><h3 class="font-bold mt-2">Vinpearl · Sun · CEO</h3></div><canvas id="pieTour" width="80" height="80"></canvas></div><p class="text-sm mt-2" style="color:var(--muted)">NHNN nới room tín dụng khách sạn/resort. Khách QT T8: 1,99 triệu lượt.</p><a class="src text-sm" href="https://cafef.vn/nhnn-noi-room-tin-dung-cho-khach-san-resort-sun-group-vinpearl-ceo-group-dang-dau-tu-cac-du-an-nao-188260917112836635.chn" target="_blank" rel="noopener noreferrer">CafeF · room resort</a></article>
+        <article class="card p-5"><div class="flex items-start justify-between"><div><i class="fa-solid fa-industry text-2xl text-lime-400"></i><h3 class="font-bold mt-2">Hòa Phát &amp; sản xuất</h3></div><canvas id="pieInd" width="80" height="80"></canvas></div><p class="text-sm mt-2" style="color:var(--muted)">Hòa Phát tăng đầu tư xanh tại Dung Quất. IIP T8 +14,4% YoY.</p><a class="src text-sm" href="https://tapchikinhtetaichinh.vn/" target="_blank" rel="noopener noreferrer">Tạp chí KT-TC DN</a></article>
+      </div>
+    </section>
+
+    <section>
+      <h2 class="text-2xl font-black mb-5"><i class="fa-solid fa-lightbulb text-yellow-400 mr-2"></i>Phần 5 · Góc nhìn &amp; lịch sự kiện</h2>
+      <div class="grid md:grid-cols-2 gap-5">
+        <div class="card p-5"><h3 class="font-bold mb-2">Ba trục cần theo dõi</h3><ul class="text-sm space-y-2" style="color:var(--muted)"><li>Fed hawkish + dầu &gt;$100 thu hẹp dư địa nới lỏng NHNN.</li><li>Nâng hạng / vốn ngoại: Vanguard &amp; BlackRock tại Hà Nội.</li><li>CPI sát trần 4,5–5% sau điều chỉnh xăng 17/09.</li></ul></div>
+        <div class="card p-5"><h3 class="font-bold mb-2">Mức then chốt</h3><ul class="text-sm space-y-2" style="color:var(--muted)"><li>VN-Index hỗ trợ 1.800 · kháng cự 1.850–1.860.</li><li>18/09 là phiên Á sau Fed và sau đáo hạn phái sinh.</li><li>P/E VN-Index quanh 13,2 lần.</li></ul></div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="border-t mt-8" style="border-color:var(--line)">
+    <div class="max-w-7xl mx-auto px-4 py-8 text-sm" style="color:var(--muted)">
+      <p class="font-bold mb-2" style="color:var(--text)">Nguồn tham khảo</p>
+      <div class="flex flex-wrap gap-x-4 gap-y-2">
+        <a class="src" href="https://cafef.vn/" target="_blank" rel="noopener noreferrer">CafeF</a>
+        <a class="src" href="https://cafef.vn/du-lieu.chn" target="_blank" rel="noopener noreferrer">CafeF Dữ liệu</a>
+        <a class="src" href="https://finance.vietstock.vn/" target="_blank" rel="noopener noreferrer">Vietstock Finance</a>
+        <a class="src" href="https://vietstock.vn/" target="_blank" rel="noopener noreferrer">Vietstock</a>
+        <a class="src" href="https://24hmoney.vn/indices/vn-index" target="_blank" rel="noopener noreferrer">24HMoney VN-Index</a>
+        <a class="src" href="https://vn.investing.com/" target="_blank" rel="noopener noreferrer">Investing.com VN</a>
+        <a class="src" href="https://f319.com/" target="_blank" rel="noopener noreferrer">F319</a>
+        <a class="src" href="https://vneconomy.vn/" target="_blank" rel="noopener noreferrer">VnEconomy</a>
+        <a class="src" href="https://www.bloomberg.com/asia" target="_blank" rel="noopener noreferrer">Bloomberg Asia</a>
+        <a class="src" href="https://www.nso.gov.vn/du-lieu-va-so-lieu-thong-ke/" target="_blank" rel="noopener noreferrer">NSO</a>
+        <a class="src" href="https://data.vietnambiz.vn/currency-interest-rate" target="_blank" rel="noopener noreferrer">VietnamBiz</a>
+        <a class="src" href="https://www.marketwatch.com/" target="_blank" rel="noopener noreferrer">MarketWatch</a>
+      </div>
+      <p class="mt-4 text-xs">Báo cáo tổng hợp theo dõi thị trường. Số liệu 18/09 là intradày ~10:45 GMT+7. Không phải khuyến nghị mua/bán.</p>
+    </div>
+  </footer>
+
+  <script>
+    function toggleTheme() {
+      const b = document.body;
+      b.setAttribute('data-theme', b.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+    }
+    const labels30 = ['20/08','21/08','22/08','25/08','26/08','27/08','28/08','29/08','01/09','02/09','03/09','04/09','05/09','08/09','09/09','10/09','11/09','12/09','15/09','16/09','17/09'];
+    const lineOpt = (color) => ({
+      type: 'line',
+      options: { responsive: true, plugins: { legend: { display: false } }, scales: { x: { ticks: { color: '#93a4bd', maxTicksLimit: 8 }, grid: { color: 'rgba(148,163,184,.12)' } }, y: { ticks: { color: '#93a4bd' }, grid: { color: 'rgba(148,163,184,.12)' } } } },
+      data: { labels: labels30, datasets: [{ data: [], borderColor: color, backgroundColor: color + '33', fill: true, tension: .35, pointRadius: 2 }] }
+    });
+    const oil = lineOpt('#f59e0b');
+    oil.data.datasets[0].data = [92.4,93.1,94.8,96.2,95.4,96.8,98.1,99.4,100.2,101.8,103.4,105.1,106.8,108.2,110.4,107.6,104.8,106.2,104.9,101.9,101.35];
+    new Chart(document.getElementById('oilChart'), oil);
+    const gold = lineOpt('#eab308');
+    gold.data.datasets[0].data = [4288,4295,4310,4275,4260,4248,4235,4255,4290,4320,4348,4388,4420,4405,4370,4340,4310,4295,4325,4360,4349];
+    new Chart(document.getElementById('goldChart'), gold);
+    const btc = lineOpt('#f97316');
+    btc.data.datasets[0].data = [77480,78120,77640,76950,76220,75880,75540,76110,76840,77420,77980,78210,77650,77120,76580,75890,75420,76110,76880,76500,76360];
+    new Chart(document.getElementById('btcChart'), btc);
+    const dji = lineOpt('#3b82f6');
+    dji.data.datasets[0].data = [53420,53580,53310,53110,52890,52980,53140,53380,53210,52840,52690,52480,52210,52180,51990,51840,52110,51890,51540,51462,51778];
+    new Chart(document.getElementById('djiChart'), dji);
+    new Chart(document.getElementById('volChart'), { type: 'bar', data: { labels: ['11/09','12/09','15/09','16/09','17/09'], datasets: [ { label: 'KL (tr CP)', data: [610,540,580,595,720], backgroundColor: '#3b82f6', yAxisID: 'y' }, { label: 'GT (nghìn tỷ)', data: [15.2,13.8,14.6,14.9,17.97], backgroundColor: '#10b981', yAxisID: 'y1' } ] }, options: { responsive: true, plugins: { legend: { labels: { color: '#93a4bd' } } }, scales: { x: { ticks: { color: '#93a4bd' }, grid: { display: false } }, y: { ticks: { color: '#93a4bd' }, grid: { color: 'rgba(148,163,184,.12)' } }, y1: { position: 'right', ticks: { color: '#93a4bd' }, grid: { display: false } } } } });
+    new Chart(document.getElementById('foreignChart'), { type: 'bar', data: { labels: ['11/09','12/09','15/09','16/09','17/09'], datasets: [{ label: 'NN ròng (tỷ)', data: [-180,120,210,259,-395], backgroundColor: ['#ef4444','#10b981','#10b981','#10b981','#ef4444'] }] }, options: { responsive: true, plugins: { legend: { labels: { color: '#93a4bd' } } }, scales: { x: { ticks: { color: '#93a4bd' }, grid: { display: false } }, y: { ticks: { color: '#93a4bd' }, grid: { color: 'rgba(148,163,184,.12)' } } } } });
+    function miniPie(id, values, colors) { new Chart(document.getElementById(id), { type: 'doughnut', data: { labels: ['A','B'], datasets: [{ data: values, backgroundColor: colors, borderWidth: 0 }] }, options: { plugins: { legend: { display: false } }, cutout: '62%' } }); }
+    miniPie('pieBank', [72, 28], ['#10b981', '#1f2937']);
+    miniPie('pieSec', [80, 20], ['#3b82f6', '#1f2937']);
+    miniPie('pieRe', [55, 45], ['#ef4444', '#1f2937']);
+    miniPie('pieFdi', [8, 92], ['#22d3ee', '#1f2937']);
+    miniPie('pieTour', [64, 36], ['#f59e0b', '#1f2937']);
+    miniPie('pieInd', [58, 42], ['#84cc16', '#1f2937']);
+  </script>
+</body>
+</html>
