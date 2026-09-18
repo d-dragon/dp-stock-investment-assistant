@@ -1,0 +1,23 @@
+{
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-09-18T14:40:00+07:00",
+  "reports": [
+    {
+      "id": "daily-brief-2026-09-17",
+      "date": "2026-09-17",
+      "title": "Vietnam & Global Market Brief",
+      "status": "closed",
+      "path": "bao-cao-kinh-te-tai-chinh-2026-09-17.html",
+      "dataPath": null,
+      "note": "Legacy monolithic HTML before data/template split"
+    },
+    {
+      "id": "daily-brief-2026-09-18",
+      "date": "2026-09-18",
+      "title": "Vietnam & Global Market Brief",
+      "status": "intraday",
+      "path": "2026-09-18.html",
+      "dataPath": "2026-09-18/report.json"
+    }
+  ]
+}
