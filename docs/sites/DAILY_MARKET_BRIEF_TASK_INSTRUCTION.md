@@ -21,6 +21,7 @@
 
 | Date | Version | Change |
 |---|---|---|
+| 2026-09-18 | 2.1.1-run2 | Closed-session refresh 16:54 GMT+7. Restored UTF-8 chrome in `report-app.js` (`đã đóng cửa`, `thị trường`, `Vĩ mô Việt Nam`). Gaps: tự doanh/cá nhân null; chuỗi VN-Index 5D chỉ 17–18/9; foreign buy/sell chi tiết chưa có bảng tổng hợp mới. |
 | 2026-09-18 | 2.1.1 | UTF-8 mandatory. Never strip Vietnamese diacritics when pushing JS/JSON. Load Be Vietnam Pro. Daily automation must fetch this file from the repo before running. |
 | 2026-09-18 | 2.1.0 | Multi-pane dashboard. Vietnamese UI. Paginated news + impact. Chart tabs VN-Index / World / Crypto. No TradingView HOSE:VNINDEX. |
 | 2026-09-18 | 2.0.0 | Split HTML into template + CSS/JS + JSON. |
