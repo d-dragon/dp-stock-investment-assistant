@@ -1,18 +1,22 @@
 {
   "schemaVersion": "1.0.0",
   "sources": [
-    {"id":"src-cafef","name":"CafeF","url":"https://cafef.vn/","accessedAt":"2026-09-18T16:30:00+07:00","reliability":"primary"},
-    {"id":"src-cafef-data","name":"CafeF Dữ liệu","url":"https://cafef.vn/du-lieu.chn","accessedAt":"2026-09-18T16:30:00+07:00","reliability":"primary"},
-    {"id":"src-vietstock","name":"Vietstock Finance","url":"https://finance.vietstock.vn/","accessedAt":"2026-09-18T16:30:00+07:00","reliability":"primary"},
-    {"id":"src-stockbiz","name":"StockBiz","url":"http://en.stockbiz.vn/ForeignerTradingStats.aspx?Exchange=HOSTC&Type=1","accessedAt":"2026-09-18T16:30:00+07:00","reliability":"primary"},
-    {"id":"src-yahoo-vn","name":"Yahoo Finance VNINDEX","url":"https://finance.yahoo.com/quote/%5EVNINDEX.VN/history/","accessedAt":"2026-09-18T16:30:00+07:00","reliability":"secondary"},
-    {"id":"src-barrons","name":"Barron's Market Data","url":"https://www.barrons.com/market-data","accessedAt":"2026-09-18T16:30:00+07:00","reliability":"secondary"},
-    {"id":"src-bloomberg","name":"Bloomberg Asia","url":"https://www.bloomberg.com/asia","accessedAt":"2026-09-18T16:30:00+07:00","reliability":"secondary"},
-    {"id":"src-vneconomy","name":"VnEconomy","url":"https://vneconomy.vn/","accessedAt":"2026-09-18T16:30:00+07:00","reliability":"secondary"},
-    {"id":"src-24h","name":"24HMoney VN-Index","url":"https://24hmoney.vn/indices/vn-index","accessedAt":"2026-09-18T16:30:00+07:00","reliability":"secondary"},
-    {"id":"src-nhnn","name":"SBV / tỷ giá","url":"https://www.sbv.gov.vn/","accessedAt":"2026-09-18T16:30:00+07:00","reliability":"primary"},
-    {"id":"src-nso","name":"NSO","url":"https://www.nso.gov.vn/","accessedAt":"2026-09-18T16:30:00+07:00","reliability":"primary"},
-    {"id":"src-vietnambiz","name":"VietnamBiz","url":"https://vietnambiz.vn/","accessedAt":"2026-09-18T16:30:00+07:00","reliability":"secondary"},
-    {"id":"src-yahoo-btc","name":"Yahoo Bitcoin","url":"https://finance.yahoo.com/quote/BTC-USD/","accessedAt":"2026-09-18T16:30:00+07:00","reliability":"secondary"}
+    {"id": "src-cafef", "name": "CafeF", "url": "https://cafef.vn/", "accessedAt": "2026-09-18T16:50:00+07:00", "reliability": "primary"},
+    {"id": "src-cafef-data", "name": "CafeF Dữ liệu", "url": "https://cafef.vn/du-lieu.chn", "accessedAt": "2026-09-18T16:50:00+07:00", "reliability": "primary"},
+    {"id": "src-vietstock", "name": "Vietstock Finance", "url": "https://finance.vietstock.vn/", "accessedAt": "2026-09-18T16:50:00+07:00", "reliability": "primary"},
+    {"id": "src-stockbiz", "name": "StockBiz", "url": "http://en.stockbiz.vn/ForeignerTradingStats.aspx?Exchange=HOSTC&Type=1", "accessedAt": "2026-09-18T16:50:00+07:00", "reliability": "primary"},
+    {"id": "src-yahoo-vn", "name": "Yahoo Finance VNINDEX", "url": "https://finance.yahoo.com/quote/%5EVNINDEX.VN/history/", "accessedAt": "2026-09-18T16:50:00+07:00", "reliability": "secondary"},
+    {"id": "src-barrons", "name": "Barron's Market Data", "url": "https://www.barrons.com/market-data", "accessedAt": "2026-09-18T16:50:00+07:00", "reliability": "secondary"},
+    {"id": "src-bloomberg", "name": "Bloomberg Asia", "url": "https://www.bloomberg.com/asia", "accessedAt": "2026-09-18T16:50:00+07:00", "reliability": "secondary"},
+    {"id": "src-reuters", "name": "Reuters / News Tribune", "url": "https://www.newstribune.com/news/2026/sep/18/tech-leads-wall-street-to-higher-close-as-oil/", "accessedAt": "2026-09-18T16:50:00+07:00", "reliability": "secondary"},
+    {"id": "src-te", "name": "Trading Economics", "url": "https://tradingeconomics.com/commodity/news", "accessedAt": "2026-09-18T16:50:00+07:00", "reliability": "secondary"},
+    {"id": "src-vneconomy", "name": "VnEconomy", "url": "https://vneconomy.vn/", "accessedAt": "2026-09-18T16:50:00+07:00", "reliability": "secondary"},
+    {"id": "src-24h", "name": "24HMoney VN-Index", "url": "https://24hmoney.vn/indices/vn-index", "accessedAt": "2026-09-18T16:50:00+07:00", "reliability": "secondary"},
+    {"id": "src-nhnn", "name": "SBV / tỷ giá", "url": "https://www.sbv.gov.vn/", "accessedAt": "2026-09-18T16:50:00+07:00", "reliability": "primary"},
+    {"id": "src-nso", "name": "NSO", "url": "https://www.nso.gov.vn/", "accessedAt": "2026-09-18T16:50:00+07:00", "reliability": "primary"},
+    {"id": "src-vietnambiz", "name": "VietnamBiz", "url": "https://vietnambiz.vn/", "accessedAt": "2026-09-18T16:50:00+07:00", "reliability": "secondary"},
+    {"id": "src-yahoo-btc", "name": "Yahoo Bitcoin", "url": "https://finance.yahoo.com/quote/BTC-USD/", "accessedAt": "2026-09-18T16:50:00+07:00", "reliability": "secondary"},
+    {"id": "src-vnexpress", "name": "VnExpress", "url": "https://vnexpress.net/chung-khoan-mat-7-diem-sau-phien-atc-5121900.html", "accessedAt": "2026-09-18T16:50:00+07:00", "reliability": "primary"},
+    {"id": "src-laodong", "name": "Báo Lao Động", "url": "https://laodong.vn/kinh-doanh/chung-khoan-ngay-189-vn-index-dao-chieu-bat-ngo-cuoi-phien-atc-1768872.ldo", "accessedAt": "2026-09-18T16:50:00+07:00", "reliability": "primary"}
   ]
 }
