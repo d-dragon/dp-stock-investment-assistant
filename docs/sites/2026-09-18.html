@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Báo cáo Kinh tế - Tài chính | 18/09/2026</title>
+  <link rel="stylesheet" href="./assets/css/report.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body data-theme="dark" data-report-date="2026-09-18">
+  <div class="ticker-bar"><div class="wrap"><div class="ticker-track" id="ticker"></div></div></div>
+  <header class="page wrap">
+    <div style="display:flex;gap:12px;align-items:center">
+      <div class="logo">DP</div>
+      <div>
+        <div class="pill">TERMINAL REPORT · DATA-BOUND</div>
+        <h1 id="title">BÁO CÁO KINH TẾ - TÀI CHÍNH</h1>
+        <div class="muted" id="meta"></div>
+      </div>
+    </div>
+    <button class="btn" type="button" onclick="toggleTheme()"><i class="fa-solid fa-moon"></i> Dark / Light</button>
+  </header>
+  <main class="wrap" id="app">
+    <section class="section"><div class="grid kpis" id="kpis"></div></section>
+    <section class="section">
+      <h2><i class="fa-solid fa-globe"></i> Phần 1 · Tin thế giới</h2>
+      <div class="grid cards-3" id="globalNews"></div>
+      <div class="grid cards-2" style="margin-top:14px">
+        <div class="card pad"><h3>Dầu WTI · 30 phiên</h3><canvas id="oilChart"></canvas></div>
+        <div class="card pad"><h3>Vàng · 30 phiên</h3><canvas id="goldChart"></canvas></div>
+        <div class="card pad"><h3>Bitcoin · 30 phiên</h3><canvas id="btcChart"></canvas></div>
+        <div class="card pad"><h3>Dow Jones · 30 phiên</h3><canvas id="djiChart"></canvas></div>
+      </div>
+    </section>
+    <section class="section">
+      <h2><i class="fa-solid fa-flag"></i> Phần 2 · Kinh tế vĩ mô Việt Nam</h2>
+      <div class="grid cards-3" id="vietnamMacro"></div>
+    </section>
+    <section class="section">
+      <h2><i class="fa-solid fa-chart-simple"></i> Phần 3 · VN-Index</h2>
+      <div class="grid kpis" id="eqSummary"></div>
+      <div class="card pad" style="margin:14px 0">
+        <iframe class="tv" title="VNINDEX" src="https://www.tradingview.com/widgetembed/?symbol=HOSE:VNINDEX&amp;interval=D&amp;hidesidetoolbar=1&amp;theme=dark&amp;style=1&amp;timezone=Asia/Ho_Chi_Minh"></iframe>
+      </div>
+      <div class="grid cards-2">
+        <div class="card pad"><h3>Thanh khoản 5 phiên</h3><canvas id="volChart"></canvas></div>
+        <div class="card pad"><h3>Khối ngoại ròng 5 phiên</h3><canvas id="foreignChart"></canvas></div>
+      </div>
+    </section>
+    <section class="section">
+      <h2><i class="fa-solid fa-building"></i> Phần 4 · Doanh nghiệp</h2>
+      <div class="grid cards-3" id="companies"></div>
+    </section>
+    <section class="section">
+      <h2><i class="fa-solid fa-lightbulb"></i> Phần 5 · Góc nhìn</h2>
+      <div class="card pad" id="outlook"></div>
+    </section>
+  </main>
+  <footer class="page wrap">
+    <b>Nguồn</b>
+    <div class="sources" id="sources"></div>
+  </footer>
+  <script src="./assets/js/schema-validate.js"></script>
+  <script src="./assets/js/report-app.js"></script>
+</body>
+</html>
