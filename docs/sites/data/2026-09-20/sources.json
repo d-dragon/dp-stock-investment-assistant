@@ -1,0 +1,33 @@
+{
+  "schemaVersion": "1.0.0",
+  "sources": [
+    {"id": "src-cafef", "name": "CafeF", "url": "https://cafef.vn/", "accessedAt": "2026-09-20T08:30:00+07:00", "reliability": "primary"},
+    {"id": "src-cafef-data", "name": "CafeF Dữ liệu", "url": "https://cafef.vn/du-lieu.chn", "accessedAt": "2026-09-20T08:30:00+07:00", "reliability": "primary"},
+    {"id": "src-vietstock", "name": "Vietstock Finance", "url": "https://finance.vietstock.vn/", "accessedAt": "2026-09-20T08:30:00+07:00", "reliability": "primary"},
+    {"id": "src-stockbiz", "name": "StockBiz", "url": "http://en.stockbiz.vn/ForeignerTradingStats.aspx?Exchange=HOSTC&Type=1", "accessedAt": "2026-09-20T08:30:00+07:00", "reliability": "primary"},
+    {"id": "src-yahoo-vn", "name": "Yahoo Finance VNINDEX", "url": "https://finance.yahoo.com/quote/%5EVNINDEX.VN/history/", "accessedAt": "2026-09-20T08:30:00+07:00", "reliability": "secondary"},
+    {"id": "src-barrons", "name": "Barron's Market Data", "url": "https://www.barrons.com/market-data", "accessedAt": "2026-09-20T08:30:00+07:00", "reliability": "secondary"},
+    {"id": "src-bloomberg", "name": "Bloomberg Asia", "url": "https://www.bloomberg.com/asia", "accessedAt": "2026-09-20T08:30:00+07:00", "reliability": "secondary"},
+    {"id": "src-reuters", "name": "Reuters / MarketScreener", "url": "https://www.marketscreener.com/news/wall-st-mixed-as-benchmark-treasury-yields-reach-5-oil-takes-a-pause-ce785adadc8ef62c", "accessedAt": "2026-09-20T08:30:00+07:00", "reliability": "secondary"},
+    {"id": "src-te", "name": "Trading Economics", "url": "https://tradingeconomics.com/commodity/news", "accessedAt": "2026-09-20T08:30:00+07:00", "reliability": "secondary"},
+    {"id": "src-nhnn", "name": "SBV / tỷ giá", "url": "https://www.sbv.gov.vn/", "accessedAt": "2026-09-20T08:30:00+07:00", "reliability": "primary"},
+    {"id": "src-nso", "name": "NSO", "url": "https://www.nso.gov.vn/", "accessedAt": "2026-09-20T08:30:00+07:00", "reliability": "primary"},
+    {"id": "src-vietnambiz", "name": "VietnamBiz", "url": "https://vietnambiz.vn/", "accessedAt": "2026-09-20T08:30:00+07:00", "reliability": "secondary"},
+    {"id": "src-yahoo-btc", "name": "Yahoo Bitcoin", "url": "https://finance.yahoo.com/quote/BTC-USD/", "accessedAt": "2026-09-20T08:30:00+07:00", "reliability": "secondary"},
+    {"id": "src-vnexpress", "name": "VnExpress", "url": "https://vnexpress.net/chung-khoan-mat-7-diem-sau-phien-atc-5121900.html", "accessedAt": "2026-09-20T08:30:00+07:00", "reliability": "primary"},
+    {"id": "src-laodong", "name": "Báo Lao Động", "url": "https://laodong.vn/kinh-doanh/chung-khoan-ngay-189-vn-index-dao-chieu-bat-ngo-cuoi-phien-atc-1768872.ldo", "accessedAt": "2026-09-20T08:30:00+07:00", "reliability": "primary"},
+    {"id": "src-tuoitre", "name": "Tuổi Trẻ", "url": "https://tuoitre.vn/vn-index-bat-ngo-dao-chieu-giam-trong-15-phut-cuoi-khoi-ngoai-mua-ban-dot-bien-100260918152117778.htm", "accessedAt": "2026-09-20T08:30:00+07:00", "reliability": "primary"},
+    {"id": "src-congly", "name": "Doanh nhân Pháp luật", "url": "https://doanhnhan.congly.vn/chung-khoan-18-9-vn-index-dao-chieu-cuoi-phien-hon-10-500-ty-dong-don-vao-atc.html", "accessedAt": "2026-09-20T08:30:00+07:00", "reliability": "primary"},
+    {"id": "src-biggo", "name": "BigGo Finance", "url": "https://finance.biggo.com/news/56c8331b-6f97-43a4-80f5-a300bf85e050", "accessedAt": "2026-09-20T08:30:00+07:00", "reliability": "secondary"},
+    {"id": "src-investor", "name": "The Investor", "url": "https://theinvestor.vn/vanguard-eyes-25-bln-investment-in-vietnam-stocks-after-ftse-upgrade-d20048.html", "accessedAt": "2026-09-20T08:30:00+07:00", "reliability": "secondary"},
+    {"id": "src-chinhphu", "name": "Chính phủ / VTC", "url": "https://vtcnews.vn/cong-dong-quoc-te-danh-gia-cao-tien-trinh-nang-hang-chung-khoan-cua-viet-nam-ar1040575.html", "accessedAt": "2026-09-20T08:30:00+07:00", "reliability": "primary"},
+    {"id": "src-bbc", "name": "BBC Tiếng Việt", "url": "https://www.bbc.com/vietnamese/articles/c98r6145dmg4o", "accessedAt": "2026-09-20T08:30:00+07:00", "reliability": "secondary"},
+    {"id": "src-vov", "name": "VOV tỷ giá", "url": "https://vov.vn/thi-truong/ty-gia-usd-hom-nay-199-gia-usd-ban-ra-26380-dongusd-post1333888.vov", "accessedAt": "2026-09-20T08:30:00+07:00", "reliability": "primary"},
+    {"id": "src-latimes", "name": "Los Angeles Times", "url": "https://www.latimes.com/business/story/2026-09-18/wall-street-drifts-lower-as-bond-yields-rise-oil-prices-swing", "accessedAt": "2026-09-20T08:30:00+07:00", "reliability": "secondary"},
+    {"id": "src-investopedia", "name": "Investopedia", "url": "https://www.investopedia.com/stock-market-today-dow-jones-s-and-p-500-09182026-12127251", "accessedAt": "2026-09-20T08:30:00+07:00", "reliability": "secondary"},
+    {"id": "src-ap", "name": "AP News", "url": "https://apnews.com/article/stock-markets-oil-war-inflation-rates-1ff3311788bcc4555d00e283a57289fe", "accessedAt": "2026-09-20T08:30:00+07:00", "reliability": "secondary"},
+    {"id": "src-agbi", "name": "AGBI / dầu Saudi", "url": "https://www.agbi.com/oil-and-gas/2026/09/saudi-oil-exports-through-gulf-climb/", "accessedAt": "2026-09-20T08:30:00+07:00", "reliability": "secondary"},
+    {"id": "src-topstep", "name": "Topstep Weekly Kickoff", "url": "https://www.topstep.com/blog/weekly-market-kickoff", "accessedAt": "2026-09-20T08:30:00+07:00", "reliability": "secondary"},
+    {"id": "src-countryecon", "name": "countryeconomy VNINDEX", "url": "https://countryeconomy.com/stock-exchange/vietnam", "accessedAt": "2026-09-20T08:30:00+07:00", "reliability": "secondary"}
+  ]
+}

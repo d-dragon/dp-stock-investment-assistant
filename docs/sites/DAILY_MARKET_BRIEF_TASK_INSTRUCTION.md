@@ -2,7 +2,7 @@
 
 **Status:** living document — edit this file; do not treat chat history as the source of truth  
 **Version:** 2.1.1  
-**Updated:** 2026-09-19 (GMT+7)  
+**Updated:** 2026-09-20 (GMT+7)  
 **Owner:** Phan Duy / DP Stock-Investment Assistant  
 **Canonical path in repo:** `docs/sites/DAILY_MARKET_BRIEF_TASK_INSTRUCTION.md` on branch `project-website-pages`  
 **Proven:** v2.0.0 ran 2026-09-18 on GitHub Pages. v2.1.0 dashboard rendered the same day. v2.1.1 restores UTF-8 Vietnamese + Be Vietnam Pro after ASCII-stripped chrome/news on Pages.
@@ -21,11 +21,12 @@
 
 | Date | Version | Change |
 |---|---|---|
+| 2026-09-20 | 2.1.1-run4 | Weekend brief 08:36 GMT+7. HOSE đóng cửa Chủ nhật; snapshot VN lấy 18/9. Tin mới: Vanguard ~2,5 tỷ USD; UNGA Trump–GCC 22/9. Chuỗi VN-Index đủ 14–18/9. Gaps: tự doanh/cá nhân vẫn null; KLGD 15–17/9 vẫn null; NDX trên ticker là Nasdaq Composite (đồng nhất schema cũ), không phải Nasdaq-100. |
 | 2026-09-19 | 2.1.1-run3 | Weekend brief 08:36 GMT+7. HOSE đóng cửa cuối tuần; snapshot VN lấy 18/9. Bổ sung bảng ngoại theo mã (PNJ/HPG/VIC). Gaps: tự doanh/cá nhân vẫn null; chuỗi VN-Index 5D chỉ 17–18/9; KLGD 17/9 vẫn null; NDX trên ticker là Nasdaq Composite (đồng nhất schema cũ), không phải Nasdaq-100. |
 | 2026-09-18 | 2.1.1-run2 | Closed-session refresh 16:54 GMT+7. Restored UTF-8 chrome in `report-app.js` (`đã đóng cửa`, `thị trường`, `Vĩ mô Việt Nam`). Gaps: tự doanh/cá nhân null; chuỗi VN-Index 5D chỉ 17–18/9; foreign buy/sell chi tiết chưa có bảng tổng hợp mới. |
 | 2026-09-18 | 2.1.1 | UTF-8 mandatory. Never strip Vietnamese diacritics when pushing JS/JSON. Load Be Vietnam Pro. Daily automation must fetch this file from the repo before running. |
 | 2026-09-18 | 2.1.0 | Multi-pane dashboard. Vietnamese UI. Paginated news + impact. Chart tabs VN-Index / World / Crypto. No TradingView HOSE:VNINDEX. |
-| 2026-09-18 | 2.0.0 | Split HTML into template + CSS/JS + JSON. |
+| 2026-09-18 | 2.0.0 | Split HTML into template + CSS/JS. |
 | 2026-09-18 | 1.0.0 | Monolithic HTML brief. |
 
 ---
