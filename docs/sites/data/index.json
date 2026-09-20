@@ -1,7 +1,15 @@
 {
   "schemaVersion": "1.0.0",
-  "updatedAt": "2026-09-19T08:36:00+07:00",
+  "updatedAt": "2026-09-20T08:36:00+07:00",
   "reports": [
+    {
+      "id": "daily-brief-2026-09-20",
+      "date": "2026-09-20",
+      "title": "Bản tin thị trường Việt Nam & thế giới",
+      "status": "closed",
+      "path": "2026-09-20.html",
+      "dataPath": "2026-09-20/report.json"
+    },
     {
       "id": "daily-brief-2026-09-19",
       "date": "2026-09-19",
