@@ -14,6 +14,9 @@
   const charts = {};
   const newsPage = { global: 0, vn: 0 };
   const PAGE = 8;
+  /** @type {Record<string, object>} in-memory cache of weekly JSON by weekPath */
+  const weekCache = {};
+  let catalogCache = null;
 
   function srcLink(id) {
     const s = SOURCES[id];
@@ -21,71 +24,114 @@
     return '<a href="' + s.url + '" target="_blank" rel="noopener noreferrer">' + s.name + "</a>";
   }
 
-  function boot() {
-    const date = document.body.getAttribute("data-date");
-    const path = date ? "./data/" + date + "/report.json" : "./data/index.json";
-    const srcPath = date ? "./data/" + date + "/sources.json" : null;
-    const reportP = window.__REPORT__
-      ? Promise.resolve(window.__REPORT__)
-      : fetch(path).then(function (r) {
-          if (!r.ok) throw new Error("HTTP " + r.status + " " + path);
-          return r.json();
-        });
-    const sourcesP = window.__SOURCES__
-      ? Promise.resolve(window.__SOURCES__)
-      : srcPath
-        ? fetch(srcPath)
-            .then(function (r) {
-              return r.ok ? r.json() : { sources: [] };
-            })
-            .catch(function () {
-              return { sources: [] };
-            })
-        : Promise.resolve({ sources: [] });
-    Promise.all([reportP, sourcesP])
-      .then(function (pair) {
-        const rep = pair[0];
-        const src = pair[1];
-        if (rep && rep.reports && !rep.snapshot) {
-          document.getElementById("app").innerHTML = renderHub(rep);
-          return;
-        }
-        REPORT = rep;
-        (src.sources || []).forEach(function (s) {
-          SOURCES[s.id] = s;
-        });
-        renderDash();
-      })
-      .catch(function (e) {
-        document.getElementById("app").innerHTML =
-          '<div class="err">Không tải được dữ liệu (' + e.message + ").</div>";
-      });
+  function parseRoute() {
+    const raw = (location.hash || "").replace(/^#\/?/, "").trim();
+    if (!raw || raw === "latest" || raw === "years" || raw.indexOf("y/") === 0) {
+      return { view: "latest", date: null };
+    }
+    const m = raw.match(/^(\d{4}-\d{2}-\d{2})$/);
+    if (m) return { view: "day", date: m[1] };
+    return { view: "latest", date: null };
   }
 
-  function renderHub(cat) {
-    const rows = (cat.reports || [])
-      .map(function (r) {
-        const href = "./" + (r.path || "");
-        return (
-          '<li class="hub-row"><a href="' +
-          href +
-          '">' +
-          r.date +
-          " \u2014 " +
-          (r.title || "") +
-          '</a> <span class="badge ' +
-          (r.status || "") +
-          '">' +
-          (r.status || "") +
-          "</span></li>"
-        );
+  function latestReportDate(cat) {
+    const list = (cat.reports || []).slice().sort(function (a, b) {
+      return b.date.localeCompare(a.date);
+    });
+    return list.length ? list[0].date : null;
+  }
+
+  function reportDates(cat) {
+    const map = {};
+    (cat.reports || []).forEach(function (r) {
+      map[r.date] = r;
+    });
+    return map;
+  }
+
+  function fetchJson(path) {
+    return fetch(path).then(function (r) {
+      if (!r.ok) throw new Error("HTTP " + r.status + " " + path);
+      return r.json();
+    });
+  }
+
+  function loadCatalog() {
+    if (catalogCache) return Promise.resolve(catalogCache);
+    return fetchJson("./data/index.json").then(function (cat) {
+      catalogCache = cat;
+      return cat;
+    });
+  }
+
+  function loadWeek(weekPath) {
+    if (weekCache[weekPath]) return Promise.resolve(weekCache[weekPath]);
+    return fetchJson("./data/" + weekPath).then(function (week) {
+      weekCache[weekPath] = week;
+      return week;
+    });
+  }
+
+  function clearSources() {
+    Object.keys(SOURCES).forEach(function (k) {
+      delete SOURCES[k];
+    });
+  }
+
+  function applyDayPayload(day) {
+    REPORT = day.report;
+    clearSources();
+    const src = day.sources || {};
+    (src.sources || []).forEach(function (s) {
+      SOURCES[s.id] = s;
+    });
+    newsPage.global = 0;
+    newsPage.vn = 0;
+    Object.keys(charts).forEach(function (id) {
+      if (charts[id]) {
+        charts[id].destroy();
+        delete charts[id];
+      }
+    });
+    renderDash();
+  }
+
+  function showError(msg) {
+    document.getElementById("app").innerHTML = '<div class="err">' + msg + "</div>";
+  }
+
+  function boot() {
+    const route = parseRoute();
+    loadCatalog()
+      .then(function (cat) {
+        window.__CATALOG__ = cat;
+        let date = route.date;
+        if (!date) {
+          date = latestReportDate(cat);
+          if (!date) throw new Error("Catalog trống");
+          location.replace("#/" + date);
+          return;
+        }
+        const entry = (cat.reports || []).find(function (r) {
+          return r.date === date;
+        });
+        if (!entry || !entry.weekPath) {
+          throw new Error("Không có mục catalog cho " + date);
+        }
+        return loadWeek(entry.weekPath).then(function (week) {
+          const day = (week.days || []).find(function (d) {
+            return d.date === date;
+          });
+          if (!day || !day.report) {
+            throw new Error("Không có ngày " + date + " trong " + entry.weekPath);
+          }
+          window.__BRIEF_DATE__ = date;
+          applyDayPayload(day);
+        });
       })
-      .join("");
-    return (
-      '<header class="hdr"><h1>DP Stock \u2014 Bản tin thị trường</h1></header><div class="pb" style="padding:16px"><ul class="news">' +
-      rows +
-      "</ul></div>"
-    );
+      .catch(function (e) {
+        showError("Không tải được (" + e.message + '). <a href="#/latest">Thử bản mới nhất</a>');
+      });
   }
 
   function sessionLabel(s) {
@@ -94,11 +140,130 @@
     return "ngoài giờ";
   }
 
+  function bindDatePicker(activeDate) {
+    const btn = document.getElementById("dateBtn");
+    const pop = document.getElementById("calPop");
+    const wrap = document.getElementById("datePicker");
+    if (!btn || !pop || !wrap) return;
+    let view = activeDate ? activeDate.slice(0, 7) : null;
+
+    function close() {
+      pop.hidden = true;
+      btn.setAttribute("aria-expanded", "false");
+    }
+    function open() {
+      const cat = window.__CATALOG__;
+      if (!cat) return;
+      if (!view) {
+        const latest = latestReportDate(cat);
+        view = latest ? latest.slice(0, 7) : null;
+      }
+      pop.innerHTML = renderCalendar(cat, view, activeDate);
+      pop.hidden = false;
+      btn.setAttribute("aria-expanded", "true");
+    }
+
+    btn.onclick = function (e) {
+      e.stopPropagation();
+      if (pop.hidden) open();
+      else close();
+    };
+    pop.onclick = function (e) {
+      e.stopPropagation();
+      const nav = e.target.closest("[data-nav]");
+      if (nav) {
+        view = nav.getAttribute("data-nav");
+        pop.innerHTML = renderCalendar(window.__CATALOG__, view, activeDate);
+        return;
+      }
+      const day = e.target.closest("button[data-date]");
+      if (day) {
+        const next = day.getAttribute("data-date");
+        close();
+        if (next && next !== activeDate) location.hash = "#/" + next;
+      }
+    };
+    if (!window.__CAL_DOC_BOUND__) {
+      window.__CAL_DOC_BOUND__ = true;
+      document.addEventListener("click", function (e) {
+        const el = document.getElementById("datePicker");
+        const p = document.getElementById("calPop");
+        if (el && p && !p.hidden && !el.contains(e.target)) {
+          p.hidden = true;
+          const b = document.getElementById("dateBtn");
+          if (b) b.setAttribute("aria-expanded", "false");
+        }
+      });
+      document.addEventListener("keydown", function (e) {
+        if (e.key === "Escape") {
+          const p = document.getElementById("calPop");
+          const b = document.getElementById("dateBtn");
+          if (p) p.hidden = true;
+          if (b) b.setAttribute("aria-expanded", "false");
+        }
+      });
+    }
+  }
+
+  function renderCalendar(cat, ym, activeDate) {
+    const dates = reportDates(cat);
+    const parts = (ym || activeDate || "").split("-");
+    let y = parseInt(parts[0], 10);
+    let m = parseInt(parts[1], 10);
+    if (!y || !m) {
+      const latest = latestReportDate(cat);
+      y = parseInt(latest.slice(0, 4), 10);
+      m = parseInt(latest.slice(5, 7), 10);
+    }
+    const first = new Date(y, m - 1, 1);
+    const startPad = (first.getDay() + 6) % 7;
+    const daysInMonth = new Date(y, m, 0).getDate();
+    const prev = m === 1 ? y - 1 + "-12" : y + "-" + String(m - 1).padStart(2, "0");
+    const next = m === 12 ? y + 1 + "-01" : y + "-" + String(m + 1).padStart(2, "0");
+    const label = first.toLocaleString("vi-VN", { month: "long", year: "numeric" });
+    let cells = "";
+    for (let i = 0; i < startPad; i++) cells += '<span class="cal-cell empty"></span>';
+    for (let day = 1; day <= daysInMonth; day++) {
+      const ds = y + "-" + String(m).padStart(2, "0") + "-" + String(day).padStart(2, "0");
+      const hit = dates[ds];
+      if (hit) {
+        const on = ds === activeDate ? " on" : "";
+        cells +=
+          '<button type="button" class="cal-cell has' +
+          on +
+          '" data-date="' +
+          ds +
+          '" title="' +
+          (hit.title || ds) +
+          '">' +
+          day +
+          "</button>";
+      } else {
+        cells += '<span class="cal-cell">' + day + "</span>";
+      }
+    }
+    return (
+      '<div class="cal-head"><button type="button" data-nav="' +
+      prev +
+      '" aria-label="Tháng trước">‹</button><strong>' +
+      label +
+      '</strong><button type="button" data-nav="' +
+      next +
+      '" aria-label="Tháng sau">›</button></div>' +
+      '<div class="cal-dow"><span>T2</span><span>T3</span><span>T4</span><span>T5</span><span>T6</span><span>T7</span><span>CN</span></div>' +
+      '<div class="cal-grid">' +
+      cells +
+      "</div>" +
+      '<div class="cal-foot"><a href="#/latest">Mới nhất</a><span class="muted">Ngày có báo cáo được tô sáng</span></div>'
+    );
+  }
+
   function renderDash() {
     const r = REPORT;
     const sess = r.marketSession || (r.coverage && r.coverage.session) || "closed";
+    const d = window.__BRIEF_DATE__ || "";
     document.getElementById("app").innerHTML =
-      '<header class="hdr"><h1>Bản tin thị trường</h1><div class="meta"><span>' +
+      '<header class="hdr"><div class="hdr-left"><a class="nav-home" href="../index.html" title="Về trang docs"><i class="fa-solid fa-house"></i><span>Home</span></a><div class="hdr-titles"><h1>Bản tin thị trường</h1></div></div><div class="meta"><span>' +
       (r.timezone || "") +
       "</span><span>" +
       (r.generatedAt || "") +
@@ -106,7 +271,14 @@
       sess +
       '">' +
       sessionLabel(sess) +
-      '</span></div><button id="themeBtn" type="button">Giao diện</button></header>' +
+      '</span></div>' +
+      '<div class="date-picker" id="datePicker">' +
+      '<button type="button" class="date-btn" id="dateBtn" aria-haspopup="dialog" aria-expanded="false" title="Chọn ngày">' +
+      '<i class="fa-regular fa-calendar"></i> <span>' +
+      d +
+      "</span></button>" +
+      '<div class="cal-pop" id="calPop" hidden role="dialog" aria-label="Chọn ngày báo cáo"></div></div>' +
+      '<button id="themeBtn" type="button">Giao diện</button></header>' +
       '<div class="ticker" id="ticker"></div><div class="grid">' +
       '<section class="pane"><div class="pt"><i class="fa-solid fa-globe"></i> Tin thế giới</div><div class="pb"><ul class="news" id="gNews"></ul></div><div class="pager" id="gPager"></div></section>' +
       '<section class="pane"><div class="pt"><i class="fa-solid fa-chart-line"></i> Biểu đồ<div class="tabs" id="chartTabs"><button data-tab="vnindex" class="on">VN-Index</button><button data-tab="world">Thế giới</button><button data-tab="crypto">Crypto</button></div></div><div class="pb" id="chartPane"></div></section>' +
@@ -120,6 +292,7 @@
     renderRight();
     renderChart("vnindex");
     renderFoot();
+    bindDatePicker(d);
     document.getElementById("themeBtn").onclick = function () {
       const next = document.documentElement.getAttribute("data-theme") === "light" ? "dark" : "light";
       document.documentElement.setAttribute("data-theme", next);
@@ -491,6 +664,7 @@
   }
 
   document.documentElement.setAttribute("data-theme", localStorage.getItem("brief-theme") || "dark");
+  window.addEventListener("hashchange", boot);
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", boot);
   } else {

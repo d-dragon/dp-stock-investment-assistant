@@ -4,6 +4,17 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Bản tin thị trường — TEMPLATE</title>
+  <!--
+    Boot notes (v2.2+):
+    - Primary page is docs/sites/index.html with hash routing:
+        #/ or empty  → hub catalog (data/index.json)
+        #/YYYY-MM-DD → daily dashboard
+    - Day data lives in monthly/weekly files: data/YYYY-MM/week-WW.json
+      (schemaVersion 2.0.0, days[] each with report + sources).
+    - Do NOT create a new YYYY-MM-DD.html dashboard on publish.
+      Old date URLs are tiny redirect stubs → index.html#/YYYY-MM-DD.
+    - This template is reference only; the live shell is index.html.
+  -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,400;0,500;0,600;0,700;1,400&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
@@ -11,8 +22,8 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 </head>
-<body data-date="YYYY-MM-DD">
+<body>
   <div id="app">Đang tải bản tin…</div>
-  <script src="../assets/js/report-app.js"></script>
+  <script src="../assets/js/report-app.js?v=20260921w"></script>
 </body>
 </html>
