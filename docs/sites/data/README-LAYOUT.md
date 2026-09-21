@@ -1,0 +1,1 @@
+# Data layout\n\nAs of 2026-09-21 (v2.2.0): monthly folders `YYYY-MM/` hold `week-WW.json` files.\nPer-day folders `YYYY-MM-DD/` were removed after migration.\n
