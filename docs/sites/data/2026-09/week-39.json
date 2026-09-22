@@ -1,1 +1,1 @@
-{"schemaVersion":"2.0.0","yearMonth":"2026-09","week":{"isoYear":2026,"isoWeek":39,"id":"2026-W39","start":"2026-09-21","end":"2026-09-27"},"updatedAt":"2026-09-22T10:30:00+07:00","days":[{"date":"2026-09-21"},{"date":"2026-09-22"}]}
+{"schemaVersion":"2.0.0","yearMonth":"2026-09","week":{"isoYear":2026,"isoWeek":39,"id":"2026-W39","start":"2026-09-21","end":"2026-09-27"},"updatedAt":"2026-09-22T10:15:00+07:00","days":[{"date":"2026-09-22","report":{"schemaVersion":"1.0.0","id":"daily-brief-2026-09-22"}}]}
