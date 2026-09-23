@@ -18,10 +18,21 @@
   const weekCache = {};
   let catalogCache = null;
 
-  function srcLink(id) {
+  function srcLink(id, overrideUrl) {
     const s = SOURCES[id];
-    if (!s) return "";
-    return '<a href="' + s.url + '" target="_blank" rel="noopener noreferrer">' + s.name + "</a>";
+    const url = overrideUrl || (s && s.url);
+    if (!url) return (s && s.name) || "";
+    const name = s ? s.name : (id || "Nguồn");
+    return '<a href="' + url + '" target="_blank" rel="noopener noreferrer">' + name + "</a>";
+  }
+
+  function resolveNewsUrl(n) {
+    if (!n) return "";
+    if (n.url && /^https?:\/\//i.test(n.url)) return n.url;
+    if (n.id && /^https?:\/\//i.test(n.id)) return n.id;
+    const s = SOURCES[n.sourceId];
+    if (s && s.url) return s.url;
+    return "";
   }
 
   function parseRoute() {
@@ -336,15 +347,24 @@
       .map(function (n) {
         const img = (n.image && n.image.url) || "https://picsum.photos/seed/mkt/144/96";
         const impact = (n.impact && n.impact.text) || "";
+        const link = resolveNewsUrl(n);
+        const titleHtml = link
+          ? '<a href="' + link + '" target="_blank" rel="noopener noreferrer">' + n.title + "</a>"
+          : n.title;
+        const imgTag = '<img src="' + img + '" alt="">';
+        const imgHtml = link
+          ? '<a href="' + link + '" target="_blank" rel="noopener noreferrer" tabindex="-1">' + imgTag + "</a>"
+          : imgTag;
+        const sourceHtml = srcLink(n.sourceId, link || null);
         return (
-          "<li><img src=\"" +
-          img +
-          '" alt=""><div><div class="when">' +
+          "<li>" +
+          imgHtml +
+          "<div><div class=\"when\">" +
           String(n.date || "").replace("T", " ").slice(0, 16) +
           " \u00b7 " +
-          srcLink(n.sourceId) +
+          sourceHtml +
           "</div><h3>" +
-          n.title +
+          titleHtml +
           "</h3><div>" +
           (n.summary || "") +
           '</div><div class="impact">' +

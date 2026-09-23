@@ -44,6 +44,7 @@
       var p = name + "[" + i + "]";
       if (!n || !n.id || !n.title || !n.summary || !n.sourceId) errors.push(p + " fields");
       if (n && n.date && !isIso(n.date)) errors.push(p + ".date");
+      if (n && n.url && typeof n.url !== "string") errors.push(p + ".url");
       if (n) checkImpact(p, n.impact, errors);
     });
   }

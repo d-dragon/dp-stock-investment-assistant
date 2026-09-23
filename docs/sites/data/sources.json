@@ -1,0 +1,109 @@
+{
+  "schemaVersion": "1.0.0",
+  "sources": [
+    {
+      "id": "src-cafef",
+      "name": "CafeF",
+      "category": "Vietnam Market Data & Indices",
+      "description": "Quotes, trading volume, corporate events",
+      "url": "https://cafef.vn/",
+      "reliability": "primary"
+    },
+    {
+      "id": "src-cafef-data",
+      "name": "CafeF Dữ liệu",
+      "category": "Vietnam Market Data & Indices",
+      "description": "Quotes, trading volume, corporate events",
+      "url": "https://cafef.vn/du-lieu.chn",
+      "reliability": "primary"
+    },
+    {
+      "id": "src-vietstock",
+      "name": "Vietstock Finance",
+      "category": "Vietnam Market Data & Indices",
+      "description": "HOSE/HNX market indices, sector performance, financial ratios",
+      "url": "https://finance.vietstock.vn/",
+      "reliability": "primary"
+    },
+    {
+      "id": "src-24h",
+      "name": "24HMoney VN-Index",
+      "category": "Vietnam Market Data & Indices",
+      "description": "VN-Index intraday and liquidity tracking",
+      "url": "https://24hmoney.vn/indices/vn-index",
+      "reliability": "primary"
+    },
+    {
+      "id": "src-stockbiz",
+      "name": "StockBiz",
+      "category": "Vietnam Market Data & Indices",
+      "description": "Official foreign trading stats (net buy/sell values) and historical indices",
+      "url": "http://en.stockbiz.vn/ForeignerTradingStats.aspx?Exchange=HOSTC&Type=1",
+      "reliability": "primary"
+    },
+    {
+      "id": "src-yahoo-vn",
+      "name": "Yahoo Finance VNINDEX",
+      "category": "Vietnam Market Data & Indices",
+      "description": "Historical closing series",
+      "url": "https://finance.yahoo.com/quote/%5EVNINDEX.VN/history/",
+      "reliability": "secondary"
+    },
+    {
+      "id": "src-nhnn",
+      "name": "SBV / tỷ giá",
+      "category": "Vietnam Macro & Policy",
+      "description": "State Bank of Vietnam central exchange rate (USD/VND), policy rates, reserve requirements",
+      "url": "https://www.sbv.gov.vn/",
+      "reliability": "primary"
+    },
+    {
+      "id": "src-nso",
+      "name": "NSO",
+      "category": "Vietnam Macro & Policy",
+      "description": "General Statistics Office / National Statistics Office for CPI, FDI, GDP, retail sales",
+      "url": "https://www.nso.gov.vn/",
+      "reliability": "primary"
+    },
+    {
+      "id": "src-vneconomy",
+      "name": "VnEconomy",
+      "category": "Vietnam Macro & Policy",
+      "description": "Macro analysis and economic policy news",
+      "url": "https://vneconomy.vn/",
+      "reliability": "secondary"
+    },
+    {
+      "id": "src-vietnambiz",
+      "name": "VietnamBiz",
+      "category": "Vietnam Macro & Policy",
+      "description": "Macro analysis and economic policy news",
+      "url": "https://vietnambiz.vn/",
+      "reliability": "secondary"
+    },
+    {
+      "id": "src-barrons",
+      "name": "Barron's Market Data",
+      "category": "Global & Commodities / Crypto",
+      "description": "US equity futures, bond yields (10Y UST), DXY, and global commodities",
+      "url": "https://www.barrons.com/market-data",
+      "reliability": "secondary"
+    },
+    {
+      "id": "src-bloomberg",
+      "name": "Bloomberg Asia",
+      "category": "Global & Commodities / Crypto",
+      "description": "Bloomberg Asia market headlines and sentiment",
+      "url": "https://www.bloomberg.com/asia",
+      "reliability": "secondary"
+    },
+    {
+      "id": "src-yahoo-btc",
+      "name": "Yahoo Bitcoin",
+      "category": "Global & Commodities / Crypto",
+      "description": "Bitcoin and major crypto benchmark pricing",
+      "url": "https://finance.yahoo.com/quote/BTC-USD/",
+      "reliability": "secondary"
+    }
+  ]
+}
