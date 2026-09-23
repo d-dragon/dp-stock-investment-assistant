@@ -46,6 +46,7 @@ The SRS covers the full system boundary:
 
 | Document | Relationship |
 |----------|-------------|
+| [Product Specification](PRODUCT_SPECIFICATION.md) | Authoritative master charter establishing business goals, retail investor obstacles, hybrid persona, 360° company lenses, and dual-track lifecycle capabilities |
 | [Documentation Methodology](../study-hub/project-documentation-and-specification-methodology.md) | Defines the documentation architecture, SDD lifecycle integration, and governance model that this SRS operates within |
 | [Requirements Method and Governance](REQUIREMENTS_METHOD_AND_GOVERNANCE.md) | Defines authoring standards, change-control processes, and approval paths for this SRS |
 | [Project Constitution](../../.specify/memory/constitution.md) | Non-negotiable governance layer; all requirements must be consistent with constitution principles and golden rules |
