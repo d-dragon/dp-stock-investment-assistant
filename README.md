@@ -41,12 +41,12 @@
 > 📘 **Quick Navigation to Authoritative Documents**:  
 > • **Product SSOT**: [`docs/system/PRODUCT_SPECIFICATION.md`](docs/system/PRODUCT_SPECIFICATION.md) — Product model, domain contracts, and roadmap.  
 > • **Conceptual IA Map**: [`docs/system/CONCEPTUAL_IA_MAP.md`](docs/system/CONCEPTUAL_IA_MAP.md) — Information architecture and workspace zones.  
-> • **Conceptual Wireframes**: [`docs/system/CONCEPTUAL_WIREFRAMES.md`](docs/system/CONCEPTUAL_WIREFRAMES.md) — Visual proof of workspace frames (W1–W6).  
+> • **User Journeys with Wireframes**: [`docs/system/USER_JOURNEYS_WITH_WIREFRAMES.md`](docs/system/USER_JOURNEYS_WITH_WIREFRAMES.md) — Techno-Fundamental user journey Pass→Position / Fail→Working Thesis + optional Case binder; proof frames W1–W6.  
 > • **Vision & Capabilities Charter**: [`docs/system/PRODUCT_VISION_AND_CAPABILITIES.md`](docs/system/PRODUCT_VISION_AND_CAPABILITIES.md) — Market microstructure & 360° deep-dive.  
 
 ### 1.1 Product Overview & Value Proposition
 
-The **DP Stock-Investment Assistant** is an intelligent, visual workspace engineered as a **Cognitive AI-powered Investment Workspace** for retail investors and active stock traders. Its primary journey owner is the **Hybrid Techno-Fundamental Investor**, who combines long-term business quality and valuation conviction with tactical technical execution, volume profiling, and strict risk discipline.
+The **DP Stock-Investment Assistant** is an intelligent, visual workspace engineered as a **Cognitive AI-powered Investment Workspace** for retail investors and active stock traders. Its primary journey owner is the **Techno-Fundamental Investor**, who combines long-term business quality and valuation conviction with tactical technical execution, volume profiling, and strict risk discipline.
 
 Modern stock investing subjects retail participants to four systemic handicaps:
 1. **Information Asymmetry**: Fragmented, low-signal disclosures, delayed news, and unverified forum sentiment.
@@ -101,7 +101,7 @@ flowchart LR
    - **Execution Portfolio (Track B)**: Governs live holdings, risk budgeting, and real capital allocations.
    - **The Decision Gate**: Ideas only promote to the portfolio by passing an explicit pre-mortem checklist (clear invalidation criteria, risk budget, and stop rules).
 2. **Living Thesis with Multi-Stance**: Theses are living records tracking parallel **Bull and Bear** arguments, continuously monitored against earnings releases and news to prevent hindsight bias.
-3. **Optional Investment Case**: A lightweight narrative thread that optionally binds research, thesis, decisions, and trades into one coherent lifecycle.
+3. **Position at Pass + optional Case binder**: Decision **Pass** creates a **Position** (size, stop, official book). Fail/Revise never creates a Position — work stays a **Working Thesis**. An **Investment Case** is an **optional narrative binder / dossier thread** (anytime; not born at Pass; not the Position; not required).
 
 #### The Unified Workspace Layout
 
@@ -109,7 +109,7 @@ All work takes place in a single, focused screen modeled after a professional wo
 
 ```text
 ┌─────────────────────────────────────────────────────────────────────────────────────────────┐
-│ TOP CHROME (Z2 Context)                 [VNM]  •  [Investment Case]  •  Research / Market  │
+│ TOP CHROME (Z2 Context)                 [VNM]  •  [Position after Pass]  •  [Case if linked] │
 ├───────────────────────┬──────────────────────────────────────────────┬──────────────────────┤
 │ LEFT SIDEBAR (Z1)     │ PRIMARY WORKSPACE (Z3 · Wide)                │ AI COMPANION (Z4)    │
 │ Dual-Track             │ • Active work and decision gate              │ • Context-aware       │
@@ -124,7 +124,7 @@ All work takes place in a single, focused screen modeled after a professional wo
 └───────────────────────┴──────────────────────────────────────────────┴──────────────────────┘
 ```
 
-> For deep architectural specifications and wireframes, see [`CONCEPTUAL_IA_MAP.md`](docs/system/CONCEPTUAL_IA_MAP.md) and [`CONCEPTUAL_WIREFRAMES.md`](docs/system/CONCEPTUAL_WIREFRAMES.md).
+> For deep architectural specifications and wireframes, see [`CONCEPTUAL_IA_MAP.md`](docs/system/CONCEPTUAL_IA_MAP.md) and [`USER_JOURNEYS_WITH_WIREFRAMES.md`](docs/system/USER_JOURNEYS_WITH_WIREFRAMES.md).
 
 ---
 
