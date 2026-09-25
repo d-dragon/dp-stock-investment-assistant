@@ -1,83 +1,107 @@
-# DP Stock-Investment Assistant
-## Product Document  
-**Version:** 1.5.2 · **Date:** 2026-09-24  
-**Status:** Working source of truth for product vision, model, and conceptual IA/UX (SDD-ready); FREEZE 2026-09-24 Pass→Position / Case=optional binder / Working Thesis; Dual-Track aligned to Vision §5.1; primary persona = Techno-Fundamental Investor
+# Product Specification
+
+| Field | Value |
+|---|---|
+| Document | Product Specification · DP Stock-Investment Assistant |
+| Version | v1.7.0 |
+| Date | 2026-09-25 |
+| Status | Working source of truth · ontology frozen 2026-09-24 |
+| Owner | Phan Duy |
+| Related | [IA map v1.0.0](./CONCEPTUAL_IA_MAP.md) · [Journeys v1.0.0](./USER_JOURNEYS_WITH_WIREFRAMES.md) · [Capabilities charter](./PRODUCT_CAPABILITIES%5BReserved%5D.md) (2026-09-03) |
 
 ---
 
 > **Core Thesis**  
-> DP Stock is a **Cognitive AI-powered Investment Workspace** built from two cooperating layers: a **Platform** (Workspace, AI Agents + Memory, Data/Information) that enables work, and an **Investment Core** of complementary domains (Insights, Thesis + Principles, Decision + Journal, Portfolio, Monitoring).  
-> A **Decision Pass creates a Position** (Track B / Portfolio execution-risk object: size, stop, official book). Fail/Revise never creates a Position — work stays a **Working Thesis** in Sandbox. A **Working / Living Thesis** is the reasoned argument (Multi-stance Bull/Bear); Thesis ≠ Position ≠ Case. An **Investment Case** is an **optional narrative binder / dossier thread** that can group related Core objects across the lifecycle when the user wants one coherent story — it is **not** born at Pass, **not** the Position, and **not** required to research or promote. The product’s job is to make the investment path — Insights → Thesis → Decision → Portfolio → Monitoring → Journal — visible, disciplined, and continuously improved through an Intelligence Loop.
-
+> DP Stock is a **Cognitive AI-powered Investment Workspace** built from two cooperating layers:
+> - a **Platform** (Workspace, AI Agents + Memory, Data/Information) that enables work, and
+> - an **Investment Core** of complementary domains (Insights, Thesis + Principles, Decision + Journal, Portfolio, Monitoring) that holds investment meaning.
+>
+> Work moves from a **Working Thesis** in the Research Sandbox through an explicit **Decision gate**. **Pass** creates a **Position** on the Execution Portfolio; **Fail** creates nothing and the user revises. An **Investment Case** is an optional narrative binder, never required (rules: §4.6).
+>
+> The product's job is to make the investment path (Insights → Thesis → Decision → Portfolio → Monitoring → Journal) visible, disciplined, and continuously improved through an Intelligence Loop.
 
 ---
 
-## 0. Vision Alignment One-Pager *(working freeze)*
+## 0. Vision alignment *(working freeze)*
 
-> **Purpose.** Freeze how this Product Specification relates to PRODUCT_VISION_AND_CAPABILITIES.md, so vision → IA → UX work has a single trusted working document.  
-> **Rule.** Prefer **this file** for product vision, model, and abstracted concepts. The Vision & Capabilities charter remains complementary material to **merge into this Spec later** — not a parallel backlog or second source of truth.
+> **Purpose.** Fix how this Spec relates to the [Capabilities charter](./PRODUCT_CAPABILITIES%5BReserved%5D.md) ("Product Vision and Core Capabilities", `docs/system/PRODUCT_CAPABILITIES[Reserved].md`), so vision → IA → UX work has one trusted working document.  
+> **Rule.** Prefer this Spec for product vision, model and concepts. The charter is complementary material to merge into this Spec later, not a parallel backlog or a second source of truth.
 
 ### 0.1 Document roles
 
 | Document | Role now | Later |
-|----------|----------|-------|
-| **This Product Specification** | Trusted working doc for vision statement, product model, personas, lifecycle, Phase intent, and conceptual IA/UX | Continues as product SSOT |
-| **PRODUCT_VISION_AND_CAPABILITIES.md** | North-star capability charter (obstacles, pillars, VN microstructure depth, 360° lenses, workspace metaphors) | Fold useful content into this Spec as appendices / capability notes; retire dual-truth usage |
+|---|---|---|
+| **This Product Specification** | Trusted working doc for the vision statement, product model, personas, lifecycle, Phase intent and conceptual IA/UX; owns the glossary (§0.2) and the ontology (§4.6) | Continues as the product source of truth |
+| **[Capabilities charter](./PRODUCT_CAPABILITIES%5BReserved%5D.md)** | North-star capability charter (obstacles, pillars, VN microstructure depth, 360° lenses, workspace metaphors) | Fold useful content into this Spec as appendices or capability notes; retire dual-truth usage |
+| **[IA map](./CONCEPTUAL_IA_MAP.md) / [Journeys](./USER_JOURNEYS_WITH_WIREFRAMES.md)** | Own zones and the layout lock (IA) and journeys, steps and frames (Journeys) | Follow this Spec |
 | **README / SRS / FE engineering docs** | Portal, requirements pool, implementation | Out of scope for this conceptual lane |
 
-### 0.2 Vocabulary freeze *(use Spec meanings)*
+### 0.2 Glossary *(the only glossary; other docs point here)*
 
 | Term | Meaning in this Spec | Do not confuse with |
-|------|----------------------|---------------------|
-| **Platform** | Workspace + AI/Memory + Data — enables work; does not own investment meaning | The whole product |
+|---|---|---|
+| **Platform** | Workspace + AI/Memory + Data; enables work, does not own investment meaning | The whole product |
 | **Investment Core** | Insights, Thesis + Principles, Decision + Journal, Portfolio, Monitoring | Chat UI alone |
-| **Position** | Track B execution-risk object **created by Decision Pass** (size, stop, official book) | Thesis argument; optional Case binder |
-| **Working Thesis / Living Thesis** | Reasoned argument (Multi-stance Bull/Bear); Sandbox pre-Pass state | Position; Case |
-| **Investment Case** | **Optional narrative binder / dossier thread** — groups related Core objects across lifecycle when user wants one story; can start anytime (often at Thesis); NOT born at Pass; NOT the Position; NOT required | Pass object; mandatory container; early-bind requirement |
-| **Investment Lifecycle** | Insights → Thesis → Decision → Portfolio → Monitoring → Journal | A single screen or one feature |
+| **Thesis** | The reasoned investment argument, and the name of the workspace stage where it is built | Position; Case |
+| **Working Thesis** | The Thesis before Pass: the Sandbox research state (also after Fail → Revise) | A Position; an early Case |
+| **Thesis (why we hold)** | The Thesis after Pass, attached to the Position as the reason it is held | A new object; the Position itself |
+| **Living Thesis** | Capability name only: a versioned, evolving Thesis with parallel Bull/Bear stances (Multi-stance). Not a stage and not a state | A stage in the flow |
+| **Multi-stance** | Parallel reasoned views inside one Thesis (at least Bull / Bear) | Dual-Track |
+| **Decision gate** | Explicit promotion gate (pre-mortem checklist) between Track A and Track B | A state of the Thesis |
+| **Pass / Fail / Revise** | Pass and Fail are the Decision gate outcomes; Revise is the action taken after Fail (no separate Fail button; §4.6) | Buttons for every outcome |
+| **Position** | Track B execution-risk object created by Pass (size, stop, official book) | The Thesis argument; the Case |
+| **Investment Case** (Case) | Optional narrative binder / dossier thread grouping related Core objects when the user wants one story; can start any time (often at Thesis); not born at Pass; not the Position; never required | A Pass object; a mandatory container |
+| **Case-on / Case-off** | Whether the current work is linked to a Case; the Case chip shows only when Case-on | Pass / Fail |
+| **Investment Lifecycle** | Product lifecycle of 6 stages: Insights → Thesis → Decision → Portfolio → Monitoring → Journal; the workspace shows 4 of them in Phase 1 (mapping in §4.5) | A single screen or feature |
+| **Dual-Track** | Two cooperating tracks, both always present: **Track A · Research Sandbox** (short: Sandbox) and **Track B · Execution Portfolio** (short: Portfolio); charter §5.1 | Multi-stance |
 | **Adaptive Workspace** | Conceptual multi-surface environment that preserves context across Core domains | A specific FE stack or component library |
-| **Dual-Track workspace** | Research Sandbox vs Execution Portfolio (Vision §5.1) | Keep thesis Multi-stance (Bull/Bear) as a separate Thesis capability |
-| **Intelligence Loop** | Outcomes and Journal feed learning back into Thesis / Memory | Autonomous mentor/agent product in Phase 1 |
+| **Zones Z1–Z4** | Z1 Left sidebar · Z2 Top chrome · Z3 Main workspace · Z4 AI companion; defined and locked in IA §2 | Screens, routes, components |
+| **Intelligence Loop** | Outcomes and the Journal feed learning back into the Thesis and Memory | An autonomous mentor product in Phase 1 |
+| **TFI** | Techno-Fundamental Investor, the primary persona (§0.3) | — |
 
 ### 0.3 Primary persona for Phase intent
 
-- **Primary journey owner:** Techno-Fundamental Investor (secondary aliases: Compounder / Swing-to-Invest) — conviction + tactical execution; Sandbox → Portfolio only after Decision / pre-mortem.  
-- **Process variant:** Active Retail Investor (same path; thicker writing / Case use).  
-- **Learning variant:** Learning Investor (more guidance later; not Phase 1 center).
+- **Primary journey owner: Techno-Fundamental Investor (TFI)** (secondary aliases: Compounder / Swing-to-Invest). Picks businesses on fundamentals, times entries, adds and stops with technical analysis, and works AI-native.
+- **"Techno" has two meanings on purpose:**
+  1. **Technical analysis** (chart, volume, structure) for entries, adds and stops, while fundamentals decide *what* to own.
+  2. A **technology-adopting investor** who deliberately uses AI abilities (agents, evidence gathering, memory, pre-mortem support) across their investment life.
+
+  The AI meaning does not change the Decision gate, whose check stays fundamental ↔ technical alignment. Later sections use TFI.
+- **Process variant:** Active Retail Investor (same path; heavier writing and Case use).
+- **Learning variant:** Learning Investor (more guidance later; not the Phase 1 center).
 
 ### 0.4 Phase 1 conceptual cut line *(what we prove next)*
 
-**In (skeleton path):** One Adaptive Workspace with Dual-Track separation (Research Sandbox vs Execution Portfolio); user can move Insights → **Working Thesis** → Decision → Portfolio; **Decision Pass creates a Position** (Fail/Revise creates none — stay Working Thesis in Sandbox); **Investment Case** is an **optional narrative binder** (anytime; not born at Pass; not the Position); evidence/provenance first-class; Multi-stance (Bull/Bear) inside Thesis.
+**In (skeleton path):** one Adaptive Workspace with Dual-Track separation; the user moves Insights → Working Thesis → Decision gate → Portfolio; Pass creates a Position, Fail creates nothing (§4.6); the Case stays optional; evidence and provenance are first-class; Multi-stance lives inside the Thesis.
 
-**Out of Phase 1 conceptual scope (Vision backlog until Spec pulls them in):** Full Gen-UI artifact zoo, Behavioral Mentor / deep risk coaching, proactive LTM/autonomy, full 360° knowledge graph, community/social surfaces, global/US depth beyond Vietnam-first foundation.
+**Out of Phase 1 conceptual scope** (charter backlog until this Spec pulls them in): the full Gen-UI artifact set, Behavioral Mentor and deep risk coaching, proactive long-term memory and autonomy, the full 360° knowledge graph, community and social surfaces, global/US depth beyond the Vietnam-first foundation.
 
-**Gate for any Vision capability ask:** Does this make Insights → Thesis → Decision → Portfolio more *completable and understandable* for a Vietnamese retail user in this phase? If no → keep on Vision backlog; do not treat as Spec Phase 1.
+**Gate for any charter capability ask:** does it make Insights → Thesis → Decision → Portfolio more *completable and understandable* for a Vietnamese retail user in this phase? If not, keep it on the charter backlog; it is not Spec Phase 1.
 
-### 0.5 Conceptual product shape *(IA seed — not implementation)*
+### 0.5 Conceptual product shape *(IA seed, not implementation)*
 
 ```text
 Adaptive Workspace (Platform · Workspace)
-├── Lifecycle orientation across Investment Core
+├── Lifecycle orientation across the Investment Core
 │     Insights → Thesis → Decision → Portfolio  (+ Monitoring / Journal later)
-├── Dual-Track: Research Sandbox | Execution Portfolio (both visible)
-├── Optional Investment Case chip / thread (linked or Case-off) — binder only
-├── Primary work surface for the active domain object
-└── Assistant as supporting companion (not the whole product)
+├── Dual-Track: Track A · Research Sandbox | Track B · Execution Portfolio (both visible)
+├── Optional Investment Case chip / thread (Case-on / Case-off), binder only
+├── Main workspace for the active domain object
+└── AI companion (supports; not the whole product)
 
-Pre-Pass (Sandbox): Insights and/or **Working Thesis** — no Position yet
-Pass: creates a **Position** on Portfolio (Thesis may attach as why we hold)
-Fail/Revise: **no Position** — stay Working Thesis in Sandbox
-Case: optional narrative binder anytime — NOT born at Pass
+Pre-Pass (Sandbox): Insights and/or Working Thesis, no Position yet
+Pass: creates a Position on Portfolio; the Thesis attaches as why we hold
+Fail: nothing created; Revise the Working Thesis in the Sandbox
+Case: optional narrative binder at any time, not born at Pass
 ```
 
+> **Spatial shell.** Zones and the layout lock are owned by the IA map: see [IA map §2.6](./CONCEPTUAL_IA_MAP.md) (Z2 Top chrome with context + utilities slot; Z1 Left sidebar left of Z3; Z3 Main workspace + Z4 AI companion) and IA §2.4 for the Sandbox chart lock.
 
-> **Spatial shell cross-link (2026-09-23 / FREEZE 2026-09-24):** Conceptual Adaptive Workspace stacking is locked in IA — **Z2 = top chrome only**; **Z1 Dual-Track + Lifecycle = left rail left of Z3**; **Z3 (wide) + Z4 (companion) = primary**. Prior top-chrome Z1+Z2 is superseded. After **Pass**, Z2 shows **Position**; **Case chip** only if work is **linked** to an optional Case binder. Spec remains SSOT for vision; see [`CONCEPTUAL_IA_MAP.md`](./CONCEPTUAL_IA_MAP.md) §2.2a / §8. Sandbox Z3 price-chart FINALIZED lock unchanged.
+### 0.6 Related docs and status
 
-### 0.6 Next conceptual outcomes *(after this freeze)*
-
-1. Conceptual IA map — see [`CONCEPTUAL_IA_MAP.md`](./CONCEPTUAL_IA_MAP.md) *(Step 2 draft)*.  
-2. User journeys + conceptual wireframes — see [`USER_JOURNEYS_WITH_WIREFRAMES.md`](./USER_JOURNEYS_WITH_WIREFRAMES.md) *(J-TF-1 Pass→Position / J-TF-2 Fail→Working Thesis + W1–W6 / W2b/W3b; Case=optional binder)*.
-3. Later merge pass: select Vision charter content into this Spec; keep one working truth.
+1. **IA map v1.0.0** (done): [`CONCEPTUAL_IA_MAP.md`](./CONCEPTUAL_IA_MAP.md): zones, layout lock, domain placement.
+2. **Journeys v1.0.0** (done): [`USER_JOURNEYS_WITH_WIREFRAMES.md`](./USER_JOURNEYS_WITH_WIREFRAMES.md): J-TFI-1 (Pass → Position) and J-TFI-2 (Fail → Revise), 8 frames as snapshot release journey-v1.0.0.
+3. **Charter merge** (open): select content from the [Capabilities charter](./PRODUCT_CAPABILITIES%5BReserved%5D.md) into this Spec; keep one working truth (§7).
 
 ---
 
@@ -96,20 +120,20 @@ Vietnamese retail investors and active traders face four structural problems:
 
 ### 1.2 Vision Statement
 
-> Build the **Cognitive AI Workspace** for Vietnamese retail investors and active traders — a system where Platform capabilities (Workspace, AI + Memory, Data) enable a multi-domain Investment Core (Insights, Thesis, Decision + Journal, Portfolio, Monitoring). Users work along a clear **lifecycle** (Insights → Working Thesis → Decision → **Position** on Portfolio, then Monitoring/Journal). An **Investment Case** is an **optional narrative binder** that can link those objects when wanted — it does not own the lifecycle and is not what Decision Pass creates. The system improves through an Intelligence Loop.
+> Build the **Cognitive AI Workspace** for Vietnamese retail investors and active traders — a system where Platform capabilities (Workspace, AI + Memory, Data) enable a multi-domain Investment Core (Insights, Thesis, Decision + Journal, Portfolio, Monitoring). Users work along a clear **lifecycle** (Insights → Working Thesis → Decision gate → Position on Portfolio, then Monitoring and Journal). The optional Investment Case can bind those objects into one story but does not own the lifecycle (§4.6). The system improves through an Intelligence Loop.
 
 ### 1.3 Goals
 
 | Horizon | Goal |
 |---------|------|
-| **Near-term (MVP)** | A user can work Insights → Working Thesis → Decision → Portfolio; **Pass creates a Position**; Fail/Revise stays Working Thesis (no Position); Case remains optional binder. |
+| **Near-term (MVP)** | A user can work Insights → Working Thesis → Decision gate → Portfolio, with Decision gate outcomes per §4.6. |
 | **Medium-term (v1–v1.5)** | Monitoring, Journal, and learning signals close the loop; domains complement each other with clear contracts. |
 | **Long-term (v2+)** | The system becomes a proactive partner across many Cases and domains, compounding user skill via Memory. |
 
 ### 1.4 Strategy
 
 1. **Vietnam-first, globally extensible** — Start with high-quality local data, provenance, and market microstructure; design data layer for later expansion.
-2. **Complementary domains over single-root rigidity** — Investment Core domains support one another; **Position** is the post-Pass execution object; **Investment Case** is an optional narrative binder across domains.
+2. **Complementary domains over single-root rigidity** — Investment Core domains support one another; the Position is the post-Pass execution object and the Investment Case an optional binder across domains (§4.6).
 3. **Lifecycle as a path across domains** — Prefer finishing the closed path (Insights → … → Journal) over isolated tools.
 4. **Progressive intelligence** — Ship skeleton first, then layer AI assistance, memory, and autonomy.
 5. **Process over prediction** — Optimize for better decision process and reduced bias, not for “beating the market” claims.
@@ -119,11 +143,11 @@ Vietnamese retail investors and active traders face four structural problems:
 ```text
 1. Complement over containment  → Domains reference each other; avoid forcing every object under one parent.
 2. Platform enables, Core means → UX, AI, and Data serve Investment Core; they do not define investment logic.
-3. Case is a thread, not a god  → **Case** = optional narrative binder; **Pass** creates **Position**; **Fail** leaves Working Thesis (no Position); never require a Case to research or promote.
+3. Case is a thread, not a god  → The Case is an optional binder; Pass creates the Position, Fail creates nothing (§4.6); never require a Case.
 4. Lifecycle integrity           → The path Insights → Thesis → Decision → Portfolio → Monitoring → Journal must remain coherent.
 5. Evidence over opinion         → Provenance and confidence are first-class.
-6. Dual-Track workspace          → Separate Active Research Sandbox from Execution Portfolio; promote ideas only after pre-mortem.
-7. Multi-stance thesis            → Bull and bear (or alternative) views remain available on a Living Thesis.
+6. Dual-Track workspace          → Separate Track A · Research Sandbox from Track B · Execution Portfolio; promote only via the Decision gate.
+7. Multi-stance Thesis           → Bull and Bear (or alternative) views stay available on the Thesis (Living Thesis capability).
 8. Closed-loop learning          → Outcomes and Journal feed Thesis quality and personal Memory.
 9. Cognitive respect             → Reduce load; preserve context; make the next action obvious.
 10. Lean delivery                → Ship the skeleton, then deepen. Avoid premature sophistication.
@@ -138,7 +162,7 @@ Vietnamese retail investors and active traders face four structural problems:
 | Persona | Description | Primary Jobs-to-be-Done |
 |---------|-------------|-------------------------|
 | **Active Retail Investor** | Holds 5–30 positions, researches independently, values process | Build coherent investment work across domains; reduce emotional decisions |
-| **Techno-Fundamental Investor** | Secondary aliases: Compounder / Swing-to-Invest — long-term business conviction (durable moats, pricing power, balance-sheet solvency, capital-allocation discipline) paired with tactical technical execution (market structure, VSA, Wyckoff accumulation/distribution, Volume Profile / VWAP, Stage Analysis — Minervini / O'Neil) to optimize entries, pyramid winners, and enforce strict stops | Build Living Theses with Multi-stance evidence; time entries/exits and pyramids with structure/volume; promote Research Sandbox work into Execution Portfolio only after Decision / pre-mortem; journal process quality |
+| **TFI** (primary; see §0.3) | Long-term business conviction (moats, pricing power, balance-sheet solvency, capital-allocation discipline) paired with tactical technical execution (market structure, VSA, Wyckoff, Volume Profile / VWAP, Stage Analysis per Minervini / O'Neil) for entries, pyramids and strict stops | Build a Thesis with Multi-stance evidence; time entries, exits and pyramids with structure and volume; promote Sandbox work to the Portfolio only via the Decision gate; journal process quality |
 | **Learning Investor** | Newer to structured investing; wants to improve over time | Guided process, bias flags, ability to revisit past work for lessons |
 
 *Secondary:* Mentors / community leaders who may review shared work (future).
@@ -170,14 +194,14 @@ mindmap
 |---------|------------|
 | **Platform** | Enabling layer: Workspace + UX/UI (Multi-pane Visual Canvas, Context preserved, Generative UI, etc.), AI Agents + Memory + Tools (Personalization), Data/Information (Knowledge Hub). Always available; does not own investment meaning. |
 | **Investment Core** | Set of complementary business domains: Insights, Thesis + Principles, Decision + Journal, Portfolio, Monitoring. |
-| **Investment Case** | Optional **narrative binder / dossier thread** that groups related Core objects (Insights ↔ Thesis ↔ Decision ↔ Position ↔ Monitoring/Journal) when the user wants one coherent story. Can start anytime (often at Thesis). NOT born at Pass; NOT the Position; NOT required. |
-| **Position** | Track B / Portfolio execution-risk object created by Decision **Pass** (size, stop, official book). Fail/Revise never creates a Position. |
-| **Working Thesis / Living Thesis** | The reasoned argument (Multi-stance Bull/Bear). Pre-Pass Sandbox state. After Pass, may attach as "why we hold" to the Position. Thesis ≠ Position ≠ Case. |
-| **Investment Lifecycle** | The coherent path across domains: Insights → Thesis → Decision → Portfolio → Monitoring → (Outcome) → Journal. |
+| **Investment Case** | Optional narrative binder across Core objects (Insights ↔ Thesis ↔ Decision ↔ Position ↔ Monitoring / Journal). Glossary §0.2; rules §4.6. |
+| **Position** | Track B execution-risk object created by Pass. Glossary §0.2; rules §4.6. |
+| **Thesis / Working Thesis** | The reasoned argument with Multi-stance; Working Thesis before Pass, Thesis (why we hold) after. Glossary §0.2. |
+| **Investment Lifecycle** | The coherent path across domains: Insights → Thesis → Decision → Portfolio → Monitoring → (Outcome) → Journal (workspace mapping in §4.5). |
 | **Intelligence Loop** | Continuous improvement: evidence/analysis → thesis → decision → monitoring → learning → memory. |
 | **Adaptive Workspace** | Visual, multi-pane environment that preserves context and surfaces Core domains without forcing tool-switching. |
-| **Dual-Track Workspace** | Continuous workload paradigm with two cooperating tracks: **Track A – Active Research Sandbox** (screening, exploratory charting/modeling, thesis drafting; does not alter official portfolio risk metrics) and **Track B – Execution Portfolio & Management** (official holdings, P&L, risk budgeting, position sizing; research promotes into portfolio only after a pre-mortem / decision hurdle). Aligns Vision §5.1. |
-| **Multi-stance Thesis** | Parallel reasoned views on a Living Thesis (at least Bull / Bear, or alternatives). Distinct from Dual-Track Workspace. |
+| **Dual-Track Workspace** | Continuous workload paradigm with two cooperating tracks, Track A · Research Sandbox and Track B · Execution Portfolio (§2.5; charter §5.1). |
+| **Multi-stance Thesis** | Parallel reasoned views inside one Thesis (at least Bull / Bear, or alternatives). Distinct from Dual-Track. |
 
 ### 2.3 Product Model (Conceptual)
 
@@ -191,7 +215,6 @@ flowchart BR
         MON[Monitoring]
         PF[Portfolio]
     end
-
     subgraph Platform["PLATFORM"]
         WS[Workspace + UX/UI]
         AI[AI Agents + Memory + Tools]
@@ -215,14 +238,15 @@ stateDiagram-v2
     [*] --> Insights: Start research / open work
     Insights --> Thesis: Evidence sufficient
     Thesis --> Decision: Thesis ready
-    Decision --> Portfolio: Action taken
+    Decision --> Portfolio: Pass → Position
+    Decision --> Thesis: Fail → Revise (no Position)
     Portfolio --> Monitoring: Position live
     Monitoring --> Journal: Capture learning / close
     Journal --> Insights: New or updated work
     Journal --> [*]: Work archived or Case closed
 
     note right of Thesis
-        Living Thesis
+        Working Thesis (Living Thesis capability)
         Multi-stance (Bull / Bear)
         Principles & assumptions
     end note
@@ -240,46 +264,45 @@ stateDiagram-v2
     end note
 ```
 
-### 2.5 Dual-Track Workspace Paradigm (from Vision §5.1)
+### 2.5 Dual-Track Workspace Paradigm
 
-The platform treats investing as a **continuous, long-lived workload**. Dual-Track is the workspace/IA contract that keeps exploration safe and execution honest:
+Origin: [Capabilities charter §5.1](./PRODUCT_CAPABILITIES%5BReserved%5D.md). The platform treats investing as a continuous, long-lived workload. Dual-Track is the workspace and IA contract that keeps exploration safe and execution honest:
 
-1. **Track A — Active Research Sandbox**
-   - Idea screening, exploratory charting, financial modeling, and thesis drafting.
-   - Operates freely **without** altering official portfolio risk metrics.
-2. **Track B — Execution Portfolio & Management Suite**
-   - Official holdings, realized/unrealized P&L, risk budgeting, and position sizing.
-   - Enforces risk rules; research ideas promote into the portfolio only after they pass a **pre-mortem / Decision** hurdle.
+1. **Track A · Research Sandbox**
+   - Idea screening, exploratory charting, financial modeling and Thesis drafting.
+   - Operates freely **without** altering official Portfolio risk metrics.
+2. **Track B · Execution Portfolio**
+   - Official holdings, realized/unrealized P&L, risk budgeting and position sizing.
+   - Enforces risk rules; research promotes into the Portfolio only after it passes the Decision gate (pre-mortem checklist).
 
 **Relationship to other concepts**
 
 | Concept | Role relative to Dual-Track |
 |---------|-----------------------------|
-| **Investment Lifecycle** | Path Insights → Thesis → Decision → Portfolio → Monitoring → Journal still runs; Dual-Track constrains *where* work lives (Sandbox vs Portfolio) and *when* promotion is allowed. |
-| **Position** | Born at Pass on Track B (execution risk); does not collapse Dual-Track. Fail ≠ Position. |
-| **Investment Case** | Optional narrative binder anytime; may link Position after Pass; does not collapse Dual-Track; never required. |
-| **Multi-stance Thesis** | Bull/Bear (or alternatives) inside Thesis — **not** a synonym for Dual-Track. |
+| **Investment Lifecycle** | The path Insights → … → Journal still runs; Dual-Track constrains *where* work lives (Sandbox vs Portfolio) and *when* promotion is allowed. |
+| **Position** | Born at Pass on Track B; does not collapse Dual-Track (§4.6). |
+| **Investment Case** | Optional binder; may link the Position after Pass; does not collapse Dual-Track (§4.6). |
+| **Multi-stance Thesis** | Bull/Bear (or alternatives) inside the Thesis, **not** a synonym for Dual-Track. |
 | **Closed-loop / Intelligence Loop** | Outcomes and Journal feed learning; Dual-Track ensures portfolio mutation stays intentional. |
 
 ### 2.6 Key Features & Capabilities (by Domain)
 
-
 | Domain / Pillar | Capabilities |
 |-----------------|--------------|
-| **Knowledge Hub - Data & Infomation** | Vietnam-first data, news, filings, provenance, source confidence, later macro & industry layers |
-| **AI-powered Assistant** | Research acceleration, thesis drafting, event briefings, generative UI, multi-factor scoring, autonomous thesis invalidation, etc. |
-| **360° Synthesis** | Multi-lens analysis (company → industry → macro), progressive depth across phases |
-| **Visual Canvas - Adaptive Unified AI-Assisted Visual Workspace** | An adaptive, unified, AI-assisted visual workspace as the primary user interface for managing and preserving the investor’s continuous, long-lived investment workload, data, reasoning, decisions, and augmented memory. Adaptive multi-pane workspace, generative UI, saved layouts, context preservation across symbol / work switches |
-| **Dual-Track Workspace** | Separate **Active Research Sandbox** (explore, model, draft theses without touching official risk) from **Execution Portfolio & Management** (holdings, P&L, risk budgeting, sizing). Promotion Research → Portfolio only after pre-mortem / Decision checklist. |
-| **Living Thesis + Multi-stance** | An investment thesis becomes a persistent, evolving decision record, rather than a static research document. Explicit Bull/Bear (or alternative) stances, versioned thesis, assumption tracking, drift detection |
-| **Risk-Aware Portfolio & Mentor** | Connect investment decisions with the investor's broader portfolio and capital allocation.Position sizing, pre-trade checklist, scorecard, risk overlay, behavioral mentor (later) |
-| **AI Agent-Cognitive with Memory, Tools & Personalization** | gradually constructs a persistent understanding of the investor's investment process, preferences, reasoning patterns, and decision history from longitudinal investment work. Outcome capture, journal, bias flags, personal long-term memory, process improvement suggestions |
-| **Evidence-Driven Monitoring** | keep track on Thesis, Decision & Portfolio. The system continuously monitors the market, conducts evidence-grounded research, and connects new information to the investor’s theses, decisions, and portfolio.|
-| **Insights** | Evidence collection, 360° synthesis (progressive), structured analysis notes |
-| **Thesis + Principles** | Living thesis, Multi-stance (Bull/Bear), versioning, assumptions, catalysts, standing principles |
-| **Decision + Journal** | Scorecard, checklist, decision record, journal, bias flags, lessons |
-| **Portfolio** | Positions, allocation views, basic risk overlay, position sizing helpers |
-| **Monitoring** | Market watch + Dashboard, Case/position health, event briefings, thesis-drift alerts |
+| **Knowledge Hub · Data & Information** | Vietnam-first data, news, filings, provenance, source confidence; later macro and industry layers. |
+| **AI-powered Assistant** | Research acceleration, Thesis drafting, event briefings, generative UI, multi-factor scoring, autonomous Thesis invalidation. |
+| **360° Synthesis** | Multi-lens analysis (company → industry → macro), progressive depth across phases. |
+| **Visual Canvas · Adaptive AI-Assisted Workspace** | The primary interface for the investor's continuous, long-lived workload: data, reasoning, decisions and augmented memory. Adaptive multi-pane workspace, generative UI, saved layouts, context preserved across symbol and work switches. |
+| **Dual-Track Workspace** | Separate Track A · Research Sandbox (explore, model, draft a Thesis without touching official risk) from Track B · Execution Portfolio (holdings, P&L, risk budgeting, sizing). Promotion only via the Decision gate. |
+| **Living Thesis + Multi-stance** | The Thesis becomes a persistent, evolving decision record rather than a static research document. Explicit Bull/Bear (or alternative) stances, versioning, assumption tracking, drift detection. |
+| **Risk-Aware Portfolio & Mentor** | Connects investment decisions with the investor's broader Portfolio and capital allocation. Position sizing, pre-trade checklist, scorecard, risk overlay, Behavioral Mentor (later). |
+| **Cognitive AI Agents with Memory, Tools & Personalization** | Gradually builds a persistent understanding of the investor's process, preferences, reasoning patterns and decision history from longitudinal work. Outcome capture, Journal, bias flags, personal long-term memory, process-improvement suggestions. |
+| **Evidence-Driven Monitoring** | Keeps track of the Thesis, Decisions and Portfolio: continuously monitors the market, runs evidence-grounded research and connects new information to the investor's Theses, Decisions and Positions. |
+| **Insights** | Evidence collection, 360° synthesis (progressive), structured analysis notes. |
+| **Thesis + Principles** | Living Thesis, Multi-stance (Bull/Bear), versioning, assumptions, catalysts, standing principles. |
+| **Decision + Journal** | Scorecard, pre-mortem checklist, Decision record, Journal, bias flags, lessons. |
+| **Portfolio** | Positions, allocation views, basic risk overlay, position-sizing helpers. |
+| **Monitoring** | Market watch and dashboard, Position and Case health, event briefings, Thesis-drift alerts. |
 
 ---
 
@@ -293,7 +316,7 @@ DP Stock-Investment Assistant is a Cognitive AI Workspace. Platform capabilities
 C4Context
     title System Context – DP Stock-Investment Assistant
 
-    Person(investor, "Investor", "Active retail investor, Techno-Fundamental Investor, or Learning Investor")
+    Person(investor, "Investor", "Active Retail Investor, TFI, or Learning Investor")
     Person(mentor, "Mentor / Reviewer", "Future: reviews shared work")
 
     System(dp, "DP Stock Workspace", "Platform + Investment Core")
@@ -315,7 +338,7 @@ C4Context
 
 | Actor | Type | Description | Primary Interaction |
 |-------|------|-------------|---------------------|
-| Investor | Primary User | Active Retail Investor, Techno-Fundamental Investor, or Learning Investor | Works in Workspace; advances Insights → Thesis → Decision → Portfolio → Monitoring → Journal |
+| Investor | Primary User | Active Retail Investor, TFI, or Learning Investor | Works in Workspace; advances Insights → Thesis → Decision → Portfolio → Monitoring → Journal |
 | Mentor / Reviewer | Secondary (future) | Experienced investor or community lead | Views / comments on shared work or Cases |
 | System (DP Stock) | Internal | Platform + Investment Core | Enforces domain contracts, provenance, and learning path |
 | Market Data Providers | External | Price, fundamental, corporate-action feeds | Supply Data / Information |
@@ -329,12 +352,11 @@ C4Context
 
 - Platform: Adaptive Workspace, AI Agents + Memory, Data/Information with provenance
 - Investment Core domains: Insights, Thesis + Principles, Decision + Journal, Portfolio, Monitoring
-- Decision Pass creates Position on Portfolio; Fail/Revise → no Position (Working Thesis)
-- Investment Case as optional narrative binder / dossier thread (anytime; not born at Pass)
+- Decision gate with Pass / Fail / Revise and the Position / Case rules of §4.6
 - Lifecycle path across domains and Intelligence Loop foundation
 - Vietnam-first Knowledge Hub with progressive 360° synthesis (company → industry → macro over phases)
-- Dual-Track Workspace paradigm (Research Sandbox vs Execution Portfolio) as IA contract
-- Living Thesis with Multi-stance (Bull/Bear) support and versioning
+- Dual-Track Workspace paradigm (Track A · Research Sandbox vs Track B · Execution Portfolio) as IA contract
+- Living Thesis capability: Multi-stance (Bull/Bear) and versioning
 - Decision support (scorecard, checklist, basic position sizing)
 - Monitoring linked to Positions / optional Cases (events, thesis-drift)
 - Outcome capture, Journal, and foundation of Intelligence Loop / Personal Memory
@@ -353,7 +375,7 @@ C4Context
 
 | Phase | Primary Boundary Focus | Still Deferred |
 |-------|------------------------|----------------|
-| **Phase 1 – MVP** | Workspace + Insights → Working Thesis → Decision → Portfolio; Pass creates Position; Case optional binder | Full Monitoring depth, Outcome attribution, rich Memory |
+| **Phase 1 – MVP** | Workspace + Insights → Working Thesis → Decision gate → Portfolio (§4.6 outcomes) | Full Monitoring depth, Outcome attribution, rich Memory |
 | **Phase 2 – v1** | Monitoring signals, event briefings, thesis-drift, Journal foundation | Full Behavioral Mentor, industry/macro depth |
 | **Phase 3 – v1.5** | Decision quality, risk overlay, industry 360°, mentor support | Autonomous invalidation, cross-Case learning at scale |
 | **Phase 4 – v2+** | Proactive multi-Case intelligence, long-term memory, global data | Full external ecosystem / marketplace |
@@ -399,7 +421,7 @@ flowchart TB
 ```
 
 **Positioning one-liner:**  
-Platform (Workspace, AI+Memory, Data) enables a multi-domain Investment Core (Insights, Thesis, Decision+Journal, Portfolio, Monitoring), with Investment Case as an optional linking thread for full lifecycle work.
+Platform (Workspace, AI+Memory, Data) enables a multi-domain Investment Core (Insights, Thesis, Decision+Journal, Portfolio, Monitoring), with the Investment Case as an optional binder across the lifecycle.
 
 ### 4.2 Platform Domains
 
@@ -421,9 +443,7 @@ Platform (Workspace, AI+Memory, Data) enables a multi-domain Investment Core (In
 | **Portfolio** | Capital allocation and exposure | Position, Allocation, Portfolio view, Risk snapshot | Realizes Decisions; observed by Monitoring |
 | **Monitoring** | Keep theses, decisions, and positions honest over time | Alert, Drift signal, Event briefing, Health state | Observes Thesis, Portfolio, Insights; can trigger new Insights or Decisions |
 
-**Linking & execution concepts:**  
-- **Position** — created when Decision **Pass** promotes into Portfolio (size, stop, official book). Fail/Revise → no Position; stay Working Thesis.  
-- **Investment Case** — optional narrative binder / dossier thread across Core objects. Can start anytime (often at Thesis). Pass may attach Position into an existing Case, or UI may offer "Start a Case for this Position" — optional only. Case is a thread, not a god.
+**Linking and execution concepts:** the Position (created by Pass) and the optional Investment Case are defined in §0.2; their rules are in §4.6.
 
 ### 4.4 Entity Summary (High-Level)
 
@@ -443,14 +463,13 @@ Platform (Workspace, AI+Memory, Data) enables a multi-domain Investment Core (In
 | Entity / Concept | Domain | Responsibility |
 |------------------|--------|----------------|
 | Evidence / Insight | Insights | Structured research input or conclusion |
-| Thesis | Thesis + Principles | Living investment argument |
+| Thesis | Thesis + Principles | Investment argument (Working Thesis before Pass; why we hold after) |
 | Principle / Stance | Thesis + Principles | Standing rules or Multi-stance (Bull/Bear) views |
 | Decision | Decision + Journal | Explicit investment action record |
 | Journal entry | Decision + Journal | Reflection and lessons |
-| Position / Allocation | Portfolio | Capital exposure; **Position born at Decision Pass** |
-| Working / Living Thesis | Thesis + Principles | Reasoned argument; Sandbox pre-Pass |
+| Position / Allocation | Portfolio | Capital exposure; the Position is born at Pass (§4.6) |
 | Monitoring signal / Alert | Monitoring | Drift, event, or health indication |
-| Investment Case *(optional binder)* | Cross-core narrative | Optional dossier thread anytime; not born at Pass; not Position |
+| Investment Case *(optional binder)* | Cross-core narrative | Optional dossier thread (§4.6) |
 
 ### 4.5 Lifecycle Path (Contract Across Domains)
 
@@ -460,24 +479,46 @@ Insights → Thesis → Decision → Portfolio → Monitoring → Journal
      └──────────── (new insights / re-open) ────────────────┘
 ```
 
+The 6-stage product lifecycle is the definition. The workspace (IA map, Journeys, Z1 Lifecycle group) shows the 4 workspace stages of Phase 1. This is a mapping, not a contradiction:
+
+| Product lifecycle stage (6) | Workspace stage (4) | Phase |
+|---|---|---|
+| Insights | Insights | Phase 1 |
+| Thesis | Thesis (Working Thesis) | Phase 1 |
+| Decision | Decision (Decision gate) | Phase 1 |
+| Portfolio | Portfolio (Position) | Phase 1 |
+| Monitoring | Portfolio (later a Monitoring view on the Position) | Phase 2 |
+| Journal | Decision + Journal (later; closes the Intelligence Loop) | Phase 2 |
+
 **Rules:**
 
-1. The lifecycle is a **path across domains**, not solely internal state of one entity.
-2. After Pass, the **Position** holds execution risk on this path; Thesis may attach as why we hold; optional Case may bind the story. Fail leaves Working Thesis without a Position.
-3. Backward moves are allowed with recorded reason.
-4. Journal and Memory are the primary learning sinks; Monitoring is the primary ongoing honesty mechanism.
+1. The lifecycle is a **path across domains**, not the internal state of one entity.
+2. After Pass, the Position holds execution risk on this path (§4.6).
+3. Backward moves are allowed with a recorded reason.
+4. The Journal and Memory are the primary learning sinks; Monitoring is the primary ongoing honesty mechanism.
 
-### 4.6 Core Invariants
+### 4.6 Decision Gate and Object Ontology (normative)
 
-1. **Complement over containment** — Core domains reference each other; do not require every object to live under a single parent.
-2. **Platform does not own investment meaning** — Final Thesis stances, Decisions, and Journal entries are user-owned.
-3. **Provenance** — Evidence and accepted AI contributions carry source / attribution metadata.
-4. **Dual-Track Workspace** — Research Sandbox work must not silently mutate Execution Portfolio risk; promotion requires an explicit Decision / pre-mortem gate.
-5. **Multi-stance readiness** — Thesis supports at least two parallel stances (e.g. Bull / Bear).
-6. **Memory isolation** — User Memory Profile is private to the user.
-7. **Case is a thread, not a god** — When a Case is linked, related objects should not contradict its narrative binder; Fail never invents a Position or a Case; Case is never required to research or promote.
+This is the only normative statement of the ontology (frozen 2026-09-24). Other sections and docs point here.
 
-### 4.7 Key Domain Events (Cross-Domain Contracts)
+1. **Decision gate.** An explicit promotion gate (pre-mortem checklist) between Track A · Research Sandbox and Track B · Execution Portfolio; not a state of the Thesis.
+2. **Outcomes and action.** Pass and Fail are the gate outcomes. **Pass** creates a Position. **Fail** means the checklist is not met; the user's action is **Revise**, which returns the work to the Working Thesis. There is no separate Fail button: the gate offers **Pass → Position** and **Revise**. Parking or archiving a Working Thesis is a later, optional step (Journeys J-TFI-B4).
+3. **Position.** Track B execution-risk object (size, stop, official book), created only by Pass. Fail never creates a Position and never mutates Portfolio risk.
+4. **Thesis states.** Before Pass the Thesis is the Working Thesis (Sandbox). After Pass the Thesis attaches to the Position as "why we hold". Living Thesis names the capability (versioned, parallel Bull/Bear), not a state.
+5. **Investment Case.** Optional narrative binder / dossier thread; can start any time (often at Thesis); not born at Pass; not the Position; never required to research or promote. Pass may attach the Position to an existing Case, or the UI may offer "Start a Case for this Position". Case-on / Case-off is independent of Pass / Fail.
+6. **Distinctness.** Thesis ≠ Position ≠ Case.
+
+### 4.7 Core Invariants
+
+1. **Complement over containment**: Core domains reference each other; do not require every object to live under a single parent.
+2. **Platform does not own investment meaning**: final Thesis stances, Decisions and Journal entries are user-owned.
+3. **Provenance**: evidence and accepted AI contributions carry source and attribution metadata.
+4. **Dual-Track Workspace**: Research Sandbox work must not silently mutate Execution Portfolio risk; promotion requires the Decision gate.
+5. **Multi-stance readiness**: the Thesis supports at least two parallel stances (e.g. Bull / Bear).
+6. **Memory isolation**: the User Memory Profile is private to the user.
+7. **Case is a thread, not a god**: when Case-on, related objects should not contradict the Case narrative; the rest of the Case rules are §4.6.
+
+### 4.8 Key Domain Events (Cross-Domain Contracts)
 
 | Event | Typical source domain | Typical consumers |
 |-------|----------------------|-------------------|
@@ -489,7 +530,7 @@ Insights → Thesis → Decision → Portfolio → Monitoring → Journal
 | Journal entry created | Decision + Journal | Memory, learning metrics |
 | Memory profile updated | AI Agents + Memory | Future assistance across domains |
 
-### 4.8 Bounded Contexts (Logical)
+### 4.9 Bounded Contexts (Logical)
 
 | Bounded Context | Layer | Owns / focuses on |
 |-----------------|-------|-------------------|
@@ -501,8 +542,8 @@ Insights → Thesis → Decision → Portfolio → Monitoring → Journal
 | Decision + Journal | Core | Decisions, rationales, journal, lessons |
 | Portfolio | Core | Positions, allocations, risk snapshots |
 | Monitoring | Core | Alerts, drift, event briefings, health |
-| Position | Core (Portfolio) | Born at Pass; Fail = no Position |
-| Investment Case *(optional binder)* | Cross | Narrative dossier anytime; not execution; Fail does not create Case |
+| Position | Core (Portfolio) | Born at Pass (§4.6) |
+| Investment Case *(optional binder)* | Cross | Narrative dossier; not execution (§4.6) |
 
 ---
 
@@ -561,17 +602,17 @@ gantt
 ### 5.3 Phase Goals & Prioritized Deliverables
 
 #### Phase 1 – MVP
-**Goal:** User can move Insights → Working Thesis → Decision → Portfolio; **Pass creates Position**; Fail/Revise stays Working Thesis (no Position); Case optional binder.
+**Goal:** the user can move Insights → Working Thesis → Decision gate → Portfolio, with the outcomes of §4.6.
 
 | Priority | Deliverable | Why |
 |----------|-------------|-----|
 | **P0** | Adaptive Visual Canvas (multi-pane, context preserved) | Platform: keeps work in one place |
 | **P0** | Vietnam-first Data Hub + provenance | Platform: enables quality Insights |
 | **P0** | Insights foundation (evidence capture) | Core: start of lifecycle path |
-| **P0** | Dual-Track Workspace IA (Research vs Execution) | Platform/Core: prevent research from mutating portfolio risk |
+| **P0** | Dual-Track Workspace IA (Sandbox vs Portfolio) | Platform/Core: prevent research from mutating portfolio risk |
 | **P0** | Living Thesis Builder v1 + Multi-stance (Bull/Bear) | Core: heart of reasoning |
-| **P0** | Basic Decision path + checklist | Core: commit actions |
-| **P0** | Basic Portfolio view + Position after Pass (+ optional Case bind) | Core Position; Case binder optional |
+| **P0** | Basic Decision gate + checklist | Core: commit actions |
+| **P0** | Basic Portfolio view + Position after Pass (+ optional Case link) | Core: the Position; Case optional |
 | **P1** | Basic AI Reasoning Assistant | Platform: acceleration |
 | **P1** | Saved layout presets | Platform: speed across work |
 
@@ -637,33 +678,33 @@ gantt
 
 ## 6. Spec-Driven & Agentic Development Guidance
 
-This document supports **Spec-Driven Development (SDD)** and agentic AI coding workflows (GitHub Copilot, Codex, Cursor, Aider, etc.).
+This Spec feeds Spec-Driven Development (SDD) and agentic coding workflows (GitHub Copilot, Codex, Cursor, Aider and similar). Process governance lives in `REQUIREMENTS_METHOD_AND_GOVERNANCE.md`; this section only says how to derive work from this Spec.
 
-### 6.1 Recommended Spec Hierarchy
+### 6.1 Spec Hierarchy
 
 ```text
-Product Document (this file)
+Product Specification (this file)
     └── Domain / Capability Specs (per Platform or Core domain)
             └── Task Specs / User Stories
                     └── Implementation Prompts (for agents)
 ```
 
-### 6.2 How to Derive Specs from This Document
+### 6.2 Deriving Specs from This Document
 
 | Source in this doc | Becomes |
-|--------------------|---------|
-| Platform vs Investment Core split | Bounded contexts / module boundaries |
-| Domain definitions + Entity Summary | Domain model & aggregate choices |
-| Lifecycle path + events | Cross-domain contracts & integration tests |
-| Phase deliverables | Epic → Feature → Spec |
-| Governance Rule | Acceptance gate on PRs / agent tasks |
-| Success Metrics | Instrumentation requirements |
+|---|---|
+| Platform vs Investment Core split (§2.2, §4.1) | Bounded contexts / module boundaries |
+| Domain definitions + Entity Summary (§4.2–§4.4) | Domain model and aggregate choices |
+| Lifecycle path, ontology and events (§4.5–§4.8) | Cross-domain contracts and integration tests |
+| Phase deliverables (§5.3) | Epic → Feature → Spec |
+| Governance Rule (§5.6) | Acceptance gate on PRs and agent tasks |
+| Success Metrics (§5.5) | Instrumentation requirements |
 
-### 6.3 Suggested Agentic Workflow
+### 6.3 Agentic Workflow
 
 ```mermaid
 flowchart LR
-    A[Product Document] --> B[Domain / Capability Spec]
+    A[Product Specification] --> B[Domain / Capability Spec]
     B --> C[Task Breakdown]
     C --> D[Agent Prompt + Context]
     D --> E[Code Generation / Edit]
@@ -673,36 +714,36 @@ flowchart LR
     G -->|No| D
 ```
 
-**Practical rules for agents:**
+**Rules for agents:**
 
-1. Inject Platform vs Investment Core boundaries and the lifecycle path into system prompts / rules files.
-2. Prefer vertical slices that advance the path (e.g. Insights → Thesis) over purely technical horizontal layers.
-3. Every new capability should declare whether it is Platform, Core, or Case-linking, and which domain(s) it strengthens.
-4. Treat the Governance Rule as a hard review gate.
+1. Inject the Platform vs Investment Core boundaries, the lifecycle path and the §4.6 ontology into system prompts or rules files.
+2. Prefer vertical slices that advance the path (e.g. Insights → Thesis) over purely technical layers.
+3. Every new capability declares whether it is Platform, Core or Case-linking, and which domains it strengthens.
+4. Treat the Governance Rule (§5.6) as a hard review gate.
 5. Keep User Memory and Agent interfaces stable so Core domains can evolve independently.
 
-### 6.4 Example Spec Skeleton (for agents)
+### 6.4 Example Spec Skeleton
 
 ```markdown
 # Spec: Living Thesis Builder v1
 
 ## Context
 Phase 1 – MVP. Investment Core → Thesis + Principles domain.
-Pre-Pass research is Working Thesis / Insights; must not require an Investment Case. Pass creates Position (not Case).
+Pre-Pass work is the Working Thesis; ontology per Product Specification §4.6.
 
 ## Invariants
 - Thesis is versioned
-- Dual-Track Workspace: Research Sandbox changes do not alter Execution Portfolio metrics
+- Dual-Track: Research Sandbox changes do not alter Execution Portfolio metrics
 - Multi-stance (at least Bull / Bear) supported
-- Assumptions / catalysts first-class
+- Assumptions and catalysts first-class
 - Changes emit events usable by Monitoring later
 
 ## Acceptance
-- [ ] User can create / update Thesis in Workspace without leaving context
+- [ ] User can create / update the Working Thesis in the Workspace without leaving context
 - [ ] Previous versions recoverable
-- [ ] Dual-Track separation visible in Workspace IA (Research vs Portfolio)
+- [ ] Dual-Track separation visible in the Workspace (Sandbox vs Portfolio)
 - [ ] Multi-stance (Bull/Bear) views available
-- [ ] Pre-Pass research works without a Case; Pass creates Position; Fail stays Working Thesis (no Position); Case remains optional binder
+- [ ] Works without a Case; Decision gate outcomes follow §4.6
 - [ ] Spec tests pass; provenance of AI-assisted content preserved
 ```
 
@@ -710,15 +751,26 @@ Pre-Pass research is Working Thesis / Insights; must not require an Investment C
 
 ## 7. Document Control & Next Actions
 
+**Done:**
+1. Vision alignment (§0).
+2. Conceptual IA map: [IA map v1.0.0](./CONCEPTUAL_IA_MAP.md).
+3. Journeys and frames: [Journeys v1.0.0](./USER_JOURNEYS_WITH_WIREFRAMES.md), snapshot release journey-v1.0.0.
 
-**Recommended immediate next steps (conceptual lane first):**
-
-1. Vision ↔ Spec alignment one-pager — captured in §0 *(this version)*.
-2. Produce a **conceptual IA map** from this Spec (domains → surfaces → Working Thesis vs Position vs optional Case binder).
-3. Produce **journeys + wireframes** that prove Adaptive Workspace + Pass→Position / Fail→Working Thesis (Case=optional binder).
-4. Later: merge selected content from `PRODUCT_VISION_AND_CAPABILITIES.md` into this Spec; then resume SDD domain specs (Workspace, Insights, Thesis, Decision) and module mapping.
-
+**Next (conceptual lane first):**
+1. Keep Figma (`frames.json`) and the Journeys snapshots in step; re-export after text changes.
+2. Merge selected content from the [Capabilities charter](./PRODUCT_CAPABILITIES%5BReserved%5D.md) into this Spec (note: the charter's §4.1 persona name predates the TFI rename).
+3. Resume SDD domain specs (Workspace, Insights, Thesis, Decision) and module mapping.
 
 ---
 
-*End of Product Document · DP Stock-Investment Assistant · v1.5 · FREEZE Pass→Position · Case=optional binder · Working Thesis · 2026-09-24*
+## 8. Change log
+
+| Version | Date | Change |
+|---|---|---|
+| v1.7.0 | 2026-09-25 | Cleanup release. Uniform header; H1 "Product Specification". Vision references retargeted to the Capabilities charter (`PRODUCT_CAPABILITIES[Reserved].md`). §0.2 is the single glossary (Thesis / Working Thesis / Living Thesis, Pass / Fail / Revise, Case-on / Case-off, canonical track and zone names). New §4.6 holds the normative Decision gate and ontology (no Fail button: Fail = outcome, Revise = action); later §4 sections renumbered; repeated ontology text elsewhere replaced by pointers. §4.5 maps the 6 product lifecycle stages to the 4 workspace stages. §2.3 Mermaid direction fixed (LR); §2.4 adds Pass / Fail edges. §2.6 typos and capitalization. §6 tightened. §0.6 and §7 mark IA map and Journeys as done. Change log added. |
+| v1.6.0 | 2026-09-25 | Primary persona renamed Techno-Fundamental Investor (TFI) with the two "Techno" meanings; IA v0.9.1 shell cross-link. |
+| v1.5.0 | 2026-09-24 | Freeze: Pass → Position; Case = optional binder; Working Thesis. |
+
+---
+
+*End of Product Specification · v1.7.0 · 2026-09-25*

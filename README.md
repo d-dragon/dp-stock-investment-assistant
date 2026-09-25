@@ -42,11 +42,11 @@
 > • **Product SSOT**: [`docs/system/PRODUCT_SPECIFICATION.md`](docs/system/PRODUCT_SPECIFICATION.md) — Product model, domain contracts, and roadmap.  
 > • **Conceptual IA Map**: [`docs/system/CONCEPTUAL_IA_MAP.md`](docs/system/CONCEPTUAL_IA_MAP.md) — Information architecture and workspace zones.  
 > • **User Journeys with Wireframes**: [`docs/system/USER_JOURNEYS_WITH_WIREFRAMES.md`](docs/system/USER_JOURNEYS_WITH_WIREFRAMES.md) — Techno-Fundamental user journey Pass→Position / Fail→Working Thesis + optional Case binder; proof frames W1–W6.  
-> • **Vision & Capabilities Charter**: [`docs/system/PRODUCT_VISION_AND_CAPABILITIES.md`](docs/system/PRODUCT_VISION_AND_CAPABILITIES.md) — Market microstructure & 360° deep-dive.  
+> • **Vision & Capabilities Charter**: [`docs/system/PRODUCT_CAPABILITIES[Reserved].md`](docs/system/PRODUCT_CAPABILITIES%5BReserved%5D.md) — Market microstructure & 360° deep-dive.  
 
 ### 1.1 Product Overview & Value Proposition
 
-The **DP Stock-Investment Assistant** is an intelligent, visual workspace engineered as a **Cognitive AI-powered Investment Workspace** for retail investors and active stock traders. Its primary journey owner is the **Techno-Fundamental Investor**, who combines long-term business quality and valuation conviction with tactical technical execution, volume profiling, and strict risk discipline.
+The **DP Stock-Investment Assistant** is an intelligent, visual workspace engineered as a **Cognitive AI-powered Investment Workspace** for retail investors and active stock traders. Its primary journey owner is the **Techno-Fundamental Investor (TFI)**, who combines long-term business quality and valuation conviction with tactical technical execution, volume profiling, and strict risk discipline.
 
 Modern stock investing subjects retail participants to four systemic handicaps:
 1. **Information Asymmetry**: Fragmented, low-signal disclosures, delayed news, and unverified forum sentiment.
@@ -109,19 +109,19 @@ All work takes place in a single, focused screen modeled after a professional wo
 
 ```text
 ┌─────────────────────────────────────────────────────────────────────────────────────────────┐
-│ TOP CHROME (Z2 Context)                 [VNM]  •  [Position after Pass]  •  [Case if linked] │
-├───────────────────────┬──────────────────────────────────────────────┬──────────────────────┤
-│ LEFT SIDEBAR (Z1)     │ PRIMARY WORKSPACE (Z3 · Wide)                │ AI COMPANION (Z4)    │
-│ Dual-Track             │ • Active work and decision gate              │ • Context-aware       │
-│  ○ Research Sandbox    │ • 360° forensic analysis & financials        │   co-analyst          │
-│  ○ Execution Portfolio │ • Living Thesis: parallel Bull / Bear       │ • Summarizes filings │
-│ Lifecycle              │ • Decision Gate: pre-mortem checklist        │   and news           │
-│  1 Insights            │ • Price & volume market anchor (Sandbox)     │ • Challenges         │
-│  2 Thesis              │                                                │   assumptions        │
-│  3 Decision            │                                                │ • Helps; never acts  │
-│  4 Portfolio           │                                                │   without investor   │
-│                       │                                                │   confirmation       │
-└───────────────────────┴──────────────────────────────────────────────┴──────────────────────┘
+│ Z2 · TOP CHROME (context)                                           [search · notif · acct] │
+│ [VNM]  •  [Position after Pass]  •  [Case if linked]                                        │
+├───────────────┬──────────────────────────────────────────────────┬──────────────────────────┤
+│ Z1 · SIDEBAR  │ Z3 · MAIN WORKSPACE (wide)                       │ Z4 · AI COMPANION        │
+│ DUAL-TRACK    │ • Active work and decision gate                  │ • Context-aware          │
+│   A Research  │ • 360° forensic analysis & financials            │   co-analyst             │
+│   B Portfolio │ • Living Thesis: parallel Bull / Bear            │ • Summarizes filings     │
+│ LIFECYCLE     │ • Decision Gate: pre-mortem checklist            │   and news               │
+│   Insights    │ • Price & volume market anchor (Sandbox)         │ • Challenges assumptions │
+│   Thesis      │                                                  │ • Helps; never acts      │
+│   Decision    │                                                  │   without investor       │
+│   Portfolio   │                                                  │   confirmation           │
+└───────────────┴──────────────────────────────────────────────────┴──────────────────────────┘
 ```
 
 > For deep architectural specifications and wireframes, see [`CONCEPTUAL_IA_MAP.md`](docs/system/CONCEPTUAL_IA_MAP.md) and [`USER_JOURNEYS_WITH_WIREFRAMES.md`](docs/system/USER_JOURNEYS_WITH_WIREFRAMES.md).
