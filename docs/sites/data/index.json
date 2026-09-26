@@ -1,6 +1,6 @@
 {
   "schemaVersion": "2.0.0",
-  "updatedAt": "2026-09-26T08:48:00+07:00",
+  "updatedAt": "2026-09-26T13:20:00+07:00",
   "layout": "monthly-weekly",
   "reports": [
     {
@@ -10,42 +10,17 @@
       "status": "closed",
       "weekId": "2026-W39",
       "weekPath": "2026-09/week-39.json",
+      "dayPath": "2026-09/d/2026-09-26.json",
       "path": "index.html#/2026-09-26"
-    },
-    {
-      "id": "daily-brief-2026-09-25",
-      "date": "2026-09-25",
-      "title": "Bản tin thị trường Việt Nam & thế giới",
-      "status": "closed",
-      "weekId": "2026-W39",
-      "weekPath": "2026-09/week-39.json",
-      "path": "index.html#/2026-09-25"
-    },
-    {
-      "id": "daily-brief-2026-09-24",
-      "date": "2026-09-24",
-      "title": "Bản tin thị trường Việt Nam & thế giới",
-      "status": "closed",
-      "weekId": "2026-W39",
-      "weekPath": "2026-09/week-39.json",
-      "path": "index.html#/2026-09-24"
-    },
-    {
-      "id": "daily-brief-2026-09-23",
-      "date": "2026-09-23",
-      "title": "Bản tin thị trường Việt Nam & thế giới",
-      "status": "closed",
-      "weekId": "2026-W39",
-      "weekPath": "2026-09/week-39.json",
-      "path": "index.html#/2026-09-23"
     },
     {
       "id": "daily-brief-2026-09-22",
       "date": "2026-09-22",
       "title": "Bản tin thị trường Việt Nam & thế giới",
-      "status": "closed",
+      "status": "intraday",
       "weekId": "2026-W39",
       "weekPath": "2026-09/week-39.json",
+      "dayPath": "2026-09/d/2026-09-22.json",
       "path": "index.html#/2026-09-22"
     },
     {
@@ -55,6 +30,7 @@
       "status": "closed",
       "weekId": "2026-W39",
       "weekPath": "2026-09/week-39.json",
+      "dayPath": "2026-09/d/2026-09-21.json",
       "path": "index.html#/2026-09-21"
     },
     {
