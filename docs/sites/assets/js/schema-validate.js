@@ -44,7 +44,6 @@
       var p = name + "[" + i + "]";
       if (!n || !n.id || !n.title || !n.summary || !n.sourceId) errors.push(p + " fields");
       if (n && n.date && !isIso(n.date)) errors.push(p + ".date");
-      if (n && n.url && typeof n.url !== "string") errors.push(p + ".url");
       if (n) checkImpact(p, n.impact, errors);
     });
   }
@@ -119,7 +118,9 @@
 
   function validateWeekFile(w) {
     var errors = [];
-    if (!w || w.schemaVersion !== "2.0.0") errors.push("schemaVersion");
+    if (!w || (w.schemaVersion !== "2.0.0" && w.schemaVersion !== "2.1.0")) {
+      errors.push("schemaVersion");
+    }
     if (!w || !/^\d{4}-\d{2}$/.test(w.yearMonth || "")) errors.push("yearMonth");
     if (!w || !w.week || !w.week.id || w.week.isoWeek == null) errors.push("week");
     if (!Array.isArray(w && w.days) || !w.days.length) errors.push("days");
@@ -130,6 +131,8 @@
         if (seen[day.date]) errors.push("days[" + i + "] duplicate " + day.date);
         seen[day.date] = 1;
       }
+      var hasPath = day && typeof day.dayPath === "string" && /\/d\/\d{4}-\d{2}-\d{2}\.json$/.test(day.dayPath);
+      if (hasPath) return;
       if (!day || !day.report) errors.push("days[" + i + "].report");
       else {
         var inner = validateReport(day.report);
@@ -141,6 +144,21 @@
         errors.push("days[" + i + "].sources");
       }
     });
+    return { ok: errors.length === 0, errors: errors };
+  }
+
+  function validateDayFile(d) {
+    var errors = [];
+    if (!d || d.schemaVersion !== "1.0.0") errors.push("schemaVersion");
+    if (!d || !isYmd(d.date)) errors.push("date");
+    if (!d || !d.report) errors.push("report");
+    else {
+      var inner = validateReport(d.report);
+      inner.errors.forEach(function (e) { errors.push("report." + e); });
+    }
+    if (!d || !d.sources || !Array.isArray(d.sources.sources) || d.sources.sources.length < 4) {
+      errors.push("sources");
+    }
     return { ok: errors.length === 0, errors: errors };
   }
 
@@ -160,6 +178,7 @@
   global.ReportSchema = {
     validateReport: validateReport,
     validateWeekFile: validateWeekFile,
+    validateDayFile: validateDayFile,
     validateCatalog: validateCatalog,
     SERIES_IDS: SERIES_IDS,
     REPORT_KEYS: REPORT_KEYS

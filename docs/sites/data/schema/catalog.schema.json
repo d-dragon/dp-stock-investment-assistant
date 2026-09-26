@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://d-dragon.github.io/dp-stock-investment-assistant/sites/data/schema/catalog.schema.json",
   "title": "DP Stock daily-brief catalog",
-  "description": "Shape of docs/sites/data/index.json. Binding: report-app.js loadCatalog() → reports[].date / weekPath / path / title.",
+  "description": "Shape of docs/sites/data/index.json. Binding: report-app.js loadCatalog() → reports[].date / weekPath / dayPath / path / title.",
   "type": "object",
   "additionalProperties": false,
   "required": ["schemaVersion", "updatedAt", "layout", "reports"],
@@ -27,6 +27,7 @@
           "status": { "enum": ["preopen", "intraday", "closed", "afterhours"] },
           "weekId": { "type": "string", "pattern": "^[0-9]{4}-W[0-9]{2}$" },
           "weekPath": { "type": "string", "pattern": "^[0-9]{4}-[0-9]{2}/week-[0-9]{2}\\.json$" },
+          "dayPath": { "type": "string", "pattern": "^[0-9]{4}-[0-9]{2}/d/[0-9]{4}-[0-9]{2}-[0-9]{2}\\.json$" },
           "path": { "type": "string", "pattern": "^index\\.html#/[0-9]{4}-[0-9]{2}-[0-9]{2}$" }
         }
       }
