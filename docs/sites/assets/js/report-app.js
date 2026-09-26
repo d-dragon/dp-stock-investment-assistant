@@ -83,18 +83,64 @@
     });
   }
 
+  function loadDayFile(dayPath) {
+    return fetchJson("./data/" + dayPath).then(function (day) {
+      if (day && day.report) return day;
+      throw new Error("day file thiếu report: " + dayPath);
+    });
+  }
+
+  function resolveDay(entry, date) {
+    if (entry.dayPath) return loadDayFile(entry.dayPath);
+    return loadWeek(entry.weekPath).then(function (week) {
+      const day = (week.days || []).find(function (d) {
+        return d.date === date;
+      });
+      if (!day) throw new Error("Không có ngày " + date + " trong " + entry.weekPath);
+      if (day.dayPath) return loadDayFile(day.dayPath);
+      if (day.report) return day;
+      throw new Error("Không có payload ngày " + date + " trong " + entry.weekPath);
+    });
+  }
+
   function clearSources() {
     Object.keys(SOURCES).forEach(function (k) {
       delete SOURCES[k];
     });
   }
 
+  function normalizeOutlook(raw) {
+    if (raw && !Array.isArray(raw) && typeof raw === "object") {
+      return {
+        watchpoints: raw.watchpoints || [],
+        levels: raw.levels || [],
+        events: raw.events || []
+      };
+    }
+    if (Array.isArray(raw)) {
+      return {
+        watchpoints: raw.map(function (x) {
+          return { text: x.text || x.title || "", impact: x.impact || null };
+        }),
+        levels: [],
+        events: raw
+          .filter(function (x) { return x && (x.when || x.title); })
+          .map(function (x) {
+            return { when: x.when || "", title: x.title || x.text || "", impact: x.impact || null };
+          })
+      };
+    }
+    return { watchpoints: [], levels: [], events: [] };
+  }
+
   function applyDayPayload(day) {
-    REPORT = day.report;
+    REPORT = day.report || {};
+    REPORT.outlook = normalizeOutlook(REPORT.outlook);
+    if (!REPORT.series || typeof REPORT.series !== "object") REPORT.series = {};
     clearSources();
     const src = day.sources || {};
     (src.sources || []).forEach(function (s) {
-      SOURCES[s.id] = s;
+      if (s && s.id) SOURCES[s.id] = s;
     });
     newsPage.global = 0;
     newsPage.vn = 0;
@@ -126,15 +172,12 @@
         const entry = (cat.reports || []).find(function (r) {
           return r.date === date;
         });
-        if (!entry || !entry.weekPath) {
+        if (!entry || (!entry.weekPath && !entry.dayPath)) {
           throw new Error("Không có mục catalog cho " + date);
         }
-        return loadWeek(entry.weekPath).then(function (week) {
-          const day = (week.days || []).find(function (d) {
-            return d.date === date;
-          });
+        return resolveDay(entry, date).then(function (day) {
           if (!day || !day.report) {
-            throw new Error("Không có ngày " + date + " trong " + entry.weekPath);
+            throw new Error("Không có payload ngày " + date);
           }
           window.__BRIEF_DATE__ = date;
           applyDayPayload(day);
@@ -294,7 +337,7 @@
       '<section class="pane"><div class="pt"><i class="fa-solid fa-globe"></i> Tin thế giới</div><div class="pb"><ul class="news" id="gNews"></ul></div><div class="pager" id="gPager"></div></section>' +
       '<section class="pane"><div class="pt"><i class="fa-solid fa-chart-line"></i> Biểu đồ<div class="tabs" id="chartTabs"><button data-tab="vnindex" class="on">VN-Index</button><button data-tab="world">Thế giới</button><button data-tab="crypto">Crypto</button></div></div><div class="pb" id="chartPane"></div></section>' +
       '<section class="pane"><div class="pt"><i class="fa-solid fa-flag"></i> Vĩ mô Việt Nam</div><div class="macros" id="macros"></div><div class="pb"><ul class="news" id="vNews"></ul></div><div class="pager" id="vPager"></div></section>' +
-      '<section class="pane"><div class="pt"><i class="fa-solid fa-building"></i> Doanh nghiệp &amp; triển vọng</div><div class="pb" id="rightPane"></div></section>' +
+      '<section class="pane"><div class="pt"><i class="fa-solid fa-building"></i> Doanh nghiệp & triển vọng</div><div class="pb" id="rightPane"></div></section>' +
       '</div><footer class="foot" id="foot"></footer>';
     renderTicker();
     renderNews("globalNews", "gNews", "gPager", "global");
