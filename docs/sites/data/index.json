@@ -1,6 +1,6 @@
 {
   "schemaVersion": "2.0.0",
-  "updatedAt": "2026-09-26T08:35:00+07:00",
+  "updatedAt": "2026-09-26T08:50:00+07:00",
   "layout": "monthly-weekly",
   "reports": [
     {
@@ -16,7 +16,7 @@
       "id": "daily-brief-2026-09-25",
       "date": "2026-09-25",
       "title": "Bản tin thị trường Việt Nam & thế giới",
-      "status": "preopen",
+      "status": "closed",
       "weekId": "2026-W39",
       "weekPath": "2026-09/week-39.json",
       "path": "index.html#/2026-09-25"
@@ -25,7 +25,7 @@
       "id": "daily-brief-2026-09-24",
       "date": "2026-09-24",
       "title": "Bản tin thị trường Việt Nam & thế giới",
-      "status": "preopen",
+      "status": "closed",
       "weekId": "2026-W39",
       "weekPath": "2026-09/week-39.json",
       "path": "index.html#/2026-09-24"
