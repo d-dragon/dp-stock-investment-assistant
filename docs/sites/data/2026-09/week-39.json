@@ -8,7 +8,7 @@
     "start": "2026-09-21",
     "end": "2026-09-27"
   },
-  "updatedAt": "2026-09-26T13:45:00+07:00",
+  "updatedAt": "2026-09-27T08:35:00+07:00",
   "storage": "day-shards",
   "days": [
     {"date": "2026-09-21", "dayPath": "2026-09/d/2026-09-21.json", "status": "closed"},
@@ -16,6 +16,7 @@
     {"date": "2026-09-23", "dayPath": "2026-09/d/2026-09-23.json", "status": "closed"},
     {"date": "2026-09-24", "dayPath": "2026-09/d/2026-09-24.json", "status": "closed"},
     {"date": "2026-09-25", "dayPath": "2026-09/d/2026-09-25.json", "status": "closed"},
-    {"date": "2026-09-26", "dayPath": "2026-09/d/2026-09-26.json", "status": "closed"}
+    {"date": "2026-09-26", "dayPath": "2026-09/d/2026-09-26.json", "status": "closed"},
+    {"date": "2026-09-27", "dayPath": "2026-09/d/2026-09-27.json", "status": "closed"}
   ]
 }
