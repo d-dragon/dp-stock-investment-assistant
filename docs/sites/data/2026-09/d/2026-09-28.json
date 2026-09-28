@@ -1,0 +1,158 @@
+{
+  "schemaVersion": "1.0.0",
+  "date": "2026-09-28",
+  "report": {
+    "schemaVersion": "1.0.0",
+    "id": "daily-brief-2026-09-28",
+    "type": "daily_market_brief",
+    "locale": "vi-VN",
+    "timezone": "Asia/Ho_Chi_Minh",
+    "generatedAt": "2026-09-28T08:35:00+07:00",
+    "coverage": {
+      "from": "2026-09-25T15:00:00+07:00",
+      "to": "2026-09-28T08:35:00+07:00",
+      "session": "preopen"
+    },
+    "marketSession": "preopen",
+    "disclaimer": "Nguon CafeF, Vietstock, 24HMoney, VietnamBiz, VnEconomy, Barron's, Bloomberg, Yahoo. 28/9 HOSE chua mo; so VN la dong 25/9.",
+    "ui": {
+      "pageSizeNews": 8,
+      "defaultChartTab": "vnindex",
+      "defaultWorldSymbol": "DJI"
+    },
+    "snapshot": {
+      "quotes": [
+        {"symbol": "VNINDEX", "nameVi": "VN-Index", "assetClass": "equity_index", "price": 1785.11, "change": 10.02, "changePct": 0.56, "session": "preopen", "sourceId": "src-24h"},
+        {"symbol": "HNX", "nameVi": "HNX-Index", "assetClass": "equity_index", "price": 272.21, "change": -0.56, "changePct": -0.21, "session": "preopen", "sourceId": "src-vietstock"},
+        {"symbol": "DXY", "nameVi": "DXY", "assetClass": "fx", "price": 101.12, "change": 0.08, "changePct": 0.08, "session": "preopen", "sourceId": "src-barrons"},
+        {"symbol": "DJI", "nameVi": "Dow Jones", "assetClass": "equity_index", "price": 51828.62, "change": 478.64, "changePct": 0.93, "session": "prior_close", "sourceId": "src-yahoo-vn"},
+        {"symbol": "NDX", "nameVi": "Nasdaq 100", "assetClass": "equity_index", "price": 30608.13, "change": 129.28, "changePct": 0.42, "session": "prior_close", "sourceId": "src-yahoo-vn"},
+        {"symbol": "SPX", "nameVi": "S&P 500", "assetClass": "equity_index", "price": 7743.41, "change": 39.28, "changePct": 0.51, "session": "prior_close", "sourceId": "src-yahoo-vn"},
+        {"symbol": "NKY", "nameVi": "Nikkei 225", "assetClass": "equity_index", "price": 66364.2, "change": 850.21, "changePct": 1.3, "session": "prior_close", "sourceId": "src-yahoo-vn"},
+        {"symbol": "HSI", "nameVi": "Hang Seng", "assetClass": "equity_index", "price": 24510.09, "change": -246.43, "changePct": -1.01, "session": "prior_close", "sourceId": "src-yahoo-vn"},
+        {"symbol": "WTI", "nameVi": "WTI", "assetClass": "commodity", "price": 92.95, "change": 0.51, "changePct": 0.55, "session": "preopen", "sourceId": "src-barrons"},
+        {"symbol": "XAU", "nameVi": "Vang COMEX", "assetClass": "commodity", "price": 4320.5, "change": 22.4, "changePct": 0.52, "session": "prior_close", "sourceId": "src-barrons"},
+        {"symbol": "BTC", "nameVi": "Bitcoin", "assetClass": "crypto", "price": 84174.0, "change": -162.0, "changePct": -0.19, "session": "preopen", "sourceId": "src-yahoo-btc"},
+        {"symbol": "USDVND", "nameVi": "USD/VND", "assetClass": "fx", "price": 26170.0, "change": 0.0, "changePct": 0.0, "session": "preopen", "sourceId": "src-vietnambiz"}
+      ]
+    },
+    "globalNews": [
+      {"id": "https://www.bloomberg.com/news/articles/2026-09-27/stock-market-today-dow-s-p-live-updates", "url": "https://www.bloomberg.com/news/articles/2026-09-27/stock-market-today-dow-s-p-live-updates", "date": "2026-09-28T07:25:00+07:00", "title": "Dau tang, trai phieu My yeu khi Trump bac Iran", "summary": "Bloomberg: Trump bac de xuat 7 ngay mo Hormuz. Brent ~105,7 USD (+1,3%); loi suat 10Y My len ~5,20%.", "impact": {"direction": "risk_off", "horizon": "days", "assets": ["WTI", "DXY", "SPX"], "text": "Dau va loi suat tang lai gay suc ep len chung khoan chau A dau tuan."}, "sourceId": "src-bloomberg"},
+      {"id": "https://www.barrons.com/market-data", "url": "https://www.barrons.com/market-data", "date": "2026-09-26T05:05:00+07:00", "title": "Pho Wall tang thu Sau: Dow +0,93%", "summary": "Barron's: Dow 51.828,62; S&P 7.743,41 (+0,51%); Nasdaq 100 30.608,13 (+0,42%). VIX 14,87.", "impact": {"direction": "risk_on", "horizon": "days", "assets": ["DJI", "SPX", "NDX"], "text": "My dong xanh du loi suat 10Y van tren 5%."}, "sourceId": "src-barrons"},
+      {"id": "https://www.barrons.com/market-data/stocks/us/indexes", "url": "https://www.barrons.com/market-data/stocks/us/indexes", "date": "2026-09-26T07:05:00+07:00", "title": "S&P tuan +1,21%; Nasdaq 100 tuan +3,25%", "summary": "Dow tuan +0,28%. Russell 2000 dong 2.837,55. Loi suat 10Y quanh 5,16-5,18%.", "impact": {"direction": "mixed", "horizon": "weeks", "assets": ["SPX", "NDX"], "text": "Co phieu tru do chi so du trai phieu My van cang."}, "sourceId": "src-barrons"},
+      {"id": "https://finance.yahoo.com/quote/%5EN225/", "url": "https://finance.yahoo.com/quote/%5EN225/", "date": "2026-09-25T15:45:00+07:00", "title": "Nikkei +1,3%; Hang Seng -1,0% phien 25/9", "summary": "Nikkei dong 66.364,20; Hang Seng 24.510,09. A phan hoa truoc cuoi tuan.", "impact": {"direction": "mixed", "horizon": "intraday", "assets": ["NKY", "HSI"], "text": "Nhat manh, Hong Kong yeu khi USD con cung."}, "sourceId": "src-yahoo-vn"},
+      {"id": "https://www.bloomberg.com/asia", "url": "https://www.bloomberg.com/asia", "date": "2026-09-25T18:37:00+07:00", "title": "Chau Au co tuan tang dau sau 4 tuan", "summary": "FTSE 100 dong 10.695,25 (+0,14%). DAX 25.408,64 (+0,56%) khi nang luong ha nhiet cuoi tuan.", "impact": {"direction": "risk_on", "horizon": "days", "assets": ["FTSE", "SPX"], "text": "Au huong loi khi dau lui phien 25/9, nhung sang 28/9 dau lai tang."}, "sourceId": "src-bloomberg"},
+      {"id": "https://finance.yahoo.com/quote/BTC-USD/", "url": "https://finance.yahoo.com/quote/BTC-USD/", "date": "2026-09-28T08:30:00+07:00", "title": "Bitcoin quanh 84.200 USD sang thu Hai", "summary": "BTC ~84.174 USD (-0,19% so voi 27/9); ETH ~2.678 USD. Bien do hep truoc phien A.", "impact": {"direction": "neutral", "horizon": "days", "assets": ["BTC"], "text": "Crypto di ngang khi lai suat thuc My con cao."}, "sourceId": "src-yahoo-btc"},
+      {"id": "https://www.barrons.com/market-data", "url": "https://www.barrons.com/market-data", "date": "2026-09-26T08:50:00+07:00", "title": "WTI quanh 92,4-93 USD; vang COMEX 4.320", "summary": "Barron's dong 25/9: WTI 92,44; vang 4.320,5. Sang 28/9 WTI nhich ~92,95 khi Hormuz cang.", "impact": {"direction": "mixed", "horizon": "days", "assets": ["WTI", "XAU"], "text": "Dau tang lai lam nong ky vong CPI; vang nhay loi suat."}, "sourceId": "src-barrons"},
+      {"id": "https://vneconomy.vn/dau-an-kinh-te-the-gioi-tuan-20-2692026-thuong-dinh-my-trung-va-bien-dong-thi-truong-trai-phieu.htm", "url": "https://vneconomy.vn/dau-an-kinh-te-the-gioi-tuan-20-2692026-thuong-dinh-my-trung-va-bien-dong-thi-truong-trai-phieu.htm", "date": "2026-09-26T19:04:00+07:00", "title": "Tuan 20-26/9: Trump-Tap va song trai phieu", "summary": "VnEconomy: thuong dinh it thoa thuan; loi suat 10Y My cao nhat tu 2007, 30Y tu 2004.", "impact": {"direction": "risk_off", "horizon": "weeks", "assets": ["DXY", "VNINDEX"], "text": "Lai suat My cao han che von vao thi truong moi noi."}, "sourceId": "src-vneconomy"}
+    ],
+    "vietnamNews": [
+      {"id": "https://cafef.vn/chung-khoan-viet-nam-da-phan-ung-voi-tin-nang-hang-hay-chua-va-cau-tra-loi-cua-quy-ngoai-ty-usd-188260927231243215.chn", "url": "https://cafef.vn/chung-khoan-viet-nam-da-phan-ung-voi-tin-nang-hang-hay-chua-va-cau-tra-loi-cua-quy-ngoai-ty-usd-188260927231243215.chn", "date": "2026-09-28T00:05:00+07:00", "title": "Nang hang FTSE: quy ngoai ty USD noi gi?", "summary": "CafeF 27-28/9: tuan dau Secondary Emerging, VN-Index -1,68% ve 1.785. Phan ung nang hang con cham.", "impact": {"direction": "mixed", "horizon": "weeks", "assets": ["VNINDEX"], "text": "Nang hang la cau chuyen trung han; ngan han van do thanh khoan va ngoai."}, "sourceId": "src-cafef"},
+      {"id": "https://cafef.vn/phien-25-9-khoi-ngoai-giam-ban-rong-nguoc-chieu-tung-250-ty-dong-gom-mot-co-phieu-tren-hose-188260925152729926.chn", "url": "https://cafef.vn/phien-25-9-khoi-ngoai-giam-ban-rong-nguoc-chieu-tung-250-ty-dong-gom-mot-co-phieu-tren-hose-188260925152729926.chn", "date": "2026-09-25T22:45:00+07:00", "title": "VN-Index +10 diem phien 25/9; ngoai -254 ty", "summary": "Chot 25/9: VN-Index 1.785,11 (+0,56%). GTGD HoSE ~15.278 ty; ngoai ban rong 254 ty, gom SBT ~247 ty.", "impact": {"direction": "mixed", "horizon": "days", "assets": ["VNINDEX"], "text": "Hoi ky thuat sau 2 phien roi, thanh khoan con yeu."}, "sourceId": "src-cafef"},
+      {"id": "https://cafef.vn/du-bao-loi-nhuan-ngan-hang-quy-iii-mot-nha-bang-duoc-ky-vong-lai-gap-ruoi-cung-ky-mb-techcombank-vpbank-vietcombank-vietinbank-va-bidv-co-the-tang-truong-hai-con-so-188260928002038834.chn", "url": "https://cafef.vn/du-bao-loi-nhuan-ngan-hang-quy-iii-mot-nha-bang-duoc-ky-vong-lai-gap-ruoi-cung-ky-mb-techcombank-vpbank-vietcombank-vietinbank-va-bidv-co-the-tang-truong-hai-con-so-188260928002038834.chn", "date": "2026-09-28T00:20:00+07:00", "title": "Q3 ngan hang: MB, TCB, VPB ky vong tang manh", "summary": "CafeF 28/9: mot nha bang co the lai gap ruoi; VCB, CTG, BID tang truong 2 chu so.", "impact": {"direction": "risk_on", "horizon": "weeks", "assets": ["VNINDEX", "VPB"], "text": "Ky vong KQKD Q3 la tro luc chinh tuan 40."}, "sourceId": "src-cafef"},
+      {"id": "https://cafef.vn/thua-vn-index-vi-khong-nam-co-phieu-vingroup-nha-sang-lap-pyn-elite-fund-thang-than-thua-nhan-mot-dieu-188260927235257843.chn", "url": "https://cafef.vn/thua-vn-index-vi-khong-nam-co-phieu-vingroup-nha-sang-lap-pyn-elite-fund-thang-than-thua-nhan-mot-dieu-188260927235257843.chn", "date": "2026-09-27T23:52:00+07:00", "title": "PYN Elite: thua VN-Index vi thieu ho Vin", "summary": "Nha sang lap quy thua nhan bo lo VIC/VHM khien hieu suat kem chi so.", "impact": {"direction": "mixed", "horizon": "weeks", "assets": ["VHM", "VNINDEX"], "text": "Do tap trung ho Vin van quyet dinh diem so VN-Index."}, "sourceId": "src-cafef"},
+      {"id": "https://cafef.vn/hon-400-co-phieu-chim-trong-sac-do-188260924170507023.chn", "url": "https://cafef.vn/hon-400-co-phieu-chim-trong-sac-do-188260924170507023.chn", "date": "2026-09-25T00:36:00+07:00", "title": "Nhip 24/9: hon 400 ma do, day 1.775", "summary": "VN-Index 1.775,09 (-1,48%). Hai phien mat gan 42 diem truoc khi hoi 25/9.", "impact": {"direction": "risk_off", "horizon": "days", "assets": ["VNINDEX"], "text": "Day 24/9 quanh 1.770 la moc phai giu phien 28/9."}, "sourceId": "src-cafef"},
+      {"id": "https://cafef.vn/pnj-dieu-chinh-ke-hoach-du-lo-ky-luc-6270-ty-dong-khong-chia-co-tuc-nam-2026-18826092516375361.chn", "url": "https://cafef.vn/pnj-dieu-chinh-ke-hoach-du-lo-ky-luc-6270-ty-dong-khong-chia-co-tuc-nam-2026-18826092516375361.chn", "date": "2026-09-25T23:38:00+07:00", "title": "PNJ ha ke hoach, kich ban lo 6.270 ty", "summary": "Doanh thu 2026 ha con 39.057 ty; co tuc tien mat ve 0% neu ghi du du phong.", "impact": {"direction": "risk_off", "horizon": "months", "assets": ["PNJ"], "text": "Tin tieu cuc nganh vang trang suc sang tuan moi."}, "sourceId": "src-cafef"},
+      {"id": "https://vneconomy.vn/nua-dau-thang-9-nhap-khau-tang-gan-gap-ba-xuat-khau-nhap-sieu-28-ty-usd.htm", "url": "https://vneconomy.vn/nua-dau-thang-9-nhap-khau-tang-gan-gap-ba-xuat-khau-nhap-sieu-28-ty-usd.htm", "date": "2026-09-22T15:11:00+07:00", "title": "Nua dau thang 9 nhap sieu 2,82 ty USD", "summary": "Xuat khau +2,4%, nhap khau +7,16%. Kim ngach luy ke 15/9 dat 825,19 ty USD.", "impact": {"direction": "mixed", "horizon": "weeks", "assets": ["USDVND"], "text": "Nhap sieu ky 1/9 gay ap luc nhe len VND."}, "sourceId": "src-vneconomy"},
+      {"id": "https://cafef.vn/novaland-nvl-chot-ngay-phat-hanh-gan-801-trieu-co-phieu-huy-dong-hon-8000-ty-dong-xu-ly-no-188260921221505758.chn", "url": "https://cafef.vn/novaland-nvl-chot-ngay-phat-hanh-gan-801-trieu-co-phieu-huy-dong-hon-8000-ty-dong-xu-ly-no-188260921221505758.chn", "date": "2026-09-22T07:05:00+07:00", "title": "NVL chot quyen mua 801 trieu cp ngay 1/10", "summary": "Chao ban ~800,7 trieu cp gia 10.000 dong, huy dong ~8.007 ty xu ly no. Ty le 3:1.", "impact": {"direction": "mixed", "horizon": "weeks", "assets": ["NVL"], "text": "Pha loang gan cua; theo doi dang ky mua tuan nay."}, "sourceId": "src-cafef"}
+    ],
+    "vietnamMacro": [
+      {"indicator": "CPI", "nameVi": "CPI YoY T8/2026", "value": 4.89, "unit": "%", "sourceId": "src-vneconomy"},
+      {"indicator": "CPI", "nameVi": "CPI BQ 8 thang", "value": 4.45, "unit": "%", "sourceId": "src-vneconomy"},
+      {"indicator": "FDI", "nameVi": "FDI dang ky 8 thang", "value": 40.63, "unit": "ty USD", "sourceId": "src-vneconomy"},
+      {"indicator": "FDI", "nameVi": "FDI thuc hien 8 thang", "value": 17.25, "unit": "ty USD", "sourceId": "src-vneconomy"},
+      {"indicator": "FX", "nameVi": "Ty gia trung tam", "value": 25641, "unit": "VND", "sourceId": "src-vietnambiz"},
+      {"indicator": "FX", "nameVi": "USD NHTM ban", "value": 26170, "unit": "VND", "sourceId": "src-vietnambiz"},
+      {"indicator": "RATES", "nameVi": "LS qua dem LHNH", "value": 1.1, "unit": "%", "sourceId": "src-vietnambiz"},
+      {"indicator": "CREDIT", "nameVi": "Tin dung YoY T7", "value": 17.7, "unit": "%", "sourceId": "src-vietnambiz"},
+      {"indicator": "M2", "nameVi": "M2 YoY T6", "value": 4.24, "unit": "%", "sourceId": "src-vietnambiz"}
+    ],
+    "equityMarket": {
+      "index": {
+        "priorClose": {"date": "2026-09-25", "price": 1785.11, "change": 10.02, "changePct": 0.56},
+        "latest": {"date": "2026-09-25", "price": 1785.11, "change": 10.02, "changePct": 0.56, "session": "preopen", "weekChange": -30.55, "weekChangePct": -1.68}
+      },
+      "liquidity": {"hose": {"volumeShares": 624262395, "valueVndBn": 15278, "note": "Dong 25/9 GTGD HoSE ~15.278 ty; 26-27/9 nghi. Phien 28/9 chua mo."}},
+      "foreign": {"netValueVndBn": -254, "note": "25/9 ngoai -254 ty HoSE; tuan W39 van ban rong."},
+      "proprietary": {"netValueVndBn": null, "note": "Chua tach tu doanh phien 25/9."},
+      "retail": {"netValueVndBn": null, "note": "Chua tach ca nhan phien 25/9."},
+      "relatedIndices": [
+        {"symbol": "VNINDEX", "price": 1785.11, "changePct": 0.56},
+        {"symbol": "VN30", "price": 1938.5, "changePct": 0.33},
+        {"symbol": "HNX", "price": 272.21, "changePct": -0.21}
+      ]
+    },
+    "worldMarkets": {
+      "quotes": [
+        {"symbol": "DXY", "nameVi": "DXY", "assetClass": "fx", "price": 101.12, "changePct": 0.08, "sourceId": "src-barrons"},
+        {"symbol": "DJI", "nameVi": "Dow", "assetClass": "equity_index", "price": 51828.62, "changePct": 0.93, "sourceId": "src-yahoo-vn"},
+        {"symbol": "NDX", "nameVi": "Nasdaq", "assetClass": "equity_index", "price": 30608.13, "changePct": 0.42, "sourceId": "src-yahoo-vn"},
+        {"symbol": "SPX", "nameVi": "S&P 500", "assetClass": "equity_index", "price": 7743.41, "changePct": 0.51, "sourceId": "src-yahoo-vn"},
+        {"symbol": "RUT", "nameVi": "Russell 2000", "assetClass": "equity_index", "price": 2837.55, "changePct": 0.07, "sourceId": "src-yahoo-vn"},
+        {"symbol": "FTSE", "nameVi": "FTSE 100", "assetClass": "equity_index", "price": 10695.25, "changePct": 0.14, "sourceId": "src-yahoo-vn"},
+        {"symbol": "NKY", "nameVi": "Nikkei", "assetClass": "equity_index", "price": 66364.2, "changePct": 1.3, "sourceId": "src-yahoo-vn"},
+        {"symbol": "HSI", "nameVi": "Hang Seng", "assetClass": "equity_index", "price": 24510.09, "changePct": -1.01, "sourceId": "src-yahoo-vn"}
+      ]
+    },
+    "cryptoMarkets": {
+      "quotes": [
+        {"symbol": "BTC", "nameVi": "Bitcoin", "assetClass": "crypto", "price": 84174.0, "changePct": -0.19, "sourceId": "src-yahoo-btc"},
+        {"symbol": "ETH", "nameVi": "Ethereum", "assetClass": "crypto", "price": 2678.4, "changePct": -0.39, "sourceId": "src-yahoo-btc"}
+      ]
+    },
+    "companies": [
+      {"ticker": "VHM", "headline": "VHM +5,66% phien 25/9; PYN thua nhan thieu ho Vin", "impact": {"direction": "risk_on", "horizon": "weeks", "assets": ["VHM"], "text": "Ho Vin van la tru diem so truoc phien mo tuan 40."}, "metrics": {"changePct": 5.66}, "sourceId": "src-cafef"},
+      {"ticker": "VPB", "headline": "KQKD Q3 ngan hang: VPB trong nhom ky vong tang manh", "impact": {"direction": "risk_on", "horizon": "weeks", "assets": ["VPB"], "text": "Cau chuyen loi nhuan Q3 ho tro nhom ngan hang."}, "metrics": {"changePct": 4.07, "price": 23000}, "sourceId": "src-cafef"},
+      {"ticker": "PNJ", "headline": "PNJ ha ke hoach, co tuc 2026 ve 0%", "impact": {"direction": "risk_off", "horizon": "months", "assets": ["PNJ"], "text": "Kich ban lo 6.270 ty neu ghi nhan du du phong."}, "metrics": {"changePct": null}, "sourceId": "src-cafef"},
+      {"ticker": "NVL", "headline": "NVL chot quyen mua 801 trieu cp ngay 1/10", "impact": {"direction": "mixed", "horizon": "weeks", "assets": ["NVL"], "text": "Huy dong ~8.007 ty xu ly no; pha loang gan cua."}, "metrics": {"changePct": null}, "sourceId": "src-cafef"},
+      {"ticker": "BCM", "headline": "MBS: BCM lai rong Q3 uoc +337% len 1.817 ty", "impact": {"direction": "risk_on", "horizon": "weeks", "assets": ["BCM"], "text": "Khu cong nghiep la diem sang KQKD quy III."}, "metrics": {"changePct": null}, "sourceId": "src-cafef"},
+      {"ticker": "HCM", "headline": "HSC chao ban rieng le 200 trieu cp gia 23.000", "impact": {"direction": "mixed", "horizon": "weeks", "assets": ["HCM"], "text": "Thu ~4.600 ty bo sung margin; 9 NDT tham gia."}, "metrics": {"price": 25500}, "sourceId": "src-cafef"}
+    ],
+    "outlook": {
+      "stance": "Than trong preopen tuan 40",
+      "summary": "VN-Index 1.785,11 truoc gio mo. Tuan W39 -1,68%. Can giu 1.770 va cai thien thanh khoan de lay lai 1.800.",
+      "watchpoints": [
+        {"text": "Giu 1.770-1.785 khi HOSE mo 28/9", "impact": {"direction": "mixed", "horizon": "days", "assets": ["VNINDEX"], "text": "Mat 1.770 mo lai kich ban 1.715-1.756."}},
+        {"text": "Thanh khoan duoi 16.000 ty", "impact": {"direction": "risk_off", "horizon": "days", "assets": ["VNINDEX"], "text": "Hoi diem ma GTGD thap de bi chan o 1.800."}},
+        {"text": "Dau va loi suat 10Y My dau tuan", "impact": {"direction": "risk_off", "horizon": "days", "assets": ["WTI", "DXY"], "text": "Hormuz va 10Y ~5,20% la rui ro ngoai."}}
+      ],
+      "levels": [
+        {"symbol": "VNINDEX", "kind": "support", "price": 1770.47, "note": "Day 24/9"},
+        {"symbol": "VNINDEX", "kind": "support", "price": 1756.0, "note": "Day bien TPS"},
+        {"symbol": "VNINDEX", "kind": "resistance", "price": 1800.0, "note": "Moc tam ly"},
+        {"symbol": "VNINDEX", "kind": "resistance", "price": 1894.0, "note": "Khang cu TPS Q4"}
+      ],
+      "events": [
+        {"when": "2026-09-28", "title": "HOSE mo cua tuan 40", "impact": {"direction": "neutral", "horizon": "intraday", "assets": ["VNINDEX"], "text": "Cho gap va dong tien sau nghi 26-27/9."}},
+        {"when": "2026-09-29", "title": "My: Case-Shiller va Consumer Confidence", "impact": {"direction": "mixed", "horizon": "days", "assets": ["SPX", "DXY"], "text": "Lich kinh te My co the lay loi suat."}},
+        {"when": "2026-10-01", "title": "NVL chot quyen mua them", "impact": {"direction": "mixed", "horizon": "weeks", "assets": ["NVL"], "text": "Ngay DKCC quyen mua 801 trieu cp."}}
+      ]
+    },
+    "series": {
+      "vnindex": {"id": "vnindex", "interpolation": "official", "points": [{"t": "2026-09-24", "v": 1775.09}, {"t": "2026-09-25", "v": 1785.11}]},
+      "dji": {"id": "dji", "interpolation": "official", "points": [{"t": "2026-09-24", "v": 51349.98}, {"t": "2026-09-25", "v": 51828.62}]},
+      "ndx": {"id": "ndx", "interpolation": "official", "points": [{"t": "2026-09-24", "v": 30478.85}, {"t": "2026-09-25", "v": 30608.13}]},
+      "spx": {"id": "spx", "interpolation": "official", "points": [{"t": "2026-09-24", "v": 7704.13}, {"t": "2026-09-25", "v": 7743.41}]},
+      "dxy": {"id": "dxy", "interpolation": "official", "points": [{"t": "2026-09-25", "v": 101.01}, {"t": "2026-09-27", "v": 101.04}, {"t": "2026-09-28", "v": 101.12}]},
+      "nky": {"id": "nky", "interpolation": "official", "points": [{"t": "2026-09-24", "v": 66143.61}, {"t": "2026-09-25", "v": 66364.2}]},
+      "hsi": {"id": "hsi", "interpolation": "official", "points": [{"t": "2026-09-24", "v": 24756.52}, {"t": "2026-09-25", "v": 24510.09}]},
+      "btcUsd": {"id": "btcUsd", "interpolation": "official", "points": [{"t": "2026-09-25", "v": 84093.13}, {"t": "2026-09-26", "v": 84433.05}, {"t": "2026-09-27", "v": 84336.0}, {"t": "2026-09-28", "v": 84174.0}]},
+      "vnindexVolume5d": {"labels": ["22/09", "23/09", "24/09", "25/09"], "volumeMillionShares": [593.82, 669.62, 654.7, 624.26], "valueVndTn": [12.888, 17.746, 16.681, 15.278]},
+      "foreignNet5dVndBn": {"labels": ["21/09", "23/09", "24/09", "25/09"], "values": [-668.3, -1053.46, -864.0, -254.0]}
+    }
+  },
+  "sources": {
+    "schemaVersion": "1.0.0",
+    "sources": [
+      {"id": "src-cafef", "name": "CafeF", "url": "https://cafef.vn/", "accessedAt": "2026-09-28T08:35:00+07:00", "reliability": "primary"},
+      {"id": "src-vietstock", "name": "Vietstock", "url": "https://finance.vietstock.vn/", "accessedAt": "2026-09-28T08:35:00+07:00", "reliability": "primary"},
+      {"id": "src-24h", "name": "24HMoney", "url": "https://24hmoney.vn/indices/vn-index", "accessedAt": "2026-09-28T08:35:00+07:00", "reliability": "primary"},
+      {"id": "src-vietnambiz", "name": "VietnamBiz", "url": "https://vietnambiz.vn/", "accessedAt": "2026-09-28T08:35:00+07:00", "reliability": "secondary"},
+      {"id": "src-vneconomy", "name": "VnEconomy", "url": "https://vneconomy.vn/", "accessedAt": "2026-09-28T08:35:00+07:00", "reliability": "secondary"},
+      {"id": "src-barrons", "name": "Barron's", "url": "https://www.barrons.com/market-data", "accessedAt": "2026-09-28T08:35:00+07:00", "reliability": "secondary"},
+      {"id": "src-bloomberg", "name": "Bloomberg", "url": "https://www.bloomberg.com/asia", "accessedAt": "2026-09-28T08:35:00+07:00", "reliability": "secondary"},
+      {"id": "src-yahoo-btc", "name": "Yahoo Bitcoin", "url": "https://finance.yahoo.com/quote/BTC-USD/", "accessedAt": "2026-09-28T08:35:00+07:00", "reliability": "secondary"},
+      {"id": "src-yahoo-vn", "name": "Yahoo Finance", "url": "https://finance.yahoo.com/", "accessedAt": "2026-09-28T08:35:00+07:00", "reliability": "secondary"}
+    ]
+  }
+}
