@@ -1,0 +1,17 @@
+{
+  "date": "2026-09-30",
+  "briefKind": "eod_prev+overnight+preopen",
+  "generatedAt": "2026-09-30T08:35:00+07:00",
+  "market": {
+    "vnindexEod": {"date": "2026-09-29", "price": 1777.73, "change": -2.95, "changePct": -0.17, "volumeShares": 537870453, "valueVndBn": 12338.41, "source": "StockBiz"},
+    "foreignEod": {"buy": 1425.98, "sell": 1825.93, "net": -399.95},
+    "usEod": {"dji": 51349.92, "spx": 7670.84, "ndxNote": 30339.33, "ust10y": 5.25},
+    "liveHint30": {"note": "StockBiz ~11:00 phiên 30/9 đang mở quanh 1.777-1.778; không dùng làm đóng cửa chính thức."}
+  },
+  "news_events": [
+    {"title": "VN-Index đóng 1.777,73 phiên 29/9", "url": "http://en.stockbiz.vn/HistoricalIndices.aspx", "sourceId": "src-stockbiz"},
+    {"title": "Ngoại bán ròng gần 400 tỷ, gom PVT", "url": "https://vneconomy.vn/khoi-ngoai-tiep-tuc-ban-rong-nhung-bat-ngo-mua-manh-mot-co-phieu-dau-khi.htm", "sourceId": "src-vneconomy"}
+  ],
+  "sentiment": {"fireant": "Thận trọng; chốt NAV quý III.", "newf319": "Dư bán NVL/PNJ.", "tone": "cautious"},
+  "gaps": ["Chưa có đóng cửa HOSE 30/9 tại cửa sổ 08:35.", "Chưa tách retail net 29/9."]
+}
