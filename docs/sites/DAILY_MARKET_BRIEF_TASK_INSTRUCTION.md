@@ -1,13 +1,13 @@
 # Daily Market Brief — Task Instruction
 
 **Status:** living document — this file is the source of truth. Chat history and the Grok automation prompt must not invent a parallel spec.
-**Version:** 2.5.0
-**Updated:** 2026-09-29 (GMT+7)
+**Version:** 2.5.1
+**Updated:** 2026-09-30 (GMT+7)
 **Owner:** Phan Duy / DP Stock-Investment Assistant
 **Canonical path:** `docs/sites/DAILY_MARKET_BRIEF_TASK_INSTRUCTION.md` on branch `project-website-pages`
 **Automation:** `Market daily brief` (`fc7b3b17-89d9-4107-a578-b4ce780a2911`) — the automation prompt only loads and follows this file.
 
-**Proven:** v2.0 Pages JSON bind 2026-09-18. v2.1 dashboard. v2.1.1 UTF-8 + Be Vietnam Pro. v2.2 monthly/weekly + hash hub. v2.3 schema lock (golden `week-38.json`). v2.3.1–2.3.4 sources.json, news URLs, Prettier JSON, sources-first. v2.4 day shards after MCP could not push a fat week-39. v2.5 consolidates the live automation guardrails into this file.
+**Proven:** v2.0 Pages JSON bind 2026-09-18. v2.1 dashboard. v2.1.1 UTF-8 + Be Vietnam Pro. v2.2 monthly/weekly + hash hub. v2.3 schema lock (golden `week-38.json`). v2.3.1–2.3.4 sources.json, news URLs, Prettier JSON, sources-first. v2.4 day shards after MCP could not push a fat week-39. v2.5 consolidates the live automation guardrails into this file. v2.5.1: day file MUST go through `gh api` Contents PUT (not MCP content=), never commit stubs.
 
 ---
 
@@ -24,6 +24,7 @@
 
 | Date | Version | Change |
 |---|---|---|
+| 2026-09-30 | 2.5.1 | Day-file transport: `gh api` PUT Contents from a local file. Ban stub/placeholder commits. Verify remote `size` == local bytes. MCP only for thin week + catalog. |
 | 2026-09-29 | 2.5.0 | Migrated live automation guardrails (branch lock, one-commit rule, day-shard publish, MCP size) into this file. Automation prompt reduced to “load and follow this file”. |
 | 2026-09-26 | 2.4.0 | Day shards: publish `data/YYYY-MM/d/YYYY-MM-DD.json` + thin `week-WW.json`. Loader prefers `catalog.dayPath`. week-38 stays embedded. |
 | 2026-09-23 | 2.3.4 | Sources-first: scrape/search registered `sources.json` domains before unconstrained search. |
@@ -56,9 +57,10 @@ Financial research analyst + front-end engineer. For **today in Asia/Ho_Chi_Minh
 
 **Commits**
 
-- Target **one Git commit per routine run** covering the day file + thin week pointer + catalog.
-- Prefer assemble locally, then one create/update that lands the complete result.
-- Exception (MCP payload cap ~30–40 KB): if a combined commit is too large, push the three small files as **separate commits of the same payload**, never extra probe/restore/cleanup commits. If a write fails, stop and report — do not pile retries.
+- Target **one Git commit per routine run** when possible. In practice: **day file via `gh api`**, then thin week + catalog via MCP if they stay small.
+- Assemble the day JSON **on disk first**. Never paste the day body into MCP `create_or_update_file` / `push_files` `content` — that envelope truncates (~30–40 KB tool JSON) and produced the 2026-09-30 stubs (`see-local`, empty arrays).
+- If a write fails, STOP and report. **Never** commit a placeholder, skeleton schema, stripped-diacritic draft, or `see-local` so the path exists.
+- After every day PUT: remote `content.size` MUST equal local `wc -c`. If not, treat the commit as invalid.
 - Commit message: `Publish daily market brief YYYY-MM-DD (dashboard v2.5 day-shard)`.
 
 ---
@@ -179,9 +181,30 @@ Routes: `#/` and `#/latest` open the newest brief (`#/YYYY-MM-DD`). Header calen
 3. Write **only** `docs/sites/data/YYYY-MM/d/YYYY-MM-DD.json`.
 4. Fetch existing thin `docs/sites/data/YYYY-MM/week-WW.json`. If it is still an embedded v2.0 blob, convert to `schemaVersion: "2.1.0"` / `storage: "day-shards"` **without deleting sibling dates**. Upsert today’s `{date, dayPath, status}` pointer. Never put `report` back into the week file. Never replace `days` with `[todayOnly]`.
 5. Upsert `docs/sites/data/index.json` newest-first with `weekPath` + `dayPath`.
-6. Push those files on `project-website-pages` (one commit if possible; split only for MCP size).
-7. Spot-check UTF-8 (`ệ` / `ư` / `ả`) in the **day** JSON. Confirm the commit SHA is on `project-website-pages`.
+6. Publish on `project-website-pages` in this order:
+   1. **Day file first** with `gh api` Contents PUT (required). GET blob SHA with `?ref=project-website-pages`, PUT base64 of the local UTF-8 file, `branch=project-website-pages`.
+   2. Then upsert thin week + catalog (MCP is OK — those files are a few KB).
+7. Spot-check UTF-8 (`ệ` / `ư` / `ả`) in the **remote** day JSON. Confirm `content.size` matches local bytes and the commit SHA is on `project-website-pages`.
 8. Do not create a new dashboard HTML.
+
+### Day-file transport (`gh api` — required)
+
+GitHub Contents API accepts ~1 MB. Connected MCP tools wrap `content` in a JSON tool call; that envelope failed on 2026-09-30 (local 23347 B valid file became remote 9 B then 1045 B stubs). Official MCP server does not cap file size; the Grok tool-argument packer does.
+
+Required pattern (sandbox `gh` + `GH_TOKEN`):
+
+```bash
+REPO=d-dragon/dp-stock-investment-assistant
+PATH_IN_REPO=docs/sites/data/YYYY-MM/d/YYYY-MM-DD.json
+LOCAL_FILE=/path/to/YYYY-MM-DD.json
+SHA=$(gh api "repos/${REPO}/contents/${PATH_IN_REPO}?ref=project-website-pages" --jq .sha || true)
+python3 -c 'import base64,json,pathlib,sys; raw=pathlib.Path(sys.argv[1]).read_bytes(); body={"message":sys.argv[2],"content":base64.b64encode(raw).decode(),"branch":"project-website-pages"};
+print("local",len(raw)); pathlib.Path("/tmp/put-day.json").write_text(json.dumps(body),encoding="utf-8")' "$LOCAL_FILE" "Publish daily market brief YYYY-MM-DD (dashboard v2.5 day-shard)"
+# add sha into /tmp/put-day.json when updating an existing file
+gh api --method PUT "repos/${REPO}/contents/${PATH_IN_REPO}" --input /tmp/put-day.json
+```
+
+Reject the commit unless returned `content.size` equals local byte length and `snapshot.quotes` length is at least 10.
 
 `week-38.json` stays embedded (legacy). New weeks use day shards.
 
