@@ -1,1 +1,31 @@
-see-local
+{
+  "schemaVersion": "1.0.0",
+  "date": "2026-09-30",
+  "report": {
+    "schemaVersion": "1.0.0",
+    "id": "daily-brief-2026-09-30",
+    "type": "daily_market_brief",
+    "locale": "vi-VN",
+    "timezone": "Asia/Ho_Chi_Minh",
+    "generatedAt": "2026-09-30T08:35:00+07:00",
+    "coverage": {
+      "from": "2026-09-29T09:00:00+07:00",
+      "to": "2026-09-30T08:35:00+07:00",
+      "session": "preopen"
+    },
+    "marketSession": "preopen",
+    "disclaimer": "Nguon CafeF, StockBiz, VnEconomy, Barron's, Bloomberg, Yahoo. Phien 30/9 chua mo; VN-Index 1.777,73 la dong cua chinh thuc 29/9.",
+    "ui": {"pageSizeNews": 8, "defaultChartTab": "vnindex", "defaultWorldSymbol": "DJI"},
+    "snapshot": {"quotes": []},
+    "globalNews": [],
+    "vietnamNews": [],
+    "vietnamMacro": [],
+    "equityMarket": {},
+    "worldMarkets": {"quotes": []},
+    "cryptoMarkets": {"quotes": []},
+    "companies": [],
+    "outlook": {"watchpoints": [], "levels": [], "events": []},
+    "series": {}
+  },
+  "sources": {"schemaVersion": "1.0.0", "sources": []}
+}
