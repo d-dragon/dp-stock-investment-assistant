@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Docs Explorer — DP Stock</title>
+  <style>
+    :root {
+      --bg: #070b10; --panel: #101820; --panel2: #16202b; --border: #2a3645;
+      --text: #e9eef6; --muted: #92a0b5; --accent: #4ea1ff; --folder: #fbbf24;
+    }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; margin: 0; background: var(--bg); color: var(--text);
+      font: 14px/1.5 Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .top {
+      display: flex; flex-wrap: wrap; gap: 12px; align-items: center;
+      padding: 10px 14px; border-bottom: 1px solid var(--border); background: var(--panel);
+    }
+    .top h1 { margin: 0; font-size: 15px; }
+    .top input {
+      margin-left: auto; min-width: 200px; flex: 1; max-width: 320px;
+      padding: 8px 10px; border-radius: 8px; border: 1px solid var(--border);
+      background: var(--bg); color: var(--text);
+    }
+    .nav-home {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 6px 10px; border-radius: 8px; border: 1px solid var(--border);
+      background: var(--panel2); color: var(--text); font-size: 12px; font-weight: 600;
+      text-decoration: none;
+    }
+    .nav-home:hover { border-color: var(--accent); text-decoration: none; }
+    .shell { display: grid; grid-template-columns: 300px 1fr; height: calc(100% - 52px); }
+    @media (max-width: 800px) { .shell { grid-template-columns: 1fr; grid-template-rows: 40vh 1fr; } }
+    .tree { border-right: 1px solid var(--border); overflow: auto; padding: 8px; background: var(--panel); }
+    .tree details { margin-left: 6px; }
+    .tree summary { cursor: pointer; list-style: none; padding: 4px 6px; border-radius: 6px; color: var(--folder); }
+    .tree summary::-webkit-details-marker { display: none; }
+    .tree summary:hover, .tree a:hover { background: #1a2430; text-decoration: none; }
+    .tree a { display: block; padding: 4px 6px 4px 16px; border-radius: 6px; color: var(--text); }
+    .tree a.on { background: #1d4ed833; color: var(--accent); }
+    .viewer { display: flex; flex-direction: column; min-width: 0; min-height: 0; }
+    .viewer-bar {
+      padding: 10px 14px; border-bottom: 1px solid var(--border); color: var(--muted);
+      font: 12px/1.4 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      word-break: break-all; display: flex; gap: 10px; align-items: center;
+    }
+    .viewer-bar a { margin-left: auto; font-family: inherit; }
+    .viewer-body { padding: 16px 18px; overflow: auto; flex: 1; }
+    .viewer-body pre { white-space: pre-wrap; word-break: break-word; font: 12.5px/1.45 ui-monospace, Menlo, Consolas, monospace; margin: 0; }
+    .md h1,.md h2,.md h3 { margin-top: 1.1em; }
+    .md code { background: #1a2430; padding: 1px 4px; border-radius: 4px; }
+    .md pre { background: #1a2430; padding: 12px; border-radius: 8px; border: 1px solid var(--border); overflow: auto; }
+    .muted { color: var(--muted); }
+  </style>
+</head>
+<body>
+  <div class="top">
+    <a class="nav-home" href="../index.html">← Home</a>
+    <h1>Docs file explorer</h1>
+    <input id="filter" type="search" placeholder="Filter files…" autocomplete="off" />
+  </div>
+  <div class="shell">
+    <aside class="tree" id="tree">Loading…</aside>
+    <div class="viewer">
+      <div class="viewer-bar">
+        <span id="pathLabel">Select a file</span>
+        <a id="rawLink" href="#" style="display:none" target="_blank" rel="noopener">Open file</a>
+      </div>
+      <div class="viewer-body" id="view"><p class="muted">Open this page as <code>explorer/index.html</code> (not the folder). Tree works on <code>file://</code>; preview needs http(s) / Pages.</p></div>
+    </div>
+  </div>
+  <script>
+  window.__DOCS_MANIFEST__ = {"schemaVersion": "1.0.0", "root": "docs", "files": ["High-level Design/AGENTIC_APP_WITH_STM_INTEGRATION_ROADMAP.md", "High-level Design/High-level design.drawio.xml", "architecture-review.md", "architecture/DECISIONS/.gitkeep", "architecture/RUNTIME_AND_INTEGRATION_FLOWS.md", "architecture/SYSTEM_OVERVIEW_AND_BOUNDARIES.md", "architecture/index.html", "data/data_model_design.md", "data/database_migration_guide.md", "data/mongodb_repository_improvements.md", "data/repository_factory_summary.md", "data/repository_implementation_summary.md", "domains/agent/AGENT_MEMORY_TECHNICAL_DESIGN.md", "domains/agent/ARCHITECTURE_DESIGN.md", "domains/agent/DECISIONS/.gitkeep", "domains/agent/DECISIONS/ADR-AGENT-001-LAYERED-LLM-ARCHITECTURE.md", "domains/agent/DECISIONS/ADR-AGENT-002-SKILLS-PATTERN-PROMPT-COMPOSITION.md", "domains/agent/DECISIONS/ADR-AGENT-003-EXTERNALIZE-VERSION-PROMPT-ASSETS.md", "domains/agent/DECISIONS/ADR-AGENT-004-THIN-TOOL-GATEWAY-AND-NORMALIZED-TOOL-CONTEXT.md", "domains/agent/DECISIONS/ADR-AGENT-005-STRUCTURED-OUTPUT-BOUNDARY-AND-RESPONSE-TOOL-PATTERN.md", "domains/agent/DECISIONS/AGENT_ARCHITECTURE_DECISION_RECORDS.md", "domains/agent/LANGCHAIN_AGENT_HOWTO.md", "domains/agent/PHASE2_ROADMAP.md", "domains/agent/PHASE_2_AGENT_ENHANCEMENT_ROADMAP.md", "domains/agent/PHASE_CDE_REQUIREMENT_ANALYSIS.md", "domains/agent/PROMPT_SYSTEM_BENCHMARK_REVIEW.md", "domains/agent/PROMPT_SYSTEM_RESEARCH_PROPOSAL.md", "domains/agent/SOFTWARE_REQUIREMENTS_SPECIFICATION.md", "domains/agent/SRS_SPEC_TRACEABILITY.md", "domains/agent/TECHNICAL_DESIGN.md", "domains/agent/TOOLS_ARCHITECTURE_BENCHMARK_REVIEW.md", "domains/agent/TOOLS_RESEARCH_AND_PROPOSAL.md", "domains/backend/TECHNICAL_DESIGN.md", "domains/backend/api/.gitkeep", "domains/data/POLICY_AND_CONSTRAINTS.md", "domains/data/TECHNICAL_DESIGN.md", "domains/frontend/ARCHITECTURE.md", "domains/frontend/DECISIONS/.gitkeep", "domains/frontend/DECISIONS/ADR-FRONTEND-001-MODULAR-APPLICATION.md", "domains/frontend/DECISIONS/ADR-FRONTEND-002-MODERNIZE-FRONTEND-FOUNDATION.md", "domains/frontend/FRONTEND_ANALYSIS.md", "domains/frontend/REFINEMENT_SUMMARY.md", "domains/frontend/TECHNICAL_DESIGN.md", "domains/frontend/UI_IMPROVEMENTS.md", "frontend/adr-frontend-001-modular-application.md", "frontend/adr-frontend-002-modernize-frontend-foundation.md", "index.html", "langchain-agent/LANGSMITH_STUDIO_GUIDE.md", "langchain-agent/Langchain_agent_data_model.xml", "langchain-agent/Langchain_agent_high_level_design.xml", "langchain-agent/agent-dev-skill.md", "notes.md", "openapi.yaml", "operations/OPERATIONS_AND_RELEASE_POLICY.md", "operations/RUNBOOKS/.gitkeep", "project-comprehensive-overview.md", "research/stategraph_migration_analysis.md", "research/structured_output_technical_analysis.md", "sites/DAILY_MARKET_BRIEF_TASK_INSTRUCTION.md", "sites/assets/css/report.css", "sites/assets/js/report-app.js", "sites/assets/js/schema-validate.js", "sites/data/README-LAYOUT.md", "sites/data/index.json", "sites/index.html", "sites/templates/daily-report.html", "spec-driven development (SDD)/adoption-analysis.md", "spec-driven development (SDD)/spec-kit HOW-TO.md", "study-hub/frontend-architecture-evolution-report.md", "study-hub/frontend-modernization-and-modularization-strategy-research.md", "study-hub/project-documentation-and-specification-methodology.md", "system/REQUIREMENTS_METHOD_AND_GOVERNANCE.md", "system/SYSTEM_REQUIREMENTS_SPECIFICATION.md", "testing/API_TEST_TOOL_COMPARISON_REPORT.md", "testing/TESTING_CONSOLIDATION_FINDINGS.md", "testing/TESTING_CONSOLIDATION_REFERENCE.md", "testing/TESTING_CONSOLIDATION_RESEARCH.md", "testing/TESTING_CONSOLIDATION_SUMMARY.md", "testing/VERIFICATION_AND_TRACEABILITY_STRATEGY.md", "testing/backend-api-service/API_TEST_TOOL_COMPARISON_REPORT.md", "testing/backend-api-service/HOWTO_BRUNO_ADOPTION.md", "testing/backend-api-service/HOWTO_NEWMAN_ADOPTION.md", "testing/backend-api-service/HOWTO_PYTEST_RUNTIME_API_INTEGRATION.md", "testing/backend-api-service/HOWTO_SCHEMATHESIS_ADOPTION.md", "testing/backend-api-service/HOWTO_SCHEMATHESIS_NEWMAN_ADOPTION.md"]};
+  </script>
+  <script>
+(function () {
+  const files = ((window.__DOCS_MANIFEST__ || {}).files || []).slice();
+  const treeEl = document.getElementById("tree");
+  const viewEl = document.getElementById("view");
+  const pathLabel = document.getElementById("pathLabel");
+  const rawLink = document.getElementById("rawLink");
+  const filterEl = document.getElementById("filter");
+  let current = null;
+
+  function escapeHtml(s) {
+    return String(s)
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;");
+  }
+
+  function qsPath() {
+    const u = new URL(location.href);
+    return (u.searchParams.get("path") || "").replace(/^\/+/, "");
+  }
+
+  function setPath(path) {
+    const u = new URL(location.href);
+    if (path) u.searchParams.set("path", path);
+    else u.searchParams.delete("path");
+    history.replaceState(null, "", u.pathname + u.search + u.hash);
+  }
+
+  function buildTree(paths) {
+    const root = { kids: {}, files: [] };
+    paths.forEach(function (p) {
+      const parts = p.split("/");
+      let node = root;
+      for (let i = 0; i < parts.length - 1; i++) {
+        const part = parts[i];
+        if (!node.kids[part]) node.kids[part] = { kids: {}, files: [] };
+        node = node.kids[part];
+      }
+      node.files.push(parts[parts.length - 1]);
+    });
+    return root;
+  }
+
+  function renderNode(node, prefix, openDepth) {
+    let html = "";
+    Object.keys(node.kids)
+      .sort()
+      .forEach(function (name) {
+        const path = prefix ? prefix + "/" + name : name;
+        html +=
+          "<details " +
+          (openDepth > 0 ? "open " : "") +
+          "><summary>📁 " +
+          escapeHtml(name) +
+          "</summary>" +
+          renderNode(node.kids[name], path, openDepth - 1) +
+          "</details>";
+      });
+    node.files
+      .slice()
+      .sort()
+      .forEach(function (f) {
+        const path = prefix ? prefix + "/" + f : f;
+        html +=
+          '<a class="file' +
+          (current === path ? " on" : "") +
+          '" href="?path=' +
+          encodeURIComponent(path) +
+          '" data-path="' +
+          escapeHtml(path) +
+          '">📄 ' +
+          escapeHtml(f) +
+          "</a>";
+      });
+    return html;
+  }
+
+  function simpleMarkdown(md) {
+    let s = escapeHtml(md);
+    s = s.replace(/^### (.*)$/gm, "<h3>$1</h3>");
+    s = s.replace(/^## (.*)$/gm, "<h2>$1</h2>");
+    s = s.replace(/^# (.*)$/gm, "<h1>$1</h1>");
+    s = s.replace(/```([\s\S]*?)```/g, "<pre><code>$1</code></pre>");
+    s = s.replace(/`([^`]+)`/g, "<code>$1</code>");
+    s = s.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
+    s = s.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>');
+    s = s.replace(/^(?!<[hpre])(.+)$/gm, function (line) {
+      if (!line.trim() || line.startsWith("<")) return line;
+      return "<p>" + line + "</p>";
+    });
+    return s;
+  }
+
+  function isText(path) {
+    return /\.(md|markdown|txt|json|ya?ml|xml|html?|css|js|ts|csv|svg)$/i.test(path);
+  }
+
+  function openFile(path) {
+    current = path;
+    pathLabel.textContent = "docs/" + path;
+    rawLink.style.display = "inline";
+    rawLink.href = "../" + path;
+    setPath(path);
+    document.querySelectorAll(".tree a.file").forEach(function (a) {
+      a.classList.toggle("on", a.getAttribute("data-path") === path);
+    });
+    if (!isText(path)) {
+      viewEl.innerHTML =
+        '<p class="muted">Binary / unsupported preview. <a href="../' +
+        encodeURI(path) +
+        '" target="_blank" rel="noopener">Open file</a></p>';
+      return;
+    }
+    viewEl.innerHTML = '<p class="muted">Loading…</p>';
+    fetch("../" + path)
+      .then(function (r) {
+        if (!r.ok) throw new Error("HTTP " + r.status);
+        return r.text();
+      })
+      .then(function (text) {
+        if (/\.md$/i.test(path) || /\.markdown$/i.test(path)) {
+          viewEl.innerHTML = '<div class="md">' + simpleMarkdown(text) + "</div>";
+        } else {
+          viewEl.innerHTML = "<pre>" + escapeHtml(text) + "</pre>";
+        }
+      })
+      .catch(function () {
+        viewEl.innerHTML =
+          '<p class="muted">Preview needs http(s) or GitHub Pages (browsers block <code>fetch</code> on <code>file://</code>).</p>' +
+          '<p><a href="../' +
+          encodeURI(path) +
+          '" target="_blank" rel="noopener">Open <strong>' +
+          escapeHtml(path) +
+          "</strong></a></p>" +
+          '<iframe title="preview" src="../' +
+          encodeURI(path) +
+          '" style="width:100%;height:56vh;border:1px solid var(--border);border-radius:8px;background:#0b1118"></iframe>';
+      });
+  }
+
+  function applyFilter() {
+    const q = (filterEl.value || "").trim().toLowerCase();
+    const list = q
+      ? files.filter(function (f) {
+          return f.toLowerCase().indexOf(q) !== -1;
+        })
+      : files;
+    treeEl.innerHTML = renderNode(buildTree(list), "", q ? 8 : 1) || '<p class="muted">No matches.</p>';
+    treeEl.onclick = function (e) {
+      const a = e.target.closest("a.file");
+      if (!a) return;
+      e.preventDefault();
+      openFile(a.getAttribute("data-path"));
+    };
+  }
+
+  applyFilter();
+  filterEl.addEventListener("input", applyFilter);
+  const initial = qsPath();
+  if (initial) {
+    if (initial.endsWith("/")) {
+      filterEl.value = initial.replace(/\/$/, "");
+      applyFilter();
+      pathLabel.textContent = "Folder: " + initial;
+    } else if (files.indexOf(initial) !== -1) {
+      openFile(initial);
+    }
+  }
+})();
+
+  </script>
+</body>
+</html>

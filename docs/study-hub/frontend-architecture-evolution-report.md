@@ -6,29 +6,32 @@
 |-------|-------|
 | Project | DP Stock Investment Assistant |
 | Domain | AI-powered stock and investment assistant |
-| Focus | Frontend evolution toward modularization or micro-frontend architecture |
-| Date | 2026-03-20 |
-| Status | Draft for technical review |
+| Focus | Frontend evolution toward modularization and multi-pane canvas architecture |
+| Date | 2026-09-03 |
+| Status | Approved Architecture Baseline |
 | Audience | Engineering, architecture, product, and platform stakeholders |
 
 ## 1. Executive Summary
 
 This report evaluates whether the DP Stock Investment Assistant frontend should evolve into a micro-frontend architecture or remain a modularized frontend application.
 
-The current recommendation is:
+The architectural decision is clear:
 
-- Do not adopt a full micro-frontend architecture immediately.
-- Adopt a modular monolith frontend first.
-- Define clear architectural boundaries now so the application can transition to micro-frontends later if scale, team topology, or release independence demands it.
+- **Do not adopt a full micro-frontend architecture immediately.**
+- **Adopt a bounded-context modular application frontend** hosting an **adaptive, resizable multi-pane financial assistant canvas**.
+- Standardize a **Dual-Speed State Architecture**: Zustand for high-frequency market ticks and symbol sync, paired with TanStack Query for cacheable server state.
+- Standardize a **two-tier financial charting engine**: TradingView Lightweight Charts (`lightweight-charts`) for 60 FPS primary candlestick charts, and `Chart.js` for auxiliary macro and solvency distributions.
+- Transform the AI Copilot via a **Structured SSE Artifact Protocol** that streams interactive Generative UI cards directly into the conversation.
+- Define explicit module boundaries and typed contracts now so the application preserves future optionality for micro-frontend extraction if scale, team topology, or release autonomy demands it later.
 
-This recommendation is based on the current state of the project:
+This recommendation is grounded in active project reality:
 
-- The system already has service-level separation at the platform level: frontend, API, and agent are independently deployable.
-- The frontend itself is still relatively small in feature surface and remains centered around a single chat-oriented SPA.
-- The current implementation does not yet show the typical pressure signals that justify micro-frontends, such as many independent frontend teams, separate release cadences, strong domain isolation, or conflicting framework/runtime needs. This aligns with the commonly cited justification for micro-frontends: independently deliverable frontend applications owned by autonomous teams rather than simply a different folder structure or build setup ([Martin Fowler](https://martinfowler.com/articles/micro-frontends.html), [micro-frontends.org](https://micro-frontends.org/)).
+- The system already maintains service-level separation at the backend: frontend, REST API, and LangGraph agent run independently.
+- The frontend is evolving from a simple chat feed into a comprehensive financial assistant workspace requiring simultaneous visualization of real-time candlestick charts, technical indicators, and AI reasoning without disjointed route hopping.
+- The current implementation does not exhibit the organizational pressures that justify micro-frontends (multiple autonomous frontend teams, distinct release trains, disparate runtime stacks). Premature micro-frontends would introduce heavy operational and cross-origin synchronization friction without business value.
 
+The optimal architectural move is a **contract-first modular SPA with a resizable multi-pane canvas shell** (`react-resizable-panels`), bounded feature modules (`market-data`, `chat`, `workspace`, `models`), and a controlled platform layer.
 For this finance and stock-assistant domain, the higher-value near-term move is stronger frontend modularization around business domains such as chat, market data, workspace, portfolio/watchlist, and model management. This yields most of the maintainability benefits without taking on the runtime, operational, and UX consistency costs of micro-frontends too early.
-
 ## 2. Problem Statement
 
 The project needs architectural clarity on how the frontend should evolve as product scope grows. The central question is whether the frontend should continue as a single SPA with better internal structure, or move toward a micro-frontend model.
@@ -123,42 +126,54 @@ Conclusion:
 
 - Not recommended.
 
-### 4.2 Option B: Modular Monolith Frontend
+### 4.2 Option B: Modular Monolith Frontend (Adaptive Multi-Pane Charting & AI Assistant Canvas)
 
 Description:
 
-- Keep one deployable frontend.
-- Organize the codebase by business domain and enforce module boundaries internally.
-- Centralize shell, design system, auth/session handling, observability, and shared contracts.
-- Decompose features into domain modules rather than separately deployed apps.
+- Keep one deployable frontend SPA.
+- Host an **adaptive, resizable multi-pane financial workspace** using `react-resizable-panels`.
+- Structure the application into bounded business modules (`market-data`, `chat`, `workspace`, `models`) and a controlled platform layer.
+- Employ a **Dual-Speed State Architecture**: Zustand for high-frequency market ticks and active symbol sync, paired with TanStack Query for cacheable server state.
+- Integrate TradingView Lightweight Charts (`lightweight-charts`) for 60 FPS primary charting, plus `Chart.js` for auxiliary macro and solvency graphics.
+- Centralize shell, design tokens, telemetry, and typed OpenAPI contracts in `src/platform/`.
 
-```mermaid
-flowchart TB
-  Browser["Browser"] --> Shell["Application Shell"]
-  Shell --> Platform["Platform Layer\nRouting, config, telemetry, UI primitives"]
-  Shell --> Chat["Assistant Chat Module"]
-  Shell --> Research["Market Research Module"]
-  Shell --> Workspace["Workspace Module"]
-  Shell --> Portfolio["Portfolio and Watchlist Module"]
-  Shell --> ModelMgmt["Model Management Module"]
-  Chat --> Api["Shared API and event contracts"]
-  Research --> Api
-  Workspace --> Api
-  Portfolio --> Api
-  ModelMgmt --> Api
 ```
-
-Caption: Option B follows a single-shell, bounded-module model, combining shared platform concerns with explicit domain boundaries. This is consistent with React guidance for scaling state and wiring through providers and contexts ([React](https://react.dev/learn/scaling-up-with-reducer-and-context)) while preserving the central shell pattern commonly discussed in [Martin Fowler](https://martinfowler.com/articles/micro-frontends.html).
+┌────────────────────────────────────────────────────────────────────────────────────────┐
+│               OPTION B: RESIZABLE MULTI-PANE MODULAR WORKSPACE                         │
+├────────────────────────────────────────────────────────────────────────────────────────┤
+│ APPLICATION SHELL (src/app/App.tsx)                                                    │
+│  Global Navigation Bar: Symbol Search, Timeframe Bar, Active Model Badge, Ping Latency │
+├────────────────────────────────────────────────────────────────────────────────────────┤
+│ MULTI-PANE SPLIT CANVAS (react-resizable-panels)                                       │
+│                                                                                        │
+│  ┌──────────────────────────────────────────────┬───────────────────────────────────┐  │
+│  │ PRIMARY FINANCIAL CANVAS (Panel 1: ~65%)    │ AI COPILOT DRAWER (Panel 2: ~35%) │  │
+│  │                                              │                                   │  │
+│  │ • 60 FPS Candlestick & Volume Chart          │ • Streaming Chat Stream           │  │
+│  │   (TradingView lightweight-charts)           │ • Generative UI Artifact Mounts:  │  │
+│  │ • Indicator Sub-panes (RSI 14, MACD)         │   - Solvency Metric Cards         │  │
+│  │ • Crosshair & Hover Tooltip                  │   - Valuation Metric Badges       │  │
+│  │ • Fast Ticks: Direct canvas updates via      │   - Macro Trend Bar (Chart.js)    │  │
+│  │   Zustand transient subscriptions            │ • Copilot Input & Prompt Library  │  │
+│  └──────────────────────────────────────────────┴───────────────────────────────────┘  │
+│  ═════════════════════════════ Drag Handle (Persistent Width) ══════════════════════   │
+│  ┌──────────────────────────────────────────────────────────────────────────────────┐  │
+│  │ COLLAPSIBLE ANALYTICAL DOCK (Bottom Drawer: Optional 20%)                        │  │
+│  │ • Valuation Multiple Tables • Financial Statement Breakdown • Trade Log          │  │
+│  └──────────────────────────────────────────────────────────────────────────────────┘  │
+└────────────────────────────────────────────────────────────────────────────────────────┘
+```
 
 Assessment:
 
-- Best fit for current scale.
-- Improves maintainability, testability, and future migration readiness. This direction is also consistent with React guidance on scaling complex screens by separating state wiring and providing structured shared state through reducer and context patterns instead of pushing everything through a single root component ([React: Scaling Up with Reducer and Context](https://react.dev/learn/scaling-up-with-reducer-and-context)).
-- Preserves UX consistency and avoids premature distributed frontend complexity.
+- Best fit for current scale and product complexity.
+- Delivers rich financial trader ergonomics (resizable multi-pane layout, 60 FPS charts, Generative UI cards) without micro-frontend overhead.
+- Improves maintainability, testability, and future migration readiness through strict internal module boundaries.
+- Preserves UX consistency and avoids premature distributed frontend synchronization failure modes.
 
 Conclusion:
 
-- Recommended as the target near-term architecture.
+- **Recommended as the target near-term architecture.**
 
 ### 4.3 Option C: True Micro-Frontend Architecture
 
@@ -592,71 +607,56 @@ The current stack makes this pattern practical without excessive disruption:
 - SSE/streaming chat, shared session behavior, and model selection all benefit from a coherent shell and shared contracts.
 - Vite, React Router, and TanStack Query are complementary choices for a modular application because they map well to shell bootstrapping, route composition, and server-state orchestration respectively ([Vite](https://vite.dev/guide/), [React Router](https://reactrouter.com/start/declarative/installation), [TanStack Query](https://tanstack.com/query/latest/docs/framework/react/overview)).
 
-### 9.1 Proposed Architecture
+### 9.1 Proposed Architecture: Multi-Pane Trading Workspace
 
-The recommended architecture is a modular application with one deployable frontend shell and several strongly bounded feature modules.
+The recommended architecture is a contract-first modular SPA with one deployable frontend shell hosting an **adaptive, resizable multi-pane financial workspace**.
 
 Architectural characteristics:
 
-- One React application shell owns app bootstrapping, navigation, layout, error boundaries, telemetry, and environment configuration.
-- Business capabilities are implemented as internal modules with explicit public APIs.
-- Shared infrastructure concerns live in a platform layer, not inside feature modules.
-- Route composition is used to assemble feature modules without turning each route into an independently deployed application.
-- Stateful cross-cutting concerns are centralized only where necessary: session, route state, streaming lifecycle, notification orchestration, and feature flags.
+- **Application Shell (`src/app/`)**: Owns app bootstrapping, top navigation bar (symbol search, timeframe switcher, model selector), and mounts the `react-resizable-panels` split-pane host.
+- **Controlled Platform Layer (`src/platform/`)**: Centralizes domain-agnostic technical services:
+  - `store/workspaceStore.ts`: Zustand fast reactive state lane (active symbol, live ticks, timeframe, panel widths).
+  - `query/`: TanStack Query client for server state caching and background invalidation.
+  - `api/`: Typed API client generated via `openapi-typescript` from `docs/openapi.yaml`.
+  - `streaming/`: Typed SSE client with structured artifact parser (`event: artifact_payload`).
+  - `ui/`: Tailwind CSS tokens and unstyled Radix UI primitives.
+- **Bounded Feature Modules (`src/modules/`)**:
+  - `market-data/`: Owns the 60 FPS TradingView canvas (`lightweight-charts`), indicator dock (RSI/MACD), and fast-lane tick subscribers.
+  - `chat/`: Owns the Copilot drawer, streaming message tokens, and Generative UI dynamic cards (`SolvencyCard`, `ValuationCard`).
+  - `models/`: Owns the OpenAI model catalog and selection dialog.
+  - `workspace/`: Owns persistent analyst notes and scratchpad state.
+- **Dual-Speed State Model**: High-frequency ticks bypass React tree re-rendering via Zustand transient selectors to feed the canvas directly at 60 FPS, while TanStack Query manages asynchronous server state with a 5-minute stale-time cache.
 
-```mermaid
-graph TB
-  Browser["Browser"] --> Shell["App Shell"]
-
-  subgraph Platform["Platform"]
-    Config["Config and env"]
-    Router["Route composition"]
-    Providers["Context providers"]
-    Api["Typed API client"]
-    ServerState["Server-state cache"]
-    Telemetry["Telemetry and error boundaries"]
-    Ui["Design tokens and shared UI primitives"]
-  end
-
-  subgraph Modules["Domain Modules"]
-    Chat["Assistant Chat"]
-    Research["Market Research"]
-    Workspace["Workspace and Context"]
-    Portfolio["Portfolio and Watchlists"]
-    ModelMgmt["Model Management"]
-  end
-
-  Shell --> Config
-  Shell --> Router
-  Shell --> Providers
-  Shell --> Ui
-
-  Router --> Chat
-  Router --> Research
-  Router --> Workspace
-  Router --> Portfolio
-  Router --> ModelMgmt
-
-  Chat --> Api
-  Research --> Api
-  Workspace --> Api
-  Portfolio --> Api
-  ModelMgmt --> Api
-
-  Chat --> ServerState
-  Research --> ServerState
-  Workspace --> ServerState
-  Portfolio --> ServerState
-  ModelMgmt --> ServerState
-
-  Chat --> Telemetry
-  Research --> Telemetry
-  Workspace --> Telemetry
-  Portfolio --> Telemetry
-  ModelMgmt --> Telemetry
 ```
-
-Caption: Deep-dive target for Option B. The route-composed shell plus shared providers model is consistent with [React Router](https://reactrouter.com/start/declarative/installation), [React state scaling guidance](https://react.dev/learn/scaling-up-with-reducer-and-context), and the need to preserve extraction seams emphasized by [Martin Fowler](https://martinfowler.com/articles/micro-frontends.html).
+┌────────────────────────────────────────────────────────────────────────────────────────┐
+│               TARGET COMPONENT & DATA-FLOW ARCHITECTURE                                │
+├────────────────────────────────────────────────────────────────────────────────────────┤
+│                          SHELL & NAVIGATION (src/app/)                                 │
+│  • Symbol Search • Timeframe Selector • Model Picker • System Latency Health Badge     │
+├────────────────────────────────────────────────────────────────────────────────────────┤
+│                MULTI-PANE WORKSPACE HOST (react-resizable-panels)                      │
+│                                                                                        │
+│  ┌──────────────────────────────────────────────┬───────────────────────────────────┐  │
+│  │ PRIMARY FINANCIAL CANVAS (market-data/)      │ AI COPILOT WORKSPACE (chat/)      │  │
+│  │                                              │                                   │  │
+│  │ • 60 FPS Candlestick & Volume Canvas         │ • Streaming Message Stream        │  │
+│  │   (TradingView lightweight-charts)           │ • Generative UI Artifact Mounts:  │  │
+│  │ • Indicator Sub-panes (RSI 14, MACD)         │   - Solvency Metric Cards         │  │
+│  │ • Fast Ticks: Direct canvas updates via      │   - Valuation Metric Badges       │  │
+│  │   Zustand workspaceStore (10ms-200ms)        │   - Macro Trend Bar (Chart.js)    │  │
+│  │ • Historical Bars: TanStack Query cache      │ • Copilot Input & Prompt Library  │  │
+│  └──────────────────────────────────────────────┴───────────────────────────────────┘  │
+│  ═════════════════════════════ Drag Handle (Persistent Width) ══════════════════════   │
+│  ┌──────────────────────────────────────────────────────────────────────────────────┐  │
+│  │ COLLAPSIBLE ANALYTICAL DOCK (Bottom Drawer: Optional 20%)                        │  │
+│  │ • Valuation Multiple Tables • Financial Statement Breakdown • Trade Log          │  │
+│  └──────────────────────────────────────────────────────────────────────────────────┘  │
+├────────────────────────────────────────────────────────────────────────────────────────┤
+│                     CONTROLLED PLATFORM LAYER (src/platform/)                          │
+│  • openapi-typescript API Client  • TanStack Query Server Cache  • Zustand Fast Lane  │
+│  • Typed SSE Stream Parser        • Tailwind CSS Tokens          • Radix Primitives   │
+└────────────────────────────────────────────────────────────────────────────────────────┘
+```
 
 ### 9.2 Proposed Technical Stack
 
@@ -664,13 +664,16 @@ Recommended near-term stack for the modular application:
 
 | Concern | Proposed Choice | Why |
 |-------|------------------|-----|
-| Build tool | [Vite](https://vite.dev/guide/) | Faster and leaner modern development experience; strong plugin model; better long-term fit than deprecated CRA |
-| UI framework | React 18 + TypeScript | Already aligned with the repo and avoids unnecessary migration risk |
-| Routing | [React Router](https://reactrouter.com/start/declarative/installation) | Clear route-based composition for domain modules |
-| Server state | [TanStack Query](https://tanstack.com/query/latest/docs/framework/react/overview) | Strong support for fetching, caching, synchronization, invalidation, and async server-state concerns |
-| Local app state | React Context + `useReducer` + feature hooks | Fits current app scale and React’s own scaling guidance |
-| Styling foundation | CSS variables + shared UI primitives in `platform/ui` | Enables consistent token governance without forcing premature heavy framework adoption |
-| Testing direction | Keep component and module-boundary tests close to modules | Supports modular boundaries and future extraction readiness |
+| Build tool | [Vite](https://vite.dev/guide/) | 10x faster HMR and build times; Rollup bundling; replaces deprecated CRA |
+| Workspace Engine | [`react-resizable-panels`](https://github.com/bvaughn/react-resizable-panels) | Accessible, fluid, drag-handle split panes with persistent width in localStorage |
+| Primary Charting | [TradingView Lightweight Charts](https://tradingview.github.io/lightweight-charts/) | 60 FPS canvas OHLCV candlestick charting with indicators; lightweight (~45 KB) |
+| Auxiliary Charting | [Chart.js](https://www.chartjs.org/) | Solvency ratios, debt distribution bars, and portfolio asset allocation donuts |
+| Reactive State (Fast Lane) | [Zustand](https://github.com/pmndrs/zustand) | Updates canvas directly on ticks without triggering React tree re-renders |
+| Server State (Slow Lane) | [TanStack Query](https://tanstack.com/query/latest/docs/framework/react/overview) | Handles REST caching, deduplication, background invalidation, and async lifecycles |
+| Streaming & GenUI | Structured SSE Artifact Protocol | Intercepts typed artifact events to mount interactive cards directly in copilot feed |
+| Styling Foundation | Tailwind CSS + Radix UI | Fast UI velocity, pre-built accessible primitives, zero runtime CSS overhead |
+| API Contracts | `openapi-typescript` | Zero-runtime compile-time TypeScript schemas generated from `docs/openapi.yaml` |
+| Test Foundation | Vitest + RTL + MSW | Native Vite test runner with Mock Service Worker for deterministic API simulation |
 
 Technical rationale:
 
@@ -942,60 +945,76 @@ gantt
 
 Caption: High-level adoption roadmap for the modular application path first, optional extraction later. Timeline is project-specific; the staged logic is consistent with [Martin Fowler](https://martinfowler.com/articles/micro-frontends.html).
 
-### Phase 1: Stabilize the Current Frontend
+### Phase 1: Build & Foundation Modernization
 
 Objective:
 
-- Remove friction that would block any future architecture work.
+- Modernize tooling, eliminate CRA technical debt, and establish developer velocity.
 
 Actions:
 
-- Consolidate duplicate frontend service code.
-- Finish TypeScript alignment.
-- Reduce root component size and move logic into hooks and feature components.
-- Establish shared API client and error handling patterns.
-- Introduce route scaffolding and shell layout.
+- Migrate from Create React App to Vite with native ESM bundling.
+- Configure Vitest + React Testing Library for frontend quality gates.
+- Configure Tailwind CSS with dark-mode financial tokens and unstyled Radix UI primitives.
+- Integrate `openapi-typescript` script to generate typed contracts from `docs/openapi.yaml`.
+- Quarantine dead/unreferenced JavaScript files (`OptimizedApp.js`, `PerformanceProfiler.js`, `MessageFormatter.js`).
 
 Expected outcome:
 
-- Cleaner baseline for modularization.
+- Fast, modern build foundation with compile-time type safety.
 
-### Phase 2: Modular Monolith by Business Domain
+### Phase 2: Dual-Pane Resizable Shell & Maiden Chart Feature (Vertical Slice)
 
 Objective:
 
-- Reorganize the frontend around stable product domains.
+- Deliver visible trading value immediately by pairing shell modernization with real-time financial charting.
 
 Actions:
 
-- Create domain modules for assistant, research, workspace, portfolio/watchlist, and model management.
-- Add explicit public module interfaces.
-- Move to route-based feature loading.
-- Introduce design tokens and shared UI primitives.
-- Add frontend telemetry and error boundaries at module level.
+- Scaffold `react-resizable-panels` in `src/app/WorkspaceLayout.tsx` with persistent width in localStorage.
+- Implement Zustand `workspaceStore` for high-frequency market ticks, active symbol synchronization, and timeframe selection.
+- Mount TradingView Lightweight Charts (`lightweight-charts`) in `src/modules/market-data/` to display 60 FPS OHLCV candlesticks and volume.
+- Connect live Vietnam market OHLCV bars alongside current chat dialog.
 
 Expected outcome:
 
-- Strong internal boundaries with one deployable app.
+- Fully interactive, resizable multi-pane financial trading canvas in production.
 
-### Phase 3: Platform Readiness for Future Extraction
+### Phase 3: Copilot Module Extraction & Generative UI
 
 Objective:
 
-- Prepare for selective extraction without committing to it yet.
+- Elevate AI chat into an actionable Copilot with structured financial artifact cards.
 
 Actions:
 
-- Centralize shell, auth/session, navigation, analytics, and event contracts.
-- Measure bundle size and domain-specific change frequency.
-- Introduce dependency governance for shared packages.
-- Identify domains with the lowest coupling and highest independent change rate.
+- Extract chat logic into bounded `src/modules/chat/` domain.
+- Implement Structured SSE Artifact Protocol (`event: chunk`, `event: artifact_payload`).
+- Build frontend `ArtifactDispatcher.tsx` to dynamically mount interactive cards (`SolvencyCard`, `ValuationCard`, and `Chart.js` macro trend bars).
+- Wire TanStack Query for cacheable server state (financial statement data, model catalog).
 
 Expected outcome:
 
-- Evidence-based readiness model for micro-frontends.
+- Generative UI copilot capable of streaming interactive financial cards directly in chat.
 
-### Phase 4: Selective Micro-Frontend Extraction Only If Needed
+### Phase 4: Quality Hardening & Domain Expansion
+
+Objective:
+
+- Enterprise-grade testing, component documentation, and expansion into auxiliary trading domains.
+
+Actions:
+
+- Set up MSW (Mock Service Worker) for deterministic network and streaming simulation.
+- Configure Storybook for isolated visual review of financial cards and canvas widgets.
+- Enforce ESLint module-boundary rules (`@nrwl/nx/enforce-module-boundaries` or `eslint-plugin-import`).
+- Expand into `workspace/` (analyst memory) and `portfolio/` (watchlist screener) modules.
+
+Expected outcome:
+
+- Complete bounded-context modular SPA with enterprise reliability and test coverage.
+
+### Phase 5: Selective Micro-Frontend Extraction Only If Needed
 
 Objective:
 
@@ -1025,81 +1044,47 @@ Avoid extracting first:
 
 ```mermaid
 flowchart LR
-  P1["Phase 1\nStabilize"] --> P2["Phase 2\nModularize"]
-  P2 --> P3["Phase 3\nPrepare for extraction"]
-  P3 --> Gate{"Readiness signals met?"}
+  P1["Phase 1\nFoundation"] --> P2["Phase 2\nCanvas & Chart"]
+  P2 --> P3["Phase 3\nCopilot & GenUI"]
+  P3 --> P4["Phase 4\nHardening"]
+  P4 --> Gate{"Readiness signals met?"}
   Gate -- "No" --> Stay["Continue as modular monolith"]
-  Gate -- "Yes" --> P4["Phase 4\nSelective extraction"]
+  Gate -- "Yes" --> P5["Phase 5\nSelective extraction"]
 ```
 
 Caption: Phase-gate logic for staying modular by default until objective extraction signals appear, following the readiness criteria described earlier and the tradeoff model documented by [Martin Fowler](https://martinfowler.com/articles/micro-frontends.html).
 
 ## 11. Decision Matrix
 
-Chart series order: Single SPA As-Is, Modular Monolith, Micro-Frontend.
-
-```mermaid
-xychart-beta
-  title "Architecture Option Comparison"
-  x-axis ["Delivery Speed", "Maintainability", "Simplicity", "UX Consistency", "Team Autonomy", "Performance Predictability", "Current Fit"]
-  y-axis "Relative Score" 0 --> 5
-  bar [5, 2, 5, 3, 1, 3, 2]
-  bar [3, 5, 4, 5, 3, 5, 5]
-  bar [2, 4, 1, 2, 5, 2, 2]
-```
-
-Caption: Relative comparison synthesized from repository context and external guidance on autonomous teams, operational complexity, server-state scaling, and modern frontend tooling ([Martin Fowler](https://martinfowler.com/articles/micro-frontends.html), [micro-frontends.org](https://micro-frontends.org/), [React](https://react.dev/learn/scaling-up-with-reducer-and-context), [Vite](https://vite.dev/guide/)).
-
-| Criterion | Single SPA As-Is | Modular Monolith | Micro-Frontend |
-|----------|-------------------|------------------|----------------|
-| Short-term delivery speed | High | Medium | Low |
+| Criterion | Single SPA As-Is | Modular Monolith (Multi-Pane Canvas) | Micro-Frontend |
+|----------|-------------------|---------------------------------------|----------------|
+| Short-term delivery speed | High | High (Vertical Slice) | Low |
 | Maintainability over time | Low | High ([Martin Fowler](https://martinfowler.com/articles/micro-frontends.html), [React](https://react.dev/learn/scaling-up-with-reducer-and-context)) | Medium ([Martin Fowler](https://martinfowler.com/articles/micro-frontends.html)) |
 | Operational simplicity | High | High | Low ([Martin Fowler](https://martinfowler.com/articles/micro-frontends.html)) |
-| UX consistency | Medium | High | Medium-Low ([micro-frontends.org](https://micro-frontends.org/)) |
+| UX consistency & visual flow | Medium | High (Unified Canvas) | Medium-Low ([micro-frontends.org](https://micro-frontends.org/)) |
+| High-frequency tick performance | Low (Re-render lag) | High (60 FPS Canvas via Zustand) | Medium-Low (Cross-origin sync) |
 | Team autonomy | Low | Medium | High ([Martin Fowler](https://martinfowler.com/articles/micro-frontends.html)) |
-| Performance predictability | Medium | High ([TanStack Query](https://tanstack.com/query/latest/docs/framework/react/overview)) | Medium-Low ([Martin Fowler](https://martinfowler.com/articles/micro-frontends.html)) |
 | Architectural risk now | Medium-High | Low | High ([Martin Fowler](https://martinfowler.com/articles/micro-frontends.html)) |
-| Fit for current project stage | Low | High ([Create React App](https://create-react-app.dev/), [Vite](https://vite.dev/guide/), [React](https://react.dev/learn/scaling-up-with-reducer-and-context)) | Low ([Martin Fowler](https://martinfowler.com/articles/micro-frontends.html)) |
-| Fit for future multi-team scale | Medium | High | High ([Module Federation](https://module-federation.io/guide/start/)) |
+| Fit for current project stage | Low | **Best Fit** | Low ([Martin Fowler](https://martinfowler.com/articles/micro-frontends.html)) |
 
 ## 12. Final Recommendation
 
-```mermaid
-flowchart TD
-  Start["Current frontend state"] --> Check1["Single SPA with growing domain scope"]
-  Check1 --> Check2["Need stronger boundaries, not yet separate deployments"]
-  Check2 --> Decision["Choose modular monolith"]
-  Decision --> Action1["Architect modules now"]
-  Decision --> Action2["Keep one deployable shell now"]
-  Decision --> Action3["Extract later only if proven necessary"]
-```
-
-Caption: Final decision logic that combines local repository constraints with external architecture guidance on modular scaling and micro-frontend adoption thresholds ([Martin Fowler](https://martinfowler.com/articles/micro-frontends.html), [React](https://react.dev/learn/scaling-up-with-reducer-and-context)).
-
-The current project should evolve toward a modular monolith frontend, not a true micro-frontend architecture at this time.
+The project will evolve toward a **contract-first modular SPA hosting an adaptive, resizable multi-pane financial canvas**, not a true micro-frontend architecture at this time.
 
 Reasoning:
 
-- The business domain benefits from a coherent, trusted, low-friction user experience.
-- The current frontend scale does not yet justify distributed frontend complexity.
-- The codebase will benefit more from internal domain boundaries, stronger shared platform contracts, and route-based composition than from separate frontend deployments.
-- This path preserves future optionality. If the product becomes a broader investment workbench with separate teams and independent release needs, the modular monolith can provide the seams for selective micro-frontend extraction later.
-
-This recommendation is evidence-based rather than preference-based: it follows the same adoption logic described by major micro-frontend references, where independent deployment and team autonomy are the main reasons to pay the added complexity cost, and where loose coupling, careful composition, and explicit contracts are prerequisites for success ([Martin Fowler](https://martinfowler.com/articles/micro-frontends.html), [micro-frontends.org](https://micro-frontends.org/), [Module Federation](https://module-federation.io/guide/start/)).
-
-In practical terms, the right move is not "micro-frontend versus monolith" as a binary choice. The right move is:
-
-- architect for separation now,
-- deploy as one frontend for now,
-- extract only when real scale signals justify it.
+- Active traders and retail investors require simultaneous access to live candlestick charts, indicators, and AI reasoning in a unified workspace without disjointed page navigation.
+- Real-time tick streaming (100ms–500ms) requires a cohesive, high-performance canvas engine (`lightweight-charts`) driven by a dual-speed state architecture (Zustand + TanStack Query).
+- Internal domain boundaries (`market-data`, `chat`, `models`, `workspace`) deliver the maintainability and team scaling benefits of micro-frontends without paying the operational, deployment, and performance taxes of distributed frontends.
+- Preserves future optionality: clean module public APIs ensure that if team scale expands to 3+ autonomous squads in the future, domain extraction into micro-frontends will be direct and low-risk.
 
 ## 13. Recommended Next Steps
 
-1. Approve the modular monolith direction as the target frontend architecture for the next implementation cycle.
-2. Define the first domain boundaries and module ownership rules.
-3. Refactor the current frontend structure into shell, platform, and modules.
-4. Add route-level composition and lazy loading.
-5. Reassess micro-frontend readiness after the product has at least several stable domain areas and measurable team/release pressure.
+1. **Adopt ADR-FRONTEND-001 and ADR-FRONTEND-002** as the authoritative governance baseline.
+2. **Execute Phase 0**: Quarantine dead JS files (`OptimizedApp.js`, `PerformanceProfiler.js`) and consolidate duplicate API services.
+3. **Execute Phase 1**: Modernize build to Vite, configure Vitest, Tailwind CSS, and `openapi-typescript`.
+4. **Execute Phase 2**: Scaffold `react-resizable-panels`, wire Zustand `workspaceStore`, and mount TradingView `lightweight-charts` for Vietnam market OHLCV bars.
+5. **Execute Phase 3**: Extract `chat/` module and build the Generative UI Structured SSE Artifact Dispatcher.
 
 ## 14. Appendix: Micro-Frontend Readiness Triggers
 
@@ -1113,18 +1098,19 @@ Micro-frontends should be reconsidered only if several of the following become t
 - Bundle growth and build times are becoming structurally difficult to manage in one app.
 - Domain boundaries have stayed stable for multiple release cycles.
 
-Until those signals appear, a modularized single frontend is the better engineering and product decision for this repository.
-
 ## 15. References
 
 | Source | Type | Relevance |
 |-------|------|-----------|
 | [Martin Fowler: Micro Frontends](https://martinfowler.com/articles/micro-frontends.html) | Architecture article | Core reference for definition, benefits, downsides, composition models, team autonomy, and governance tradeoffs |
-| [micro-frontends.org](https://micro-frontends.org/) | Practical guide and reference site | Useful for composition techniques, contracts, event-based communication, namespacing, and anti-anarchy guidance |
-| [Module Federation: Introduction](https://module-federation.io/guide/start/) | Tooling and architecture documentation | Supports statements about Module Federation as an implementation option for large, multi-team decentralized JavaScript applications |
-| [Create React App](https://create-react-app.dev/) | Official project site | Evidence that Create React App is officially deprecated and should not be treated as a forward-looking frontend platform choice |
-| [React: Scaling Up with Reducer and Context](https://react.dev/learn/scaling-up-with-reducer-and-context) | Official React documentation | Supports the recommendation to modularize state, providers, and feature boundaries before jumping to distributed frontends |
-| [Vite Guide](https://vite.dev/guide/) | Official tooling documentation | Supports the recommendation to modernize the frontend build pipeline toward a faster, leaner development experience |
-| [TanStack Query Overview](https://tanstack.com/query/latest/docs/framework/react/overview) | Official server-state documentation | Supports the recommendation to separate server-state concerns from local UI state in a modular application |
-| [React Router Installation](https://reactrouter.com/start/declarative/installation) | Official routing documentation | Supports route-based composition as the assembly mechanism for feature modules |
-| [Thoughtworks Technology Radar: Micro Frontends](https://www.thoughtworks.com/radar/techniques/micro-frontends) | Industry architecture reference | Background source for the maturity and mainstream recognition of micro-frontends as an architectural technique |
+| [micro-frontends.org](https://micro-frontends.org/) | Practical guide and reference site | Composition techniques, contracts, event-based communication, namespacing, and anti-anarchy guidance |
+| [react-resizable-panels](https://github.com/bvaughn/react-resizable-panels) | Open-source library | Standard for accessible, performant resizable split-pane canvas layouts in React |
+| [TradingView Lightweight Charts](https://tradingview.github.io/lightweight-charts/) | Visualization library | Industry standard for high-performance (60 FPS) canvas-based financial candlestick charting |
+| [Chart.js](https://www.chartjs.org/) | Visualization library | Flexible canvas charting for auxiliary financial distributions and solvency metrics |
+| [Zustand](https://github.com/pmndrs/zustand) | State management | High-performance state store supporting fine-grained transient subscriptions for 60 FPS ticks |
+| [TanStack Query Overview](https://tanstack.com/query/latest/docs/framework/react/overview) | Server-state documentation | Asynchronous server-state caching, deduplication, and invalidation |
+| [Tailwind CSS](https://tailwindcss.com/docs) | Styling framework | Utility-first CSS engine providing rapid development velocity with zero runtime overhead |
+| [Radix UI](https://www.radix-ui.com/) | UI primitives | Accessible, unstyled UI components for dialogs, popovers, tooltips, and tabs |
+| [Vite Guide](https://vite.dev/guide/) | Build documentation | Fast ESM dev server and optimized Rollup bundling replacing deprecated CRA |
+| [openapi-typescript](https://openapi-ts.dev/introduction) | Code generation | Generates compile-time TypeScript types directly from OpenAPI specifications |
+| [Vitest](https://vitest.dev/) | Testing framework | Native Vite test runner with Jest-compatible API |

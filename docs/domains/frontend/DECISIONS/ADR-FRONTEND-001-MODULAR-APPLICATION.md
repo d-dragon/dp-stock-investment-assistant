@@ -9,7 +9,7 @@
 | **Standards Stance** | Practice-Based ADR discipline |
 | **Status** | Proposed |
 | **Date** | 2026-03-27 |
-| **Last Updated** | 2026-04-01 |
+| **Last Updated** | 2026-09-03 |
 | **Decision Owners** | Engineering · Architecture · Frontend maintainers |
 
 ## Context
@@ -20,27 +20,29 @@ The product domain imposes constraints that make frontend fragmentation expensiv
 
 - High UX consistency is important for trust and clarity in a finance-oriented assistant.
 - Shared session and streaming behavior are part of the primary user journey.
-- Cross-feature workflows are still tightly connected.
+- Cross-feature workflows are still tightly connected: retail investors and active traders require simultaneous access to high-fidelity charting, technical indicator screening, and AI reasoning without disjointed view switching.
+- The primary interface must function as an **adaptive, resizable multi-pane financial canvas** (hosting interactive TradingView charts, an AI Copilot drawer, and collapsible analytical docks) rather than a simple chat feed.
 - The current codebase would benefit more from explicit internal boundaries than from deployment-time decomposition.
 
 At the same time, the frontend needs stronger modularity so it can scale beyond a root-heavy SPA structure.
 
 Research and analysis in the companion report indicate that the current system does not yet show the main signals that justify true micro-frontends, such as multiple frontend teams requiring independent releases, mature and stable domain boundaries, or sustained deployment bottlenecks caused by a shared frontend release train.
 
-The deeper modernization research also clarifies that Option B should not remain an abstract "modular frontend" direction. The preferred realization is now a **contract-first modular SPA** with:
+The deeper modernization research also clarifies that Option B should not remain an abstract "modular frontend" direction. The preferred realization is now a **contract-first modular SPA hosting a resizable financial canvas** with:
 
-- one application shell
+- one application shell orchestrating resizable multi-pane layout management
 - one controlled platform layer
-- bounded feature modules with public APIs
-- route-based composition
+- bounded feature modules with public APIs (financial charting canvas, AI copilot, workspace memory)
+- route-based and workspace-state composition
 - typed platform services and contract-generated frontend-backend types
 
-This ADR therefore captures the architectural direction, while the modernization stack and delivery approach are captured separately in [ADR-Frontend-002](./ADR-FRONTEND-002-MODERNIZE-FRONTEND-FOUNDATION.md).
+This ADR therefore captures the architectural direction, while the modernization stack, layout engine, and delivery approach are captured separately in [ADR-Frontend-002](./ADR-FRONTEND-002-MODERNIZE-FRONTEND-FOUNDATION.md).
 
 ## Decision
 
 - Adopt a modular application architecture for the frontend.
 - Keep a single deployable frontend shell.
+- Structure the primary user workspace as an **adaptive, resizable multi-pane financial canvas** (coordinating a primary visual charting canvas, an AI Copilot drawer, and collapsible analytical docks) rather than a single-column chat interface.
 - Organize the codebase around bounded feature modules and a controlled platform layer.
 - Use route composition, shared providers, and typed platform services as the primary integration mechanism.
 - Prefer a contract-first modular SPA realization of the modular application architecture.
@@ -48,14 +50,14 @@ This ADR therefore captures the architectural direction, while the modernization
 
 ## Decision Statement
 
-The frontend will evolve as a bounded-context modular SPA, not as independently deployed micro-frontends in the near term.
+The frontend will evolve as a bounded-context modular SPA hosting a multi-pane financial workspace, not as independently deployed micro-frontends in the near term.
 
 In practical terms, this means:
 
 - one React runtime
 - one deployable frontend artifact
-- one shared application shell
-- multiple internal feature modules with explicit boundaries
+- one shared application shell managing resizable multi-pane layout state and global navigation
+- multiple internal feature modules with explicit boundaries (`market-data` for visual charting, `chat` for copilot dialog, `workspace` for analyst memory)
 - platform-owned shared technical capabilities such as routing, configuration, query orchestration, streaming, and UI primitives
 - contract-generated frontend-backend types at the platform boundary where practical
 - future extraction capability preserved through disciplined module contracts
@@ -65,6 +67,7 @@ In practical terms, this means:
 - A monolith-first strategy is lower risk when boundaries are not yet stable, and it allows the team to discover real seams before turning them into expensive deployment boundaries ([Monolith First](https://martinfowler.com/bliki/MonolithFirst.html)).
 - React's scaling model supports internal modular growth through providers, contexts, reducers, and custom hooks, which maps well to a modular application design ([React: Scaling Up with Reducer and Context](https://react.dev/learn/scaling-up-with-reducer-and-context)).
 - True micro-frontends are most justified when independently deliverable frontend applications are needed for autonomous teams and independent release cycles; that is not the current pressure profile of this repository ([Martin Fowler: Micro Frontends](https://martinfowler.com/articles/micro-frontends.html)).
+- A unified multi-pane canvas keeps chart interactions, technical screener updates, and AI copilot dialog synchronized in a single cohesive workspace without cross-origin iframe or micro-app synchronization overhead.
 - The repository already maintains an OpenAPI contract and currently shows duplicated API-access patterns. A contract-first modular SPA reduces drift between frontend and backend and creates more durable platform boundaries.
 - Modernizing the existing SPA into a modular application is a smaller and safer architectural step than introducing distributed frontend composition prematurely.
 
@@ -74,6 +77,7 @@ In practical terms, this means:
 
 - Lower near-term architecture risk
 - Faster modernization path from the current SPA
+- Richer, unified trader user experience combining visual charts and AI copilot in a single adaptive canvas
 - Better UX consistency across assistant, data, and workspace features
 - Better control of shared session, streaming lifecycle, notifications, and configuration
 - Reduced platform and deployment complexity compared to micro-frontends
@@ -92,9 +96,9 @@ In practical terms, this means:
 
 The intended architectural form is:
 
-- shared shell in `app/`
+- shared shell in `app/` hosting the multi-pane resizable layout
 - controlled platform layer in `platform/`
-- bounded business modules in `modules/`
+- bounded business modules in `modules/` (e.g., `market-data/` for charting canvas, `chat/` for copilot dialog and generative UI)
 - module public entry points as the only supported integration surface
 - typed platform-owned API and streaming adapters rather than ad hoc feature-local clients
 
@@ -102,6 +106,7 @@ Preferred realization of this ADR:
 
 - contract-first modular SPA
 - one browser shell, one React runtime, and one deployable artifact
+- multi-pane resizable canvas layout combining visual chart canvas and copilot drawer
 - route-composed feature ownership
 - platform services that own API contracts, query orchestration, config, streaming, and shared UI primitives
 
@@ -143,10 +148,10 @@ This decision serves the following system requirement families without owning th
 
 | Requirement Family | Relevance |
 |--------------------|-----------|
-| **SR-1**: User Interaction and Experience Continuity | Modular SPA preserves UX consistency and shared session behavior across all frontend features |
-| **SR-5**: Real-Time Delivery and Streaming Behavior | Shared platform layer centralizes streaming lifecycle instead of fragmenting it across micro-frontends |
+| **SR-1**: User Interaction and Experience Continuity | Modular SPA with resizable multi-pane canvas preserves UX consistency and shared session behavior across all trading and assistant features |
+| **SR-5**: Real-Time Delivery and Streaming Behavior | Shared platform layer centralizes streaming lifecycle and market data feeds instead of fragmenting them across micro-frontends |
 | **SNR-4**: Maintainability, Modularity, and Evolvability | Bounded feature modules with explicit public APIs directly address modularity and evolvability obligations |
-| **SNR-7**: Usability, Accessibility, and Design Governance | Single application shell and controlled platform layer support consistent UX governance |
+| **SNR-7**: Usability, Accessibility, and Design Governance | Single application shell and controlled platform layer support consistent UX governance and financial workspace design standards |
 
 ## Related Documents
 
@@ -172,3 +177,4 @@ This decision serves the following system requirement families without owning th
 | 0.1 | 2026-03-27 | Engineering | Initial ADR proposed |
 | 0.2 | 2026-04-01 | Engineering | Refined context with contract-first SPA realization and companion ADR-002 linkage |
 | 0.3 | 2026-04-13 | Engineering | Standardized to project ADR discipline; migrated to `docs/domains/frontend/DECISIONS/`; added Document Control, Requirement Alignment, and Revision History |
+| 0.4 | 2026-09-03 | Engineering | Incorporated resizable multi-pane financial canvas paradigm; refined scope to coordinate visual charting and AI copilot workspace |

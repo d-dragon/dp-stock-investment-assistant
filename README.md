@@ -8,8 +8,9 @@
 ## 📑 Table of Contents
 
 - [1. Project Vision & Core Capabilities](#1-project-vision--core-capabilities)
-  - [1.1 Business Goals, Values & Strategic Vision](#11-business-goals-values--strategic-vision)
-  - [1.2 Key Features & System Functionalities](#12-key-features--system-functionalities)
+  - [1.1 Product Overview & Value Proposition](#11-product-overview--value-proposition)
+  - [1.2 Conceptual Model & Workspace Anatomy](#12-conceptual-model--workspace-anatomy)
+  - [1.3 Key Capabilities by Domain](#13-key-capabilities-by-domain)
 - [2. System Architecture & Topology](#2-system-architecture--topology)
   - [2.1 High-Level C4 Container Topology](#21-high-level-c4-container-topology)
   - [2.2 Governed Architecture References](#22-governed-architecture-references)
@@ -37,65 +38,107 @@
 
 ## 1. Project Vision & Core Capabilities
 
-### 1.1 Business Goals, Values & Strategic Vision
+> 📘 **Quick Navigation to Authoritative Documents**:  
+> • **Product SSOT**: [`docs/system/PRODUCT_SPECIFICATION.md`](docs/system/PRODUCT_SPECIFICATION.md) — Product model, domain contracts, and roadmap.  
+> • **Conceptual IA Map**: [`docs/system/CONCEPTUAL_IA_MAP.md`](docs/system/CONCEPTUAL_IA_MAP.md) — Information architecture and workspace zones.  
+> • **Conceptual Wireframes**: [`docs/system/CONCEPTUAL_WIREFRAMES.md`](docs/system/CONCEPTUAL_WIREFRAMES.md) — Visual proof of workspace frames (W1–W6).  
+> • **Vision & Capabilities Charter**: [`docs/system/PRODUCT_VISION_AND_CAPABILITIES.md`](docs/system/PRODUCT_VISION_AND_CAPABILITIES.md) — Market microstructure & 360° deep-dive.  
 
-The **DP Stock-Investment Assistant** is an intelligent, visual financial workspace engineered specifically to empower **retail investors and active stock traders** in managing their daily end-to-end investment workloads.
+### 1.1 Product Overview & Value Proposition
 
-Modern stock investing requires navigating fragmented tools, overwhelming news feeds, and intricate financial filings. This platform bridges that gap by combining automated data ingestion, multi-model AI reasoning, and persistent memory into a unified visual environment—elevating everyday traders from manual data gatherers to disciplined, well-informed decision makers.
+The **DP Stock-Investment Assistant** is an intelligent, visual workspace engineered as a **Cognitive AI-powered Investment Workspace** for retail investors and active stock traders. Its primary journey owner is the **Hybrid Techno-Fundamental Investor**, who combines long-term business quality and valuation conviction with tactical technical execution, volume profiling, and strict risk discipline.
 
+Modern stock investing subjects retail participants to four systemic handicaps:
+1. **Information Asymmetry**: Fragmented, low-signal disclosures, delayed news, and unverified forum sentiment.
+2. **Cognitive Overload**: Context shattered across dozens of disconnected tabs, charts, screeners, and note-taking apps.
+3. **Single-Lens Myopia**: Flawed decisions caused by relying solely on technical chart patterns without balance-sheet checks, or vice-versa.
+4. **Emotional & Process Drift**: Lack of recorded reasoning, causing thesis drift, disposition effect, panic selling, and unlearned mistakes.
+
+**DP Stock solves this** by pairing an enabling **Platform** (Adaptive Workspace, AI Agents with Longitudinal Memory, and Data Hub with provenance) with a disciplined **Investment Core** (Insights, Living Thesis, Decision Gate, Portfolio, and Monitoring). It treats investing as a continuous, compounding lifecycle:
+
+```text
+Insights ──▶ Living Thesis ──▶ Decision Gate ──▶ Portfolio ──▶ Monitoring ──▶ Journal
+   ▲                                                                             │
+   └──────────────────────── (Intelligence Loop & Memory) ───────────────────────┘
 ```
-┌────────────────────────────────────────────────────────────────────────────────────────┐
-│                                 STRATEGIC VALUE PILLARS                                │
-├────────────────────────┬────────────────────────┬──────────────────────────────────────┤
-│ Value Pillar           │ Core Mechanism         │ Trader Outcome                       │
-├────────────────────────┼────────────────────────┼──────────────────────────────────────┤
-│ ⚡ Decision Speed       │ Automated Data Pipeline│ Cuts daily research from hours to    │
-│                        │ & Multi-Source Parsing │ minutes with instant summaries.      │
-│ 🎯 High Fidelity       │ Normalized Market Feeds│ Eliminates AI hallucinations with    │
-│                        │ + Auditable Provenance │ real TradingView charts & live data. │
-│ 🧠 Longitudinal Memory │ Short & Long-Term Memory│ Preserves theses, watchlists & notes │
-│                        │ (STM + LTM Context)    │ to augment unique investing styles.  │
-│ 🔭 Proactive Copilot   │ Agentic Event Triggers │ Shifts from reactive Q&A to proactive│
-│                        │ & Technical Screeners  │ setup & risk deviation alerts.       │
-└────────────────────────┴────────────────────────┴──────────────────────────────────────┘
-```
-
-#### Primary Business & Operational Goals
-
-1. **Drastically Cut Daily Research Workload**: Automate repetitive pre-market and post-market tasks—such as quote monitoring, technical indicator screening, and quarterly financial statement breakdowns—reducing research turnaround time from hours to minutes.
-2. **Provide a Modern, Visualized AI-Assisted Workspace**: Unify conversational AI, interactive TradingView charts, and structured financial tables in a single responsive UI to eliminate context switching across disconnected tools.
-3. **Preserve Longitudinal Working Data & Augmented Memory**: Retain working notes, investment theses, active watchlists, and analytical findings across sessions over time. This continuous historical context augments diverse trading and investing styles (Value, Growth, Swing, Momentum, and Technical).
-4. **Evolve from a Reactive Assistant to a Proactive Copilot**: Advance from standard prompt-and-response interactions to an autonomous copilot that proactively tracks watchlists, detects technical/fundamental trigger conditions, and alerts on thesis invalidations.
 
 ---
 
-### 1.2 Key Features & System Functionalities
+### 1.2 Conceptual Model & Workspace Anatomy
 
+DP Stock models investing as a **disciplined, continuous practice** rather than isolated transactions. The product is organized into two cooperating layers:
+
+```mermaid
+flowchart LR
+    subgraph Platform["1. PLATFORM (Enabler)"]
+        direction TB
+        DATA["📊 Data Hub<br/>(VN-First & Provenance)"]
+        CANVAS["🖥️ Visual Canvas<br/>(Adaptive Workspace)"]
+        AI["🤖 AI Copilot<br/>(Long-Term Memory)"]
+    end
+
+    subgraph Core["2. INVESTMENT CORE (Reasoning)"]
+        direction TB
+        INS["Insights (360° Due Diligence)"]
+        TH["Living Thesis (Bull vs. Bear)"]
+        GATE{"Decision Gate (Pre-Mortem)"}
+        PF["Portfolio (Execution & Sizing)"]
+        MON["Monitoring (Thesis Drift)"]
+        INS --> TH --> GATE -->|promote| PF --> MON
+    end
+
+    Platform ==>|powers & preserves context| Core
+    MON -.->|learning loop| INS
 ```
-                        ┌─────────────────────────────────────────────────────────┐
-                        │             DP Stock-Investment Assistant               │
-                        └─────────────────────────────────────────────────────────┘
-                                                     │
-         ┌───────────────────┬───────────────────────┼───────────────────────┬───────────────────┐
-         ▼                   ▼                       ▼                       ▼                   ▼
- ┌───────────────┐   ┌───────────────┐       ┌───────────────┐       ┌───────────────┐   ┌───────────────┐
- │ Data Ingestion│   │Natural Lang Q&A│      │Financial Health│      │ Persistent    │   │ Visual Charts │
- │ & Refinement  │   │Financial Copilot│     │& Report Parsing│      │Analyst Memory │   │& Reports Export│
- └───────────────┘   └───────────────┘       └───────────────┘       └───────────────┘   └───────────────┘
+
+> **Platform Principle — "Platform Enables, Core Means"**:  
+> The Platform provides spatial tools, data ingestion, and AI reasoning, but **never owns investment meaning**. Final theses, risk decisions, and journal reflections are strictly user-owned.
+
+#### Core Product Pillars
+
+1. **Dual-Track Workflow (Sandbox vs. Portfolio)**:
+   - **Research Sandbox (Track A)**: Freely explore ideas, inspect charts, and draft theses without altering real portfolio risk.
+   - **Execution Portfolio (Track B)**: Governs live holdings, risk budgeting, and real capital allocations.
+   - **The Decision Gate**: Ideas only promote to the portfolio by passing an explicit pre-mortem checklist (clear invalidation criteria, risk budget, and stop rules).
+2. **Living Thesis with Multi-Stance**: Theses are living records tracking parallel **Bull and Bear** arguments, continuously monitored against earnings releases and news to prevent hindsight bias.
+3. **Optional Investment Case**: A lightweight narrative thread that optionally binds research, thesis, decisions, and trades into one coherent lifecycle.
+
+#### The Unified Workspace Layout
+
+All work takes place in a single, focused screen modeled after a professional workshop:
+
+```text
+┌─────────────────────────────────────────────────────────────────────────────────────────────┐
+│ TOP CHROME (Z2 Context)                 [VNM]  •  [Investment Case]  •  Research / Market  │
+├───────────────────────┬──────────────────────────────────────────────┬──────────────────────┤
+│ LEFT SIDEBAR (Z1)     │ PRIMARY WORKSPACE (Z3 · Wide)                │ AI COMPANION (Z4)    │
+│ Dual-Track             │ • Active work and decision gate              │ • Context-aware       │
+│  ○ Research Sandbox    │ • 360° forensic analysis & financials        │   co-analyst          │
+│  ○ Execution Portfolio │ • Living Thesis: parallel Bull / Bear       │ • Summarizes filings │
+│ Lifecycle              │ • Decision Gate: pre-mortem checklist        │   and news           │
+│  1 Insights            │ • Price & volume market anchor (Sandbox)     │ • Challenges         │
+│  2 Thesis              │                                                │   assumptions        │
+│  3 Decision            │                                                │ • Helps; never acts  │
+│  4 Portfolio           │                                                │   without investor   │
+│                       │                                                │   confirmation       │
+└───────────────────────┴──────────────────────────────────────────────┴──────────────────────┘
 ```
 
-- **Data Ingestion, Aggregation & Refinement**: Seamless ingestion, cleaning, and normalization of live market quotes, historical OHLCV bars, valuation multiples, and corporate disclosures across Vietnamese (HOSE, HNX, UPCoM) and international markets.
-- **Natural Language Financial Intelligence**: Conversational query engine capable of interpreting complex stock queries, technical indicator setups (RSI, MACD, Moving Averages), macroeconomic trends, and comparative sector valuations.
-- **Modern Visualized Trading Workspace**: Rich React single-page application integrating interactive TradingView charting with visual provenance, multi-pane workspaces, and real-time streaming updates.
-- **Automated Financial Statement & Health Breakdown**: Instant extraction, digestion, and synthesis of quarterly earnings releases, balance sheet solvency, revenue/profit growth, and corporate disclosures.
-- **Persistent Memory & Longitudinal Decision History**: Multi-session Short-Term Memory (STM) and Long-Term Memory (LTM) that maintain conversational continuity, investment theses, watchlists, and historical analysis over time.
-- **Proactive Monitoring & Exportable Research Reports**: Automated setup detection, thesis deviation alerts, and dynamic report generation in Markdown, PDF, and CSV formats tailored for trading decisions.
+> For deep architectural specifications and wireframes, see [`CONCEPTUAL_IA_MAP.md`](docs/system/CONCEPTUAL_IA_MAP.md) and [`CONCEPTUAL_WIREFRAMES.md`](docs/system/CONCEPTUAL_WIREFRAMES.md).
 
-System Requirement Specification (SRS) references:
-- [SRS - Master System](docs/system/SYSTEM_REQUIREMENTS_SPECIFICATION.md)
-- [SRS - Domain: AI Agent](docs/domains/agent/SOFTWARE_REQUIREMENTS_SPECIFICATION.md)
-...
+---
 
+### 1.3 Key Capabilities by Domain
+
+| Layer | Domain / Capability | Description & Investor Benefit |
+|---|---|---|
+| **Platform** | **Knowledge Hub (Data & Information)** | Vietnam-first coverage (HOSE, HNX, UPCoM), financial footnotes (*Thuyết minh BCTC*), foreign/proprietary order flow, and news—all with strict source provenance tracking. |
+| **Platform** | **Adaptive Visual Canvas (UX/UI)** | Multi-pane workspace with docked market chart anchors, context preservation across symbol switches, and saved layout presets. |
+| **Platform** | **Cognitive AI & Memory** | Supporting companion (Z4), event briefings, thesis drift monitoring, and longitudinal memory profiling that learns the investor’s personal process. |
+| **Core** | **Insights & 360° Synthesis** | Evidence-backed research synthesizing micro company fundamentals (forensics, moats), meso industry dynamics, and macro market drivers. |
+| **Core** | **Living Thesis & Principles** | Version-controlled thesis builder featuring parallel Bull/Bear stances, explicit assumptions, and standing investment principles. |
+| **Core** | **Decision Gate & Journal** | Pre-mortem checklist, position sizing guardrails, post-trade journaling, and cognitive bias detection (e.g. disposition effect). |
+| **Core** | **Portfolio & Continuous Monitoring** | Position allocation, official risk tracking, automated thesis invalidation radars, and catalyst event tracking. |
 
 ## 2. System Architecture & Topology
 
