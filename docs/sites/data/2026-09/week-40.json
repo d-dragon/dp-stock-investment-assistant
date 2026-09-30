@@ -13,6 +13,6 @@
   "days": [
     {"date": "2026-09-28", "dayPath": "2026-09/d/2026-09-28.json", "status": "closed"},
     {"date": "2026-09-29", "dayPath": "2026-09/d/2026-09-29.json", "status": "closed"},
-    {"date": "2026-09-30", "dayPath": "2026-09/d/2026-09-30.json", "newsPath": "2026-09/n/2026-09-30.json", "status": "preopen"}
+    {"date": "2026-09-30", "dayPath": "2026-09/d/2026-09-30.json", "newsPath": "2026-09/n/2026-09-30.json", "analysisPath": "2026-09/a/2026-09-30.md", "status": "preopen"}
   ]
 }

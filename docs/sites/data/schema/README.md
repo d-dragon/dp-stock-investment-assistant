@@ -14,9 +14,9 @@ Why shards: GitHub Contents API accepts ~1 MB, but **Grok MCP tool arguments** s
 1. `data/YYYY-MM/raw/YYYY-MM-DD.json` — optional fat raw (market + news_events + sentiment)
 2. `data/YYYY-MM/n/YYYY-MM-DD.json` — full impact-ranked news + feeds (scrollable hub list)
 3. `data/YYYY-MM/d/YYYY-MM-DD.json` — report + sources; may keep a short news fallback
-4. `data/YYYY-MM/a/YYYY-MM-DD.md` — same-run analysis / narrative
-5. `data/YYYY-MM/week-WW.json` — thin pointers (`dayPath`, optional `newsPath`)
-6. `data/index.json` — catalog row with `weekPath`, `dayPath`, optional `newsPath`
+4. `data/YYYY-MM/a/YYYY-MM-DD.md` — same-run analysis / narrative (hub tab Phân tích)
+5. `data/YYYY-MM/week-WW.json` — thin pointers (`dayPath`, optional `newsPath`, optional `analysisPath`)
+6. `data/index.json` — catalog row with `weekPath`, `dayPath`, optional `newsPath`, optional `analysisPath`
 
 ## Size rules
 

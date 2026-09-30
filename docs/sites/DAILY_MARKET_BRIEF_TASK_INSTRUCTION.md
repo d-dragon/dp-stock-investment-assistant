@@ -1,7 +1,7 @@
 # Daily Market Brief — Task Instruction
 
 **Status:** living document — this file is the source of truth. Chat history and the Grok automation prompt must not invent a parallel spec.
-**Version:** 2.6.0
+**Version:** 2.6.1
 **Updated:** 2026-09-30 (GMT+7)
 **Owner:** Phan Duy / DP Stock-Investment Assistant
 **Canonical path:** `docs/sites/DAILY_MARKET_BRIEF_TASK_INSTRUCTION.md` on branch `project-website-pages`
@@ -24,6 +24,7 @@
 
 | Date | Version | Change |
 |---|---|---|
+| 2026-09-30 | 2.6.1 | Analysis MD is a narrative investor note (coverage + takeaways). Hub right pane tab **Phân tích** renders `a/YYYY-MM-DD.md`. Catalog `analysisPath`. |
 | 2026-09-30 | 2.6.0 | Phase 1 collector on this automation + git/`gh` only (no Grok bot). One 08:35 window = prior EOD + overnight + pre-open. Raw one-file + `n/` ranked feed (no 25 KB cap) + same-job `a/*.md`. Sentiment: FireAnt, F247, newf319.com (not f319.com). Loader scrolls impact-sorted feeds. |
 | 2026-09-30 | 2.5.1 | Day-file transport: `gh api` PUT Contents from a local file. Ban stub/placeholder commits. Verify remote `size` == local bytes. MCP only for thin week + catalog. |
 | 2026-09-29 | 2.5.0 | Migrated live automation guardrails (branch lock, one-commit rule, day-shard publish, MCP size) into this file. Automation prompt reduced to “load and follow this file”. |
@@ -204,8 +205,8 @@ Do **not** use a separate Grok bot, DataFeed API, Vietstock login, Drive, or Gis
 5. Rank every usable headline/feed item by impact (`high` / `medium` / `low` + `impactScore` 0–100). Heuristic: official prints and exchange actions first; VN30 / foreign-flow extremes; overnight US/Asia gap risk; sector-wide stories; single-name color; community last.
 6. Write the full ranked list to `data/YYYY-MM/n/YYYY-MM-DD.json` (`news.schema.json`). No 25 KB cap.
 7. Compose `d/YYYY-MM-DD.json` (schema-locked report). Keep a short news fallback inside `d/` so the hub still works if `n/` is late.
-8. Write `a/YYYY-MM-DD.md` in the **same** run (tape vs chatter, foreign/proprietary, overnight, community tone, unknowns at 08:35).
-9. Upsert thin week + catalog with `dayPath` and `newsPath`.
+8. Write `a/YYYY-MM-DD.md` in the **same** run using the **Analysis note** template below.
+9. Upsert thin week + catalog with `dayPath`, `newsPath`, and `analysisPath`.
 10. Publish large files with `gh` / git — never MCP `content=`.
 
 **Feed item**
@@ -230,13 +231,59 @@ Do **not** use a separate Grok bot, DataFeed API, Vietstock login, Drive, or Gis
 
 `kind`: `news` | `disclosure` | `macro` | `market` | `community`. Community rows must stay labeled.
 
+## Analysis note (`a/YYYY-MM-DD.md`)
+
+This file is the **reasoner output** the hub tab **Phân tích** renders. Vietnamese, diacritics on. 500–900 words. Not a bullet dump of the shard. Do not invent a close. Cite `sourceId` or outlet in prose.
+
+**Required sections (use these headings):**
+
+```markdown
+# Nhật ký phiên YYYY-MM-DD — [một câu thesis]
+
+**Cửa sổ:** EOD {eodDate} + overnight + pre-open {briefDate} (GMT+7).
+**Thesis:** [1–2 sentences: what the tape is saying and what would invalidate it]
+
+## Nhà đầu tư nắm gì
+- [3–5 grab-able insights: bias for the session, sectors/tickers in play, risk that would change the plan]
+- Mỗi ý: hành động hoặc quan sát được, không khẩu hiệu.
+
+## Bức tranh phiên
+Narrative 1 short paragraph: index, breadth, liquidity vs 20-session feel, who supplied/demanded.
+
+## Dòng tiền
+Foreign / proprietary / retail if known. Name the 3–5 tickers that explain the print. Say what is *not* known.
+
+## Thế giới chồng lên VN
+What overnight US/Asia/FX/rates/oil actually transmits to VN today. Skip decoration quotes.
+
+## Sự kiện & cổ phiếu
+Rights, floors, weight names, sector tapes that can gap the index.
+
+## Sentiment (không phải print)
+FireAnt / F247 / newF319 tone vs the tape. One sentence on agreement or disagreement.
+
+## Kế hoạch phiên
+- Kịch bản cơ sở / nghiêng / rủi ro
+- Mốc: hỗ trợ — kháng cự (from raw/outlook, labeled)
+- Ấn số còn lại (today’s official close if pre-open, scheduled data)
+```
+
+**Quality bar**
+
+- Lead with a thesis an investor can use before the open or into the session.
+- Cover: tape, liquidity, three investor groups when data exists, overnight transmission, 2–4 names, community only as color.
+- Insights must be falsifiable (“mất 1.760 thì bias đổi”, not “thị trường sẽ tăng”).
+- No buy/sell order. No invented prints. Community ≠ foreign flow.
+
+Hub: `report-app.js` loads `analysisPath` or `YYYY-MM/a/YYYY-MM-DD.md` into the right-pane tab **Phân tích**. Companies + compact outlook stay on tab **Doanh nghiệp**.
+
 ## Publish (every run)
 
 1. Compute ISO week (Monday start) and today’s date in `Asia/Ho_Chi_Minh`.
 2. Collect data (sources-first, Phase 1 collector above). Validate `d/` with `schema-validate.js` `validateDayFile`.
 3. Write `raw/`, `n/`, `d/`, and `a/` for today.
 4. Fetch existing thin `docs/sites/data/YYYY-MM/week-WW.json`. If it is still an embedded v2.0 blob, convert to `schemaVersion: "2.1.0"` / `storage: "day-shards"` **without deleting sibling dates**. Upsert today’s `{date, dayPath, newsPath, status}` pointer. Never put `report` back into the week file. Never replace `days` with `[todayOnly]`.
-5. Upsert `docs/sites/data/index.json` newest-first with `weekPath` + `dayPath` + `newsPath`.
+5. Upsert `docs/sites/data/index.json` newest-first with `weekPath` + `dayPath` + `newsPath` + `analysisPath`.
 6. Publish on `project-website-pages` with **`gh` / git** (required for `raw/`, `n/`, `d/`, `a/`):
    1. Assemble files on disk.
    2. Prefer `git add && git commit && git push origin project-website-pages`.
