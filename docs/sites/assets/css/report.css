@@ -91,7 +91,18 @@ a:hover { text-decoration: underline; }
 .news a img { transition: opacity .15s; }
 .news a:hover img { opacity: .85; }
 .news .when { color: var(--muted); font-size: 10px; }
-.news .impact { color: var(--gold); font-size: 11px; margin-top: 2px; }
+.news li.no-thumb { grid-template-columns: 1fr; }
+.news li.is-community { border-left: 3px solid #7c3aed; }
+.impact-badge, .kind-badge {
+  display: inline-block; margin-right: 6px; padding: 0 6px; border-radius: 999px;
+  font-size: 9px; font-weight: 700; letter-spacing: .02em; text-transform: uppercase;
+  vertical-align: middle;
+}
+.impact-badge.impact-high { background: #7f1d1d; color: #fecaca; }
+.impact-badge.impact-medium { background: #78350f; color: #fde68a; }
+.impact-badge.impact-low { background: #1f2937; color: #9ca3af; }
+.kind-badge { background: #3b0764; color: #e9d5ff; }
+.pager span { font-size: 11px; }
 .macros { display: flex; gap: 6px; overflow-x: auto; padding: 6px 8px; border-bottom: 1px solid var(--border); }
 .mac { min-width: 110px; background: var(--pane2); border: 1px solid var(--border); border-radius: 4px; padding: 4px 6px; }
 .mac b { display: block; font-size: 10px; color: var(--muted); }

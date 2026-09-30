@@ -104,6 +104,30 @@
       "description": "Bitcoin and major crypto benchmark pricing",
       "url": "https://finance.yahoo.com/quote/BTC-USD/",
       "reliability": "secondary"
+    },
+    {
+      "id": "src-fireant",
+      "name": "FireAnt cộng đồng",
+      "category": "Community sentiment",
+      "description": "Retail discussion and stocks of interest. Sentiment only — not a price print.",
+      "url": "https://fireant.vn/cong-dong/moi-nhat",
+      "reliability": "sentiment"
+    },
+    {
+      "id": "src-f247",
+      "name": "F247",
+      "category": "Community sentiment",
+      "description": "Retail / media community around the F-board culture. Sentiment only.",
+      "url": "https://f247.com/",
+      "reliability": "sentiment"
+    },
+    {
+      "id": "src-newf319",
+      "name": "newF319",
+      "category": "Community sentiment",
+      "description": "Live F319 successor forum. Use https://newf319.com/ — do not use shutdown f319.com.",
+      "url": "https://newf319.com/",
+      "reliability": "sentiment"
     }
   ]
 }

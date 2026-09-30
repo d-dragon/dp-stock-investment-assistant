@@ -103,6 +103,75 @@
     });
   }
 
+  function impactScore(n) {
+    if (!n) return 0;
+    if (typeof n.impactScore === "number") return n.impactScore;
+    const lvl = n.impactLevel || n.impact;
+    if (lvl === "high") return 80;
+    if (lvl === "medium") return 50;
+    if (lvl === "low") return 20;
+    return 0;
+  }
+
+  function sortByImpact(items) {
+    return (items || []).slice().sort(function (a, b) {
+      const d = impactScore(b) - impactScore(a);
+      if (d) return d;
+      return String(b.publishedAt || b.date || "").localeCompare(String(a.publishedAt || a.date || ""));
+    });
+  }
+
+  function feedItemToNews(n) {
+    if (!n) return n;
+    const out = Object.assign({}, n);
+    if (!out.date && out.publishedAt) out.date = out.publishedAt;
+    if (!out.summary && out.excerpt) out.summary = out.excerpt;
+    if (!out.impact && out.whyImpact) out.impact = { text: out.whyImpact };
+    return out;
+  }
+
+  function inferBoard(n) {
+    if (n.board === "global" || n.region === "global") return "global";
+    if (n.board === "vn" || n.region === "vn") return "vn";
+    if (n.kind === "disclosure" || n.kind === "macro") return "vn";
+    const sid = String(n.sourceId || "");
+    if (/barrons|bloomberg|yahoo|reuters|wsj/i.test(sid)) return "global";
+    return "vn";
+  }
+
+  function applyFeedItems(day, items) {
+    const ranked = sortByImpact(items).map(feedItemToNews);
+    const global = ranked.filter(function (n) {
+      return inferBoard(n) === "global" && n.kind !== "community";
+    });
+    const vn = ranked.filter(function (n) {
+      return inferBoard(n) === "vn" || n.kind === "community" || n.kind === "disclosure" || n.kind === "macro";
+    });
+    if (!day.report) day.report = {};
+    if (global.length) day.report.globalNews = global;
+    if (vn.length) day.report.vietnamNews = vn;
+    day.report._feedCount = ranked.length;
+    return day;
+  }
+
+  function attachNewsFeed(day, entry, date) {
+    const explicit = (entry && entry.newsPath) || (day && day.newsPath);
+    const fallback = date ? date.slice(0, 7) + "/n/" + date + ".json" : "";
+    const path = explicit || fallback;
+    if (!path) return Promise.resolve(day);
+    return fetchJson("./data/" + path).then(function (feed) {
+      const items = (feed && feed.items) || [];
+      if (!items.length) return day;
+      return applyFeedItems(day, items);
+    }).catch(function () {
+      if (day.report) {
+        day.report.globalNews = sortByImpact(day.report.globalNews || []);
+        day.report.vietnamNews = sortByImpact(day.report.vietnamNews || []);
+      }
+      return day;
+    });
+  }
+
   function clearSources() {
     Object.keys(SOURCES).forEach(function (k) {
       delete SOURCES[k];
@@ -175,12 +244,15 @@
         if (!entry || (!entry.weekPath && !entry.dayPath)) {
           throw new Error("Không có mục catalog cho " + date);
         }
+        window.__CATALOG_ENTRY__ = entry;
         return resolveDay(entry, date).then(function (day) {
           if (!day || !day.report) {
             throw new Error("Không có payload ngày " + date);
           }
           window.__BRIEF_DATE__ = date;
-          applyDayPayload(day);
+          return attachNewsFeed(day, entry, date).then(function (merged) {
+            applyDayPayload(merged);
+          });
         });
       })
       .catch(function (e) {
@@ -382,42 +454,57 @@
   }
 
   function renderNews(key, listId, pagerId, which) {
-    const items = REPORT[key] || [];
-    const size = (REPORT.ui && REPORT.ui.pageSizeNews) || PAGE;
-    const page = newsPage[which];
+    const items = sortByImpact(REPORT[key] || []);
+    const scrollAll = !(REPORT.ui && REPORT.ui.pageSizeNews);
+    const size = scrollAll ? items.length || 1 : ((REPORT.ui && REPORT.ui.pageSizeNews) || PAGE);
+    const page = scrollAll ? 0 : newsPage[which];
     const slice = items.slice(page * size, page * size + size);
     document.getElementById(listId).innerHTML = slice
       .map(function (n) {
-        const img = (n.image && n.image.url) || "https://picsum.photos/seed/mkt/144/96";
-        const impact = (n.impact && n.impact.text) || "";
+        const img = n.image && n.image.url;
+        const impact = (n.impact && n.impact.text) || n.whyImpact || "";
+        const level = n.impactLevel || (typeof n.impact === "string" ? n.impact : "");
         const link = resolveNewsUrl(n);
         const titleHtml = link
-          ? '<a href="' + link + '" target="_blank" rel="noopener noreferrer">' + n.title + "</a>"
-          : n.title;
-        const imgTag = '<img src="' + img + '" alt="">';
-        const imgHtml = link
-          ? '<a href="' + link + '" target="_blank" rel="noopener noreferrer" tabindex="-1">' + imgTag + "</a>"
-          : imgTag;
+          ? '<a href="' + link + '" target="_blank" rel="noopener noreferrer">' + (n.title || "") + "</a>"
+          : (n.title || "");
         const sourceHtml = srcLink(n.sourceId, link || null);
+        const badge = level
+          ? '<span class="impact-badge impact-' + level + '">' + level + "</span>"
+          : "";
+        const kind = n.kind === "community" ? '<span class="kind-badge">cộng đồng</span>' : "";
+        const imgHtml = img
+          ? (link
+              ? '<a href="' + link + '" target="_blank" rel="noopener noreferrer" tabindex="-1"><img src="' + img + '" alt=""></a>'
+              : '<img src="' + img + '" alt="">')
+          : "";
         return (
-          "<li>" +
+          '<li class="' + (img ? "" : "no-thumb ") + (n.kind === "community" ? "is-community" : "") + '">' +
           imgHtml +
           "<div><div class=\"when\">" +
-          String(n.date || "").replace("T", " ").slice(0, 16) +
-          " \u00b7 " +
+          badge +
+          kind +
+          String(n.publishedAt || n.date || "").replace("T", " ").slice(0, 16) +
+          " · " +
           sourceHtml +
           "</div><h3>" +
           titleHtml +
           "</h3><div>" +
-          (n.summary || "") +
+          (n.summary || n.excerpt || "") +
           '</div><div class="impact">' +
           impact +
           "</div></div></li>"
         );
       })
       .join("");
+    const pager = document.getElementById(pagerId);
+    if (scrollAll) {
+      pager.innerHTML = "<span>" + items.length + " tin · sắp xếp theo mức ảnh hưởng</span>";
+      pager.onclick = null;
+      return;
+    }
     const pages = Math.max(1, Math.ceil(items.length / size));
-    document.getElementById(pagerId).innerHTML =
+    pager.innerHTML =
       '<button type="button" data-d="-1">Trước</button><span>Trang ' +
       (page + 1) +
       "/" +
@@ -425,7 +512,7 @@
       " (" +
       items.length +
       ' tin)</span><button type="button" data-d="1">Sau</button>';
-    document.getElementById(pagerId).onclick = function (e) {
+    pager.onclick = function (e) {
       const b = e.target.closest("button");
       if (!b) return;
       newsPage[which] = Math.min(pages - 1, Math.max(0, page + Number(b.getAttribute("data-d"))));

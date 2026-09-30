@@ -1,12 +1,39 @@
-# Weekly + daily data schema (v2.4)
+# Weekly + daily data schema (v2.6)
 
 Canonical files:
 
 - `week.schema.json` — thin week index `data/YYYY-MM/week-WW.json` (v2.1.0) **or** legacy embedded week (v2.0.0, golden `2026-09/week-38.json`)
-- `day.schema.json` — one trading day `data/YYYY-MM/d/YYYY-MM-DD.json`
-- `catalog.schema.json` — `data/index.json`
+- `day.schema.json` — one trading day `data/YYYY-MM/d/YYYY-MM-DD.json` (tape + outlook)
+- `news.schema.json` — ranked feed `data/YYYY-MM/n/YYYY-MM-DD.json` (no 25 KB cap)
+- `catalog.schema.json` — `data/index.json` (`dayPath`, optional `newsPath`)
 
-Why shards: GitHub Contents API accepts ~1 MB, but the **connected GitHub MCP tools truncate / fail around 30–40 KB payloads**. A 5-day embedded week (~100 KB) cannot be pushed reliably. One day file is ~18–29 KB.
+Why shards: GitHub Contents API accepts ~1 MB, but **Grok MCP tool arguments** still choke around 30–40 KB. Push large files with **`gh api` Contents PUT / git push**, never MCP `content=`.
+
+## Publish unit (v2.6)
+
+1. `data/YYYY-MM/raw/YYYY-MM-DD.json` — optional fat raw (market + news_events + sentiment)
+2. `data/YYYY-MM/n/YYYY-MM-DD.json` — full impact-ranked news + feeds (scrollable hub list)
+3. `data/YYYY-MM/d/YYYY-MM-DD.json` — report + sources; may keep a short news fallback
+4. `data/YYYY-MM/a/YYYY-MM-DD.md` — same-run analysis / narrative
+5. `data/YYYY-MM/week-WW.json` — thin pointers (`dayPath`, optional `newsPath`)
+6. `data/index.json` — catalog row with `weekPath`, `dayPath`, optional `newsPath`
+
+## Size rules
+
+- **No product cap of 25 KB on the news/feed list.** Collect as many usable items as public sources yield. Sort by `impactScore` desc, then `publishedAt` desc.
+- Soft engineering warning: keep a single JSON under ~1 MB so Contents API + the browser stay comfortable.
+- Day-file tape/outlook can stay compact. Do not stuff the full feed into `d/` when `n/` exists.
+- Numbers as JSON numbers. UTF-8 Vietnamese diacritics. No data-URL images.
+
+## Binding map
+
+`index.html` → `data/index.json` → `dayPath` + optional `newsPath` (`YYYY-MM/n/YYYY-MM-DD.json`).
+
+| UI pane | JSON path |
+|---|---|
+| Ticker / charts / outlook | `d/*.json` `report.*` |
+| Tin thế giới / tin Việt Nam | prefer `n/*.json` `items[]` (impact-sorted, scrollable); else `report.globalNews` / `vietnamNews` |
+
 
 ## Load order for the daily agent
 
