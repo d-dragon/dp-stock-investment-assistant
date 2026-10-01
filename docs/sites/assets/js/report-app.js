@@ -334,7 +334,12 @@
         });
       })
       .catch(function (e) {
-        showError("Không tải được (" + e.message + '). <a href="#/latest">Thử bản mới nhất</a>');
+        var isFileProto = location.protocol === "file:";
+        var fileMsg = isFileProto
+          ? 'Không thể tải dữ liệu trên giao thức <code>file://</code> do trình duyệt chặn <code>fetch()</code>.<br>' +
+            'Vui lòng xem trang qua web server cục bộ (VD: Live Server trên VS Code, <code>python -m http.server</code>) hoặc qua GitHub Pages. (' + e.message + ')'
+          : 'Không tải được (' + e.message + '). <a href="#/latest">Thử bản mới nhất</a>';
+        showError(fileMsg);
       });
   }
 
@@ -483,17 +488,25 @@
       "</span></button>" +
       '<div class="cal-pop" id="calPop" hidden role="dialog" aria-label="Chọn ngày báo cáo"></div></div>' +
       '<button id="themeBtn" type="button">Giao diện</button></header>' +
-      '<div class="ticker" id="ticker"></div><div class="grid">' +
-      '<section class="pane"><div class="pt"><i class="fa-solid fa-globe"></i> Tin thế giới</div><div class="pb"><ul class="news" id="gNews"></ul></div><div class="pager" id="gPager"></div></section>' +
-      '<section class="pane"><div class="pt"><i class="fa-solid fa-chart-line"></i> Biểu đồ<div class="tabs" id="chartTabs"><button data-tab="vnindex" class="on">VN-Index</button><button data-tab="world">Thế giới</button><button data-tab="crypto">Crypto</button></div></div><div class="pb" id="chartPane"></div></section>' +
+      '<div class="ticker" id="ticker"></div><div class="grid-layout">' +
+      '<section class="pane col-left">' +
+      '<div class="pt"><i class="fa-solid fa-lightbulb"></i> Góc nhìn &bull; Phân tích</div>' +
+      '<div class="pb" id="analysisPane"></div>' +
+      '</section>' +
+      '<div class="col-right">' +
+      '<div class="col-right-top">' +
+      '<section class="pane"><div class="pt"><i class="fa-solid fa-globe"></i> Thế giới</div><div class="pb"><ul class="news" id="gNews"></ul></div><div class="pager" id="gPager"></div></section>' +
       '<section class="pane"><div class="pt"><i class="fa-solid fa-flag"></i> Vĩ mô Việt Nam</div><div class="macros" id="macros"></div><div class="pb"><ul class="news" id="vNews"></ul></div><div class="pager" id="vPager"></div></section>' +
-      '<section class="pane"><div class="pt"><i class="fa-solid fa-lightbulb"></i> Góc nhìn<div class="tabs" id="rightTabs"><button data-right="analysis" class="on">Phân tích</button><button data-right="names">Doanh nghiệp</button></div></div><div class="pb" id="rightPane"></div></section>' +
-      '</div><footer class="foot" id="foot"></footer>';
+      '<section class="pane"><div class="pt"><i class="fa-solid fa-building"></i> Doanh nghiệp &amp; Triển vọng</div><div class="pb" id="companiesPane"></div></section>' +
+      '</div>' +
+      '<section class="pane col-right-bottom"><div class="pt"><i class="fa-solid fa-chart-line"></i> Biểu đồ<div class="tabs" id="chartTabs"><button data-tab="vnindex" class="on">VN-Index</button><button data-tab="world">Thế giới</button><button data-tab="crypto">Crypto</button></div></div><div class="pb" id="chartPane"></div></section>' +
+      '</div></div><footer class="foot" id="foot"></footer>';
     renderTicker();
+    renderAnalysis();
     renderNews("globalNews", "gNews", "gPager", "global");
     renderNews("vietnamNews", "vNews", "vPager", "vn");
     renderMacros();
-    renderRight();
+    renderCompanies();
     renderChart("vnindex");
     renderFoot();
     bindDatePicker(d);
@@ -510,18 +523,6 @@
       });
       renderChart(b.dataset.tab);
     };
-    const rightTabs = document.getElementById("rightTabs");
-    if (rightTabs) {
-      rightTabs.onclick = function (e) {
-        const b = e.target.closest("button");
-        if (!b) return;
-        rightTabs.querySelectorAll("button").forEach(function (x) {
-          x.classList.toggle("on", x === b);
-        });
-        window.__RIGHT_TAB__ = b.getAttribute("data-right") || "analysis";
-        renderRight();
-      };
-    }
   }
 
   function renderTicker() {
@@ -627,20 +628,21 @@
       .join("");
   }
 
-  function renderRight() {
-    const pane = document.getElementById("rightPane");
+  function renderAnalysis() {
+    const pane = document.getElementById("analysisPane");
     if (!pane) return;
-    const tab = window.__RIGHT_TAB__ || "analysis";
-    if (tab === "analysis") {
-      const md = REPORT._analysisMd;
-      if (md && String(md).trim()) {
-        pane.innerHTML = '<div class="md-body">' + renderMarkdown(md) + "</div>";
-      } else {
-        pane.innerHTML =
-          '<div class="md-empty">Chưa có file phân tích <code>a/YYYY-MM-DD.md</code> cho ngày này.</div>';
-      }
-      return;
+    const md = REPORT._analysisMd;
+    if (md && String(md).trim()) {
+      pane.innerHTML = '<div class="md-body">' + renderMarkdown(md) + "</div>";
+    } else {
+      pane.innerHTML =
+        '<div class="md-empty">Chưa có file phân tích <code>a/YYYY-MM-DD.md</code> cho ngày này.</div>';
     }
+  }
+
+  function renderCompanies() {
+    const pane = document.getElementById("companiesPane");
+    if (!pane) return;
     const cos = (REPORT.companies || [])
       .map(function (c) {
         const chg = c.metrics && c.metrics.changePct;
@@ -700,6 +702,11 @@
           "</div>"
         );
       });
+  }
+
+  function renderRight() {
+    renderAnalysis();
+    renderCompanies();
   }
 
   function seriesById(id) {
