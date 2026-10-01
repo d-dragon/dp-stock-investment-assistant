@@ -8,11 +8,12 @@
     "start": "2026-09-28",
     "end": "2026-10-04"
   },
-  "updatedAt": "2026-09-30T08:35:00+07:00",
+  "updatedAt": "2026-10-01T08:35:00+07:00",
   "storage": "day-shards",
   "days": [
     {"date": "2026-09-28", "dayPath": "2026-09/d/2026-09-28.json", "status": "closed"},
     {"date": "2026-09-29", "dayPath": "2026-09/d/2026-09-29.json", "status": "closed"},
-    {"date": "2026-09-30", "dayPath": "2026-09/d/2026-09-30.json", "newsPath": "2026-09/n/2026-09-30.json", "analysisPath": "2026-09/a/2026-09-30.md", "status": "preopen"}
+    {"date": "2026-09-30", "dayPath": "2026-09/d/2026-09-30.json", "newsPath": "2026-09/n/2026-09-30.json", "analysisPath": "2026-09/a/2026-09-30.md", "status": "closed"},
+    {"date": "2026-10-01", "dayPath": "2026-10/d/2026-10-01.json", "newsPath": "2026-10/n/2026-10-01.json", "analysisPath": "2026-10/a/2026-10-01.md", "status": "preopen"}
   ]
 }
