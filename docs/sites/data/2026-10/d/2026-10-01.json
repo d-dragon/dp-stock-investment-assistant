@@ -1,1 +1,140 @@
-PLACEHOLDER
+{
+  "schemaVersion": "1.0.0",
+  "date": "2026-10-01",
+  "newsPath": "2026-10/n/2026-10-01.json",
+  "report": {
+    "schemaVersion": "1.0.0",
+    "id": "daily-brief-2026-10-01",
+    "type": "daily_market_brief",
+    "locale": "vi-VN",
+    "timezone": "Asia/Ho_Chi_Minh",
+    "generatedAt": "2026-10-01T08:35:00+07:00",
+    "coverage": {
+      "from": "2026-09-30T09:00:00+07:00",
+      "to": "2026-10-01T08:35:00+07:00",
+      "session": "preopen"
+    },
+    "marketSession": "preopen",
+    "disclaimer": "Ngu\u1ed3n CafeF, StockBiz, Vietstock, Barron's, Bloomberg, Yahoo. Phi\u00ean 1/10 ch\u01b0a m\u1edf HOSE; VN-Index 1.768,62 l\u00e0 \u0111\u00f3ng c\u1eeda ch\u00ednh th\u1ee9c 30/9. Kh\u00f4ng invent \u0111\u00f3ng c\u1eeda h\u00f4m nay.",
+    "ui": {
+      "pageSizeNews": 8,
+      "defaultChartTab": "vnindex",
+      "defaultWorldSymbol": "DJI"
+    },
+    "snapshot": {
+      "quotes": [
+        {"symbol": "VNINDEX", "nameVi": "VN-Index", "assetClass": "equity_index", "price": 1768.62, "change": -9.11, "changePct": -0.51, "session": "prior_close", "sourceId": "src-stockbiz"},
+        {"symbol": "HNX", "nameVi": "HNX-Index", "assetClass": "equity_index", "price": 271.64, "change": 1.73, "changePct": 0.64, "session": "prior_close", "sourceId": "src-stockbiz"},
+        {"symbol": "DXY", "nameVi": "DXY", "assetClass": "fx", "price": 101.47, "change": 0.02, "changePct": 0.02, "session": "prior_close", "sourceId": "src-barrons"},
+        {"symbol": "DJI", "nameVi": "Dow Jones", "assetClass": "equity_index", "price": 50906.05, "change": -443.87, "changePct": -0.86, "session": "prior_close", "sourceId": "src-barrons"},
+        {"symbol": "NDX", "nameVi": "Nasdaq 100", "assetClass": "equity_index", "price": 30408.5, "change": 69.17, "changePct": 0.23, "session": "prior_close", "sourceId": "src-yahoo-vn"},
+        {"symbol": "SPX", "nameVi": "S&P 500", "assetClass": "equity_index", "price": 7651.54, "change": -19.3, "changePct": -0.25, "session": "prior_close", "sourceId": "src-barrons"},
+        {"symbol": "NKY", "nameVi": "Nikkei 225", "assetClass": "equity_index", "price": 66753.72, "change": 1272.45, "changePct": 1.94, "session": "prior_close", "sourceId": "src-barrons"},
+        {"symbol": "HSI", "nameVi": "Hang Seng", "assetClass": "equity_index", "price": 24613.3, "change": 89.7, "changePct": 0.37, "session": "prior_close", "sourceId": "src-yahoo-vn"},
+        {"symbol": "WTI", "nameVi": "WTI", "assetClass": "commodity", "price": 89.98, "change": -0.44, "changePct": -0.49, "session": "prior_close", "sourceId": "src-barrons"},
+        {"symbol": "XAU", "nameVi": "V\u00e0ng COMEX", "assetClass": "commodity", "price": 4185.2, "change": -1.5, "changePct": -0.04, "session": "prior_close", "sourceId": "src-barrons"},
+        {"symbol": "BTC", "nameVi": "Bitcoin", "assetClass": "crypto", "price": 83678.35, "change": 78.49, "changePct": 0.09, "session": "preopen", "sourceId": "src-yahoo-btc"},
+        {"symbol": "USDVND", "nameVi": "USD/VND", "assetClass": "fx", "price": 26160.0, "change": 0.0, "changePct": 0.0, "session": "preopen", "sourceId": "src-vietnambiz"}
+      ]
+    },
+    "globalNews": [],
+    "vietnamNews": [],
+    "vietnamMacro": [],
+    "equityMarket": {
+      "index": {
+        "priorClose": {"date": "2026-09-30", "price": 1768.62, "change": -9.11, "changePct": -0.51},
+        "latest": {"date": "2026-09-30", "price": 1768.62, "change": -9.11, "changePct": -0.51, "session": "prior_close", "weekChange": -16.49, "weekChangePct": -0.92}
+      },
+      "liquidity": {
+        "hose": {
+          "volumeShares": 650368664,
+          "valueVndBn": 15230.52,
+          "valueChangePct": 23.44,
+          "note": "StockBiz 30/9: 650,4 tri\u1ec7u cp / 15.230,5 t\u1ef7."
+        }
+      },
+      "foreign": {
+        "buyValueVndBn": 1000.57,
+        "sellValueVndBn": 1891.01,
+        "netValueVndBn": -890.44,
+        "note": "StockBiz HoSE 30/9."
+      },
+      "proprietary": {"netValueVndBn": 1200.0, "note": "FireAnt t\u1ef1 doanh +~1.200 t\u1ef7; c\u1ea7n \u0111\u1ed1i chi\u1ebfu Fiin."},
+      "retail": {"netValueVndBn": null, "note": "Ch\u01b0a t\u00e1ch c\u00e1 nh\u00e2n phi\u00ean 30/9."},
+      "relatedIndices": [
+        {"symbol": "VNINDEX", "price": 1768.62, "changePct": -0.51},
+        {"symbol": "HNX", "price": 271.64, "changePct": 0.64},
+        {"symbol": "UPCOM", "price": 126.31, "changePct": 0.65}
+      ]
+    },
+    "worldMarkets": {"quotes": [
+        {"symbol": "DXY", "nameVi": "DXY", "assetClass": "fx", "price": 101.47, "changePct": 0.02, "sourceId": "src-barrons"},
+        {"symbol": "DJI", "nameVi": "Dow", "assetClass": "equity_index", "price": 50906.05, "changePct": -0.86, "sourceId": "src-barrons"},
+        {"symbol": "NDX", "nameVi": "Nasdaq", "assetClass": "equity_index", "price": 30408.5, "changePct": 0.23, "sourceId": "src-yahoo-vn"},
+        {"symbol": "SPX", "nameVi": "S&P 500", "assetClass": "equity_index", "price": 7651.54, "changePct": -0.25, "sourceId": "src-barrons"},
+        {"symbol": "RUT", "nameVi": "Russell 2000", "assetClass": "equity_index", "price": 2796.86, "changePct": -0.39, "sourceId": "src-yahoo-vn"},
+        {"symbol": "FTSE", "nameVi": "FTSE 100", "assetClass": "equity_index", "price": 10606.0, "changePct": -0.29, "sourceId": "src-barrons"},
+        {"symbol": "NKY", "nameVi": "Nikkei", "assetClass": "equity_index", "price": 66753.72, "changePct": 1.94, "sourceId": "src-barrons"},
+        {"symbol": "HSI", "nameVi": "Hang Seng", "assetClass": "equity_index", "price": 24613.3, "changePct": 0.37, "sourceId": "src-yahoo-vn"}
+    ]},
+    "cryptoMarkets": {"quotes": [
+        {"symbol": "BTC", "nameVi": "Bitcoin", "assetClass": "crypto", "price": 83678.35, "changePct": 0.09, "sourceId": "src-yahoo-btc"},
+        {"symbol": "ETH", "nameVi": "Ethereum", "assetClass": "crypto", "price": 2684.65, "changePct": 0.3, "sourceId": "src-yahoo-btc"}
+    ]},
+    "companies": [
+      {"ticker": "VHM", "headline": "Ngo\u1ea1i b\u00e1n r\u00f2ng 329 t\u1ef7 VHM phi\u00ean 30/9", "impact": {"direction": "risk_off", "horizon": "days", "assets": ["VHM"], "text": "D\u00f2ng ngo\u1ea1i x\u1ea3 h\u1ecd Vin."}, "metrics": {"changePct": null, "price": null}, "sourceId": "src-stockbiz"},
+      {"ticker": "VIC", "headline": "VIC k\u00e9o ch\u1ec9 s\u1ed1 \u22123,38 \u0111i\u1ec3m; ngo\u1ea1i \u221282 t\u1ef7", "impact": {"direction": "risk_off", "horizon": "days", "assets": ["VIC"], "text": "Tr\u1ee5 l\u1edbn nh\u1ea5t."}, "metrics": {"changePct": null, "price": null}, "sourceId": "src-vietstock"},
+      {"ticker": "TCB", "headline": "Ngo\u1ea1i b\u00e1n r\u00f2ng 156 t\u1ef7 TCB", "impact": {"direction": "risk_off", "horizon": "days", "assets": ["TCB"], "text": "Ng\u00e2n h\u00e0ng b\u1ecb x\u1ea3."}, "metrics": {"changePct": null, "price": null}, "sourceId": "src-stockbiz"},
+      {"ticker": "NVL", "headline": "\u0110KCC quy\u1ec1n mua ~801 tri\u1ec7u cp ng\u00e0y 1/10", "impact": {"direction": "risk_off", "horizon": "weeks", "assets": ["NVL"], "text": "Pha lo\u00e3ng 3:1 gi\u00e1 10.000\u0111."}, "metrics": {"changePct": -0.5, "price": 10.2}, "sourceId": "src-cafef"},
+      {"ticker": "PNJ", "headline": "Tr\u00ecnh ph\u00e1t h\u00e0nh ri\u00eang l\u1ebb t\u1ed1i \u0111a 550 tri\u1ec7u cp", "impact": {"direction": "risk_off", "horizon": "weeks", "assets": ["PNJ"], "text": "Ngo\u1ea1i \u221262 t\u1ef7 phi\u00ean 30/9."}, "metrics": {"changePct": null, "price": null}, "sourceId": "src-cafef"},
+      {"ticker": "VPB", "headline": "T\u1ef1 doanh gom VPB ~387 t\u1ef7; ngo\u1ea1i \u221257 t\u1ef7", "impact": {"direction": "mixed", "horizon": "days", "assets": ["VPB"], "text": "N\u1ed9i\u2013ngo\u1ea1i l\u1ec7ch chi\u1ec1u."}, "metrics": {"changePct": null, "price": null}, "sourceId": "src-fireant"}
+    ],
+    "outlook": {
+      "watchpoints": [
+        "Gi\u1eef hay m\u1ea5t v\u00f9ng 1.760 tr\u00ean VN-Index phi\u00ean 1/10; th\u1ee7ng th\u00ec bias l\u00f9i 1.730.",
+        "Ngo\u1ea1i c\u00f2n b\u00e1n r\u00f2ng tr\u00ean VHM/VIC/TCB hay kh\u00f4ng.",
+        "Thanh kho\u1ea3n kh\u1edbp HoSE c\u00f3 v\u01b0\u1ee3t l\u1ea1i 15.000 t\u1ef7 kh\u00f4ng."
+      ],
+      "levels": [
+        "H\u1ed7 tr\u1ee3: 1.760 \u2014 1.730 (EOD 30/9 + CTCK).",
+        "Kh\u00e1ng c\u1ef1: 1.778 \u2014 1.800.",
+        "SMA50: \u0111\u00e3 th\u1ee7ng theo BSC 30/9."
+      ],
+      "events": [
+        "1/10: \u0110KCC quy\u1ec1n mua NVL.",
+        "M\u1ef9: vi\u1ec7c l\u00e0m phi n\u00f4ng nghi\u1ec7p cu\u1ed1i tu\u1ea7n; 10Y ~5,30%.",
+        "M\u00f9a KQKD Q3 (SSI: MSN/VGC/NT2 vs STB)."
+      ]
+    },
+    "series": {
+      "vnindex": {"id": "vnindex", "points": [{"t": "2026-09-24", "v": 1775.09}, {"t": "2026-09-25", "v": 1785.11}, {"t": "2026-09-28", "v": 1780.68}, {"t": "2026-09-29", "v": 1777.73}, {"t": "2026-09-30", "v": 1768.62}]},
+      "dji": {"id": "dji", "points": [{"t": "2026-09-29", "v": 51349.92}, {"t": "2026-09-30", "v": 50906.05}]},
+      "ndx": {"id": "ndx", "points": [{"t": "2026-09-29", "v": 30339.33}, {"t": "2026-09-30", "v": 30408.5}]},
+      "spx": {"id": "spx", "points": [{"t": "2026-09-29", "v": 7670.84}, {"t": "2026-09-30", "v": 7651.54}]},
+      "dxy": {"id": "dxy", "points": [{"t": "2026-09-29", "v": 101.38}, {"t": "2026-09-30", "v": 101.47}]},
+      "nky": {"id": "nky", "points": [{"t": "2026-09-29", "v": 65481.27}, {"t": "2026-09-30", "v": 66753.72}]},
+      "hsi": {"id": "hsi", "points": [{"t": "2026-09-29", "v": 24523.57}, {"t": "2026-09-30", "v": 24613.3}]},
+      "btcUsd": {"id": "btcUsd", "points": [{"t": "2026-09-29", "v": 83422.0}, {"t": "2026-09-30", "v": 83678.35}]},
+      "vnindexVolume5d": {"id": "vnindexVolume5d", "points": [{"t": "2026-09-24", "v": 654.7}, {"t": "2026-09-25", "v": 624.26}, {"t": "2026-09-28", "v": 676.73}, {"t": "2026-09-29", "v": 537.87}, {"t": "2026-09-30", "v": 650.37}]},
+      "foreignNet5dVndBn": {"id": "foreignNet5dVndBn", "points": [{"t": "2026-09-24", "v": -920.29}, {"t": "2026-09-25", "v": -273.21}, {"t": "2026-09-28", "v": -293.3}, {"t": "2026-09-29", "v": -399.95}, {"t": "2026-09-30", "v": -890.44}]}
+    }
+  },
+  "sources": {
+    "schemaVersion": "1.0.0",
+    "sources": [
+      {"id": "src-cafef", "name": "CafeF", "url": "https://cafef.vn/", "accessedAt": "2026-10-01T08:35:00+07:00"},
+      {"id": "src-stockbiz", "name": "StockBiz", "url": "http://en.stockbiz.vn/HistoricalIndices.aspx", "accessedAt": "2026-10-01T08:35:00+07:00"},
+      {"id": "src-vietstock", "name": "Vietstock", "url": "https://finance.vietstock.vn/", "accessedAt": "2026-10-01T08:35:00+07:00"},
+      {"id": "src-barrons", "name": "Barron's", "url": "https://www.barrons.com/market-data", "accessedAt": "2026-10-01T08:35:00+07:00"},
+      {"id": "src-bloomberg", "name": "Bloomberg Asia", "url": "https://www.bloomberg.com/asia", "accessedAt": "2026-10-01T08:35:00+07:00"},
+      {"id": "src-vneconomy", "name": "VnEconomy", "url": "https://vneconomy.vn/", "accessedAt": "2026-10-01T08:35:00+07:00"},
+      {"id": "src-yahoo-vn", "name": "Yahoo Finance", "url": "https://finance.yahoo.com/", "accessedAt": "2026-10-01T08:35:00+07:00"},
+      {"id": "src-yahoo-btc", "name": "Yahoo Bitcoin", "url": "https://finance.yahoo.com/quote/BTC-USD/", "accessedAt": "2026-10-01T08:35:00+07:00"},
+      {"id": "src-nhnn", "name": "SBV", "url": "https://www.sbv.gov.vn/", "accessedAt": "2026-10-01T08:35:00+07:00"},
+      {"id": "src-vietnambiz", "name": "VietnamBiz", "url": "https://vietnambiz.vn/", "accessedAt": "2026-10-01T08:35:00+07:00"},
+      {"id": "src-fireant", "name": "FireAnt", "url": "https://fireant.vn/cong-dong/moi-nhat", "accessedAt": "2026-10-01T08:35:00+07:00"},
+      {"id": "src-newf319", "name": "newF319", "url": "https://newf319.com/", "accessedAt": "2026-10-01T08:35:00+07:00"},
+      {"id": "src-f247", "name": "F247", "url": "https://f247.com/", "accessedAt": "2026-10-01T08:35:00+07:00"}
+    ]
+  }
+}
