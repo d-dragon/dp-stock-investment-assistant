@@ -1,9 +1,10 @@
 {
   "schemaVersion": "2.0.0",
-  "updatedAt": "2026-09-30T08:35:00+07:00",
+  "updatedAt": "2026-10-01T08:35:00+07:00",
   "layout": "monthly-weekly",
   "reports": [
-    {"id": "daily-brief-2026-09-30", "date": "2026-09-30", "title": "Bản tin thị trường Việt Nam & thế giới", "status": "preopen", "weekId": "2026-W40", "weekPath": "2026-09/week-40.json", "dayPath": "2026-09/d/2026-09-30.json", "newsPath": "2026-09/n/2026-09-30.json", "analysisPath": "2026-09/a/2026-09-30.md", "path": "index.html#/2026-09-30"},
+    {"id": "daily-brief-2026-10-01", "date": "2026-10-01", "title": "Bản tin thị trường Việt Nam & thế giới", "status": "preopen", "weekId": "2026-W40", "weekPath": "2026-09/week-40.json", "dayPath": "2026-10/d/2026-10-01.json", "newsPath": "2026-10/n/2026-10-01.json", "analysisPath": "2026-10/a/2026-10-01.md", "path": "index.html#/2026-10-01"},
+    {"id": "daily-brief-2026-09-30", "date": "2026-09-30", "title": "Bản tin thị trường Việt Nam & thế giới", "status": "closed", "weekId": "2026-W40", "weekPath": "2026-09/week-40.json", "dayPath": "2026-09/d/2026-09-30.json", "newsPath": "2026-09/n/2026-09-30.json", "analysisPath": "2026-09/a/2026-09-30.md", "path": "index.html#/2026-09-30"},
     {"id": "daily-brief-2026-09-29", "date": "2026-09-29", "title": "Bản tin thị trường Việt Nam & thế giới", "status": "closed", "weekId": "2026-W40", "weekPath": "2026-09/week-40.json", "dayPath": "2026-09/d/2026-09-29.json", "path": "index.html#/2026-09-29"},
     {"id": "daily-brief-2026-09-28", "date": "2026-09-28", "title": "Bản tin thị trường Việt Nam & thế giới", "status": "closed", "weekId": "2026-W40", "weekPath": "2026-09/week-40.json", "dayPath": "2026-09/d/2026-09-28.json", "path": "index.html#/2026-09-28"},
     {"id": "daily-brief-2026-09-27", "date": "2026-09-27", "title": "Bản tin thị trường Việt Nam & thế giới", "status": "closed", "weekId": "2026-W39", "weekPath": "2026-09/week-39.json", "dayPath": "2026-09/d/2026-09-27.json", "path": "index.html#/2026-09-27"},
