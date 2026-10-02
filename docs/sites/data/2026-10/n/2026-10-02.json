@@ -1,0 +1,258 @@
+{
+  "schemaVersion": "1.0.0",
+  "date": "2026-10-02",
+  "generatedAt": "2026-10-02T08:35:00+07:00",
+  "briefKind": "eod_prev+overnight+preopen",
+  "items": [
+    {
+      "id": "n-2026-10-02-001",
+      "impact": "high",
+      "impactScore": 92,
+      "rank": 1,
+      "kind": "market",
+      "board": "vn",
+      "title": "VN-Index đóng cửa 1/10 tại 1.749,3 điểm, giảm 19,32 điểm (−1,09%)",
+      "url": "https://vtv.vn/vn-index-mat-moc-1750-diem-100261001163349151.htm",
+      "sourceId": "src-vietstock",
+      "publishedAt": "2026-10-01T16:33:00+07:00",
+      "tickers": [
+        "VIC",
+        "TCB"
+      ],
+      "excerpt": "Phiên thứ tư giảm liên tiếp, mất mốc 1.750. VN30 1.890,57 (−16,24). HNX 268,66. Khớp HoSE khoảng 11.300 tỷ.",
+      "whyImpact": "Print chính thức phiên trước — mốc 1.760 đã thủng, bias pre-open 2/10 đổi."
+    },
+    {
+      "id": "n-2026-10-02-002",
+      "impact": "high",
+      "impactScore": 88,
+      "rank": 2,
+      "kind": "market",
+      "board": "vn",
+      "title": "VIC giảm 3,47%, lấy khoảng 12,5 điểm của VN-Index",
+      "url": "https://baomoi.com/vn-index-giam-19-diem-nhom-co-phieu-von-hoa-lon-suy-yeu-c56174997.epi",
+      "sourceId": "src-cafef",
+      "publishedAt": "2026-10-01T17:42:00+07:00",
+      "tickers": [
+        "VIC",
+        "VHM"
+      ],
+      "excerpt": "Mức giảm mạnh nhất 18 phiên của VIC. Độ rộng 110 tăng / 177 giảm.",
+      "whyImpact": "Một mã trụ giải thích phần lớn phiên; mất VIC thì chỉ số không giữ 1.750."
+    },
+    {
+      "id": "n-2026-10-02-003",
+      "impact": "high",
+      "impactScore": 84,
+      "rank": 3,
+      "kind": "market",
+      "board": "vn",
+      "title": "Ngoại HoSE bán ròng hơn 63 tỷ; toàn thị trường +3.078 tỷ vì thỏa thuận MSR",
+      "url": "https://cafef.vn/mot-co-phieu-duoc-khoi-ngoai-mua-rong-dot-bien-3200-ty-dong-phien-dau-thang-10-188261001152545159.chn",
+      "sourceId": "src-cafef",
+      "publishedAt": "2026-10-01T15:25:00+07:00",
+      "tickers": [
+        "MSR",
+        "SBT",
+        "VHM",
+        "TCB"
+      ],
+      "excerpt": "SBT +160 tỷ, VHM và HDB mỗi mã ~61 tỷ. TCB bị bán ~86 tỷ. Loại MSR thì ngoại vẫn bán ròng.",
+      "whyImpact": "Đọc sai dòng ngoại (cộng MSR) sẽ đảo bias. HoSE mới là print dùng được."
+    },
+    {
+      "id": "n-2026-10-02-004",
+      "impact": "high",
+      "impactScore": 80,
+      "rank": 4,
+      "kind": "macro",
+      "board": "global",
+      "title": "WTI chốt 92,87 USD (+2,71%) sau khi Trung Quốc dừng xuất khẩu sản phẩm dầu",
+      "url": "https://www.eoption.com/market-review-october-01-2026/",
+      "sourceId": "src-barrons",
+      "publishedAt": "2026-10-02T03:10:00+07:00",
+      "tickers": [
+        "PLX",
+        "GAS"
+      ],
+      "excerpt": "Brent 102,31 (+4,37%). WSJ: Mỹ có thể điều thêm tới 10.000 quân tới Trung Đông.",
+      "whyImpact": "Dầu và rủi ro Hormuz truyền vào lạm phát và nhóm dầu khí VN trước giờ mở."
+    },
+    {
+      "id": "n-2026-10-02-005",
+      "impact": "high",
+      "impactScore": 78,
+      "rank": 5,
+      "kind": "macro",
+      "board": "global",
+      "title": "Phố Wall đóng cửa xanh nhẹ; lợi suất 10 năm Mỹ về 5,248% sau nhịp đỉnh nhiều thập kỷ",
+      "url": "https://apnews.com/article/wall-street-stocks-dow-nasdaq-c367e6e87c621f06078ea223ab7ce6d1",
+      "sourceId": "src-bloomberg",
+      "publishedAt": "2026-10-02T03:20:00+07:00",
+      "tickers": [],
+      "excerpt": "S&P 7.666,45 (+0,2%), Dow 50.926,56 (+0,04%). Châu Âu giảm mạnh hơn (London −1,7%).",
+      "whyImpact": "Risk-on Mỹ mỏng, lãi suất vẫn cao — không phải cú đệm rõ cho VN."
+    },
+    {
+      "id": "n-2026-10-02-006",
+      "impact": "medium",
+      "impactScore": 70,
+      "rank": 6,
+      "kind": "macro",
+      "board": "vn",
+      "title": "NHNN công bố tỷ giá trung tâm 25.624 đồng/USD ngày 1/10, giảm 3 đồng",
+      "url": "https://en.vietnamplus.vn/reference-exchange-rate-continues-downward-on-october-1-post352877.vnp",
+      "sourceId": "src-nhnn",
+      "publishedAt": "2026-10-01T08:56:00+07:00",
+      "tickers": [],
+      "excerpt": "Trần ±5% khoảng 26.905. Sáng 2/10 VOV: bán ngân hàng quanh 26.186.",
+      "whyImpact": "Tỷ giá trung tâm ổn; giá bán NH vẫn sát trần mềm — không phải shock mở cửa."
+    },
+    {
+      "id": "n-2026-10-02-007",
+      "impact": "medium",
+      "impactScore": 66,
+      "rank": 7,
+      "kind": "market",
+      "board": "vn",
+      "title": "Thanh khoản khớp HoSE chỉ khoảng 11.300 tỷ, tổng giá trị 15.354 tỷ",
+      "url": "https://www.dnse.com.vn/senses/tin-tuc/vn-index-roi-tu-do-nhom-bat-dong-san-gay-ap-luc-35287653",
+      "sourceId": "src-vietstock",
+      "publishedAt": "2026-10-01T16:09:00+07:00",
+      "tickers": [],
+      "excerpt": "Khối lượng 638,45 triệu cp, trong đó thỏa thuận 189 triệu. Sáng giằng 1.760 rồi gãy cuối phiên.",
+      "whyImpact": "Cầu khớp yếu hơn giá trị tổng — phiên giảm không có thanh khoản cứu."
+    },
+    {
+      "id": "n-2026-10-02-008",
+      "impact": "medium",
+      "impactScore": 62,
+      "rank": 8,
+      "kind": "news",
+      "board": "vn",
+      "title": "9 tháng ngoại bán ròng gần 96.000 tỷ trên HoSE; VIC-VHM vẫn là trụ vốn hóa",
+      "url": "https://cafef.vn/mot-du-lieu-cho-thay-su-kien-cuong-cua-nha-dau-tu-chung-khoan-trong-nuoc-188261001232001596.chn",
+      "sourceId": "src-cafef",
+      "publishedAt": "2026-10-02T07:01:00+07:00",
+      "tickers": [
+        "VIC",
+        "VHM"
+      ],
+      "excerpt": "CafeF: nội và margin đang đỡ chỉ số trong khi ngoại xả nhóm Vin.",
+      "whyImpact": "Khung lớn hơn một phiên: bias nội đỡ, ngoại không phải lực mua bền."
+    },
+    {
+      "id": "n-2026-10-02-009",
+      "impact": "medium",
+      "impactScore": 58,
+      "rank": 9,
+      "kind": "macro",
+      "board": "global",
+      "title": "Nikkei 1/10 tăng mạnh quanh 68.800; Hong Kong đóng cửa Quốc khánh",
+      "url": "https://nordfx.com/market-news/market-pulse-october-01-2026",
+      "sourceId": "src-bloomberg",
+      "publishedAt": "2026-10-01T12:54:00+07:00",
+      "tickers": [],
+      "excerpt": "NordFX: Nikkei +3,1% lên 68.840. HSI giữ đóng cửa 30/9 ở 24.613.",
+      "whyImpact": "Châu Á không đồng thuận; HSI vắng mặt nên không có neo Hồng Kông cho sáng 2/10."
+    },
+    {
+      "id": "n-2026-10-02-010",
+      "impact": "medium",
+      "impactScore": 55,
+      "rank": 10,
+      "kind": "market",
+      "board": "vn",
+      "title": "VIX: ngoại bán ròng 63 tỷ phiên 1/10; tháng 9 bán ròng 4.836 tỷ",
+      "url": "https://vixs.vn/toan-canh-thi-truong-cuoi-phien-116.html",
+      "sourceId": "src-vietstock",
+      "publishedAt": "2026-10-01T16:09:00+07:00",
+      "tickers": [
+        "TCB",
+        "BID",
+        "VNM"
+      ],
+      "excerpt": "TCB +1,4% trong khi BID −1,4%, VIC −3,5%, VNM −1,3%. NHNN hút ròng 584 tỷ OMO.",
+      "whyImpact": "Xác nhận độ rộng yếu và OMO hút nhẹ — không phải nới tiền ngay."
+    },
+    {
+      "id": "n-2026-10-02-011",
+      "impact": "medium",
+      "impactScore": 52,
+      "rank": 11,
+      "kind": "macro",
+      "board": "global",
+      "title": "Vàng COMEX chốt 4.202,3 USD (+0,37%); DXY 102,10 (+0,65%)",
+      "url": "https://www.eoption.com/market-review-october-01-2026/",
+      "sourceId": "src-barrons",
+      "publishedAt": "2026-10-02T03:10:00+07:00",
+      "tickers": [
+        "PNJ"
+      ],
+      "excerpt": "Đô la lên phiên thứ sáu liên tiếp theo quý. Bạc 61,18.",
+      "whyImpact": "USD cứng + vàng cao: kênh tỷ giá và vàng miếng trong nước vẫn là biến quan sát, chưa phải shock."
+    },
+    {
+      "id": "n-2026-10-02-012",
+      "impact": "low",
+      "impactScore": 40,
+      "rank": 12,
+      "kind": "news",
+      "board": "global",
+      "title": "Nasdaq 100 đóng cửa 30.501,56 (+0,31%) ngày 1/10",
+      "url": "https://www.marketwatch.com/investing/index/ndx/download-data",
+      "sourceId": "src-yahoo-vn",
+      "publishedAt": "2026-10-02T04:15:00+07:00",
+      "tickers": [],
+      "excerpt": "Previous close 30.408,50. Phần mềm Mỹ hồi, không phải gap lớn.",
+      "whyImpact": "Không có gap tech đủ lớn để kéo nhóm FPT/MWG trước mở cửa."
+    },
+    {
+      "id": "n-2026-10-02-013",
+      "impact": "low",
+      "impactScore": 34,
+      "rank": 13,
+      "kind": "community",
+      "board": "vn",
+      "title": "FireAnt: live 1/10 gọi phiên giảm là pha rũ trước sóng — sentiment, không phải print",
+      "url": "https://fireant.vn/cong-dong/moi-nhat",
+      "sourceId": "src-fireant",
+      "publishedAt": "2026-10-01T21:00:00+07:00",
+      "tickers": [
+        "MSR"
+      ],
+      "excerpt": "Dòng cộng đồng nghiêng bắt đáy sau khi chỉ số thủng 1.750; MSR được bàn vì thỏa thuận.",
+      "whyImpact": "Lệch với tape: cộng đồng lạc quan hơn độ rộng 177 mã giảm."
+    },
+    {
+      "id": "n-2026-10-02-014",
+      "impact": "low",
+      "impactScore": 28,
+      "rank": 14,
+      "kind": "community",
+      "board": "vn",
+      "title": "newF319 không có thread định lượng trong cửa sổ thu thập 08:35",
+      "url": "https://newf319.com/",
+      "sourceId": "src-newf319",
+      "publishedAt": "2026-10-02T08:35:00+07:00",
+      "tickers": [],
+      "excerpt": "Không dùng f319.com. Sentiment forum để trống thay vì bịa tone.",
+      "whyImpact": "Thiếu màu forum; không được điền bằng suy đoán."
+    },
+    {
+      "id": "n-2026-10-02-015",
+      "impact": "low",
+      "impactScore": 26,
+      "rank": 15,
+      "kind": "community",
+      "board": "vn",
+      "title": "F247 không trả thread định lượng trong cửa sổ 08:35",
+      "url": "https://f247.com/",
+      "sourceId": "src-f247",
+      "publishedAt": "2026-10-02T08:35:00+07:00",
+      "tickers": [],
+      "excerpt": "Ghi nhận khoảng trống nguồn sentiment, không suy ra dòng tiền.",
+      "whyImpact": "Cộng đồng không được dùng thay ngoại/tự doanh."
+    }
+  ]
+}

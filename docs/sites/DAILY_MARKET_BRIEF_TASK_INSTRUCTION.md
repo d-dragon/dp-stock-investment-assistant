@@ -24,6 +24,7 @@
 
 | Date | Version | Change |
 |---|---|---|
+| 2026-10-02 | 2.6.1 | Run 2026-10-02: Nikkei sources disagreed; proprietary and newF319/F247 thin; FTSE board uses AP percent not a locked print. |
 | 2026-09-30 | 2.6.1 | Analysis MD is a narrative investor note (coverage + takeaways). Hub right pane tab **Phân tích** renders `a/YYYY-MM-DD.md`. Catalog `analysisPath`. |
 | 2026-09-30 | 2.6.0 | Phase 1 collector on this automation + git/`gh` only (no Grok bot). One 08:35 window = prior EOD + overnight + pre-open. Raw one-file + `n/` ranked feed (no 25 KB cap) + same-job `a/*.md`. Sentiment: FireAnt, F247, newf319.com (not f319.com). Loader scrolls impact-sorted feeds. |
 | 2026-09-30 | 2.5.1 | Day-file transport: `gh api` PUT Contents from a local file. Ban stub/placeholder commits. Verify remote `size` == local bytes. MCP only for thin week + catalog. |
