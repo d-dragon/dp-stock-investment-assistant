@@ -67,8 +67,11 @@ a:hover { text-decoration: underline; }
 }
 .col-right-top {
   display: grid; min-height: 0;
-  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 1px; background: var(--border);
+}
+.col-right-top > * {
+  width: 100%; min-width: 0;
 }
 .col-right-bottom {
   display: flex; flex-direction: column; min-height: 0;
@@ -144,13 +147,59 @@ a:hover { text-decoration: underline; }
   .col-right-top { grid-template-columns: 1fr; }
 }
 @media (max-width: 960px) {
-  .grid, .grid-layout { grid-template-columns: 1fr; grid-template-rows: none; overflow-y: auto; }
-  .col-left { min-height: 420px; }
-  .col-right { grid-template-rows: auto; }
-  .col-right-top { grid-template-columns: 1fr; }
-  .pane { min-height: 320px; }
-  .chart-wrap { grid-template-columns: 1fr; }
-  .qlist { border-left: 0; border-top: 1px solid var(--border); max-height: 180px; }
+  html, body { overflow-x: hidden; }
+  #app { min-height: 100vh; }
+  .hdr {
+    height: auto;
+    padding: 8px 10px;
+    flex-wrap: wrap;
+    align-items: flex-start;
+  }
+  .hdr-left {
+    width: 100%;
+    justify-content: space-between;
+    flex-wrap: wrap;
+  }
+  .hdr .meta { width: 100%; }
+  .ticker {
+    height: auto;
+    min-height: var(--ticker-h);
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+  .grid, .grid-layout {
+    display: block;
+    grid-template-columns: none;
+    grid-template-rows: none;
+    overflow-y: auto;
+  }
+  .col-left, .col-right {
+    display: block;
+    min-height: auto;
+  }
+  .col-right { grid-template-rows: none; }
+  .col-right-top {
+    display: block;
+    grid-template-columns: none;
+  }
+  .col-right-top > * {
+    display: block;
+    min-height: 110px;
+  }
+  .pane { min-height: 260px; }
+  .chart-wrap { display: block; }
+  .qlist {
+    border-left: 0; border-top: 1px solid var(--border);
+    max-height: 180px;
+  }
+  .news li {
+    grid-template-columns: 1fr;
+  }
+  .news img {
+    width: 100%;
+    height: 180px;
+  }
+  .pb { overflow: auto; }
 }
 
 /* Header date calendar popover */
