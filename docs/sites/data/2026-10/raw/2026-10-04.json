@@ -1,0 +1,44 @@
+{
+  "market": {
+    "briefDate": "2026-10-04",
+    "eodDate": "2026-10-02",
+    "briefKind": "eod_prev+overnight+preopen",
+    "vnindex": 1737.71,
+    "hnx": 266.75,
+    "foreignHoseNetVndBn": -3283.32,
+    "foreignAltPrintVndBn": -3299.2,
+    "proprietaryNetVndBn": 1691.5,
+    "note": "Sunday. No HOSE close. Foreign prints disagree."
+  },
+  "news_events": [
+    "VN-Index đóng 1.737,71, mất mốc 1.740, phiên giảm thứ năm",
+    "Ngoại HoSE bán ròng 3.283 tỷ, tập trung PNJ và HDB",
+    "PNJ về sàn 23.050 đồng, khớp hơn 76 triệu cp",
+    "Payrolls Mỹ +29.000, S&P đóng 7.722,72",
+    "Tự doanh mua ròng 1.691,5 tỷ nhưng khớp lệnh chỉ 344,5 tỷ",
+    "Hang Seng −2,60% về 23.972,29; Nikkei −0,94%",
+    "UST 10 năm 5,276%; DXY quanh 101,9",
+    "Khớp lệnh HoSE 14.473,7 tỷ, cao hơn TB 20 phiên",
+    "VIC +1,82% nhưng ngoại vẫn bán khoảng 188 tỷ",
+    "Tỷ giá trung tâm 2/10 là 25.636, chưa có print cuối tuần",
+    "WTI settle 91,11 USD; vàng 4.162,3 USD",
+    "F247: tuần giảm 48 điểm, ngoại tuần −5.020 tỷ, hỏi đã tạo đáy chưa",
+    "F247: PNJ sàn, bắt đáy chờ thứ Ba",
+    "FireAnt: bài 2/10 PNJ khớp lớn, VN-Index giảm 11 điểm",
+    "newF319 không có thread cuối tuần khóa được về phiên 2/10"
+  ],
+  "sentiment": {
+    "fireant": "thin — page live, no fresh community thread locked",
+    "f247": "bottom-watching after five down sessions; PNJ floor debate",
+    "newf319": "thin — no weekend thread on 2/10 tape"
+  },
+  "gaps": [
+    "No SBV central rate for 3/10 or 4/10",
+    "Foreign HoSE vs broader-market print disagree",
+    "Volume 615m vs 829m disagree",
+    "DXY 101.86 / 101.92 / 101.93 disagree",
+    "Proprietary not an HOSE locked print",
+    "newF319 and FireAnt community thin",
+    "No US futures at 08:35 Sunday ICT"
+  ]
+}

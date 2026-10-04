@@ -24,6 +24,7 @@
 
 | Date | Version | Change |
 |---|---|---|
+| 2026-10-04 | 2.6.1 | Run 2026-10-04: Sunday preopen; foreign HoSE vs broader print disagree; volume 615m vs 829m; DXY sources disagree; no SBV print; newF319/FireAnt thin. |
 | 2026-10-03 | 2.6.1 | Run 2026-10-03: weekend preopen; foreign prints disagree (HoSE vs whole market); proprietary only Fili; newF319/F247/FireAnt thin; no SBV print for Saturday. |
 | 2026-10-02 | 2.6.1 | Run 2026-10-02: Nikkei sources disagreed; proprietary and newF319/F247 thin; FTSE board uses AP percent not a locked print. |
 | 2026-09-30 | 2.6.1 | Analysis MD is a narrative investor note (coverage + takeaways). Hub right pane tab **Phân tích** renders `a/YYYY-MM-DD.md`. Catalog `analysisPath`. |
