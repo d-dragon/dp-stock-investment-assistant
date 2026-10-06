@@ -1,0 +1,151 @@
+{
+  "schemaVersion": "1.0.0",
+  "date": "2026-10-06",
+  "generatedAt": "2026-10-06T08:35:00+07:00",
+  "market": {
+    "vnindex": {
+      "priorClose": {
+        "date": "2026-10-05",
+        "price": 1753.2,
+        "change": 15.49,
+        "changePct": 0.89
+      },
+      "latest": {
+        "date": "2026-10-05",
+        "price": 1753.2,
+        "change": 15.49,
+        "changePct": 0.89,
+        "session": "prior_close",
+        "weekChange": 15.49
+      },
+      "note": "Close 6/10 chưa có. CafeF/TCTC/DNSE 1.753,20. Vietbao 1.752,97 — không gộp."
+    },
+    "liquidity": {
+      "hose": {
+        "volumeShares": 575750000,
+        "valueVndBn": 13501,
+        "matchedValueVndBn": 10102.9,
+        "note": "Tổng KL DNSE/Fili 575,75 triệu, GT 13.501 tỷ. CafeF khớp 432,27 triệu / 10.102,9 tỷ; thỏa thuận 139,16 triệu / 3.207,2 tỷ. Nhân Dân 3 sàn >661 triệu / 15.105 tỷ — không gộp."
+      }
+    },
+    "foreign": {
+      "buyValueVndBn": null,
+      "sellValueVndBn": null,
+      "netValueVndBn": -281.6,
+      "note": "HoSE Fili −281,6 tỷ; CafeF HoSE −279; toàn TT ~280–283. TCB −147, VHM −114, PNJ −90. Mua: HPG ~64, DGW ~57, GMD ~37. HNX bán nhẹ ~0,5–2 tỷ."
+    },
+    "proprietary": {
+      "netValueVndBn": null,
+      "note": "Không có print tự doanh khóa cho 5/10. Dòng Fili 24,97 tỷ lệch với ngoại HoSE — bỏ, không dùng làm print."
+    },
+    "world": {
+      "quotes": [
+        {
+          "symbol": "DXY",
+          "nameVi": "DXY",
+          "assetClass": "fx",
+          "price": 102.18,
+          "changePct": -0.22,
+          "sourceId": "src-barrons"
+        },
+        {
+          "symbol": "DJI",
+          "nameVi": "Dow Jones",
+          "assetClass": "equity_index",
+          "price": 51267.9,
+          "changePct": 0.18,
+          "sourceId": "src-barrons"
+        },
+        {
+          "symbol": "NDX",
+          "nameVi": "Nasdaq 100",
+          "assetClass": "equity_index",
+          "price": 31076.44,
+          "changePct": 0.87,
+          "sourceId": "src-bloomberg"
+        },
+        {
+          "symbol": "SPX",
+          "nameVi": "S&P 500",
+          "assetClass": "equity_index",
+          "price": 7773.95,
+          "changePct": 0.66,
+          "sourceId": "src-barrons"
+        },
+        {
+          "symbol": "RUT",
+          "nameVi": "Russell 2000",
+          "assetClass": "equity_index",
+          "price": 2847.14,
+          "changePct": 0.5,
+          "sourceId": "src-barrons"
+        },
+        {
+          "symbol": "FTSE",
+          "nameVi": "FTSE 100",
+          "assetClass": "equity_index",
+          "price": 10497.94,
+          "changePct": 0.34,
+          "sourceId": "src-barrons"
+        },
+        {
+          "symbol": "NKY",
+          "nameVi": "Nikkei 225",
+          "assetClass": "equity_index",
+          "price": 69946.86,
+          "changePct": 2.4,
+          "sourceId": "src-bloomberg"
+        },
+        {
+          "symbol": "HSI",
+          "nameVi": "Hang Seng",
+          "assetClass": "equity_index",
+          "price": 24040.34,
+          "changePct": 0.28,
+          "sourceId": "src-bloomberg"
+        }
+      ]
+    }
+  },
+  "news_events": [
+    "VN-Index 5/10 đóng 1.753,2 điểm, +15,49",
+    "Ngoại HoSE bán ròng 279–282 tỷ, TCB dẫn đầu",
+    "GDP Q3 +9,95%, 9 tháng +9,01%",
+    "S&P 7.773,95 (+0,66%), Nasdaq Composite đỉnh 27.477",
+    "Nasdaq 100 31.076,44, +0,87%",
+    "WTI settle 89,43 (−1,84%); Brent 100,32",
+    "VIC +3,6% quanh 232.000; đóng góp điểm lớn nhất",
+    "LPB trần 43.000, khớp 2,42 triệu cp",
+    "Trung tâm USD/VND 25.643, +7 đồng",
+    "Thâm hụt thương mại 9 tháng 19,42 tỷ USD",
+    "Nikkei 5/10 +2,40% lên 69.946,86",
+    "HSI cash 24.040 (+0,28%); night futures 24.266",
+    "HPG ngoại mua ròng ~64 tỷ; DGW ~57 tỷ",
+    "DXY quanh 102,18",
+    "FTSE 100 10.497,94, +0,34%",
+    "Bitcoin quanh 86.000, ngành +1,74%",
+    "FireAnt/F247/newF319 mỏng trong cửa sổ 08:35",
+    "newF319 không có thread khóa"
+  ],
+  "sentiment": {
+    "fireant": "thin",
+    "f247": "thin",
+    "newf319": "thin",
+    "note": "Không có thread khóa. Bài Fili: xanh vỏ đỏ lòng, VIC gánh điểm."
+  },
+  "gaps": [
+    "close 6/10 trống",
+    "1.753,20 vs 1.752,97",
+    "KL 575,75m vs khớp 432,27m",
+    "ngoại HoSE 279 vs 281,6 vs toàn TT ~283",
+    "tự doanh không khóa",
+    "WTI 89,43 vs 89,21",
+    "vàng 4.170,7 vs spot Reuters 4.143",
+    "DXY 102,18 vs 102,21",
+    "SBV gốc không scrape",
+    "NDX vs Composite",
+    "FTSE lệch nguồn",
+    "Nikkei futures sáng 6/10 không có",
+    "community thin"
+  ]
+}

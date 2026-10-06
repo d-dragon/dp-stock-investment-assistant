@@ -1,0 +1,307 @@
+{
+  "schemaVersion": "1.0.0",
+  "date": "2026-10-06",
+  "generatedAt": "2026-10-06T08:35:00+07:00",
+  "briefKind": "eod_prev+overnight+preopen",
+  "items": [
+    {
+      "id": "n-2026-10-06-001",
+      "impact": "high",
+      "impactScore": 92,
+      "rank": 1,
+      "kind": "market",
+      "board": "vn",
+      "title": "VN-Index 5/10 đóng 1.753,2 điểm, +15,49",
+      "url": "https://cafef.vn/du-lieu/tracuulichsu2/tracuu.chn?date=05/10/2026",
+      "sourceId": "src-cafef-data",
+      "publishedAt": "2026-10-05T15:05:00+07:00",
+      "tickers": [
+        "VNINDEX"
+      ],
+      "excerpt": "CafeF lịch sử giá. Vietbao 1.752,97 lệch.",
+      "whyImpact": "Close khóa cho pre-open 6/10; cắt chuỗi 5 phiên giảm."
+    },
+    {
+      "id": "n-2026-10-06-002",
+      "impact": "high",
+      "impactScore": 88,
+      "rank": 2,
+      "kind": "market",
+      "board": "vn",
+      "title": "Ngoại HoSE bán ròng 279–282 tỷ, TCB dẫn đầu",
+      "url": "https://cafef.vn/phien-5-10-khoi-ngoai-tiep-da-ban-rong-gan-300-ty-dong-tam-diem-xa-manh-mot-co-phieu-ngan-hang-188261005153118683.chn",
+      "sourceId": "src-cafef",
+      "publishedAt": "2026-10-05T15:31:00+07:00",
+      "tickers": [
+        "TCB",
+        "VHM",
+        "PNJ"
+      ],
+      "excerpt": "CafeF −279 HoSE; Fili −281,6.",
+      "whyImpact": "Dòng ngoại chưa đảo dù chỉ số xanh."
+    },
+    {
+      "id": "n-2026-10-06-003",
+      "impact": "high",
+      "impactScore": 84,
+      "rank": 3,
+      "kind": "macro",
+      "board": "vn",
+      "title": "GDP Q3 +9,95%, 9 tháng +9,01%",
+      "url": "https://vir.com.vn/vietnams-gdp-grows-over-9-per-cent-in-the-first-nine-months-162165.html",
+      "sourceId": "src-nso",
+      "publishedAt": "2026-10-05T18:45:00+07:00",
+      "tickers": [],
+      "excerpt": "NSO 3/10, vẫn là nền phiên 5/10.",
+      "whyImpact": "Vĩ mô giải thích tâm lý hồi, không phải thanh khoản."
+    },
+    {
+      "id": "n-2026-10-06-004",
+      "impact": "high",
+      "impactScore": 80,
+      "rank": 4,
+      "kind": "market",
+      "board": "global",
+      "title": "S&P 7.773,95 (+0,66%), Nasdaq Composite đỉnh 27.477",
+      "url": "https://apnews.com/article/wall-street-stocks-dow-nasdaq-7f89624b604f25f313502c77d4d0b010",
+      "sourceId": "src-barrons",
+      "publishedAt": "2026-10-06T03:15:00+07:00",
+      "tickers": [
+        "SPX",
+        "NDX"
+      ],
+      "excerpt": "AP close 5/10. UST 10 năm 5,31%.",
+      "whyImpact": "Overnight risk-on có trần lợi suất."
+    },
+    {
+      "id": "n-2026-10-06-005",
+      "impact": "high",
+      "impactScore": 76,
+      "rank": 5,
+      "kind": "market",
+      "board": "global",
+      "title": "Nasdaq 100 31.076,44, +0,87%",
+      "url": "https://www.marketscreener.com/news/nasdaq-hits-record-as-dollar-and-treasury-yields-climb-oil-prices-ease-ce785dd8db8efe27",
+      "sourceId": "src-bloomberg",
+      "publishedAt": "2026-10-05T23:19:00+07:00",
+      "tickers": [
+        "NDX"
+      ],
+      "excerpt": "MarketScreener. Không trộn với Composite.",
+      "whyImpact": "Mega-cap là kênh truyền dẫn chính."
+    },
+    {
+      "id": "n-2026-10-06-006",
+      "impact": "high",
+      "impactScore": 74,
+      "rank": 6,
+      "kind": "macro",
+      "board": "global",
+      "title": "WTI settle 89,43 (−1,84%); Brent 100,32",
+      "url": "https://www.marketscreener.com/news/nasdaq-hits-record-as-dollar-and-treasury-yields-climb-oil-prices-ease-ce785dd8db8efe27",
+      "sourceId": "src-bloomberg",
+      "publishedAt": "2026-10-05T23:19:00+07:00",
+      "tickers": [],
+      "excerpt": "Reuters. Digest 89,21 lệch.",
+      "whyImpact": "Dầu hạ nhẹ nhưng Brent vẫn quanh 100."
+    },
+    {
+      "id": "n-2026-10-06-007",
+      "impact": "medium",
+      "impactScore": 70,
+      "rank": 7,
+      "kind": "market",
+      "board": "vn",
+      "title": "VIC +3,6% quanh 232.000; đóng góp điểm lớn nhất",
+      "url": "https://fili.vn/2026/10/nhip-dap-thi-truong-0510-thi-truong-xanh-vo-do-long-vic-gop-hon-133-diem-tang-cho-vn-index-1636-1498802.htm",
+      "sourceId": "src-vietstock",
+      "publishedAt": "2026-10-05T15:43:00+07:00",
+      "tickers": [
+        "VIC"
+      ],
+      "excerpt": "Fili điểm đóng góp lệch giữa các bảng (8,6–13,3).",
+      "whyImpact": "Index-heavy: mất VIC thì +15 điểm không lặp lại."
+    },
+    {
+      "id": "n-2026-10-06-008",
+      "impact": "medium",
+      "impactScore": 68,
+      "rank": 8,
+      "kind": "market",
+      "board": "vn",
+      "title": "LPB trần 43.000, khớp 2,42 triệu cp",
+      "url": "https://cafef.vn/du-lieu/tracuulichsu2/tracuu.chn?date=05/10/2026",
+      "sourceId": "src-cafef-data",
+      "publishedAt": "2026-10-05T15:05:00+07:00",
+      "tickers": [
+        "LPB"
+      ],
+      "excerpt": "CafeF. Thỏa thuận 6,5 triệu.",
+      "whyImpact": "Bank trần là điểm nóng đơn lẻ."
+    },
+    {
+      "id": "n-2026-10-06-009",
+      "impact": "medium",
+      "impactScore": 66,
+      "rank": 9,
+      "kind": "macro",
+      "board": "vn",
+      "title": "Trung tâm USD/VND 25.643, +7 đồng",
+      "url": "https://vietbao.vn/ty-gia-usd-hom-nay-610-ty-gia-trung-tam-o-muc-25643-dongusd-610046.html",
+      "sourceId": "src-nhnn",
+      "publishedAt": "2026-10-06T05:35:00+07:00",
+      "tickers": [],
+      "excerpt": "Vietbao cuối 5/10. Không scrape được sbv.gov.vn.",
+      "whyImpact": "FX vẫn nghiêng lên trước giờ mở."
+    },
+    {
+      "id": "n-2026-10-06-010",
+      "impact": "medium",
+      "impactScore": 64,
+      "rank": 10,
+      "kind": "macro",
+      "board": "vn",
+      "title": "Thâm hụt thương mại 9 tháng 19,42 tỷ USD",
+      "url": "https://www.thestar.com.my/business/business-news/2026/10/05/vietnams-quarterly-gdp-grows-fastest-in-4-years",
+      "sourceId": "src-nso",
+      "publishedAt": "2026-10-05T07:00:00+07:00",
+      "tickers": [],
+      "excerpt": "Reuters/NSO. CPI tháng 9 +5,08%.",
+      "whyImpact": "Tăng trưởng cao không xóa nhập siêu năng lượng."
+    },
+    {
+      "id": "n-2026-10-06-011",
+      "impact": "medium",
+      "impactScore": 60,
+      "rank": 11,
+      "kind": "market",
+      "board": "global",
+      "title": "Nikkei 5/10 +2,40% lên 69.946,86",
+      "url": "https://stock.cngold.org/c/2026-10-05/c10797412.html",
+      "sourceId": "src-bloomberg",
+      "publishedAt": "2026-10-05T17:38:00+07:00",
+      "tickers": [
+        "NKY"
+      ],
+      "excerpt": "Bảng cngold khớp Reuters +2,4%. Chưa có futures sáng 6/10.",
+      "whyImpact": "Sàn Á hôm qua xanh."
+    },
+    {
+      "id": "n-2026-10-06-012",
+      "impact": "medium",
+      "impactScore": 58,
+      "rank": 12,
+      "kind": "market",
+      "board": "global",
+      "title": "HSI cash 24.040 (+0,28%); night futures 24.266",
+      "url": "https://stock360.hkej.com/indices/futures",
+      "sourceId": "src-bloomberg",
+      "publishedAt": "2026-10-06T03:00:00+07:00",
+      "tickers": [
+        "HSI"
+      ],
+      "excerpt": "Đêm kỳ +0,97%, cao nước 226.",
+      "whyImpact": "Màu châu Á trước mở cửa, không phải cash hôm nay."
+    },
+    {
+      "id": "n-2026-10-06-013",
+      "impact": "medium",
+      "impactScore": 55,
+      "rank": 13,
+      "kind": "market",
+      "board": "vn",
+      "title": "HPG ngoại mua ròng ~64 tỷ; DGW ~57 tỷ",
+      "url": "https://cafef.vn/phien-5-10-khoi-ngoai-tiep-da-ban-rong-gan-300-ty-dong-tam-diem-xa-manh-mot-co-phieu-ngan-hang-188261005153118683.chn",
+      "sourceId": "src-cafef",
+      "publishedAt": "2026-10-05T15:31:00+07:00",
+      "tickers": [
+        "HPG",
+        "DGW",
+        "GMD"
+      ],
+      "excerpt": "Đối ứng bán TCB/VHM/PNJ.",
+      "whyImpact": "Nhóm mua không đủ đảo net."
+    },
+    {
+      "id": "n-2026-10-06-014",
+      "impact": "medium",
+      "impactScore": 52,
+      "rank": 14,
+      "kind": "market",
+      "board": "global",
+      "title": "DXY quanh 102,18",
+      "url": "https://www.gurufocus.com/economic_indicators/5747/us-dollar-index-dxy",
+      "sourceId": "src-barrons",
+      "publishedAt": "2026-10-05T22:00:00+07:00",
+      "tickers": [
+        "DXY"
+      ],
+      "excerpt": "GuruFocus 102,181 vs 102,41 hôm trước.",
+      "whyImpact": "USD vẫn cao dù giảm trong phiên."
+    },
+    {
+      "id": "n-2026-10-06-015",
+      "impact": "low",
+      "impactScore": 40,
+      "rank": 15,
+      "kind": "market",
+      "board": "global",
+      "title": "FTSE 100 10.497,94, +0,34%",
+      "url": "https://www.capitalfutures.com.tw/zh-tw/Financial/BreakingNewsArticle?ContentId=C26100600160",
+      "sourceId": "src-barrons",
+      "publishedAt": "2026-10-06T08:46:00+07:00",
+      "tickers": [
+        "FTSE"
+      ],
+      "excerpt": "Capital Futures. Bảng khác còn số 2/10.",
+      "whyImpact": "Châu Âu phụ."
+    },
+    {
+      "id": "n-2026-10-06-016",
+      "impact": "low",
+      "impactScore": 36,
+      "rank": 16,
+      "kind": "market",
+      "board": "global",
+      "title": "Bitcoin quanh 86.000, ngành +1,74%",
+      "url": "https://www.thebigwhale.io/article/monday-market-brief-bitcoin-holds-its-50-week-average-as-it-shrugs-off-a-stronger-dollar",
+      "sourceId": "src-yahoo-btc",
+      "publishedAt": "2026-10-05T07:00:00+07:00",
+      "tickers": [
+        "BTC"
+      ],
+      "excerpt": "Không phải close sàn. ETH chỉ có % ngành +1,59.",
+      "whyImpact": "Crypto không truyền sang VN-Index."
+    },
+    {
+      "id": "n-2026-10-06-017",
+      "impact": "low",
+      "impactScore": 28,
+      "rank": 17,
+      "kind": "community",
+      "board": "vn",
+      "title": "FireAnt/F247/newF319 mỏng trong cửa sổ 08:35",
+      "url": "https://fireant.vn/cong-dong/moi-nhat",
+      "sourceId": "src-fireant",
+      "publishedAt": "2026-10-06T08:35:00+07:00",
+      "tickers": [],
+      "excerpt": "Không scrape được thread khóa. Màu lấy từ bài: xanh vỏ đỏ lòng.",
+      "whyImpact": "Sentiment không phải print."
+    },
+    {
+      "id": "n-2026-10-06-018",
+      "impact": "low",
+      "impactScore": 22,
+      "rank": 18,
+      "kind": "community",
+      "board": "vn",
+      "title": "newF319 không có thread khóa",
+      "url": "https://newf319.com/",
+      "sourceId": "src-newf319",
+      "publishedAt": "2026-10-06T08:35:00+07:00",
+      "tickers": [],
+      "excerpt": "Không dùng f319.com.",
+      "whyImpact": "Cộng đồng chỉ là màu."
+    }
+  ]
+}

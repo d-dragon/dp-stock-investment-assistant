@@ -24,6 +24,7 @@
 
 | Date | Version | Change |
 |---|---|---|
+| 2026-10-06 | 2.6.1 | Run 2026-10-06: Tuesday preopen; VN 1.753,20 vs 1.752,97; volume 575,75m vs match 432,27m; foreign HoSE 279 vs 281,6; proprietary unlocked; WTI/gold/DXY disagree; NDX vs Composite; FireAnt/newF319 thin; no SBV page. |
 | 2026-10-05 | 2.6.1 | Run 2026-10-05: Monday preopen; VN close sources 1.737,71 vs 1.737,11; volume 615/678/829m; foreign HoSE vs broader print; Nikkei/HSI futures only; FireAnt/newF319 thin. |
 | 2026-10-04 | 2.6.1 | Run 2026-10-04: Sunday preopen; foreign HoSE vs broader print disagree; volume 615m vs 829m; DXY sources disagree; no SBV print; newF319/FireAnt thin. |
 | 2026-10-03 | 2.6.1 | Run 2026-10-03: weekend preopen; foreign prints disagree (HoSE vs whole market); proprietary only Fili; newF319/F247/FireAnt thin; no SBV print for Saturday. |
