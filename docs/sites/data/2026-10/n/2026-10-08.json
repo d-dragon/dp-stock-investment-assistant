@@ -1,0 +1,291 @@
+{
+  "schemaVersion": "1.0.0",
+  "date": "2026-10-08",
+  "generatedAt": "2026-10-08T08:35:00+07:00",
+  "briefKind": "eod_prev+overnight+preopen",
+  "items": [
+    {
+      "id": "n-2026-10-08-001",
+      "impact": "high",
+      "impactScore": 94,
+      "rank": 1,
+      "kind": "market",
+      "board": "vn",
+      "title": "VN-Index đóng 7/10 tại 1.753,39 (−5,69), chưa có close 8/10",
+      "url": "http://en.stockbiz.vn/HistoricalIndices.aspx",
+      "sourceId": "src-stockbiz",
+      "publishedAt": "2026-10-07T15:10:00+07:00",
+      "tickers": [
+        "VNINDEX"
+      ],
+      "excerpt": "StockBiz: 1.753,39 (−0,32%), KL 597,34 triệu, GT 15.226,19 tỷ. Trước đó 1.759,08.",
+      "whyImpact": "Mốc tham chiếu mở cửa 8/10. Mất 1.737,71 thì hai phiên hồi bị vô hiệu."
+    },
+    {
+      "id": "n-2026-10-08-002",
+      "impact": "high",
+      "impactScore": 90,
+      "rank": 2,
+      "kind": "market",
+      "board": "vn",
+      "title": "Khối ngoại HoSE bán ròng; StockBiz −910,27 tỷ, báo chí −922 đến −934",
+      "url": "http://en.stockbiz.vn/HistoricalIndices.aspx",
+      "sourceId": "src-stockbiz",
+      "publishedAt": "2026-10-07T15:10:00+07:00",
+      "tickers": [
+        "PNJ",
+        "TCB",
+        "HDB",
+        "FPT"
+      ],
+      "excerpt": "Mua 1.590,41 / bán 2.500,68 tỷ. DNSE ghi 934 tỷ, TCKTTC 922,53.",
+      "whyImpact": "Phiên bán ròng thứ liên tiếp. Print lệch, không gộp."
+    },
+    {
+      "id": "n-2026-10-08-003",
+      "impact": "high",
+      "impactScore": 86,
+      "rank": 3,
+      "kind": "news",
+      "board": "vn",
+      "title": "PNJ bị ngoại bán ~399–403 tỷ, ĐHCĐ 21/10 bàn phát hành 550 triệu cp",
+      "url": "https://cafef.vn/cong-ty-vang-bac-da-quy-pnj-co-dong-thai-la-188261006185746531.chn",
+      "sourceId": "src-cafef",
+      "publishedAt": "2026-10-07T18:57:00+07:00",
+      "tickers": [
+        "PNJ"
+      ],
+      "excerpt": "Đóng 18.900 (−>6%), khớp >51,8 triệu. Phát hành riêng lẻ lớn hơn lượng lưu hành.",
+      "whyImpact": "Vừa là tâm điểm net ngoại vừa là sự kiện pha loãng."
+    },
+    {
+      "id": "n-2026-10-08-004",
+      "impact": "high",
+      "impactScore": 82,
+      "rank": 4,
+      "kind": "macro",
+      "board": "global",
+      "title": "Phố Wall rời đỉnh: Dow −0,66%, S&P −0,22%, UST 10 năm quanh 5,31%",
+      "url": "https://www.reuters.com/business/wall-st-futures-slip-yields-oil-rebound-fed-minutes-focus-2026-10-07/",
+      "sourceId": "src-bloomberg",
+      "publishedAt": "2026-10-07T17:36:00+07:00",
+      "tickers": [
+        "DJI",
+        "SPX"
+      ],
+      "excerpt": "AP/Yahoo: Dow 51.179,87, S&P 7.801,77, Nasdaq Composite 27.538,69. Reuters Dow 51.180,17.",
+      "whyImpact": "Lãi suất dài hạn và biên bản Fed là kênh truyền chính sang bank/VN."
+    },
+    {
+      "id": "n-2026-10-08-005",
+      "impact": "high",
+      "impactScore": 78,
+      "rank": 5,
+      "kind": "market",
+      "board": "global",
+      "title": "HSI đóng 24.130,50 (−0,62%); night futures 23.962, thấp nước 169",
+      "url": "https://www.barrons.com/market-data/stocks/asia/indexes",
+      "sourceId": "src-barrons",
+      "publishedAt": "2026-10-08T07:10:00+07:00",
+      "tickers": [
+        "HSI"
+      ],
+      "excerpt": "Nikkei Barron's 70.035,71 (−0,92%). Bảng sớm 8/10 chưa phải close.",
+      "whyImpact": "Gap châu Á trước mở cửa HoSE."
+    },
+    {
+      "id": "n-2026-10-08-006",
+      "impact": "medium",
+      "impactScore": 74,
+      "rank": 6,
+      "kind": "market",
+      "board": "vn",
+      "title": "Tự doanh VietnamBiz bán ròng ~561 tỷ; CTG −239, FPT +123",
+      "url": "https://vietnambiz.vn/tu-doanh-ban-rong-hon-200-ty-dong-mot-co-phieu-ngan-hang-202610717498156.htm",
+      "sourceId": "src-vietnambiz",
+      "publishedAt": "2026-10-07T19:39:00+07:00",
+      "tickers": [
+        "CTG",
+        "FPT",
+        "VPB"
+      ],
+      "excerpt": "Không có trang HOSE gốc. CTG chủ yếu thỏa thuận.",
+      "whyImpact": "Nhóm thứ ba cùng chiều bán với ngoại, nhưng print chưa khóa."
+    },
+    {
+      "id": "n-2026-10-08-007",
+      "impact": "medium",
+      "impactScore": 70,
+      "rank": 7,
+      "kind": "news",
+      "board": "vn",
+      "title": "MSN hút khớp 1.152 tỷ, ngoại mua ròng +44,3 tỷ",
+      "url": "https://vneconomy.vn/giang-co-phan-hoa-dong-tien-van-rat-than-trong.htm",
+      "sourceId": "src-vneconomy",
+      "publishedAt": "2026-10-07T15:32:00+07:00",
+      "tickers": [
+        "MSN",
+        "MWG",
+        "BSR"
+      ],
+      "excerpt": "MSN +4,4%. Bán lẻ/vận tải giữ nhịp khi trụ Vingroup điều chỉnh.",
+      "whyImpact": "Dòng tiền chọn lọc, không phải sóng rộng."
+    },
+    {
+      "id": "n-2026-10-08-008",
+      "impact": "medium",
+      "impactScore": 66,
+      "rank": 8,
+      "kind": "macro",
+      "board": "vn",
+      "title": "Chưa có trang SBV cho 8/10; trung tâm 7/10 VNA 25.638, TG&VN 25.645",
+      "url": "https://en.vietnamplus.vn/reference-exchange-rate-down-7-vnd-on-october-7-post353193.vnp",
+      "sourceId": "src-nhnn",
+      "publishedAt": "2026-10-07T09:07:00+07:00",
+      "tickers": [
+        "USDVND"
+      ],
+      "excerpt": "sbv.gov.vn vẫn hiển thị 06/10/2026 = 25.638. VCB 7/10 khoảng 25.770–26.180.",
+      "whyImpact": "Không bịa tỷ giá trung tâm sáng 8/10."
+    },
+    {
+      "id": "n-2026-10-08-009",
+      "impact": "medium",
+      "impactScore": 64,
+      "rank": 9,
+      "kind": "news",
+      "board": "global",
+      "title": "WTI và vàng lệch nguồn; Brent vẫn quanh 101",
+      "url": "https://rivkin.com.au/hide/morning-market-wrap-today/",
+      "sourceId": "src-bloomberg",
+      "publishedAt": "2026-10-08T06:00:00+07:00",
+      "tickers": [
+        "WTI",
+        "XAU"
+      ],
+      "excerpt": "SMW WTI 88,93 (−0,57%); Rivkin 88,99. Vàng 4.135,30 hoặc spot 4.103,67.",
+      "whyImpact": "Dầu/vàng không đủ một print để trade GAS/PNJ."
+    },
+    {
+      "id": "n-2026-10-08-010",
+      "impact": "medium",
+      "impactScore": 60,
+      "rank": 10,
+      "kind": "news",
+      "board": "vn",
+      "title": "Ngoại YTD đến 7/10 khoảng 102.200 tỷ toàn thị trường",
+      "url": "https://cafef.vn/buon-khoi-ngoai-ban-rong-hon-100000-ty-dong-tren-ttck-viet-nam-tu-dau-nam-188261007225424669.chn",
+      "sourceId": "src-cafef",
+      "publishedAt": "2026-10-07T22:54:00+07:00",
+      "tickers": [
+        "VNINDEX"
+      ],
+      "excerpt": "HoSE CafeF 105.166 tỷ. Không phải print một phiên.",
+      "whyImpact": "Bối cảnh hấp thụ, không phải tín hiệu mở cửa."
+    },
+    {
+      "id": "n-2026-10-08-011",
+      "impact": "medium",
+      "impactScore": 55,
+      "rank": 11,
+      "kind": "disclosure",
+      "board": "vn",
+      "title": "KSV và TMG tạm ứng cổ tức 30%, GDKHQ 23/10 và 21/10",
+      "url": "https://cafef.vn/hai-doanh-nghiep-sap-chia-3000-dong-cp-loi-nhuan-tang-vot-co-tuc-tien-mat-thuoc-hang-khung-188261007115104105.chn",
+      "sourceId": "src-cafef",
+      "publishedAt": "2026-10-07T11:51:00+07:00",
+      "tickers": [
+        "KSV",
+        "TMG"
+      ],
+      "excerpt": "3.000 đồng/cp. KSV thanh toán dự kiến 11/11.",
+      "whyImpact": "Sự kiện lịch, không gap chỉ số hôm nay."
+    },
+    {
+      "id": "n-2026-10-08-012",
+      "impact": "medium",
+      "impactScore": 52,
+      "rank": 12,
+      "kind": "market",
+      "board": "global",
+      "title": "Bitcoin Yahoo 83.417,92 (−2,57%); NQBTC 83.193",
+      "url": "https://finance.yahoo.com/quote/BTC-USD/history/",
+      "sourceId": "src-yahoo-btc",
+      "publishedAt": "2026-10-08T07:21:00+07:00",
+      "tickers": [
+        "BTC"
+      ],
+      "excerpt": "Rivkin spot ~83.463 (−2,5%). ETH chưa khóa close 7/10.",
+      "whyImpact": "Risk appetite crypto yếu, không truyền trực tiếp sang HoSE."
+    },
+    {
+      "id": "n-2026-10-08-013",
+      "impact": "low",
+      "impactScore": 40,
+      "rank": 13,
+      "kind": "community",
+      "board": "vn",
+      "title": "FireAnt: tiêu đề thận trọng, PNJ bắt đáy, không có print riêng",
+      "url": "https://web.fireant.vn/ma-chung-khoan/VNINDEX",
+      "sourceId": "src-fireant",
+      "publishedAt": "2026-10-07T20:39:00+07:00",
+      "tickers": [
+        "PNJ",
+        "VNINDEX"
+      ],
+      "excerpt": "Bài tổng hợp phiên giảm sau hai phiên tăng. Tone tiêu cực ở live.",
+      "whyImpact": "Màu sentiment, không dùng thay tape."
+    },
+    {
+      "id": "n-2026-10-08-014",
+      "impact": "low",
+      "impactScore": 32,
+      "rank": 14,
+      "kind": "community",
+      "board": "vn",
+      "title": "F247 bàn phát hành PNJ, không phải dòng tiền 7/10",
+      "url": "https://f247.com/t/pnj-tinh-hoan-nhap-hon-4-600-ty-dong-vao-loi-nhuan-phat-hanh-550-trieu-co-phieu-rieng-le/878896",
+      "sourceId": "src-f247",
+      "publishedAt": "2026-09-30T07:06:00+07:00",
+      "tickers": [
+        "PNJ"
+      ],
+      "excerpt": "Thread cũ về hoàn nhập quỹ và phát hành.",
+      "whyImpact": "Màu sự kiện, lệch ngày."
+    },
+    {
+      "id": "n-2026-10-08-015",
+      "impact": "low",
+      "impactScore": 22,
+      "rank": 15,
+      "kind": "community",
+      "board": "vn",
+      "title": "newF319 mỏng sáng 8/10, không lấy làm print",
+      "url": "https://newf319.com/",
+      "sourceId": "src-newf319",
+      "publishedAt": "2026-10-08T08:20:00+07:00",
+      "tickers": [
+        "VNINDEX"
+      ],
+      "excerpt": "Không scrape được thread hữu ích. Không dùng f319.com.",
+      "whyImpact": "Ghi khoảng trống sentiment."
+    },
+    {
+      "id": "n-2026-10-08-016",
+      "impact": "medium",
+      "impactScore": 58,
+      "rank": 16,
+      "kind": "market",
+      "board": "vn",
+      "title": "HNX −2,15% về 259,82; độ rộng HoSE 150/151/64",
+      "url": "https://www.dnse.com.vn/senses/tin-tuc/chung-khoan-ngay-710-vn-index-giam-5-diem-35287966",
+      "sourceId": "src-vietstock",
+      "publishedAt": "2026-10-07T17:39:00+07:00",
+      "tickers": [
+        "HNX"
+      ],
+      "excerpt": "UPCoM 125,19 (−0,03%). VN30 giảm gần 5 điểm, chưa khóa số tuyệt đối.",
+      "whyImpact": "Điều chỉnh không chỉ ở trụ HoSE."
+    }
+  ]
+}

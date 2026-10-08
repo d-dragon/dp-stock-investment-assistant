@@ -1,0 +1,116 @@
+{
+  "schemaVersion": "1.0.0",
+  "date": "2026-10-08",
+  "generatedAt": "2026-10-08T08:35:00+07:00",
+  "briefKind": "eod_prev+overnight+preopen",
+  "eodDate": "2026-10-07",
+  "market": {
+    "vnindex": {
+      "price": 1753.39,
+      "change": -5.69,
+      "changePct": -0.32,
+      "prior": 1759.08,
+      "source": "StockBiz 10/7, confirmed DNSE/VnEconomy/Tap chi KTTC"
+    },
+    "hnx": {
+      "price": 259.82,
+      "change": -5.71,
+      "changePct": -2.15,
+      "source": "StockBiz"
+    },
+    "upcom": {
+      "price": 125.19,
+      "change": -0.04,
+      "changePct": -0.03,
+      "source": "StockBiz"
+    },
+    "volume": {
+      "stockbiz_shares": 597341825,
+      "stockbiz_value_bn": 15226.19,
+      "dnse_shares": 588600000,
+      "dnse_value_bn": 15078,
+      "matched_shares_fili": 485000000
+    },
+    "foreign": {
+      "stockbiz_buy_bn": 1590.41,
+      "stockbiz_sell_bn": 2500.68,
+      "stockbiz_net_bn": -910.27,
+      "press": [
+        -934,
+        -922.53,
+        -910.68
+      ],
+      "tickers_sell": [
+        "PNJ",
+        "TCB",
+        "HDB",
+        "FPT"
+      ]
+    },
+    "proprietary": {
+      "vietnamBiz_net_bn": -561,
+      "top_sell": "CTG -239",
+      "top_buy": "FPT +123",
+      "official_hose_page": false
+    },
+    "breadth_hose": {
+      "up": 150,
+      "down": 151,
+      "flat": 64,
+      "source": "Tap chi KTTC / DNSE"
+    },
+    "usd_vnd": {
+      "vna_central_oct7": 25638,
+      "baoquocte_oct7_8h": 25645,
+      "sbv_page": "still 06/10/2026 = 25638",
+      "vcb_oct7": [
+        25770,
+        26180
+      ]
+    },
+    "world": {
+      "dji": 51179.87,
+      "spx": 7801.77,
+      "ixic": 27538.69,
+      "rut": 2793.2,
+      "nky": 70035.71,
+      "hsi": 24130.5,
+      "hsi_night": 23962,
+      "ftse": 10458.5,
+      "dxy_board": 102.25,
+      "wti": [
+        88.93,
+        88.99,
+        89.07
+      ],
+      "gold": [
+        4135.3,
+        4103.67
+      ],
+      "btc_yahoo": 83417.92,
+      "ust10": 5.31
+    }
+  },
+  "news_events": [
+    "CafeF: khối ngoại YTD đến 7/10 ~102.200 tỷ toàn TT, HoSE 105.166 tỷ",
+    "PNJ ĐHCĐ bất thường 21/10, phát hành riêng lẻ tối đa 550 triệu cp",
+    "KSV/TMG tạm ứng cổ tức 30% = 3.000 đồng; GDKHQ 23/10 và 21/10",
+    "US yields 10Y ~5.31%; Fed minutes; Brent ~101; Hormuz",
+    "HSI night 23962, low water 169 vs close 24130.50"
+  ],
+  "sentiment": {
+    "fireant": "tiêu đề thận trọng, PNJ bắt đáy, dòng tiền bán lẻ/vận tải; không có print độc lập",
+    "f247": "thread PNJ phát hành/hoàn nhập quỹ, không phải tape 7/10",
+    "newf319": "thin / không scrape được thread hữu ích sáng 8/10"
+  },
+  "gaps": [
+    "no SBV page for 8/10",
+    "foreign StockBiz -910.27 vs press -934/-922.53",
+    "volume StockBiz 597.34m/15.226 vs DNSE 588.6m/15.078",
+    "proprietary VietnamBiz only, no HOSE page",
+    "NDX-100 not locked, only Composite",
+    "WTI/gold/DXY sources disagree",
+    "newF319 thin",
+    "ETH close 7/10 not locked"
+  ]
+}
