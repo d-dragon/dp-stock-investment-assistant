@@ -1,0 +1,98 @@
+{
+  "schemaVersion": "1.0.0",
+  "date": "2026-10-10",
+  "generatedAt": "2026-10-10T08:35:00+07:00",
+  "briefKind": "eod_prev+overnight+preopen",
+  "market": {
+    "vnindex": {
+      "price": 1735.09,
+      "change": -3.88,
+      "changePct": -0.22,
+      "volume": 911324549,
+      "valueBn": 27542.82,
+      "sourceId": "src-stockbiz",
+      "note": "StockBiz HistoricalIndices 10/9/2026 close; CafeF/press match 1.735,09"
+    },
+    "hnx": {
+      "price": 261.6,
+      "change": 5.38,
+      "changePct": 2.1,
+      "sourceId": "src-stockbiz"
+    },
+    "foreignHoSE": {
+      "buyValueBn": 3561.55,
+      "sellValueBn": 13296.66,
+      "netValueBn": -9735.11,
+      "sourceId": "src-stockbiz",
+      "note": "Net dominated by MCH negotiated block ~9.641 tỷ; matched-order foreign print elsewhere ~185 tỷ net sell (Fili)"
+    },
+    "proprietary": {
+      "netValueBn": 266,
+      "sourceId": "src-vneconomy",
+      "note": "Fili matched-order self-trading net buy 266 tỷ; not full book"
+    },
+    "breadth": {
+      "up": 130,
+      "down": 175,
+      "flat": 63,
+      "sourceId": "src-cafef"
+    },
+    "us": {
+      "dji": 51654.95,
+      "spx": 7811.54,
+      "ndx": 30883.15,
+      "comp": 27366.17,
+      "sourceId": "src-bloomberg"
+    },
+    "asia": {
+      "nky": 69030.92,
+      "hsi": 24211.35,
+      "sourceId": "src-barrons"
+    },
+    "fx": {
+      "dxy": 102.23,
+      "usdvndCentral": 25629,
+      "sourceId": "src-nhnn"
+    },
+    "commodities": {
+      "wti": 91.66,
+      "xau": 4220.3,
+      "note": "Sources disagree on exact WTI/gold settlement; use Barron's/MarketWatch snapshot"
+    },
+    "crypto": {
+      "btc": 82562.2,
+      "sourceId": "src-yahoo-btc"
+    }
+  },
+  "news_events": [
+    {
+      "title": "MCH negotiated block ~64.2m shares / 9.641 tỷ by foreign; Lepus (Masan) registered buy 73m",
+      "sourceId": "src-cafef"
+    },
+    {
+      "title": "PNJ reversed 13-session decline, closed +~7%",
+      "sourceId": "src-vietnambiz"
+    },
+    {
+      "title": "US equities rebounded Friday: Dow +0.83%, SPX +0.59%, NDX +0.51%",
+      "sourceId": "src-bloomberg"
+    },
+    {
+      "title": "SBV central rate for 10/10/2026 = 25.629 (issued 09/10)",
+      "sourceId": "src-nhnn"
+    }
+  ],
+  "sentiment": {
+    "fireant": "thin; screenshots of VN-Index chart, no clear directional consensus beyond noting foreign MCH block",
+    "f247": "thin recent threads; no locked 9/10 print discussion",
+    "newf319": "thin; community color only",
+    "note": "Community ≠ foreign flow. MCH block is the print, not retail chatter."
+  },
+  "gaps": [
+    "No SBV page unique to 10/10 beyond central rate already issued 09/10",
+    "WTI/gold/DXY exact settlement disagree across Barron's, MarketWatch, TradingEconomics",
+    "NDX vs Composite: use NDX 30.883,15 for world board",
+    "Proprietary only from Fili matched-order slice",
+    "FireAnt/F247/newF319 thin on 9/10 color"
+  ]
+}
