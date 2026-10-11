@@ -1,0 +1,144 @@
+{
+  "schemaVersion": "1.0.0",
+  "date": "2026-10-11",
+  "generatedAt": "2026-10-11T08:35:00+07:00",
+  "briefKind": "eod_prev+overnight+preopen",
+  "items": [
+    {
+      "id": "n-2026-10-11-001",
+      "impact": "high",
+      "impactScore": 90,
+      "rank": 1,
+      "kind": "market",
+      "board": "vn",
+      "title": "StockBiz khóa VN-Index 9/10 tại 1.735,09 (−3,88 điểm)",
+      "url": "http://en.stockbiz.vn/HistoricalIndices.aspx",
+      "sourceId": "src-stockbiz",
+      "publishedAt": "2026-10-09T15:10:00+07:00",
+      "tickers": [
+        "VNINDEX"
+      ],
+      "excerpt": "Khối lượng 911 triệu cp, giá trị 27.543 tỷ.",
+      "whyImpact": "Print khóa cuối tuần."
+    },
+    {
+      "id": "n-2026-10-11-002",
+      "impact": "high",
+      "impactScore": 85,
+      "rank": 2,
+      "kind": "market",
+      "board": "vn",
+      "title": "Ngoại bán ròng ~9.735 tỷ HoSE, chủ yếu MCH thỏa thuận",
+      "url": "https://cafef.vn/mot-co-phieu-bat-ngo-bi-khoi-ngoai-xa-dot-bien-hon-9600-ty-dong-phien-cuoi-tuan-188261009153241263.chn",
+      "sourceId": "src-cafef",
+      "publishedAt": "2026-10-09T15:43:00+07:00",
+      "tickers": [
+        "MCH"
+      ],
+      "excerpt": "Không phải bán ròng khớp lệnh thông thường.",
+      "whyImpact": "Điểm dòng tiền lớn."
+    },
+    {
+      "id": "n-2026-10-11-003",
+      "impact": "medium",
+      "impactScore": 70,
+      "rank": 3,
+      "kind": "news",
+      "board": "global",
+      "title": "Dow +0,83%, S&P 500 +0,59% phiên 9/10",
+      "url": "https://finance.yahoo.com/markets/world-indices/articles/major-us-stock-indexes-fared-201628920.html",
+      "sourceId": "src-bloomberg",
+      "publishedAt": "2026-10-09T20:16:00+07:00",
+      "tickers": [
+        "DJI",
+        "SPX"
+      ],
+      "excerpt": "Wall Street đóng tuần xanh.",
+      "whyImpact": "Overnight Mỹ truyền vào thứ Hai."
+    },
+    {
+      "id": "n-2026-10-11-004",
+      "impact": "medium",
+      "impactScore": 65,
+      "rank": 4,
+      "kind": "macro",
+      "board": "vn",
+      "title": "Tỷ giá trung tâm NHNN cho 10/10: 25.629 VND/USD",
+      "url": "https://sbv.gov.vn/vi/t%E1%BB%B7-gi%C3%A1",
+      "sourceId": "src-nhnn",
+      "publishedAt": "2026-10-09T09:00:00+07:00",
+      "tickers": [
+        "USDVND"
+      ],
+      "excerpt": "Giảm 5 đồng.",
+      "whyImpact": "Mốc FX cuối tuần."
+    },
+    {
+      "id": "n-2026-10-11-005",
+      "impact": "low",
+      "impactScore": 40,
+      "rank": 5,
+      "kind": "community",
+      "board": "vn",
+      "title": "Sentiment FireAnt/F247/newF319 mỏng cuối tuần",
+      "url": "https://newf319.com/",
+      "sourceId": "src-newf319",
+      "publishedAt": "2026-10-10T12:00:00+07:00",
+      "tickers": [],
+      "excerpt": "Không phải print.",
+      "whyImpact": "Màu sắc cộng đồng."
+    },
+    {
+      "id": "n-2026-10-11-006",
+      "impact": "medium",
+      "impactScore": 60,
+      "rank": 6,
+      "kind": "news",
+      "board": "vn",
+      "title": "PNJ tăng ~7%, NVL +6,83% phiên 9/10",
+      "url": "https://en.vietstock.vn/2026/10/vn-index-ends-lower-despite-liquidity-hit-over-1-billion-36-644969.htm",
+      "sourceId": "src-vietstock",
+      "publishedAt": "2026-10-10T14:14:00+07:00",
+      "tickers": [
+        "PNJ",
+        "NVL"
+      ],
+      "excerpt": "Bắt đáy cục bộ.",
+      "whyImpact": "Độ rộng vẫn nghiêng giảm."
+    },
+    {
+      "id": "n-2026-10-11-007",
+      "impact": "medium",
+      "impactScore": 55,
+      "rank": 7,
+      "kind": "news",
+      "board": "global",
+      "title": "Hang Seng +1,79% lên 24.211,35",
+      "url": "https://www.marketwatch.com/investing/index/hsi/download-data?countrycode=hk",
+      "sourceId": "src-barrons",
+      "publishedAt": "2026-10-09T16:08:00+07:00",
+      "tickers": [
+        "HSI"
+      ],
+      "excerpt": "Châu Á chủ yếu xanh.",
+      "whyImpact": "Không phải futures thứ Hai."
+    },
+    {
+      "id": "n-2026-10-11-008",
+      "impact": "low",
+      "impactScore": 45,
+      "rank": 8,
+      "kind": "news",
+      "board": "global",
+      "title": "Bitcoin đóng quanh 82.562 USD",
+      "url": "https://finance.yahoo.com/quote/BTC-USD/",
+      "sourceId": "src-yahoo-btc",
+      "publishedAt": "2026-10-09T23:00:00+07:00",
+      "tickers": [
+        "BTC"
+      ],
+      "excerpt": "Crypto rebound.",
+      "whyImpact": "Màu rủi ro."
+    }
+  ]
+}
