@@ -1,0 +1,29 @@
+{
+  "date": "2026-10-12",
+  "generatedAt": "2026-10-12T08:35:00+07:00",
+  "briefKind": "eod_prev+overnight+preopen",
+  "market": {
+    "vnindex_prior": 1735.09,
+    "source": "StockBiz / CafeF locked 9/10",
+    "volume": 911324549,
+    "value_bn": 27542.82,
+    "foreign_net_bn": -9735.11,
+    "proprietary_net_bn": 266,
+    "note": "Foreign mostly MCH agreement; proprietary matched only"
+  },
+  "news_events": [
+    "MCH foreign agreement ~9600 bn",
+    "US equities green Friday",
+    "HSI +1.79%, Nikkei flat"
+  ],
+  "sentiment": {
+    "fireant": "thin",
+    "f247": "discussion on NVL rights, MCH flow",
+    "newf319": "thin"
+  },
+  "gaps": [
+    "No SBV rate for 12/10 yet",
+    "WTI/gold sources disagree slightly",
+    "No official proprietary for full market"
+  ]
+}
