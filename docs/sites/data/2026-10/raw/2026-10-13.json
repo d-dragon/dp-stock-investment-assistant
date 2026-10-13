@@ -1,0 +1,14 @@
+{
+  "schemaVersion": "1.0.0",
+  "date": "2026-10-13",
+  "market": {
+    "vnindex_close_12": 1720.98,
+    "volume_12": 578727890,
+    "value_12": 12977.95,
+    "foreign_net_hose": -583.39,
+    "proprietary_net": 145
+  },
+  "news_events": ["VIC/VHM drag", "foreign sell streak", "proprietary buy VPB"],
+  "sentiment": {"fireant": "cautious around 1720", "f247": "watch support"},
+  "gaps": ["retail print missing", "exact NDX vs Composite minor variance", "SBV rate for 13/10 not yet published at 08:35"]
+}

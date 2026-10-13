@@ -1,0 +1,180 @@
+{
+  "schemaVersion": "1.0.0",
+  "date": "2026-10-13",
+  "generatedAt": "2026-10-13T08:35:00+07:00",
+  "briefKind": "eod_prev+overnight+preopen",
+  "items": [
+    {
+      "id": "n-2026-10-13-001",
+      "impact": "high",
+      "impactScore": 92,
+      "rank": 1,
+      "kind": "market",
+      "board": "vn",
+      "title": "VN-Index đóng 12/10 tại 1.720,98 (−14,11 điểm)",
+      "url": "http://en.stockbiz.vn/HistoricalIndices.aspx",
+      "sourceId": "src-stockbiz",
+      "publishedAt": "2026-10-12T15:05:00+07:00",
+      "tickers": [
+        "VNINDEX"
+      ],
+      "excerpt": "Khối lượng 578,7 triệu cp, giá trị ~12.978 tỷ. HNX +1,18%.",
+      "whyImpact": "Print chính thức khóa mốc hỗ trợ gần."
+    },
+    {
+      "id": "n-2026-10-13-002",
+      "impact": "high",
+      "impactScore": 88,
+      "rank": 2,
+      "kind": "market",
+      "board": "vn",
+      "title": "Khối ngoại bán ròng ~583–615 tỷ trên HOSE",
+      "url": "https://vneconomy.vn/khoi-ngoai-lai-ban-rong-hon-600-ty.htm",
+      "sourceId": "src-vneconomy",
+      "publishedAt": "2026-10-12T21:42:00+07:00",
+      "tickers": [
+        "TCB",
+        "PNJ",
+        "FPT"
+      ],
+      "excerpt": "Chuỗi bán ròng tiếp diễn, tập trung ngân hàng và PNJ.",
+      "whyImpact": "Áp lực dòng tiền ngoại liên tục."
+    },
+    {
+      "id": "n-2026-10-13-003",
+      "impact": "high",
+      "impactScore": 85,
+      "rank": 3,
+      "kind": "news",
+      "board": "vn",
+      "title": "VIC và VHM lấy đi gần 14 điểm của VN-Index",
+      "url": "https://fili.vn/2026/10/nhip-dap-thi-truong-1210-bo-doi-vic-vhm-lay-di-gan-14-diem-vn-index-tiep-tuc-lao-doc-1636-1501314.htm",
+      "sourceId": "src-vneconomy",
+      "publishedAt": "2026-10-12T15:45:00+07:00",
+      "tickers": [
+        "VIC",
+        "VHM"
+      ],
+      "excerpt": "Độ rộng cân bằng 158 tăng / 154 giảm nhưng trụ lớn kéo chỉ số.",
+      "whyImpact": "Tác động điểm số từ blue-chip."
+    },
+    {
+      "id": "n-2026-10-13-004",
+      "impact": "medium",
+      "impactScore": 75,
+      "rank": 4,
+      "kind": "market",
+      "board": "vn",
+      "title": "Tự doanh mua ròng ~145 tỷ, gom mạnh VPB",
+      "url": "https://vietnambiz.vn/tu-doanh-noi-dai-chuoi-mua-rong-co-phieu-vpb-20261012175041672.htm",
+      "sourceId": "src-vietnambiz",
+      "publishedAt": "2026-10-12T17:56:00+07:00",
+      "tickers": [
+        "VPB"
+      ],
+      "excerpt": "Nội địa đỡ một phần, VPB +2,52%.",
+      "whyImpact": "Dòng nội địa đối trọng ngoại."
+    },
+    {
+      "id": "n-2026-10-13-005",
+      "impact": "medium",
+      "impactScore": 70,
+      "rank": 5,
+      "kind": "macro",
+      "board": "vn",
+      "title": "Tỷ giá trung tâm NHNN 25.621 cho 12/10",
+      "url": "https://sbv.gov.vn/vi/t%E1%BB%B7-gi%C3%A1",
+      "sourceId": "src-nhnn",
+      "publishedAt": "2026-10-12T09:00:00+07:00",
+      "tickers": [],
+      "excerpt": "Giảm nhẹ so với mốc trước.",
+      "whyImpact": "Mốc FX ổn định."
+    },
+    {
+      "id": "n-2026-10-13-006",
+      "impact": "medium",
+      "impactScore": 68,
+      "rank": 6,
+      "kind": "news",
+      "board": "global",
+      "title": "Dow +0,38%, Nasdaq −0,44% phiên 12/10",
+      "url": "https://apnews.com/article/wall-street-stocks-dow-nasdaq-f07713e8b2e438ac5903b50f5ce97235",
+      "sourceId": "src-bloomberg",
+      "publishedAt": "2026-10-12T20:28:00+07:00",
+      "tickers": [
+        "DJI",
+        "NDX"
+      ],
+      "excerpt": "Mỹ mixed, dầu tăng, tech yếu.",
+      "whyImpact": "Overnight truyền sang châu Á."
+    },
+    {
+      "id": "n-2026-10-13-007",
+      "impact": "medium",
+      "impactScore": 65,
+      "rank": 7,
+      "kind": "news",
+      "board": "vn",
+      "title": "SHB +4%, HPG +2,99% – nhóm bank/thép xanh",
+      "url": "https://acbs.com.vn/trung-tam-phan-tich/chi-tiet/chatty-stock-12-10-thi-truong-co-dau-hieu-can-bang-nhung-vingroup-keo-vn-index-ve-moc-1-720",
+      "sourceId": "src-cafef",
+      "publishedAt": "2026-10-12T16:16:00+07:00",
+      "tickers": [
+        "SHB",
+        "HPG",
+        "VPB"
+      ],
+      "excerpt": "Độ rộng không xấu hoàn toàn.",
+      "whyImpact": "Phân hóa rõ."
+    },
+    {
+      "id": "n-2026-10-13-008",
+      "impact": "low",
+      "impactScore": 55,
+      "rank": 8,
+      "kind": "community",
+      "board": "vn",
+      "title": "F247: tâm lý thận trọng, chờ tín hiệu 1.720",
+      "url": "https://f247.com/t/nhan-dinh-thi-truong-ngay-13-10-bank-leader-len-truoc-nhom-kenh-duoi-theo-sau/879716",
+      "sourceId": "src-f247",
+      "publishedAt": "2026-10-12T18:48:00+07:00",
+      "tickers": [],
+      "excerpt": "Cộng đồng nhìn hỗ trợ gần.",
+      "whyImpact": "Sentiment, không phải print."
+    },
+    {
+      "id": "n-2026-10-13-009",
+      "impact": "medium",
+      "impactScore": 62,
+      "rank": 9,
+      "kind": "news",
+      "board": "global",
+      "title": "Hang Seng đóng 24.271 (+0,25%), Tokyo nghỉ",
+      "url": "https://longbridge.com/en/news/301560814",
+      "sourceId": "src-barrons",
+      "publishedAt": "2026-10-12T16:13:00+07:00",
+      "tickers": [
+        "HSI"
+      ],
+      "excerpt": "Châu Á hỗ trợ nhẹ.",
+      "whyImpact": "Overnight Asia."
+    },
+    {
+      "id": "n-2026-10-13-010",
+      "impact": "low",
+      "impactScore": 50,
+      "rank": 10,
+      "kind": "community",
+      "board": "vn",
+      "title": "FireAnt: VN-Index 1.720,98, độ rộng cân",
+      "url": "https://fireant.vn/ma-chung-khoan/VNINDEX",
+      "sourceId": "src-fireant",
+      "publishedAt": "2026-10-13T07:22:00+07:00",
+      "tickers": [
+        "VNINDEX"
+      ],
+      "excerpt": "Theo dõi mốc hỗ trợ.",
+      "whyImpact": "Sentiment cộng đồng."
+    }
+  ]
+}
