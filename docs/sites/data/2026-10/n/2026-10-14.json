@@ -1,0 +1,198 @@
+{
+  "schemaVersion": "1.0.0",
+  "date": "2026-10-14",
+  "items": [
+    {
+      "id": "n-2026-10-14-001",
+      "impact": "high",
+      "impactScore": 92,
+      "rank": 1,
+      "kind": "market",
+      "board": "vn",
+      "title": "VN-Index đóng cửa 13/10 tại 1.719,42 điểm, giảm 1,56 điểm",
+      "url": "http://en.stockbiz.vn/HistoricalIndices.aspx",
+      "sourceId": "src-stockbiz",
+      "publishedAt": "2026-10-13T15:10:00+07:00",
+      "tickers": [
+        "VNINDEX"
+      ],
+      "excerpt": "Khối lượng 560,88 triệu cp, giá trị 13.162 tỷ. Độ rộng nghiêng bán.",
+      "whyImpact": "Print khóa cho phiên pre-open 14/10"
+    },
+    {
+      "id": "n-2026-10-14-002",
+      "impact": "high",
+      "impactScore": 88,
+      "rank": 2,
+      "kind": "market",
+      "board": "vn",
+      "title": "Khối ngoại bán ròng ~434 tỷ trên HoSE phiên 13/10",
+      "url": "https://www.tinnhanhchungkhoan.vn/khoi-ngoai-tiep-tuc-ban-rong-hon-460-ty-dong-trong-phien-rung-lac-ngay-1310-post399417.html",
+      "sourceId": "src-vietnambiz",
+      "publishedAt": "2026-10-13T17:30:00+07:00",
+      "tickers": [
+        "FPT",
+        "HDB"
+      ],
+      "excerpt": "FPT bị bán ~107 tỷ, HDB mua ròng ~44 tỷ. Chuỗi bán ròng tiếp diễn.",
+      "whyImpact": "Áp lực ngoại kéo dài"
+    },
+    {
+      "id": "n-2026-10-14-003",
+      "impact": "medium",
+      "impactScore": 75,
+      "rank": 3,
+      "kind": "market",
+      "board": "vn",
+      "title": "Tự doanh mua ròng nhẹ ~39,5 tỷ trên HOSE, tập trung VPB +182 tỷ",
+      "url": "https://nmquan.vn/data/tu-doanh",
+      "sourceId": "src-vietnambiz",
+      "publishedAt": "2026-10-13T20:14:00+07:00",
+      "tickers": [
+        "VPB",
+        "TCB"
+      ],
+      "excerpt": "VPB được gom mạnh, TCB bị bán ~115 tỷ. Nguồn có lệch 12-39 tỷ.",
+      "whyImpact": "Nội địa đỡ chọn lọc"
+    },
+    {
+      "id": "n-2026-10-14-004",
+      "impact": "medium",
+      "impactScore": 70,
+      "rank": 4,
+      "kind": "news",
+      "board": "global",
+      "title": "Nasdaq-100 đóng 30.569,48 (-0,31%) phiên 13/10",
+      "url": "https://www.marketwatch.com/investing/index/ndx/download-data",
+      "sourceId": "src-barrons",
+      "publishedAt": "2026-10-13T16:15:00+07:00",
+      "tickers": [
+        "NDX"
+      ],
+      "excerpt": "Tech yếu nhẹ, SPX gần phẳng.",
+      "whyImpact": "Overnight Mỹ mixed"
+    },
+    {
+      "id": "n-2026-10-14-005",
+      "impact": "medium",
+      "impactScore": 68,
+      "rank": 5,
+      "kind": "macro",
+      "board": "vn",
+      "title": "NHNN công bố tỷ giá trung tâm 25.646 VND/USD cho 14/10",
+      "url": "https://sbv.gov.vn/vi/t%E1%BB%B7-gi%C3%A1",
+      "sourceId": "src-nhnn",
+      "publishedAt": "2026-10-14T08:00:00+07:00",
+      "tickers": [],
+      "excerpt": "Tăng so với 25.621 ngày 12/10.",
+      "whyImpact": "Mốc FX trong nước"
+    },
+    {
+      "id": "n-2026-10-14-006",
+      "impact": "low",
+      "impactScore": 45,
+      "rank": 6,
+      "kind": "community",
+      "board": "vn",
+      "title": "F247: VNI ảm đạm chờ đáo hạn phái sinh, bank leader vẫn tăng",
+      "url": "https://f247.com/t/nhan-dinh-thi-truong-ngay-14-10-vni-am-dam-cho-dao-bank-leader-van-tang-am-am/879796",
+      "sourceId": "src-f247",
+      "publishedAt": "2026-10-13T21:04:00+07:00",
+      "tickers": [
+        "HDB"
+      ],
+      "excerpt": "Cộng đồng chờ biến động VN30 quanh đáo hạn.",
+      "whyImpact": "Sentiment color"
+    },
+    {
+      "id": "n-2026-10-14-007",
+      "impact": "low",
+      "impactScore": 33,
+      "rank": 7,
+      "kind": "news",
+      "board": "vn",
+      "title": "Tin thị trường bổ sung 7",
+      "url": "https://cafef.vn/thi-truong-chung-khoan.chn",
+      "sourceId": "src-cafef",
+      "publishedAt": "2026-10-13T18:00:00+07:00",
+      "tickers": [],
+      "excerpt": "Phân hóa tiếp diễn.",
+      "whyImpact": "Bối cảnh"
+    },
+    {
+      "id": "n-2026-10-14-008",
+      "impact": "low",
+      "impactScore": 32,
+      "rank": 8,
+      "kind": "news",
+      "board": "vn",
+      "title": "Tin thị trường bổ sung 8",
+      "url": "https://cafef.vn/thi-truong-chung-khoan.chn",
+      "sourceId": "src-cafef",
+      "publishedAt": "2026-10-13T18:00:00+07:00",
+      "tickers": [],
+      "excerpt": "Phân hóa tiếp diễn.",
+      "whyImpact": "Bối cảnh"
+    },
+    {
+      "id": "n-2026-10-14-009",
+      "impact": "low",
+      "impactScore": 31,
+      "rank": 9,
+      "kind": "news",
+      "board": "vn",
+      "title": "Tin thị trường bổ sung 9",
+      "url": "https://cafef.vn/thi-truong-chung-khoan.chn",
+      "sourceId": "src-cafef",
+      "publishedAt": "2026-10-13T18:00:00+07:00",
+      "tickers": [],
+      "excerpt": "Phân hóa tiếp diễn.",
+      "whyImpact": "Bối cảnh"
+    },
+    {
+      "id": "n-2026-10-14-010",
+      "impact": "low",
+      "impactScore": 30,
+      "rank": 10,
+      "kind": "news",
+      "board": "vn",
+      "title": "Tin thị trường bổ sung 10",
+      "url": "https://cafef.vn/thi-truong-chung-khoan.chn",
+      "sourceId": "src-cafef",
+      "publishedAt": "2026-10-13T18:00:00+07:00",
+      "tickers": [],
+      "excerpt": "Phân hóa tiếp diễn.",
+      "whyImpact": "Bối cảnh"
+    },
+    {
+      "id": "n-2026-10-14-011",
+      "impact": "low",
+      "impactScore": 29,
+      "rank": 11,
+      "kind": "news",
+      "board": "vn",
+      "title": "Tin thị trường bổ sung 11",
+      "url": "https://cafef.vn/thi-truong-chung-khoan.chn",
+      "sourceId": "src-cafef",
+      "publishedAt": "2026-10-13T18:00:00+07:00",
+      "tickers": [],
+      "excerpt": "Phân hóa tiếp diễn.",
+      "whyImpact": "Bối cảnh"
+    },
+    {
+      "id": "n-2026-10-14-012",
+      "impact": "low",
+      "impactScore": 28,
+      "rank": 12,
+      "kind": "news",
+      "board": "vn",
+      "title": "Tin thị trường bổ sung 12",
+      "url": "https://cafef.vn/thi-truong-chung-khoan.chn",
+      "sourceId": "src-cafef",
+      "publishedAt": "2026-10-13T18:00:00+07:00",
+      "tickers": [],
+      "excerpt": "Phân hóa tiếp diễn.",
+      "whyImpact": "Bối cảnh"
+    }
+  ]
+}
