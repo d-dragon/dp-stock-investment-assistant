@@ -3,11 +3,11 @@
 | Field | Value |
 |---|---|
 | Document | User Journeys with Wireframes · DP Stock-Investment Assistant |
-| Version | v1.0.0 |
-| Date | 2026-09-25 |
+| Version | v1.0.2 |
+| Date | 2026-10-08 |
 | Status | Review · frames = snapshot release journey-v1.0.0 |
 | Owner | Phan Duy |
-| Related | [Spec v1.7.0](./PRODUCT_SPECIFICATION.md) · [IA map v1.0.0](./CONCEPTUAL_IA_MAP.md) · `frames.json` → Figma (Journeys v1.0.0) |
+| Related | [Spec v1.7.2](./PRODUCT_SPECIFICATION.md) · [IA map v1.0.1](./CONCEPTUAL_IA_MAP.md) · `frames.json` → Figma (Journeys v1.0.0) |
 
 > **Purpose.** One PO-facing doc: the Phase 1 conceptual journeys for the Techno-Fundamental Investor (TFI) and the frames that make each step evaluable.  
 > **Not this doc:** pixel UI, components, routes, FE stack, Gen-UI widgets, Mentor, chart libraries.
@@ -24,7 +24,7 @@ Terms follow Spec §0.2 (glossary). This doc defines no terms of its own.
 
 1. Skim §1.3 for the shell and the locks every frame obeys.
 2. Walk J-TFI-1 (§2.1): Decision gate Pass → Position on Portfolio.
-3. Walk J-TFI-2 (§2.2): Decision gate Fail → Revise → no Position; back to the Working Thesis.
+3. Walk J-TFI-2 (§2.2): at the Decision gate, Revise records Fail (Decision record kept, unmet items listed), no Position; back to the Working Thesis.
 4. Open a frame (§3) when you need the picture.
 5. Use §4 for the clickable Figma prototype.
 
@@ -44,7 +44,7 @@ Every frame follows these rules; they are defined elsewhere and not restated her
 - **Layout lock** (IA §2.6): Z2 Top chrome holds context plus the right-corner utilities slot; Z1 Left sidebar sits left of Z3 and shows conceptual Dual-Track and Lifecycle status only (no chips, no hotspots); Z3 Main workspace and Z4 AI companion take the remaining width.
 - **Stage moves:** Z3 CTA buttons (**Continue to Working Thesis**, **Go to Decision gate**). The Z1 Lifecycle list is status, not navigation.
 - **Sandbox chart lock** (IA §2.4): docked price chart in Sandbox Z3; it yields at the Decision gate and named levels travel on Pass; Track B does not auto-apply it.
-- **Ontology and gate outcomes** (Spec §4.6): Pass → Position; Fail → Revise, no Position; Investment Case optional (Case-on / Case-off).
+- **Ontology and gate outcomes** (Spec §4.6): Pass → Position + Decision record; Fail via Revise → Decision record kept (outcome Fail), no Position; Investment Case optional (Case-on / Case-off).
 - **Default landing:** Insights (IA §8 #2).
 
 ### 1.4 Index
@@ -80,28 +80,28 @@ flowchart LR
 |---|---|---|---|---|---|
 | **J-TFI-1.1** | Gather evidence on a symbol | Insights first; provenance; both tracks visible; no Position | Z2 symbol + Insights · Z1 A, > Insights · Z3 Insight + docked chart · Z4 | W2b | Open Workspace / pick symbol → Z3 CTA **Continue to Working Thesis** |
 | **J-TFI-1.2** | Form the Working Thesis with Bull/Bear | Multi-stance ≠ Dual-Track; still Track A; no Position | Z2 Working Thesis · Z1 A, > Thesis · Z3 Working Thesis + Multi-stance + docked chart · Z4 | W3b | From Insights → Z3 CTA **Go to Decision gate** |
-| **J-TFI-1.3** | Promote or revise | Pre-mortem checklist; Pass creates a Position, Fail does not; no Case is created | Z2 Decision gate · Z1 A, > Decision · Z3 checklist, chart yielded · Z4 | W4 | From Working Thesis → **Pass → Position** (J-TFI-1.4) or **Revise** (J-TFI-2) |
+| **J-TFI-1.3** | Promote or revise | Checklist fixed at gate open; Pass available only when all mandatory items are met and creates a Position + Decision record; Revise records Fail, no Position; no Case is created | Z2 Decision gate · Z1 A, > Decision · Z3 checklist, chart yielded · Z4 | W4 | From Working Thesis → **Pass → Position** (J-TFI-1.4) or **Revise** (J-TFI-2) |
 | **J-TFI-1.4** | Work the Position on Track B | Portfolio hosts the Position; Thesis attached; Case chip only when Case-on | Z2 Position + Portfolio (+ Case chip) · Z1 B, > Portfolio · Z3 size / stop / levels · Z4 | W6 | Decision gate Pass → Position active (size, stop, carried levels) |
 
 **Step notes** (branches and out of scope):
 - **1.1:** may stay on Insights; screener entry is J-TFI-B1. A Case may be linked at any time (soft UX). Out of scope: FE pixels; treating the Case as required.
 - **1.2:** may go back to Insights (prototype link, §2.4); optional Case link at Thesis (soft UX). Out of scope: Bull/Bear as separate tracks; Case = Thesis.
 - **1.3:** checklist payload = fundamental ↔ technical alignment, named levels, size vs book (peek only). Out of scope: silent risk mutation; a Case as the Pass result.
-- **1.4:** the Sandbox stays visible; Monitoring comes later; UI may offer "Start a Case for this Position". Out of scope: the chart-anchor rule on Track B; the Case as an execution object.
+- **1.4:** the Sandbox stays visible; Phase 1 shows only a light status cue on the Position (full Monitoring is Phase 2); UI may offer "Start a Case for this Position". Out of scope: the chart-anchor rule on Track B; the Case as an execution object.
 
 **Soft UX lean (not ontology).** The UI may offer a Case link at Thesis or after Pass ("Start a Case for this Position", or attach the Position to an existing Case). Optional only.
 
 ### 2.2 J-TFI-2 · Fail → Revise → Working Thesis (no Position)
 
-**Intent.** Same path to the Decision gate, but the checklist is not met: the outcome is Fail and the action is **Revise** (Spec §4.6). No Position is created; the work returns to the Working Thesis in the Sandbox, where it can be revised, parked or dropped.
+**Intent.** Same path to the Decision gate, but one or more mandatory items are unmet, so Pass stays unavailable; the user presses **Revise** (no Fail button), and the Decision record is kept with outcome Fail and the unmet items listed (Spec §4.6, §4.7 #8). No Position is created; the work returns to the Working Thesis in the Sandbox, where it can be revised, parked or dropped.
 
 | Step | Delta vs J-TFI-1 | Frame |
 |---|---|---|
 | **J-TFI-2.1–2.2** | Same as J-TFI-1.1–1.2 | W2b / W3b |
-| **J-TFI-2.3** | Checklist not met (Fail); choose **Revise** at the Decision gate | W4 |
+| **J-TFI-2.3** | Mandatory items unmet, Pass unavailable; choose **Revise** at the Decision gate → Decision record (outcome Fail, unmet items shown) | W4 |
 | **J-TFI-2.4** | Back to the Working Thesis (or park); no Position; still Sandbox | W5 |
 
-**Rule.** Fail never creates a Position and never mutates Portfolio risk. The Case state is unchanged (Case-on or Case-off); Fail neither creates nor requires a Case. An archive or Journal stub is optional later (J-TFI-B4).
+**Rule.** Fail keeps a Decision record (outcome Fail) but never creates a Position and never mutates Portfolio risk. The Case state is unchanged (Case-on or Case-off); Fail neither creates nor requires a Case. An archive or Journal stub is optional later (J-TFI-B4).
 
 ### 2.3 Branches (Phase 1: named, no frames)
 
@@ -141,7 +141,7 @@ Frames prove the IA map; they do not define a second zone map. Each frame shows 
 | W2b | Insights + chart | Sandbox chart lock with the Insight Core | **J-TFI-1.1**, **J-TFI-2.1** |
 | W3 | Working Thesis + Multi-stance (no-chart variant) | Bull/Bear ≠ Dual-Track | J-TFI-1.2 (variant) |
 | W3b | Working Thesis + chart | Sandbox chart lock with the Working Thesis Core | **J-TFI-1.2**, **J-TFI-2.2** |
-| W4 | Decision gate | Promotion A → B; chart yields; Pass → Position, Revise | **J-TFI-1.3**, **J-TFI-2.3** |
+| W4 | Decision gate | Promotion A → B; chart yields; Pass (only when all mandatory items are met) → Position; Revise → Fail recorded, unmet items shown | **J-TFI-1.3**, **J-TFI-2.3** |
 | W5 | Fail/Revise · Working Thesis | No Position; revise or park | **J-TFI-2.4** |
 | W6 | Portfolio after Pass · Position | Position born at Pass; Thesis = why we hold; Case chip only when Case-on | **J-TFI-1.4** |
 
@@ -184,7 +184,7 @@ Frames prove the IA map; they do not define a second zone map. Each frame shows 
 
 ![W4 · Decision gate: pre-mortem checklist owns Z3, chart yielded to a thin levels strip, Pass → Position and Revise buttons](../figma/snapshots/journey-v1.0.0/Design%20System/Wireframe/W4.png)
 
-- **Intent:** explicit promote-or-revise gate; the checklist owns Z3 and the chart yields to a thin levels strip; Pass → Position, Revise creates nothing (Spec §4.6).
+- **Intent:** explicit promote-or-revise gate; the checklist owns Z3 and the chart yields to a thin levels strip; Pass is available only when every mandatory item is met and creates the Position + Decision record; Revise (no Fail button) records Fail, shows the unmet items, and creates no Position (Spec §4.6).
 - **Serves:** J-TFI-1.3 (Pass → W6) and J-TFI-2.3 (Revise → W5).
 
 ### 3.8 W5 · Fail/Revise · Working Thesis
@@ -198,7 +198,7 @@ Frames prove the IA map; they do not define a second zone map. Each frame shows 
 
 ![W6 · Position on Track B after Pass: size, stop, carried levels, Thesis as why we hold, optional Case chip](../figma/snapshots/journey-v1.0.0/Design%20System/Wireframe/W6.png)
 
-- **Intent:** Track B emphasized; the Position exists because Pass created it, with carried levels and the Thesis attached as why we hold; the Case chip shows only when Case-on.
+- **Intent:** Track B emphasized; the Position exists because Pass created it, with carried levels and the Thesis attached as why we hold; the Case chip shows only when Case-on. Phase 1 Monitoring is a light status cue on this Position, not a separate surface (Spec §3.4, §4.5).
 - **Serves:** J-TFI-1.4.
 - **Note:** the snapshot still shows a dashed "Thesis link" hotspot; that link was dropped in v1.0.0 (a post-Pass Thesis view is a future frame, §6).
 
@@ -220,8 +220,8 @@ W2b → W3b is the Z3 CTA **Continue to Working Thesis**; W3b → W4 is the Z3 C
 ## 5. Success check
 
 A PO can answer from this doc alone:
-- What Pass does: creates a Position on Portfolio (size, stop, official book); the Thesis attaches as why we hold.
-- What Fail does: nothing is created; Revise returns the work to the Working Thesis in the Sandbox.
+- What Pass does: creates a Position on Portfolio (size, stop, official book) and a Decision record; the Thesis attaches as why we hold.
+- What Fail does: Pass stays unavailable while mandatory items are unmet; Revise keeps a Decision record (outcome Fail, unmet items listed) and no Position is created; Revise returns the work to the Working Thesis in the Sandbox.
 - What a Case is: an optional binder at any time, not born at Pass and not the Position; research never requires one.
 - Where things sit: Z2 Top chrome (+ utilities slot), Z1 Left sidebar with Dual-Track and Lifecycle status, Z3 Main workspace, Z4 AI companion (not the product).
 - How Dual-Track, Multi-stance and the Lifecycle differ, and that stage moves use Z3 CTAs.
@@ -235,7 +235,7 @@ A PO can answer from this doc alone:
 |---|---|---|
 | 1 | Post-Pass "why we hold" Thesis view | Future frame. Would restore a W6 → Thesis link, targeting a post-Pass view rather than the pre-Pass W3b. |
 | 2 | Per-frame Figma links | Add "Live frame (working)" links per frame once node ids are on record from a Validate run. |
-| 3 | Next snapshot release | Re-export the 8 PNGs after the v1.0.0 text fixes (zone and track labels, W6 link removal, Z1 title overlap fix in the plugin). |
+| 3 | Next snapshot release | Re-export the 8 PNGs after the v1.0.0 text fixes (zone and track labels, W6 link removal, Z1 title overlap fix in the plugin); W4 Pass-disabled state and unmet-items list; W6 light status cue. |
 | 4 | Remove Appendix A | Drop the legacy ASCII frames in the next version. |
 | 5 | Detailed Z1 sidebar and Z2 utilities design | Deferred per IA §2.6. |
 
@@ -245,6 +245,8 @@ A PO can answer from this doc alone:
 
 | Version | Date | Change |
 |---|---|---|
+| v1.0.2 | 2026-10-14 | Aligned to Spec v1.7.2: W4 checklist meaning; Fail keeps a Decision record, no Position; Phase 1 Monitoring is a light status cue on the Position (J-TFI-1.4, W6). Frames unchanged; see backlog #3. |
+| v1.0.1 | 2026-10-08 | Fail wording aligned to Phan's 2026-10-08 decision: Fail keeps a Decision record (outcome Fail) and creates no Position (§3.7 W4 intent, §5). Frames unchanged. |
 | v1.0.0 | 2026-09-25 | Cleanup release. ASCII frames replaced by snapshot images (release journey-v1.0.0), old ASCII moved to Appendix A. Precedence rule added (§1.2). Shell, chart and ontology rules replaced by pointers to IA §2.6 / §2.4 and Spec §4.6. Canonical zone, track and Thesis names. Fail = outcome, Revise = action. W6 → W3b "Thesis link" dropped (future frame, §6). Prototype-only links listed (§2.4). Step table split into steps + notes. Numbered sections; uniform header. |
 | v0.8.2 | 2026-09-25 | Follow IA v0.9.1: Z1 column in all 8 frames shows the conceptual Dual-Track and Lifecycle groups with the active track and stage marked. |
 | v0.8.1 | 2026-09-25 | Follow IA v0.9.0: single narrower Z1 sidebar; Z2 utilities slot; stage moves via Z3 CTAs. |
@@ -412,4 +414,4 @@ Kept for one version for reference only; superseded by §3 and removed in the ne
 
 ---
 
-*End of User Journeys with Wireframes · v1.0.0 · 2026-09-25*
+*End of User Journeys with Wireframes · v1.0.1 · 2026-10-08*
