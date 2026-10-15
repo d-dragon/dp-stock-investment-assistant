@@ -1,0 +1,212 @@
+{
+  "schemaVersion": "1.0.0",
+  "date": "2026-10-15",
+  "generatedAt": "2026-10-15T08:35:00+07:00",
+  "briefKind": "eod_prev+overnight+preopen",
+  "items": [
+    {
+      "id": "n-2026-10-15-001",
+      "impact": "high",
+      "impactScore": 94,
+      "rank": 1,
+      "kind": "market",
+      "board": "vn",
+      "title": "VN-Index đóng cửa 14/10 tại 1.704,87 điểm, giảm 14,55 điểm",
+      "url": "http://en.stockbiz.vn/HistoricalIndices.aspx",
+      "sourceId": "src-stockbiz",
+      "publishedAt": "2026-10-14T15:10:00+07:00",
+      "tickers": [
+        "VNINDEX"
+      ],
+      "excerpt": "Khối lượng 584,04 triệu cp, giá trị 13.732 tỷ. Phiên thứ năm liên tiếp giảm.",
+      "whyImpact": "Print khóa, sát hỗ trợ 1.700"
+    },
+    {
+      "id": "n-2026-10-15-002",
+      "impact": "high",
+      "impactScore": 90,
+      "rank": 2,
+      "kind": "market",
+      "board": "vn",
+      "title": "Khối ngoại bán ròng ~770 tỷ trên HoSE phiên 14/10",
+      "url": "https://vietnambiz.vn/tu-doanh-miet-mai-gom-vpb-ban-rong-tcb-ba-phien-lien-tiep-2026101417371466.htm",
+      "sourceId": "src-vietnambiz",
+      "publishedAt": "2026-10-14T17:37:00+07:00",
+      "tickers": [
+        "VIC",
+        "VHM",
+        "MBB"
+      ],
+      "excerpt": "StockBiz: mua 1.399 − bán 2.169. VIC −153, VHM −152 tỷ. Chuỗi bán ròng thứ 16.",
+      "whyImpact": "Áp lực ngoại kéo dài, tập trung Vin"
+    },
+    {
+      "id": "n-2026-10-15-003",
+      "impact": "high",
+      "impactScore": 82,
+      "rank": 3,
+      "kind": "news",
+      "board": "global",
+      "title": "Nasdaq-100 đóng 29.950,82 (−2,02%) sau CPI nóng",
+      "url": "https://www.bloomberg.com/quote/NDX:IND",
+      "sourceId": "src-bloomberg",
+      "publishedAt": "2026-10-14T16:15:00+07:00",
+      "tickers": [
+        "NDX"
+      ],
+      "excerpt": "SPX −1,11% tại 7.718,94. Kỳ vọng Fed thắt chặt hơn.",
+      "whyImpact": "Overnight Mỹ risk-off mạnh, tech yếu"
+    },
+    {
+      "id": "n-2026-10-15-004",
+      "impact": "medium",
+      "impactScore": 76,
+      "rank": 4,
+      "kind": "market",
+      "board": "vn",
+      "title": "Tự doanh mua ròng ~425 tỷ trên HOSE, VPB +227 tỷ",
+      "url": "https://vietnambiz.vn/tu-doanh-miet-mai-gom-vpb-ban-rong-tcb-ba-phien-lien-tiep-2026101417371466.htm",
+      "sourceId": "src-vietnambiz",
+      "publishedAt": "2026-10-14T18:00:00+07:00",
+      "tickers": [
+        "VPB"
+      ],
+      "excerpt": "Nội địa đỡ chọn lọc bank.",
+      "whyImpact": "Cân bằng một phần áp lực ngoại"
+    },
+    {
+      "id": "n-2026-10-15-005",
+      "impact": "medium",
+      "impactScore": 70,
+      "rank": 5,
+      "kind": "macro",
+      "board": "vn",
+      "title": "Tỷ giá trung tâm NHNN giữ 25.646 VND/USD cho 15/10",
+      "url": "https://vietbao.vn/ty-gia-usd-hom-nay-1510-ty-gia-trung-tam-on-dinh-o-muc-25646-dongusd-611493.html",
+      "sourceId": "src-nhnn",
+      "publishedAt": "2026-10-15T05:18:00+07:00",
+      "tickers": [],
+      "excerpt": "Ổn định so với 14/10. Ngân hàng thương mại tăng nhẹ.",
+      "whyImpact": "Mốc FX trong nước ổn"
+    },
+    {
+      "id": "n-2026-10-15-006",
+      "impact": "medium",
+      "impactScore": 65,
+      "rank": 6,
+      "kind": "news",
+      "board": "global",
+      "title": "DXY đóng ~102,4–102,5 (nguồn lệch) sau CPI",
+      "url": "https://portfolio-terminal.com/markets/us-dollar-index",
+      "sourceId": "src-barrons",
+      "publishedAt": "2026-10-14T20:00:00+07:00",
+      "tickers": [
+        "DXY"
+      ],
+      "excerpt": "USD vững do kỳ vọng lãi suất.",
+      "whyImpact": "Truyền áp lực lên FX EM"
+    },
+    {
+      "id": "n-2026-10-15-007",
+      "impact": "low",
+      "impactScore": 48,
+      "rank": 7,
+      "kind": "community",
+      "board": "vn",
+      "title": "F247: VNINDEX NGHỊCH LÍ — sau thép sẽ tới BĐS & CK?",
+      "url": "https://f247.com/t/nhan-dinh-thi-truong-ngay-15-10-vnindex-nghich-li-sau-thep-se-toi-bds-ck/879864",
+      "sourceId": "src-f247",
+      "publishedAt": "2026-10-14T20:32:00+07:00",
+      "tickers": [
+        "HPG",
+        "VIC"
+      ],
+      "excerpt": "Cộng đồng thấy phân hóa, bank/thép đỡ trong khi Vin giảm.",
+      "whyImpact": "Sentiment color, không phải print"
+    },
+    {
+      "id": "n-2026-10-15-008",
+      "impact": "low",
+      "impactScore": 40,
+      "rank": 8,
+      "kind": "news",
+      "board": "vn",
+      "title": "HNX-Index đóng 265,16 (+0,34%) phiên 14/10",
+      "url": "https://nhandan.vn/chung-khoan-ngay-1410-vn-index-mat-hon-14-diem-co-phieu-bat-dong-san-gay-suc-ep-len-thi-truong-post995172.html",
+      "sourceId": "src-cafef",
+      "publishedAt": "2026-10-14T18:47:00+07:00",
+      "tickers": [
+        "HNX"
+      ],
+      "excerpt": "Phân hóa sàn.",
+      "whyImpact": "Bối cảnh độ rộng"
+    },
+    {
+      "id": "n-2026-10-15-009",
+      "impact": "low",
+      "impactScore": 35,
+      "rank": 9,
+      "kind": "news",
+      "board": "global",
+      "title": "Nikkei 225 đóng 67.744 (−0,05%), HSI 24.314 (−0,13%)",
+      "url": "https://english.news.cn/20261014/9bd2afeffd724700a264e600d0e89739/c.html",
+      "sourceId": "src-bloomberg",
+      "publishedAt": "2026-10-14T17:10:00+07:00",
+      "tickers": [
+        "NKY",
+        "HSI"
+      ],
+      "excerpt": "Châu Á yếu nhẹ trước CPI Mỹ.",
+      "whyImpact": "Bối cảnh khu vực"
+    },
+    {
+      "id": "n-2026-10-15-010",
+      "impact": "low",
+      "impactScore": 30,
+      "rank": 10,
+      "kind": "community",
+      "board": "vn",
+      "title": "FireAnt: ngoại nối chuỗi bán ròng, VIC/VHM chịu áp lực",
+      "url": "https://fireant.vn/ma-chung-khoan/VIC",
+      "sourceId": "src-fireant",
+      "publishedAt": "2026-10-14T20:39:00+07:00",
+      "tickers": [
+        "VIC"
+      ],
+      "excerpt": "Cộng đồng theo dõi sát hỗ trợ 1.700.",
+      "whyImpact": "Sentiment color"
+    },
+    {
+      "id": "n-2026-10-15-011",
+      "impact": "low",
+      "impactScore": 28,
+      "rank": 11,
+      "kind": "news",
+      "board": "global",
+      "title": "Vàng đóng ~4.110–4.120 USD (nguồn lệch) sau CPI",
+      "url": "https://www.ausecure.com/gold-market-close-oct-14-2026/",
+      "sourceId": "src-barrons",
+      "publishedAt": "2026-10-14T17:00:00+07:00",
+      "tickers": [
+        "XAU"
+      ],
+      "excerpt": "Giảm do USD và lợi suất tăng.",
+      "whyImpact": "Hàng hóa"
+    },
+    {
+      "id": "n-2026-10-15-012",
+      "impact": "low",
+      "impactScore": 25,
+      "rank": 12,
+      "kind": "news",
+      "board": "vn",
+      "title": "Thanh khoản HoSE ~13.732 tỷ, thấp so với trung bình gần đây",
+      "url": "http://en.stockbiz.vn/HistoricalIndices.aspx",
+      "sourceId": "src-stockbiz",
+      "publishedAt": "2026-10-14T15:10:00+07:00",
+      "tickers": [],
+      "excerpt": "Cầu bắt đáy chưa mạnh.",
+      "whyImpact": "Liquidity"
+    }
+  ]
+}
