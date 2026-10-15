@@ -1,0 +1,183 @@
+{
+  "schemaVersion": "1.0.0",
+  "date": "2026-10-10",
+  "generatedAt": "2026-10-10T08:35:00+07:00",
+  "briefKind": "eod_prev+overnight+preopen",
+  "items": [
+    {
+      "id": "n-2026-10-10-001",
+      "impact": "high",
+      "impactScore": 92,
+      "rank": 1,
+      "kind": "market",
+      "board": "vn",
+      "title": "StockBiz khóa VN-Index 9/10 tại 1.735,09 (−0,22%), khối lượng 911,3 triệu, giá trị 27.542,82 tỷ",
+      "url": "http://en.stockbiz.vn/HistoricalIndices.aspx",
+      "sourceId": "src-stockbiz",
+      "publishedAt": "2026-10-09T15:05:00+07:00",
+      "tickers": [
+        "VNINDEX"
+      ],
+      "excerpt": "Foreign buy 3.561,55 tỷ / sell 13.296,66 tỷ; HNX 261,60 (+2,10%).",
+      "whyImpact": "Print khóa cho bản tin pre-open 10/10."
+    },
+    {
+      "id": "n-2026-10-10-002",
+      "impact": "high",
+      "impactScore": 88,
+      "rank": 2,
+      "kind": "news",
+      "board": "vn",
+      "title": "Khối ngoại bán ròng ~9.735 tỷ trên HoSE, chủ yếu thỏa thuận MCH ~9.641 tỷ (64,2 triệu cp)",
+      "url": "https://www.dnse.com.vn/senses/tin-tuc/thanh-khoan-thi-truong-chung-khoan-tang-vot-khoi-ngoai-ban-rong-hon-9200-ty-dong-35288083",
+      "sourceId": "src-cafef",
+      "publishedAt": "2026-10-09T15:43:00+07:00",
+      "tickers": [
+        "MCH"
+      ],
+      "excerpt": "Lepus (công ty con Masan) đăng ký mua 73 triệu cp MCH.",
+      "whyImpact": "Giải thích toàn bộ print ngoại bán; không phải bán ròng khớp lệnh thông thường."
+    },
+    {
+      "id": "n-2026-10-10-003",
+      "impact": "high",
+      "impactScore": 78,
+      "rank": 3,
+      "kind": "news",
+      "board": "global",
+      "title": "Phố Wall 9/10 đóng cửa xanh: Dow 51.654,95 (+0,83%), S&P 500 7.811,54 (+0,59%), Nasdaq-100 30.883,15 (+0,51%)",
+      "url": "https://finance.yahoo.com/markets/world-indices/articles/major-us-stock-indexes-fared-201628920.html",
+      "sourceId": "src-bloomberg",
+      "publishedAt": "2026-10-09T20:16:00+07:00",
+      "tickers": [
+        "DJI",
+        "SPX",
+        "NDX"
+      ],
+      "excerpt": "Tech rebound after OpenAI revenue noise; 10Y ~5,24%.",
+      "whyImpact": "Overnight risk-on truyền vào phiên thứ Hai 13/10."
+    },
+    {
+      "id": "n-2026-10-10-004",
+      "impact": "medium",
+      "impactScore": 72,
+      "rank": 4,
+      "kind": "macro",
+      "board": "vn",
+      "title": "NHNN công bố tỷ giá trung tâm 10/10/2026: 25.629 VND/USD (văn bản 427/TB-NHNN ngày 09/10)",
+      "url": "https://sbv.gov.vn/vi/t%E1%BB%B7-gi%C3%A1",
+      "sourceId": "src-nhnn",
+      "publishedAt": "2026-10-09T09:00:00+07:00",
+      "tickers": [
+        "USDVND"
+      ],
+      "excerpt": "Giảm 5 đồng so với 8/10.",
+      "whyImpact": "Mốc FX cho tuần tới."
+    },
+    {
+      "id": "n-2026-10-10-005",
+      "impact": "medium",
+      "impactScore": 68,
+      "rank": 5,
+      "kind": "news",
+      "board": "vn",
+      "title": "PNJ tăng ~7% chấm dứt chuỗi 13 phiên giảm; NVL +6,83%",
+      "url": "https://vietnamnews.vn/economy/1801641/vn-index-ends-lower-despite-liquidity-hit-over-1-billion.html",
+      "sourceId": "src-vietnambiz",
+      "publishedAt": "2026-10-09T19:08:00+07:00",
+      "tickers": [
+        "PNJ",
+        "NVL"
+      ],
+      "excerpt": "Độ rộng vẫn nghiêng giảm 130 tăng / 175 giảm.",
+      "whyImpact": "Tín hiệu bắt đáy cục bộ, không đảo chỉ số."
+    },
+    {
+      "id": "n-2026-10-10-006",
+      "impact": "medium",
+      "impactScore": 65,
+      "rank": 6,
+      "kind": "market",
+      "board": "global",
+      "title": "Hang Seng 9/10 đóng 24.211,35 (+1,79%); Nikkei 69.030,92 (−0,02%)",
+      "url": "https://indexes.nikkei.co.jp/en/nkave/statistics",
+      "sourceId": "src-barrons",
+      "publishedAt": "2026-10-09T16:00:00+07:00",
+      "tickers": [
+        "HSI",
+        "NKY"
+      ],
+      "excerpt": "Hàn/Đài đóng cửa lễ.",
+      "whyImpact": "Châu Á phiên trước xanh nhẹ, không phải futures thứ Hai."
+    },
+    {
+      "id": "n-2026-10-10-007",
+      "impact": "medium",
+      "impactScore": 60,
+      "rank": 7,
+      "kind": "macro",
+      "board": "global",
+      "title": "DXY đóng ~102,23; WTI và vàng các nguồn lệch (WTI ~90–91,7; vàng ~4.208–4.220)",
+      "url": "https://www.barrons.com/market-data",
+      "sourceId": "src-barrons",
+      "publishedAt": "2026-10-09T21:00:00+07:00",
+      "tickers": [
+        "DXY",
+        "WTI",
+        "XAU"
+      ],
+      "excerpt": "Không khóa một print settlement.",
+      "whyImpact": "Kênh dầu/FX truyền sang PLX và tỷ giá."
+    },
+    {
+      "id": "n-2026-10-10-008",
+      "impact": "low",
+      "impactScore": 48,
+      "rank": 8,
+      "kind": "news",
+      "board": "vn",
+      "title": "Tự doanh khớp lệnh mua ròng 266 tỷ (Fili); ngoại khớp lệnh bán ròng ~185 tỷ",
+      "url": "https://fili.vn/2026/10/theo-dau-dong-tien-ca-map-0910-khoi-ngoai-ban-rong-185-ty-dong-tu-doanh-mua-rong-266-ty-dong-830-1501105.htm",
+      "sourceId": "src-vneconomy",
+      "publishedAt": "2026-10-09T17:40:00+07:00",
+      "tickers": [
+        "VPB",
+        "HPG"
+      ],
+      "excerpt": "Tách khỏi khối thỏa thuận MCH.",
+      "whyImpact": "Dòng tổ chức nội địa không đỡ được chỉ số."
+    },
+    {
+      "id": "n-2026-10-10-009",
+      "impact": "low",
+      "impactScore": 42,
+      "rank": 9,
+      "kind": "community",
+      "board": "vn",
+      "title": "FireAnt / F247 / newF319 mỏng trên phiên 9/10 — không phải print",
+      "url": "https://fireant.vn/cong-dong/moi-nhat",
+      "sourceId": "src-fireant",
+      "publishedAt": "2026-10-09T20:00:00+07:00",
+      "tickers": [],
+      "excerpt": "Chỉ màu tâm lý.",
+      "whyImpact": "Community ≠ dòng ngoại."
+    },
+    {
+      "id": "n-2026-10-10-010",
+      "impact": "low",
+      "impactScore": 40,
+      "rank": 10,
+      "kind": "news",
+      "board": "global",
+      "title": "Bitcoin đóng 9/10 quanh 82.562 USD (nguồn lệch nhẹ)",
+      "url": "https://finance.yahoo.com/quote/BTC-USD/",
+      "sourceId": "src-yahoo-btc",
+      "publishedAt": "2026-10-09T23:00:00+07:00",
+      "tickers": [
+        "BTC"
+      ],
+      "excerpt": "Crypto chỉ là màu rủi ro.",
+      "whyImpact": "Không phải dòng tiền HoSE."
+    }
+  ]
+}

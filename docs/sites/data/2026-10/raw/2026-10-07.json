@@ -1,0 +1,108 @@
+{
+  "schemaVersion": "1.0.0",
+  "date": "2026-10-07",
+  "generatedAt": "2026-10-07T08:35:00+07:00",
+  "market": {
+    "vnindex": {
+      "price": 1759.08,
+      "change": 5.88,
+      "changePct": 0.34,
+      "session": "2026-10-06",
+      "sources": [
+        "src-vietstock",
+        "Nhân Dân"
+      ]
+    },
+    "hnx": {
+      "price": 265.53,
+      "change": -4.09
+    },
+    "upcom": {
+      "price": 125.23,
+      "change": -0.26
+    },
+    "vn30": {
+      "price": 1898.82,
+      "change": 4.36,
+      "source": "Petrotimes"
+    },
+    "breadth_hose": {
+      "up": 127,
+      "down": 177,
+      "unch": 64
+    },
+    "liquidity": {
+      "hose_volume_tb": 827000000,
+      "hose_value_vnd_bn": 19579,
+      "dnse_total_volume": 791550000,
+      "dnse_matched_volume": 614090000,
+      "dnse_value_vnd_bn": 18715.11,
+      "negotiated_value_vnd_bn": 5471.9
+    },
+    "foreign": {
+      "hose_sggp": -2613,
+      "whole_sggp": -2670,
+      "vneconomy": -2700,
+      "matched_net": 134.3,
+      "hdb_negotiated": 1981.8,
+      "vjc_negotiated": 764
+    },
+    "proprietary": {
+      "net": 274.5,
+      "matched": 285.8,
+      "source": "src-vneconomy"
+    },
+    "world": {
+      "dji": 51521.28,
+      "spx": 7818.93,
+      "nasdaq_composite": 27599.79,
+      "ndx": 31224.47,
+      "rut": 2830.3,
+      "nky_cash_1006": 70683.98,
+      "hsi_cash_1006": 24280.56,
+      "dxy_range": [
+        101.94,
+        101.97
+      ],
+      "wti_digest": 89.92,
+      "xau_digest": 4191.2,
+      "btc_okx": 85722.8,
+      "eth_okx": 2702.13,
+      "usdvnd_center": 25645
+    }
+  },
+  "news_events": [
+    "VN-Index đóng 6/10 tại 1.759,08 (+5,88), close 7/10 chưa có",
+    "Ngoại bán ròng ~2.600–2.700 tỷ nhưng khớp lệnh mua ròng 134,3 tỷ",
+    "Tự doanh mua ròng 274,5 tỷ (khớp 285,8)",
+    "PNJ sàn 20.150, dư bán 14,7 triệu, đáy 9 năm",
+    "S&P 7.818,93 và Nasdaq Composite 27.599,79 lập đỉnh",
+    "Thanh khoản HOSE 19.579 tỷ / 827 triệu cp, lệch DNSE 18.715 tỷ",
+    "Nhóm VHM, VCB, CTG, LPB, TCX, MWG, VNM đóng góp 5,76 điểm",
+    "Tỷ giá trung tâm 7/10 là 25.645, không có trang SBV",
+    "NDX 31.224,47 khác Nasdaq Composite 27.599,79",
+    "WTI digest 89,92 lệch Reuters dầu −2% trong phiên",
+    "NVL thoát sàn sau đính chính không phá sản",
+    "Nikkei futures 7/10 tách quanh close 70.684",
+    "DXY 101,94–101,97; UST 10 năm 5,25–5,31",
+    "Pyn Elite cảnh báo cú sập toàn cầu có thể chạm VN",
+    "newF319: thread PNJ, VIB 285 triệu USD, kế hoạch chuyển HNX sang HOSE",
+    "FireAnt và F247 mỏng trong cửa sổ 08:35",
+    "FTSE ~10.542 (+0,42%), không phải print AP khóa",
+    "Bitcoin OKX 85.723, ETH 2.702"
+  ],
+  "sentiment": {
+    "newf319": "Box sáng 7/10 đông (~6.281 online). Thread nổi: PNJ, VIB huy động 285 triệu USD, chuyển HNX sang HOSE, PVT/PVP, MSN. Không có print.",
+    "fireant": "Không scrape được feed khóa. Chỉ thấy chart FireAnt được DNSE dẫn.",
+    "f247": "Không có thread khóa trong cửa sổ này."
+  },
+  "gaps": [
+    "Không có trang sbv.gov.vn; trung tâm 25.645 là báo dẫn.",
+    "Khối lượng 827 triệu/19.579 tỷ lệch DNSE 791,55 triệu/18.715 tỷ.",
+    "Ngoại HoSE −2.613 (SGGP) lệch −2.700 (VnEconomy) và khớp +134,3.",
+    "WTI, vàng, DXY, UST 10 năm lệch nguồn.",
+    "NDX và Nasdaq Composite là hai chỉ số.",
+    "Nikkei/HSI 7/10 chỉ có futures, chưa có cash close.",
+    "FireAnt/F247 mỏng."
+  ]
+}

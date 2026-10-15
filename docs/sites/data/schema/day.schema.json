@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://d-dragon.github.io/dp-stock-investment-assistant/sites/data/schema/day.schema.json",
+  "title": "DP Stock single-day market-brief file",
+  "description": "Canonical shape for docs/sites/data/YYYY-MM/d/YYYY-MM-DD.json. One trading day only so GitHub MCP / Contents API pushes stay under the tool payload cap. report + sources reuse week.schema.json $defs.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "date", "report", "sources"],
+  "properties": {
+    "schemaVersion": { "const": "1.0.0" },
+    "date": { "type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$" },
+    "report": { "$ref": "week.schema.json#/$defs/report" },
+    "sources": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schemaVersion", "sources"],
+      "properties": {
+        "schemaVersion": { "const": "1.0.0" },
+        "sources": {
+          "type": "array",
+          "minItems": 4,
+          "maxItems": 32,
+          "items": { "$ref": "week.schema.json#/$defs/sourceItem" }
+        }
+      }
+    }
+  }
+}

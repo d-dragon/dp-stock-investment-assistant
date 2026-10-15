@@ -1,0 +1,33 @@
+{
+  "schemaVersion": "1.0.0",
+  "date": "2026-10-11",
+  "briefKind": "eod_prev+overnight+preopen",
+  "market": {
+    "vnindex": {
+      "price": 1735.09,
+      "change": -3.88,
+      "changePct": -0.22,
+      "date": "2026-10-09",
+      "source": "src-stockbiz"
+    },
+    "volumeShares": 911324549,
+    "valueVndBn": 27542.82,
+    "foreignNetVndBn": -9735.11,
+    "hnx": 261.6
+  },
+  "news_events": [
+    "MCH block sale dominates foreign print",
+    "US markets closed green Friday"
+  ],
+  "sentiment": {
+    "fireant": "thin",
+    "f247": "thin",
+    "newf319": "thin"
+  },
+  "gaps": [
+    "No official close for 10/11 or 11/11",
+    "Proprietary print from Fili only",
+    "WTI/gold/DXY sources disagree slightly",
+    "No new SBV for 11/10"
+  ]
+}

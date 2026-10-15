@@ -1,0 +1,264 @@
+{
+  "schemaVersion": "1.0.0",
+  "date": "2026-10-04",
+  "generatedAt": "2026-10-04T08:35:00+07:00",
+  "briefKind": "eod_prev+overnight+preopen",
+  "items": [
+    {
+      "id": "n-2026-10-04-001",
+      "impact": "high",
+      "impactScore": 92,
+      "rank": 1,
+      "kind": "market",
+      "board": "vn",
+      "title": "VN-Index đóng 1.737,71, mất mốc 1.740, phiên giảm thứ năm",
+      "url": "https://doanhnhan.congly.vn/chung-khoan-chot-phien-2-10-vn-index-giam-phien-thu-5-khoi-ngoai-ban-rong-khoang-3-300-ty-dong.html",
+      "sourceId": "src-cafef",
+      "publishedAt": "2026-10-02T19:38:00+07:00",
+      "tickers": [
+        "VNINDEX"
+      ],
+      "excerpt": "Công lý khóa 1.737,71 (−11,59). Không có close 4/10.",
+      "whyImpact": "Mốc chỉ số dùng cho phiên 5/10."
+    },
+    {
+      "id": "n-2026-10-04-002",
+      "impact": "high",
+      "impactScore": 90,
+      "rank": 2,
+      "kind": "market",
+      "board": "vn",
+      "title": "Ngoại HoSE bán ròng 3.283 tỷ, tập trung PNJ và HDB",
+      "url": "https://fili.vn/2026/10/nhip-dap-thi-truong-0210-msr-giu-vung-da-but-pha-vn-index-giang-co-quanh-1748-diem-1636-1498135.htm",
+      "sourceId": "src-vietstock",
+      "publishedAt": "2026-10-02T15:50:00+07:00",
+      "tickers": [
+        "PNJ",
+        "HDB"
+      ],
+      "excerpt": "Fili −3.283,32 tỷ. PNJ 1.264 tỷ, HDB 961,76 tỷ.",
+      "whyImpact": "Dòng ngoại giải thích phiên, không phải chỉ độ rộng."
+    },
+    {
+      "id": "n-2026-10-04-003",
+      "impact": "high",
+      "impactScore": 84,
+      "rank": 3,
+      "kind": "news",
+      "board": "vn",
+      "title": "PNJ về sàn 23.050 đồng, khớp hơn 76 triệu cp",
+      "url": "https://www.tinnhanhchungkhoan.vn/luc-ban-gia-tang-vn-index-mat-them-11-diem-trong-phien-ngay-210-post398729.html",
+      "sourceId": "src-cafef",
+      "publishedAt": "2026-10-02T15:42:00+07:00",
+      "tickers": [
+        "PNJ"
+      ],
+      "excerpt": "Tin nhanh: −6,87%, ngoại bán hơn 58,7 triệu cp.",
+      "whyImpact": "Một mã mid-cap có thể gap chỉ số nếu thứ Hai còn sàn."
+    },
+    {
+      "id": "n-2026-10-04-004",
+      "impact": "high",
+      "impactScore": 80,
+      "rank": 4,
+      "kind": "macro",
+      "board": "global",
+      "title": "Payrolls Mỹ +29.000, S&P đóng 7.722,72",
+      "url": "https://www.reuters.com/business/wall-st-futures-gain-yields-oil-prices-ease-ahead-jobs-report-2026-10-02/",
+      "sourceId": "src-bloomberg",
+      "publishedAt": "2026-10-03T04:35:00+07:00",
+      "tickers": [
+        "SPX"
+      ],
+      "excerpt": "Reuters: Dow +0,49%, Nasdaq Composite +1,19%.",
+      "whyImpact": "Kênh truyền thứ Hai là lợi suất và USD, không phải điểm Mỹ xanh."
+    },
+    {
+      "id": "n-2026-10-04-005",
+      "impact": "high",
+      "impactScore": 76,
+      "rank": 5,
+      "kind": "market",
+      "board": "vn",
+      "title": "Tự doanh mua ròng 1.691,5 tỷ nhưng khớp lệnh chỉ 344,5 tỷ",
+      "url": "https://baomoi.com/khoi-ngoai-bat-ngo-xa-rong-o-at-3-300-ty-phien-cuoi-tuan-tiep-tuc-ban-thao-pnj-c56188201.epi",
+      "sourceId": "src-vneconomy",
+      "publishedAt": "2026-10-03T12:42:00+07:00",
+      "tickers": [
+        "HDB"
+      ],
+      "excerpt": "VnEconomy. Không đối soát được print HOSE khóa.",
+      "whyImpact": "Đỡ giá chủ yếu thỏa thuận, dễ hiểu sai là nội bắt đáy diện rộng."
+    },
+    {
+      "id": "n-2026-10-04-006",
+      "impact": "medium",
+      "impactScore": 68,
+      "rank": 6,
+      "kind": "market",
+      "board": "global",
+      "title": "Hang Seng −2,60% về 23.972,29; Nikkei −0,94%",
+      "url": "https://talkmarkets.com/article/market-talk-friday-oct-2-2",
+      "sourceId": "src-bloomberg",
+      "publishedAt": "2026-10-02T16:30:00+07:00",
+      "tickers": [
+        "HSI",
+        "NKY"
+      ],
+      "excerpt": "TalkMarkets. Mỹ xanh sau khi châu Á đã đóng.",
+      "whyImpact": "Rủi ro gap châu Á thứ Hai, chưa có futures sáng Chủ nhật."
+    },
+    {
+      "id": "n-2026-10-04-007",
+      "impact": "medium",
+      "impactScore": 64,
+      "rank": 7,
+      "kind": "macro",
+      "board": "global",
+      "title": "UST 10 năm 5,276%; DXY quanh 101,9",
+      "url": "https://www.eoption.com/market-review-october-02-2026/",
+      "sourceId": "src-barrons",
+      "publishedAt": "2026-10-03T03:07:00+07:00",
+      "tickers": [
+        "DXY"
+      ],
+      "excerpt": "Lợi suất không gãy dù jobs yếu. DXY các nguồn lệch 101,86–101,93.",
+      "whyImpact": "Trần định giá bank/BĐS nếu lợi suất giữ trên 5,2%."
+    },
+    {
+      "id": "n-2026-10-04-008",
+      "impact": "medium",
+      "impactScore": 60,
+      "rank": 8,
+      "kind": "market",
+      "board": "vn",
+      "title": "Khớp lệnh HoSE 14.473,7 tỷ, cao hơn TB 20 phiên",
+      "url": "https://baomoi.com/khoi-ngoai-bat-ngo-xa-rong-o-at-3-300-ty-phien-cuoi-tuan-tiep-tuc-ban-thao-pnj-c56188201.epi",
+      "sourceId": "src-vneconomy",
+      "publishedAt": "2026-10-03T12:42:00+07:00",
+      "tickers": [
+        "VNINDEX"
+      ],
+      "excerpt": "Tổng ba sàn 20.389,1 tỷ. Tổng HoSE Tin nhanh 19.176 tỷ.",
+      "whyImpact": "Thanh khoản tăng trong phiên giảm là cung, không phải cạn tiền."
+    },
+    {
+      "id": "n-2026-10-04-009",
+      "impact": "medium",
+      "impactScore": 55,
+      "rank": 9,
+      "kind": "news",
+      "board": "vn",
+      "title": "VIC +1,82% nhưng ngoại vẫn bán khoảng 188 tỷ",
+      "url": "https://fili.vn/2026/10/nhip-dap-thi-truong-0210-msr-giu-vung-da-but-pha-vn-index-giang-co-quanh-1748-diem-1636-1498135.htm",
+      "sourceId": "src-vietstock",
+      "publishedAt": "2026-10-02T15:50:00+07:00",
+      "tickers": [
+        "VIC"
+      ],
+      "excerpt": "Trụ đỡ chỉ số không được ngoại xác nhận.",
+      "whyImpact": "Nếu VIC đảo chiều thứ Hai, chỉ số mất điểm đỡ còn lại."
+    },
+    {
+      "id": "n-2026-10-04-010",
+      "impact": "medium",
+      "impactScore": 52,
+      "rank": 10,
+      "kind": "macro",
+      "board": "vn",
+      "title": "Tỷ giá trung tâm 2/10 là 25.636, chưa có print cuối tuần",
+      "url": "https://en.vietnamplus.vn/reference-exchange-rate-bounces-back-on-october-2-post352944.vnp",
+      "sourceId": "src-nhnn",
+      "publishedAt": "2026-10-02T08:49:00+07:00",
+      "tickers": [
+        "USDVND"
+      ],
+      "excerpt": "VietnamPlus. Trần 26.918. Không có số 3/10 hay 4/10.",
+      "whyImpact": "Không đủ để đổi bias tỷ giá trước phiên 5/10."
+    },
+    {
+      "id": "n-2026-10-04-011",
+      "impact": "medium",
+      "impactScore": 48,
+      "rank": 11,
+      "kind": "market",
+      "board": "global",
+      "title": "WTI settle 91,11 USD; vàng 4.162,3 USD",
+      "url": "https://www.eoption.com/market-review-october-02-2026/",
+      "sourceId": "src-barrons",
+      "publishedAt": "2026-10-03T03:07:00+07:00",
+      "tickers": [
+        "GAS"
+      ],
+      "excerpt": "eOption. Một digest ghi WTI 91,41.",
+      "whyImpact": "Dầu hạ không đảo nhóm khí đã kéo chỉ số phiên 2/10."
+    },
+    {
+      "id": "n-2026-10-04-012",
+      "impact": "low",
+      "impactScore": 34,
+      "rank": 12,
+      "kind": "community",
+      "board": "vn",
+      "title": "F247: tuần giảm 48 điểm, ngoại tuần −5.020 tỷ, hỏi đã tạo đáy chưa",
+      "url": "https://f247.com/t/giam-nhanh-giam-manh-tao-day-chua/879110",
+      "sourceId": "src-f247",
+      "publishedAt": "2026-10-03T16:56:00+07:00",
+      "tickers": [
+        "VNINDEX"
+      ],
+      "excerpt": "Bài cộng đồng, không phải print. Vol thấp được diễn giải là chưa bán tháo.",
+      "whyImpact": "Màu sentiment: chờ đáy, không xác nhận dòng tiền."
+    },
+    {
+      "id": "n-2026-10-04-013",
+      "impact": "low",
+      "impactScore": 28,
+      "rank": 13,
+      "kind": "community",
+      "board": "vn",
+      "title": "F247: PNJ sàn, bắt đáy chờ thứ Ba",
+      "url": "https://f247.com/t/pnj-que-son-phong-co-tay-ngoai-thao-chay-buong-xa-ndt-noi-ham-bat-day-dao-roi/879028",
+      "sourceId": "src-f247",
+      "publishedAt": "2026-10-02T10:59:00+07:00",
+      "tickers": [
+        "PNJ"
+      ],
+      "excerpt": "Thread chia hai: hồi sớm hoặc còn vài phiên sàn.",
+      "whyImpact": "Màu, không phải lệnh hay print ngoại."
+    },
+    {
+      "id": "n-2026-10-04-014",
+      "impact": "low",
+      "impactScore": 22,
+      "rank": 14,
+      "kind": "community",
+      "board": "vn",
+      "title": "FireAnt: bài 2/10 PNJ khớp lớn, VN-Index giảm 11 điểm",
+      "url": "https://fireant.vn/ma-chung-khoan/VNINDEX",
+      "sourceId": "src-fireant",
+      "publishedAt": "2026-10-03T11:39:00+07:00",
+      "tickers": [
+        "PNJ",
+        "VNINDEX"
+      ],
+      "excerpt": "Trang mã còn bài cũ dưới 1.800. Không có thread cộng đồng mới khóa được.",
+      "whyImpact": "Nguồn mỏng, chỉ ghi nhận trang còn sống."
+    },
+    {
+      "id": "n-2026-10-04-015",
+      "impact": "low",
+      "impactScore": 18,
+      "rank": 15,
+      "kind": "community",
+      "board": "vn",
+      "title": "newF319 không có thread cuối tuần khóa được về phiên 2/10",
+      "url": "https://newf319.com/",
+      "sourceId": "src-newf319",
+      "publishedAt": "2026-10-04T08:00:00+07:00",
+      "tickers": [],
+      "excerpt": "Tìm thấy box cũ, không phải màu phiên 2/10. Không dùng f319.com.",
+      "whyImpact": "Ghi gap sentiment, không suy diễn tone."
+    }
+  ]
+}

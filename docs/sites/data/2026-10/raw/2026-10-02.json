@@ -1,0 +1,85 @@
+{
+  "schemaVersion": "1.0.0",
+  "date": "2026-10-02",
+  "generatedAt": "2026-10-02T08:35:00+07:00",
+  "briefKind": "eod_prev+overnight+preopen",
+  "eodDate": "2026-10-01",
+  "briefDate": "2026-10-02",
+  "market": {
+    "vnindex_prior_close": {
+      "date": "2026-10-01",
+      "price": 1749.3,
+      "change": -19.32,
+      "changePct": -1.09,
+      "source": "VTV/DNSE/CafeF/Nhan Dan"
+    },
+    "hnx": {
+      "price": 268.66,
+      "change": -2.98,
+      "source": "VTV"
+    },
+    "upcom": {
+      "price": 126.52,
+      "change": 0.21,
+      "source": "VTV"
+    },
+    "vn30": {
+      "price": 1890.57,
+      "change": -16.24,
+      "source": "VTV"
+    },
+    "breadth": {
+      "up": 110,
+      "down": 177,
+      "flat": 76,
+      "source": "DNSE/TC DN"
+    },
+    "hose_volume_shares": 638450000,
+    "hose_value_vnd_bn": 15354.22,
+    "hose_matched_value_vnd_bn": 11300,
+    "foreign_hose_net_vnd_bn": -63,
+    "foreign_all_market_net_vnd_bn": 3078,
+    "foreign_note": "Toàn thị trường mua ròng ~3.078 tỷ do thỏa thuận MSR trên UPCoM; loại MSR thì ngoại vẫn bán ròng. HoSE bán ròng hơn 63 tỷ (CafeF/VTV/VIX).",
+    "proprietary": null,
+    "sbv_usd_central": 25624,
+    "sbv_usd_change": -3,
+    "bank_usd_sell": 26186,
+    "omo_net_vnd_bn": -584,
+    "us": {
+      "dji": 50926.56,
+      "dji_chg": 20.51,
+      "spx": 7666.45,
+      "spx_chg": 14.91,
+      "ndx": 30501.56,
+      "ndx_chg_pct": 0.31,
+      "rut": 2806.63,
+      "dxy": 102.1,
+      "wti": 92.87,
+      "xau": 4202.3,
+      "ust10y": 5.248
+    },
+    "asia": {
+      "nky_print": 68840,
+      "nky_note": "NordFX 1/10 ~+3,1% lên 68.840; Report.az cùng ngày 68.677 — chưa một print chính thức thống nhất.",
+      "hsi": "HK đóng cửa Quốc khánh 1/10; đóng cửa trước 24.613,3"
+    }
+  },
+  "news_events": [
+    "VN-Index mất 1.750, VIC lấy ~12,5 điểm",
+    "Khối ngoại HoSE bán ròng nhẹ; MSR thỏa thuận làm lệch toàn thị trường",
+    "WTI +2,71% lên 92,87 sau khi Trung Quốc tạm dừng xuất khẩu sản phẩm dầu; WSJ đưa tin Mỹ điều thêm quân Trung Đông",
+    "UST 10Y về 5,248% sau khi chạm đỉnh nhiều thập kỷ trong phiên",
+    "SBV tỷ giá trung tâm 25.624, −3 đồng ngày 1/10"
+  ],
+  "sentiment": {
+    "fireant": "Bài/live 1/10 nghiêng 'pha rũ cuối' rồi sóng — màu lạc quan sau phiên giảm, không phải print.",
+    "f247": "Không lấy được thread định lượng trong cửa sổ 08:35.",
+    "newf319": "Không lấy được thread định lượng; không dùng f319.com."
+  },
+  "gaps": [
+    "Tự doanh phiên 1/10 không có print đối soát",
+    "Nikkei close chính thức lệch giữa nguồn",
+    "newF319/F247 mỏng",
+    "Đóng cửa HOSE 2/10 chưa có"
+  ]
+}

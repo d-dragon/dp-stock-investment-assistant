@@ -1,0 +1,36 @@
+{
+  "schemaVersion": "1.0.0",
+  "date": "2026-10-15",
+  "market": {
+    "vnindex": {
+      "price": 1704.87,
+      "change": -14.55,
+      "changePct": -0.85,
+      "volume": 584041036,
+      "valueVndBn": 13732.34,
+      "source": "src-stockbiz",
+      "note": "đóng 14/10"
+    },
+    "hnx": {
+      "price": 265.16,
+      "change": 0.91,
+      "changePct": 0.34,
+      "source": "src-stockbiz"
+    },
+    "foreign_hose_net_bn": -770.11,
+    "proprietary_hose_net_bn": 425,
+    "usdvnd_central": 25646
+  },
+  "news_events": [],
+  "sentiment": {
+    "fireant": "thin",
+    "f247": "thận trọng, nghịch lý Vin giảm vs bank/thép",
+    "newf319": "thin"
+  },
+  "gaps": [
+    "DXY sources disagree ~102.39-102.54",
+    "gold sources ~4105-4123",
+    "no new SBV page for 15/10 beyond press confirming 25646",
+    "newF319 thin"
+  ]
+}

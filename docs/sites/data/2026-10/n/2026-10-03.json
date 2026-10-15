@@ -1,0 +1,266 @@
+{
+  "schemaVersion": "1.0.0",
+  "date": "2026-10-03",
+  "generatedAt": "2026-10-03T08:35:00+07:00",
+  "briefKind": "eod_prev+overnight+preopen",
+  "items": [
+    {
+      "id": "n-2026-10-03-001",
+      "impact": "high",
+      "impactScore": 92,
+      "rank": 1,
+      "kind": "market",
+      "board": "vn",
+      "title": "VN-Index đóng cửa 1.737,71 điểm, giảm 11,59 điểm phiên 2/10",
+      "url": "https://baomoi.com/chung-khoan-chot-phien-2-10-vn-index-giam-phien-thu-5-khoi-ngoai-ban-rong-khoang-3-300-ty-dong-c56184489.epi",
+      "sourceId": "src-cafef",
+      "publishedAt": "2026-10-02T20:38:00+07:00",
+      "tickers": [
+        "VNINDEX"
+      ],
+      "excerpt": "Phiên giảm thứ năm. Yahoo khóa cùng mức đóng cửa.",
+      "whyImpact": "Print chính thức cuối tuần, mốc cho phiên 5/10."
+    },
+    {
+      "id": "n-2026-10-03-002",
+      "impact": "high",
+      "impactScore": 90,
+      "rank": 2,
+      "kind": "market",
+      "board": "vn",
+      "title": "Ngoại HoSE bán ròng hơn 3.283 tỷ, tập trung PNJ và HDB",
+      "url": "https://fili.vn/2026/10/nhip-dap-thi-truong-0210-msr-giu-vung-da-but-pha-vn-index-giang-co-quanh-1748-diem-1636-1498135.htm",
+      "sourceId": "src-vietstock",
+      "publishedAt": "2026-10-02T15:50:00+07:00",
+      "tickers": [
+        "PNJ",
+        "HDB",
+        "VIC",
+        "TCB"
+      ],
+      "excerpt": "PNJ khoảng 1.264 tỷ, HDB 962 tỷ, VIC 188 tỷ, TCB 147 tỷ.",
+      "whyImpact": "Dòng ngoại một phiên lớn hơn nhiều so với −63 tỷ ngày 1/10."
+    },
+    {
+      "id": "n-2026-10-03-003",
+      "impact": "high",
+      "impactScore": 86,
+      "rank": 3,
+      "kind": "macro",
+      "board": "global",
+      "title": "Payrolls Mỹ tháng 9 chỉ +29.000, thất nghiệp 4,2%",
+      "url": "https://www.bls.gov/news.release/empsit.nr0.htm",
+      "sourceId": "src-bloomberg",
+      "publishedAt": "2026-10-02T19:30:00+07:00",
+      "tickers": [],
+      "excerpt": "Dưới kỳ vọng khoảng 90.000. Lương giờ +3,0% YoY.",
+      "whyImpact": "Hạ xác suất Fed nâng lãi suất tháng 10, truyền sang USD và chứng khoán Mỹ."
+    },
+    {
+      "id": "n-2026-10-03-004",
+      "impact": "high",
+      "impactScore": 82,
+      "rank": 4,
+      "kind": "market",
+      "board": "global",
+      "title": "S&P 500 đóng 7.722,72 (+0,73%), Dow 51.176,96 (+0,49%)",
+      "url": "https://apnews.com/article/wall-street-stocks-dow-nasdaq-48e9066481cba91a5d7c6688aa74a5cd",
+      "sourceId": "src-bloomberg",
+      "publishedAt": "2026-10-03T03:17:00+07:00",
+      "tickers": [
+        "SPX",
+        "DJI"
+      ],
+      "excerpt": "Nasdaq Composite +1,19% lên 27.190,86. Tuần: S&P −0,3%, Dow −1,3%.",
+      "whyImpact": "Overnight Mỹ xanh nhưng tuần vẫn yếu — không đủ để gọi risk-on bền."
+    },
+    {
+      "id": "n-2026-10-03-005",
+      "impact": "high",
+      "impactScore": 78,
+      "rank": 5,
+      "kind": "market",
+      "board": "global",
+      "title": "Hang Seng 2/10 mất 2,60% xuống 23.972, Nikkei −0,94%",
+      "url": "https://www.ft.com/markets",
+      "sourceId": "src-bloomberg",
+      "publishedAt": "2026-10-02T16:30:00+07:00",
+      "tickers": [
+        "HSI",
+        "NKY"
+      ],
+      "excerpt": "FT: HSI 23.972,29 (−640,98), Nikkei 68.309,46 (−647,26).",
+      "whyImpact": "Châu Á lệch chiều Mỹ; Hồng Kông là kênh rủi ro gần VN hơn Dow."
+    },
+    {
+      "id": "n-2026-10-03-006",
+      "impact": "medium",
+      "impactScore": 74,
+      "rank": 6,
+      "kind": "market",
+      "board": "vn",
+      "title": "Thanh khoản HoSE nới lên gần 19,2 nghìn tỷ khi chỉ số giảm",
+      "url": "https://kinhtexaydung.petrotimes.vn/tin-nhanh-chung-khoan-ngay-2-10-khoi-ngoai-xa-hang-manh-vn-index-mat-moc-1-740-diem-746230.html",
+      "sourceId": "src-cafef",
+      "publishedAt": "2026-10-02T18:12:00+07:00",
+      "tickers": [
+        "PNJ"
+      ],
+      "excerpt": "Khớp khoảng 615 triệu cp / hơn 14,4 nghìn tỷ. Độ rộng HoSE 90 tăng / 216 giảm.",
+      "whyImpact": "Tăng thanh khoản trên phiên giảm = cung chủ động, một phần do PNJ."
+    },
+    {
+      "id": "n-2026-10-03-007",
+      "impact": "medium",
+      "impactScore": 70,
+      "rank": 7,
+      "kind": "news",
+      "board": "vn",
+      "title": "Tự doanh mua ròng gần 1,7 nghìn tỷ, dồn vào HDB theo Fili",
+      "url": "https://fili.vn/2026/10/theo-dau-dong-tien-ca-map-0210-khoi-ngoai-rut-manh-khoi-pnj-tu-doanh-don-tien-vao-hdb-830-1498463.htm",
+      "sourceId": "src-vietstock",
+      "publishedAt": "2026-10-02T18:00:00+07:00",
+      "tickers": [
+        "HDB",
+        "VPB",
+        "PNJ"
+      ],
+      "excerpt": "HDB chiếm phần lớn mua ròng tự doanh; ngoại lại bán HDB.",
+      "whyImpact": "Hai nhóm tiền lệch chiều trên cùng mã. Print chưa đối soát HOSE."
+    },
+    {
+      "id": "n-2026-10-03-008",
+      "impact": "medium",
+      "impactScore": 66,
+      "rank": 8,
+      "kind": "macro",
+      "board": "global",
+      "title": "DXY 101,92 (−0,17%); UST 10 năm 5,276%",
+      "url": "https://www.eoption.com/market-review-october-02-2026/",
+      "sourceId": "src-barrons",
+      "publishedAt": "2026-10-03T03:07:00+07:00",
+      "tickers": [
+        "DXY"
+      ],
+      "excerpt": "USD hạ sau jobs nhưng lợi suất 10 năm nhích 3 bp cuối phiên.",
+      "whyImpact": "USD dịu giúp tỷ giá, lợi suất còn cao thì chiết khấu cổ phiếu chưa hết."
+    },
+    {
+      "id": "n-2026-10-03-009",
+      "impact": "medium",
+      "impactScore": 62,
+      "rank": 9,
+      "kind": "macro",
+      "board": "global",
+      "title": "WTI 91,11 USD (−1,9%); vàng 4.162,3 USD (−0,95%)",
+      "url": "https://www.eoption.com/market-review-october-02-2026/",
+      "sourceId": "src-barrons",
+      "publishedAt": "2026-10-03T03:07:00+07:00",
+      "tickers": [],
+      "excerpt": "Dầu rời đáy 88,06. Vàng tuần −3,6%.",
+      "whyImpact": "Dầu hạ giảm áp lực nhóm dầu khí, chưa đảo được phiên 2/10."
+    },
+    {
+      "id": "n-2026-10-03-010",
+      "impact": "medium",
+      "impactScore": 60,
+      "rank": 10,
+      "kind": "macro",
+      "board": "vn",
+      "title": "Tỷ giá trung tâm 2/10 là 25.636 đồng, tăng 12 đồng",
+      "url": "https://en.vietnamplus.vn/reference-exchange-rate-bounces-back-on-october-2-post352944.vnp",
+      "sourceId": "src-nhnn",
+      "publishedAt": "2026-10-02T08:49:00+07:00",
+      "tickers": [],
+      "excerpt": "Trần ±5% là 26.918. VCB bán mở cửa 26.170. Chưa có print 3/10.",
+      "whyImpact": "Neo tỷ giá trước phiên 5/10, không phải shock."
+    },
+    {
+      "id": "n-2026-10-03-011",
+      "impact": "medium",
+      "impactScore": 58,
+      "rank": 11,
+      "kind": "news",
+      "board": "vn",
+      "title": "Năng lượng giảm 2,46%: BSR, PLX, OIL, PVD, PVS cùng đỏ",
+      "url": "https://baomoi.com/vn-index-giam-gan-12-diem-khoi-ngoai-ban-rong-hon-3-300-ty-dong-c56182992.epi",
+      "sourceId": "src-vietnambiz",
+      "publishedAt": "2026-10-02T17:29:00+07:00",
+      "tickers": [
+        "BSR",
+        "PLX",
+        "OIL",
+        "PVD",
+        "PVS"
+      ],
+      "excerpt": "Ngành giảm mạnh nhất phiên 2/10.",
+      "whyImpact": "Kéo chỉ số ngoài nhóm ngân hàng–PNJ."
+    },
+    {
+      "id": "n-2026-10-03-012",
+      "impact": "medium",
+      "impactScore": 55,
+      "rank": 12,
+      "kind": "market",
+      "board": "global",
+      "title": "Nasdaq 100 đóng 30.807,93 (+1,00%)",
+      "url": "https://www.marketwatch.com/investing/index/ndx/download-data",
+      "sourceId": "src-yahoo-vn",
+      "publishedAt": "2026-10-02T16:15:00+07:00",
+      "tickers": [
+        "NDX"
+      ],
+      "excerpt": "MarketWatch khóa 30.807,93 so với 30.501,56 ngày 1/10.",
+      "whyImpact": "Tech Mỹ hồi, chưa thấy dòng vào cổ phiếu công nghệ VN."
+    },
+    {
+      "id": "n-2026-10-03-013",
+      "impact": "low",
+      "impactScore": 42,
+      "rank": 13,
+      "kind": "market",
+      "board": "global",
+      "title": "FTSE 100 đóng 10.461,95 (+0,32%)",
+      "url": "https://www.ft.com/markets",
+      "sourceId": "src-bloomberg",
+      "publishedAt": "2026-10-02T23:00:00+07:00",
+      "tickers": [
+        "FTSE"
+      ],
+      "excerpt": "FT khóa print, không chỉ lấy phần trăm.",
+      "whyImpact": "Châu Âu ổn định, tác động gián tiếp."
+    },
+    {
+      "id": "n-2026-10-03-014",
+      "impact": "low",
+      "impactScore": 40,
+      "rank": 14,
+      "kind": "market",
+      "board": "global",
+      "title": "Bitcoin quanh 84.645 USD sáng thứ Bảy, không phải đóng cửa chuẩn",
+      "url": "https://ph.investing.com/crypto/bitcoin/historical-data",
+      "sourceId": "src-yahoo-btc",
+      "publishedAt": "2026-10-03T08:35:00+07:00",
+      "tickers": [
+        "BTC"
+      ],
+      "excerpt": "OKX ngày 2/10 đóng gần 85.330. Snapshot cuối tuần dao động.",
+      "whyImpact": "Màu rủi ro, không truyền trực tiếp sang HoSE."
+    },
+    {
+      "id": "n-2026-10-03-015",
+      "impact": "low",
+      "impactScore": 28,
+      "rank": 15,
+      "kind": "community",
+      "board": "vn",
+      "title": "FireAnt / F247 / newF319 không cho mẫu thảo luận khớp phiên 2/10",
+      "url": "https://newf319.com/",
+      "sourceId": "src-newf319",
+      "publishedAt": "2026-10-03T08:35:00+07:00",
+      "tickers": [],
+      "excerpt": "Sentiment mỏng. Không dùng làm dòng tiền.",
+      "whyImpact": "Ghi nhận khoảng trống màu, không phải tín hiệu."
+    }
+  ]
+}

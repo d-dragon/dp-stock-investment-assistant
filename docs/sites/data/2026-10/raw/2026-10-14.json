@@ -1,0 +1,16 @@
+{
+  "schemaVersion": "1.0.0",
+  "date": "2026-10-14",
+  "market": {
+    "vnindex": {"priorClose": 1719.42, "change": -1.56, "changePct": -0.09, "source": "StockBiz/FireAnt"},
+    "hnx": 264.25,
+    "volumeHose": 560876017,
+    "valueHoseBn": 13162.20,
+    "foreignNetHoseBn": -434.2,
+    "proprietaryNetBn": 39.5,
+    "note": "Sources: StockBiz HistoricalIndices, nmquan.vn proprietary, various press for foreign ~434-468"
+  },
+  "news_events": [],
+  "sentiment": {"fireant": "cautious", "f247": "waiting for derivatives expiry", "newf319": "thin"},
+  "gaps": ["proprietary print variance 12-39.5 bn", "exact WTI/XAU close vary by source", "NDX vs Composite slight"]
+}

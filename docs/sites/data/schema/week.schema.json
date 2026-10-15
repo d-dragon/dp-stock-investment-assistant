@@ -82,7 +82,8 @@
       "additionalProperties": false,
       "required": ["id", "date", "title", "summary", "impact", "sourceId"],
       "properties": {
-        "id": { "type": "string", "minLength": 1, "maxLength": 16 },
+        "id": { "type": "string", "minLength": 1, "maxLength": 500 },
+        "url": { "type": "string", "maxLength": 500 },
         "date": { "$ref": "#/$defs/iso8601vn" },
         "title": { "type": "string", "minLength": 8, "maxLength": 160 },
         "summary": { "type": "string", "minLength": 12, "maxLength": 320 },

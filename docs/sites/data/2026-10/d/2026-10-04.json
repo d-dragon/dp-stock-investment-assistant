@@ -1,0 +1,1005 @@
+{
+  "schemaVersion": "1.0.0",
+  "date": "2026-10-04",
+  "newsPath": "2026-10/n/2026-10-04.json",
+  "report": {
+    "schemaVersion": "1.0.0",
+    "id": "daily-brief-2026-10-04",
+    "type": "daily_market_brief",
+    "locale": "vi-VN",
+    "timezone": "Asia/Ho_Chi_Minh",
+    "generatedAt": "2026-10-04T08:35:00+07:00",
+    "coverage": {
+      "from": "2026-10-02T09:00:00+07:00",
+      "to": "2026-10-04T08:35:00+07:00",
+      "session": "preopen"
+    },
+    "marketSession": "preopen",
+    "disclaimer": "Phiên 4/10 là Chủ nhật, HOSE đóng. 1.737,71 là đóng cửa chính thức 2/10. Không invent đóng cửa hôm nay. Ngoại HoSE lấy Fili −3.283 tỷ; VnEconomy 3.299,2 tỷ là print rộng hơn. Tự doanh lấy VnEconomy 1.691,5 tỷ. Không có tỷ giá NHNN Chủ nhật. Bitcoin là snapshot OKX sáng 4/10.",
+    "ui": {
+      "pageSizeNews": 8,
+      "defaultChartTab": "vnindex",
+      "defaultWorldSymbol": "DJI"
+    },
+    "snapshot": {
+      "quotes": [
+        {
+          "symbol": "VNINDEX",
+          "nameVi": "VN-Index",
+          "assetClass": "equity_index",
+          "price": 1737.71,
+          "change": -11.59,
+          "changePct": -0.66,
+          "session": "prior_close",
+          "sourceId": "src-vietstock"
+        },
+        {
+          "symbol": "HNX",
+          "nameVi": "HNX-Index",
+          "assetClass": "equity_index",
+          "price": 266.75,
+          "change": -1.91,
+          "changePct": -0.71,
+          "session": "prior_close",
+          "sourceId": "src-vietstock"
+        },
+        {
+          "symbol": "DXY",
+          "nameVi": "DXY",
+          "assetClass": "fx",
+          "price": 101.92,
+          "change": -0.18,
+          "changePct": -0.17,
+          "session": "prior_close",
+          "sourceId": "src-barrons"
+        },
+        {
+          "symbol": "DJI",
+          "nameVi": "Dow Jones",
+          "assetClass": "equity_index",
+          "price": 51176.96,
+          "change": 250.4,
+          "changePct": 0.49,
+          "session": "prior_close",
+          "sourceId": "src-bloomberg"
+        },
+        {
+          "symbol": "NDX",
+          "nameVi": "Nasdaq 100",
+          "assetClass": "equity_index",
+          "price": 30807.93,
+          "change": 306.37,
+          "changePct": 1.0,
+          "session": "prior_close",
+          "sourceId": "src-yahoo-vn"
+        },
+        {
+          "symbol": "SPX",
+          "nameVi": "S&P 500",
+          "assetClass": "equity_index",
+          "price": 7722.72,
+          "change": 56.27,
+          "changePct": 0.73,
+          "session": "prior_close",
+          "sourceId": "src-bloomberg"
+        },
+        {
+          "symbol": "NKY",
+          "nameVi": "Nikkei 225",
+          "assetClass": "equity_index",
+          "price": 68309.46,
+          "change": -647.26,
+          "changePct": -0.94,
+          "session": "prior_close",
+          "sourceId": "src-bloomberg"
+        },
+        {
+          "symbol": "HSI",
+          "nameVi": "Hang Seng",
+          "assetClass": "equity_index",
+          "price": 23972.29,
+          "change": -640.98,
+          "changePct": -2.6,
+          "session": "prior_close",
+          "sourceId": "src-yahoo-vn"
+        },
+        {
+          "symbol": "WTI",
+          "nameVi": "WTI",
+          "assetClass": "commodity",
+          "price": 91.11,
+          "change": -1.76,
+          "changePct": -1.9,
+          "session": "prior_close",
+          "sourceId": "src-barrons"
+        },
+        {
+          "symbol": "XAU",
+          "nameVi": "Vàng COMEX",
+          "assetClass": "commodity",
+          "price": 4162.3,
+          "change": -40.0,
+          "changePct": -0.95,
+          "session": "prior_close",
+          "sourceId": "src-barrons"
+        },
+        {
+          "symbol": "BTC",
+          "nameVi": "Bitcoin",
+          "assetClass": "crypto",
+          "price": 84847.3,
+          "change": -17.0,
+          "changePct": -0.02,
+          "session": "preopen",
+          "sourceId": "src-yahoo-btc"
+        },
+        {
+          "symbol": "USDVND",
+          "nameVi": "USD/VND trung tâm",
+          "assetClass": "fx",
+          "price": 25636.0,
+          "change": 12.0,
+          "changePct": 0.05,
+          "session": "prior_close",
+          "sourceId": "src-nhnn"
+        }
+      ]
+    },
+    "globalNews": [
+      {
+        "id": "g1",
+        "title": "Payrolls Mỹ tháng 9 chỉ +29.000, thất nghiệp 4,2%",
+        "url": "https://www.reuters.com/business/wall-st-futures-gain-yields-oil-prices-ease-ahead-jobs-report-2026-10-02/",
+        "sourceId": "src-bloomberg",
+        "publishedAt": "2026-10-02T19:30:00+07:00",
+        "summary": "Số việc làm yếu hơn kỳ vọng, xác suất Fed tăng lãi tháng 10 hạ.",
+        "impact": {
+          "direction": "risk_on",
+          "horizon": "days",
+          "assets": [
+            "SPX",
+            "DXY"
+          ],
+          "text": "Jobs yếu là kênh truyền chính sang VN tuần tới qua lợi suất và USD."
+        }
+      },
+      {
+        "id": "g2",
+        "title": "S&P 500 đóng 7.722,72 (+0,73%); Dow 51.176,96 (+0,49%)",
+        "url": "https://www.reuters.com/business/wall-st-futures-gain-yields-oil-prices-ease-ahead-jobs-report-2026-10-02/",
+        "sourceId": "src-bloomberg",
+        "publishedAt": "2026-10-03T04:35:00+07:00",
+        "summary": "Wall Street xanh sau payrolls. Reuters khóa điểm đóng cửa thứ Sáu.",
+        "impact": {
+          "direction": "risk_on",
+          "horizon": "days",
+          "assets": [
+            "SPX",
+            "DJI"
+          ],
+          "text": "Đóng cửa Mỹ đã có, nhưng VN chưa mở lại đến 5/10."
+        }
+      },
+      {
+        "id": "g3",
+        "title": "Nasdaq Composite 27.190,86 (+1,19%); Nasdaq 100 30.807,93 (+1,00%)",
+        "url": "https://www.reuters.com/business/wall-st-futures-gain-yields-oil-prices-ease-ahead-jobs-report-2026-10-02/",
+        "sourceId": "src-yahoo-vn",
+        "publishedAt": "2026-10-03T04:35:00+07:00",
+        "summary": "Nhóm tăng trưởng dẫn sóng Mỹ. NDX lấy print MarketWatch phiên 2/10.",
+        "impact": {
+          "direction": "risk_on",
+          "horizon": "days",
+          "assets": [
+            "NDX"
+          ],
+          "text": "Cổ phiếu công nghệ Mỹ xanh không tự động kéo VN30 ngân hàng."
+        }
+      },
+      {
+        "id": "g4",
+        "title": "Nikkei 68.309,46 (−0,94%); Hang Seng 23.972,29 (−2,60%)",
+        "url": "https://talkmarkets.com/article/market-talk-friday-oct-2-2",
+        "sourceId": "src-bloomberg",
+        "publishedAt": "2026-10-02T16:30:00+07:00",
+        "summary": "Châu Á đỏ phiên 2/10 trong khi Mỹ xanh sau đó. TalkMarkets ghi nhận điểm.",
+        "impact": {
+          "direction": "risk_off",
+          "horizon": "days",
+          "assets": [
+            "NKY",
+            "HSI"
+          ],
+          "text": "HSI mất 2,6% là rủi ro mở cửa châu Á thứ Hai, không phải đóng cửa hôm nay."
+        }
+      },
+      {
+        "id": "g5",
+        "title": "DXY quanh 101,9; UST 10 năm đóng 5,276%",
+        "url": "https://www.eoption.com/market-review-october-02-2026/",
+        "sourceId": "src-barrons",
+        "publishedAt": "2026-10-03T03:07:00+07:00",
+        "summary": "eOption: DXY hạ, lợi suất 10 năm +3,1 bp lên 5,276%. Barron's delayed 101,86; một print khác 101,93.",
+        "impact": {
+          "direction": "mixed",
+          "horizon": "days",
+          "assets": [
+            "DXY"
+          ],
+          "text": "Lợi suất vẫn cao là trần định giá cho bank/bất động sản VN."
+        }
+      },
+      {
+        "id": "g6",
+        "title": "WTI settle 91,11 USD (−1,9%); vàng COMEX 4.162,3 USD",
+        "url": "https://www.eoption.com/market-review-october-02-2026/",
+        "sourceId": "src-barrons",
+        "publishedAt": "2026-10-03T03:07:00+07:00",
+        "summary": "Dầu và vàng cùng hạ cuối phiên 2/10. Một digest ghi WTI 91,41.",
+        "impact": {
+          "direction": "mixed",
+          "horizon": "days",
+          "assets": [
+            "WTI",
+            "XAU"
+          ],
+          "text": "Dầu hạ bớt áp lực lạm phát nhưng không xóa đà bán ngoại trên PNJ."
+        }
+      },
+      {
+        "id": "g7",
+        "title": "FTSE 100 đóng 10.461,95 (+0,32%)",
+        "url": "https://www.ft.com/markets",
+        "sourceId": "src-bloomberg",
+        "publishedAt": "2026-10-02T23:00:00+07:00",
+        "summary": "Châu Âu xanh nhẹ. Giữ print FT đã dùng trong brief 3/10.",
+        "impact": {
+          "direction": "neutral",
+          "horizon": "days",
+          "assets": [
+            "FTSE"
+          ],
+          "text": "Không phải kênh truyền chính sang HOSE."
+        }
+      },
+      {
+        "id": "g8",
+        "title": "Bitcoin sáng Chủ nhật quanh 84.847 USD, không phải đóng cửa sàn",
+        "url": "https://www.okx.com/price-history/bitcoin-btc",
+        "sourceId": "src-yahoo-btc",
+        "publishedAt": "2026-10-04T07:00:00+07:00",
+        "summary": "OKX ghi nhận print 4/10 gần 84.847. Khối lượng trong ngày còn mỏng.",
+        "impact": {
+          "direction": "neutral",
+          "horizon": "days",
+          "assets": [
+            "BTC"
+          ],
+          "text": "Crypto cuối tuần không phải tín hiệu dòng ngoại HOSE."
+        }
+      }
+    ],
+    "vietnamNews": [
+      {
+        "id": "v1",
+        "title": "VN-Index đóng 1.737,71, giảm 11,59 điểm phiên 2/10",
+        "url": "https://doanhnhan.congly.vn/chung-khoan-chot-phien-2-10-vn-index-giam-phien-thu-5-khoi-ngoai-ban-rong-khoang-3-300-ty-dong.html",
+        "sourceId": "src-cafef",
+        "publishedAt": "2026-10-02T19:38:00+07:00",
+        "summary": "Phiên giảm thứ năm. Công lý khóa 1.737,71. Không có đóng cửa 4/10.",
+        "impact": {
+          "direction": "risk_off",
+          "horizon": "days",
+          "assets": [
+            "VNINDEX"
+          ],
+          "text": "Mốc 1.740 đã mất. Hôm nay là Chủ nhật, HOSE đóng."
+        }
+      },
+      {
+        "id": "v2",
+        "title": "Ngoại HoSE bán ròng khoảng 3.283–3.284 tỷ",
+        "url": "https://fili.vn/2026/10/nhip-dap-thi-truong-0210-msr-giu-vung-da-but-pha-vn-index-giang-co-quanh-1748-diem-1636-1498135.htm",
+        "sourceId": "src-vietstock",
+        "publishedAt": "2026-10-02T15:50:00+07:00",
+        "summary": "Fili 3.283,32 tỷ trên HOSE. Công lý khoảng 3.284 tỷ. VnEconomy 3.299,2 tỷ là print rộng hơn.",
+        "impact": {
+          "direction": "risk_off",
+          "horizon": "days",
+          "assets": [
+            "PNJ",
+            "HDB"
+          ],
+          "text": "Lệch print giữa HoSE và toàn thị trường. Không cộng hai số."
+        }
+      },
+      {
+        "id": "v3",
+        "title": "PNJ bị ngoại bán khoảng 1.264 tỷ; HDB gần 962 tỷ",
+        "url": "https://doanhnhan.congly.vn/chung-khoan-chot-phien-2-10-vn-index-giam-phien-thu-5-khoi-ngoai-ban-rong-khoang-3-300-ty-dong.html",
+        "sourceId": "src-cafef",
+        "publishedAt": "2026-10-02T19:38:00+07:00",
+        "summary": "Hai mã giải thích phần lớn dòng bán. PNJ về sàn 23.050 theo Tin nhanh chứng khoán.",
+        "impact": {
+          "direction": "risk_off",
+          "horizon": "days",
+          "assets": [
+            "PNJ",
+            "HDB"
+          ],
+          "text": "Nếu thứ Hai ngoại còn xả hai mã này, chỉ số khó giữ 1.738."
+        }
+      },
+      {
+        "id": "v4",
+        "title": "Tự doanh mua ròng 1.691,5 tỷ; khớp lệnh chỉ 344,5 tỷ",
+        "url": "https://baomoi.com/khoi-ngoai-bat-ngo-xa-rong-o-at-3-300-ty-phien-cuoi-tuan-tiep-tuc-ban-thao-pnj-c56188201.epi",
+        "sourceId": "src-vneconomy",
+        "publishedAt": "2026-10-03T12:42:00+07:00",
+        "summary": "VnEconomy. Fili trước đó ghi gần 1,7 nghìn tỷ, dồn HDB. Không phải print HOSE khóa.",
+        "impact": {
+          "direction": "mixed",
+          "horizon": "days",
+          "assets": [
+            "HDB"
+          ],
+          "text": "Mua tự doanh chủ yếu thỏa thuận, không phải đỡ khớp lệnh diện rộng."
+        }
+      },
+      {
+        "id": "v5",
+        "title": "Khớp lệnh HoSE 14.473,7 tỷ; ba sàn tổng 20.389,1 tỷ",
+        "url": "https://baomoi.com/khoi-ngoai-bat-ngo-xa-rong-o-at-3-300-ty-phien-cuoi-tuan-tiep-tuc-ban-thao-pnj-c56188201.epi",
+        "sourceId": "src-vneconomy",
+        "publishedAt": "2026-10-03T12:42:00+07:00",
+        "summary": "Thanh khoản khớp lệnh cao hơn bình quân 20 phiên 9,6% theo VnEconomy. Tin nhanh ghi tổng HoSE 19.176 tỷ.",
+        "impact": {
+          "direction": "neutral",
+          "horizon": "days",
+          "assets": [
+            "VNINDEX"
+          ],
+          "text": "Thanh khoản tăng khi giảm điểm là cung chủ động, không phải cạn tiền."
+        }
+      },
+      {
+        "id": "v6",
+        "title": "HoSE 90 mã tăng / 216 mã giảm; VN30 về 1.875,99",
+        "url": "https://kinhtexaydung.petrotimes.vn/tin-nhanh-chung-khoan-ngay-2-10-khoi-ngoai-xa-hang-manh-vn-index-mat-moc-1-740-diem-746230.html",
+        "sourceId": "src-cafef",
+        "publishedAt": "2026-10-02T18:12:00+07:00",
+        "summary": "Độ rộng nghiêng bán. Fili ghi toàn thị trường 259 tăng / 436 giảm — khác mẫu số.",
+        "impact": {
+          "direction": "risk_off",
+          "horizon": "days",
+          "assets": [
+            "VNINDEX"
+          ],
+          "text": "Breadth đỏ xác nhận phiên không phải chỉ vài trụ kéo."
+        }
+      },
+      {
+        "id": "v7",
+        "title": "HNX-Index 266,75 (−0,71%); ngoại HNX bán 13,6 tỷ",
+        "url": "https://fili.vn/2026/10/nhip-dap-thi-truong-0210-msr-giu-vung-da-but-pha-vn-index-giang-co-quanh-1748-diem-1636-1498135.htm",
+        "sourceId": "src-vietstock",
+        "publishedAt": "2026-10-02T15:50:00+07:00",
+        "summary": "Sàn Hà Nội cùng chiều. Không có print 3/10 hay 4/10.",
+        "impact": {
+          "direction": "risk_off",
+          "horizon": "days",
+          "assets": [
+            "HNX"
+          ],
+          "text": "HNX không phải nơi đảo chiều chỉ số."
+        }
+      },
+      {
+        "id": "v8",
+        "title": "Tỷ giá trung tâm 2/10 là 25.636, tăng 12 đồng",
+        "url": "https://en.vietnamplus.vn/reference-exchange-rate-bounces-back-on-october-2-post352944.vnp",
+        "sourceId": "src-nhnn",
+        "publishedAt": "2026-10-02T08:49:00+07:00",
+        "summary": "Chưa có print NHNN cho 3/10 và 4/10. Trần 26.918.",
+        "impact": {
+          "direction": "neutral",
+          "horizon": "days",
+          "assets": [
+            "USDVND"
+          ],
+          "text": "Không có tỷ giá Chủ nhật để đổi bias."
+        }
+      }
+    ],
+    "vietnamMacro": [
+      {
+        "id": "m1",
+        "title": "Tỷ giá trung tâm NHNN",
+        "value": "25.636 VND/USD",
+        "change": "+12 đồng so với 1/10",
+        "sourceId": "src-nhnn",
+        "note": "VietnamPlus 2/10. Không có print 3/10 hay 4/10."
+      },
+      {
+        "id": "m2",
+        "title": "VN-Index đóng cửa gần nhất",
+        "value": "1.737,71",
+        "change": "−11,59 điểm (−0,66%)",
+        "sourceId": "src-cafef",
+        "note": "Phiên 2/10. Hôm nay Chủ nhật, không invent close."
+      },
+      {
+        "id": "m3",
+        "title": "Ngoại HoSE",
+        "value": "bán ròng 3.283 tỷ",
+        "change": "so với −63 tỷ ngày 1/10",
+        "sourceId": "src-vietstock",
+        "note": "Fili. VnEconomy 3.299,2 tỷ là print rộng hơn, không cộng."
+      },
+      {
+        "id": "m4",
+        "title": "Tự doanh",
+        "value": "mua ròng 1.691,5 tỷ",
+        "change": "khớp lệnh chỉ +344,5 tỷ",
+        "sourceId": "src-vneconomy",
+        "note": "VnEconomy. Fili gần 1,7 nghìn tỷ. Không phải print HOSE khóa."
+      },
+      {
+        "id": "m5",
+        "title": "Thanh khoản khớp lệnh",
+        "value": "14.473,7 tỷ HoSE",
+        "change": "+29% phiên; +9,6% so với TB 20 phiên",
+        "sourceId": "src-vneconomy",
+        "note": "Tổng ba sàn 20.389,1 tỷ. Tin nhanh ghi tổng HoSE 19.176 tỷ."
+      },
+      {
+        "id": "m6",
+        "title": "Độ rộng HoSE",
+        "value": "90 tăng / 216 giảm",
+        "change": "Fili toàn thị trường 259/436",
+        "sourceId": "src-cafef",
+        "note": "Hai mẫu số khác nhau. Cùng hướng đỏ."
+      },
+      {
+        "id": "m7",
+        "title": "DXY",
+        "value": "101,92",
+        "change": "−0,17% phiên 2/10",
+        "sourceId": "src-barrons",
+        "note": "eOption. Barron's delayed 101,86; một close khác 101,93."
+      },
+      {
+        "id": "m8",
+        "title": "UST 10Y",
+        "value": "5,276%",
+        "change": "+3,1 bp cuối phiên 2/10",
+        "sourceId": "src-barrons",
+        "note": "eOption. Jobs yếu nhưng lợi suất không gãy."
+      }
+    ],
+    "equityMarket": {
+      "index": {
+        "priorClose": {
+          "date": "2026-10-02",
+          "price": 1737.71,
+          "change": -11.59,
+          "changePct": -0.66
+        },
+        "latest": {
+          "date": "2026-10-02",
+          "price": 1737.71,
+          "change": -11.59,
+          "changePct": -0.66,
+          "session": "prior_close",
+          "weekChange": -47.4,
+          "weekChangePct": -2.65
+        }
+      },
+      "liquidity": {
+        "hose": {
+          "volumeShares": 615000000,
+          "valueVndBn": 19176.09,
+          "valueChangePct": 24.9,
+          "note": "Khớp lệnh 14.473,7 tỷ (VnEconomy). Tổng HoSE 19.176 tỷ (Tin nhanh). Khối lượng 615 triệu cp lấy Fili; Tin nhanh ghi hơn 829 triệu — không gộp."
+        }
+      },
+      "foreign": {
+        "buyValueVndBn": null,
+        "sellValueVndBn": null,
+        "netValueVndBn": -3283.32,
+        "note": "Net HoSE lấy Fili −3.283,32 tỷ. VnEconomy 3.299,2 tỷ không dùng làm buy/sell HoSE."
+      },
+      "proprietary": {
+        "netValueVndBn": 1691.5,
+        "note": "VnEconomy: mua ròng 1.691,5 tỷ, khớp lệnh chỉ 344,5 tỷ. Fili gần 1,7 nghìn tỷ. Không phải print HOSE khóa."
+      },
+      "retail": {
+        "netValueVndBn": null,
+        "note": "Chưa tách cá nhân phiên 2/10."
+      },
+      "relatedIndices": [
+        {
+          "symbol": "VNINDEX",
+          "price": 1737.71,
+          "changePct": -0.66
+        },
+        {
+          "symbol": "HNX",
+          "price": 266.75,
+          "changePct": -0.71
+        },
+        {
+          "symbol": "UPCOM",
+          "price": 125.93,
+          "changePct": -0.47
+        }
+      ]
+    },
+    "worldMarkets": {
+      "quotes": [
+        {
+          "symbol": "DXY",
+          "nameVi": "DXY",
+          "assetClass": "fx",
+          "price": 101.92,
+          "changePct": -0.17,
+          "sourceId": "src-barrons"
+        },
+        {
+          "symbol": "DJI",
+          "nameVi": "Dow",
+          "assetClass": "equity_index",
+          "price": 51176.96,
+          "changePct": 0.49,
+          "sourceId": "src-bloomberg"
+        },
+        {
+          "symbol": "NDX",
+          "nameVi": "Nasdaq 100",
+          "assetClass": "equity_index",
+          "price": 30807.93,
+          "changePct": 1.0,
+          "sourceId": "src-yahoo-vn"
+        },
+        {
+          "symbol": "SPX",
+          "nameVi": "S&P 500",
+          "assetClass": "equity_index",
+          "price": 7722.72,
+          "changePct": 0.73,
+          "sourceId": "src-bloomberg"
+        },
+        {
+          "symbol": "RUT",
+          "nameVi": "Russell 2000",
+          "assetClass": "equity_index",
+          "price": 2832.9,
+          "changePct": 0.94,
+          "sourceId": "src-yahoo-vn"
+        },
+        {
+          "symbol": "FTSE",
+          "nameVi": "FTSE 100",
+          "assetClass": "equity_index",
+          "price": 10461.95,
+          "changePct": 0.32,
+          "sourceId": "src-bloomberg"
+        },
+        {
+          "symbol": "NKY",
+          "nameVi": "Nikkei",
+          "assetClass": "equity_index",
+          "price": 68309.46,
+          "changePct": -0.94,
+          "sourceId": "src-bloomberg"
+        },
+        {
+          "symbol": "HSI",
+          "nameVi": "Hang Seng",
+          "assetClass": "equity_index",
+          "price": 23972.29,
+          "changePct": -2.6,
+          "sourceId": "src-yahoo-vn"
+        }
+      ]
+    },
+    "cryptoMarkets": {
+      "quotes": [
+        {
+          "symbol": "BTC",
+          "nameVi": "Bitcoin",
+          "assetClass": "crypto",
+          "price": 84847.3,
+          "changePct": -0.02,
+          "sourceId": "src-yahoo-btc"
+        },
+        {
+          "symbol": "ETH",
+          "nameVi": "Ethereum",
+          "assetClass": "crypto",
+          "price": 2693.05,
+          "changePct": 0.42,
+          "sourceId": "src-yahoo-btc"
+        }
+      ]
+    },
+    "companies": [
+      {
+        "ticker": "PNJ",
+        "headline": "Ngoại bán khoảng 1.264 tỷ; giá sàn 23.050 (−6,87%)",
+        "impact": {
+          "direction": "risk_off",
+          "horizon": "days",
+          "assets": [
+            "PNJ"
+          ],
+          "text": "Một mã chiếm phần lớn dòng bán. Giá sàn lấy Tin nhanh chứng khoán, không phải close mới."
+        },
+        "metrics": {
+          "changePct": -6.87,
+          "price": 23050
+        },
+        "sourceId": "src-cafef"
+      },
+      {
+        "ticker": "HDB",
+        "headline": "Ngoại bán gần 962 tỷ; tự doanh mua ngược",
+        "impact": {
+          "direction": "mixed",
+          "horizon": "days",
+          "assets": [
+            "HDB"
+          ],
+          "text": "Hai nhóm tiền lệch chiều. Print tự doanh là VnEconomy/Fili, chưa đối soát HOSE."
+        },
+        "metrics": {
+          "changePct": null,
+          "price": null
+        },
+        "sourceId": "src-vietstock"
+      },
+      {
+        "ticker": "VIC",
+        "headline": "VIC +1,82% nhưng ngoại vẫn bán khoảng 188 tỷ",
+        "impact": {
+          "direction": "mixed",
+          "horizon": "days",
+          "assets": [
+            "VIC"
+          ],
+          "text": "Giá đỡ chỉ số, dòng ngoại không xác nhận."
+        },
+        "metrics": {
+          "changePct": 1.82,
+          "price": null
+        },
+        "sourceId": "src-vietstock"
+      },
+      {
+        "ticker": "TCB",
+        "headline": "Ngoại bán ròng khoảng 147 tỷ TCB",
+        "impact": {
+          "direction": "risk_off",
+          "horizon": "days",
+          "assets": [
+            "TCB"
+          ],
+          "text": "Nằm trong nhóm bank kéo chỉ số xuống cùng BID, MBB."
+        },
+        "metrics": {
+          "changePct": null,
+          "price": null
+        },
+        "sourceId": "src-cafef"
+      },
+      {
+        "ticker": "VHM",
+        "headline": "Ngoại bán khoảng 78–79 tỷ; thuộc nhóm kéo chỉ số giảm",
+        "impact": {
+          "direction": "risk_off",
+          "horizon": "days",
+          "assets": [
+            "VHM"
+          ],
+          "text": "VHM nằm trong nhóm tác động tiêu cực cùng bank và GAS theo VnEconomy."
+        },
+        "metrics": {
+          "changePct": null,
+          "price": null
+        },
+        "sourceId": "src-vneconomy"
+      },
+      {
+        "ticker": "GAS",
+        "headline": "GAS thuộc nhóm kéo VN-Index giảm phiên 2/10",
+        "impact": {
+          "direction": "risk_off",
+          "horizon": "days",
+          "assets": [
+            "GAS"
+          ],
+          "text": "Dầu settle hạ không đủ để đảo nhóm khí trong phiên đã đóng."
+        },
+        "metrics": {
+          "changePct": null,
+          "price": null
+        },
+        "sourceId": "src-vneconomy"
+      }
+    ],
+    "outlook": {
+      "watchpoints": [
+        "Mất 1.728 (đáy phiên 2/10) vào thứ Hai thì bias tiếp diễn bán.",
+        "Giữ trên 1.740 mới là hồi kỹ thuật, không phải đảo chiều.",
+        "Ngoại còn bán ròng trên 1.000 tỷ ở PNJ/HDB thì trụ không đủ."
+      ],
+      "levels": [
+        {
+          "label": "Hỗ trợ",
+          "value": "1.728 – 1.738",
+          "note": "Đáy và đóng cửa 2/10. Không phải mốc hôm nay."
+        },
+        {
+          "label": "Kháng cự",
+          "value": "1.750 – 1.752",
+          "note": "Đỉnh phiên 2/10 và mốc vừa mất."
+        }
+      ],
+      "events": [
+        "Chủ nhật HOSE đóng. Phiên kế tiếp là 5/10.",
+        "Chưa có tỷ giá trung tâm 3/10 và 4/10.",
+        "Fed tháng 10: jobs yếu làm hike kém chắc, lợi suất 10 năm vẫn 5,276%."
+      ]
+    },
+    "series": {
+      "vnindex": {
+        "id": "vnindex",
+        "points": [
+          {
+            "t": "2026-09-28",
+            "v": 1780.68
+          },
+          {
+            "t": "2026-09-29",
+            "v": 1777.73
+          },
+          {
+            "t": "2026-09-30",
+            "v": 1768.62
+          },
+          {
+            "t": "2026-10-01",
+            "v": 1749.3
+          },
+          {
+            "t": "2026-10-02",
+            "v": 1737.71
+          }
+        ]
+      },
+      "dji": {
+        "id": "dji",
+        "points": [
+          {
+            "t": "2026-10-01",
+            "v": 50926.56
+          },
+          {
+            "t": "2026-10-02",
+            "v": 51176.96
+          }
+        ]
+      },
+      "ndx": {
+        "id": "ndx",
+        "points": [
+          {
+            "t": "2026-10-01",
+            "v": 30501.56
+          },
+          {
+            "t": "2026-10-02",
+            "v": 30807.93
+          }
+        ]
+      },
+      "spx": {
+        "id": "spx",
+        "points": [
+          {
+            "t": "2026-10-01",
+            "v": 7666.45
+          },
+          {
+            "t": "2026-10-02",
+            "v": 7722.72
+          }
+        ]
+      },
+      "dxy": {
+        "id": "dxy",
+        "points": [
+          {
+            "t": "2026-10-01",
+            "v": 102.1
+          },
+          {
+            "t": "2026-10-02",
+            "v": 101.92
+          }
+        ]
+      },
+      "nky": {
+        "id": "nky",
+        "points": [
+          {
+            "t": "2026-10-01",
+            "v": 68840.0
+          },
+          {
+            "t": "2026-10-02",
+            "v": 68309.46
+          }
+        ]
+      },
+      "hsi": {
+        "id": "hsi",
+        "points": [
+          {
+            "t": "2026-09-30",
+            "v": 24613.3
+          },
+          {
+            "t": "2026-10-02",
+            "v": 23972.29
+          }
+        ]
+      },
+      "btcUsd": {
+        "id": "btcUsd",
+        "points": [
+          {
+            "t": "2026-10-02",
+            "v": 85330.1
+          },
+          {
+            "t": "2026-10-03",
+            "v": 84864.3
+          },
+          {
+            "t": "2026-10-04",
+            "v": 84847.3
+          }
+        ]
+      },
+      "vnindexVolume5d": {
+        "id": "vnindexVolume5d",
+        "labels": [
+          "28/9",
+          "29/9",
+          "30/9",
+          "1/10",
+          "2/10"
+        ],
+        "points": [
+          {
+            "t": "2026-09-28",
+            "v": 676.73
+          },
+          {
+            "t": "2026-09-29",
+            "v": 537.87
+          },
+          {
+            "t": "2026-09-30",
+            "v": 650.37
+          },
+          {
+            "t": "2026-10-01",
+            "v": 638.45
+          },
+          {
+            "t": "2026-10-02",
+            "v": 615.0
+          }
+        ]
+      },
+      "foreignNet5dVndBn": {
+        "id": "foreignNet5dVndBn",
+        "points": [
+          {
+            "t": "2026-09-28",
+            "v": -293.3
+          },
+          {
+            "t": "2026-09-29",
+            "v": -399.95
+          },
+          {
+            "t": "2026-09-30",
+            "v": -890.44
+          },
+          {
+            "t": "2026-10-01",
+            "v": -63.0
+          },
+          {
+            "t": "2026-10-02",
+            "v": -3283.32
+          }
+        ]
+      }
+    }
+  },
+  "sources": {
+    "schemaVersion": "1.0.0",
+    "sources": [
+      {
+        "id": "src-cafef",
+        "name": "CafeF / Công lý / PetroTimes",
+        "url": "https://cafef.vn/",
+        "accessedAt": "2026-10-04T08:35:00+07:00"
+      },
+      {
+        "id": "src-vietstock",
+        "name": "Vietstock / Fili",
+        "url": "https://finance.vietstock.vn/",
+        "accessedAt": "2026-10-04T08:35:00+07:00"
+      },
+      {
+        "id": "src-vneconomy",
+        "name": "VnEconomy",
+        "url": "https://vneconomy.vn/",
+        "accessedAt": "2026-10-04T08:35:00+07:00"
+      },
+      {
+        "id": "src-nhnn",
+        "name": "SBV / VietnamPlus",
+        "url": "https://www.sbv.gov.vn/",
+        "accessedAt": "2026-10-04T08:35:00+07:00"
+      },
+      {
+        "id": "src-bloomberg",
+        "name": "Reuters / TalkMarkets / FT",
+        "url": "https://www.bloomberg.com/asia",
+        "accessedAt": "2026-10-04T08:35:00+07:00"
+      },
+      {
+        "id": "src-barrons",
+        "name": "eOption / Barron's",
+        "url": "https://www.barrons.com/market-data",
+        "accessedAt": "2026-10-04T08:35:00+07:00"
+      },
+      {
+        "id": "src-yahoo-vn",
+        "name": "MarketWatch / Yahoo",
+        "url": "https://finance.yahoo.com/quote/%5EVNINDEX.VN/history/",
+        "accessedAt": "2026-10-04T08:35:00+07:00"
+      },
+      {
+        "id": "src-yahoo-btc",
+        "name": "OKX BTC/ETH",
+        "url": "https://finance.yahoo.com/quote/BTC-USD/",
+        "accessedAt": "2026-10-04T08:35:00+07:00"
+      },
+      {
+        "id": "src-fireant",
+        "name": "FireAnt",
+        "url": "https://fireant.vn/cong-dong/moi-nhat",
+        "accessedAt": "2026-10-04T08:35:00+07:00"
+      },
+      {
+        "id": "src-f247",
+        "name": "F247",
+        "url": "https://f247.com/",
+        "accessedAt": "2026-10-04T08:35:00+07:00"
+      },
+      {
+        "id": "src-newf319",
+        "name": "newF319",
+        "url": "https://newf319.com/",
+        "accessedAt": "2026-10-04T08:35:00+07:00"
+      }
+    ]
+  }
+}

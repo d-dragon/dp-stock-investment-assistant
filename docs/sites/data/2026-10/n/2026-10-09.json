@@ -1,0 +1,283 @@
+{
+  "schemaVersion": "1.0.0",
+  "date": "2026-10-09",
+  "generatedAt": "2026-10-09T08:35:00+07:00",
+  "briefKind": "eod_prev+overnight+preopen",
+  "items": [
+    {
+      "id": "n-2026-10-09-001",
+      "impact": "high",
+      "impactScore": 92,
+      "rank": 1,
+      "kind": "market",
+      "board": "vn",
+      "title": "StockBiz: VN-Index 8/10 đóng 1.738,97 (−14,42 điểm)",
+      "url": "http://en.stockbiz.vn/HistoricalIndices.aspx",
+      "sourceId": "src-stockbiz",
+      "publishedAt": "2026-10-08T15:05:00+07:00",
+      "tickers": [
+        "VNINDEX"
+      ],
+      "excerpt": "KL 676,6 triệu; GT 15.883,31 tỷ; ngoại HoSE −446,42 tỷ.",
+      "whyImpact": "Print khóa chỉ số và thanh khoản."
+    },
+    {
+      "id": "n-2026-10-09-002",
+      "impact": "high",
+      "impactScore": 88,
+      "rank": 2,
+      "kind": "market",
+      "board": "vn",
+      "title": "Ngoại bán ròng phiên thứ 12 trên HoSE, các nguồn lệch 415–451 tỷ",
+      "url": "https://vneconomy.vn/khoi-ngoai-tiep-tuc-ban-rong-451-ty-dong-van-tiep-tuc-xa-pnj.htm",
+      "sourceId": "src-vneconomy",
+      "publishedAt": "2026-10-08T20:09:00+07:00",
+      "tickers": [
+        "TCB",
+        "PNJ",
+        "PLX"
+      ],
+      "excerpt": "VnEconomy 451,22 / khớp −271,1; StockBiz −446,42; CafeF ~415.",
+      "whyImpact": "Dòng ngoại là biến số mở cửa."
+    },
+    {
+      "id": "n-2026-10-09-003",
+      "impact": "high",
+      "impactScore": 80,
+      "rank": 3,
+      "kind": "news",
+      "board": "vn",
+      "title": "PNJ thủng vùng thấp nhiều năm, ngoại tiếp tục xả",
+      "url": "https://vietnambiz.vn/co-phieu-pnj-thung-day-thoi-covid-19-sau-chuoi-13-phien-giam-2026108113751783.htm",
+      "sourceId": "src-vietnambiz",
+      "publishedAt": "2026-10-08T11:38:00+07:00",
+      "tickers": [
+        "PNJ"
+      ],
+      "excerpt": "Chuỗi 13 phiên giảm; sáng 8/10 ngoại bán khoảng 145 tỷ.",
+      "whyImpact": "Độ rộng và tâm lý bán lẻ."
+    },
+    {
+      "id": "n-2026-10-09-004",
+      "impact": "high",
+      "impactScore": 78,
+      "rank": 4,
+      "kind": "macro",
+      "board": "vn",
+      "title": "Xăng E5RON92 tăng lên trần 27.703 đồng/lít",
+      "url": "https://vneconomy.vn/gia-xang-dau-tang-manh-truoc-bien-dong-cua-thi-truong-the-gioi.htm",
+      "sourceId": "src-vneconomy",
+      "publishedAt": "2026-10-08T15:31:00+07:00",
+      "tickers": [
+        "PLX"
+      ],
+      "excerpt": "E10 28.254; diesel giảm. Znews lệch vài đồng.",
+      "whyImpact": "Truyền dầu thế giới sang CPI và dầu khí."
+    },
+    {
+      "id": "n-2026-10-09-005",
+      "impact": "high",
+      "impactScore": 76,
+      "rank": 5,
+      "kind": "news",
+      "board": "global",
+      "title": "Nasdaq Composite −1,25%, Nasdaq-100 −1,39% đêm 8/10",
+      "url": "https://www.marketscreener.com/news/s-p-500-nasdaq-end-lower-as-crude-prices-jump-chip-stocks-weigh-ce785ddfdd8dff20",
+      "sourceId": "src-bloomberg",
+      "publishedAt": "2026-10-08T16:32:00+07:00",
+      "tickers": [
+        "NDX",
+        "FPT"
+      ],
+      "excerpt": "Dow +0,10% lên 51.231,64; S&P −0,47% về 7.765,36.",
+      "whyImpact": "Gió ngược nhóm công nghệ VN."
+    },
+    {
+      "id": "n-2026-10-09-006",
+      "impact": "high",
+      "impactScore": 74,
+      "rank": 6,
+      "kind": "macro",
+      "board": "global",
+      "title": "WTI digest 91,11 USD (+3,21%); print sáng 9/10 chưa khóa",
+      "url": "https://stockmarketwatch.com/digest/2026-10-08",
+      "sourceId": "src-barrons",
+      "publishedAt": "2026-10-08T21:00:00+07:00",
+      "tickers": [
+        "WTI",
+        "PLX"
+      ],
+      "excerpt": "Reuters: WTI/Brent kỳ hạn gần +3,6%/+4,1%. Vàng digest 4.157,90.",
+      "whyImpact": "Dầu là kênh vĩ mô chính."
+    },
+    {
+      "id": "n-2026-10-09-007",
+      "impact": "high",
+      "impactScore": 70,
+      "rank": 7,
+      "kind": "news",
+      "board": "vn",
+      "title": "Nhận định 9/10: hỗ trợ 1.730, cản 1.755–1.760",
+      "url": "https://vneconomy.vn/vn-index-tiep-tuc-giam-va-ap-luc-ban-chiem-uu-the.htm",
+      "sourceId": "src-vneconomy",
+      "publishedAt": "2026-10-08T22:51:00+07:00",
+      "tickers": [
+        "VNINDEX"
+      ],
+      "excerpt": "BVSC 1.720–1.730; SSI 1.760 còn là cản; VCSC cần vượt 1.750.",
+      "whyImpact": "Mốc kế hoạch phiên."
+    },
+    {
+      "id": "n-2026-10-09-008",
+      "impact": "medium",
+      "impactScore": 66,
+      "rank": 8,
+      "kind": "market",
+      "board": "vn",
+      "title": "Tự doanh mua ròng 18,4 tỷ nhưng khớp lệnh bán 64,9 tỷ",
+      "url": "https://vneconomy.vn/khoi-ngoai-tiep-tuc-ban-rong-451-ty-dong-van-tiep-tuc-xa-pnj.htm",
+      "sourceId": "src-vneconomy",
+      "publishedAt": "2026-10-08T20:09:00+07:00",
+      "tickers": [
+        "VPB",
+        "HPG"
+      ],
+      "excerpt": "Mua khớp VPB, TCB, MWG; bán MBB, HPG, VIC.",
+      "whyImpact": "Không phải lực đỡ chỉ số."
+    },
+    {
+      "id": "n-2026-10-09-009",
+      "impact": "medium",
+      "impactScore": 64,
+      "rank": 9,
+      "kind": "macro",
+      "board": "vn",
+      "title": "NHNN tỷ giá trung tâm 8/10: 25.634 VND; chưa thấy trang 9/10",
+      "url": "https://sbv.gov.vn/vi/t%E1%BB%B7-gi%C3%A1",
+      "sourceId": "src-nhnn",
+      "publishedAt": "2026-10-08T09:00:00+07:00",
+      "tickers": [
+        "USDVND"
+      ],
+      "excerpt": "Văn bản 423/TB-NHNN. MarketVeo 25.889 không phải trung tâm.",
+      "whyImpact": "FX chính thức dừng ở ngày 8/10."
+    },
+    {
+      "id": "n-2026-10-09-010",
+      "impact": "medium",
+      "impactScore": 62,
+      "rank": 10,
+      "kind": "news",
+      "board": "global",
+      "title": "Nikkei đóng 8/10 69.042,11 (−1,42%); sáng 9/10 Bloomberg nói tiếp tục giảm",
+      "url": "https://www.bloomberg.com/jp/news/articles/2026-10-09/TMM3LGT9NJLS00",
+      "sourceId": "src-bloomberg",
+      "publishedAt": "2026-10-09T07:42:00+07:00",
+      "tickers": [
+        "NKY"
+      ],
+      "excerpt": "HSI đóng 8/10 −1,43%. Không có futures khóa.",
+      "whyImpact": "Châu Á rủi ro nhưng thiếu print mở cửa."
+    },
+    {
+      "id": "n-2026-10-09-011",
+      "impact": "medium",
+      "impactScore": 55,
+      "rank": 11,
+      "kind": "news",
+      "board": "vn",
+      "title": "KOS giảm sàn giữa giải chấp chưa khớp",
+      "url": "https://baomoi.com/chung-khoan-8-10-vn-index-giam-hon-14-diem-kos-tiep-tuc-giam-san-giua-ap-luc-giai-chap-c56224755.epi",
+      "sourceId": "src-hanoimoi",
+      "publishedAt": "2026-10-08T16:55:00+07:00",
+      "tickers": [
+        "KOS"
+      ],
+      "excerpt": "Hà Nội Mới: sàn phiên thứ hai.",
+      "whyImpact": "Rủi ro lan giải chấp đơn mã."
+    },
+    {
+      "id": "n-2026-10-09-012",
+      "impact": "low",
+      "impactScore": 48,
+      "rank": 12,
+      "kind": "community",
+      "board": "vn",
+      "title": "F247: độ rộng 122 tăng/190 giảm, họ Vin kéo khoảng 8 điểm",
+      "url": "https://f247.com/t/phuc-hoi-chu-k-co-nen-bo-qua-chi-so/879509",
+      "sourceId": "src-f247",
+      "publishedAt": "2026-10-08T17:49:00+07:00",
+      "tickers": [
+        "VNINDEX"
+      ],
+      "excerpt": "Bài cộng đồng, không phải print.",
+      "whyImpact": "Màu sentiment phân hóa chữ K."
+    },
+    {
+      "id": "n-2026-10-09-013",
+      "impact": "low",
+      "impactScore": 42,
+      "rank": 13,
+      "kind": "community",
+      "board": "vn",
+      "title": "FireAnt: VN30 điều chỉnh gần 1%, phái sinh chênh lệch dương nới",
+      "url": "https://fireant.vn/ma-chung-khoan/VN30",
+      "sourceId": "src-fireant",
+      "publishedAt": "2026-10-08T18:36:00+07:00",
+      "tickers": [
+        "VN30"
+      ],
+      "excerpt": "Tin trang mã, không thay print StockBiz.",
+      "whyImpact": "Sentiment mỏng."
+    },
+    {
+      "id": "n-2026-10-09-014",
+      "impact": "low",
+      "impactScore": 30,
+      "rank": 14,
+      "kind": "community",
+      "board": "vn",
+      "title": "newF319: không có thread khóa phiên 8/10 trong lượt quét",
+      "url": "https://newf319.com/",
+      "sourceId": "src-newf319",
+      "publishedAt": "2026-10-09T08:35:00+07:00",
+      "tickers": [],
+      "excerpt": "Trang diễn đàn mở được nhưng headline phiên không khóa.",
+      "whyImpact": "Sentiment mỏng, không dùng làm print."
+    },
+    {
+      "id": "n-2026-10-09-015",
+      "impact": "medium",
+      "impactScore": 40,
+      "rank": 15,
+      "kind": "market",
+      "board": "global",
+      "title": "DXY Barron's 102,30 lúc 04:33 EDT — không khóa đóng cửa",
+      "url": "https://www.barrons.com/market-data/indexes/dxy",
+      "sourceId": "src-barrons",
+      "publishedAt": "2026-10-08T04:33:00+07:00",
+      "tickers": [
+        "DXY"
+      ],
+      "excerpt": "Previous close trên trang 102,24.",
+      "whyImpact": "FX thế giới chưa khóa."
+    },
+    {
+      "id": "n-2026-10-09-016",
+      "impact": "low",
+      "impactScore": 36,
+      "rank": 16,
+      "kind": "market",
+      "board": "global",
+      "title": "Bitcoin OKX đóng 8/10 tại 81.031 USD",
+      "url": "https://www.okx.com/price-history/bitcoin-btc",
+      "sourceId": "src-yahoo-btc",
+      "publishedAt": "2026-10-08T23:00:00+07:00",
+      "tickers": [
+        "BTC"
+      ],
+      "excerpt": "MarketVeo cùng cửa sổ ghi ~81.748.",
+      "whyImpact": "Crypto không phải dòng HoSE."
+    }
+  ]
+}

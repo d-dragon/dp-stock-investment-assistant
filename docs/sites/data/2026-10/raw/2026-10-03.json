@@ -1,0 +1,150 @@
+{
+  "schemaVersion": "1.0.0",
+  "date": "2026-10-03",
+  "briefKind": "eod_prev+overnight+preopen",
+  "generatedAt": "2026-10-03T08:35:00+07:00",
+  "market": {
+    "eodDate": "2026-10-02",
+    "briefDate": "2026-10-03",
+    "hose": {
+      "vnindex": {
+        "price": 1737.71,
+        "change": -11.59,
+        "changePct": -0.66,
+        "session": "official_close"
+      },
+      "hnx": {
+        "price": 266.75,
+        "change": -1.91,
+        "changePct": -0.71
+      },
+      "upcom": {
+        "price": 125.93,
+        "change": -0.59,
+        "changePct": -0.47
+      },
+      "vn30": {
+        "price": 1875.99,
+        "change": -14.58,
+        "note": "PetroTimes: 22 giảm / 5 tăng"
+      },
+      "breadthHose": {
+        "adv": 90,
+        "dec": 216,
+        "unc": 50
+      },
+      "liquidity": {
+        "matchVolumeShares": 615000000,
+        "matchValueVndBn": 14400,
+        "hoseValueVndBn": 19176,
+        "note": "Fili khớp ~615 triệu cp / >14,4 nghìn tỷ. Người Đưa Tin tổng GT 19.176 tỷ. PetroTimes HoSE gần 19,2 nghìn tỷ."
+      },
+      "foreign": {
+        "hoseNetVndBn": -3283.32,
+        "wholeMarketNetVndBn": -3361.1,
+        "hnxNetVndBn": -13.61,
+        "note": "HoSE Fili −3.283 tỷ; Hà Nội Mới toàn thị trường −3.361 tỷ (mua 1.286,5 / bán 4.647,6). Không khóa một print khi hai nguồn lệch."
+      },
+      "proprietary": {
+        "netValueVndBn": 1700,
+        "note": "Fili: tự doanh mua ròng gần 1,7 nghìn tỷ, dồn HDB ~1,5 nghìn tỷ. Không phải print HOSE đối soát. Nguồn khác không xác nhận."
+      }
+    },
+    "world": {
+      "dji": {
+        "price": 51176.96,
+        "change": 250.4,
+        "changePct": 0.49,
+        "source": "AP"
+      },
+      "spx": {
+        "price": 7722.72,
+        "change": 56.27,
+        "changePct": 0.73,
+        "source": "AP"
+      },
+      "ndx": {
+        "price": 30807.93,
+        "change": 306.37,
+        "changePct": 1.0,
+        "source": "MarketWatch"
+      },
+      "rut": {
+        "price": 2832.9,
+        "change": 26.27,
+        "changePct": 0.94,
+        "source": "AP"
+      },
+      "ftse": {
+        "price": 10461.95,
+        "changePct": 0.32,
+        "source": "FT"
+      },
+      "nky": {
+        "price": 68309.46,
+        "change": -647.26,
+        "changePct": -0.94,
+        "source": "FT"
+      },
+      "hsi": {
+        "price": 23972.29,
+        "change": -640.98,
+        "changePct": -2.6,
+        "source": "FT"
+      },
+      "dxy": {
+        "price": 101.92,
+        "changePct": -0.17,
+        "source": "portfolio-terminal"
+      },
+      "wti": {
+        "price": 91.11,
+        "change": -1.76,
+        "changePct": -1.9,
+        "source": "eOption"
+      },
+      "xau": {
+        "price": 4162.3,
+        "change": -40.0,
+        "changePct": -0.95,
+        "source": "eOption"
+      },
+      "ust10y": {
+        "price": 5.276,
+        "changeBp": 3.1,
+        "source": "eOption"
+      },
+      "btcWeekend": {
+        "price": 84645.5,
+        "note": "Investing.com snapshot sáng 3/10, không phải đóng cửa chuẩn"
+      }
+    },
+    "fx": {
+      "sbvCentralOct2": 25636,
+      "changeVsOct1": 12,
+      "band": "±5%",
+      "ceiling": 26918,
+      "floor": 24354,
+      "vcbSellOct2Open": 26170,
+      "note": "Chưa có tỷ giá trung tâm 3/10 (thứ Bảy)."
+    }
+  },
+  "news_events": [
+    "BLS: payrolls tháng 9 +29.000, thất nghiệp 4,2%, lương giờ +3,0% YoY. Reuters: dưới kỳ vọng 90.000, Fed hike tháng 10 bị đẩy ra.",
+    "Mỹ đóng cửa xanh sau jobs; châu Á 2/10 lệch: Nikkei −0,94%, HSI −2,60%.",
+    "Ngoại xả PNJ ~1.264–1.270 tỷ và HDB ~962–1.035 tỷ. VIC +1,82% nhưng vẫn bị bán ròng ~188 tỷ.",
+    "Dầu khí kéo ngành năng lượng −2,46% (BSR, PLX, OIL, PVD, PVS)."
+  ],
+  "sentiment": {
+    "fireant": "Trang cộng đồng không trả bài mới khớp phiên 2/10; snapshot chỉ số trên fireant.vn còn số cũ.",
+    "f247": "Không lấy được thread phiên 2/10 trong cửa sổ này.",
+    "newf319": "newf319.com không trả mẫu thảo luận dùng được. Sentiment mỏng, không dùng làm print."
+  },
+  "gaps": [
+    "Tự doanh chỉ có Fili, lệch quy mô so với ngoại các báo.",
+    "Hai print ngoại: HoSE −3.283 tỷ vs toàn thị trường −3.361 tỷ.",
+    "Không có tỷ giá trung tâm 3/10.",
+    "ETH không có đóng cửa cuối tuần khóa.",
+    "Cộng đồng FireAnt/F247/newF319 mỏng."
+  ]
+}

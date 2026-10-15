@@ -1,0 +1,64 @@
+{
+  "schemaVersion": "2.1.0",
+  "yearMonth": "2026-10",
+  "week": {
+    "isoYear": 2026,
+    "isoWeek": 41,
+    "id": "2026-W41",
+    "start": "2026-10-05",
+    "end": "2026-10-11"
+  },
+  "updatedAt": "2026-10-11T08:35:00+07:00",
+  "storage": "day-shards",
+  "days": [
+    {
+      "date": "2026-10-05",
+      "dayPath": "2026-10/d/2026-10-05.json",
+      "newsPath": "2026-10/n/2026-10-05.json",
+      "analysisPath": "2026-10/a/2026-10-05.md",
+      "status": "preopen"
+    },
+    {
+      "date": "2026-10-06",
+      "dayPath": "2026-10/d/2026-10-06.json",
+      "newsPath": "2026-10/n/2026-10-06.json",
+      "analysisPath": "2026-10/a/2026-10-06.md",
+      "status": "preopen"
+    },
+    {
+      "date": "2026-10-07",
+      "dayPath": "2026-10/d/2026-10-07.json",
+      "newsPath": "2026-10/n/2026-10-07.json",
+      "analysisPath": "2026-10/a/2026-10-07.md",
+      "status": "preopen"
+    },
+    {
+      "date": "2026-10-08",
+      "dayPath": "2026-10/d/2026-10-08.json",
+      "newsPath": "2026-10/n/2026-10-08.json",
+      "analysisPath": "2026-10/a/2026-10-08.md",
+      "status": "preopen"
+    },
+    {
+      "date": "2026-10-09",
+      "dayPath": "2026-10/d/2026-10-09.json",
+      "newsPath": "2026-10/n/2026-10-09.json",
+      "analysisPath": "2026-10/a/2026-10-09.md",
+      "status": "preopen"
+    },
+    {
+      "date": "2026-10-10",
+      "dayPath": "2026-10/d/2026-10-10.json",
+      "newsPath": "2026-10/n/2026-10-10.json",
+      "analysisPath": "2026-10/a/2026-10-10.md",
+      "status": "preopen"
+    },
+    {
+      "date": "2026-10-11",
+      "dayPath": "2026-10/d/2026-10-11.json",
+      "newsPath": "2026-10/n/2026-10-11.json",
+      "analysisPath": "2026-10/a/2026-10-11.md",
+      "status": "preopen"
+    }
+  ]
+}

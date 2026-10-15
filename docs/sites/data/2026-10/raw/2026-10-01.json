@@ -1,0 +1,30 @@
+{
+  "date": "2026-10-01",
+  "briefDate": "2026-10-01",
+  "eodDate": "2026-09-30",
+  "briefKind": "eod_prev+overnight+preopen",
+  "generatedAt": "2026-10-01T08:35:00+07:00",
+  "market": {
+    "vnindex": {"price": 1768.62, "change": -9.11, "changePct": -0.51, "session": "prior_close", "sourceId": "src-stockbiz"},
+    "hnx": {"price": 271.64, "changePct": 0.64, "sourceId": "src-stockbiz"},
+    "hoseValueVndBn": 15230.52,
+    "hoseVolume": 650368664,
+    "foreignNetHoSEVndBn": -890.44,
+    "world": {"dji": 50906.05, "spx": 7651.54, "ndx": 30408.5, "dxy": 101.47, "nky": 66753.72, "hsi": 24613.3, "wti": 89.98, "xau": 4185.2, "btc": 83678.35}
+  },
+  "news_events": [
+    "NVL record date 2026-10-01 rights issue",
+    "PNJ private placement proposal 550m shares",
+    "BSC SMA50 break 2026-09-30"
+  ],
+  "sentiment": {
+    "fireant": "cautious; notes proprietary ~+1200bn and VPB buying",
+    "newf319": "defensive, watch 1760",
+    "f247": "defensive color only"
+  },
+  "gaps": [
+    "No official HOSE 2026-10-01 close at 08:35",
+    "Retail net unknown",
+    "Proprietary 1200bn is FireAnt-reported, not Fiin primary"
+  ]
+}

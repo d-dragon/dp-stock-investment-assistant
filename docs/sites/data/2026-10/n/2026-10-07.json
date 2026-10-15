@@ -1,0 +1,322 @@
+{
+  "schemaVersion": "1.0.0",
+  "date": "2026-10-07",
+  "generatedAt": "2026-10-07T08:35:00+07:00",
+  "briefKind": "eod_prev+overnight+preopen",
+  "items": [
+    {
+      "id": "n-2026-10-07-001",
+      "impact": "high",
+      "impactScore": 92,
+      "rank": 1,
+      "kind": "market",
+      "board": "vn",
+      "title": "VN-Index đóng 6/10 tại 1.759,08 (+5,88), close 7/10 chưa có",
+      "url": "https://en.nhandan.vn/infographic-vn-index-rises-034-on-october-6-post167396.html",
+      "sourceId": "src-vietstock",
+      "publishedAt": "2026-10-06T20:57:00+07:00",
+      "tickers": [
+        "VNINDEX"
+      ],
+      "excerpt": "StockBiz và Nhân Dân cùng print. Trong phiên có lúc mất gần 18 điểm.",
+      "whyImpact": "Mốc tham chiếu mở cửa 7/10."
+    },
+    {
+      "id": "n-2026-10-07-002",
+      "impact": "high",
+      "impactScore": 90,
+      "rank": 2,
+      "kind": "market",
+      "board": "vn",
+      "title": "Ngoại bán ròng ~2.600–2.700 tỷ nhưng khớp lệnh mua ròng 134,3 tỷ",
+      "url": "https://vneconomy.vn/khoi-ngoai-ban-thoa-thuan-hon-2800-ty-o-hdb-va-vjc.htm",
+      "sourceId": "src-vneconomy",
+      "publishedAt": "2026-10-06T23:01:00+07:00",
+      "tickers": [
+        "HDB",
+        "VJC"
+      ],
+      "excerpt": "HDB thỏa thuận 1.981,8 tỷ, VJC 764 tỷ, bán cho trong nước.",
+      "whyImpact": "Net tổng và net khớp trái dấu."
+    },
+    {
+      "id": "n-2026-10-07-003",
+      "impact": "high",
+      "impactScore": 84,
+      "rank": 3,
+      "kind": "market",
+      "board": "vn",
+      "title": "Tự doanh mua ròng 274,5 tỷ (khớp 285,8)",
+      "url": "https://vneconomy.vn/khoi-ngoai-ban-thoa-thuan-hon-2800-ty-o-hdb-va-vjc.htm",
+      "sourceId": "src-vneconomy",
+      "publishedAt": "2026-10-06T23:01:00+07:00",
+      "tickers": [
+        "VPB",
+        "VIC",
+        "FPT",
+        "VCB",
+        "MWG"
+      ],
+      "excerpt": "Bán khớp SSI, TCB, MBB, PNJ.",
+      "whyImpact": "Dòng trong nước ngược put-through ngoại."
+    },
+    {
+      "id": "n-2026-10-07-004",
+      "impact": "high",
+      "impactScore": 80,
+      "rank": 4,
+      "kind": "news",
+      "board": "vn",
+      "title": "PNJ sàn 20.150, dư bán 14,7 triệu, đáy 9 năm",
+      "url": "https://www.dnse.com.vn/senses/tin-tuc/pnj-ve-day-9-nam-khoi-ngoai-xa-manh-hdb-35287892",
+      "sourceId": "src-cafef",
+      "publishedAt": "2026-10-06T16:10:00+07:00",
+      "tickers": [
+        "PNJ"
+      ],
+      "excerpt": "Ngoại khớp vẫn bán PNJ.",
+      "whyImpact": "Rủi ro margin đơn lẻ, không phải beta chỉ số."
+    },
+    {
+      "id": "n-2026-10-07-005",
+      "impact": "high",
+      "impactScore": 78,
+      "rank": 5,
+      "kind": "market",
+      "board": "global",
+      "title": "S&P 7.818,93 và Nasdaq Composite 27.599,79 lập đỉnh",
+      "url": "https://apnews.com/article/wall-street-stocks-dow-nasdaq-267ca73e15e09f7e8deb5f6076405f48",
+      "sourceId": "src-barrons",
+      "publishedAt": "2026-10-07T03:21:00+07:00",
+      "tickers": [
+        "SPX"
+      ],
+      "excerpt": "Dow 51.521,28. Russell −0,59%.",
+      "whyImpact": "Risk-on Mỹ nhưng small-cap không xác nhận."
+    },
+    {
+      "id": "n-2026-10-07-006",
+      "impact": "medium",
+      "impactScore": 70,
+      "rank": 6,
+      "kind": "market",
+      "board": "vn",
+      "title": "Thanh khoản HOSE 19.579 tỷ / 827 triệu cp, lệch DNSE 18.715 tỷ",
+      "url": "https://baomoi.com/chung-khoan-ngay-6-10-thanh-khoan-khoi-sac-vn-index-dao-chieu-tang-diem-c56209830.epi",
+      "sourceId": "src-cafef",
+      "publishedAt": "2026-10-06T19:02:00+07:00",
+      "tickers": [
+        "VNINDEX"
+      ],
+      "excerpt": "Khớp DNSE 614,09 triệu. Thỏa thuận VnEconomy 5.471,9 tỷ.",
+      "whyImpact": "Thanh khoản cải thiện nhưng print không khóa."
+    },
+    {
+      "id": "n-2026-10-07-007",
+      "impact": "medium",
+      "impactScore": 68,
+      "rank": 7,
+      "kind": "news",
+      "board": "vn",
+      "title": "Nhóm VHM, VCB, CTG, LPB, TCX, MWG, VNM đóng góp 5,76 điểm",
+      "url": "https://vneconomy.vn/khoi-ngoai-ban-thoa-thuan-hon-2800-ty-o-hdb-va-vjc.htm",
+      "sourceId": "src-vneconomy",
+      "publishedAt": "2026-10-06T23:01:00+07:00",
+      "tickers": [
+        "VHM",
+        "VCB",
+        "MWG"
+      ],
+      "excerpt": "Breadth 127/177/64.",
+      "whyImpact": "Hồi là trụ, không phải sóng."
+    },
+    {
+      "id": "n-2026-10-07-008",
+      "impact": "medium",
+      "impactScore": 66,
+      "rank": 8,
+      "kind": "macro",
+      "board": "vn",
+      "title": "Tỷ giá trung tâm 7/10 là 25.645, không có trang SBV",
+      "url": "https://baoquocte.vn/ty-gia-ngoai-te-ty-gia-usd-vnd-hom-nay-7-10-dong-usd-giam-gia-tao-da-nang-do-cac-dong-tien-khac-452889.html",
+      "sourceId": "src-nhnn",
+      "publishedAt": "2026-10-07T08:02:00+07:00",
+      "tickers": [
+        "USDVND"
+      ],
+      "excerpt": "VCB 25.770–26.180.",
+      "whyImpact": "Không phải shock tỷ giá."
+    },
+    {
+      "id": "n-2026-10-07-009",
+      "impact": "medium",
+      "impactScore": 64,
+      "rank": 9,
+      "kind": "market",
+      "board": "global",
+      "title": "NDX 31.224,47 khác Nasdaq Composite 27.599,79",
+      "url": "https://www.marketscreener.com/news/s-p-500-nasdaq-hit-record-highs-as-treasury-yields-stall-oil-slips-ce785dd9da8af226",
+      "sourceId": "src-bloomberg",
+      "publishedAt": "2026-10-06T23:04:00+07:00",
+      "tickers": [
+        "NDX"
+      ],
+      "excerpt": "Không gộp hai chỉ số.",
+      "whyImpact": "Tránh sai mốc công nghệ."
+    },
+    {
+      "id": "n-2026-10-07-010",
+      "impact": "medium",
+      "impactScore": 62,
+      "rank": 10,
+      "kind": "macro",
+      "board": "global",
+      "title": "WTI digest 89,92 lệch Reuters dầu −2% trong phiên",
+      "url": "https://stockmarketwatch.com/digest/2026-10-06",
+      "sourceId": "src-barrons",
+      "publishedAt": "2026-10-07T04:07:00+07:00",
+      "tickers": [
+        "WTI"
+      ],
+      "excerpt": "Đêm ~90,3. Vàng digest 4.191.",
+      "whyImpact": "Không trade GAS theo một print."
+    },
+    {
+      "id": "n-2026-10-07-011",
+      "impact": "medium",
+      "impactScore": 58,
+      "rank": 11,
+      "kind": "news",
+      "board": "vn",
+      "title": "NVL thoát sàn sau đính chính không phá sản",
+      "url": "https://vneconomy.vn/novaland-khang-dinh-khong-pha-san-duy-tri-hoat-dong-on-dinh.htm",
+      "sourceId": "src-vneconomy",
+      "publishedAt": "2026-10-06T18:00:00+07:00",
+      "tickers": [
+        "NVL"
+      ],
+      "excerpt": "Tin doanh nghiệp, chưa phải dòng ngành.",
+      "whyImpact": "BĐS còn gap theo tin."
+    },
+    {
+      "id": "n-2026-10-07-012",
+      "impact": "medium",
+      "impactScore": 55,
+      "rank": 12,
+      "kind": "market",
+      "board": "global",
+      "title": "Nikkei futures 7/10 tách quanh close 70.684",
+      "url": "https://www.cnbc.com/2026/10/06/stock-market-today-live-updates.html",
+      "sourceId": "src-bloomberg",
+      "publishedAt": "2026-10-07T05:04:00+07:00",
+      "tickers": [
+        "NKY",
+        "HSI"
+      ],
+      "excerpt": "Osaka ~70.070, Chicago ~71.020. HSI futures ~24.272.",
+      "whyImpact": "Châu Á không gap cùng chiều Mỹ."
+    },
+    {
+      "id": "n-2026-10-07-013",
+      "impact": "low",
+      "impactScore": 42,
+      "rank": 13,
+      "kind": "macro",
+      "board": "global",
+      "title": "DXY 101,94–101,97; UST 10 năm 5,25–5,31",
+      "url": "https://daxfutures.org/world-markets/",
+      "sourceId": "src-barrons",
+      "publishedAt": "2026-10-07T02:39:00+07:00",
+      "tickers": [
+        "DXY"
+      ],
+      "excerpt": "Hai nguồn lệch nhẹ.",
+      "whyImpact": "Trần định giá, không phải catalyst sáng."
+    },
+    {
+      "id": "n-2026-10-07-014",
+      "impact": "low",
+      "impactScore": 40,
+      "rank": 14,
+      "kind": "news",
+      "board": "vn",
+      "title": "Pyn Elite cảnh báo cú sập toàn cầu có thể chạm VN",
+      "url": "https://vneconomy.vn/dai-dien-pyn-elite-fund-thi-truong-toan-cau-co-the-doi-dien-mot-cu-sap-lon-tac-dong-den-chung-khoan-viet-nam.htm",
+      "sourceId": "src-vneconomy",
+      "publishedAt": "2026-10-06T21:00:00+07:00",
+      "tickers": [
+        "VNINDEX"
+      ],
+      "excerpt": "Ý kiến, không phải print.",
+      "whyImpact": "Màu định vị, không phải dòng ngày."
+    },
+    {
+      "id": "n-2026-10-07-015",
+      "impact": "low",
+      "impactScore": 36,
+      "rank": 15,
+      "kind": "community",
+      "board": "vn",
+      "title": "newF319: thread PNJ, VIB 285 triệu USD, kế hoạch chuyển HNX sang HOSE",
+      "url": "https://newf319.com/",
+      "sourceId": "src-newf319",
+      "publishedAt": "2026-10-07T08:30:00+07:00",
+      "tickers": [
+        "PNJ",
+        "VIB"
+      ],
+      "excerpt": "Box ~6.281 online. Không có print giá.",
+      "whyImpact": "Sentiment, không phải dòng ngoại."
+    },
+    {
+      "id": "n-2026-10-07-016",
+      "impact": "low",
+      "impactScore": 28,
+      "rank": 16,
+      "kind": "community",
+      "board": "vn",
+      "title": "FireAnt và F247 mỏng trong cửa sổ 08:35",
+      "url": "https://fireant.vn/cong-dong/moi-nhat",
+      "sourceId": "src-fireant",
+      "publishedAt": "2026-10-07T08:35:00+07:00",
+      "tickers": [],
+      "excerpt": "Không scrape được thread khóa. DNSE dùng ảnh FireAnt cho chart phiên.",
+      "whyImpact": "Không dùng làm print."
+    },
+    {
+      "id": "n-2026-10-07-017",
+      "impact": "low",
+      "impactScore": 24,
+      "rank": 17,
+      "kind": "macro",
+      "board": "global",
+      "title": "FTSE ~10.542 (+0,42%), không phải print AP khóa",
+      "url": "https://daxfutures.org/world-markets/",
+      "sourceId": "src-barrons",
+      "publishedAt": "2026-10-07T02:39:00+07:00",
+      "tickers": [
+        "FTSE"
+      ],
+      "excerpt": "Board châu Âu.",
+      "whyImpact": "Không truyền dẫn VN."
+    },
+    {
+      "id": "n-2026-10-07-018",
+      "impact": "low",
+      "impactScore": 22,
+      "rank": 18,
+      "kind": "news",
+      "board": "global",
+      "title": "Bitcoin OKX 85.723, ETH 2.702",
+      "url": "https://www.okx.com/price-history/ethereum-eth",
+      "sourceId": "src-yahoo-btc",
+      "publishedAt": "2026-10-07T07:00:00+07:00",
+      "tickers": [
+        "BTC",
+        "ETH"
+      ],
+      "excerpt": "FXGlory BTC sáng thấp hơn.",
+      "whyImpact": "Không liên quan thanh khoản HOSE."
+    }
+  ]
+}
