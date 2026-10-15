@@ -41,12 +41,12 @@
 > 📘 **Quick Navigation to Authoritative Documents**:  
 > • **Product SSOT**: [`docs/system/PRODUCT_SPECIFICATION.md`](docs/system/PRODUCT_SPECIFICATION.md) — Product model, domain contracts, and roadmap.  
 > • **Conceptual IA Map**: [`docs/system/CONCEPTUAL_IA_MAP.md`](docs/system/CONCEPTUAL_IA_MAP.md) — Information architecture and workspace zones.  
-> • **Conceptual Wireframes**: [`docs/system/CONCEPTUAL_WIREFRAMES.md`](docs/system/CONCEPTUAL_WIREFRAMES.md) — Visual proof of workspace frames (W1–W6).  
-> • **Vision & Capabilities Charter**: [`docs/system/PRODUCT_VISION_AND_CAPABILITIES.md`](docs/system/PRODUCT_VISION_AND_CAPABILITIES.md) — Market microstructure & 360° deep-dive.  
+> • **User Journeys with Wireframes**: [`docs/system/USER_JOURNEYS_WITH_WIREFRAMES.md`](docs/system/USER_JOURNEYS_WITH_WIREFRAMES.md) — Techno-Fundamental user journey Pass→Position / Fail→Working Thesis + optional Case binder; proof frames W1–W6.  
+> • **Vision & Capabilities Charter**: [`docs/system/PRODUCT_CAPABILITIES[Reserved].md`](docs/system/PRODUCT_CAPABILITIES%5BReserved%5D.md) — Market microstructure & 360° deep-dive.  
 
 ### 1.1 Product Overview & Value Proposition
 
-The **DP Stock-Investment Assistant** is an intelligent, visual workspace engineered as a **Cognitive AI-powered Investment Workspace** for retail investors and active stock traders. Its primary journey owner is the **Hybrid Techno-Fundamental Investor**, who combines long-term business quality and valuation conviction with tactical technical execution, volume profiling, and strict risk discipline.
+The **DP Stock-Investment Assistant** is an intelligent, visual workspace engineered as a **Cognitive AI-powered Investment Workspace** for retail investors and active stock traders. Its primary journey owner is the **Techno-Fundamental Investor (TFI)**, who combines long-term business quality and valuation conviction with tactical technical execution, volume profiling, and strict risk discipline.
 
 Modern stock investing subjects retail participants to four systemic handicaps:
 1. **Information Asymmetry**: Fragmented, low-signal disclosures, delayed news, and unverified forum sentiment.
@@ -101,7 +101,7 @@ flowchart LR
    - **Execution Portfolio (Track B)**: Governs live holdings, risk budgeting, and real capital allocations.
    - **The Decision Gate**: Ideas only promote to the portfolio by passing an explicit pre-mortem checklist (clear invalidation criteria, risk budget, and stop rules).
 2. **Living Thesis with Multi-Stance**: Theses are living records tracking parallel **Bull and Bear** arguments, continuously monitored against earnings releases and news to prevent hindsight bias.
-3. **Optional Investment Case**: A lightweight narrative thread that optionally binds research, thesis, decisions, and trades into one coherent lifecycle.
+3. **Position at Pass + optional Case binder**: Decision **Pass** creates a **Position** (size, stop, official book). Fail/Revise never creates a Position — work stays a **Working Thesis**. An **Investment Case** is an **optional narrative binder / dossier thread** (anytime; not born at Pass; not the Position; not required).
 
 #### The Unified Workspace Layout
 
@@ -109,22 +109,22 @@ All work takes place in a single, focused screen modeled after a professional wo
 
 ```text
 ┌─────────────────────────────────────────────────────────────────────────────────────────────┐
-│ TOP CHROME (Z2 Context)                 [VNM]  •  [Investment Case]  •  Research / Market  │
-├───────────────────────┬──────────────────────────────────────────────┬──────────────────────┤
-│ LEFT SIDEBAR (Z1)     │ PRIMARY WORKSPACE (Z3 · Wide)                │ AI COMPANION (Z4)    │
-│ Dual-Track             │ • Active work and decision gate              │ • Context-aware       │
-│  ○ Research Sandbox    │ • 360° forensic analysis & financials        │   co-analyst          │
-│  ○ Execution Portfolio │ • Living Thesis: parallel Bull / Bear       │ • Summarizes filings │
-│ Lifecycle              │ • Decision Gate: pre-mortem checklist        │   and news           │
-│  1 Insights            │ • Price & volume market anchor (Sandbox)     │ • Challenges         │
-│  2 Thesis              │                                                │   assumptions        │
-│  3 Decision            │                                                │ • Helps; never acts  │
-│  4 Portfolio           │                                                │   without investor   │
-│                       │                                                │   confirmation       │
-└───────────────────────┴──────────────────────────────────────────────┴──────────────────────┘
+│ Z2 · TOP CHROME (context)                                           [search · notif · acct] │
+│ [VNM]  •  [Position after Pass]  •  [Case if linked]                                        │
+├───────────────┬──────────────────────────────────────────────────┬──────────────────────────┤
+│ Z1 · SIDEBAR  │ Z3 · MAIN WORKSPACE (wide)                       │ Z4 · AI COMPANION        │
+│ DUAL-TRACK    │ • Active work and decision gate                  │ • Context-aware          │
+│   A Research  │ • 360° forensic analysis & financials            │   co-analyst             │
+│   B Portfolio │ • Living Thesis: parallel Bull / Bear            │ • Summarizes filings     │
+│ LIFECYCLE     │ • Decision Gate: pre-mortem checklist            │   and news               │
+│   Insights    │ • Price & volume market anchor (Sandbox)         │ • Challenges assumptions │
+│   Thesis      │                                                  │ • Helps; never acts      │
+│   Decision    │                                                  │   without investor       │
+│   Portfolio   │                                                  │   confirmation           │
+└───────────────┴──────────────────────────────────────────────────┴──────────────────────────┘
 ```
 
-> For deep architectural specifications and wireframes, see [`CONCEPTUAL_IA_MAP.md`](docs/system/CONCEPTUAL_IA_MAP.md) and [`CONCEPTUAL_WIREFRAMES.md`](docs/system/CONCEPTUAL_WIREFRAMES.md).
+> For deep architectural specifications and wireframes, see [`CONCEPTUAL_IA_MAP.md`](docs/system/CONCEPTUAL_IA_MAP.md) and [`USER_JOURNEYS_WITH_WIREFRAMES.md`](docs/system/USER_JOURNEYS_WITH_WIREFRAMES.md).
 
 ---
 
@@ -181,9 +181,10 @@ flowchart TB
 
 For detailed structural specifications, component designs, and deployment models, consult the authoritative architecture documentation:
 
-- 🏛️ **[System Overview & Boundaries](docs/architecture/SYSTEM_OVERVIEW_AND_BOUNDARIES.md)** — arc42 §3, §4, §5 Level 1 system building blocks and container scopes.
+- 🏛️ **[System Overview & Boundaries](docs/architecture/SYSTEM_OVERVIEW_AND_BOUNDARIES.md)** (draft) — arc42 §3, §4, §5 Level 1 system building blocks and container scopes, logical layers, security (identity and access), risks and decision index.
+- 📜 **[Architecture Decisions](docs/architecture/DECISIONS/)** — ADR-SYS-001 Identity and per-user isolation (accepted in part: Auth0), ADR-SYS-002 Decision gate (proposed), ADR-SYS-003 Backend modular monolith (proposed), ADR-SYS-004 Data pipeline and records (accepted: ELT), ADR-SYS-005 External AI agent access (proposed).
 - 🔄 **[Runtime & Integration Flows](docs/architecture/RUNTIME_AND_INTEGRATION_FLOWS.md)** — arc42 §6 dynamic sequence flows, streaming chat, and tool execution lifecycles.
-- ☁️ **[Deployment & Cloud Infrastructure](docs/architecture/DEPLOYMENT_AND_INFRASTRUCTURE.md)** — arc42 §7 Docker, Kubernetes/Helm, and Azure AKS/ACR infrastructure.
+- ☁️ **Deployment & Cloud Infrastructure** _(planned)_ — arc42 §7 Docker, Kubernetes/Helm, and Azure AKS/ACR infrastructure.
 - 🧠 **[Agent Domain Architecture](docs/domains/agent/ARCHITECTURE_DESIGN.md)** — Deep-dive agent reasoning graph, prompt compiler, and tool gateway design.
 
 ---
@@ -372,7 +373,7 @@ kubectl -n dp-stock port-forward svc/dp-stock-api 5000:5000
 kubectl -n dp-stock port-forward svc/dp-stock-frontend 3000:80
 ```
 
-📖 *For Terraform Azure AKS/ACR provisioning, Helm chart overrides, and production container guidelines, see **[`IaC/README.md`](IaC/README.md)** and **[`docs/architecture/DEPLOYMENT_AND_INFRASTRUCTURE.md`](docs/architecture/DEPLOYMENT_AND_INFRASTRUCTURE.md)**.*
+📖 *For Terraform Azure AKS/ACR provisioning, Helm chart overrides, and production container guidelines, see **[`IaC/README.md`](IaC/README.md)** (architecture deployment view `docs/architecture/DEPLOYMENT_AND_INFRASTRUCTURE.md` is planned).*
 
 ---
 
@@ -399,7 +400,7 @@ Documentation is structured across **4 authoritative directories** aligned with 
 | Directory | Standard / Authority | Purpose & Lifecycle Role | Key Artifacts |
 |---|---|---|---|
 | **`docs/system/`** | ISO 29148 / ISO 25010 | Authoritative System Requirements Specification (SRS) baseline; cross-domain functional and quality requirements. | [System SRS](docs/system/SYSTEM_REQUIREMENTS_SPECIFICATION.md)<br>[Method & Governance](docs/system/REQUIREMENTS_METHOD_AND_GOVERNANCE.md) |
-| **`docs/architecture/`** | arc42 / C4 Model / ISO 42010 | Long-lived system architecture views, deployment topology, cross-cutting mechanisms, risks, and ADRs. | [System Overview](docs/architecture/SYSTEM_OVERVIEW_AND_BOUNDARIES.md)<br>[Deployment & Infra](docs/architecture/DEPLOYMENT_AND_INFRASTRUCTURE.md)<br>[Cross-Cutting Concepts](docs/architecture/CROSS_CUTTING_CONCEPTS.md)<br>[Risks & Debt](docs/architecture/RISKS_AND_TECHNICAL_DEBT.md)<br>[ADRs](docs/architecture/DECISIONS/) |
+| **`docs/architecture/`** | arc42 / C4 Model / ISO 42010 | Long-lived system architecture views, deployment topology, cross-cutting mechanisms, risks, and ADRs. | [System Overview](docs/architecture/SYSTEM_OVERVIEW_AND_BOUNDARIES.md)<br>Deployment & Infra _(planned)_<br>[Cross-Cutting Concepts](docs/architecture/SYSTEM_OVERVIEW_AND_BOUNDARIES.md#47-cross-cutting-concepts)<br>[Risks & Debt](docs/architecture/SYSTEM_OVERVIEW_AND_BOUNDARIES.md#48-risks)<br>[ADRs](docs/architecture/DECISIONS/) |
 | **`docs/domains/`** | Domain-Driven Design (DDD) | Bounded context technical designs, component internals (C4 Level 3), and subordinate domain SRS documents. | [Agent Architecture](docs/domains/agent/ARCHITECTURE_DESIGN.md)<br>[Backend Design](docs/domains/backend/TECHNICAL_DESIGN.md)<br>[Frontend Architecture](docs/domains/frontend/ARCHITECTURE.md)<br>[Data Policy](docs/domains/data/POLICY_AND_CONSTRAINTS.md) |
 | **`specs/`** | Spec Kit Feature Deltas | Delivery-scoped feature specifications, implementation plans, user-story tasks, verification reports, and RTM manifest. | [Traceability Manifest](specs/spec-traceability.yaml)<br>[Forward Sync Report](specs/spec-sync-status.md)<br>[Feature Specs](specs/) |
 
@@ -433,8 +434,8 @@ The platform enforces a closed-loop engineering discipline connecting high-level
 4. **arc42 Upward Knowledge Promotion**: Verified feature specs act as local delivery evidence. Stable architectural patterns are promoted upward into long-lived docs:
    - System Containers ➔ [`docs/architecture/SYSTEM_OVERVIEW_AND_BOUNDARIES.md`](docs/architecture/SYSTEM_OVERVIEW_AND_BOUNDARIES.md) (arc42 §3–§5)
    - Runtime Flows ➔ [`docs/architecture/RUNTIME_AND_INTEGRATION_FLOWS.md`](docs/architecture/RUNTIME_AND_INTEGRATION_FLOWS.md) (arc42 §6)
-   - Infrastructure Topology ➔ [`docs/architecture/DEPLOYMENT_AND_INFRASTRUCTURE.md`](docs/architecture/DEPLOYMENT_AND_INFRASTRUCTURE.md) (arc42 §7)
-   - Cross-Cutting Concepts ➔ [`docs/architecture/CROSS_CUTTING_CONCEPTS.md`](docs/architecture/CROSS_CUTTING_CONCEPTS.md) (arc42 §8)
+   - Infrastructure Topology ➔ `docs/architecture/DEPLOYMENT_AND_INFRASTRUCTURE.md` _(planned)_ (arc42 §7)
+   - Cross-Cutting Concepts ➔ [System Overview 4.7](docs/architecture/SYSTEM_OVERVIEW_AND_BOUNDARIES.md#47-cross-cutting-concepts) (arc42 §8)
    - Architectural Decisions ➔ [`docs/architecture/DECISIONS/`](docs/architecture/DECISIONS/) (arc42 §9 / ADRs)
    - API Contracts ➔ [`docs/openapi.yaml`](docs/openapi.yaml) (Golden Rule 9)
 
