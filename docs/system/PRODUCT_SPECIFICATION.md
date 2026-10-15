@@ -3,11 +3,11 @@
 | Field | Value |
 |---|---|
 | Document | Product Specification · DP Stock-Investment Assistant |
-| Version | v1.7.0 |
-| Date | 2026-09-25 |
+| Version | v1.7.2 |
+| Date | 2026-10-14 |
 | Status | Working source of truth · ontology frozen 2026-09-24 |
 | Owner | Phan Duy |
-| Related | [IA map v1.0.0](./CONCEPTUAL_IA_MAP.md) · [Journeys v1.0.0](./USER_JOURNEYS_WITH_WIREFRAMES.md) · [Capabilities charter](./PRODUCT_CAPABILITIES%5BReserved%5D.md) (2026-09-03) |
+| Related | [IA map v1.0.0](./CONCEPTUAL_IA_MAP.md) · [Journeys v1.0.1](./USER_JOURNEYS_WITH_WIREFRAMES.md) · [Capabilities charter](./PRODUCT_CAPABILITIES%5BReserved%5D.md) (2026-09-03) |
 
 ---
 
@@ -16,7 +16,7 @@
 > - a **Platform** (Workspace, AI Agents + Memory, Data/Information) that enables work, and
 > - an **Investment Core** of complementary domains (Insights, Thesis + Principles, Decision + Journal, Portfolio, Monitoring) that holds investment meaning.
 >
-> Work moves from a **Working Thesis** in the Research Sandbox through an explicit **Decision gate**. **Pass** creates a **Position** on the Execution Portfolio; **Fail** creates nothing and the user revises. An **Investment Case** is an optional narrative binder, never required (rules: §4.6).
+> Work moves from a **Working Thesis** in the Research Sandbox through an explicit **Decision gate**. **Pass** creates a **Position** on the Execution Portfolio; **Fail** keeps a Decision record (outcome Fail), creates no Position, and the user revises. An **Investment Case** is an optional narrative binder, never required (rules: §4.6).
 >
 > The product's job is to make the investment path (Insights → Thesis → Decision → Portfolio → Monitoring → Journal) visible, disciplined, and continuously improved through an Intelligence Loop.
 
@@ -41,6 +41,7 @@
 | Term | Meaning in this Spec | Do not confuse with |
 |---|---|---|
 | **Platform** | Workspace + AI/Memory + Data; enables work, does not own investment meaning | The whole product |
+| **Layer** | In this Spec, only the two product layers: Platform and Investment Core. The architecture's five layers are a separate, technical view (architecture overview) | Architecture layers |
 | **Investment Core** | Insights, Thesis + Principles, Decision + Journal, Portfolio, Monitoring | Chat UI alone |
 | **Thesis** | The reasoned investment argument, and the name of the workspace stage where it is built | Position; Case |
 | **Working Thesis** | The Thesis before Pass: the Sandbox research state (also after Fail → Revise) | A Position; an early Case |
@@ -72,7 +73,7 @@
 
 ### 0.4 Phase 1 conceptual cut line *(what we prove next)*
 
-**In (skeleton path):** one Adaptive Workspace with Dual-Track separation; the user moves Insights → Working Thesis → Decision gate → Portfolio; Pass creates a Position, Fail creates nothing (§4.6); the Case stays optional; evidence and provenance are first-class; Multi-stance lives inside the Thesis.
+**In (skeleton path):** one Adaptive Workspace with Dual-Track separation; the user moves Insights → Working Thesis → Decision gate → Portfolio; Pass creates a Position, Fail keeps a Decision record (outcome Fail) and creates no Position (§4.6); the Case stays optional; evidence and provenance are first-class; Multi-stance lives inside the Thesis.
 
 **Out of Phase 1 conceptual scope** (charter backlog until this Spec pulls them in): the full Gen-UI artifact set, Behavioral Mentor and deep risk coaching, proactive long-term memory and autonomy, the full 360° knowledge graph, community and social surfaces, global/US depth beyond the Vietnam-first foundation.
 
@@ -91,7 +92,7 @@ Adaptive Workspace (Platform · Workspace)
 
 Pre-Pass (Sandbox): Insights and/or Working Thesis, no Position yet
 Pass: creates a Position on Portfolio; the Thesis attaches as why we hold
-Fail: nothing created; Revise the Working Thesis in the Sandbox
+Fail: Decision record kept (outcome Fail), no Position; Revise the Working Thesis in the Sandbox
 Case: optional narrative binder at any time, not born at Pass
 ```
 
@@ -143,7 +144,7 @@ Vietnamese retail investors and active traders face four structural problems:
 ```text
 1. Complement over containment  → Domains reference each other; avoid forcing every object under one parent.
 2. Platform enables, Core means → UX, AI, and Data serve Investment Core; they do not define investment logic.
-3. Case is a thread, not a god  → The Case is an optional binder; Pass creates the Position, Fail creates nothing (§4.6); never require a Case.
+3. Case is a thread, not a god  → The Case is an optional binder; Pass creates the Position, Fail creates no Position (§4.6); never require a Case.
 4. Lifecycle integrity           → The path Insights → Thesis → Decision → Portfolio → Monitoring → Journal must remain coherent.
 5. Evidence over opinion         → Provenance and confidence are first-class.
 6. Dual-Track workspace          → Separate Track A · Research Sandbox from Track B · Execution Portfolio; promote only via the Decision gate.
@@ -375,7 +376,7 @@ C4Context
 
 | Phase | Primary Boundary Focus | Still Deferred |
 |-------|------------------------|----------------|
-| **Phase 1 – MVP** | Workspace + Insights → Working Thesis → Decision gate → Portfolio (§4.6 outcomes) | Full Monitoring depth, Outcome attribution, rich Memory |
+| **Phase 1 – MVP** | Workspace + Insights → Working Thesis → Decision gate → Portfolio (§4.6 outcomes) | Full Monitoring depth (Phase 1 shows only a light status on the Position), Outcome attribution, rich Memory |
 | **Phase 2 – v1** | Monitoring signals, event briefings, thesis-drift, Journal foundation | Full Behavioral Mentor, industry/macro depth |
 | **Phase 3 – v1.5** | Decision quality, risk overlay, industry 360°, mentor support | Autonomous invalidation, cross-Case learning at scale |
 | **Phase 4 – v2+** | Proactive multi-Case intelligence, long-term memory, global data | Full external ecosystem / marketplace |
@@ -386,6 +387,16 @@ C4Context
 - **AI boundary**: AI suggestions are advisory. Final Thesis stances, Decisions, and Journal entries remain user-owned. Accepted AI outputs are tagged as AI-assisted.
 - **Isolation**: One user’s work and Personal Memory are not visible to others unless explicitly shared.
 - **Governance gate**: New capabilities should strengthen Platform enablement or Investment Core complementarity (and the lifecycle path), not add isolated tools.
+
+### 3.6 External Dependencies (architecture-derived)
+
+These come from the architecture and technical design, not from product decisions in this Spec. Detail lives in the [architecture overview](../architecture/SYSTEM_OVERVIEW_AND_BOUNDARIES.md).
+
+| Dependency | Product role |
+|---|---|
+| Chart provider (TradingView) | Charts in the workspace |
+| Identity provider (Auth0) | Sign-in and user identity |
+| External AI agents | Optional outside assistants; advisory only (§3.5) |
 
 ---
 
@@ -487,7 +498,7 @@ The 6-stage product lifecycle is the definition. The workspace (IA map, Journeys
 | Thesis | Thesis (Working Thesis) | Phase 1 |
 | Decision | Decision (Decision gate) | Phase 1 |
 | Portfolio | Portfolio (Position) | Phase 1 |
-| Monitoring | Portfolio (later a Monitoring view on the Position) | Phase 2 |
+| Monitoring | Portfolio: Phase 1 shows a light status on the Position; the full Monitoring view is Phase 2 | Phase 1 light / Phase 2 |
 | Journal | Decision + Journal (later; closes the Intelligence Loop) | Phase 2 |
 
 **Rules:**
@@ -501,7 +512,7 @@ The 6-stage product lifecycle is the definition. The workspace (IA map, Journeys
 
 This is the only normative statement of the ontology (frozen 2026-09-24). Other sections and docs point here.
 
-1. **Decision gate.** An explicit promotion gate (pre-mortem checklist) between Track A · Research Sandbox and Track B · Execution Portfolio; not a state of the Thesis.
+1. **Decision gate.** An explicit promotion gate (pre-mortem checklist) between Track A · Research Sandbox and Track B · Execution Portfolio; not a state of the Thesis. **Checklist meaning:** the checklist is fixed when the gate is opened; Pass needs every mandatory item met; a Fail lists the items not met. Who authors the items and the default set are open (§7).
 2. **Outcomes and action.** Pass and Fail are the gate outcomes. **Pass** creates a Position. **Fail** means the checklist is not met; the user's action is **Revise**, which returns the work to the Working Thesis. There is no separate Fail button: the gate offers **Pass → Position** and **Revise**. Parking or archiving a Working Thesis is a later, optional step (Journeys J-TFI-B4).
 3. **Position.** Track B execution-risk object (size, stop, official book), created only by Pass. Fail never creates a Position and never mutates Portfolio risk.
 4. **Thesis states.** Before Pass the Thesis is the Working Thesis (Sandbox). After Pass the Thesis attaches to the Position as "why we hold". Living Thesis names the capability (versioned, parallel Bull/Bear), not a state.
@@ -517,6 +528,7 @@ This is the only normative statement of the ontology (frozen 2026-09-24). Other 
 5. **Multi-stance readiness**: the Thesis supports at least two parallel stances (e.g. Bull / Bear).
 6. **Memory isolation**: the User Memory Profile is private to the user.
 7. **Case is a thread, not a god**: when Case-on, related objects should not contradict the Case narrative; the rest of the Case rules are §4.6.
+8. **Gate outcome is recorded with its Decision record**: a gate outcome and its Decision record are recorded together; Pass never creates a Position without its Decision record.
 
 ### 4.8 Key Domain Events (Cross-Domain Contracts)
 
@@ -524,6 +536,7 @@ This is the only normative statement of the ontology (frozen 2026-09-24). Other 
 |-------|----------------------|-------------------|
 | Evidence / Insight added | Insights | Thesis, Agents |
 | Thesis updated | Thesis + Principles | Monitoring, Decision, Journal |
+| Gate outcome recorded (Pass / Fail) | Decision + Journal | Portfolio (Pass only), Journal, Memory, process metrics |
 | Decision taken | Decision + Journal | Portfolio, Journal, Memory |
 | Position changed | Portfolio | Monitoring, Decision |
 | Drift / alert raised | Monitoring | Thesis, Insights, user |
@@ -532,7 +545,7 @@ This is the only normative statement of the ontology (frozen 2026-09-24). Other 
 
 ### 4.9 Bounded Contexts (Logical)
 
-| Bounded Context | Layer | Owns / focuses on |
+| Bounded Context | Group (Platform or Core) | Owns / focuses on |
 |-----------------|-------|-------------------|
 | Workspace / Canvas | Platform | Layout, context, navigation |
 | AI Agents + Memory | Platform | Agent runtime, suggestions, User Memory Profile |
@@ -599,6 +612,8 @@ gantt
     Global data extensibility      :p4c, 2027-08, 2M
 ```
 
+*Dates are planning targets, owner-confirmed 2026-10-14.*
+
 ### 5.3 Phase Goals & Prioritized Deliverables
 
 #### Phase 1 – MVP
@@ -657,16 +672,16 @@ gantt
 | Thesis | Living Thesis + Multi-stance | Drift awareness | Richer versioning | Autonomous signals |
 | Decision + Journal | Basic decision path | Journal foundation | Mentor + quality | Smarter support |
 | Portfolio | Basic view + linking | — | Risk overlay | — |
-| Monitoring | Light / status | Signals + briefings | — | Deeper autonomy |
+| Monitoring | Light status on the Position | Signals + briefings | — | Deeper autonomy |
 | Memory / Loop | — | Foundation | — | Active compounding |
 
 ### 5.5 Success Metrics
 
-| Category | Metrics |
-|----------|---------|
-| **Product Adoption** | Active work threads or Cases / user / month · % reaching Journal or explicit close · Time in Insights vs Decision · Retention after ≥3 completed threads |
-| **Process Quality** | Thesis update frequency before Decision · % Decisions with explicit rationale/scorecard · Journal completion rate · Bias flags acknowledged |
-| **Learning Signal** | Revisits of past work for lessons · Self-reported process improvement · Reduction in repeated error patterns · Memory utilization rate |
+| Category | Metrics | Source events (§4.8) |
+|----------|---------|---------|
+| **Product Adoption** | Active work threads or Cases / user / month · % reaching Journal or explicit close · Time in Insights vs Decision · Retention after ≥3 completed threads | Evidence / Insight added · Journal entry created |
+| **Process Quality** | Thesis update frequency before Decision · % Decisions with explicit rationale/scorecard · Journal completion rate · Bias flags acknowledged | Thesis updated · Gate outcome recorded · Journal entry created |
+| **Learning Signal** | Revisits of past work for lessons · Self-reported process improvement · Reduction in repeated error patterns · Memory utilization rate | Journal entry created · Memory profile updated |
 
 ### 5.6 Delivery Governance Rule
 
@@ -761,16 +776,21 @@ Pre-Pass work is the Working Thesis; ontology per Product Specification §4.6.
 2. Merge selected content from the [Capabilities charter](./PRODUCT_CAPABILITIES%5BReserved%5D.md) into this Spec (note: the charter's §4.1 persona name predates the TFI rename).
 3. Resume SDD domain specs (Workspace, Insights, Thesis, Decision) and module mapping.
 
+**Open questions:**
+1. Decision gate checklist: who authors the items, and what is the default set (§4.6)?
+
 ---
 
 ## 8. Change log
 
 | Version | Date | Change |
 |---|---|---|
+| v1.7.2 | 2026-10-14 | Review fixes M1–M9 (no technical detail): new §3.6 architecture-derived external dependencies; §4.6 checklist meaning; §4.7 #8 gate outcome recorded with its Decision record; Monitoring is a light Position status in Phase 1 (§3.4, §4.5, §5.4); Gantt dates owner-confirmed; §4.8 gate-outcome event and §5.5 source-event column; "Layer" glossary entry and §4.9 column renamed; §7 open question. |
+| v1.7.1 | 2026-10-08 | Fail wording aligned to Phan's 2026-10-08 decision: Fail keeps a Decision record (outcome Fail) and creates no Position (header, §0.4, §0.5, §1.5 #3). No other change. |
 | v1.7.0 | 2026-09-25 | Cleanup release. Uniform header; H1 "Product Specification". Vision references retargeted to the Capabilities charter (`PRODUCT_CAPABILITIES[Reserved].md`). §0.2 is the single glossary (Thesis / Working Thesis / Living Thesis, Pass / Fail / Revise, Case-on / Case-off, canonical track and zone names). New §4.6 holds the normative Decision gate and ontology (no Fail button: Fail = outcome, Revise = action); later §4 sections renumbered; repeated ontology text elsewhere replaced by pointers. §4.5 maps the 6 product lifecycle stages to the 4 workspace stages. §2.3 Mermaid direction fixed (LR); §2.4 adds Pass / Fail edges. §2.6 typos and capitalization. §6 tightened. §0.6 and §7 mark IA map and Journeys as done. Change log added. |
 | v1.6.0 | 2026-09-25 | Primary persona renamed Techno-Fundamental Investor (TFI) with the two "Techno" meanings; IA v0.9.1 shell cross-link. |
 | v1.5.0 | 2026-09-24 | Freeze: Pass → Position; Case = optional binder; Working Thesis. |
 
 ---
 
-*End of Product Specification · v1.7.0 · 2026-09-25*
+*End of Product Specification · v1.7.1 · 2026-10-08*
