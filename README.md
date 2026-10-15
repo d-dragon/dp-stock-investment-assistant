@@ -181,9 +181,10 @@ flowchart TB
 
 For detailed structural specifications, component designs, and deployment models, consult the authoritative architecture documentation:
 
-- 🏛️ **[System Overview & Boundaries](docs/architecture/SYSTEM_OVERVIEW_AND_BOUNDARIES.md)** — arc42 §3, §4, §5 Level 1 system building blocks and container scopes.
+- 🏛️ **[System Overview & Boundaries](docs/architecture/SYSTEM_OVERVIEW_AND_BOUNDARIES.md)** (draft) — arc42 §3, §4, §5 Level 1 system building blocks and container scopes, logical layers, security (identity and access), risks and decision index.
+- 📜 **[Architecture Decisions](docs/architecture/DECISIONS/)** — ADR-SYS-001 Identity and per-user isolation (accepted in part: Auth0), ADR-SYS-002 Decision gate (proposed), ADR-SYS-003 Backend modular monolith (proposed), ADR-SYS-004 Data pipeline and records (accepted: ELT), ADR-SYS-005 External AI agent access (proposed).
 - 🔄 **[Runtime & Integration Flows](docs/architecture/RUNTIME_AND_INTEGRATION_FLOWS.md)** — arc42 §6 dynamic sequence flows, streaming chat, and tool execution lifecycles.
-- ☁️ **[Deployment & Cloud Infrastructure](docs/architecture/DEPLOYMENT_AND_INFRASTRUCTURE.md)** — arc42 §7 Docker, Kubernetes/Helm, and Azure AKS/ACR infrastructure.
+- ☁️ **Deployment & Cloud Infrastructure** _(planned)_ — arc42 §7 Docker, Kubernetes/Helm, and Azure AKS/ACR infrastructure.
 - 🧠 **[Agent Domain Architecture](docs/domains/agent/ARCHITECTURE_DESIGN.md)** — Deep-dive agent reasoning graph, prompt compiler, and tool gateway design.
 
 ---
@@ -372,7 +373,7 @@ kubectl -n dp-stock port-forward svc/dp-stock-api 5000:5000
 kubectl -n dp-stock port-forward svc/dp-stock-frontend 3000:80
 ```
 
-📖 *For Terraform Azure AKS/ACR provisioning, Helm chart overrides, and production container guidelines, see **[`IaC/README.md`](IaC/README.md)** and **[`docs/architecture/DEPLOYMENT_AND_INFRASTRUCTURE.md`](docs/architecture/DEPLOYMENT_AND_INFRASTRUCTURE.md)**.*
+📖 *For Terraform Azure AKS/ACR provisioning, Helm chart overrides, and production container guidelines, see **[`IaC/README.md`](IaC/README.md)** (architecture deployment view `docs/architecture/DEPLOYMENT_AND_INFRASTRUCTURE.md` is planned).*
 
 ---
 
@@ -399,7 +400,7 @@ Documentation is structured across **4 authoritative directories** aligned with 
 | Directory | Standard / Authority | Purpose & Lifecycle Role | Key Artifacts |
 |---|---|---|---|
 | **`docs/system/`** | ISO 29148 / ISO 25010 | Authoritative System Requirements Specification (SRS) baseline; cross-domain functional and quality requirements. | [System SRS](docs/system/SYSTEM_REQUIREMENTS_SPECIFICATION.md)<br>[Method & Governance](docs/system/REQUIREMENTS_METHOD_AND_GOVERNANCE.md) |
-| **`docs/architecture/`** | arc42 / C4 Model / ISO 42010 | Long-lived system architecture views, deployment topology, cross-cutting mechanisms, risks, and ADRs. | [System Overview](docs/architecture/SYSTEM_OVERVIEW_AND_BOUNDARIES.md)<br>[Deployment & Infra](docs/architecture/DEPLOYMENT_AND_INFRASTRUCTURE.md)<br>[Cross-Cutting Concepts](docs/architecture/CROSS_CUTTING_CONCEPTS.md)<br>[Risks & Debt](docs/architecture/RISKS_AND_TECHNICAL_DEBT.md)<br>[ADRs](docs/architecture/DECISIONS/) |
+| **`docs/architecture/`** | arc42 / C4 Model / ISO 42010 | Long-lived system architecture views, deployment topology, cross-cutting mechanisms, risks, and ADRs. | [System Overview](docs/architecture/SYSTEM_OVERVIEW_AND_BOUNDARIES.md)<br>Deployment & Infra _(planned)_<br>[Cross-Cutting Concepts](docs/architecture/SYSTEM_OVERVIEW_AND_BOUNDARIES.md#47-cross-cutting-concepts)<br>[Risks & Debt](docs/architecture/SYSTEM_OVERVIEW_AND_BOUNDARIES.md#48-risks)<br>[ADRs](docs/architecture/DECISIONS/) |
 | **`docs/domains/`** | Domain-Driven Design (DDD) | Bounded context technical designs, component internals (C4 Level 3), and subordinate domain SRS documents. | [Agent Architecture](docs/domains/agent/ARCHITECTURE_DESIGN.md)<br>[Backend Design](docs/domains/backend/TECHNICAL_DESIGN.md)<br>[Frontend Architecture](docs/domains/frontend/ARCHITECTURE.md)<br>[Data Policy](docs/domains/data/POLICY_AND_CONSTRAINTS.md) |
 | **`specs/`** | Spec Kit Feature Deltas | Delivery-scoped feature specifications, implementation plans, user-story tasks, verification reports, and RTM manifest. | [Traceability Manifest](specs/spec-traceability.yaml)<br>[Forward Sync Report](specs/spec-sync-status.md)<br>[Feature Specs](specs/) |
 
@@ -433,8 +434,8 @@ The platform enforces a closed-loop engineering discipline connecting high-level
 4. **arc42 Upward Knowledge Promotion**: Verified feature specs act as local delivery evidence. Stable architectural patterns are promoted upward into long-lived docs:
    - System Containers ➔ [`docs/architecture/SYSTEM_OVERVIEW_AND_BOUNDARIES.md`](docs/architecture/SYSTEM_OVERVIEW_AND_BOUNDARIES.md) (arc42 §3–§5)
    - Runtime Flows ➔ [`docs/architecture/RUNTIME_AND_INTEGRATION_FLOWS.md`](docs/architecture/RUNTIME_AND_INTEGRATION_FLOWS.md) (arc42 §6)
-   - Infrastructure Topology ➔ [`docs/architecture/DEPLOYMENT_AND_INFRASTRUCTURE.md`](docs/architecture/DEPLOYMENT_AND_INFRASTRUCTURE.md) (arc42 §7)
-   - Cross-Cutting Concepts ➔ [`docs/architecture/CROSS_CUTTING_CONCEPTS.md`](docs/architecture/CROSS_CUTTING_CONCEPTS.md) (arc42 §8)
+   - Infrastructure Topology ➔ `docs/architecture/DEPLOYMENT_AND_INFRASTRUCTURE.md` _(planned)_ (arc42 §7)
+   - Cross-Cutting Concepts ➔ [System Overview 4.7](docs/architecture/SYSTEM_OVERVIEW_AND_BOUNDARIES.md#47-cross-cutting-concepts) (arc42 §8)
    - Architectural Decisions ➔ [`docs/architecture/DECISIONS/`](docs/architecture/DECISIONS/) (arc42 §9 / ADRs)
    - API Contracts ➔ [`docs/openapi.yaml`](docs/openapi.yaml) (Golden Rule 9)
 
