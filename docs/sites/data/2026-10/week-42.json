@@ -8,7 +8,7 @@
     "start": "2026-10-12",
     "end": "2026-10-18"
   },
-  "updatedAt": "2026-10-14T08:35:00+07:00",
+  "updatedAt": "2026-10-15T08:35:00+07:00",
   "storage": "day-shards",
   "days": [
     {
@@ -30,6 +30,13 @@
       "dayPath": "2026-10/d/2026-10-14.json",
       "newsPath": "2026-10/n/2026-10-14.json",
       "analysisPath": "2026-10/a/2026-10-14.md",
+      "status": "preopen"
+    },
+    {
+      "date": "2026-10-15",
+      "dayPath": "2026-10/d/2026-10-15.json",
+      "newsPath": "2026-10/n/2026-10-15.json",
+      "analysisPath": "2026-10/a/2026-10-15.md",
       "status": "preopen"
     }
   ]
