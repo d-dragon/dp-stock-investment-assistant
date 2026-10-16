@@ -3,8 +3,8 @@
 | Field | Value |
 |---|---|
 | Document | Product Specification · DP Stock-Investment Assistant |
-| Version | v1.7.2 |
-| Date | 2026-10-14 |
+| Version | v1.7.4 |
+| Date | 2026-10-16 |
 | Status | Working source of truth · ontology frozen 2026-09-24 |
 | Owner | Phan Duy |
 | Related | [IA map v1.0.0](./CONCEPTUAL_IA_MAP.md) · [Journeys v1.0.1](./USER_JOURNEYS_WITH_WIREFRAMES.md) · [Capabilities charter](./PRODUCT_CAPABILITIES%5BReserved%5D.md) (2026-09-03) |
@@ -460,27 +460,27 @@ Platform (Workspace, AI+Memory, Data) enables a multi-domain Investment Core (In
 
 #### Platform
 
-| Entity / Concept | Domain | Responsibility |
-|------------------|--------|----------------|
-| Workspace | Workspace + UX/UI | Container for user work and layouts |
-| Canvas / Layout context | Workspace + UX/UI | Preserves multi-pane working context |
-| Agent | AI Agents + Memory | Reasoning and tool-using assistant |
-| User Memory Profile | AI Agents + Memory | Longitudinal process & preference model |
-| Instrument / Symbol | Data / Information | Tradable or researchable identity |
-| Market data / News / Filing | Data / Information | External facts with provenance |
+| Entity / Concept | Domain | Responsibility | Architecture home |
+|------------------|--------|----------------|-------------------|
+| Workspace | Workspace + UX/UI | Container for user work and layouts | [§4.2.1](../architecture/SYSTEM_OVERVIEW_AND_BOUNDARIES.md#421-logical-building-blocks) Workspace shell, [§4.2.3](../architecture/SYSTEM_OVERVIEW_AND_BOUNDARIES.md#423-layered-boundaries) Presentation |
+| Canvas / Layout context | Workspace + UX/UI | Preserves multi-pane working context | [§4.2.1](../architecture/SYSTEM_OVERVIEW_AND_BOUNDARIES.md#421-logical-building-blocks) Workspace shell, [§4.2.3](../architecture/SYSTEM_OVERVIEW_AND_BOUNDARIES.md#423-layered-boundaries) Presentation |
+| Agent | AI Agents + Memory | Reasoning and tool-using assistant | [§4.2.1](../architecture/SYSTEM_OVERVIEW_AND_BOUNDARIES.md#421-logical-building-blocks) AI Companion, [§4.2.2](../architecture/SYSTEM_OVERVIEW_AND_BOUNDARIES.md#422-responsibility-and-dependency-boundaries) Agent write rule; [ADR-SYS-005](../architecture/DECISIONS/ADR-SYS-005-EXTERNAL-AI-AGENT-ACCESS.md) (proposed) |
+| User Memory Profile | AI Agents + Memory | Longitudinal process & preference model | [§4.3](../architecture/SYSTEM_OVERVIEW_AND_BOUNDARIES.md#43-information-view) |
+| Instrument / Symbol | Data / Information | Tradable or researchable identity | [§4.2.1](../architecture/SYSTEM_OVERVIEW_AND_BOUNDARIES.md#421-logical-building-blocks), [§4.3](../architecture/SYSTEM_OVERVIEW_AND_BOUNDARIES.md#43-information-view); [ADR-SYS-004](../architecture/DECISIONS/ADR-SYS-004-DATA-PIPELINE-AND-RECORDS.md); [§4.7](../architecture/SYSTEM_OVERVIEW_AND_BOUNDARIES.md#47-cross-cutting-concepts) |
+| Market data / News / Filing | Data / Information | External facts with provenance | [§4.2.1](../architecture/SYSTEM_OVERVIEW_AND_BOUNDARIES.md#421-logical-building-blocks), [§4.3](../architecture/SYSTEM_OVERVIEW_AND_BOUNDARIES.md#43-information-view); [ADR-SYS-004](../architecture/DECISIONS/ADR-SYS-004-DATA-PIPELINE-AND-RECORDS.md); [§4.7](../architecture/SYSTEM_OVERVIEW_AND_BOUNDARIES.md#47-cross-cutting-concepts) |
 
 #### Investment Core
 
-| Entity / Concept | Domain | Responsibility |
-|------------------|--------|----------------|
-| Evidence / Insight | Insights | Structured research input or conclusion |
-| Thesis | Thesis + Principles | Investment argument (Working Thesis before Pass; why we hold after) |
-| Principle / Stance | Thesis + Principles | Standing rules or Multi-stance (Bull/Bear) views |
-| Decision | Decision + Journal | Explicit investment action record |
-| Journal entry | Decision + Journal | Reflection and lessons |
-| Position / Allocation | Portfolio | Capital exposure; the Position is born at Pass (§4.6) |
-| Monitoring signal / Alert | Monitoring | Drift, event, or health indication |
-| Investment Case *(optional binder)* | Cross-core narrative | Optional dossier thread (§4.6) |
+| Entity / Concept | Domain | Responsibility | Architecture home |
+|------------------|--------|----------------|-------------------|
+| Evidence / Insight | Insights | Structured research input or conclusion | [§4.2.1](../architecture/SYSTEM_OVERVIEW_AND_BOUNDARIES.md#421-logical-building-blocks), [§4.3](../architecture/SYSTEM_OVERVIEW_AND_BOUNDARIES.md#43-information-view); [ADR-SYS-003](../architecture/DECISIONS/ADR-SYS-003-BACKEND-MODULAR-MONOLITH.md) (proposed); [ADR-SYS-001](../architecture/DECISIONS/ADR-SYS-001-IDENTITY-AND-PER-USER-ISOLATION.md) (partly accepted) |
+| Thesis | Thesis + Principles | Investment argument (Working Thesis before Pass; why we hold after) | [§4.2.1](../architecture/SYSTEM_OVERVIEW_AND_BOUNDARIES.md#421-logical-building-blocks), [§4.3](../architecture/SYSTEM_OVERVIEW_AND_BOUNDARIES.md#43-information-view); [ADR-SYS-003](../architecture/DECISIONS/ADR-SYS-003-BACKEND-MODULAR-MONOLITH.md) (proposed); [ADR-SYS-001](../architecture/DECISIONS/ADR-SYS-001-IDENTITY-AND-PER-USER-ISOLATION.md) (partly accepted) |
+| Principle / Stance | Thesis + Principles | Standing rules or Multi-stance (Bull/Bear) views | [§4.2.1](../architecture/SYSTEM_OVERVIEW_AND_BOUNDARIES.md#421-logical-building-blocks), [§4.3](../architecture/SYSTEM_OVERVIEW_AND_BOUNDARIES.md#43-information-view); [ADR-SYS-003](../architecture/DECISIONS/ADR-SYS-003-BACKEND-MODULAR-MONOLITH.md) (proposed); [ADR-SYS-001](../architecture/DECISIONS/ADR-SYS-001-IDENTITY-AND-PER-USER-ISOLATION.md) (partly accepted) |
+| Decision | Decision + Journal | Explicit investment action record | [§4.2.2](../architecture/SYSTEM_OVERVIEW_AND_BOUNDARIES.md#422-responsibility-and-dependency-boundaries); [ADR-SYS-002](../architecture/DECISIONS/ADR-SYS-002-DECISION-GATE.md) (proposed) |
+| Journal entry | Decision + Journal | Reflection and lessons | [§4.2.1](../architecture/SYSTEM_OVERVIEW_AND_BOUNDARIES.md#421-logical-building-blocks) |
+| Position / Allocation | Portfolio | Capital exposure; the Position is born at Pass (§4.6) | [§4.2.2](../architecture/SYSTEM_OVERVIEW_AND_BOUNDARIES.md#422-responsibility-and-dependency-boundaries); [ADR-SYS-002](../architecture/DECISIONS/ADR-SYS-002-DECISION-GATE.md) (proposed) |
+| Monitoring signal / Alert | Monitoring | Drift, event, or health indication | [§4.2.1](../architecture/SYSTEM_OVERVIEW_AND_BOUNDARIES.md#421-logical-building-blocks) |
+| Investment Case *(optional binder)* | Cross-core narrative | Optional dossier thread (§4.6) | [§4.2.1](../architecture/SYSTEM_OVERVIEW_AND_BOUNDARIES.md#421-logical-building-blocks) |
 
 ### 4.5 Lifecycle Path (Contract Across Domains)
 
@@ -619,50 +619,52 @@ gantt
 #### Phase 1 – MVP
 **Goal:** the user can move Insights → Working Thesis → Decision gate → Portfolio, with the outcomes of §4.6.
 
-| Priority | Deliverable | Why |
-|----------|-------------|-----|
-| **P0** | Adaptive Visual Canvas (multi-pane, context preserved) | Platform: keeps work in one place |
-| **P0** | Vietnam-first Data Hub + provenance | Platform: enables quality Insights |
-| **P0** | Insights foundation (evidence capture) | Core: start of lifecycle path |
-| **P0** | Dual-Track Workspace IA (Sandbox vs Portfolio) | Platform/Core: prevent research from mutating portfolio risk |
-| **P0** | Living Thesis Builder v1 + Multi-stance (Bull/Bear) | Core: heart of reasoning |
-| **P0** | Basic Decision gate + checklist | Core: commit actions |
-| **P0** | Basic Portfolio view + Position after Pass (+ optional Case link) | Core: the Position; Case optional |
-| **P1** | Basic AI Reasoning Assistant | Platform: acceleration |
-| **P1** | Saved layout presets | Platform: speed across work |
+| Priority | Deliverable | Why | Requirements |
+|----------|-------------|-----|--------------|
+| **P0** | Adaptive Visual Canvas (multi-pane, context preserved) | Platform: keeps work in one place | [SR-1.3.1](SYSTEM_REQUIREMENTS_SPECIFICATION.md#sr-1-3-1), [SR-1.3.2](SYSTEM_REQUIREMENTS_SPECIFICATION.md#sr-1-3-2), [SR-1.3.4](SYSTEM_REQUIREMENTS_SPECIFICATION.md#sr-1-3-4) |
+| **P0** | Vietnam-first Data Hub + provenance | Platform: enables quality Insights | [SR-4.4.1](SYSTEM_REQUIREMENTS_SPECIFICATION.md#sr-4-4-1), [SR-4.4.2](SYSTEM_REQUIREMENTS_SPECIFICATION.md#sr-4-4-2), [SR-4.4.3](SYSTEM_REQUIREMENTS_SPECIFICATION.md#sr-4-4-3) |
+| **P0** | Insights foundation (evidence capture) | Core: start of lifecycle path | [SR-9.1.1](SYSTEM_REQUIREMENTS_SPECIFICATION.md#sr-9-1-1), [SR-9.1.2](SYSTEM_REQUIREMENTS_SPECIFICATION.md#sr-9-1-2), [SNR-3.2.1](SYSTEM_REQUIREMENTS_SPECIFICATION.md#snr-3-2-1) |
+| **P0** | Dual-Track Workspace IA (Sandbox vs Portfolio) | Platform/Core: prevent research from mutating portfolio risk | — (pending) |
+| **P0** | Living Thesis Builder v1 + Multi-stance (Bull/Bear) | Core: heart of reasoning | — (pending) |
+| **P0** | Basic Decision gate + checklist | Core: commit actions | — (pending) |
+| **P0** | Basic Portfolio view + Position after Pass (+ optional Case link) | Core: the Position; Case optional | — (pending) |
+| **P1** | Basic AI Reasoning Assistant | Platform: acceleration | — (pending) |
+| **P1** | Saved layout presets | Platform: speed across work | — (pending) |
+
+Roadmap items trace to [master SRS](SYSTEM_REQUIREMENTS_SPECIFICATION.md) IDs; SRS lines trace onward to spec-kit slices.
 
 #### Phase 2 – v1
 **Goal:** Monitoring and Journal begin closing the loop; domains complement each other in production use.
 
-| Priority | Deliverable | Why |
-|----------|-------------|-----|
-| **P0** | Monitoring signals + thesis-drift alerts | Core: honesty over time |
-| **P0** | Automated event briefings | Core: keep Thesis relevant |
-| **P0** | Journal foundation | Core: learning sink |
-| **P1** | AI Memory (user-style + work-linked) | Platform: start Intelligence Loop |
-| **P1** | Enhanced company-level 360° | Core: deeper Insights |
+| Priority | Deliverable | Why | Requirements |
+|----------|-------------|-----|--------------|
+| **P0** | Monitoring signals + thesis-drift alerts | Core: honesty over time | — (pending) |
+| **P0** | Automated event briefings | Core: keep Thesis relevant | — (pending) |
+| **P0** | Journal foundation | Core: learning sink | — (pending) |
+| **P1** | AI Memory (user-style + work-linked) | Platform: start Intelligence Loop | — (pending) |
+| **P1** | Enhanced company-level 360° | Core: deeper Insights | — (pending) |
 
 #### Phase 3 – v1.5
 **Goal:** Raise quality and discipline across Decision, Portfolio, and Insights.
 
-| Priority | Deliverable | Why |
-|----------|-------------|-----|
-| **P0** | Industry-level 360° layer | Deeper Insights |
-| **P0** | Behavioral Mentor support | Stronger Decision quality |
-| **P1** | Richer Thesis management & versioning | Better Thesis evolution |
-| **P1** | Position sizing + risk overlay | Stronger Portfolio |
-| **P1** | Selected macro drivers | Broader Insights context |
+| Priority | Deliverable | Why | Requirements |
+|----------|-------------|-----|--------------|
+| **P0** | Industry-level 360° layer | Deeper Insights | — (pending) |
+| **P0** | Behavioral Mentor support | Stronger Decision quality | — (pending) |
+| **P1** | Richer Thesis management & versioning | Better Thesis evolution | — (pending) |
+| **P1** | Position sizing + risk overlay | Stronger Portfolio | — (pending) |
+| **P1** | Selected macro drivers | Broader Insights context | — (pending) |
 
 #### Phase 4 – v2+
 **Goal:** Proactive multi-work / multi-Case partnership and compounding Memory.
 
-| Priority | Deliverable | Why |
-|----------|-------------|-----|
-| **P0** | Stronger autonomous drift / invalidation signals | Tighter Monitoring → Thesis loop |
-| **P0** | Micro-to-macro continuum + stress views | Highest-quality Insights |
-| **P1** | Custom multi-factor scoring | Personalized Decision support |
-| **P1** | Active Long-Term Memory | Intelligence compounds |
-| **P1** | Global data extensibility | Broader universe of work |
+| Priority | Deliverable | Why | Requirements |
+|----------|-------------|-----|--------------|
+| **P0** | Stronger autonomous drift / invalidation signals | Tighter Monitoring → Thesis loop | — (pending) |
+| **P0** | Micro-to-macro continuum + stress views | Highest-quality Insights | — (pending) |
+| **P1** | Custom multi-factor scoring | Personalized Decision support | — (pending) |
+| **P1** | Active Long-Term Memory | Intelligence compounds | — (pending) |
+| **P1** | Global data extensibility | Broader universe of work | — (pending) |
 
 ### 5.4 Lifecycle Path × Phase (Simplified)
 
@@ -785,6 +787,8 @@ Pre-Pass work is the Working Thesis; ontology per Product Specification §4.6.
 
 | Version | Date | Change |
 |---|---|---|
+| v1.7.4 | 2026-10-16 | §4.4 Entity Summary tables gain an "Architecture home" column (links to the architecture overview and ADRs only). No other change. |
+| v1.7.3 | 2026-10-16 | §5.3 roadmap tables gain a Requirements column (master SRS IDs for the first three Phase 1 P0 items; others pending) and a one-line trace note. No other change. |
 | v1.7.2 | 2026-10-14 | Review fixes M1–M9 (no technical detail): new §3.6 architecture-derived external dependencies; §4.6 checklist meaning; §4.7 #8 gate outcome recorded with its Decision record; Monitoring is a light Position status in Phase 1 (§3.4, §4.5, §5.4); Gantt dates owner-confirmed; §4.8 gate-outcome event and §5.5 source-event column; "Layer" glossary entry and §4.9 column renamed; §7 open question. |
 | v1.7.1 | 2026-10-08 | Fail wording aligned to Phan's 2026-10-08 decision: Fail keeps a Decision record (outcome Fail) and creates no Position (header, §0.4, §0.5, §1.5 #3). No other change. |
 | v1.7.0 | 2026-09-25 | Cleanup release. Uniform header; H1 "Product Specification". Vision references retargeted to the Capabilities charter (`PRODUCT_CAPABILITIES[Reserved].md`). §0.2 is the single glossary (Thesis / Working Thesis / Living Thesis, Pass / Fail / Revise, Case-on / Case-off, canonical track and zone names). New §4.6 holds the normative Decision gate and ontology (no Fail button: Fail = outcome, Revise = action); later §4 sections renumbered; repeated ontology text elsewhere replaced by pointers. §4.5 maps the 6 product lifecycle stages to the 4 workspace stages. §2.3 Mermaid direction fixed (LR); §2.4 adds Pass / Fail edges. §2.6 typos and capitalization. §6 tightened. §0.6 and §7 mark IA map and Journeys as done. Change log added. |
@@ -793,4 +797,4 @@ Pre-Pass work is the Working Thesis; ontology per Product Specification §4.6.
 
 ---
 
-*End of Product Specification · v1.7.1 · 2026-10-08*
+*End of Product Specification · v1.7.4 · 2026-10-16*
