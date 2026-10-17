@@ -1,0 +1,42 @@
+{
+  "schemaVersion": "1.0.0",
+  "date": "2026-10-17",
+  "market": {
+    "vnindex": {
+      "close": 1705.91,
+      "change": 7.56,
+      "changePct": 0.45,
+      "volume": 509780773,
+      "valueBn": 10996.28,
+      "source": "StockBiz/CafeF"
+    },
+    "hnx": {
+      "close": 259.13,
+      "changePct": -0.06
+    },
+    "upcom": {
+      "close": 124.87,
+      "changePct": 0.58
+    },
+    "foreignNetBn": -534.4,
+    "proprietaryNetBn": 538.4,
+    "note": "VN locked StockBiz 1.705,91; foreign StockBiz vs press ~552 total; proprietary nmquan/VietnamBiz ~538"
+  },
+  "news_events": [
+    "VN-Index lấy lại 1.700 sau 7 phiên giảm",
+    "Ngoại bán ròng phiên 11",
+    "US tech selloff overnight",
+    "Asia mixed Nikkei/HSI up"
+  ],
+  "sentiment": {
+    "fireant": "thin",
+    "f247": "thin",
+    "newf319": "thin"
+  },
+  "gaps": [
+    "No SBV exact for 17/10 locked",
+    "WTI/gold/DXY source disagreement",
+    "NDX vs Composite noted",
+    "retail net unknown"
+  ]
+}
