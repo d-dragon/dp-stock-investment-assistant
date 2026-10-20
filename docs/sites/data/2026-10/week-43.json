@@ -1,1 +1,29 @@
-$(cat /tmp/week-43-updated.json)
+{
+  "schemaVersion": "2.1.0",
+  "yearMonth": "2026-10",
+  "week": {
+    "isoYear": 2026,
+    "isoWeek": 43,
+    "id": "2026-W43",
+    "start": "2026-10-19",
+    "end": "2026-10-25"
+  },
+  "updatedAt": "2026-10-20T08:35:00+07:00",
+  "storage": "day-shards",
+  "days": [
+    {
+      "date": "2026-10-19",
+      "dayPath": "2026-10/d/2026-10-19.json",
+      "newsPath": "2026-10/n/2026-10-19.json",
+      "analysisPath": "2026-10/a/2026-10-19.md",
+      "status": "preopen"
+    },
+    {
+      "date": "2026-10-20",
+      "dayPath": "2026-10/d/2026-10-20.json",
+      "newsPath": "2026-10/n/2026-10-20.json",
+      "analysisPath": "2026-10/a/2026-10-20.md",
+      "status": "preopen"
+    }
+  ]
+}
