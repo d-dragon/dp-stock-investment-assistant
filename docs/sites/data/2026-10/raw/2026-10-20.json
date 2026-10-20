@@ -1,0 +1,38 @@
+{
+  "schemaVersion": "1.0.0",
+  "date": "2026-10-20",
+  "market": {
+    "vnindex_prior": {
+      "price": 1689.84,
+      "change": -16.07,
+      "changePct": -0.94,
+      "date": "2026-10-19",
+      "source": "multiple (Yahoo, press, StockBiz header)"
+    },
+    "hose_liquidity": {
+      "volume": 518613400,
+      "valueBn": 11302,
+      "note": "CafeF khớp lệnh"
+    },
+    "foreign_net": {
+      "hoseBn": -800,
+      "note": "approx -799 to -850 from press/StockBiz"
+    },
+    "proprietary": {
+      "netBn": 281.2,
+      "note": "VnEconomy"
+    }
+  },
+  "news_events": [],
+  "sentiment": {
+    "fireant": "thin on current date",
+    "f247": "mostly historical",
+    "newf319": "thin"
+  },
+  "gaps": [
+    "exact StockBiz foreign print for 19/10 not fully scraped",
+    "SBV rate page not checked",
+    "Asia open quotes incomplete",
+    "community thin"
+  ]
+}
