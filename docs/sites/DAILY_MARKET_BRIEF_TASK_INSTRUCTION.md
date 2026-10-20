@@ -24,6 +24,8 @@
 
 | Date | Version | Change |
 |---|---|---|
+| 2026-10-20 | 2.6.1 | Run 2026-10-20: Tuesday preopen; VN 1.689,84 locked multiple sources; foreign ~-800 to -850 HoSE; proprietary VnEconomy 281; WTI/gold/DXY sources disagree; Nasdaq +1.11% overnight; community thin; day/n/raw/a/week/catalog pushed via gh. |
+|---|---|---|
 | 2026-10-09 | 2.6.1 | Run 2026-10-09: Friday preopen; VN 1.738,97 StockBiz vs CafeF 1.738/−11đ; foreign −446,42 vs 415/451,22; proprietary VnEconomy only; WTI/gold/DXY disagree; NDX vs Composite; no SBV page 9/10; newF319/FireAnt thin; day/n/raw/catalog pushed after gh auth recovered. |
 | 2026-10-08 | 2.6.1 | Run 2026-10-08: Thursday preopen; StockBiz vs DNSE volume; foreign StockBiz vs press; proprietary VietnamBiz only; WTI/gold/DXY disagree; NDX vs Composite; no SBV page for 8/10; newF319 thin. |
 | 2026-10-07 | 2.6.1 | Run 2026-10-07: Wednesday preopen; VN 1.759,08 locked StockBiz/Nhân Dân; volume 827m/19.579 vs DNSE 791,55m/18.715; foreign HoSE −2.613 vs matched +134,3; proprietary 274,5 VnEconomy; WTI/DXY/UST disagree; NDX vs Composite; no SBV page; FireAnt/F247 thin. |
