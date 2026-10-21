@@ -1,0 +1,21 @@
+{
+  "market": {
+    "vnindex_prior": 1691.97,
+    "foreign_net": -220.64,
+    "liquidity_hose": 13251.58
+  },
+  "news_events": [
+    "TCB Q3 strong",
+    "US mixed overnight",
+    "Asia weak"
+  ],
+  "sentiment": {
+    "fireant": "thin",
+    "f247": "thin",
+    "newf319": "thin"
+  },
+  "gaps": [
+    "proprietary print missing for 20/10",
+    "exact WTI/gold close sources disagree"
+  ]
+}
