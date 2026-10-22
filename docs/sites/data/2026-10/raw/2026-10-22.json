@@ -1,0 +1,39 @@
+{
+  "date": "2026-10-22",
+  "market": {
+    "vnindex_prior": {
+      "price": 1738.67,
+      "change": 46.7,
+      "changePct": 2.76,
+      "volumeShares": 947789989,
+      "valueVndBn": 20290.59,
+      "source": "StockBiz"
+    },
+    "hnx_prior": {
+      "price": 261.67,
+      "changePct": 1.44
+    },
+    "foreign_hose_net_vnd_bn": 189.78,
+    "proprietary_net_vnd_bn": -132.4,
+    "notes": "Foreign turned net buy after selling streak; proprietary sold."
+  },
+  "news_events": [
+    {
+      "title": "VN-Index +2.76% to 1738.67 on strong rebound",
+      "source": "StockBiz/CafeF"
+    },
+    {
+      "title": "US indices higher overnight: Dow +0.69%, Nasdaq +1.05%",
+      "source": "Xinhua/Morningstar"
+    }
+  ],
+  "sentiment": {
+    "fireant": "positive on rebound",
+    "f247": "mixed",
+    "newf319": "thin"
+  },
+  "gaps": [
+    "No official SBV print for 22/10 yet",
+    "Proprietary source secondary"
+  ]
+}
