@@ -1,0 +1,28 @@
+{
+  "schemaVersion": "1.0.0",
+  "date": "2026-10-24",
+  "market": {
+    "vnindex": 1774.15,
+    "hnx": 262.7,
+    "volume": 777197613,
+    "value": 16942.03,
+    "foreignNet": -478.0
+  },
+  "news_events": [
+    "VN tăng 4 phiên liên tiếp",
+    "Ngoại bán ròng HOSE",
+    "US Dow giảm mạnh",
+    "Vàng dưới 4000",
+    "Dầu cao"
+  ],
+  "sentiment": {
+    "fireant": "Tích cực trên bank",
+    "newf319": "Thin",
+    "f247": "Thin"
+  },
+  "gaps": [
+    "Proprietary net không rõ cho 23/10",
+    "SBV no new print",
+    "Community thin"
+  ]
+}
