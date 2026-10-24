@@ -1,8 +1,20 @@
 {
   "schemaVersion": "2.0.0",
-  "updatedAt": "2026-10-23T08:35:00+07:00",
+  "updatedAt": "2026-10-24T08:35:00+07:00",
   "layout": "monthly-weekly",
   "reports": [
+    {
+      "id": "daily-brief-2026-10-24",
+      "date": "2026-10-24",
+      "title": "Bản tin thị trường Việt Nam & thế giới",
+      "status": "preopen",
+      "weekId": "2026-W43",
+      "weekPath": "2026-10/week-43.json",
+      "dayPath": "2026-10/d/2026-10-24.json",
+      "newsPath": "2026-10/n/2026-10-24.json",
+      "analysisPath": "2026-10/a/2026-10-24.md",
+      "path": "index.html#/2026-10-24"
+    },
     {
       "id": "daily-brief-2026-10-23",
       "date": "2026-10-23",
