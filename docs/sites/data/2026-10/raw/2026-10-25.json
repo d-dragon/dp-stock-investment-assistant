@@ -1,0 +1,29 @@
+{
+  "market": {
+    "vnindex_prior": 1774.15,
+    "change": 13.52,
+    "pct": 0.77,
+    "volume_hose": 777197613,
+    "value_bn": 16942.03,
+    "foreign_net_bn": -478,
+    "hnx": 262.7,
+    "proprietary_net_bn": 10.5,
+    "note": "EOD 23/10 locked StockBiz/CafeF/Nhân Dân. Proprietary nmquan ~+10.5 tỷ."
+  },
+  "news_events": [
+    "VN-Index +0.77% to 1774.15 on bank/BDS leadership",
+    "Foreign net sell ~478 tỷ HOSE",
+    "US markets closed lower Friday: DJI -1.23%, SPX -0.52%",
+    "Oil surge, gold under 4000"
+  ],
+  "sentiment": {
+    "f247": "positive on close, cautious on foreign",
+    "fireant": "thin",
+    "newf319": "thin"
+  },
+  "gaps": [
+    "No official close for 25/10 (weekend)",
+    "Community thin",
+    "Some global quotes disagree slightly"
+  ]
+}
