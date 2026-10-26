@@ -1,0 +1,22 @@
+{
+  "schemaVersion": "2.1.0",
+  "yearMonth": "2026-10",
+  "week": {
+    "isoYear": 2026,
+    "isoWeek": 44,
+    "id": "2026-W44",
+    "start": "2026-10-26",
+    "end": "2026-11-01"
+  },
+  "updatedAt": "2026-10-26T08:35:00+07:00",
+  "storage": "day-shards",
+  "days": [
+    {
+      "date": "2026-10-26",
+      "dayPath": "2026-10/d/2026-10-26.json",
+      "newsPath": "2026-10/n/2026-10-26.json",
+      "analysisPath": "2026-10/a/2026-10-26.md",
+      "status": "preopen"
+    }
+  ]
+}

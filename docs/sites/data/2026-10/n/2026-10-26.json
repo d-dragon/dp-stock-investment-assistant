@@ -1,0 +1,170 @@
+{
+  "schemaVersion": "1.0.0",
+  "date": "2026-10-26",
+  "generatedAt": "2026-10-26T08:35:00+07:00",
+  "briefKind": "eod_prev+overnight+preopen",
+  "items": [
+    {
+      "id": "n-2026-10-26-001",
+      "impact": "high",
+      "impactScore": 92,
+      "rank": 1,
+      "kind": "market",
+      "board": "vn",
+      "title": "VN-Index đóng 23/10 tại 1.774,15 điểm (+0,77%)",
+      "url": "http://en.stockbiz.vn/HistoricalIndices.aspx",
+      "sourceId": "src-stockbiz",
+      "publishedAt": "2026-10-23T15:30:00+07:00",
+      "tickers": [
+        "VNINDEX"
+      ],
+      "excerpt": "Volume 777 triệu cp, giá trị 16.942 tỷ. HNX 262,70 (+0,62%).",
+      "whyImpact": "Print chính thức phiên EOD trước cuối tuần, neo cho pre-open thứ Hai."
+    },
+    {
+      "id": "n-2026-10-26-002",
+      "impact": "high",
+      "impactScore": 88,
+      "rank": 2,
+      "kind": "market",
+      "board": "vn",
+      "title": "Khối ngoại bán ròng khoảng 478 tỷ đồng trên HOSE",
+      "url": "https://nhandan.vn/chung-khoan-ngay-2310-vn-index-tang-hon-13-diem-khoi-ngoai-tiep-tuc-ban-rong-manh-post997587.html",
+      "sourceId": "src-vietstock",
+      "publishedAt": "2026-10-23T16:54:00+07:00",
+      "tickers": [
+        "ACB",
+        "FPT",
+        "PNJ"
+      ],
+      "excerpt": "Mua 1.897 tỷ, bán 2.375 tỷ. Tập trung ACB, FPT, PNJ.",
+      "whyImpact": "Dòng ngoại tiếp tục xả, ảnh hưởng tâm lý và thanh khoản đầu tuần."
+    },
+    {
+      "id": "n-2026-10-26-003",
+      "impact": "high",
+      "impactScore": 85,
+      "rank": 3,
+      "kind": "news",
+      "board": "global",
+      "title": "Wall Street đóng cửa thấp hơn cuối tuần: Dow -1,23%",
+      "url": "https://www.reuters.com/business/wall-street-futures-dip-after-ai-rout-telecoms-slide-2026-10-23/",
+      "sourceId": "src-bloomberg",
+      "publishedAt": "2026-10-23T17:43:00+07:00",
+      "tickers": [],
+      "excerpt": "S&P -0,52%, Nasdaq -0,21%. Dầu tăng, lo ngại chi phí AI.",
+      "whyImpact": "Risk-off Mỹ truyền sang châu Á và VN qua gap và tâm lý."
+    },
+    {
+      "id": "n-2026-10-26-004",
+      "impact": "medium",
+      "impactScore": 72,
+      "rank": 4,
+      "kind": "macro",
+      "board": "vn",
+      "title": "Tự doanh HOSE mua ròng 10,5 tỷ đồng phiên 23/10",
+      "url": "https://nmquan.vn/data/tu-doanh",
+      "sourceId": "src-vneconomy",
+      "publishedAt": "2026-10-24T11:41:00+07:00",
+      "tickers": [
+        "ACB",
+        "TCB",
+        "VPB"
+      ],
+      "excerpt": "ACB +240 tỷ, TCB +55 tỷ. Khớp lệnh mua ròng mạnh hơn.",
+      "whyImpact": "Nội địa chọn lọc ngân hàng, cân bằng một phần xả ngoại."
+    },
+    {
+      "id": "n-2026-10-26-005",
+      "impact": "medium",
+      "impactScore": 68,
+      "rank": 5,
+      "kind": "news",
+      "board": "vn",
+      "title": "CafeF: độ rộng 144 tăng / 156 giảm trên HOSE",
+      "url": "https://cafef.vn/du-lieu/tracuulichsu2/tracuu.chn?date=23/10/2026",
+      "sourceId": "src-cafef",
+      "publishedAt": "2026-10-23T16:00:00+07:00",
+      "tickers": [],
+      "excerpt": "Khớp lệnh ~707 triệu cp / 14.164 tỷ. STB trần +6,86%.",
+      "whyImpact": "Breadth gần cân bằng, không phải rally rộng."
+    },
+    {
+      "id": "n-2026-10-26-006",
+      "impact": "medium",
+      "impactScore": 65,
+      "rank": 6,
+      "kind": "macro",
+      "board": "global",
+      "title": "Dầu WTI quanh 101-103 USD, vàng dưới 4.000",
+      "url": "https://www.investopedia.com/stock-market-today-dow-jones-s-and-p-500-10232026-12189475",
+      "sourceId": "src-barrons",
+      "publishedAt": "2026-10-23T20:00:00+07:00",
+      "tickers": [],
+      "excerpt": "Dầu tăng hỗ trợ năng lượng, vàng yếu do kỳ vọng lãi suất.",
+      "whyImpact": "Truyền sang dầu khí VN và lạm phát/FX."
+    },
+    {
+      "id": "n-2026-10-26-007",
+      "impact": "medium",
+      "impactScore": 62,
+      "rank": 7,
+      "kind": "news",
+      "board": "global",
+      "title": "Nikkei nhẹ giảm, Hang Seng +0,69% đóng 23/10",
+      "url": "https://en.vietstock.vn/2026/10/market-mixed-vn-index-extends-strong-rallies-36-645812.htm",
+      "sourceId": "src-bloomberg",
+      "publishedAt": "2026-10-23T15:00:00+07:00",
+      "tickers": [],
+      "excerpt": "Châu Á phân hóa trước risk-off Mỹ.",
+      "whyImpact": "Tín hiệu hỗn hợp cho phiên VN."
+    },
+    {
+      "id": "n-2026-10-26-008",
+      "impact": "low",
+      "impactScore": 48,
+      "rank": 8,
+      "kind": "community",
+      "board": "vn",
+      "title": "FireAnt xác nhận VNINDEX 1774.15, ngoại ~-480 tỷ",
+      "url": "https://fireant.vn/ma-chung-khoan/VNINDEX",
+      "sourceId": "src-fireant",
+      "publishedAt": "2026-10-24T14:08:00+07:00",
+      "tickers": [
+        "VNINDEX"
+      ],
+      "excerpt": "Dữ liệu cộng đồng khớp print chính thức.",
+      "whyImpact": "Sentiment xác nhận, không phải print mới."
+    },
+    {
+      "id": "n-2026-10-26-009",
+      "impact": "low",
+      "impactScore": 45,
+      "rank": 9,
+      "kind": "community",
+      "board": "vn",
+      "title": "F247: chiến lược hướng 1.770, hỗ trợ 1.740",
+      "url": "https://f247.com/t/chien-luoc-giao-dich-23-10-2026-huong-den-vung-1-770-diem-trong-khi-1-740-diem-dong-vai-tro-ho-tro-gan/880285",
+      "sourceId": "src-f247",
+      "publishedAt": "2026-10-23T08:11:00+07:00",
+      "tickers": [],
+      "excerpt": "Nhận định kỹ thuật trước phiên 23/10, cộng đồng theo dõi hồi phục.",
+      "whyImpact": "Màu sắc tâm lý, không phải dòng tiền."
+    },
+    {
+      "id": "n-2026-10-26-010",
+      "impact": "low",
+      "impactScore": 40,
+      "rank": 10,
+      "kind": "news",
+      "board": "vn",
+      "title": "Tỷ giá trung tâm USD/VND 25.627 (SBV)",
+      "url": "https://sbv.gov.vn/vi/t%E1%BB%B7-gi%C3%A1",
+      "sourceId": "src-nhnn",
+      "publishedAt": "2026-10-23T09:00:00+07:00",
+      "tickers": [],
+      "excerpt": "Ổn định, áp dụng quanh cuối tuần.",
+      "whyImpact": "FX ổn định giảm áp lực nhập khẩu."
+    }
+  ]
+}
