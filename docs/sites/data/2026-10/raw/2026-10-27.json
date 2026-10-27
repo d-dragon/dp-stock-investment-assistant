@@ -1,0 +1,46 @@
+{
+  "schemaVersion": "1.0.0",
+  "date": "2026-10-27",
+  "generatedAt": "2026-10-27T08:35:00+07:00",
+  "market": {
+    "vnindex_prior": {
+      "date": "2026-10-26",
+      "price": 1763.55,
+      "change": -10.6,
+      "changePct": -0.6,
+      "volumeShares": 605225920,
+      "valueVndBn": 13528.79
+    },
+    "foreign_hose_net": -891.71,
+    "proprietary_hose_net": -222.8,
+    "hnx": 259.32,
+    "upcom": 126.28
+  },
+  "news_events": [
+    {
+      "title": "VN-Index đóng 1.763,55 (-0,60%)",
+      "source": "StockBiz/FireAnt"
+    },
+    {
+      "title": "Ngoại bán ròng ~892 tỷ",
+      "source": "StockBiz"
+    },
+    {
+      "title": "Tự doanh bán ròng 222,8 tỷ",
+      "source": "nmquan"
+    },
+    {
+      "title": "US đóng cửa tăng: Dow +0,28%, Nasdaq +0,82%",
+      "source": "various"
+    }
+  ],
+  "sentiment": {
+    "fireant": "thin",
+    "f247": "thin",
+    "newf319": "thin"
+  },
+  "gaps": [
+    "No official close for 27/10 yet",
+    "community thin"
+  ]
+}
