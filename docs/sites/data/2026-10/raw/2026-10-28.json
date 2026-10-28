@@ -1,0 +1,34 @@
+{
+  "schemaVersion": "1.0.0",
+  "date": "2026-10-28",
+  "generatedAt": "2026-10-28T08:35:00+07:00",
+  "market": {
+    "vnindex_prior_close": 1761.87,
+    "vnindex_prior_change": -1.68,
+    "vnindex_prior_change_pct": -0.1,
+    "hose_volume_m": 631.6,
+    "hose_value_vnd_bn": 13922.3,
+    "foreign_hose_net_vnd_bn": -441,
+    "proprietary_hose_net_vnd_bn": 227.3,
+    "hnx_close": 259.5,
+    "hnx_change_pct": 0.07
+  },
+  "news_events": [
+    "VN-Index closed 1,761.87 (-0.10%) on thin liquidity, VIC support not enough.",
+    "Foreign net sell ~441 bn HoSE; proprietary net buy +227.3 bn.",
+    "US overnight: Nasdaq +1.18%, S&P +0.60%, Dow flat ahead of Fed.",
+    "Hang Seng -0.73% to 23,041; Nikkei higher.",
+    "SBV central rate 25,633 for 27/10."
+  ],
+  "sentiment": {
+    "fireant": "thin",
+    "f247": "thin",
+    "newf319": "thin"
+  },
+  "gaps": [
+    "No official HOSE close for 28/10 (preopen).",
+    "Retail net not printed separately.",
+    "Some commodity sources disagree on exact WTI/gold ticks.",
+    "Community threads thin; no strong consensus."
+  ]
+}
