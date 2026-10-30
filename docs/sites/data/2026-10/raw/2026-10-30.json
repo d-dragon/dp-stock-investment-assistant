@@ -1,0 +1,20 @@
+{
+  "schemaVersion": "1.0.0",
+  "date": "2026-10-30",
+  "market": {
+    "vnindex_prior": { "date": "2026-10-29", "price": 1755.61, "change": -11.04, "changePct": -0.62, "source": "src-stockbiz" },
+    "volume_hose_m": 637.06,
+    "value_hose_bn": 14505,
+    "foreign_net_bn": -457,
+    "proprietary_net_bn": -284.8,
+    "hnx": 256.61
+  },
+  "news_events": [
+    "VN-Index 1.755,61 (-0,62%) trên thanh khoản ~14.505 tỷ; dầu khí và BĐS áp lực",
+    "Ngoại bán ròng ~457 tỷ HoSE; tự doanh -284,8 tỷ (nmquan)",
+    "US overnight: S&P -0,30% 7.720; Nasdaq -1,38% do Alphabet; Dow -0,25%",
+    "Nikkei +1,10% 64.659; HSI -0,59% 22.958"
+  ],
+  "sentiment": { "fireant": "thin", "f247": "thin", "newf319": "thin" },
+  "gaps": ["No official HOSE close for 30/10 yet", "Retail net not printed", "Community thin"]
+}
