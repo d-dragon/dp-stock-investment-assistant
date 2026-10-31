@@ -1,0 +1,40 @@
+{
+  "schemaVersion": "1.0.0",
+  "date": "2026-10-31",
+  "market": {
+    "vnindex_prior": {
+      "date": "2026-10-30",
+      "price": 1741.62,
+      "change": -13.99,
+      "changePct": -0.8,
+      "source": "multiple StockBiz/HOSE/Yahoo"
+    },
+    "hnx_prior": {
+      "price": 252.74,
+      "change": -3.87,
+      "changePct": -1.51
+    },
+    "volume_hose": 692647474,
+    "value_hose_bn": 14673.26,
+    "foreign_net_bn": -633.9,
+    "proprietary_net_bn": 92.8,
+    "notes": "Phiên 30/10 cuối tháng; US risk-off mạnh overnight"
+  },
+  "news_events": [
+    "VN-Index 1.741,62 (-0,80%) độ rộng 72 tăng/253 giảm",
+    "Ngoại bán ròng ~634 tỷ HOSE (BSC/StockBiz)",
+    "Tự doanh mua ròng +92,8 tỷ (nmquan), MWG +306, VPB +97",
+    "US: S&P -1,82%, Nasdaq -2,86% do tech/AI selloff",
+    "HSI +1,46% 23.294; Nikkei chưa lock chính xác"
+  ],
+  "sentiment": {
+    "fireant": "thin / mismatched old posts",
+    "f247": "thin",
+    "newf319": "not sampled live"
+  },
+  "gaps": [
+    "Nikkei exact close not locked",
+    "USDVND SBV page for 31/10 not fetched",
+    "community thin"
+  ]
+}
