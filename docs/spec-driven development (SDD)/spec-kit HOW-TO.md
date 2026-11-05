@@ -403,7 +403,7 @@ Testing and QA are woven into the loop rather than deferred to the end. Steps `1
 
 | SDLC Phase | Steps | Main Inputs | Main Outputs and Sync Targets |
 |------------|-------|-------------|-------------------------------|
-| Requirements and Architecture | `0-1` | [SOFTWARE_REQUIREMENTS_SPECIFICATION.md](../domains/agent/SOFTWARE_REQUIREMENTS_SPECIFICATION.md)<br/>[SYSTEM_REQUIREMENTS_SPECIFICATION.md](../system/SYSTEM_REQUIREMENTS_SPECIFICATION.md)<br/>[REQUIREMENTS_METHOD_AND_GOVERNANCE.md](../system/REQUIREMENTS_METHOD_AND_GOVERNANCE.md)<br/>[SYSTEM_OVERVIEW_AND_BOUNDARIES.md](../architecture/SYSTEM_OVERVIEW_AND_BOUNDARIES.md)<br/>domain technical design docs under [domains/](../domains/)<br/>research/proposal documents and benchmark review reports as non-authoritative inputs | Scoped requirement set, affected architecture boundaries, long-lived document impact map, planned propagation targets, requirements/design increments, initial acceptance and testability expectations, and expected delivery or operational impact |
+| Requirements and Architecture | `0-1` | [PRODUCT_SPECIFICATION.md](../system/PRODUCT_SPECIFICATION.md) (Product; roadmap Milestones `M-nnn`)<br/>pitches in [specs/pitches/](../../specs/pitches/README.md)<br/>[SOFTWARE_REQUIREMENTS_SPECIFICATION.md](../domains/agent/SOFTWARE_REQUIREMENTS_SPECIFICATION.md)<br/>[SYSTEM_REQUIREMENTS_SPECIFICATION.md](../system/SYSTEM_REQUIREMENTS_SPECIFICATION.md)<br/>[REQUIREMENTS_METHOD_AND_GOVERNANCE.md](../system/REQUIREMENTS_METHOD_AND_GOVERNANCE.md)<br/>[SYSTEM_OVERVIEW_AND_BOUNDARIES.md](../architecture/SYSTEM_OVERVIEW_AND_BOUNDARIES.md)<br/>domain technical design docs under [domains/](../domains/)<br/>research/proposal documents and benchmark review reports as non-authoritative inputs | Scoped requirement set, affected architecture boundaries, long-lived document impact map, planned propagation targets, requirements/design increments, initial acceptance and testability expectations, and expected delivery or operational impact |
 | Spec Authoring and Planning | `2-5` | requirements baseline, architecture references, [spec-traceability.yaml](../../specs/spec-traceability.yaml) | `specs/feature/spec.md`<br/>`specs/feature/plan.md`<br/>updated feature-to-SRS mapping, draft QA intent, and expected application or IaC change scope |
 | Readiness and Review | `6-11` | governed spec and plan artifacts, planned test intent, review criteria | `specs/feature/tasks.md`<br/>`specs/feature/analysis.md`<br/>review findings, readiness verdict, QA scope, and expected test coverage |
 | Delivery and Verification | `12-14` | tasks, review findings, [VERIFICATION_AND_TRACEABILITY_STRATEGY.md](../testing/VERIFICATION_AND_TRACEABILITY_STRATEGY.md)<br/>[HOWTO_PYTEST_RUNTIME_API_INTEGRATION.md](../testing/backend-api-service/HOWTO_PYTEST_RUNTIME_API_INTEGRATION.md) | implemented application changes in `src/` and `frontend/`<br/>IaC artifacts in `IaC/Dockerfile.api`, `IaC/Dockerfile.agent`, `IaC/helm/dp-stock/`, `IaC/infra/terraform/`, and `IaC/ci-cd/`<br/>QA and testing results in `tests/` and `specs/<feature>/review.md` |
@@ -419,6 +419,7 @@ The installed `speckit` workflow currently executes 14 concrete steps, including
 
 0. **Requirements Baseline**: Define functional and non-functional requirements as traceable SRS items with stable identifiers, measurable behavior, and explicit scope boundaries.
    - **Mapped Long-Lived Documents**:
+     - [PRODUCT_SPECIFICATION.md](../system/PRODUCT_SPECIFICATION.md) (Product Definition and Specification, "Product": product meaning and the roadmap of Milestones `M-nnn`; each Milestone lists its SRS IDs and links to its pitches)
      - [SYSTEM_REQUIREMENTS_SPECIFICATION.md](../system/SYSTEM_REQUIREMENTS_SPECIFICATION.md) (Cross-domain system baseline)
      - [REQUIREMENTS_METHOD_AND_GOVERNANCE.md](../system/REQUIREMENTS_METHOD_AND_GOVERNANCE.md) (Requirements standards and governance)
      - [SOFTWARE_REQUIREMENTS_SPECIFICATION.md](../domains/agent/SOFTWARE_REQUIREMENTS_SPECIFICATION.md) (Agent domain specialization)
@@ -552,6 +553,10 @@ The installed `speckit` workflow currently executes 14 concrete steps, including
      - Runnable roadmap increments or phases
      - Backlog mirror IDs linked to SRS requirement IDs, acceptance criteria, dependencies, outcomes, and detailed roadmap sections
      - Promotion gates for items that must not start until contracts, provider policy, authorization, testability, or evidence rules exist
+   - **Product Milestones and Pitches**: For product-roadmap work, the delivery plan is the Milestone table in [Product §5.3](../system/PRODUCT_SPECIFICATION.md#product-roadmap). Each bet on a Milestone is shaped as a pitch, `specs/pitches/M-nnn-<slug>.md`, using the template in [Governance §2.3](../system/REQUIREMENTS_METHOD_AND_GOVERNANCE.md#23-pitch-template-l15). A pitch carries appetite (time), cost and the FR (`SR-`) and NFR (`SNR-`) lines it covers, and proposes the slices that become spec-kit features.
+     - The pitch header's Milestone field is authoritative; the roadmap's Pitches cell is navigation only.
+     - A pitch's SR / SNR lines must all be among its Milestone's SRS IDs, and each line belongs to at most one active pitch ("partly" / "closes").
+     - Betting order across pitches lives in [specs/pitches/README.md](../../specs/pitches/README.md).
    - **Cross-Reference Prompt Hint**:
      > *Prompt Hint*: "When a proposal creates a multi-step capability, add a roadmap backlog mirror with concrete backlog IDs, SRS mappings, dependencies, outcomes, and links to detailed sections before implementation tasks are generated."
 
@@ -593,8 +598,9 @@ The installed `speckit` workflow currently executes 14 concrete steps, including
    - **Cross-Reference Prompt Hint**:
      > *Prompt Hint*: "Validate rules early: 'Read [constitution.md](../../.specify/memory/constitution.md) and confirm that the proposed feature design respects all 9 Golden Development Rules (especially Rule 1: Security First and Rule 9: API Contract Sync).'"
 
-3. **`speckit.specify`**: Produce the feature specification, map it back to SRS scope, and publish governed artifacts under [specs/](../../specs/).
+3. **`speckit.specify`**: Produce the feature specification, map it back to SRS scope, and publish governed artifacts under [specs/](../../specs/). For product-roadmap work, the feature description is one slice from a pitch; the slice header cites its pitch and the exact SRS lines it delivers ([Governance §2.4](../system/REQUIREMENTS_METHOD_AND_GOVERNANCE.md#24-slice-header-template-top-of-each-spec-kit-specmd)).
    - **Mapped Long-Lived Documents**:
+     - the source pitch under [specs/pitches/](../../specs/pitches/README.md)
      - [SYSTEM_REQUIREMENTS_SPECIFICATION.md](../system/SYSTEM_REQUIREMENTS_SPECIFICATION.md)
      - [spec-traceability.yaml](../../specs/spec-traceability.yaml) (Bidirectional traceability manifest)
    - **Cross-Reference Prompt Hint**:
@@ -631,7 +637,7 @@ The installed `speckit` workflow currently executes 14 concrete steps, including
    - **Mapped Long-Lived Documents**:
      - [REQUIREMENTS_METHOD_AND_GOVERNANCE.md](../system/REQUIREMENTS_METHOD_AND_GOVERNANCE.md) (Quality gate definitions)
    - **Cross-Reference Prompt Hint**:
-     > *Prompt Hint*: "Perform requirements check: 'Compare this specification (`spec.md`) with the quality gate criteria defined in Section 8 of [REQUIREMENTS_METHOD_AND_GOVERNANCE.md](../system/REQUIREMENTS_METHOD_AND_GOVERNANCE.md) to generate a custom quality checklist.'"
+     > *Prompt Hint*: "Perform requirements check: 'Compare this specification (`spec.md`) with the quality gate criteria in [methodology §8.2 Quality Gate Chain](../study-hub/project-documentation-and-specification-methodology.md#82-quality-gate-chain) to generate a custom quality checklist.'"
 
 8. **`speckit.tasks`**: Break the approved plan into actionable, dependency-aware implementation tasks.
    - **Mapped Long-Lived Documents**:
@@ -655,7 +661,7 @@ The installed `speckit` workflow currently executes 14 concrete steps, including
     - **Mapped Long-Lived Documents**:
       - [REQUIREMENTS_METHOD_AND_GOVERNANCE.md](../system/REQUIREMENTS_METHOD_AND_GOVERNANCE.md)
     - **Cross-Reference Prompt Hint**:
-      > *Prompt Hint*: "Simulate fleet review: 'Execute pre-implementation review criteria in Section 11 of [REQUIREMENTS_METHOD_AND_GOVERNANCE.md](../system/REQUIREMENTS_METHOD_AND_GOVERNANCE.md) to verify that tasks are dependency-aware and ready for coding.'"
+      > *Prompt Hint*: "Simulate fleet review: 'Execute pre-implementation review criteria in [Governance §2.2 Rules](../system/REQUIREMENTS_METHOD_AND_GOVERNANCE.md#22-rules) to verify that tasks are dependency-aware and ready for coding.'"
 
 #### 3.3.4 Delivery and Verification
 
@@ -1142,6 +1148,7 @@ Use Living Spec behavior only for long-lived authority documents outside a compl
 | Location | Role | Authority Level | Notes |
 |----------|------|-----------------|-------|
 | [../../specs/](../../specs/) | Governed feature work | Canonical | Create and maintain approved feature specs, plans, tasks, review evidence, and sync artifacts here. |
+| [../../specs/pitches/](../../specs/pitches/README.md) | Pitches and betting order | Canonical for bets | One pitch per bet on a Product Milestone (`M-nnn-<slug>.md`); the README holds the ranking. Rules: [Governance §2.3](../system/REQUIREMENTS_METHOD_AND_GOVERNANCE.md#23-pitch-template-l15). |
 | [../../specs/spec-traceability.yaml](../../specs/spec-traceability.yaml) | SRS to feature traceability | Canonical | Update when a feature gains, removes, or changes SRS scope. |
 | [../../specs/spec-sync-status.md](../../specs/spec-sync-status.md) | Feature sync reporting | Canonical | Reflects current coverage, derived status, and evidence links. |
 | [../../.specify/](../../.specify/) | Runtime and automation area | Supporting | Stores templates, workflows, integration metadata, extension catalogs, scripts, and local command assets. |
@@ -1253,6 +1260,9 @@ The current supported synchronization posture is local-script first: `speckit.do
 
 ### 8.1 Repository References
 
+- [../system/PRODUCT_SPECIFICATION.md](../system/PRODUCT_SPECIFICATION.md)
+- [../system/REQUIREMENTS_METHOD_AND_GOVERNANCE.md](../system/REQUIREMENTS_METHOD_AND_GOVERNANCE.md)
+- [../../specs/pitches/README.md](../../specs/pitches/README.md)
 - [../../.github/agents/documentation.spec-maintainer.agent.md](../../.github/agents/documentation.spec-maintainer.agent.md)
 - [../../.specify/templates/spec-template.md](../../.specify/templates/spec-template.md)
 - [../../.specify/extensions.yml](../../.specify/extensions.yml)

@@ -7,7 +7,7 @@
 | Project | DP Stock Investment Assistant |
 | Domain | Documentation architecture, requirements engineering, and specification governance |
 | Focus | Harmonized documentation architecture synthesizing **arc42 (12-section structural blueprint)**, **C4 Model (visual zoom hierarchy)**, **ISO/IEC/IEEE 42010 (architecture meta-standard)**, and **Spec-Driven Development (SDD)** for a multi-layer, multi-domain financial agent system |
-| Date | 2026-08-20 |
+| Date | 2026-10-19 |
 | Status | Target-state architecture & methodology baseline |
 | Audience | Engineering, architecture, product, quant/trader, platform, and technical documentation maintainers |
 
@@ -70,6 +70,9 @@ This proposal is based on and aligned with the current project documents below.
 
 | Document | Purpose in Current Repository | Role in This Proposal |
 |----------|-------------------------------|-----------------------|
+| [Product Definition and Specification (Product)](../system/PRODUCT_SPECIFICATION.md) | Product meaning and the product roadmap of Milestones `M-nnn` | Top of the requirement chain; each Milestone lists its SRS IDs and links to its pitches |
+| [Requirements Method and Governance](../system/REQUIREMENTS_METHOD_AND_GOVERNANCE.md) | Layers, authoring rules, pitch and slice templates, roles | Operational rules for the chain Product → Pitch → SRS → slice → code |
+| [Pitches and ranking](../../specs/pitches/README.md) | One pitch per bet on a Milestone, plus the betting order | The translation layer between product time and cost and SRS lines |
 | [Architecture Review](../architecture-review.md) | Cross-domain and cross-layer architecture assessment of frontend, backend, agent, data, and infrastructure | Provides the system-wide framing and writing style for cross-domain and cross-layer documentation |
 | [Stock Investment Assistant Agent — Software Requirements Specification](../domains/agent/SOFTWARE_REQUIREMENTS_SPECIFICATION.md) | Detailed domain SRS for the agent system | Reference model for requirement structure, numbering, and wording |
 | [SRS Spec Traceability](../domains/agent/SRS_SPEC_TRACEABILITY.md) | Reverse trace from SRS items to feature specs | Reference model for requirement-to-delivery traceability |
@@ -238,6 +241,10 @@ The terms in this glossary are the canonical vocabulary for this repository. Con
 | **Agent Domain** | AI reasoning workflow, tool orchestration, memory behavior, and response composition | Agent-specific subordinate SRS and behavior constraints | Full-system requirement ownership |
 | **Data Domain** | Persistence, schema/index policy, retention, migration, and cache behavior | Data constraints, storage semantics, recoverability concerns | UI or API interaction behavior |
 | **Operations Domain** | Release readiness, observability operations, reconciliation, migration safety, and runbooks | Operations policy and runbook responsibilities | Functional feature behavior definitions |
+| **Product** | Short name for the Product Definition and Specification (`docs/system/PRODUCT_SPECIFICATION.md`): product meaning, scope and roadmap | Product intent and the Milestone delivery plan | Calling it "the Spec"; "spec" means only a spec-kit `spec.md` |
+| **Milestone** | A row of the product roadmap with a stable ID `M-nnn`, a priority and the SRS IDs it needs | Delivery planning and pitch ownership | Engineering themes such as README M3–M7, or renumbered IDs |
+| **Pitch** | One shaped bet on a Milestone (`specs/pitches/M-nnn-<slug>.md`) that translates time (appetite), cost and work into the FR (`SR-`) and NFR (`SNR-`) lines it delivers | Choosing and sizing delivery work; proposing slices | Restating requirements or holding technical design |
+| **Slice** | One spec-kit feature (`specs/NNN-<slug>/spec.md`) cut from a pitch, naming the exact SRS lines it delivers | Delivery-scoped behaviour and UX acceptance criteria | Long-lived requirement authority |
 | **Master System SRS** | The authoritative cross-domain requirement baseline | SR/SNR requirements, system-level lifecycle obligations | Domain-local implementation detail |
 | **Domain SRS** | A subordinate SRS for one domain when justified by complexity | Domain-local specialization that does not contradict master SRS | Replacing master SRS authority |
 | **Executable Contract** | Machine-readable interface source of truth (e.g., OpenAPI schema) | Payload/schema definitions and compatibility checks | Narrative rationale and decision tradeoffs |
@@ -261,7 +268,7 @@ The SDD workflow organizes feature delivery into five governed stages:
 
 | Stage | Purpose | Primary Spec Kit Commands / Tools | Key Documentation & Artifact Impact |
 |---|---|---|---|
-| **1. Requirements & Governance** | Align with system requirements baseline and verify non-negotiable constitution constraints | `speckit.constitution`, SRS baselines | Sourced from `docs/system/SYSTEM_REQUIREMENTS_SPECIFICATION.md`, <br> `docs/domains/*/SOFTWARE_REQUIREMENTs_SPECIFICATION.md`, `.specify/memory/constitution.md` |
+| **1. Requirements & Governance** | Pick the Product Milestone and its pitch, align with the system requirements baseline, and verify non-negotiable constitution constraints | `speckit.constitution`, Product roadmap, pitches, SRS baselines | Sourced from `docs/system/PRODUCT_SPECIFICATION.md` (Milestones), `specs/pitches/`, `docs/system/SYSTEM_REQUIREMENTS_SPECIFICATION.md`, <br> `docs/domains/*/SOFTWARE_REQUIREMENTs_SPECIFICATION.md`, `.specify/memory/constitution.md` |
 | **2. Specification & Refinement** | Translate approved requirements into delivery-scoped feature specifications with acceptance scenarios | `speckit.specify`, `speckit.clarify`, `speckit.checklist` | Generates `specs/<feature-id>/spec.md` with explicit SRS requirement IDs and quality checklists |
 | **3. Planning & Review** | Produce technical design, constitution-checked plan, user-story tasks, and cross-model risk review | `speckit.plan`, `speckit.tasks`, `speckit.analyze`, `speckit.fleet.review` | Generates `plan.md`, `tasks.md`, `data-model.md` (C4 L4 seams), and records mappings in `specs/spec-traceability.yaml`. Governed and referenced documents like <br> `docs/architecture/`, <br> `docs/domains/*/TECHNICAL_DESIGN.md`, <br> `docs/domains/*/ARCHITECTURE_DECISIONS.md`,<br> `docs/domains/*/RISKS_AND_TECHNICAL_DEBTS.md`, <br> `docs/domains/*/ARCHITECTURE_DESIGN.md` , <br> `docs/openapi.yaml`,... |
 | **4. Implementation & Verification** | Execute code changes aligned to plan, detect phantom task completions, and verify against constitution | `speckit.implement`, `speckit.verify-tasks.run`, `speckit.verify.run` | Implements changes under `src/`; produces verification evidence and passes quality gates |
@@ -388,6 +395,7 @@ The target structure organizes documents first by ownership scope, then by arc42
 ```text
 docs/
   system/
+    PRODUCT_SPECIFICATION.md                # Product: product meaning and roadmap of Milestones M-nnn
     REQUIREMENTS_METHOD_AND_GOVERNANCE.md   # Requirements governance, lifecycle, change control (arc42 §2)
     SYSTEM_REQUIREMENTS_SPECIFICATION.md    # Upstream master requirement pool + ISO 25010 Quality Scenarios (arc42 §1, §10)
 
@@ -437,6 +445,9 @@ docs/
     <research, comparison studies, planning proposals>
 
 specs/
+  pitches/
+    README.md                               # Betting order across pitches, grouped by Milestone
+    M-nnn-<slug>.md                         # One pitch per bet on a Product Milestone
   <feature-id>/
     spec.md                                 # Delivery-scoped requirement delta
     plan.md                                 # Technical design delta & constitution check
@@ -452,6 +463,7 @@ specs/
 
 | Document Type | Target Files | Purpose | Standards Stance |
 |---------------|--------------|---------|------------------|
+| **Product Definition and Specification** | `docs/system/PRODUCT_SPECIFICATION.md` | Product meaning, scope and the roadmap of Milestones (`M-nnn`); the one document that links down to SRS IDs and pitches | **Practice-Based** product definition |
 | **Master System SRS** | `docs/system/SYSTEM_REQUIREMENTS_SPECIFICATION.md` | Authoritative source for cross-domain functional, non-functional, interface, lifecycle, and ISO 25010 quality scenarios (arc42 §1, §10) | **Aligned** to ISO/IEC/IEEE 29148 & ISO/IEC 25010 |
 | **Requirements Governance Guide** | `docs/system/REQUIREMENTS_METHOD_AND_GOVERNANCE.md` | Defines how requirements are authored, approved, changed, traced, and retired (arc42 §2 constraints) | **Aligned** to 29148 & ISO 42010 governance |
 | **System Architecture Overview** | `docs/architecture/SYSTEM_OVERVIEW_AND_BOUNDARIES.md` | Describes system context, solution strategy, and Level 1 building blocks / containers (arc42 §3, §4, §5 L1) | **Aligned** to ISO 42010 & C4 Model (L1, L2) |
@@ -465,6 +477,7 @@ specs/
 | **Executable Contracts** | current: `docs/openapi.yaml`; target: `docs/domains/backend/api/openapi.yaml` | Defines request/response schemas, event contracts, and integration payloads without prose duplication | **Conformant** to OpenAPI 3.1 schema standard |
 | **Operations Policy and Runbooks** | `docs/operations/OPERATIONS_AND_RELEASE_POLICY.md`, `docs/operations/RUNBOOKS/` | Operational policies, release readiness, migration procedures, and incident handling | **Aligned** for policy; **Practice-Based** for runbooks |
 | **Verification and Traceability Strategy** | `docs/testing/VERIFICATION_AND_TRACEABILITY_STRATEGY.md` | Test levels, quality gates, evidence standards, and requirement-to-test traceability | **Aligned** internal verification standard |
+| **Pitches** | `specs/pitches/M-nnn-<slug>.md`, `specs/pitches/README.md` | One shaped bet per Milestone pitch with appetite, cost and covered SRS lines; README holds the betting order | **Practice-Based** Shape Up |
 | **Feature Specs** | `specs/<feature-id>/...` | Delivery-scoped realization documents acting as local arc42 deltas during active development | **Practice-Based** Spec-Kit workflow |
 | **Traceability Registry and Reports** | `specs/spec-traceability.yaml`, `specs/spec-sync-status.md` | Maintains bidirectional requirement-to-delivery traceability | **Practice-Based** RTM-style governance |
 
@@ -829,3 +842,4 @@ The practical recommendation is to keep `docs/` small, keep `specs/` rich, and p
 | 1.0 | 2026-07-01 | Codex | Aligned methodology with current local Spec Kit command surfaces, documented spec persistence policy, clarified sync-extension posture, and preserved `docs/openapi.yaml` as the current canonical contract until governed migration |
 | 1.1 | 2026-08-20 | Antigravity | Harmonized documentation architecture with **arc42 (12-section structural blueprint)**, **C4 Model (visual zoom hierarchy L1–L4)**, **ISO/IEC/IEEE 42010 (architecture meta-standard)**, and **ISO/IEC 25010** quality categories; established multi-modeling notation standards (UML, C4, PlantUML/DSL, BPMN, Mermaid); updated target file tree with dedicated `DEPLOYMENT_AND_INFRASTRUCTURE.md`, `CROSS_CUTTING_CONCEPTS.md`, and `RISKS_AND_TECHNICAL_DEBT.md`; formalized the arc42 Upward Promotion Engine from SDD feature specs. |
 | 1.2 | 2026-08-20 | Antigravity | Streamlined Section 7 (SDD Lifecycle Integration) by introducing SDD with Spec Kit as the governance engine, organizing lifecycle into 5 high-level stages, and delegating detailed 18-step execution, CLI commands, and troubleshooting to the dedicated `docs/spec-driven development (SDD)/spec-kit HOW-TO.md`. |
+| 1.3 | 2026-10-19 | Requirements and Delivery Lead (approved by Product Owner) | Added the requirement chain Product (Milestones `M-nnn`) → Pitch → SRS lines → slice → code: Product, Governance and pitches in Related Documents; glossary rows for Product, Milestone, Pitch and Slice; stage 1 sources; `PRODUCT_SPECIFICATION.md` and `specs/pitches/` in the target tree and document-type table |

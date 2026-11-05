@@ -5,6 +5,9 @@ a LangChain/LangGraph agent with MongoDB short-term memory, and MongoDB/Redis pe
 Models are multi-provider, from OpenAI with fallbacks via `ModelClientFactory`.
 Layering is **routes → services → repositories → DB**, with dependencies wired through service and repository factories.
 
+## Project ownership
+- **Product Owner for this project scope: Phan Duy.** Long-lived product docs name the Product Owner role; this file is the bot rulebook and names Phan explicitly as that Product Owner.
+
 ## Safety rules (read first)
 - **Never edit the main working tree.** It holds many uncommitted changes. Make every edit in a named git worktree.
 - **No commits, pushes, PRs or branch deletions without Phan's explicit approval** given for that action.
@@ -83,6 +86,7 @@ Repo-wide fallback: `.github/copilot-instructions.md`.
 
 ## Docs map (authority order: product/system → architecture → ADRs → domain design)
 - Product: `docs/system/PRODUCT_SPECIFICATION.md`, `CONCEPTUAL_IA_MAP.md`, `USER_JOURNEYS_WITH_WIREFRAMES.md`, `SYSTEM_REQUIREMENTS_SPECIFICATION.md`, `REQUIREMENTS_METHOD_AND_GOVERNANCE.md`
+- Naming: "Product" means the Product Definition and Specification (`docs/system/PRODUCT_SPECIFICATION.md`), whose roadmap defines Milestones `M-nnn`. "Spec" or "spec" means only a spec-kit `spec.md`.
 - Architecture: `docs/architecture/SYSTEM_OVERVIEW_AND_BOUNDARIES.md`, `RUNTIME_AND_INTEGRATION_FLOWS.md`
 - ADRs, in `docs/architecture/DECISIONS/`:
   - ADR-SYS-001 Identity & per-user isolation (Accepted in part)

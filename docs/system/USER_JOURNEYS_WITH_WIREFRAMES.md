@@ -3,18 +3,19 @@
 | Field | Value |
 |---|---|
 | Document | User Journeys with Wireframes · DP Stock-Investment Assistant |
-| Version | v1.0.2 |
-| Date | 2026-10-08 |
+| Version | v1.0.4 |
+| Date | 2026-11-05 |
 | Status | Review · frames = snapshot release journey-v1.0.0 |
-| Owner | Phan Duy |
-| Related | [Spec v1.7.2](./PRODUCT_SPECIFICATION.md) · [IA map v1.0.1](./CONCEPTUAL_IA_MAP.md) · `frames.json` → Figma (Journeys v1.0.0) |
+| Owner | Product Owner |
+| Maintainer | UX Designer |
+| Related | [Product v1.8.1](./PRODUCT_SPECIFICATION.md) · [IA map v1.0.3](./CONCEPTUAL_IA_MAP.md) · `frames.json` → Figma (Journeys v1.0.0) |
 
 > **Purpose.** One PO-facing doc: the Phase 1 conceptual journeys for the Techno-Fundamental Investor (TFI) and the frames that make each step evaluable.  
 > **Not this doc:** pixel UI, components, routes, FE stack, Gen-UI widgets, Mentor, chart libraries.
 
 > **Frames.** The images below are snapshot release **journey-v1.0.0** (2026-09-25), exported from Figma. The [Live Figma page](https://www.figma.com/design/Jy1qyQeJJT1gaQVar8KJLd/?node-id=0-1) may be ahead of them (for example, v1.0.0 text fixes to zone and track labels land in the live frames first).
 
-Terms follow Spec §0.2 (glossary). This doc defines no terms of its own.
+Terms follow Product §0.2 (glossary). This doc defines no terms of its own.
 
 ---
 
@@ -32,7 +33,7 @@ Terms follow Spec §0.2 (glossary). This doc defines no terms of its own.
 
 | Content | Owner (normative) |
 |---|---|
-| IDs (journeys, steps, branches, frames), ontology, flow logic | Markdown: Spec > IA map > Journeys |
+| IDs (journeys, steps, branches, frames), ontology, flow logic | Markdown: Product > IA map > Journeys |
 | Frame layout, on-frame text, CTA labels, prototype links | `frames.json` → Figma |
 
 When the two disagree, fix the owner rather than the copy. ASCII frames are retired as of v1.0.0; the v0.8.2 ASCII frames remain in Appendix A for one version.
@@ -44,7 +45,7 @@ Every frame follows these rules; they are defined elsewhere and not restated her
 - **Layout lock** (IA §2.6): Z2 Top chrome holds context plus the right-corner utilities slot; Z1 Left sidebar sits left of Z3 and shows conceptual Dual-Track and Lifecycle status only (no chips, no hotspots); Z3 Main workspace and Z4 AI companion take the remaining width.
 - **Stage moves:** Z3 CTA buttons (**Continue to Working Thesis**, **Go to Decision gate**). The Z1 Lifecycle list is status, not navigation.
 - **Sandbox chart lock** (IA §2.4): docked price chart in Sandbox Z3; it yields at the Decision gate and named levels travel on Pass; Track B does not auto-apply it.
-- **Ontology and gate outcomes** (Spec §4.6): Pass → Position + Decision record; Fail via Revise → Decision record kept (outcome Fail), no Position; Investment Case optional (Case-on / Case-off).
+- **Ontology and gate outcomes** (Product §4.6): Pass → Position + Decision record; Fail via Revise → Decision record kept (outcome Fail), no Position; Investment Case optional (Case-on / Case-off).
 - **Default landing:** Insights (IA §8 #2).
 
 ### 1.4 Index
@@ -64,7 +65,7 @@ Every frame follows these rules; they are defined elsewhere and not restated her
 
 **Intent.** The TFI researches on Track A · Research Sandbox, builds a Working Thesis with parallel Bull/Bear stances, passes the Decision gate, and a Position is created on Track B · Execution Portfolio. The Thesis then attaches as "why we hold". An Investment Case may be linked at any time; it is never required.
 
-**Anchors.** Spec §0.4 (Phase 1 cut line), §2.5 (Dual-Track), §4.6 (ontology). IA §2.6 (layout lock), §2.4 (chart lock), §3 (placement).
+**Anchors.** Product §0.4 (Phase 1 cut line), §2.5 (Dual-Track), §4.6 (ontology). IA §2.6 (layout lock), §2.4 (chart lock), §3 (placement).
 
 ```mermaid
 flowchart LR
@@ -76,7 +77,7 @@ flowchart LR
 
 #### 2.1.1 Steps
 
-| Step | User intent | Spec focus | Placement (zones) | Frame | Entry → Exit |
+| Step | User intent | Product focus | Placement (zones) | Frame | Entry → Exit |
 |---|---|---|---|---|---|
 | **J-TFI-1.1** | Gather evidence on a symbol | Insights first; provenance; both tracks visible; no Position | Z2 symbol + Insights · Z1 A, > Insights · Z3 Insight + docked chart · Z4 | W2b | Open Workspace / pick symbol → Z3 CTA **Continue to Working Thesis** |
 | **J-TFI-1.2** | Form the Working Thesis with Bull/Bear | Multi-stance ≠ Dual-Track; still Track A; no Position | Z2 Working Thesis · Z1 A, > Thesis · Z3 Working Thesis + Multi-stance + docked chart · Z4 | W3b | From Insights → Z3 CTA **Go to Decision gate** |
@@ -93,7 +94,7 @@ flowchart LR
 
 ### 2.2 J-TFI-2 · Fail → Revise → Working Thesis (no Position)
 
-**Intent.** Same path to the Decision gate, but one or more mandatory items are unmet, so Pass stays unavailable; the user presses **Revise** (no Fail button), and the Decision record is kept with outcome Fail and the unmet items listed (Spec §4.6, §4.7 #8). No Position is created; the work returns to the Working Thesis in the Sandbox, where it can be revised, parked or dropped.
+**Intent.** Same path to the Decision gate, but one or more mandatory items are unmet, so Pass stays unavailable; the user presses **Revise** (no Fail button), and the Decision record is kept with outcome Fail and the unmet items listed (Product §4.6, §4.7 #8). No Position is created; the work returns to the Working Thesis in the Sandbox, where it can be revised, parked or dropped.
 
 | Step | Delta vs J-TFI-1 | Frame |
 |---|---|---|
@@ -184,7 +185,7 @@ Frames prove the IA map; they do not define a second zone map. Each frame shows 
 
 ![W4 · Decision gate: pre-mortem checklist owns Z3, chart yielded to a thin levels strip, Pass → Position and Revise buttons](../figma/snapshots/journey-v1.0.0/Design%20System/Wireframe/W4.png)
 
-- **Intent:** explicit promote-or-revise gate; the checklist owns Z3 and the chart yields to a thin levels strip; Pass is available only when every mandatory item is met and creates the Position + Decision record; Revise (no Fail button) records Fail, shows the unmet items, and creates no Position (Spec §4.6).
+- **Intent:** explicit promote-or-revise gate; the checklist owns Z3 and the chart yields to a thin levels strip; Pass is available only when every mandatory item is met and creates the Position + Decision record; Revise (no Fail button) records Fail, shows the unmet items, and creates no Position (Product §4.6).
 - **Serves:** J-TFI-1.3 (Pass → W6) and J-TFI-2.3 (Revise → W5).
 
 ### 3.8 W5 · Fail/Revise · Working Thesis
@@ -198,7 +199,7 @@ Frames prove the IA map; they do not define a second zone map. Each frame shows 
 
 ![W6 · Position on Track B after Pass: size, stop, carried levels, Thesis as why we hold, optional Case chip](../figma/snapshots/journey-v1.0.0/Design%20System/Wireframe/W6.png)
 
-- **Intent:** Track B emphasized; the Position exists because Pass created it, with carried levels and the Thesis attached as why we hold; the Case chip shows only when Case-on. Phase 1 Monitoring is a light status cue on this Position, not a separate surface (Spec §3.4, §4.5).
+- **Intent:** Track B emphasized; the Position exists because Pass created it, with carried levels and the Thesis attached as why we hold; the Case chip shows only when Case-on. Phase 1 Monitoring is a light status cue on this Position, not a separate surface (Product §3.4, §4.5).
 - **Serves:** J-TFI-1.4.
 - **Note:** the snapshot still shows a dashed "Thesis link" hotspot; that link was dropped in v1.0.0 (a post-Pass Thesis view is a future frame, §6).
 
@@ -245,6 +246,7 @@ A PO can answer from this doc alone:
 
 | Version | Date | Change |
 |---|---|---|
+| v1.0.3 | 2026-10-19 | Terminology only: the product doc is now Product (Product Definition and Specification), so "Spec §" pointers read "Product §". Header Owner is now the Product Owner role. No IA or journey change. |
 | v1.0.2 | 2026-10-14 | Aligned to Spec v1.7.2: W4 checklist meaning; Fail keeps a Decision record, no Position; Phase 1 Monitoring is a light status cue on the Position (J-TFI-1.4, W6). Frames unchanged; see backlog #3. |
 | v1.0.1 | 2026-10-08 | Fail wording aligned to Phan's 2026-10-08 decision: Fail keeps a Decision record (outcome Fail) and creates no Position (§3.7 W4 intent, §5). Frames unchanged. |
 | v1.0.0 | 2026-09-25 | Cleanup release. ASCII frames replaced by snapshot images (release journey-v1.0.0), old ASCII moved to Appendix A. Precedence rule added (§1.2). Shell, chart and ontology rules replaced by pointers to IA §2.6 / §2.4 and Spec §4.6. Canonical zone, track and Thesis names. Fail = outcome, Revise = action. W6 → W3b "Thesis link" dropped (future frame, §6). Prototype-only links listed (§2.4). Step table split into steps + notes. Numbered sections; uniform header. |
@@ -414,4 +416,4 @@ Kept for one version for reference only; superseded by §3 and removed in the ne
 
 ---
 
-*End of User Journeys with Wireframes · v1.0.1 · 2026-10-08*
+*End of User Journeys with Wireframes · v1.0.4 · 2026-11-05*
