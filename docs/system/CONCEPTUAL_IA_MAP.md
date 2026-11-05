@@ -3,16 +3,17 @@
 | Field | Value |
 |---|---|
 | Document | Conceptual IA Map · DP Stock-Investment Assistant |
-| Version | v1.0.1 |
-| Date | 2026-09-25 |
+| Version | v1.0.3 |
+| Date | 2026-11-05 |
 | Status | Review · layout lock and ontology frozen |
-| Owner | Phan Duy |
-| Related | [Spec v1.7.2](./PRODUCT_SPECIFICATION.md) · [Journeys v1.0.2](./USER_JOURNEYS_WITH_WIREFRAMES.md) · `frames.json` → Figma (Journeys v1.0.0) |
+| Owner | Product Owner |
+| Maintainer | UX Designer |
+| Related | [Product v1.8.1](./PRODUCT_SPECIFICATION.md) · [Journeys v1.0.4](./USER_JOURNEYS_WITH_WIREFRAMES.md) · `frames.json` → Figma (Journeys v1.0.0) |
 
-> **Purpose.** Show what the product looks like as information architecture: zones, domain placement, Dual-Track, and where the Working Thesis, the Position and the optional Investment Case appear. Derived only from the Spec.  
+> **Purpose.** Show what the product looks like as information architecture: zones, domain placement, Dual-Track, and where the Working Thesis, the Position and the optional Investment Case appear. Derived only from the Product doc.\
 > **Not this doc:** FE stack, routes, components, APIs, or pixel UI.
 
-Terms follow Spec §0.2 (glossary); the object ontology is Spec §4.6. This doc owns the zones (§2), the layout lock (§2.6) and domain placement (§3).
+Terms follow Product §0.2 (glossary); the object ontology is Product §4.6. This doc owns the zones (§2), the layout lock (§2.6) and domain placement (§3).
 
 **How to read this doc.** Zones (§2) are the rooms of one workshop. Placement (§3) says which work lives in which room. §7 draws the rooms once so every frame shares one target.
 
@@ -26,7 +27,7 @@ Terms follow Spec §0.2 (glossary); the object ontology is Spec §4.6. This doc 
 - Investment Core domains → zones
 - Dual-Track: Track A · Research Sandbox and Track B · Execution Portfolio
 - Multi-stance (Bull/Bear) as a Thesis capability, not a Dual-Track lane
-- Where Decision gate outcomes show up (Pass → Position + Decision record; Fail via Revise → Decision record kept (outcome Fail), no Position; Spec §4.6)
+- Where Decision gate outcomes show up (Pass → Position + Decision record; Fail via Revise → Decision record kept (outcome Fail), no Position; Product §4.6)
 - The optional Investment Case as a binder overlay (Case-on / Case-off)
 - Persona coverage for Phase 1 (§5; journeys live in Journeys v1.0.0)
 
@@ -38,7 +39,7 @@ Terms follow Spec §0.2 (glossary); the object ontology is Spec §4.6. This doc 
 - Full 360° knowledge graph and community
 - Implementation choices (bundler, libraries, layout engines)
 
-**Gate** (Spec §0.4): does this surface make Insights → Thesis → Decision → Portfolio more completable and understandable for a Vietnamese retail user in this phase?
+**Gate** (Product §0.4): does this surface make Insights → Thesis → Decision → Portfolio more completable and understandable for a Vietnamese retail user in this phase?
 
 ---
 
@@ -83,7 +84,7 @@ Adaptive Workspace
 
 One zone left of Z3, with no sub-zones, at 2/3 of its earlier width (the freed width goes to Z3 + Z4). It shows two conceptual status groups:
 - **Dual-Track:** Track A · Research Sandbox and Track B · Execution Portfolio, active track marked. Both tracks always exist (continuous workload, not a mode); exploration never silently changes official Portfolio risk.
-- **Lifecycle:** the 4 workspace stages Insights · Thesis · Decision · Portfolio, current stage marked (Spec §4.5 maps these to the 6-stage product lifecycle; in Phase 1, Monitoring is only a light status on the Position; full Monitoring and Journal come later).
+- **Lifecycle:** the 4 workspace stages Insights · Thesis · Decision · Portfolio, current stage marked (Product §4.5 maps these to the 6-stage product lifecycle; in Phase 1, Monitoring is only a light status on the Position; full Monitoring and Journal come later).
 
 Track ≠ stage. These are status cues, not clickable chips; stage moves use Z3 CTA buttons (for example **Continue to Working Thesis**, **Go to Decision gate**). Detailed sidebar design is deferred.
 
@@ -97,7 +98,7 @@ Where Core meaning is created and edited: the Insight, the Working Thesis (with 
 
 **Sandbox chart lock** (finalized 2026-09-23): on Track A · Research Sandbox, Z3 includes a docked price-chart market anchor that shares the workspace with the active Core object (Insights, or the Working Thesis with Multi-stance).
 - **Why:** ground the whole research and thesis picture on the price chart, so market reality stays visible while evidence and the Thesis are edited.
-- **What it is:** exploratory charting (Spec §2.5, Track A), a docked strip or panel; not a Core domain and not a Lifecycle stage.
+- **What it is:** exploratory charting (Product §2.5, Track A), a docked strip or panel; not a Core domain and not a Lifecycle stage.
 - **Decision gate:** the chart yields (collapses or thins) so the checklist owns Z3; named levels travel on Pass into the Position.
 - **Track B:** the rule does not auto-apply (execution context may differ; optional later).
 - **Not this lock:** chart library, FE stack or pixels.
@@ -108,7 +109,7 @@ Helps explain, draft or retrieve; never replaces Core objects. If Z4 becomes the
 
 ### 2.6 Layout lock (normative)
 
-Locked by Phan 2026-09-23; simplified in v0.9.0 and v0.9.1 (2026-09-25). This is the only normative statement of the shell; other sections and docs point here.
+Locked by the Product Owner 2026-09-23; simplified in v0.9.0 and v0.9.1 (2026-09-25). This is the only normative statement of the shell; other sections and docs point here.
 
 1. **Top chrome = Z2** (context + right-corner header utilities slot). Top chrome never includes Z1.
 2. **Z1 Left sidebar** sits left of Z3: one zone, no sub-zones, 2/3 of its earlier width, showing conceptual Dual-Track and Lifecycle status (§2.2). Detailed design deferred.
@@ -144,7 +145,7 @@ flowchart LR
 | **Thesis + Principles** (Working Thesis, Multi-stance) | Track A (draft), promoted via the Decision gate | Z3 | Working Thesis, no Position | Thesis attaches as "why we hold"; optional Case link | **Phase 1** |
 | **Decision** (+ pre-mortem checklist) | Explicit gate between Track A and Track B | Z3 (gate surface) | Gate, no Position yet | Checklist fixed when the gate opens; Pass available only when every mandatory item is met and creates the Position + Decision record; Revise (no Fail button) records Fail with the unmet items, no Position | **Phase 1** |
 | **Portfolio** (Position) | Track B · Execution Portfolio | Z3 | None (no Position before Pass) | Position (size, stop, official book) | **Phase 1** |
-| **Monitoring** | Track B (live risk) | Phase 1: light status cue on the Position (W6, Z3), no Monitoring surface | Status on the Position | Full Monitoring view | **Phase 1 light / Phase 2 full** (Spec §3.4, §4.5) |
+| **Monitoring** | Track B (live risk) | Phase 1: light status cue on the Position (W6, Z3), no Monitoring surface | Status on the Position | Full Monitoring view | **Phase 1 light / Phase 2 full** (Product §3.4, §4.5) |
 | **Journal** | Closes the Intelligence Loop | Z3 stub | Later | Later | **Later** |
 | **Investment Case** (optional binder) | Cross-core narrative | Z2 chip when Case-on | Can start any time (often at Thesis) | The Position may join an existing Case; optional | **Phase 1** (thin) |
 
@@ -197,7 +198,7 @@ Platform: orientation and context → Z1–Z2; Data Hub feeds Insights in Z3; AI
 
 ## 4. Zone cues: Working Thesis · Position · Case
 
-Rules for what each object is and when it exists are in Spec §4.6. This table only shows how the zones reflect them.
+Rules for what each object is and when it exists are in Product §4.6. This table only shows how the zones reflect them.
 
 | | Working Thesis (Sandbox research) | After Pass (Position) | Optional Case binder |
 |---|---|---|---|
@@ -211,7 +212,7 @@ Rules for what each object is and when it exists are in Spec §4.6. This table o
 
 ## 5. Persona coverage
 
-Journeys and their IDs live in [Journeys v1.0.0](./USER_JOURNEYS_WITH_WIREFRAMES.md); this section only records which personas they cover (personas per Spec §0.3).
+Journeys and their IDs live in [Journeys v1.0.0](./USER_JOURNEYS_WITH_WIREFRAMES.md); this section only records which personas they cover (personas per Product §0.3).
 
 | Persona | Coverage in Phase 1 |
 |---|---|
@@ -285,7 +286,7 @@ All IA questions are decided. New questions go in an "Open questions" list here 
 |---|---|---|---|
 | 1 | Dual-Track as two modes, or two lanes visible at once? | Two lanes at once (Sandbox / Portfolio), active lane emphasized; continuous workload, not a mode. Shown as the Dual-Track group in Z1 (§2.2). | 2026-09-22 (Z1 group 2026-09-25) |
 | 2 | Default Phase 1 landing: Insights or Thesis? | Insights, for the TFI primary journey (the Lifecycle starts at evidence). | 2026-09-22 |
-| 3 | What does Pass create? What is a Case? | Pass creates a Position and a Decision record; Fail (via Revise) keeps a Decision record with outcome Fail, no Position; the Case is an optional binder, never created by Pass. Normative text: Spec §4.6. | 2026-09-24 |
+| 3 | What does Pass create? What is a Case? | Pass creates a Position and a Decision record; Fail (via Revise) keeps a Decision record with outcome Fail, no Position; the Case is an optional binder, never created by Pass. Normative text: Product §4.6. | 2026-09-24 |
 | 4 | Decision as a gate surface, or a Thesis state? | Explicit promotion gate surface between Track A and Track B. | 2026-09-22 |
 | 5 | Price chart in Sandbox Z3? | Yes: the Sandbox chart lock (§2.4). | 2026-09-23 |
 | 6 | Where do Z1 and Z2 sit? | Layout lock (§2.6). | 2026-09-23 (simplified 2026-09-25) |
@@ -296,17 +297,17 @@ Frames and journeys that prove §7 and these decisions: [Journeys v1.0.0](./USER
 
 ## 9. Traceability
 
-| IA element | Spec anchor |
+| IA element | Product anchor |
 |---|---|
-| Source of truth, cut line, gate | Spec §0, §0.4 |
-| Glossary (zones, tracks, Thesis terms, Case-on / Case-off) | Spec §0.2 |
-| Personas | Spec §0.3, §2.1 |
-| Dual-Track / Multi-stance | Spec §2.2, §2.5 |
-| Lifecycle (6 product stages ↔ 4 workspace stages) | Spec §2.4, §4.5 |
-| Decision gate and object ontology | Spec §4.6 |
-| Domains, Position, Case binder | Spec §4 |
-| Phase 1 intent | Spec §0.4, §1.3, §5.3 |
-| Shell layout (pointer back to §2.6) | Spec §0.5 |
+| Source of truth, cut line, gate | Product §0, §0.4 |
+| Glossary (zones, tracks, Thesis terms, Case-on / Case-off) | Product §0.2 |
+| Personas | Product §0.3, §2.1 |
+| Dual-Track / Multi-stance | Product §2.2, §2.5 |
+| Lifecycle (6 product stages ↔ 4 workspace stages) | Product §2.4, §4.5 |
+| Decision gate and object ontology | Product §4.6 |
+| Domains, Position, Case binder | Product §4 |
+| Phase 1 intent | Product §0.4, §1.3, §5.3 |
+| Shell layout (pointer back to §2.6) | Product §0.5 |
 
 ---
 
@@ -314,6 +315,7 @@ Frames and journeys that prove §7 and these decisions: [Journeys v1.0.0](./USER
 
 | Version | Date | Change |
 |---|---|---|
+| v1.0.2 | 2026-10-19 | Terminology only: the product doc is now Product (Product Definition and Specification), so "Spec §" pointers read "Product §". Header Owner is now the Product Owner role. No IA or journey change. |
 | v1.0.1 | 2026-10-14 | Aligned to Spec v1.7.2: gate checklist meaning (Pass only when all mandatory items are met; Revise records Fail with unmet items; no Fail button); Fail keeps a Decision record, no Position; Monitoring is a Phase 1 light status on the Position (W6, Z3), not a Z3 stub, with full Monitoring in Phase 2. Frames unchanged. |
 | v1.0.0 | 2026-09-25 | Cleanup release. Canonical zone names (Z1 Left sidebar, Z2 Top chrome, Z3 Main workspace, Z4 AI companion) and track names. Zones renumbered §2.2–§2.7 with one normative layout lock (§2.6); Z2 described as context + utilities. Lifecycle shown as the 4 workspace stages (Spec §4.5 maps them). Ontology replaced by a pointer to Spec §4.6. §5 persona journeys replaced by a persona-coverage table (no J1–J3 IDs). §7.2 ASCII composite replaced by the W1 snapshot. §8 retitled "Decision log (resolved)" with dates. Traceability updated to Spec v1.7.0. Uniform header. |
 | v0.9.1 | 2026-09-25 | Z1 stays one narrow sidebar but conceptually groups Dual-Track and Lifecycle as status; stage moves via Z3 buttons. |
@@ -322,4 +324,4 @@ Frames and journeys that prove §7 and these decisions: [Journeys v1.0.0](./USER
 
 ---
 
-*End of Conceptual IA Map · v1.0.0 · 2026-09-25*
+*End of Conceptual IA Map · v1.0.3 · 2026-11-05*

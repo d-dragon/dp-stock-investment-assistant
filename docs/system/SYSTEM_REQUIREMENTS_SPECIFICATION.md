@@ -8,8 +8,8 @@
 | Document Type | Master System SRS |
 | Standards Stance | Aligned to ISO/IEC/IEEE 29148 |
 | Governance | Subject to the SRS versioning and change-control mechanism defined in [documentation methodology](../study-hub/project-documentation-and-specification-methodology.md) Section 10.3 |
-| Date | 2026-10-16 |
-| Status | Draft 0.2.2 — requirement families seeded; SR-1.3, SR-4.4 and SR-9.1 added by the Phase 1 pilot (Spec §5.3 first three P0 items); other entries populated incrementally through SDD delivery |
+| Date | 2026-11-05 |
+| Status | Draft 0.2.5 — requirement families seeded; SR-1.3, SR-4.4 and SR-9.1 added by the Phase 1 pilot (first three P0 roadmap deliverables of the Product roadmap); other entries populated incrementally through SDD delivery |
 | Audience | Engineering, architecture, product, and technical documentation maintainers |
 
 ## 2. Purpose, Scope, and Intended Use
@@ -46,7 +46,7 @@ The SRS covers the full system boundary:
 
 | Document | Relationship |
 |----------|-------------|
-| [Product Specification](PRODUCT_SPECIFICATION.md) | Authoritative master charter establishing business goals, retail investor obstacles, Techno-Fundamental Investor (TFI) persona, 360° company lenses, and dual-track lifecycle capabilities |
+| [Product Definition and Specification (Product)](PRODUCT_SPECIFICATION.md) | Authoritative master charter establishing business goals, retail investor obstacles, Techno-Fundamental Investor (TFI) persona, 360° company lenses, and dual-track lifecycle capabilities |
 | [Documentation Methodology](../study-hub/project-documentation-and-specification-methodology.md) | Defines the documentation architecture, SDD lifecycle integration, and governance model that this SRS operates within |
 | [Requirements Method and Governance](REQUIREMENTS_METHOD_AND_GOVERNANCE.md) | Defines authoring standards, change-control processes, and approval paths for this SRS |
 | [Project Constitution](../../.specify/memory/constitution.md) | Non-negotiable governance layer; all requirements must be consistent with constitution principles and golden rules |
@@ -66,7 +66,7 @@ The SRS covers the full system boundary:
 
 ### 4.1 System Purpose
 
-The DP Stock Investment Assistant is an AI-assisted investment workspace for the investment lifecycle (Insights → Thesis → Decision → Portfolio). Product vision and shape are owned by the [Spec](PRODUCT_SPECIFICATION.md) (§1.2, §0.5); the AI companion supports the work and is not the whole product.
+The DP Stock Investment Assistant is an AI-assisted investment workspace for the investment lifecycle (Insights → Thesis → Decision → Portfolio). Product vision and shape are owned by the [Product](PRODUCT_SPECIFICATION.md) (§1.2, §0.5); the AI companion supports the work and is not the whole product.
 
 ### 4.2 Domain Model
 
@@ -119,16 +119,16 @@ graph TB
 | SR-1.2.1 | Model selection | The system SHALL allow users to select the AI model used for response generation from a list of available models. | P1 | Frontend | Backend | — |
 | SR-1.2.2 | User preference persistence | The system SHALL persist user preferences (selected model, workspace settings) across sessions. | P1 | Backend | Frontend, Data | — |
 
-#### SR-1.3: Adaptive Visual Canvas (Phase 1 pilot)
+#### <a id="sr-1-3"></a>SR-1.3: Adaptive Visual Canvas (Phase 1 pilot)
 
-> Pilot lines for Spec §5.3 "Adaptive Visual Canvas (multi-pane, context preserved)". Lines state what must be true; layout is owned by the [IA map](CONCEPTUAL_IA_MAP.md) and [Journeys](USER_JOURNEYS_WITH_WIREFRAMES.md).
+> Pilot lines for the Adaptive Visual Canvas (multi-pane, context preserved). Lines state what must be true; layout is owned by the [IA map](CONCEPTUAL_IA_MAP.md) and [Journeys](USER_JOURNEYS_WITH_WIREFRAMES.md).
 
 | ID | Title | Statement | Pri | Primary | Contributing | References | Spec Coverage |
 |----|-------|-----------|-----|---------|-------------|------------|---------------|
-| <a id="sr-1-3-1"></a>SR-1.3.1 | Zoned workspace with both tracks visible | The system SHALL present the workspace through the four zones Z1–Z4 and SHALL keep both tracks (Research Sandbox and Execution Portfolio) visible at the same time in Z1. | P0 | Frontend | Backend | [IA map](CONCEPTUAL_IA_MAP.md) §2.1, §2.6; Spec §2.5, §2.6; [Journeys](USER_JOURNEYS_WITH_WIREFRAMES.md) W2b | — |
-| <a id="sr-1-3-2"></a>SR-1.3.2 | Context preserved on switching | When the user switches symbol or work object, the system SHALL preserve the context of the open work. | P0 | Frontend | Backend | [IA map](CONCEPTUAL_IA_MAP.md) §2; Spec §2.6 | — |
-| <a id="sr-1-3-3"></a>SR-1.3.3 | Generated UI stays in its place and never writes Core *(Future)* | Where the AI generates UI, the Agent SHALL only propose it and the Frontend SHALL render it only in Z4 or as a draft in Z3; generated UI SHALL NOT write to Core objects, and its content SHALL become a Core object only through explicit user action. | P2 (Future, not Phase 1) | Frontend | Agent | [IA map](CONCEPTUAL_IA_MAP.md) §2.4, §2.5; [overview §4.2.2](../architecture/SYSTEM_OVERVIEW_AND_BOUNDARIES.md#422-responsibility-and-dependency-boundaries); Spec §3.5 (AI boundary) | — |
-| <a id="sr-1-3-4"></a>SR-1.3.4 | Chart yields at the Decision gate (Sandbox only) | While the Decision gate is open in the Research Sandbox, the system SHALL let the price chart yield to the gate checklist, and on Pass the named levels SHALL carry over to the Position; this SHALL NOT apply on the Execution Portfolio. | P0 | Frontend | Backend | [IA map](CONCEPTUAL_IA_MAP.md) §2.4 (Sandbox chart lock); Spec §4.6; [Journeys](USER_JOURNEYS_WITH_WIREFRAMES.md) W2b, W3b, W4 | — |
+| <a id="sr-1-3-1"></a>SR-1.3.1 | Zoned workspace with both tracks visible | The system SHALL present the workspace through the four zones Z1–Z4 and SHALL keep both tracks (Research Sandbox and Execution Portfolio) visible at the same time in Z1. | P0 | Frontend | Backend | [IA map](CONCEPTUAL_IA_MAP.md) §2.1, §2.6; Product §2.5, §2.6; [Journeys](USER_JOURNEYS_WITH_WIREFRAMES.md) W2b | — |
+| <a id="sr-1-3-2"></a>SR-1.3.2 | Context preserved on switching | When the user switches symbol, work object or track, the system SHALL preserve the context of the open work. | P0 | Frontend | Backend | [IA map](CONCEPTUAL_IA_MAP.md) §2; Product §2.6 | — |
+| <a id="sr-1-3-3"></a>SR-1.3.3 | Generated UI stays in its place and never writes Core *(Future)* | Where the AI generates UI, the Agent SHALL only propose it and the Frontend SHALL render it only in Z4 or as a draft in Z3; generated UI SHALL NOT write to Core objects, and its content SHALL become a Core object only through explicit user action. | P2 (Future, not Phase 1) | Frontend | Agent | [IA map](CONCEPTUAL_IA_MAP.md) §2.4, §2.5; [overview §4.2.2](../architecture/SYSTEM_OVERVIEW_AND_BOUNDARIES.md#422-responsibility-and-dependency-boundaries); Product §3.5 (AI boundary) | — |
+| <a id="sr-1-3-4"></a>SR-1.3.4 | Chart yields at the Decision gate (Sandbox only) | While the Decision gate is open in the Research Sandbox, the system SHALL let the price chart yield to the gate checklist, and on Pass the named levels SHALL carry over to the Position; this SHALL NOT apply on the Execution Portfolio. | P0 | Frontend | Backend | [IA map](CONCEPTUAL_IA_MAP.md) §2.4 (Sandbox chart lock); Product §4.6; [Journeys](USER_JOURNEYS_WITH_WIREFRAMES.md) W2b, W3b, W4 | — |
 
 ### SR-2: Workspace, Session, and Conversation Lifecycle
 
@@ -162,13 +162,13 @@ graph TB
 
 #### SR-4.4: Vietnam-first Data Hub and Provenance (Phase 1 pilot — initial draft)
 
-> **Initial draft**, to be refined and finalized later. Pilot lines for Spec §5.3 "Vietnam-first Data Hub + provenance". No provider is named here; the data pipeline and its sources are owned by Backend/Data per [ADR-SYS-004](../architecture/DECISIONS/ADR-SYS-004-DATA-PIPELINE-AND-RECORDS.md). Open question on "confidence": see OI-6.
+> **Initial draft**, to be refined and finalized later. Pilot lines for the Vietnam-first Data Hub with provenance. No provider is named here; the data pipeline and its sources are owned by Backend/Data per [ADR-SYS-004](../architecture/DECISIONS/ADR-SYS-004-DATA-PIPELINE-AND-RECORDS.md). Open question on "confidence": see OI-6.
 
 | ID | Title | Statement | Pri | Primary | Contributing | References | Spec Coverage |
 |----|-------|-----------|-----|---------|-------------|------------|---------------|
-| <a id="sr-4-4-1"></a>SR-4.4.1 | Vietnam-first sourcing *(draft)* | The system SHALL treat Vietnam-listed symbols as the primary market for data used in Insights, sourced through the Backend/Data-owned data pipeline, which the Agent uses to collect data. | P0 | Backend, Data | Agent | Spec §2.6 (Knowledge Hub); [ADR-SYS-004](../architecture/DECISIONS/ADR-SYS-004-DATA-PIPELINE-AND-RECORDS.md); [overview §4.1](../architecture/SYSTEM_OVERVIEW_AND_BOUNDARIES.md#41-context-and-boundary) (providers as neighbours); [overview §4.2.1](../architecture/SYSTEM_OVERVIEW_AND_BOUNDARIES.md#421-logical-building-blocks) (Ingestion pipeline); [overview §4.2.2](../architecture/SYSTEM_OVERVIEW_AND_BOUNDARIES.md#422-responsibility-and-dependency-boundaries) (Data collection; Provider choice and licensing); [risk R4](../architecture/SYSTEM_OVERVIEW_AND_BOUNDARIES.md#48-risks) | — |
-| <a id="sr-4-4-2"></a>SR-4.4.2 | Provenance on ingress *(draft)* | When external data enters Insights, the system SHALL record its source, timestamp and confidence. | P0 | Data | Backend, Agent | Spec §3.5 (Data ingress), §4.7 (3); [overview §4.3](../architecture/SYSTEM_OVERVIEW_AND_BOUNDARIES.md#43-information-view); [overview §4.7](../architecture/SYSTEM_OVERVIEW_AND_BOUNDARIES.md#47-cross-cutting-concepts) (Evidence); [risk R3](../architecture/SYSTEM_OVERVIEW_AND_BOUNDARIES.md#48-risks) | — |
-| <a id="sr-4-4-3"></a>SR-4.4.3 | Provenance shown *(draft)* | Where external data is shown to the user, the system SHALL display its provenance. | P0 | Frontend | Backend, Data | Spec §3.5, §4.7 (3); [overview §4.7](../architecture/SYSTEM_OVERVIEW_AND_BOUNDARIES.md#47-cross-cutting-concepts) (Evidence); [overview §4.2.3](../architecture/SYSTEM_OVERVIEW_AND_BOUNDARIES.md#423-layered-boundaries) (Presentation layer) | — |
+| <a id="sr-4-4-1"></a>SR-4.4.1 | Vietnam-first sourcing *(draft)* | The system SHALL treat Vietnam-listed symbols as the primary market for data used in Insights, sourced through the Backend/Data-owned data pipeline, which the Agent uses to collect data. | P0 | Backend, Data | Agent | Product §2.6 (Knowledge Hub); [ADR-SYS-004](../architecture/DECISIONS/ADR-SYS-004-DATA-PIPELINE-AND-RECORDS.md); [overview §4.1](../architecture/SYSTEM_OVERVIEW_AND_BOUNDARIES.md#41-context-and-boundary) (providers as neighbours); [overview §4.2.1](../architecture/SYSTEM_OVERVIEW_AND_BOUNDARIES.md#421-logical-building-blocks) (Ingestion pipeline); [overview §4.2.2](../architecture/SYSTEM_OVERVIEW_AND_BOUNDARIES.md#422-responsibility-and-dependency-boundaries) (Data collection; Provider choice and licensing); [risk R4](../architecture/SYSTEM_OVERVIEW_AND_BOUNDARIES.md#48-risks) | — |
+| <a id="sr-4-4-2"></a>SR-4.4.2 | Provenance on ingress *(draft)* | When external data enters Insights, the system SHALL record its source, timestamp and confidence. | P0 | Data | Backend, Agent | Product §3.5 (Data ingress), §4.7 (3); [overview §4.3](../architecture/SYSTEM_OVERVIEW_AND_BOUNDARIES.md#43-information-view); [overview §4.7](../architecture/SYSTEM_OVERVIEW_AND_BOUNDARIES.md#47-cross-cutting-concepts) (Evidence); [risk R3](../architecture/SYSTEM_OVERVIEW_AND_BOUNDARIES.md#48-risks) | — |
+| <a id="sr-4-4-3"></a>SR-4.4.3 | Provenance shown *(draft)* | Where external data is shown to the user, the system SHALL display its provenance. | P0 | Frontend | Backend, Data | Product §3.5, §4.7 (3); [overview §4.7](../architecture/SYSTEM_OVERVIEW_AND_BOUNDARIES.md#47-cross-cutting-concepts) (Evidence); [overview §4.2.3](../architecture/SYSTEM_OVERVIEW_AND_BOUNDARIES.md#423-layered-boundaries) (Presentation layer) | — |
 
 ### SR-5: Real-Time Delivery and Streaming Behavior
 
@@ -207,12 +207,12 @@ graph TB
 
 ### SR-9: Investment Lifecycle Core
 
-> New family for Investment Core objects (Spec §4.3, §4.5). SR-9.1 is the Phase 1 pilot for Spec §5.3 "Insights foundation (evidence capture)"; later groups will host Working Thesis, Decision gate and Position.
+> New family for Investment Core objects (Product §4.3, §4.5). SR-9.1 is the Phase 1 pilot for the Insights foundation (evidence capture); later groups will host Working Thesis, Decision gate and Position.
 
 | ID | Title | Statement | Pri | Primary | Contributing | References | Spec Coverage |
 |----|-------|-----------|-----|---------|-------------|------------|---------------|
-| <a id="sr-9-1-1"></a>SR-9.1.1 | Evidence capture as Insights | The system SHALL let the user capture evidence items as Insights for a symbol, and Insights SHALL be owner-scoped. | P0 | Backend | Frontend, Data | Spec §2.6 (Insights), §4.5; [ADR-SYS-001](../architecture/DECISIONS/ADR-SYS-001-IDENTITY-AND-PER-USER-ISOLATION.md) (partly accepted). Depends on the identity slice (ADR-SYS-001, OI-4): not verifiable on `X-User-ID` header scoping alone | — |
-| <a id="sr-9-1-2"></a>SR-9.1.2 | AI-assisted attribution | When the user accepts an AI-suggested Insight, the system SHALL tag it as AI-assisted. | P0 | Backend | Agent, Frontend | Spec §3.5 (AI boundary), §4.7 (3) | — |
+| <a id="sr-9-1-1"></a>SR-9.1.1 | Evidence capture as Insights | The system SHALL let the user capture evidence items as Insights for a symbol, and Insights SHALL be owner-scoped. | P0 | Backend | Frontend, Data | Product §2.6 (Insights), §4.5; [ADR-SYS-001](../architecture/DECISIONS/ADR-SYS-001-IDENTITY-AND-PER-USER-ISOLATION.md) (partly accepted). Depends on the identity slice (ADR-SYS-001, OI-4): not verifiable on `X-User-ID` header scoping alone | — |
+| <a id="sr-9-1-2"></a>SR-9.1.2 | AI-assisted attribution | When the user accepts an AI-suggested Insight, the system SHALL tag it as AI-assisted. | P0 | Backend | Agent, Frontend | Product §3.5 (AI boundary), §4.7 (3) | — |
 
 ## 6. System Non-Functional Requirements
 
@@ -240,7 +240,7 @@ graph TB
 |----|-------|-----------|-----|---------|-------------|------------|
 | SNR-3.1.1 | Secret management | The system SHALL NOT store API keys, passwords, or credentials in source code, logs, or version control. | P0 | Operations | Backend, Agent | — |
 | SNR-3.1.2 | Environment-based secrets | The system SHALL load secrets from environment variables (local/staging) or Azure Key Vault (production). | P0 | Backend | Operations | — |
-| <a id="snr-3-2-1"></a>SNR-3.2.1 | User data isolation | The system SHALL scope workspace, session, and conversation data to the owning user identifier so that users cannot access other users' data; Investment Core objects (SR-9, Insights first) SHALL be owner-scoped. | P0 | Backend | Data | Spec §3.5 (Isolation), §4.7 (6); [ADR-SYS-001](../architecture/DECISIONS/ADR-SYS-001-IDENTITY-AND-PER-USER-ISOLATION.md) (partly accepted). Depends on the identity slice (ADR-SYS-001, OI-4): not verifiable on `X-User-ID` header scoping alone |
+| <a id="snr-3-2-1"></a>SNR-3.2.1 | User data isolation | The system SHALL scope workspace, session, and conversation data to the owning user identifier so that users cannot access other users' data; Investment Core objects (SR-9, Insights first) SHALL be owner-scoped. | P0 | Backend | Data | Product §3.5 (Isolation), §4.7 (6); [ADR-SYS-001](../architecture/DECISIONS/ADR-SYS-001-IDENTITY-AND-PER-USER-ISOLATION.md) (partly accepted). Depends on the identity slice (ADR-SYS-001, OI-4): not verifiable on `X-User-ID` header scoping alone |
 | SNR-3.3.1 | Input validation | The system SHALL validate and sanitize all user inputs at the API boundary before processing. | P0 | Backend | — | — |
 
 ### SNR-4: Data Integrity, Consistency, and Recoverability
@@ -356,3 +356,6 @@ Changes to approved requirements follow the seven-step change-control flow: trig
 | 0.2.0 | 2026-10-16 | Chief of Staff (approved by Phan) | Minor: Phase 1 pilot for Spec §5.3 first three P0 items — added SR-1.3 (Canvas), SR-4.4 (Vietnam-first Data Hub + provenance, initial draft) and new family SR-9 (Investment Lifecycle Core, SR-9.1 Insights); widened SNR-3.2.1 to owner-scope Core objects; EARS-style lines pointing to Spec/IA/Journeys/ADRs; refreshed §4.1 purpose and §3 persona wording; §7 allocation updated; traceability rows deferred; identity noted as separate slice (OI-1) |
 | 0.2.1 | 2026-10-16 | Chief of Staff (approved by Phan) | Patch/review fixes (Designer, SAA): References column added to pilot tables and SNR-3; SR-1.3.2 split, new SR-1.3.4 (chart yields at gate, named levels carry to Position); SR-1.3.1 Z1 + W2b; SR-1.3.3 scoped to Z4/draft in Z3, explicit user action, P2/Future; SR-4.4.1 owned by Backend/Data with Agent contributing; SR-4.4.2–3 references retargeted; OI-6 confidence question; SR-9.1.1 and SNR-3.2.1 depend on identity slice; SR-1.3 and SR-4.4 headings demoted to ####; §7 updated |
 | 0.2.2 | 2026-10-16 | Chief of Staff (approved by Phan) | Patch: architecture references for SR-4.4 per SAA review |
+| 0.2.3 | 2026-10-17 | Chief of Staff (approved by Phan) | Patch: pilot group notes cite roadmap IDs RM-01 to RM-03; SR-1.3 group anchor added. The SRS does not link to pitches; the pitch ranking file is the index |
+| 0.2.5 | 2026-11-05 | Requirements and Delivery Lead (approved by Product Owner) | SR-1.3.2 adds "or track". Status wording: "P0 roadmap deliverables". SR-1.3.4 ownership moves to Milestone M-006 (Product). |
+| 0.2.4 | 2026-10-19 | Requirements and Delivery Lead (approved by Product Owner) | Patch: the product doc is now called Product (Product Definition and Specification), so "Spec §" pointers read "Product §". Group notes no longer cite roadmap IDs: Product Milestones (`M-nnn`) link down to SRS IDs, and the SRS links up only to Product sections for meaning |

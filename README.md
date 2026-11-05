@@ -39,7 +39,7 @@
 ## 1. Project Vision & Core Capabilities
 
 > 📘 **Quick Navigation to Authoritative Documents**:  
-> • **Product SSOT**: [`docs/system/PRODUCT_SPECIFICATION.md`](docs/system/PRODUCT_SPECIFICATION.md) — Product model, domain contracts, and roadmap.  
+> • **Product Definition and Specification (Product)**: [`docs/system/PRODUCT_SPECIFICATION.md`](docs/system/PRODUCT_SPECIFICATION.md) — Product SSOT: product model, domain contracts, and the [product roadmap](docs/system/PRODUCT_SPECIFICATION.md#product-roadmap) of Milestones `M-001`…\
 > • **Conceptual IA Map**: [`docs/system/CONCEPTUAL_IA_MAP.md`](docs/system/CONCEPTUAL_IA_MAP.md) — Information architecture and workspace zones.  
 > • **User Journeys with Wireframes**: [`docs/system/USER_JOURNEYS_WITH_WIREFRAMES.md`](docs/system/USER_JOURNEYS_WITH_WIREFRAMES.md) — Techno-Fundamental user journey Pass→Position / Fail→Working Thesis + optional Case binder; proof frames W1–W6.  
 > • **Vision & Capabilities Charter**: [`docs/system/PRODUCT_CAPABILITIES[Reserved].md`](docs/system/PRODUCT_CAPABILITIES%5BReserved%5D.md) — Market microstructure & 360° deep-dive.  
@@ -393,16 +393,18 @@ This project follows **Spec-Driven Development (SDD)** with **Spec Kit**, ensuri
                           • speckit.checklist      • fleet.review          • verify.run            • RTM update
 ```
 
+Before stage 1, product intent is turned into delivery work through one chain: **Product** roadmap Milestone (`M-nnn`) → **pitch** (`specs/pitches/M-nnn-<slug>.md`: appetite, cost, and the FR `SR-` / NFR `SNR-` lines it delivers) → **SRS** lines → spec-kit **slice** (`specs/NNN-<slug>/spec.md`) → code, with evidence flowing back up to the SRS. In this repository "spec" means only a spec-kit `spec.md`; the product document is called Product. The rules are in [Requirements Method & Governance](docs/system/REQUIREMENTS_METHOD_AND_GOVERNANCE.md#12-why-this-method).
+
 ### 4.2 4-Directory Governance Matrix & Standards
 
 Documentation is structured across **4 authoritative directories** aligned with ISO/IEC/IEEE 42010, arc42, and C4 standards:
 
 | Directory | Standard / Authority | Purpose & Lifecycle Role | Key Artifacts |
 |---|---|---|---|
-| **`docs/system/`** | ISO 29148 / ISO 25010 | Authoritative System Requirements Specification (SRS) baseline; cross-domain functional and quality requirements. | [System SRS](docs/system/SYSTEM_REQUIREMENTS_SPECIFICATION.md)<br>[Method & Governance](docs/system/REQUIREMENTS_METHOD_AND_GOVERNANCE.md) |
+| **`docs/system/`** | ISO 29148 / ISO 25010 | Authoritative System Requirements Specification (SRS) baseline; cross-domain functional and quality requirements. | [Product](docs/system/PRODUCT_SPECIFICATION.md)<br>[System SRS](docs/system/SYSTEM_REQUIREMENTS_SPECIFICATION.md)<br>[Method & Governance](docs/system/REQUIREMENTS_METHOD_AND_GOVERNANCE.md) |
 | **`docs/architecture/`** | arc42 / C4 Model / ISO 42010 | Long-lived system architecture views, deployment topology, cross-cutting mechanisms, risks, and ADRs. | [System Overview](docs/architecture/SYSTEM_OVERVIEW_AND_BOUNDARIES.md)<br>Deployment & Infra _(planned)_<br>[Cross-Cutting Concepts](docs/architecture/SYSTEM_OVERVIEW_AND_BOUNDARIES.md#47-cross-cutting-concepts)<br>[Risks & Debt](docs/architecture/SYSTEM_OVERVIEW_AND_BOUNDARIES.md#48-risks)<br>[ADRs](docs/architecture/DECISIONS/) |
 | **`docs/domains/`** | Domain-Driven Design (DDD) | Bounded context technical designs, component internals (C4 Level 3), and subordinate domain SRS documents. | [Agent Architecture](docs/domains/agent/ARCHITECTURE_DESIGN.md)<br>[Backend Design](docs/domains/backend/TECHNICAL_DESIGN.md)<br>[Frontend Architecture](docs/domains/frontend/ARCHITECTURE.md)<br>[Data Policy](docs/domains/data/POLICY_AND_CONSTRAINTS.md) |
-| **`specs/`** | Spec Kit Feature Deltas | Delivery-scoped feature specifications, implementation plans, user-story tasks, verification reports, and RTM manifest. | [Traceability Manifest](specs/spec-traceability.yaml)<br>[Forward Sync Report](specs/spec-sync-status.md)<br>[Feature Specs](specs/) |
+| **`specs/`** | Spec Kit Feature Deltas | Pitches (one bet on a Milestone each), delivery-scoped feature specifications (slices), implementation plans, user-story tasks, verification reports, and RTM manifest. | [Pitches & Ranking](specs/pitches/README.md)<br>[Traceability Manifest](specs/spec-traceability.yaml)<br>[Forward Sync Report](specs/spec-sync-status.md)<br>[Feature Specs](specs/) |
 
 ### 4.3 Requirements-to-Delivery Traceability & Upward Promotion
 
@@ -423,7 +425,7 @@ The platform enforces a closed-loop engineering discipline connecting high-level
 
 #### Core Operational Disciplines:
 
-1. **Upstream Requirement Sourcing**: Feature specifications in `specs/<feature-id>/spec.md` draw directly from system and domain SRS requirement IDs (e.g., `SR-x`, `SNR-x`, `FR-x`, `NFR-x`), establishing explicit provenance.
+1. **Upstream Requirement Sourcing**: Feature specifications in `specs/<feature-id>/spec.md` draw directly from system and domain SRS requirement IDs (e.g., `SR-x`, `SNR-x`, `FR-x`, `NFR-x`), establishing explicit provenance. Product-roadmap work also cites its pitch, and each slice names the exact SRS lines it delivers.
 2. **Automated Traceability Manifest & Gates**: [`specs/spec-traceability.yaml`](specs/spec-traceability.yaml) tracks delivery gates (`clarified` ➔ `planned` ➔ `implemented` ➔ `verified`).
    ```powershell
    python scripts/sync_spec_status.py        # Regenerate forward/reverse sync reports
@@ -529,6 +531,8 @@ The platform's verified milestones and implemented capabilities are categorized 
 ```
 
 ### 6.2 Strategic Roadmap
+
+> The authoritative product delivery plan is the Milestone table (`M-001`…) in the [product roadmap](docs/system/PRODUCT_SPECIFICATION.md#product-roadmap). The engineering themes M3–M7 below are a longer-range technical outlook and are not Product Milestone IDs.
 
 ```
                        ┌──────────────────────────────────────────────┐
