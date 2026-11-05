@@ -1,0 +1,27 @@
+{
+  "date": "2026-11-05",
+  "eodDate": "2026-11-04",
+  "briefKind": "eod_prev+overnight+preopen",
+  "market": {
+    "vnindex": {"price": 1733.02, "change": 33.4, "changePct": 1.97, "prior": 1699.62, "source": "src-stockbiz"},
+    "hnx": {"price": 257.88, "changePct": 2.57, "source": "src-stockbiz"},
+    "hoseValueBn": 17954.95,
+    "hoseVolume": 908590883,
+    "foreignNetBn": -65.5,
+    "proprietaryNetBn": 286.8,
+    "note": "Locked multiple sources including StockBiz historical and press. Proprietary from nmquan ~287."
+  },
+  "news_events": [
+    "VN-Index +1.97% to 1733.02 after 4 down sessions",
+    "Foreign net sell narrowed to ~-65bn HoSE",
+    "Proprietary net buy ~287bn, VPB +100",
+    "US midterms: Dow +3.03%, S&P +1.58%",
+    "HSI +1.67%, Nikkei -1.42%"
+  ],
+  "sentiment": {
+    "fireant": "positive on rebound and proprietary buy",
+    "newf319": "thin",
+    "f247": "thin"
+  },
+  "gaps": ["No official SBV print update for 5/11", "Community threads thin", "Exact NDX vs Composite not locked"]
+}
