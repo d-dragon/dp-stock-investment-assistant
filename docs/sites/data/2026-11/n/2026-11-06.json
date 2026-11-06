@@ -1,0 +1,184 @@
+{
+  "schemaVersion": "1.0.0",
+  "date": "2026-11-06",
+  "generatedAt": "2026-11-06T08:35:00+07:00",
+  "briefKind": "eod_prev+overnight+preopen",
+  "items": [
+    {
+      "id": "n-2026-11-06-001",
+      "impact": "high",
+      "impactScore": 92,
+      "rank": 1,
+      "kind": "market",
+      "board": "global",
+      "title": "S&P 500 đóng 7.353,73 (-4,36%), Nasdaq -5,52% sau bán tháo AI",
+      "url": "https://portfolio-terminal.com/markets/stock-market-close",
+      "sourceId": "src-barrons",
+      "publishedAt": "2026-11-05T16:00:00-05:00",
+      "tickers": [
+        "SPX",
+        "NDX"
+      ],
+      "excerpt": "Phiên xấu nhất kể từ 4/2025, xóa sạch rally midterms.",
+      "whyImpact": "Risk-off overnight truyền sang VN pre-open."
+    },
+    {
+      "id": "n-2026-11-06-002",
+      "impact": "high",
+      "impactScore": 88,
+      "rank": 2,
+      "kind": "market",
+      "board": "vn",
+      "title": "VN-Index đóng 1.740,73 (+0,44%) ngày 5/11, VIC đóng góp 6,54 điểm",
+      "url": "http://en.stockbiz.vn/HistoricalIndices.aspx",
+      "sourceId": "src-stockbiz",
+      "publishedAt": "2026-11-05T15:00:00+07:00",
+      "tickers": [
+        "VNINDEX",
+        "VIC"
+      ],
+      "excerpt": "Tăng phiên thứ hai, thanh khoản HoSE 15.830 tỷ.",
+      "whyImpact": "Tape chính thức locked nhiều nguồn."
+    },
+    {
+      "id": "n-2026-11-06-003",
+      "impact": "high",
+      "impactScore": 80,
+      "rank": 3,
+      "kind": "market",
+      "board": "vn",
+      "title": "Ngoại bán ròng ~170,6 tỷ HoSE (StockBiz), chuỗi thứ 10",
+      "url": "http://en.stockbiz.vn/HistoricalIndices.aspx",
+      "sourceId": "src-stockbiz",
+      "publishedAt": "2026-11-05T15:10:00+07:00",
+      "tickers": [
+        "VIX",
+        "VCB"
+      ],
+      "excerpt": "Mua 2.318,78 tỷ, bán 2.489,34 tỷ. VIX mua ròng ~452 tỷ.",
+      "whyImpact": "Foreign flow vẫn áp lực."
+    },
+    {
+      "id": "n-2026-11-06-004",
+      "impact": "high",
+      "impactScore": 78,
+      "rank": 4,
+      "kind": "market",
+      "board": "vn",
+      "title": "Tự doanh mua ròng +327 tỷ (nmquan) phiên 5/11",
+      "url": "https://nmquan.vn/data/tu-doanh/lich-su",
+      "sourceId": "src-vietnambiz",
+      "publishedAt": "2026-11-05T16:00:00+07:00",
+      "tickers": [
+        "VPB",
+        "FPT"
+      ],
+      "excerpt": "VPB +105, FPT bán ròng mạnh.",
+      "whyImpact": "Proprietary hỗ trợ, nhưng sources differ."
+    },
+    {
+      "id": "n-2026-11-06-005",
+      "impact": "medium",
+      "impactScore": 70,
+      "rank": 5,
+      "kind": "market",
+      "board": "global",
+      "title": "Hang Seng đóng 24.796,98 (+3,67%), Nikkei -1,79%",
+      "url": "https://edgeconsultancykw.com/asia-market-wrap-05-november-2026/",
+      "sourceId": "src-bloomberg",
+      "publishedAt": "2026-11-05T16:00:00+07:00",
+      "tickers": [
+        "HSI",
+        "NKY"
+      ],
+      "excerpt": "Asia mixed, HK tech strong.",
+      "whyImpact": "Regional transmission mixed."
+    },
+    {
+      "id": "n-2026-11-06-006",
+      "impact": "medium",
+      "impactScore": 65,
+      "rank": 6,
+      "kind": "macro",
+      "board": "vn",
+      "title": "SBV tỷ giá trung tâm 25.623 (-4 đồng) ngày 5/11",
+      "url": "https://sbv.gov.vn/vi/tỷ-giá",
+      "sourceId": "src-nhnn",
+      "publishedAt": "2026-11-05T09:00:00+07:00",
+      "tickers": [
+        "USDVND"
+      ],
+      "excerpt": "USD thấp nhất 18 tháng tại ngân hàng.",
+      "whyImpact": "FX ổn định hỗ trợ."
+    },
+    {
+      "id": "n-2026-11-06-007",
+      "impact": "medium",
+      "impactScore": 60,
+      "rank": 7,
+      "kind": "news",
+      "board": "vn",
+      "title": "Thanh khoản HoSE giảm, volume 747 triệu cổ",
+      "url": "https://nhandan.vn/infographic-chung-khoan-ngay-511-vn-index-tang-771-diem-thanh-khoan-thi-truong-giam-post1000513.html",
+      "sourceId": "src-vietstock",
+      "publishedAt": "2026-11-05T19:58:00+07:00",
+      "tickers": [
+        "VNINDEX"
+      ],
+      "excerpt": "Giá trị 15.830 tỷ, giảm so phiên trước.",
+      "whyImpact": "Liquidity không xác nhận mạnh."
+    },
+    {
+      "id": "n-2026-11-06-008",
+      "impact": "medium",
+      "impactScore": 55,
+      "rank": 8,
+      "kind": "news",
+      "board": "global",
+      "title": "Vàng giữ trên 4.100, WTI nguồn không thống nhất",
+      "url": "https://www.babypips.com/news/daily-financial-forex-market-recap-2026-11-05",
+      "sourceId": "src-barrons",
+      "publishedAt": "2026-11-05T16:55:00+07:00",
+      "tickers": [
+        "XAU",
+        "WTI"
+      ],
+      "excerpt": "Gold ~4.096-4.125, WTI ~87-91.",
+      "whyImpact": "Commodity mixed."
+    },
+    {
+      "id": "n-2026-11-06-009",
+      "impact": "low",
+      "impactScore": 40,
+      "rank": 9,
+      "kind": "community",
+      "board": "vn",
+      "title": "FireAnt xác nhận VN-Index 1.740,73 phiên 5/11",
+      "url": "https://fireant.vn/thi-truong",
+      "sourceId": "src-fireant",
+      "publishedAt": "2026-11-06T07:43:00+07:00",
+      "tickers": [
+        "VNINDEX"
+      ],
+      "excerpt": "Cộng đồng thin trên crash US overnight.",
+      "whyImpact": "Color only."
+    },
+    {
+      "id": "n-2026-11-06-010",
+      "impact": "low",
+      "impactScore": 35,
+      "rank": 10,
+      "kind": "community",
+      "board": "vn",
+      "title": "F247 thảo luận kịch bản tháng 11 quanh 1.730-1.740",
+      "url": "https://f247.com/t/thang-11-vnindex-se-tang-tot/880668",
+      "sourceId": "src-f247",
+      "publishedAt": "2026-11-01T20:31:00+07:00",
+      "tickers": [
+        "VNINDEX"
+      ],
+      "excerpt": "Thread cũ, không phản ánh crash mới.",
+      "whyImpact": "Sentiment color."
+    }
+  ]
+}
