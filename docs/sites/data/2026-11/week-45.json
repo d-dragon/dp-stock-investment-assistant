@@ -8,7 +8,7 @@
     "start": "2026-11-02",
     "end": "2026-11-08"
   },
-  "updatedAt": "2026-11-07T08:35:00+07:00",
+  "updatedAt": "2026-11-08T08:35:00+07:00",
   "storage": "day-shards",
   "days": [
     {
@@ -51,6 +51,13 @@
       "dayPath": "2026-11/d/2026-11-07.json",
       "newsPath": "2026-11/n/2026-11-07.json",
       "analysisPath": "2026-11/a/2026-11-07.md",
+      "status": "preopen"
+    },
+    {
+      "date": "2026-11-08",
+      "dayPath": "2026-11/d/2026-11-08.json",
+      "newsPath": "2026-11/n/2026-11-08.json",
+      "analysisPath": "2026-11/a/2026-11-08.md",
       "status": "preopen"
     }
   ]
