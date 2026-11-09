@@ -1,0 +1,29 @@
+{
+  "schemaVersion": "1.0.0",
+  "date": "2026-11-09",
+  "generatedAt": "2026-11-09T08:35:00+07:00",
+  "market": {
+    "vnindex_prior_close": 1725.36,
+    "vnindex_prior_change": -15.37,
+    "vnindex_prior_change_pct": -0.88,
+    "eod_date": "2026-11-06",
+    "hose_volume_m": 984.18,
+    "hose_value_vnd_bn": 18799,
+    "foreign_net_hose_vnd_bn": 394,
+    "hnx_close": 256.73,
+    "upcom_close": 121.75
+  },
+  "news_events": [
+    "VN-Index closed 1,725.36 on 6/11 after interrupting recovery; foreign returned to net buy ~394 tỷ HoSE (StockBiz/multiple).",
+    "US Friday: SPX +0.31% to 7,376.86, Nasdaq +1.09% rebound after Thursday AI selloff; Dow -0.46%.",
+    "Asia Friday: Nikkei -5.96% to 57,434.77, HSI -1.27% to 24,481.86 amid tech rout spillover."
+  ],
+  "sentiment": {
+    "note": "Community samples (FireAnt/F247/newF319) thin on pre-open Monday; tone mixed after red close and foreign turnaround."
+  },
+  "gaps": [
+    "Proprietary desk net for 6/11 not locked from primary sources in this window.",
+    "No official HOSE close for 9/11 (pre-open).",
+    "Some commodity prints vary across outlets."
+  ]
+}
