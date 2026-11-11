@@ -1,0 +1,41 @@
+{
+  "market": {
+    "briefDate": "2026-11-11",
+    "eodDate": "2026-11-10",
+    "briefKind": "eod_prev+overnight+preopen",
+    "vnindex_prior": {
+      "date": "2026-11-10",
+      "price": 1743.07,
+      "change": 28.75,
+      "changePct": 1.68,
+      "source": "src-stockbiz"
+    },
+    "hose_volume_m": 877.0,
+    "hose_value_bn": 16901.28,
+    "foreign_net_bn": 477.3,
+    "proprietary_net_bn": 517.0,
+    "notes": "Confirmed StockBiz/Nhân Dân/CafeF/Tin nhanh: +28.75 to 1743.07. Foreign HoSE +477bn. Proprietary +517bn HOSE (VIX +272). Liquidity improved ~29%."
+  },
+  "news_events": [
+    {
+      "title": "NHNN mua ngoại tệ giao ngay từ 11/11",
+      "source": "src-nhnn",
+      "impact": "high"
+    },
+    {
+      "title": "US CPI nóng, S&P -0.38% Nasdaq -0.74% NVDA -5.5%",
+      "source": "src-bloomberg",
+      "impact": "high"
+    }
+  ],
+  "sentiment": {
+    "fireant": "positive on rebound",
+    "f247": "thin",
+    "newf319": "thin"
+  },
+  "gaps": [
+    "No official proprietary full breakdown beyond CafeF",
+    "Community threads thin",
+    "No SBV page for 11/11 yet"
+  ]
+}
