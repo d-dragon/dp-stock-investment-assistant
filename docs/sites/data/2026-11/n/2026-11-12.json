@@ -1,0 +1,175 @@
+{
+  "schemaVersion": "1.0.0",
+  "date": "2026-11-12",
+  "items": [
+    {
+      "id": "n-2026-11-12-001",
+      "impact": "high",
+      "impactScore": 92,
+      "rank": 1,
+      "kind": "market",
+      "board": "vn",
+      "title": "VN-Index đóng cửa 11/11 tại 1.746,90 điểm (+0,22%)",
+      "url": "https://stockbiz.vn/en/stocks/VNINDEX",
+      "sourceId": "src-stockbiz",
+      "publishedAt": "2026-11-11T15:00:00+07:00",
+      "tickers": [
+        "VNINDEX"
+      ],
+      "excerpt": "Hồi cuối phiên nhờ VIC, thanh khoản giảm.",
+      "whyImpact": "Print chính thức phiên trước"
+    },
+    {
+      "id": "n-2026-11-12-002",
+      "impact": "high",
+      "impactScore": 88,
+      "rank": 2,
+      "kind": "market",
+      "board": "global",
+      "title": "S&P 500 +1,31%, Nasdaq +1,60% nhờ hồi phục AI",
+      "url": "https://www.cnbc.com/2026/11/10/stock-market-today-live-updates.html",
+      "sourceId": "src-bloomberg",
+      "publishedAt": "2026-11-11T16:22:00+07:00",
+      "tickers": [
+        "SPX",
+        "NDX"
+      ],
+      "excerpt": "CoreWeave và chip dẫn dắt.",
+      "whyImpact": "Overnight risk-on truyền sang châu Á"
+    },
+    {
+      "id": "n-2026-11-12-003",
+      "impact": "high",
+      "impactScore": 85,
+      "rank": 3,
+      "kind": "market",
+      "board": "vn",
+      "title": "Khối ngoại mua ròng ~74 tỷ đồng trên HoSE",
+      "url": "http://en.stockbiz.vn/HistoricalIndices.aspx",
+      "sourceId": "src-stockbiz",
+      "publishedAt": "2026-11-11T15:30:00+07:00",
+      "tickers": [
+        "VIC",
+        "VHM"
+      ],
+      "excerpt": "Phiên thứ hai liên tiếp mua ròng.",
+      "whyImpact": "Dòng tiền ngoại"
+    },
+    {
+      "id": "n-2026-11-12-004",
+      "impact": "medium",
+      "impactScore": 78,
+      "rank": 4,
+      "kind": "market",
+      "board": "vn",
+      "title": "Tự doanh bán ròng ~570 tỷ trên HOSE",
+      "url": "https://vietnambiz.vn/tu-doanh-xa-rong-gan-500-ty-dong-hai-co-phieu-ngan-hang-20261111171840159.htm",
+      "sourceId": "src-vietnambiz",
+      "publishedAt": "2026-11-11T19:53:00+07:00",
+      "tickers": [
+        "TCB",
+        "CTG"
+      ],
+      "excerpt": "Áp lực bán tập trung ngân hàng.",
+      "whyImpact": "Dòng tiền tự doanh"
+    },
+    {
+      "id": "n-2026-11-12-005",
+      "impact": "medium",
+      "impactScore": 75,
+      "rank": 5,
+      "kind": "news",
+      "board": "global",
+      "title": "Nikkei 225 +1,31% lên 61.248 điểm",
+      "url": "https://indexes.nikkei.co.jp/",
+      "sourceId": "src-bloomberg",
+      "publishedAt": "2026-11-11T15:30:00+07:00",
+      "tickers": [
+        "NKY"
+      ],
+      "excerpt": "Cổ phiếu AI mạnh.",
+      "whyImpact": "Châu Á overnight"
+    },
+    {
+      "id": "n-2026-11-12-006",
+      "impact": "medium",
+      "impactScore": 72,
+      "rank": 6,
+      "kind": "news",
+      "board": "global",
+      "title": "Hang Seng -0,98% xuống 24.316",
+      "url": "https://www.bloomberg.com/asia",
+      "sourceId": "src-bloomberg",
+      "publishedAt": "2026-11-11T16:00:00+07:00",
+      "tickers": [
+        "HSI"
+      ],
+      "excerpt": "Áp lực từ kỳ vọng Fed.",
+      "whyImpact": "Châu Á phân hóa"
+    },
+    {
+      "id": "n-2026-11-12-007",
+      "impact": "medium",
+      "impactScore": 70,
+      "rank": 7,
+      "kind": "macro",
+      "board": "vn",
+      "title": "SBV tỷ giá trung tâm 25.611 đồng/USD",
+      "url": "https://www.sbv.gov.vn/",
+      "sourceId": "src-nhnn",
+      "publishedAt": "2026-11-11T09:00:00+07:00",
+      "tickers": [],
+      "excerpt": "Ổn định.",
+      "whyImpact": "FX"
+    },
+    {
+      "id": "n-2026-11-12-008",
+      "impact": "medium",
+      "impactScore": 68,
+      "rank": 8,
+      "kind": "news",
+      "board": "vn",
+      "title": "Thanh khoản HoSE giảm 18% xuống 13.844 tỷ",
+      "url": "https://tuoitre.vn/",
+      "sourceId": "src-cafef",
+      "publishedAt": "2026-11-11T16:00:00+07:00",
+      "tickers": [],
+      "excerpt": "Dòng tiền thận trọng.",
+      "whyImpact": "Thanh khoản"
+    },
+    {
+      "id": "n-2026-11-12-009",
+      "impact": "low",
+      "impactScore": 55,
+      "rank": 9,
+      "kind": "news",
+      "board": "vn",
+      "title": "SHB +2,29% dẫn đầu khối lượng",
+      "url": "https://cafef.vn/",
+      "sourceId": "src-cafef",
+      "publishedAt": "2026-11-11T16:30:00+07:00",
+      "tickers": [
+        "SHB"
+      ],
+      "excerpt": "Ngân hàng phân hóa.",
+      "whyImpact": "Single name"
+    },
+    {
+      "id": "n-2026-11-12-010",
+      "impact": "low",
+      "impactScore": 50,
+      "rank": 10,
+      "kind": "community",
+      "board": "vn",
+      "title": "Cộng đồng thảo luận vùng kháng cự 1.750-1.760",
+      "url": "https://fireant.vn/",
+      "sourceId": "src-fireant",
+      "publishedAt": "2026-11-11T20:00:00+07:00",
+      "tickers": [
+        "VNINDEX"
+      ],
+      "excerpt": "Thận trọng trước kháng cự.",
+      "whyImpact": "Sentiment color"
+    }
+  ]
+}

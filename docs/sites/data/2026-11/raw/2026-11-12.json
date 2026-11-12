@@ -1,0 +1,30 @@
+{
+  "schemaVersion": "1.0.0",
+  "date": "2026-11-12",
+  "market": {
+    "vnindex": {
+      "price": 1746.9,
+      "changePct": 0.22,
+      "source": "src-stockbiz"
+    },
+    "foreign_net": 74.18,
+    "proprietary_net": -570.5,
+    "liquidity_bn": 13844.23
+  },
+  "news_events": [
+    "VN-Index đóng cửa 11/11 tại 1.746,90 điểm (+0,22%)",
+    "S&P 500 +1,31%, Nasdaq +1,60% nhờ hồi phục AI",
+    "Khối ngoại mua ròng ~74 tỷ đồng trên HoSE",
+    "Tự doanh bán ròng ~570 tỷ trên HOSE",
+    "Nikkei 225 +1,31% lên 61.248 điểm",
+    "Hang Seng -0,98% xuống 24.316"
+  ],
+  "sentiment": {
+    "community": "thận trọng quanh kháng cự 1750",
+    "source": "src-fireant"
+  },
+  "gaps": [
+    "Chưa có print chính thức phiên 12/11",
+    "Proprietary exact từ nmquan"
+  ]
+}
