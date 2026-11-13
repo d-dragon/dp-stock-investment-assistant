@@ -1,0 +1,101 @@
+{
+  "schemaVersion": "1.0.0",
+  "date": "2026-11-13",
+  "market": {
+    "vnindex_prior": {
+      "date": "2026-11-12",
+      "price": 1734.75,
+      "change": -12.15,
+      "changePct": -0.7,
+      "volumeShares": 653554240,
+      "valueVndBn": 15138.35,
+      "source": "src-stockbiz"
+    },
+    "hnx_prior": {
+      "price": 256.62,
+      "changePct": 0.35,
+      "source": "src-stockbiz"
+    },
+    "foreign_hose": {
+      "buy": 1415.69,
+      "sell": 2292.17,
+      "net": -876.48,
+      "source": "src-stockbiz"
+    },
+    "proprietary_hose": {
+      "net": 305.8,
+      "source": "nmquan/VnEconomy"
+    },
+    "us": {
+      "spx": 7592.4,
+      "changePct": -0.39,
+      "dji": 52297.09,
+      "ndx": 25366.09
+    },
+    "asia": {
+      "nky": 60819.36,
+      "changePct": -1.26,
+      "hsi": 24008.55
+    },
+    "fx": {
+      "dxy": 103.17,
+      "changePct": 0.25,
+      "usdvnd_central": 25623
+    },
+    "commodities": {
+      "wti": 88.99,
+      "xau": 3877.59
+    },
+    "crypto": {
+      "btc": 71374,
+      "changePct": -3.46
+    }
+  },
+  "news_events": [
+    {
+      "title": "VN-Index giảm 12,15 điểm phiên 12/11 xuống 1.734,75",
+      "url": "https://stockbiz.vn/en/stocks/VNINDEX",
+      "sourceId": "src-stockbiz"
+    },
+    {
+      "title": "Khối ngoại bán ròng ~876 tỷ trên HoSE",
+      "url": "http://en.stockbiz.vn/HistoricalIndices.aspx",
+      "sourceId": "src-stockbiz"
+    },
+    {
+      "title": "Tự doanh mua ròng ~306-325 tỷ trên HoSE",
+      "url": "https://nmquan.vn/data/tu-doanh/lich-su",
+      "sourceId": "src-vneconomy"
+    },
+    {
+      "title": "S&P 500 đóng cửa -0,35% phiên 12/11",
+      "url": "https://portfolio-terminal.com/markets/stock-market-close",
+      "sourceId": "src-bloomberg"
+    },
+    {
+      "title": "Nikkei -0,70% xuống 60.819",
+      "url": "https://en.kabutan.com/jp/news/n202611120909",
+      "sourceId": "src-bloomberg"
+    },
+    {
+      "title": "Hang Seng -1,26% xuống 24.008",
+      "url": "https://www.ad-hoc-news.de/boerse/news/marktberichte/hang-seng-closes-1-26-lower-at-24-008-55-as-tech-stocks-retreat/70501107",
+      "sourceId": "src-bloomberg"
+    },
+    {
+      "title": "SBV tỷ giá trung tâm 25.623 VND/USD ngày 12/11",
+      "url": "https://sbv.gov.vn/vi/tỷ-giá",
+      "sourceId": "src-nhnn"
+    }
+  ],
+  "sentiment": {
+    "note": "Community thin; FireAnt/newF319 limited public color pre-open.",
+    "sources": [
+      "src-fireant",
+      "src-newf319"
+    ]
+  },
+  "gaps": [
+    "No official proprietary print locked single source; nmquan +305.8 vs VnEconomy +324.8. Retail net unknown. No SBV page yet for 13/11. Community samples thin."
+  ]
+}

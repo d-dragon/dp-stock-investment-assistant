@@ -1,0 +1,168 @@
+{
+  "schemaVersion": "1.0.0",
+  "date": "2026-11-13",
+  "generatedAt": "2026-11-13T08:35:00+07:00",
+  "briefKind": "eod_prev+overnight+preopen",
+  "items": [
+    {
+      "id": "n-2026-11-13-001",
+      "impact": "high",
+      "impactScore": 92,
+      "rank": 1,
+      "kind": "market",
+      "board": "vn",
+      "title": "VN-Index đóng cửa 12/11 tại 1.734,75 (-0,70%)",
+      "url": "https://stockbiz.vn/en/stocks/VNINDEX",
+      "sourceId": "src-stockbiz",
+      "publishedAt": "2026-11-12T15:00:00+07:00",
+      "tickers": [
+        "VNINDEX"
+      ],
+      "excerpt": "Giảm 12,15 điểm, thanh khoản 653,55 triệu cp / 15.138 tỷ.",
+      "whyImpact": "Prior close chính thức khóa nhiều nguồn."
+    },
+    {
+      "id": "n-2026-11-13-002",
+      "impact": "high",
+      "impactScore": 88,
+      "rank": 2,
+      "kind": "market",
+      "board": "vn",
+      "title": "Khối ngoại bán ròng ~876 tỷ trên HoSE phiên 12/11",
+      "url": "http://en.stockbiz.vn/HistoricalIndices.aspx",
+      "sourceId": "src-stockbiz",
+      "publishedAt": "2026-11-12T15:30:00+07:00",
+      "tickers": [
+        "FPT",
+        "KDH"
+      ],
+      "excerpt": "Mua 1.415,69 tỷ, bán 2.292,17 tỷ. FPT bán ròng ~450 tỷ.",
+      "whyImpact": "Đảo chiều sau 2 phiên mua ròng."
+    },
+    {
+      "id": "n-2026-11-13-003",
+      "impact": "high",
+      "impactScore": 85,
+      "rank": 3,
+      "kind": "market",
+      "board": "vn",
+      "title": "Tự doanh mua ròng ~306-325 tỷ trên HoSE",
+      "url": "https://vneconomy.vn/khoi-ngoai-tiep-tuc-ban-rong-hon-800-ty-dong.htm",
+      "sourceId": "src-vneconomy",
+      "publishedAt": "2026-11-12T22:30:00+07:00",
+      "tickers": [
+        "GMD",
+        "REE"
+      ],
+      "excerpt": "nmquan +305,8; VnEconomy +324,8. Tập trung GMD, REE, NLG.",
+      "whyImpact": "Dòng tiền nội hấp thụ một phần bán ngoại."
+    },
+    {
+      "id": "n-2026-11-13-004",
+      "impact": "high",
+      "impactScore": 80,
+      "rank": 4,
+      "kind": "market",
+      "board": "global",
+      "title": "S&P 500 đóng cửa -0,35% phiên 12/11 tại 7.592,40",
+      "url": "https://portfolio-terminal.com/markets/stock-market-close",
+      "sourceId": "src-bloomberg",
+      "publishedAt": "2026-11-12T23:00:00+07:00",
+      "tickers": [],
+      "excerpt": "Dow -0,36%, Nasdaq -0,39%. Nvidia CEO resignation gây biến động.",
+      "whyImpact": "Overnight Mỹ đỏ nhẹ sau phiên xanh trước."
+    },
+    {
+      "id": "n-2026-11-13-005",
+      "impact": "medium",
+      "impactScore": 72,
+      "rank": 5,
+      "kind": "market",
+      "board": "global",
+      "title": "Nikkei 225 đóng cửa -0,70% tại 60.819",
+      "url": "https://en.kabutan.com/jp/news/n202611120909",
+      "sourceId": "src-bloomberg",
+      "publishedAt": "2026-11-12T15:30:00+07:00",
+      "tickers": [],
+      "excerpt": "Giảm lần đầu sau 4 phiên.",
+      "whyImpact": "Asia overnight yếu."
+    },
+    {
+      "id": "n-2026-11-13-006",
+      "impact": "medium",
+      "impactScore": 70,
+      "rank": 6,
+      "kind": "market",
+      "board": "global",
+      "title": "Hang Seng đóng cửa -1,26% tại 24.008",
+      "url": "https://www.ad-hoc-news.de/boerse/news/marktberichte/hang-seng-closes-1-26-lower-at-24-008-55-as-tech-stocks-retreat/70501107",
+      "sourceId": "src-bloomberg",
+      "publishedAt": "2026-11-12T16:00:00+07:00",
+      "tickers": [],
+      "excerpt": "Tech dẫn dắt giảm.",
+      "whyImpact": "Áp lực khu vực châu Á."
+    },
+    {
+      "id": "n-2026-11-13-007",
+      "impact": "medium",
+      "impactScore": 65,
+      "rank": 7,
+      "kind": "macro",
+      "board": "vn",
+      "title": "SBV công bố tỷ giá trung tâm 25.623 VND/USD ngày 12/11",
+      "url": "https://sbv.gov.vn/vi/tỷ-giá",
+      "sourceId": "src-nhnn",
+      "publishedAt": "2026-11-12T09:00:00+07:00",
+      "tickers": [],
+      "excerpt": "Tăng so với phiên trước.",
+      "whyImpact": "FX ổn định nhưng theo dõi."
+    },
+    {
+      "id": "n-2026-11-13-008",
+      "impact": "medium",
+      "impactScore": 60,
+      "rank": 8,
+      "kind": "market",
+      "board": "global",
+      "title": "DXY đóng cửa 103,17 (+0,25%)",
+      "url": "https://portfolio-terminal.com/markets/us-dollar-index",
+      "sourceId": "src-barrons",
+      "publishedAt": "2026-11-12T23:00:00+07:00",
+      "tickers": [],
+      "excerpt": "Cao nhất gần đây.",
+      "whyImpact": "USD mạnh hỗ trợ áp lực lên EM."
+    },
+    {
+      "id": "n-2026-11-13-009",
+      "impact": "low",
+      "impactScore": 45,
+      "rank": 9,
+      "kind": "community",
+      "board": "vn",
+      "title": "Community FireAnt/newF319 thin pre-open 13/11",
+      "url": "https://fireant.vn/",
+      "sourceId": "src-fireant",
+      "publishedAt": "2026-11-13T08:00:00+07:00",
+      "tickers": [],
+      "excerpt": "Ít thread nổi bật về phiên 12/11.",
+      "whyImpact": "Sentiment color only."
+    },
+    {
+      "id": "n-2026-11-13-010",
+      "impact": "low",
+      "impactScore": 40,
+      "rank": 10,
+      "kind": "news",
+      "board": "vn",
+      "title": "HNX-Index tăng 0,35% lên 256,62",
+      "url": "https://stockbiz.vn/en/stocks/HNXINDEX",
+      "sourceId": "src-stockbiz",
+      "publishedAt": "2026-11-12T15:00:00+07:00",
+      "tickers": [
+        "HNX"
+      ],
+      "excerpt": "Phân hóa so với VN-Index.",
+      "whyImpact": "Breadth mixed."
+    }
+  ]
+}
