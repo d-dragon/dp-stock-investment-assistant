@@ -8,8 +8,8 @@
 | Document Type | Master System SRS |
 | Standards Stance | Aligned to ISO/IEC/IEEE 29148 |
 | Governance | Subject to the SRS versioning and change-control mechanism defined in [documentation methodology](../study-hub/project-documentation-and-specification-methodology.md) Section 10.3 |
-| Date | 2026-11-05 |
-| Status | Draft 0.2.5 — requirement families seeded; SR-1.3, SR-4.4 and SR-9.1 added by the Phase 1 pilot (first three P0 roadmap deliverables of the Product roadmap); other entries populated incrementally through SDD delivery |
+| Date | 2026-11-13 |
+| Status | Draft 0.3.3 — requirement families seeded; SR-1.3.5 docked chart proof of concept for M-001; SR-1.3, SR-4.4 and SR-9.1 Phase 1 pilot retained; M-000 Platform foundation adds draft SR-10 (auth/session from OI-1), SR-1.4 (modular shell; SR-1.4.2 `sessionRef` clarified), SNR-6.1.4 (FE testability from OI-3); SR-5.2.1 and SR-5.2.2 Superseded by SSE-only transport; SNR-8.1.2 already amended to HTTPS+SSE; SNR-7.1.1 viewport 768–1920 px (1920 px primary; below 768 px Future); launch UI `vi-VN` with Vietnamese price-board price display (dot decimal; comma thousands for volume and ₫ totals; dates standard vi-VN); OpenAPI path `docs/openapi.yaml`; other entries populated incrementally through SDD delivery |
 | Audience | Engineering, architecture, product, and technical documentation maintainers |
 
 ## 2. Purpose, Scope, and Intended Use
@@ -37,7 +37,7 @@ The SRS covers the full system boundary:
 
 ### 2.4 What This Document Does Not Own
 
-- **Detailed API schemas** — owned by the executable contract (`docs/domains/backend/api/openapi.yaml`)
+- **Detailed API schemas** — owned by the executable contract (`docs/openapi.yaml`)
 - **Implementation algorithms** — owned by domain technical design documents
 - **Feature delivery detail** — owned by SDD feature specs under `specs/`
 - **Architecture decisions** — owned by ADRs under `docs/architecture/DECISIONS/` and `docs/domains/*/DECISIONS/`
@@ -51,7 +51,7 @@ The SRS covers the full system boundary:
 | [Requirements Method and Governance](REQUIREMENTS_METHOD_AND_GOVERNANCE.md) | Defines authoring standards, change-control processes, and approval paths for this SRS |
 | [Project Constitution](../../.specify/memory/constitution.md) | Non-negotiable governance layer; all requirements must be consistent with constitution principles and golden rules |
 | [Agent Domain SRS](../domains/agent/SOFTWARE_REQUIREMENTS_SPECIFICATION.md) | Subordinate domain SRS for agent-specific requirements |
-| [OpenAPI Specification](../domains/backend/api/openapi.yaml) | Executable API contract; prevails for schema shape when prose and contract disagree |
+| [OpenAPI Specification](../openapi.yaml) | Executable API contract; prevails for schema shape when prose and contract disagree |
 | [Spec Traceability Registry](../../specs/spec-traceability.yaml) | Machine-readable traceability from requirement IDs to feature specs and delivery status |
 | [Architecture Review](../architecture-review.md) | Cross-domain architecture assessment providing system-wide technical context |
 
@@ -81,7 +81,7 @@ graph TB
     end
 
     User["User"] --> FE
-    FE -->|"REST / SSE / WebSocket"| BE
+    FE -->|"REST / SSE"| BE
     BE -->|"Agent invocation"| AG
     AG -->|"Tool calls"| BE
     BE -->|"Persistence / Cache"| DA
@@ -95,10 +95,10 @@ graph TB
 
 | Interface | Type | Owner |
 |-----------|------|-------|
-| User browser | HTTP / WebSocket | Frontend domain |
+| User browser | HTTP / SSE | Frontend domain |
 | REST API | HTTP (JSON) | Backend domain |
 | SSE streaming | HTTP (text/event-stream) | Backend domain |
-| WebSocket (Socket.IO) | WebSocket | Backend domain |
+| WebSocket (Socket.IO) *(current-state legacy; being removed)* | WebSocket | Backend domain |
 | LLM provider APIs | HTTP | Agent domain (via model factory) |
 | Financial data APIs | HTTP | Agent domain (via tools) |
 | MongoDB | TCP | Data domain |
@@ -129,6 +129,17 @@ graph TB
 | <a id="sr-1-3-2"></a>SR-1.3.2 | Context preserved on switching | When the user switches symbol, work object or track, the system SHALL preserve the context of the open work. | P0 | Frontend | Backend | [IA map](CONCEPTUAL_IA_MAP.md) §2; Product §2.6 | — |
 | <a id="sr-1-3-3"></a>SR-1.3.3 | Generated UI stays in its place and never writes Core *(Future)* | Where the AI generates UI, the Agent SHALL only propose it and the Frontend SHALL render it only in Z4 or as a draft in Z3; generated UI SHALL NOT write to Core objects, and its content SHALL become a Core object only through explicit user action. | P2 (Future, not Phase 1) | Frontend | Agent | [IA map](CONCEPTUAL_IA_MAP.md) §2.4, §2.5; [overview §4.2.2](../architecture/SYSTEM_OVERVIEW_AND_BOUNDARIES.md#422-responsibility-and-dependency-boundaries); Product §3.5 (AI boundary) | — |
 | <a id="sr-1-3-4"></a>SR-1.3.4 | Chart yields at the Decision gate (Sandbox only) | While the Decision gate is open in the Research Sandbox, the system SHALL let the price chart yield to the gate checklist, and on Pass the named levels SHALL carry over to the Position; this SHALL NOT apply on the Execution Portfolio. | P0 | Frontend | Backend | [IA map](CONCEPTUAL_IA_MAP.md) §2.4 (Sandbox chart lock); Product §4.6; [Journeys](USER_JOURNEYS_WITH_WIREFRAMES.md) W2b, W3b, W4 | — |
+| <a id="sr-1-3-5"></a>SR-1.3.5 | Docked price chart (proof of concept) | In the Research Sandbox canvas (Z3), the system SHALL show a docked price chart for the active symbol with a candlestick or line series plus volume and a selectable time range, and SHALL mark the reference, ceiling and floor prices as supplied by the Backend; the Frontend SHALL NOT compute price bands. The chart SHALL carry the chart library's required attribution. Richer charting and the chart yielding at the Decision gate stay with SR-1.3.4 (M-006). | P0 | Frontend | Backend | [IA map](CONCEPTUAL_IA_MAP.md) 2.4 (Sandbox chart lock); Product 4.6; [ADR-FRONTEND-004](../domains/frontend/DECISIONS/ADR-FRONTEND-004-CHART-ENGINE-ADAPTER.md) | - |
+
+
+#### <a id="sr-1-4"></a>SR-1.4: Modular presentation shell (Platform foundation — draft)
+
+> Draft enablement lines for the FE foundation under Product Milestone M-000. Zone geometry stays owned by the [IA map](CONCEPTUAL_IA_MAP.md) and [Journeys](USER_JOURNEYS_WITH_WIREFRAMES.md). Canvas behaviors remain on SR-1.3.x (M-001). GenUI (SR-1.3.3), chart-yield (SR-1.3.4 / M-006), and saved layouts (M-009) are out of M-000.
+
+| ID | Title | Statement | Pri | Primary | Contributing | References | Spec Coverage |
+|----|-------|-----------|-----|---------|-------------|------------|---------------|
+| <a id="sr-1-4-1"></a>SR-1.4.1 | Modular zone shell | The system SHALL present the workspace through a modular shell that hosts the four zones Z1–Z4 as distinct composition slots so later Canvas features can mount without rewriting the shell. | P0 | Frontend | — | [IA map](CONCEPTUAL_IA_MAP.md) §2.1; Product §5.3 M-000; [ADR-FRONTEND-001](../domains/frontend/DECISIONS/ADR-FRONTEND-001-MODULAR-APPLICATION.md) (Accept pending) | — |
+| <a id="sr-1-4-2"></a>SR-1.4.2 | In-session workspace context | The system SHALL maintain an in-session workspace context (active track, focused symbol, open Core-object reference, and Z4 Backend-session reference (`sessionRef`: the Backend session id plus conversation id, per the API hierarchy workspace > session > conversation in [`docs/openapi.yaml`](../openapi.yaml))) so shell surfaces share one context without copying Backend session state into a second source of truth. | P0 | Frontend | Backend | [IA map](CONCEPTUAL_IA_MAP.md) §2; Product §5.3 M-000; [ADR-FRONTEND-002](../domains/frontend/DECISIONS/ADR-FRONTEND-002-MODERNIZE-FRONTEND-FOUNDATION.md) (Amend pending). Context across reload, device or account depends on SR-10 / [ADR-SYS-001](../architecture/DECISIONS/ADR-SYS-001-IDENTITY-AND-PER-USER-ISOLATION.md) | — |
 
 ### SR-2: Workspace, Session, and Conversation Lifecycle
 
@@ -175,9 +186,12 @@ graph TB
 | ID | Title | Statement | Pri | Primary | Contributing | Spec Coverage |
 |----|-------|-----------|-----|---------|-------------|---------------|
 | SR-5.1.1 | Streaming response delivery | The system SHALL deliver assistant responses incrementally to the user interface for streaming-capable chat requests. | P0 | Backend | Frontend, Agent | — |
-| SR-5.1.2 | SSE streaming protocol | The system SHALL use Server-Sent Events (SSE) with `text/event-stream` content type for HTTP-based streaming delivery. | P0 | Backend | Frontend | — |
-| SR-5.2.1 | WebSocket real-time events | The system SHALL support real-time bidirectional communication via Socket.IO for chat interactions that require server-initiated updates. | P1 | Backend | Frontend | — |
-| SR-5.2.2 | WebSocket reconnection | The system SHALL handle client reconnection gracefully when WebSocket connections are interrupted. | P1 | Frontend | Backend | — |
+| <a id="sr-5-1-2"></a>SR-5.1.2 | SSE streaming protocol | The system SHALL use Server-Sent Events (SSE) with `text/event-stream` content type for HTTP-based streaming delivery. | P0 | Backend | Frontend | — |
+| <a id="sr-5-2-1"></a>SR-5.2.1 | WebSocket real-time events *(Superseded)* | **Superseded** by SSE-only transport ([SR-5.1.2](#sr-5-1-2), [SNR-8.1.2](#snr-8-1-2), and [ADR-FRONTEND-002](../domains/frontend/DECISIONS/ADR-FRONTEND-002-MODERNIZE-FRONTEND-FOUNDATION.md) Socket.IO retirement). Original statement (retained as history): The system SHALL support real-time bidirectional communication via Socket.IO for chat interactions that require server-initiated updates. | P1 *(Superseded)* | Backend | Frontend | — |
+| <a id="sr-5-2-2"></a>SR-5.2.2 | WebSocket reconnection *(Superseded)* | **Superseded** by SSE-only transport ([SR-5.1.2](#sr-5-1-2), [SNR-8.1.2](#snr-8-1-2), and [ADR-FRONTEND-002](../domains/frontend/DECISIONS/ADR-FRONTEND-002-MODERNIZE-FRONTEND-FOUNDATION.md) Socket.IO retirement). Original statement (retained as history): The system SHALL handle client reconnection gracefully when WebSocket connections are interrupted. | P1 *(Superseded)* | Frontend | Backend | — |
+
+
+> **M-000 transport note:** Client transport is HTTPS + SSE only ([SR-5.1.2](#sr-5-1-2); Product M-000 / [ADR-FRONTEND-002](../domains/frontend/DECISIONS/ADR-FRONTEND-002-MODERNIZE-FRONTEND-FOUNDATION.md): Socket.IO retired). **SR-5.2.1** and **SR-5.2.2** are Superseded by that SSE-only transport, [SNR-8.1.2](#snr-8-1-2) and ADR-FRONTEND-002. **SNR-8.1.2** has already been amended from WebSocket/Socket.IO wording to HTTPS+SSE streaming event contracts. Typed stream events are a follow-up Backend contract (see §8.1).
 
 ### SR-6: Model and Provider Selection with Fallback
 
@@ -213,6 +227,17 @@ graph TB
 |----|-------|-----------|-----|---------|-------------|------------|---------------|
 | <a id="sr-9-1-1"></a>SR-9.1.1 | Evidence capture as Insights | The system SHALL let the user capture evidence items as Insights for a symbol, and Insights SHALL be owner-scoped. | P0 | Backend | Frontend, Data | Product §2.6 (Insights), §4.5; [ADR-SYS-001](../architecture/DECISIONS/ADR-SYS-001-IDENTITY-AND-PER-USER-ISOLATION.md) (partly accepted). Depends on the identity slice (ADR-SYS-001, OI-4): not verifiable on `X-User-ID` header scoping alone | — |
 | <a id="sr-9-1-2"></a>SR-9.1.2 | AI-assisted attribution | When the user accepts an AI-suggested Insight, the system SHALL tag it as AI-assisted. | P0 | Backend | Agent, Frontend | Product §3.5 (AI boundary), §4.7 (3) | — |
+
+
+### SR-10: Authentication, Authorization, and Session Identity
+
+> Promoted from [OI-1](#oi-1). Draft family for Product Milestone M-000 Pitch A (identity-and-session). Completes the identity slice with [ADR-SYS-001](../architecture/DECISIONS/ADR-SYS-001-IDENTITY-AND-PER-USER-ISOLATION.md) (token storage and role mapping still open on that ADR). Owner isolation for Core objects continues to cite [SNR-3.2.1](#snr-3-2-1); full multi-tenant enforcement remains [OI-4](#oi-4).
+
+| ID | Title | Statement | Pri | Primary | Contributing | References | Spec Coverage |
+|----|-------|-----------|-----|---------|-------------|------------|---------------|
+| <a id="sr-10-1-1"></a>SR-10.1.1 | User authentication | The system SHALL authenticate the user before granting access to owner-scoped workspace, session, conversation, and Investment Core data. | P0 | Backend | Frontend | Product §3.5 (Isolation); [ADR-SYS-001](../architecture/DECISIONS/ADR-SYS-001-IDENTITY-AND-PER-USER-ISOLATION.md) (partly accepted → complete under M-000) | — |
+| <a id="sr-10-1-2"></a>SR-10.1.2 | Sign-in and sign-out | The system SHALL provide sign-in and sign-out flows, and SHALL end the authenticated session on sign-out so subsequent requests are unauthenticated. | P0 | Frontend | Backend | [ADR-SYS-001](../architecture/DECISIONS/ADR-SYS-001-IDENTITY-AND-PER-USER-ISOLATION.md); Product §5.3 M-000 | — |
+| <a id="sr-10-1-3"></a>SR-10.1.3 | Expired or rejected session | When an authenticated session expires or is rejected, the system SHALL require re-authentication and SHALL NOT expose another user's data; where feasible, unsent client input for the same user MAY be preserved across the re-auth step. | P0 | Frontend | Backend | [ADR-SYS-001](../architecture/DECISIONS/ADR-SYS-001-IDENTITY-AND-PER-USER-ISOLATION.md) | — |
 
 ## 6. System Non-Functional Requirements
 
@@ -265,21 +290,24 @@ graph TB
 | SNR-6.1.1 | Layered architecture | The system SHALL maintain separation between route, service, and repository layers so that each can be tested and evolved independently. | P0 | Backend | — |
 | SNR-6.1.2 | Dependency injection | The system SHALL use factory-based dependency injection for services and repositories to enable isolated unit testing without live infrastructure. | P0 | Backend | Agent |
 | SNR-6.1.3 | Test coverage baseline | The system SHALL maintain a minimum meaningful test coverage of 56% as measured by pytest with coverage reporting. | P1 | Backend | Agent |
+| <a id="snr-6-1-4"></a>SNR-6.1.4 | Frontend testability baseline | The Frontend SHALL maintain automated unit/component tests for the presentation shell and critical client seams (workspace context store, streaming client) so regressions are caught without manual-only verification. *(Promoted from OI-3; coverage target TBD when the Vitest baseline lands under M-000 Pitch B.)* | P1 | Frontend | — |
 | SNR-6.2.1 | Configuration layering | The system SHALL support hierarchical configuration loading (base YAML → environment overlay → environment variables → cloud secrets) to accommodate local, staging, and production environments without code changes. | P1 | Backend | Operations |
 
 ### SNR-7: Usability, Accessibility, and Responsive Behavior
 
 | ID | Title | Statement | Pri | Primary | Contributing |
 |----|-------|-----------|-----|---------|-------------|
-| SNR-7.1.1 | Responsive layout | The system SHALL render correctly on viewport widths from 320px (mobile) to 1920px (desktop). | P2 | Frontend | — |
+| SNR-7.1.1 | Responsive layout *(amended)* | The system SHALL render correctly on viewport widths from 768 px to 1920 px, with 1920 px as the primary design and test width. Widths below 768 px (phones) are Future. | P2 | Frontend | — |
 | SNR-7.2.1 | Accessibility baseline | The system SHALL target WCAG 2.2 AA compliance for all user-facing UI components. | P2 | Frontend | — |
+
+> **Launch UI language and number format (Product Owner decision, 2026-11-13):** The launch UI is `vi-VN`. Prices use Vietnamese price-board style: thousands of VND with a dot decimal (for example, `25.30` = 25,300 VND). Percent change uses the same dot (`+6.98%`). Volume is a whole number of shares with comma grouping (`1,234,500`). ₫ totals also use comma grouping (`25,300,000 ₫`). Across all numbers, the dot is only ever a decimal and the comma only ever groups thousands. Dates stay standard `vi-VN`.
 
 ### SNR-8: Compatibility, Versioning, and Change Safety
 
 | ID | Title | Statement | Pri | Primary | Contributing |
 |----|-------|-----------|-----|---------|-------------|
 | SNR-8.1.1 | API backward compatibility | The system SHALL not introduce breaking changes to published API endpoints without a versioned migration path (e.g., `/api/v1/` → `/api/v2/`). | P1 | Backend | Frontend |
-| SNR-8.1.2 | WebSocket event compatibility | The system SHALL centralize WebSocket event names in shared configuration so frontend and backend remain aligned. | P1 | Backend | Frontend |
+| <a id="snr-8-1-2"></a>SNR-8.1.2 | Client streaming event compatibility *(amended draft)* | The system SHALL centralize HTTPS+SSE streaming event names and contracts in shared configuration so frontend and backend remain aligned. *(Amends prior WebSocket/Socket.IO wording to match M-000 / ADR-FRONTEND-002 carve-out; SR-5.2.1 / SR-5.2.2 are Superseded.)* | P1 | Backend | Frontend |
 | SNR-8.2.1 | Container platform support | The system SHALL run on Docker (local) and Kubernetes/AKS (production) with Helm-managed deployments. | P1 | Operations | Backend |
 
 ## 7. Requirement Allocation by Domain
@@ -288,8 +316,8 @@ The table below summarizes requirement family ownership. Each requirement entry 
 
 | Domain | Primary Ownership (Families) | Key Contributing Roles |
 |--------|------------------------------|----------------------|
-| **Frontend** | SR-1 (User Interaction, incl. SR-1.3.1, SR-1.3.2, SR-1.3.4 Canvas — P0; SR-1.3.3 generated UI — P2/Future), SR-4.4.3 (P0, draft), SNR-7 (Usability/Accessibility) | SR-2 (Workspace UI), SR-5 (Streaming display), SNR-8 (Compatibility) |
-| **Backend** | SR-2 (Lifecycle), SR-9 (Investment Lifecycle Core; SR-9.1 P0), SR-4.4.1 (P0, draft, shared with Data), SR-5 (Streaming delivery), SR-6 (Model selection), SR-7 (Admin), SR-8 (Contracts), SNR-1 (Performance), SNR-3 (Security), SNR-5 (Observability), SNR-6 (Maintainability) | Most requirement families — backend mediates cross-domain coordination |
+| **Frontend** | SR-1 (User Interaction, incl. SR-1.4 modular shell draft — P0 M-000; SR-1.3.1, SR-1.3.2, SR-1.3.4, SR-1.3.5 Canvas — P0; SR-1.3.3 generated UI — P2/Future), SR-4.4.3 (P0, draft), SR-10.1.2–10.1.3 (sign-in UX, draft), SNR-6.1.4 (FE testability, draft), SNR-7 (Usability/Accessibility) | SR-2 (Workspace UI), SR-5 (Streaming display), SNR-8 (Compatibility) |
+| **Backend** | SR-2 (Lifecycle), SR-9 (Investment Lifecycle Core; SR-9.1 P0), SR-10 (Authentication; SR-10.1.1 P0 draft), SR-4.4.1 (P0, draft, shared with Data), SR-5 (Streaming delivery), SR-6 (Model selection), SR-7 (Admin), SR-8 (Contracts), SNR-1 (Performance), SNR-3 (Security), SNR-5 (Observability), SNR-6 (Maintainability) | Most requirement families — backend mediates cross-domain coordination |
 | **Agent** | SR-3 (AI Response), SR-4 (Data Acquisition), SR-6.1.2 (Fallback) | SR-5 (Streaming composition), SNR-2 (LLM resilience), SR-4.4.1 (collects data through the pipeline), SR-1.3.3 (proposes generated UI) |
 | **Data** | SNR-4 (Data Integrity), SR-4.4.1 (pipeline and sources, P0 draft, shared with Backend), SR-4.4.2 (Provenance, P0 draft), SNR-1.2.1 (Caching) | SR-2 (Lifecycle persistence), SNR-2.2.1 (Cache resilience) |
 | **Operations** | SR-7.3 (Operational Tooling), SNR-3.1 (Secret Management), SNR-8.2 (Container Platform) | SNR-5 (Observability), SNR-4.2.1 (Migration Safety) |
@@ -300,8 +328,8 @@ The table below summarizes requirement family ownership. Each requirement entry 
 
 | Contract | Location | Owner | Standard |
 |----------|----------|-------|----------|
-| OpenAPI Specification | `docs/domains/backend/api/openapi.yaml` | Backend domain | Conformant to OpenAPI 3.1 |
-| WebSocket Event Names | `frontend/src/config.ts` (API_CONFIG.WEBSOCKET.EVENTS) | Backend domain (definition), Frontend domain (consumption) | Practice-Based |
+| OpenAPI Specification | `docs/openapi.yaml` | Backend domain | Conformant to OpenAPI 3.1 |
+| SSE stream contract | `docs/openapi.yaml` (`POST /api/chat`, `text/event-stream`) | Backend domain (definition), Frontend domain (consumption) | OpenAPI 3.1; typed stream events are a follow-up Backend contract |
 
 ### 8.2 Subordinate Requirement Sets
 
@@ -319,7 +347,7 @@ The table below summarizes requirement family ownership. Each requirement entry 
 - Feature specs reference requirement IDs to establish delivery coverage.
 - The traceability registry tracks status gates: `analyzed → planned → implemented → verified`.
 - `scripts/sync_spec_status.py` generates forward and reverse traceability reports.
-- **Deferred:** registry rows for the pilot IDs (SR-1.3.x, SR-4.4.x, SR-9.1.x, widened SNR-3.2.1) are not yet in `specs/spec-traceability.yaml`; they are added when a slice first references them. Trace scope rules live in [Requirements Method and Governance](REQUIREMENTS_METHOD_AND_GOVERNANCE.md).
+- **Deferred:** registry rows for the pilot IDs (SR-1.3.x, SR-4.4.x, SR-9.1.x, widened SNR-3.2.1) and the new M-000 draft IDs (SR-10.1.x, SR-1.4.x, SNR-6.1.4) are not yet in `specs/spec-traceability.yaml`; they are added when a slice first references them. **Do not edit** `specs/spec-traceability.yaml` in this draft. Trace scope rules live in [Requirements Method and Governance](REQUIREMENTS_METHOD_AND_GOVERNANCE.md).
 
 ### 9.2 Verification Approach
 
@@ -341,12 +369,14 @@ Changes to approved requirements follow the seven-step change-control flow: trig
 
 | ID | Topic | Status | Notes |
 |----|-------|--------|-------|
-| OI-1 | Authentication and authorization | Deferred | No auth mechanism is currently implemented; SR-x entries for auth will be added when the auth strategy is decided. Identity is delivered as a separate thin slice and is out of scope of the Phase 1 SRS pilot (SR-1.3, SR-4.4, SR-9.1); see [ADR-SYS-001](../architecture/DECISIONS/ADR-SYS-001-IDENTITY-AND-PER-USER-ISOLATION.md) (partly accepted) |
+| <a id="oi-1"></a>OI-1 | Authentication and authorization | In progress (promoted) | Draft **SR-10.1.x** added under Product M-000 Pitch A; completion depends on finishing [ADR-SYS-001](../architecture/DECISIONS/ADR-SYS-001-IDENTITY-AND-PER-USER-ISOLATION.md) (token storage, role mapping still open). Phase 1 Canvas pilot (SR-1.3) stays separate. OI-4 remains dependent on this family. |
 | OI-2 | Rate limiting | Deferred | No rate limiting on API or external provider calls; SNR entry to be added when approach is defined |
-| OI-3 | Frontend testing coverage | Deferred | Frontend currently has zero automated tests; SNR entry for frontend test coverage to be added when the frontend modernization delivers a testable architecture |
-| OI-4 | Multi-tenant isolation enforcement | Deferred | User isolation is scoped by `X-User-ID` header without authentication; full tenant isolation depends on OI-1 |
+| <a id="oi-3"></a>OI-3 | Frontend testing coverage | In progress (promoted) | Draft **SNR-6.1.4** added under Product M-000 Pitch B; Frontend still has no automated tests until the Vitest baseline lands. Coverage numeric target TBD. |
+| <a id="oi-4"></a>OI-4 | Multi-tenant isolation enforcement | Deferred | User isolation is still scoped by `X-User-ID` header without authentication; full tenant isolation depends on SR-10 / OI-1 completion and verifiable [SNR-3.2.1](#snr-3-2-1) |
 | OI-5 | Metrics and distributed tracing | Deferred | Logging exists; structured metrics and tracing infrastructure requirements to be defined when observability strategy matures |
 | OI-6 | Definition of "confidence" on raw external data | Open | SR-4.4.2 requires confidence on ingress; what confidence means for raw external data (and who sets it) is undefined. Resolve before SR-4.4.x leaves draft |
+
+> **Note (non-requirement):** The "Case" object referenced in frontend documents is not yet introduced by any Milestone module.
 
 ## 11. Revision History
 
@@ -357,5 +387,9 @@ Changes to approved requirements follow the seven-step change-control flow: trig
 | 0.2.1 | 2026-10-16 | Chief of Staff (approved by Phan) | Patch/review fixes (Designer, SAA): References column added to pilot tables and SNR-3; SR-1.3.2 split, new SR-1.3.4 (chart yields at gate, named levels carry to Position); SR-1.3.1 Z1 + W2b; SR-1.3.3 scoped to Z4/draft in Z3, explicit user action, P2/Future; SR-4.4.1 owned by Backend/Data with Agent contributing; SR-4.4.2–3 references retargeted; OI-6 confidence question; SR-9.1.1 and SNR-3.2.1 depend on identity slice; SR-1.3 and SR-4.4 headings demoted to ####; §7 updated |
 | 0.2.2 | 2026-10-16 | Chief of Staff (approved by Phan) | Patch: architecture references for SR-4.4 per SAA review |
 | 0.2.3 | 2026-10-17 | Chief of Staff (approved by Phan) | Patch: pilot group notes cite roadmap IDs RM-01 to RM-03; SR-1.3 group anchor added. The SRS does not link to pitches; the pitch ranking file is the index |
+| 0.3.3 | 2026-11-13 | Requirements and Delivery Lead (approved by Product Owner) | Patch: SNR-7 launch-UI number-format note — volume and ₫ totals use comma grouping (`1,234,500`, `25,300,000 ₫`); across all numbers the dot is only a decimal and the comma only groups thousands; dates stay standard vi-VN. |
+| 0.3.2 | 2026-11-13 | Requirements and Delivery Lead (approved by Product Owner) | Patch: SR-5.2.1 and SR-5.2.2 marked Superseded (SSE-only transport, SNR-8.1.2, ADR-FRONTEND-002 Socket.IO retirement); §4.2 / §4.3 and §8.1 contracts retargeted from WebSocket/Socket.IO to the SSE stream contract in `docs/openapi.yaml` (typed stream events a follow-up Backend contract); all OpenAPI path references corrected to `docs/openapi.yaml`; SR-5.1.2 in-doc anchor fixed (`#sr-5-1-2`); transport note updated (SNR-8.1.2 already amended); SR-1.4.2 clarifies `sessionRef` as the Backend session id plus conversation id (API hierarchy workspace > session > conversation); SNR-7.1.1 amended to supported viewport 768–1920 px with 1920 px primary (below 768 px Future; priority unchanged); launch UI `vi-VN` price-board display note (prices in thousands of VND with a dot decimal; other numbers, dates and VND totals use standard `vi-VN`); non-requirement note that the Case object has no Milestone yet. SNR-7.2.1 priority unchanged. |
+| 0.3.1 | 2026-11-10 | Requirements and Delivery Lead (approved by Product Owner) | Patch: new SR-1.3.5 docked price chart proof of concept (P0, Milestone M-001): reference, ceiling and floor as supplied by the Backend; chart library attribution required. Richer charting and chart-yield stay SR-1.3.4 / M-006. Allocation table updated. |
+| 0.3.0 | 2026-11-05 | Requirements and Delivery Lead (draft for Product Owner) | Minor: Product M-000 Platform foundation — draft SR-10.1.x (auth/session from OI-1), SR-1.4.x (modular shell + in-session context), SNR-6.1.4 (FE testability from OI-3); amend SNR-8.1.2 toward SSE; flag SR-5.2.x Socket.IO conflict; OI-1/OI-3 in progress; §7 allocation updated. |
 | 0.2.5 | 2026-11-05 | Requirements and Delivery Lead (approved by Product Owner) | SR-1.3.2 adds "or track". Status wording: "P0 roadmap deliverables". SR-1.3.4 ownership moves to Milestone M-006 (Product). |
 | 0.2.4 | 2026-10-19 | Requirements and Delivery Lead (approved by Product Owner) | Patch: the product doc is now called Product (Product Definition and Specification), so "Spec §" pointers read "Product §". Group notes no longer cite roadmap IDs: Product Milestones (`M-nnn`) link down to SRS IDs, and the SRS links up only to Product sections for meaning |

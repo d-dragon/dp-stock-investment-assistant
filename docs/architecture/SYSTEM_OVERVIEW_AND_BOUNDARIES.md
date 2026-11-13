@@ -6,8 +6,8 @@
 |---|---|
 | Document | System architecture description |
 | Path | `docs/architecture/SYSTEM_OVERVIEW_AND_BOUNDARIES.md` |
-| Version | 0.8.4 |
-| Date | 2026-10-14 |
+| Version | 0.8.9 |
+| Date | 2026-11-13 |
 | Status | Local working draft. Not committed. Builds on v0.8.3, on v0.6 committed at `59e26e0`. |
 | Standards stance | **Aligned** to ISO/IEC/IEEE 42010. Not a certification claim. |
 | Shape | Same architecture-description shape as the [agent architecture description](../domains/agent/ARCHITECTURE_DESIGN.md): entity, stakeholders, viewpoints, views, correspondences, rationale. |
@@ -102,8 +102,8 @@ It does not replace:
 | This file | System context, quality goals, containers, Phase 1 boundary, product-to-architecture mapping |
 | [Spec](../system/PRODUCT_SPECIFICATION.md), [IA map](../system/CONCEPTUAL_IA_MAP.md), [Journeys](../system/USER_JOURNEYS_WITH_WIREFRAMES.md) | Product meaning, zones, journeys |
 | [Agent architecture description](../domains/agent/ARCHITECTURE_DESIGN.md) | Agent viewpoints |
-| [Frontend ADR-001](../domains/frontend/DECISIONS/ADR-FRONTEND-001-MODULAR-APPLICATION.md) | Modular shell and multi-pane workspace, not micro-frontends |
-| [Frontend ADR-002](../domains/frontend/DECISIONS/ADR-FRONTEND-002-MODERNIZE-FRONTEND-FOUNDATION.md) | Frontend foundation. Domain decision. |
+| [Frontend ADR-001](../domains/frontend/DECISIONS/ADR-FRONTEND-001-MODULAR-APPLICATION.md) | Modular shell and multi-pane workspace, not micro-frontends. **Accepted** (M-000 Pitch B). |
+| [Frontend ADR-002](../domains/frontend/DECISIONS/ADR-FRONTEND-002-MODERNIZE-FRONTEND-FOUNDATION.md) | Frontend foundation. **Accepted** (amended for M-000 Pitch B: HTTPS+SSE; GenUI Future). |
 | [Data-pipeline proposal](../research/DATA_PIPELINE_PROCESS_ELT_RESEARCH_AND_PROPOSAL.md) | Ingestion architecture, adopted by [ADR-SYS-004](./DECISIONS/ADR-SYS-004-DATA-PIPELINE-AND-RECORDS.md) without its gold-layer naming. |
 | [Runtime flows](./RUNTIME_AND_INTEGRATION_FLOWS.md), ADRs, [data technical design](../domains/data/TECHNICAL_DESIGN.md) | Step-by-step flows, decisions, kept-versus-new records |
 
@@ -403,7 +403,8 @@ Detail stays in the document linked beside each one.
 | Pattern | What it means here | Status |
 |---|---|---|
 | One system, four containers | Frontend, Backend with the Agent in-process, Data, and Cache. Calls follow the dependency rules in §4.2. | Target. Today the Agent is already in-process. |
-| Modular monolith frontend | One deployable shell and an adaptive canvas. Modules sit behind a platform layer. | Decided. [Frontend ADR-001](../domains/frontend/DECISIONS/ADR-FRONTEND-001-MODULAR-APPLICATION.md). |
+| Modular monolith frontend | One deployable shell and an adaptive canvas. Modules sit behind a platform layer. | **Accepted.** [Frontend ADR-001](../domains/frontend/DECISIONS/ADR-FRONTEND-001-MODULAR-APPLICATION.md). |
+| Frontend foundation stack | Vite, Router, panels (Z1/Z3/Z4), Zustand + TanStack Query, Tailwind+Radix, Vitest; HTTPS+SSE only | **Accepted** (amended). [Frontend ADR-002](../domains/frontend/DECISIONS/ADR-FRONTEND-002-MODERNIZE-FRONTEND-FOUNDATION.md). |
 | Modular monolith, backend | One Backend deployable with the Core modules and the Agent in-process, behind the dependency rules in §4.2. | Proposed. [ADR-SYS-003](./DECISIONS/ADR-SYS-003-BACKEND-MODULAR-MONOLITH.md). |
 | Services in front of repositories | The presentation domain does not touch storage. | Current. [Backend technical design](../domains/backend/TECHNICAL_DESIGN.md). |
 | One ReAct assistant | The enabled agent is the AI Companion. Tools fetch and calculate. The model explains. Output advises and does not trade. | Current. [Agent architecture description](../domains/agent/ARCHITECTURE_DESIGN.md). |
@@ -417,7 +418,7 @@ One line each. The link is where the stack is actually described. This table doe
 
 | Domain | Stack, briefly | Where the description lives |
 |---|---|---|
-| Frontend | One React and TypeScript shell. The companion stream is server-sent events. The foundation direction is a domain decision, not restated here. | [Frontend architecture](../domains/frontend/ARCHITECTURE.md). [ADR-001](../domains/frontend/DECISIONS/ADR-FRONTEND-001-MODULAR-APPLICATION.md). [ADR-002](../domains/frontend/DECISIONS/ADR-FRONTEND-002-MODERNIZE-FRONTEND-FOUNDATION.md). |
+| Frontend | One React and TypeScript shell. Companion stream is HTTPS+SSE (**Accepted** ADR-002 amended). Foundation stack not restated here. | [Frontend architecture](../domains/frontend/ARCHITECTURE.md). [ADR-001](../domains/frontend/DECISIONS/ADR-FRONTEND-001-MODULAR-APPLICATION.md) (Accepted). [ADR-002](../domains/frontend/DECISIONS/ADR-FRONTEND-002-MODERNIZE-FRONTEND-FOUNDATION.md) (Accepted, amended). |
 | Backend | Python services on Flask. They own the API, service orchestration, and server-sent event delivery. Socket.IO is named in that design and is not the companion's path. | [Backend technical design](../domains/backend/TECHNICAL_DESIGN.md). |
 | Agent | One ReAct assistant, the AI Companion, with session memory and a tool gateway, running in the Backend process. | [Agent architecture description](../domains/agent/ARCHITECTURE_DESIGN.md). |
 | Data | MongoDB for records and Redis for cache, as named by the data technical design. A medallion on that same store is adopted by ADR-SYS-004. | [Data technical design](../domains/data/TECHNICAL_DESIGN.md). [ELT proposal](../research/DATA_PIPELINE_PROCESS_ELT_RESEARCH_AND_PROPOSAL.md). |
@@ -486,7 +487,7 @@ Detail and sources are in the Researcher's brief (`OWASP_LLM_AGENTIC_BOUNDARY_BR
 
 #### Identity and access (target)
 
-The Investor as user signs in through an identity provider (IdP) with OpenID Connect, a login layer on OAuth 2.0. The Frontend uses the authorization-code flow with PKCE. The IdP issues a short-lived signed JWT access token, and the Backend never handles passwords. The IdP is Auth0. Where the browser keeps tokens and how roles map to permissions are still open in [ADR-SYS-001](DECISIONS/ADR-SYS-001-IDENTITY-AND-PER-USER-ISOLATION.md).
+The Investor as user signs in through an identity provider (IdP) with OpenID Connect, a login layer on OAuth 2.0. The Backend acts as a Backend-for-Frontend: it is the confidential OAuth client, runs the authorization-code flow with PKCE, and keeps tokens server-side. The browser holds only an HttpOnly session cookie and never sees a token. The IdP issues a short-lived signed JWT access token, and the Backend never handles passwords. The IdP is Auth0. How roles map to permissions is still open in [ADR-SYS-001](DECISIONS/ADR-SYS-001-IDENTITY-AND-PER-USER-ISOLATION.md).
 
 ```mermaid
 sequenceDiagram
@@ -560,7 +561,7 @@ One row per bounded context in [Spec §4.9](../system/PRODUCT_SPECIFICATION.md#4
 | This view says | Must stay consistent with |
 |---|---|
 | One shell, not micro-frontends | [Frontend ADR-001](../domains/frontend/DECISIONS/ADR-FRONTEND-001-MODULAR-APPLICATION.md) |
-| Foundation is a domain decision | [Frontend ADR-002](../domains/frontend/DECISIONS/ADR-FRONTEND-002-MODERNIZE-FRONTEND-FOUNDATION.md) |
+| Foundation Accepted (amended M-000 Pitch B) | [Frontend ADR-002](../domains/frontend/DECISIONS/ADR-FRONTEND-002-MODERNIZE-FRONTEND-FOUNDATION.md) |
 | One agent, session memory, visualization is not thesis evidence | [Agent architecture description](../domains/agent/ARCHITECTURE_DESIGN.md) |
 | Medallion layers plus a live bypass. ELT is the proposal's fill method | [Data-pipeline proposal](../research/DATA_PIPELINE_PROCESS_ELT_RESEARCH_AND_PROPOSAL.md), adopted by ADR-SYS-004 |
 | Pass creates a Position. Fail keeps a Decision record and creates no Position; Revise is the path after Fail. Case is optional. | [Spec §0.4](../system/PRODUCT_SPECIFICATION.md#04-phase-1-conceptual-cut-line-what-we-prove-next); [Spec §4.6](../system/PRODUCT_SPECIFICATION.md#46-decision-gate-and-object-ontology-normative) |
@@ -585,13 +586,13 @@ If a gold mart in the proposal and a Phase 1 identity share a word, the Spec win
 
 | ADR | Decision | Status | Blocks |
 |---|---|---|---|
-| [ADR-SYS-001](./DECISIONS/ADR-SYS-001-IDENTITY-AND-PER-USER-ISOLATION.md) | Identity and per-user isolation | Accepted in part: Auth0 is the IdP. Token storage and role mapping open | All Phase 1 Core writes; ADR-SYS-002; ADR-SYS-005 |
+| [ADR-SYS-001](./DECISIONS/ADR-SYS-001-IDENTITY-AND-PER-USER-ISOLATION.md) | Identity and per-user isolation | Accepted in part: Auth0 is the IdP; tokens held by a Backend-for-Frontend with an HttpOnly cookie. Role mapping open | All Phase 1 Core writes; ADR-SYS-002; ADR-SYS-005 |
 | [ADR-SYS-002](./DECISIONS/ADR-SYS-002-DECISION-GATE.md) | Decision gate: atomic Pass, idempotency key, immutable Decision records, and the admission rules for the Agent's write paths (Phase 1); `mongo:5.0` end-of-life. Also carries the note that [Spec §4.6](../system/PRODUCT_SPECIFICATION.md#46-decision-gate-and-object-ontology-normative) #2 does not yet say Fail keeps a Decision record | Proposed | Gate and Position deliverables; runtime v0.2 |
 | [ADR-SYS-003](./DECISIONS/ADR-SYS-003-BACKEND-MODULAR-MONOLITH.md) | Backend modular monolith; when the Agent moves out | Proposed | §4.2 rules; the placeholder `agent` container |
 | [ADR-SYS-004](./DECISIONS/ADR-SYS-004-DATA-PIPELINE-AND-RECORDS.md) | ELT pipeline adopted, without the gold-layer naming; kept versus new records; licensing | Accepted | Data Hub deliverable |
 | [ADR-SYS-005](./DECISIONS/ADR-SYS-005-EXTERNAL-AI-AGENT-ACCESS.md) | External AI agent access through a Backend-owned tool interface, read-only first, writes only as proposals the user confirms | Proposed, future | None in Phase 1 |
 
-Domain decisions stay in their domains: [Frontend ADR-001](../domains/frontend/DECISIONS/ADR-FRONTEND-001-MODULAR-APPLICATION.md), [ADR-002](../domains/frontend/DECISIONS/ADR-FRONTEND-002-MODERNIZE-FRONTEND-FOUNDATION.md), and the agent ADRs starting at [ADR-AGENT-001](../domains/agent/DECISIONS/ADR-AGENT-001-LAYERED-LLM-ARCHITECTURE.md).
+Domain decisions stay in their domains: [Frontend ADR-001](../domains/frontend/DECISIONS/ADR-FRONTEND-001-MODULAR-APPLICATION.md) (**Accepted**), [ADR-002](../domains/frontend/DECISIONS/ADR-FRONTEND-002-MODERNIZE-FRONTEND-FOUNDATION.md) (**Accepted**, amended for M-000 Pitch B), Frontend ADR-003, 004, 005, 007 and 008 (**Accepted**: [URL-owned state](../domains/frontend/DECISIONS/ADR-FRONTEND-003-URL-OWNED-SHAREABLE-STATE.md), [chart adapter](../domains/frontend/DECISIONS/ADR-FRONTEND-004-CHART-ENGINE-ADAPTER.md), [i18n seam](../domains/frontend/DECISIONS/ADR-FRONTEND-005-I18N-READINESS-SEAM.md), [design-token architecture](../domains/frontend/DECISIONS/ADR-FRONTEND-007-DESIGN-TOKEN-ARCHITECTURE.md), [MSW and Storybook in M-000](../domains/frontend/DECISIONS/ADR-FRONTEND-008-MSW-AND-STORYBOOK-IN-M000.md)), Frontend ADR-006 (**Proposed**, future: [generated-UI registry](../domains/frontend/DECISIONS/ADR-FRONTEND-006-GENERATED-UI-COMPONENT-REGISTRY.md)), and the agent ADRs starting at [ADR-AGENT-001](../domains/agent/DECISIONS/ADR-AGENT-001-LAYERED-LLM-ARCHITECTURE.md).
 
 Anything else waits.
 
@@ -616,3 +617,8 @@ Anything else waits.
 | 0.8.2 | 2026-10-13 | Local only. ADR-SYS-001 accepted in part (Auth0 as IdP). ADR-SYS-004 accepted: ELT pipeline adopted without the gold-layer naming. Decision index, pipeline status text and R7 updated to match. |
 | 0.8.3 | 2026-10-13 | Local only. Logical view gains 4.2.1 building blocks (Decision gate inside the Investment Core block), 4.2.2 responsibility and dependency boundaries, 4.2.3 layered boundaries (Presentation, Application, Business rules, Integration, Persistence); Platform and Core as a reading note; ingestion pipeline as a Phase 1 block. Agent role broadened with status per responsibility; §4.9 write rules updated to match. |
 | 0.8.4 | 2026-10-14 | Local only. Review fixes: four containers everywhere, gate ownership, one home for the Agent write rule (§4.2.2), read port from Integration to Business rules, gate wording in Pass and Fail terms, status pass and status legend. Agent collect and report as Phase 1 target; R5 to M; R2 to H. Architecture-derived labels. `mongo:5.0` end-of-life noted. Privacy and retention row and R11. |
+| 0.8.5 | 2026-11-05 | Local only. Frontend ADR-001 Accepted; ADR-002 Accepted (amended M-000 Pitch B: HTTPS+SSE carve-outs). Overview §1.6 / §4.5–4.6 / §5.2 / §7 cites updated. |
+| 0.8.6 | 2026-11-10 | Local only. §7 domain-decisions sentence lists Frontend ADR-003 to ADR-007 as Proposed (URL-owned state, chart adapter, i18n seam, generated-UI registry as future, design-token architecture). |
+| 0.8.7 | 2026-11-13 | Local only. §7 sentence: Frontend ADR-003, 004, 005 and 007 Accepted; ADR-006 stays Proposed (future). |
+| 0.8.8 | 2026-11-13 | Local only. §7 sentence adds Frontend ADR-008 (Accepted). |
+| 0.8.9 | 2026-11-13 | Local only. ADR-SYS-001 token storage accepted (Backend-for-Frontend, HttpOnly cookie): identity-and-access text and decision index updated. |
