@@ -3,7 +3,7 @@
 | Field | Value |
 |---|---|
 | Document | Product Definition and Specification (short name: Product) · DP Stock-Investment Assistant |
-| Version | v1.8.1 |
+| Version | v1.8.3 |
 | Date | 2026-11-05 |
 | Status | Working source of truth · ontology frozen 2026-09-24 |
 | Owner | Product Owner |
@@ -626,7 +626,8 @@ The roadmap defines the delivery plan as Milestones. Each Milestone has a stable
 
 | Milestone | Priority | Deliverable | Why | Requirements | Pitches |
 |----|----------|-------------|-----|--------------|---|
-| <a id="m-001"></a>M-001 | **P0** | Adaptive Visual Canvas (multi-pane, context preserved) | Platform: keeps work in one place | [SR-1.3.1](SYSTEM_REQUIREMENTS_SPECIFICATION.md#sr-1-3-1), [SR-1.3.2](SYSTEM_REQUIREMENTS_SPECIFICATION.md#sr-1-3-2) | [M-001 Adaptive Visual Canvas](../../specs/pitches/M-001-adaptive-visual-canvas.md) *(shaped)* |
+| <a id="m-000"></a>M-000 | **P0** | Platform foundation (identity + FE shell) | Platform: unblocks Canvas and Core with sign-in, owner scope, and a modern FE shell; appetite flexible / agentic OK across pitches | [SR-10.1.1](SYSTEM_REQUIREMENTS_SPECIFICATION.md#sr-10-1-1), [SR-10.1.2](SYSTEM_REQUIREMENTS_SPECIFICATION.md#sr-10-1-2), [SR-10.1.3](SYSTEM_REQUIREMENTS_SPECIFICATION.md#sr-10-1-3), [SR-1.4.1](SYSTEM_REQUIREMENTS_SPECIFICATION.md#sr-1-4-1), [SR-1.4.2](SYSTEM_REQUIREMENTS_SPECIFICATION.md#sr-1-4-2), [SR-5.1.2](SYSTEM_REQUIREMENTS_SPECIFICATION.md), [SNR-3.2.1](SYSTEM_REQUIREMENTS_SPECIFICATION.md#snr-3-2-1), [SNR-6.1.4](SYSTEM_REQUIREMENTS_SPECIFICATION.md#snr-6-1-4), [SNR-7.1.1](SYSTEM_REQUIREMENTS_SPECIFICATION.md), [SNR-7.2.1](SYSTEM_REQUIREMENTS_SPECIFICATION.md) | [M-000 Identity & session](../../specs/pitches/M-000-A-identity-and-session.md) *(planned)*; [M-000 Frontend foundation](../../specs/pitches/M-000-B-frontend-foundation.md) *(planned)*; Pitch C deferred |
+| <a id="m-001"></a>M-001 | **P0** | Adaptive Visual Canvas (multi-pane, context preserved) | Platform: keeps work in one place | [SR-1.3.1](SYSTEM_REQUIREMENTS_SPECIFICATION.md#sr-1-3-1), [SR-1.3.2](SYSTEM_REQUIREMENTS_SPECIFICATION.md#sr-1-3-2), [SR-1.3.5](SYSTEM_REQUIREMENTS_SPECIFICATION.md#sr-1-3-5) | [M-001 Adaptive Visual Canvas](../../specs/pitches/M-001-adaptive-visual-canvas.md) *(shaped; prerequisites: [M-000 Identity & session](../../specs/pitches/M-000-A-identity-and-session.md), [M-000 Frontend foundation](../../specs/pitches/M-000-B-frontend-foundation.md))* |
 | <a id="m-002"></a>M-002 | **P0** | Vietnam-first Data Hub + provenance | Platform: enables quality Insights | [SR-4.4.1](SYSTEM_REQUIREMENTS_SPECIFICATION.md#sr-4-4-1), [SR-4.4.2](SYSTEM_REQUIREMENTS_SPECIFICATION.md#sr-4-4-2), [SR-4.4.3](SYSTEM_REQUIREMENTS_SPECIFICATION.md#sr-4-4-3) | — |
 | <a id="m-003"></a>M-003 | **P0** | Insights foundation (evidence capture) | Core: start of lifecycle path | [SR-9.1.1](SYSTEM_REQUIREMENTS_SPECIFICATION.md#sr-9-1-1), [SR-9.1.2](SYSTEM_REQUIREMENTS_SPECIFICATION.md#sr-9-1-2), [SNR-3.2.1](SYSTEM_REQUIREMENTS_SPECIFICATION.md#snr-3-2-1) | — |
 | <a id="m-004"></a>M-004 | **P0** | Dual-Track Workspace IA (Sandbox vs Portfolio) | Platform/Core: prevent research from mutating portfolio risk | — (pending) | — |
@@ -780,7 +781,7 @@ Pre-Pass work is the Working Thesis; ontology per Product §4.6. Slice cites its
 **Next (conceptual lane first):**
 1. Keep Figma (`frames.json`) and the Journeys snapshots in step; re-export after text changes.
 2. Merge selected content from the [Capabilities charter](./PRODUCT_CAPABILITIES%5BReserved%5D.md) into this document (note: the charter's §4.1 persona name predates the TFI rename).
-3. Shape the next pitches on open Phase 1 Milestones (chain: Product Milestone → Pitch → SRS lines → slice), then resume SDD slices.
+3. Shape M-000 pitches (identity-and-session; frontend-foundation) then M-001 (chain: Product Milestone → Pitch → SRS lines → slice); Pitch C under M-000 deferred.
 
 **Open questions:**
 1. Decision gate checklist: who authors the items, and what is the default set (§4.6)?
@@ -791,6 +792,8 @@ Pre-Pass work is the Working Thesis; ontology per Product §4.6. Slice cites its
 
 | Version | Date | Change |
 |---|---|---|
+| v1.8.3 | 2026-11-10 | M-001 adds SR-1.3.5, a docked price chart proof of concept. Richer charting and chart-yield stay with M-006 (SR-1.3.4).
+| v1.8.2 | 2026-11-05 | Add Milestone M-000 Platform foundation (P0, before M-001) with planned pitches M-000-identity-and-session and M-000-frontend-foundation; M-001 lists those pitches as prerequisites; SRS IDs SR-10.1.x / SR-1.4.x / SNR-6.1.4 cited. Pitch C deferred.
 | v1.8.1 | 2026-11-05 | SR-1.3.4 moves fully to M-006 (removed from M-001). §6 hierarchy, workflow and next items follow Product → Pitch → SRS → slice → code. |
 | v1.8.0 | 2026-10-19 | Renamed "Product Definition and Specification", short name Product, so "spec" means only a spec-kit `spec.md`; file path unchanged. §5.3 roadmap rows become Milestones `M-001`–`M-024` (column "Milestone", anchors `m-001`…), replacing `RM-nn`; each Milestone links down to its SRS IDs and, in a new Pitches column, to the pitches that deliver it. Header Owner is now the Product Owner role. §0.2 adds Product and Milestone. §6.2 maps Milestones to pitch and slice. No product meaning changed. |
 | v1.7.5 | 2026-10-17 | §5.3 roadmap items gain stable IDs (`RM-nn`, e.g. RM-01) and an explicit `product-roadmap` anchor. The Spec links only down to SRS IDs, never to pitches. No other change. |
@@ -804,4 +807,4 @@ Pre-Pass work is the Working Thesis; ontology per Product §4.6. Slice cites its
 
 ---
 
-*End of Product Definition and Specification · v1.8.1 · 2026-11-05*
+*End of Product Definition and Specification · v1.8.3 · 2026-11-10*
