@@ -24,6 +24,7 @@
 
 | Date | Version | Change |
 |---|---|---|
+| 2026-11-14 | 2.6.1 | Run 2026-11-14: Saturday preopen; VN prior 1.734,93 locked StockBiz/multiple; foreign ~+337.5 HoSE VnEconomy; proprietary ~154 CafeF/nmquan +140; US S&P -0.40% Nasdaq -0.91%; Nikkei +0.53% HSI -1.55%; DXY ~103.29; community thin; day/n/raw/a/week/catalog pushed via gh. |
 | 2026-11-13 | 2.6.1 | Run 2026-11-13: Friday preopen; VN prior 1.734,75 locked StockBiz/multiple; foreign ~-876 HoSE StockBiz; proprietary nmquan +305,8 / VnEconomy +324,8; US S&P -0,35% Nasdaq -0,39%; Nikkei -0,70% HSI -1,26%; DXY 103,17; community thin; day/n/raw/a/week/catalog pushed via git. |
 | 2026-11-06 | 2.6.1 | Run 2026-11-06: Friday preopen; VN prior 1.740,73 locked StockBiz/multiple; foreign ~-170.6 HoSE StockBiz; proprietary nmquan +327; US S&P -4,36% Nasdaq -5,52% AI selloff; HSI +3,67%; community thin; day/n/raw/a/week/catalog pushed via git. |
 | 2026-11-02 | 2.6.1 | Run 2026-11-02: Monday preopen; VN prior 1.741,62 locked StockBiz/multiple; foreign ~-634 HoSE; proprietary nmquan +92,8; US S&P -1,82% Nasdaq -2,86%; community thin; day/n/raw/a/week/catalog pushed via git. |
