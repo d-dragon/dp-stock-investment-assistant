@@ -1,0 +1,178 @@
+{
+  "schemaVersion": "1.0.0",
+  "date": "2026-11-14",
+  "items": [
+    {
+      "id": "n-2026-11-14-001",
+      "impact": "high",
+      "impactScore": 92,
+      "rank": 1,
+      "kind": "market",
+      "board": "vn",
+      "title": "VN-Index đóng cửa 13/11 tại 1.734,93 (+0,18 điểm / +0,01%)",
+      "url": "https://stockbiz.vn/en/stocks/VNINDEX",
+      "sourceId": "src-stockbiz",
+      "publishedAt": "2026-11-13T15:00:00+07:00",
+      "tickers": [
+        "VNINDEX"
+      ],
+      "excerpt": "Đảo chiều phút cuối từ vùng thấp, thanh khoản ~15.138 tỷ.",
+      "whyImpact": "Prior close chính thức cho pre-open 14/11."
+    },
+    {
+      "id": "n-2026-11-14-002",
+      "impact": "high",
+      "impactScore": 88,
+      "rank": 2,
+      "kind": "market",
+      "board": "vn",
+      "title": "Khối ngoại mua ròng ~337,5 tỷ trên HoSE phiên 13/11",
+      "url": "https://vneconomy.vn/khoi-ngoai-tiep-tuc-mua-rong-gom-nhieu-nhat-mot-co-phieu-chung-khoan.htm",
+      "sourceId": "src-vneconomy",
+      "publishedAt": "2026-11-13T20:08:00+07:00",
+      "tickers": [
+        "VIX",
+        "FPT"
+      ],
+      "excerpt": "VIX +308 tỷ, FPT -221,5 tỷ. Đảo chiều sau phiên bán mạnh.",
+      "whyImpact": "Dòng ngoại trở lại mua hỗ trợ tâm lý."
+    },
+    {
+      "id": "n-2026-11-14-003",
+      "impact": "high",
+      "impactScore": 85,
+      "rank": 3,
+      "kind": "market",
+      "board": "vn",
+      "title": "Tự doanh mua ròng ~154 tỷ trên HoSE, gom mạnh GMD",
+      "url": "https://cafef.vn/tu-doanh-ctck-mua-rong-hang-tram-ty-phien-cuoi-tuan-co-phieu-nao-duoc-gom-manh-nhat-18826111316571562.chn",
+      "sourceId": "src-cafef",
+      "publishedAt": "2026-11-13T23:57:00+07:00",
+      "tickers": [
+        "GMD",
+        "VIX"
+      ],
+      "excerpt": "GMD +201 tỷ, VIX bị bán ròng 270 tỷ (trái chiều ngoại).",
+      "whyImpact": "Nội hấp thụ, phân hóa với ngoại tại VIX."
+    },
+    {
+      "id": "n-2026-11-14-004",
+      "impact": "high",
+      "impactScore": 80,
+      "rank": 4,
+      "kind": "news",
+      "board": "global",
+      "title": "S&P 500 đóng cửa 13/11 tại 7.561,67 (-0,40%)",
+      "url": "https://www.reuters.com/business/nasdaq-futures-dip-nvidia-tumult-keeps-investors-edge-2026-11-13/",
+      "sourceId": "src-bloomberg",
+      "publishedAt": "2026-11-13T22:00:00+07:00",
+      "tickers": [
+        "SPX"
+      ],
+      "excerpt": "Nasdaq -0,91%, Dow +0,10% amid Nvidia uncertainty.",
+      "whyImpact": "Overnight Mỹ mixed, tech yếu."
+    },
+    {
+      "id": "n-2026-11-14-005",
+      "impact": "medium",
+      "impactScore": 75,
+      "rank": 5,
+      "kind": "news",
+      "board": "global",
+      "title": "Nikkei 225 +0,53% lên 61.142, Hang Seng -1,55% xuống 23.637",
+      "url": "https://en.moneyandbanking.co.th/2026/286994/",
+      "sourceId": "src-bloomberg",
+      "publishedAt": "2026-11-13T16:42:00+07:00",
+      "tickers": [
+        "NKY",
+        "HSI"
+      ],
+      "excerpt": "Asia mixed, HSI tech pressure từ Nvidia.",
+      "whyImpact": "Truyền dẫn khu vực cho VN."
+    },
+    {
+      "id": "n-2026-11-14-006",
+      "impact": "medium",
+      "impactScore": 70,
+      "rank": 6,
+      "kind": "market",
+      "board": "vn",
+      "title": "HNX-Index giảm 0,64% xuống 254,98",
+      "url": "https://znews.vn/vn-index-thoat-hiem-phut-cuoi-post1696197.html",
+      "sourceId": "src-cafef",
+      "publishedAt": "2026-11-13T17:13:00+07:00",
+      "tickers": [
+        "HNX"
+      ],
+      "excerpt": "Phân hóa so với VN-Index.",
+      "whyImpact": "Breadth mixed."
+    },
+    {
+      "id": "n-2026-11-14-007",
+      "impact": "medium",
+      "impactScore": 65,
+      "rank": 7,
+      "kind": "news",
+      "board": "global",
+      "title": "DXY quanh 103,2-103,4, vàng ~3.890-3.910 USD",
+      "url": "https://www.fxstreet.com/cryptocurrencies/news/bitcoin-vs-gold-outlook-btc-downtrend-gains-momentum-xau-pares-losses-as-us-ppi-rises-202611131520",
+      "sourceId": "src-barrons",
+      "publishedAt": "2026-11-13T22:20:00+07:00",
+      "tickers": [
+        "DXY",
+        "XAU"
+      ],
+      "excerpt": "USD mạnh, vàng phục hồi nhẹ từ đáy.",
+      "whyImpact": "Áp lực EM và commodities."
+    },
+    {
+      "id": "n-2026-11-14-008",
+      "impact": "medium",
+      "impactScore": 60,
+      "rank": 8,
+      "kind": "news",
+      "board": "global",
+      "title": "Bitcoin giao dịch quanh 69.000 USD sau điều chỉnh",
+      "url": "https://nexo.com/blog/markets-today-november-13",
+      "sourceId": "src-yahoo-btc",
+      "publishedAt": "2026-11-13T22:00:00+07:00",
+      "tickers": [
+        "BTC"
+      ],
+      "excerpt": "Dưới 70k, risk-off crypto.",
+      "whyImpact": "Sentiment risk assets."
+    },
+    {
+      "id": "n-2026-11-14-009",
+      "impact": "low",
+      "impactScore": 40,
+      "rank": 9,
+      "kind": "community",
+      "board": "vn",
+      "title": "FireAnt: Vàng thế giới phục hồi sau đáy 13 tháng",
+      "url": "https://fireant.vn/bai-viet/gia-vang-chot-phien-1311-vang-the-gioi-phuc-hoi-sau-khi-cham-muc-thap-nhat-13-thang/42776185",
+      "sourceId": "src-fireant",
+      "publishedAt": "2026-11-13T20:22:00+07:00",
+      "tickers": [
+        "XAU"
+      ],
+      "excerpt": "Color cộng đồng về commodities.",
+      "whyImpact": "Sentiment only, không phải print."
+    },
+    {
+      "id": "n-2026-11-14-010",
+      "impact": "low",
+      "impactScore": 35,
+      "rank": 10,
+      "kind": "community",
+      "board": "vn",
+      "title": "Cộng đồng thin trên F247/newF319 về tape 13/11",
+      "url": "https://newf319.com/",
+      "sourceId": "src-newf319",
+      "publishedAt": "2026-11-14T08:00:00+07:00",
+      "tickers": [],
+      "excerpt": "Không có thread mạnh về VN-Index pre-open.",
+      "whyImpact": "Color only."
+    }
+  ]
+}
