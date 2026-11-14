@@ -1,0 +1,51 @@
+{
+  "market": {
+    "vnindex_prior": {
+      "date": "2026-11-13",
+      "price": 1734.93,
+      "change": 0.18,
+      "changePct": 0.01,
+      "source": "src-stockbiz"
+    },
+    "hnx": {
+      "price": 254.98,
+      "changePct": -0.64
+    },
+    "liquidity_hose": {
+      "volumeShares": 656750000,
+      "valueVndBn": 15138.0
+    },
+    "foreign_hose": {
+      "netValueVndBn": 337.5,
+      "note": "VnEconomy/Finhay ~337; VIX +308, FPT -221"
+    },
+    "proprietary": {
+      "netValueVndBn": 154,
+      "note": "CafeF/StockBiz ~154; nmquan +140.1 overall / +553.6 matched; VnEconomy 161.7"
+    },
+    "us": {
+      "spx": 7561.67,
+      "changePct": -0.91,
+      "dji": 52347.55,
+      "nasdaq": 25136.27
+    },
+    "asia": {
+      "nky": 61142.35,
+      "changePct": -1.55,
+      "hsi": 23637.6
+    }
+  },
+  "news_events": [
+    "VN-Index đảo chiều phút cuối đóng 1.734,93 (+0,01%) nhờ STB/VJC/TCB",
+    "Khối ngoại mua ròng ~337 tỷ HoSE, tập trung VIX",
+    "Tự doanh mua ròng ~154 tỷ, gom GMD mạnh",
+    "US mixed: SPX -0.40% Nasdaq -0.91% amid Nvidia",
+    "Nikkei +0.53% HSI -1.55%"
+  ],
+  "sentiment": {
+    "note": "Community thin; FireAnt gold recovery posts, no strong tape color on VN"
+  },
+  "gaps": [
+    "Exact proprietary print varies 140-162; no official retail net; no SBV page for 14/11; community thin"
+  ]
+}
