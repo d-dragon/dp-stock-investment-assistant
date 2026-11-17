@@ -1,0 +1,167 @@
+{
+  "schemaVersion": "1.0.0",
+  "date": "2026-10-19",
+  "generatedAt": "2026-10-19T08:35:00+07:00",
+  "briefKind": "eod_prev+overnight+preopen",
+  "items": [
+    {
+      "id": "n-2026-10-19-001",
+      "impact": "high",
+      "impactScore": 92,
+      "rank": 1,
+      "kind": "market",
+      "board": "vn",
+      "title": "VN-Index đóng cửa 1.705,91 (+0,45%), lấy lại mốc 1.700 sau 7 phiên giảm",
+      "url": "https://cafef.vn/chung-khoan-tuan-qua-thi-truong-hoi-phuc-phien-cuoi-tuan-khoi-ngoai-van-miet-mai-thoat-hang-18826101722005976.chn",
+      "sourceId": "src-cafef",
+      "publishedAt": "2026-10-16T16:30:00+07:00",
+      "tickers": [
+        "VNINDEX"
+      ],
+      "excerpt": "Hồi phục kỹ thuật nhờ bank và VHM, thanh khoản thấp.",
+      "whyImpact": "Mốc tâm lý 1.700 và chấm dứt chuỗi giảm."
+    },
+    {
+      "id": "n-2026-10-19-002",
+      "impact": "high",
+      "impactScore": 88,
+      "rank": 2,
+      "kind": "market",
+      "board": "vn",
+      "title": "Khối ngoại bán ròng ~534 tỷ trên HoSE phiên 16/10, chuỗi dài tiếp diễn",
+      "url": "https://stockbiz.vn/en/markets/flows",
+      "sourceId": "src-stockbiz",
+      "publishedAt": "2026-10-16T16:00:00+07:00",
+      "tickers": [
+        "HDB",
+        "VIC"
+      ],
+      "excerpt": "HDB bị bán mạnh nhất, FPT được mua.",
+      "whyImpact": "Dòng tiền biên quyết định bias ngắn hạn."
+    },
+    {
+      "id": "n-2026-10-19-003",
+      "impact": "high",
+      "impactScore": 85,
+      "rank": 3,
+      "kind": "news",
+      "board": "global",
+      "title": "Nasdaq giảm 2,15% phiên 16/10, tuần -4,5% vì lo AI",
+      "url": "https://www.investopedia.com/stock-market-today-dow-jones-s-and-p-500-10162026-12176848",
+      "sourceId": "src-bloomberg",
+      "publishedAt": "2026-10-16T15:00:00+07:00",
+      "tickers": [],
+      "excerpt": "Tech sell-off overnight truyền sang phiên VN đầu tuần.",
+      "whyImpact": "Risk-off toàn cầu ảnh hưởng mở cửa."
+    },
+    {
+      "id": "n-2026-10-19-004",
+      "impact": "medium",
+      "impactScore": 78,
+      "rank": 4,
+      "kind": "market",
+      "board": "vn",
+      "title": "Thanh khoản HoSE ~11 nghìn tỷ, khối lượng thu hẹp phiên hồi",
+      "url": "https://en.vietstock.vn/2026/10/vn-index-reverses-course-breaking-above-1700-point-threshold-36-645457.htm",
+      "sourceId": "src-vietstock",
+      "publishedAt": "2026-10-16T20:00:00+07:00",
+      "tickers": [],
+      "excerpt": "Cầu bắt đáy yếu dù breadth dương.",
+      "whyImpact": "Chất lượng hồi phục thấp."
+    },
+    {
+      "id": "n-2026-10-19-005",
+      "impact": "medium",
+      "impactScore": 75,
+      "rank": 5,
+      "kind": "macro",
+      "board": "vn",
+      "title": "Tỷ giá trung tâm NHNN giữ 25.637 VND/USD đầu tuần",
+      "url": "https://www.sbv.gov.vn/",
+      "sourceId": "src-nhnn",
+      "publishedAt": "2026-10-19T08:00:00+07:00",
+      "tickers": [],
+      "excerpt": "Không đổi so với cuối tuần trước.",
+      "whyImpact": "FX ổn định, không thêm áp lực."
+    },
+    {
+      "id": "n-2026-10-19-006",
+      "impact": "medium",
+      "impactScore": 72,
+      "rank": 6,
+      "kind": "news",
+      "board": "global",
+      "title": "Nikkei đóng cửa tăng 1,39% lên 65.324, phân hóa với US tech",
+      "url": "https://www.marketwatch.com/investing/index/nik",
+      "sourceId": "src-barrons",
+      "publishedAt": "2026-10-16T15:30:00+07:00",
+      "tickers": [],
+      "excerpt": "Asia không follow US sell-off hoàn toàn.",
+      "whyImpact": "Regional support nhẹ."
+    },
+    {
+      "id": "n-2026-10-19-007",
+      "impact": "medium",
+      "impactScore": 68,
+      "rank": 7,
+      "kind": "news",
+      "board": "vn",
+      "title": "Chuyên gia dự báo vùng kháng cự 1.715–1.750 sau hồi 16/10",
+      "url": "https://cafef.vn/goc-nhin-chuyen-gia-vn-index-con-nguy-co-giam-sau-ba-nhom-co-phieu-ky-vong-hut-dong-tien-sau-mua-kqkd-quy-3-188261018161028566.chn",
+      "sourceId": "src-cafef",
+      "publishedAt": "2026-10-18T23:00:00+07:00",
+      "tickers": [
+        "VNINDEX"
+      ],
+      "excerpt": "Hồi kỹ thuật đầu tuần có thể, rủi ro nếu mất 1.700.",
+      "whyImpact": "Levels cho kế hoạch phiên."
+    },
+    {
+      "id": "n-2026-10-19-008",
+      "impact": "low",
+      "impactScore": 55,
+      "rank": 8,
+      "kind": "community",
+      "board": "vn",
+      "title": "FireAnt/F247/newF319: sentiment thận trọng trước mở cửa",
+      "url": "https://fireant.vn/cong-dong/moi-nhat",
+      "sourceId": "src-fireant",
+      "publishedAt": "2026-10-19T07:00:00+07:00",
+      "tickers": [],
+      "excerpt": "Cộng đồng theo dõi mốc 1.700 và dòng ngoại.",
+      "whyImpact": "Màu sắc tâm lý, không phải print."
+    },
+    {
+      "id": "n-2026-10-19-009",
+      "impact": "medium",
+      "impactScore": 65,
+      "rank": 9,
+      "kind": "market",
+      "board": "global",
+      "title": "DXY quanh 101,84, giảm nhẹ",
+      "url": "https://www.barrons.com/market-data",
+      "sourceId": "src-barrons",
+      "publishedAt": "2026-10-16T16:00:00+07:00",
+      "tickers": [],
+      "excerpt": "Dollar không mạnh thêm.",
+      "whyImpact": "Hỗ trợ nhẹ cho emerging."
+    },
+    {
+      "id": "n-2026-10-19-010",
+      "impact": "low",
+      "impactScore": 48,
+      "rank": 10,
+      "kind": "news",
+      "board": "global",
+      "title": "BTC dao động 81.500–82.300 cuối tuần",
+      "url": "https://finance.yahoo.com/quote/BTC-USD/",
+      "sourceId": "src-yahoo-btc",
+      "publishedAt": "2026-10-19T08:00:00+07:00",
+      "tickers": [
+        "BTC"
+      ],
+      "excerpt": "Crypto không gap lớn.",
+      "whyImpact": "Risk appetite ổn."
+    }
+  ]
+}

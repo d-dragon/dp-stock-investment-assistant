@@ -1,0 +1,169 @@
+{
+  "schemaVersion": "1.0.0",
+  "date": "2026-10-25",
+  "items": [
+    {
+      "id": "n-2026-10-25-001",
+      "impact": "high",
+      "impactScore": 88,
+      "rank": 1,
+      "kind": "market",
+      "board": "vn",
+      "title": "VN-Index đóng cửa 23/10 tại 1.774,15 điểm (+0,77%)",
+      "url": "http://en.stockbiz.vn/HistoricalIndices.aspx",
+      "sourceId": "src-stockbiz",
+      "publishedAt": "2026-10-23T15:30:00+07:00",
+      "tickers": [
+        "VNINDEX"
+      ],
+      "excerpt": "Phiên tăng thứ 4 liên tiếp, volume ~777 triệu, giá trị 16.942 tỷ.",
+      "whyImpact": "Đóng cửa chính thức trước cuối tuần, xác nhận hồi phục."
+    },
+    {
+      "id": "n-2026-10-25-002",
+      "impact": "high",
+      "impactScore": 82,
+      "rank": 2,
+      "kind": "market",
+      "board": "vn",
+      "title": "Khối ngoại bán ròng ~478 tỷ đồng trên HOSE",
+      "url": "https://nhandan.vn/chung-khoan-ngay-2310-vn-index-tang-hon-13-diem-khoi-ngoai-tiep-tuc-ban-rong-manh-post997587.html",
+      "sourceId": "src-vietstock",
+      "publishedAt": "2026-10-23T16:54:00+07:00",
+      "tickers": [
+        "ACB",
+        "FPT",
+        "PNJ"
+      ],
+      "excerpt": "Bán tập trung ACB ~469 tỷ, FPT, PNJ, STB.",
+      "whyImpact": "Dòng tiền ngoại tiếp tục áp lực dù chỉ số tăng."
+    },
+    {
+      "id": "n-2026-10-25-003",
+      "impact": "high",
+      "impactScore": 80,
+      "rank": 3,
+      "kind": "news",
+      "board": "global",
+      "title": "Dow Jones đóng cửa giảm 1,23% xuống 52.215",
+      "url": "https://www.moneycontrol.com/news/business/markets/wall-street-closes-lower-to-end-rocky-week-14058977.html",
+      "sourceId": "src-bloomberg",
+      "publishedAt": "2026-10-24T09:15:00+07:00",
+      "tickers": [],
+      "excerpt": "S&P -0,52%, Nasdaq Composite -0,21%.",
+      "whyImpact": "Overnight risk-off từ Mỹ vào tuần mới."
+    },
+    {
+      "id": "n-2026-10-25-004",
+      "impact": "medium",
+      "impactScore": 72,
+      "rank": 4,
+      "kind": "macro",
+      "board": "global",
+      "title": "Vàng trượt dưới 4.000 USD, dầu tăng mạnh",
+      "url": "https://www.nationthailand.com/business/trading-investment/40072669",
+      "sourceId": "src-barrons",
+      "publishedAt": "2026-10-24T07:41:00+07:00",
+      "tickers": [],
+      "excerpt": "Vàng ~3.998, WTI ~103.",
+      "whyImpact": "Lạm phát kỳ vọng tăng, hỗ trợ nhóm dầu khí VN."
+    },
+    {
+      "id": "n-2026-10-25-005",
+      "impact": "medium",
+      "impactScore": 68,
+      "rank": 5,
+      "kind": "market",
+      "board": "vn",
+      "title": "Tự doanh mua ròng nhẹ ~10,5 tỷ trên HOSE",
+      "url": "https://nmquan.vn/data/tu-doanh",
+      "sourceId": "src-vneconomy",
+      "publishedAt": "2026-10-24T11:41:00+07:00",
+      "tickers": [
+        "ACB",
+        "TCB",
+        "VPB"
+      ],
+      "excerpt": "ACB +240 tỷ, nhưng KBC/TPB bán mạnh.",
+      "whyImpact": "Dòng nội hỗ trợ chọn lọc."
+    },
+    {
+      "id": "n-2026-10-25-006",
+      "impact": "medium",
+      "impactScore": 65,
+      "rank": 6,
+      "kind": "news",
+      "board": "asia",
+      "title": "Nikkei đóng 62.693 (-0,34%), Hang Seng +0,69%",
+      "url": "https://en.kabutan.com/jp/news/n202610230862",
+      "sourceId": "src-bloomberg",
+      "publishedAt": "2026-10-23T15:32:00+07:00",
+      "tickers": [],
+      "excerpt": "Châu Á phân hóa.",
+      "whyImpact": "Truyền tải overnight trung tính đến VN."
+    },
+    {
+      "id": "n-2026-10-25-007",
+      "impact": "medium",
+      "impactScore": 60,
+      "rank": 7,
+      "kind": "macro",
+      "board": "vn",
+      "title": "Tỷ giá trung tâm USD/VND ổn định 25.627",
+      "url": "https://www.sbv.gov.vn/",
+      "sourceId": "src-nhnn",
+      "publishedAt": "2026-10-23T16:00:00+07:00",
+      "tickers": [],
+      "excerpt": "Áp dụng cho 24/10.",
+      "whyImpact": "FX ổn định hỗ trợ tâm lý."
+    },
+    {
+      "id": "n-2026-10-25-008",
+      "impact": "low",
+      "impactScore": 45,
+      "rank": 8,
+      "kind": "community",
+      "board": "vn",
+      "title": "F247: thị trường khép phiên xanh, ngoại bán",
+      "url": "https://f247.com/t/nhan-dinh-thi-truong-so-dac-biet-song-dong-lo-dien-1-co-phieu-vuot-dinh-trong-tuan-sau/880354",
+      "sourceId": "src-f247",
+      "publishedAt": "2026-10-24T20:43:00+07:00",
+      "tickers": [],
+      "excerpt": "Nhận định tích cực nhưng lưu ý ngoại.",
+      "whyImpact": "Sentiment color, không phải print."
+    },
+    {
+      "id": "n-2026-10-25-009",
+      "impact": "medium",
+      "impactScore": 55,
+      "rank": 9,
+      "kind": "news",
+      "board": "vn",
+      "title": "VN-Index vượt 1.770 nhờ bank và BĐS",
+      "url": "https://vneconomy.vn/tang-ba-phien-bu-ca-thang-giam-vn-index-vuot-1770-diem.htm",
+      "sourceId": "src-vneconomy",
+      "publishedAt": "2026-10-23T15:26:00+07:00",
+      "tickers": [
+        "STB",
+        "VIC"
+      ],
+      "excerpt": "Thanh khoản chiều tăng mạnh.",
+      "whyImpact": "Xác nhận sức cầu nội."
+    },
+    {
+      "id": "n-2026-10-25-010",
+      "impact": "low",
+      "impactScore": 40,
+      "rank": 10,
+      "kind": "community",
+      "board": "vn",
+      "title": "FireAnt ghi nhận foreign net ~-480 tỷ",
+      "url": "https://fireant.vn/ma-chung-khoan/VNINDEX",
+      "sourceId": "src-fireant",
+      "publishedAt": "2026-10-24T14:08:00+07:00",
+      "tickers": [],
+      "excerpt": "Dữ liệu tổng hợp.",
+      "whyImpact": "Xác nhận print ngoại."
+    }
+  ]
+}

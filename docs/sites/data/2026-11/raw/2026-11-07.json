@@ -1,0 +1,56 @@
+{
+  "market": {
+    "vnindex_prior": {
+      "date": "2026-11-06",
+      "price": 1725.36,
+      "change": -15.37,
+      "changePct": -0.88,
+      "source": "src-stockbiz"
+    },
+    "hnx_prior": {
+      "date": "2026-11-06",
+      "price": 256.73,
+      "changePct": 0.05,
+      "source": "src-stockbiz"
+    },
+    "foreign_net_hose_vnd_bn": 393.59,
+    "proprietary_net_vnd_bn": 224.0,
+    "hose_volume_shares": 984184812,
+    "hose_value_vnd_bn": 18799.44,
+    "usdvnd_central": 25615,
+    "us": {
+      "spx": 7376.86,
+      "spx_pct": 0.31,
+      "ndx": 24579.42,
+      "ndx_pct": 1.09,
+      "dji": 51285.73,
+      "dji_pct": -0.46
+    },
+    "asia": {
+      "hsi": 24481.86,
+      "hsi_pct": -1.27,
+      "nky": 57434.77,
+      "nky_pct": -5.96
+    },
+    "btc": 75800.0,
+    "dxy": 102.28,
+    "xau": 4070.0,
+    "wti": 90.6
+  },
+  "news_events": [
+    "VN-Index closed 1725.36 on 06/11 after profit-taking near 1750",
+    "Foreign net buy ~393.6 tỷ HoSE, proprietary +224 tỷ",
+    "US mixed: SPX +0.31%, NDX +1.09% rebound after Thursday crash",
+    "Nikkei -5.96%, HSI -1.27%"
+  ],
+  "sentiment": {
+    "fireant": "Confirms numbers, weekend quiet",
+    "f247": "Older posts, thin on 07/11",
+    "newf319": "Thin"
+  },
+  "gaps": [
+    "No official SBV for 07/11 yet",
+    "Proprietary exact from VietnamBiz",
+    "Community thin"
+  ]
+}

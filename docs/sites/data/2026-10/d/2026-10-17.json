@@ -1,0 +1,1011 @@
+{
+  "schemaVersion": "1.0.0",
+  "date": "2026-10-17",
+  "newsPath": "2026-10/n/2026-10-17.json",
+  "report": {
+    "schemaVersion": "1.0.0",
+    "id": "daily-brief-2026-10-17",
+    "type": "daily_market_brief",
+    "locale": "vi-VN",
+    "timezone": "Asia/Ho_Chi_Minh",
+    "generatedAt": "2026-10-17T08:35:00+07:00",
+    "coverage": {
+      "from": "2026-10-16T15:00:00+07:00",
+      "to": "2026-10-17T08:35:00+07:00",
+      "session": "preopen"
+    },
+    "marketSession": "preopen",
+    "disclaimer": "Bản tin nghiên cứu pre-open Thứ Bảy 17/10. Không có đóng cửa HoSE ngày 17/10. Không phải khuyến nghị mua bán. Nguồn có thể lệch nhẹ.",
+    "ui": {
+      "pageSizeNews": 8,
+      "defaultChartTab": "vnindex",
+      "defaultWorldSymbol": "NDX"
+    },
+    "snapshot": {
+      "quotes": [
+        {
+          "symbol": "VNINDEX",
+          "nameVi": "VN-Index (đóng 16/10, StockBiz)",
+          "assetClass": "equity_index",
+          "price": 1705.91,
+          "change": 7.56,
+          "changePct": 0.45,
+          "session": "prior_close",
+          "sourceId": "src-stockbiz"
+        },
+        {
+          "symbol": "HNX",
+          "nameVi": "HNX-Index (đóng 16/10)",
+          "assetClass": "equity_index",
+          "price": 259.13,
+          "change": -0.16,
+          "changePct": -0.06,
+          "session": "prior_close",
+          "sourceId": "src-stockbiz"
+        },
+        {
+          "symbol": "DXY",
+          "nameVi": "Dollar Index (đóng 16/10, nguồn lệch)",
+          "assetClass": "fx",
+          "price": 101.8,
+          "change": -0.2,
+          "changePct": -0.2,
+          "session": "prior_close",
+          "sourceId": "src-barrons"
+        },
+        {
+          "symbol": "DJI",
+          "nameVi": "Dow Jones (đóng 16/10)",
+          "assetClass": "equity_index",
+          "price": 52002.41,
+          "change": -175.28,
+          "changePct": -0.34,
+          "session": "prior_close",
+          "sourceId": "src-bloomberg"
+        },
+        {
+          "symbol": "NDX",
+          "nameVi": "Nasdaq-100 (đóng 16/10)",
+          "assetClass": "equity_index",
+          "price": 29187.55,
+          "change": -748.05,
+          "changePct": -2.5,
+          "session": "prior_close",
+          "sourceId": "src-bloomberg"
+        },
+        {
+          "symbol": "SPX",
+          "nameVi": "S&P 500 (đóng 16/10)",
+          "assetClass": "equity_index",
+          "price": 7659.44,
+          "change": -84.62,
+          "changePct": -1.09,
+          "session": "prior_close",
+          "sourceId": "src-bloomberg"
+        },
+        {
+          "symbol": "NKY",
+          "nameVi": "Nikkei 225 (đóng 16/10)",
+          "assetClass": "equity_index",
+          "price": 65324.29,
+          "change": 898.34,
+          "changePct": 1.39,
+          "session": "prior_close",
+          "sourceId": "src-barrons"
+        },
+        {
+          "symbol": "HSI",
+          "nameVi": "Hang Seng (đóng 16/10)",
+          "assetClass": "equity_index",
+          "price": 24186.83,
+          "change": 124.11,
+          "changePct": 0.52,
+          "session": "prior_close",
+          "sourceId": "src-barrons"
+        },
+        {
+          "symbol": "WTI",
+          "nameVi": "WTI (đóng 16/10, nguồn lệch)",
+          "assetClass": "commodity",
+          "price": 99.0,
+          "change": 2.5,
+          "changePct": 2.6,
+          "session": "prior_close",
+          "sourceId": "src-barrons"
+        },
+        {
+          "symbol": "XAU",
+          "nameVi": "Vàng (đóng 16/10, nguồn lệch)",
+          "assetClass": "commodity",
+          "price": 4169.6,
+          "change": -5,
+          "changePct": -0.1,
+          "session": "prior_close",
+          "sourceId": "src-barrons"
+        },
+        {
+          "symbol": "BTC",
+          "nameVi": "Bitcoin (snapshot 16/10)",
+          "assetClass": "crypto",
+          "price": 81600,
+          "change": -500,
+          "changePct": -0.6,
+          "session": "prior_close",
+          "sourceId": "src-yahoo-btc"
+        },
+        {
+          "symbol": "USDVND",
+          "nameVi": "Tỷ giá trung tâm NHNN (~16/10)",
+          "assetClass": "fx",
+          "price": 25637,
+          "change": -5,
+          "changePct": null,
+          "session": "prior_close",
+          "sourceId": "src-nhnn"
+        }
+      ]
+    },
+    "globalNews": [
+      {
+        "id": "g-2026-10-17-001",
+        "url": "https://www.marketwatch.com/investing/index/ndx",
+        "date": "2026-10-16T16:15:00+07:00",
+        "title": "NDX −2,50% tại 29.187,55; tech AI pressure",
+        "summary": "Chip và AI names yếu. SPX −1,09%.",
+        "impact": {
+          "direction": "risk_off",
+          "horizon": "days",
+          "assets": [
+            "NDX",
+            "SPX"
+          ],
+          "text": "Overnight tech risk-off."
+        },
+        "sourceId": "src-bloomberg"
+      },
+      {
+        "id": "g-2026-10-17-002",
+        "url": "https://www.marketwatch.com/investing/index/djia",
+        "date": "2026-10-16T16:30:00+07:00",
+        "title": "Dow −0,34% tại 52.002,41",
+        "summary": "Defensive tương đối tốt hơn tech.",
+        "impact": {
+          "direction": "mixed",
+          "horizon": "days",
+          "assets": [
+            "DJI"
+          ],
+          "text": "Rotation tiếp tục."
+        },
+        "sourceId": "src-bloomberg"
+      },
+      {
+        "id": "g-2026-10-17-003",
+        "url": "https://www.barrons.com/market-data",
+        "date": "2026-10-16T17:00:00+07:00",
+        "title": "DXY ~101,8 (nguồn lệch)",
+        "summary": "USD hạ nhẹ.",
+        "impact": {
+          "direction": "risk_on",
+          "horizon": "days",
+          "assets": [
+            "DXY"
+          ],
+          "text": "Giảm áp FX."
+        },
+        "sourceId": "src-barrons"
+      },
+      {
+        "id": "g-2026-10-17-004",
+        "url": "https://www.marketwatch.com/investing/index/nik",
+        "date": "2026-10-16T15:30:00+07:00",
+        "title": "Nikkei +1,39% 65.324",
+        "summary": "Asia rebound.",
+        "impact": {
+          "direction": "risk_on",
+          "horizon": "intraday",
+          "assets": [
+            "NKY"
+          ],
+          "text": "Regional support."
+        },
+        "sourceId": "src-barrons"
+      },
+      {
+        "id": "g-2026-10-17-005",
+        "url": "https://www.marketwatch.com/investing/index/hsi",
+        "date": "2026-10-16T16:00:00+07:00",
+        "title": "HSI +0,52% 24.187",
+        "summary": "Tech HK hồi nhẹ.",
+        "impact": {
+          "direction": "risk_on",
+          "horizon": "intraday",
+          "assets": [
+            "HSI"
+          ],
+          "text": "HK hỗ trợ."
+        },
+        "sourceId": "src-barrons"
+      },
+      {
+        "id": "g-2026-10-17-006",
+        "url": "https://www.barrons.com/market-data",
+        "date": "2026-10-16T17:30:00+07:00",
+        "title": "WTI ~99 (lệch 96–101)",
+        "summary": "Dầu tăng Hormuz.",
+        "impact": {
+          "direction": "mixed",
+          "horizon": "days",
+          "assets": [
+            "WTI"
+          ],
+          "text": "Energy mixed."
+        },
+        "sourceId": "src-barrons"
+      },
+      {
+        "id": "g-2026-10-17-007",
+        "url": "https://www.goldprice.com/gold-price-today",
+        "date": "2026-10-16T17:00:00+07:00",
+        "title": "Vàng ~4.170 (nguồn lệch)",
+        "summary": "Ổn định.",
+        "impact": {
+          "direction": "neutral",
+          "horizon": "days",
+          "assets": [
+            "XAU"
+          ],
+          "text": "Safe haven ổn."
+        },
+        "sourceId": "src-barrons"
+      },
+      {
+        "id": "g-2026-10-17-008",
+        "url": "https://finance.yahoo.com/quote/BTC-USD/",
+        "date": "2026-10-16T20:00:00+07:00",
+        "title": "Bitcoin ~81.600",
+        "summary": "Crypto ổn.",
+        "impact": {
+          "direction": "neutral",
+          "horizon": "days",
+          "assets": [
+            "BTC"
+          ],
+          "text": "Risk assets bình."
+        },
+        "sourceId": "src-yahoo-btc"
+      }
+    ],
+    "vietnamNews": [
+      {
+        "id": "vn-2026-10-17-001",
+        "url": "http://en.stockbiz.vn/HistoricalIndices.aspx",
+        "date": "2026-10-16T15:10:00+07:00",
+        "title": "StockBiz khóa VN-Index 16/10 tại 1.705,91",
+        "summary": "Lấy lại 1.700. Volume 509,78m / 10.996 tỷ.",
+        "impact": {
+          "direction": "risk_on",
+          "horizon": "intraday",
+          "assets": [
+            "VNINDEX"
+          ],
+          "text": "Print khóa phục hồi."
+        },
+        "sourceId": "src-stockbiz"
+      },
+      {
+        "id": "vn-2026-10-17-002",
+        "url": "http://en.stockbiz.vn/ForeignerTradingStats.aspx?Exchange=HOSTC&Type=1",
+        "date": "2026-10-16T15:20:00+07:00",
+        "title": "Ngoại bán ròng ~534 tỷ HoSE",
+        "summary": "Chuỗi 11 phiên. HDB/VIC chịu áp.",
+        "impact": {
+          "direction": "risk_off",
+          "horizon": "intraday",
+          "assets": [
+            "HDB",
+            "VIC"
+          ],
+          "text": "Áp lực ngoại tiếp."
+        },
+        "sourceId": "src-stockbiz"
+      },
+      {
+        "id": "vn-2026-10-17-003",
+        "url": "https://nmquan.vn/data/tu-doanh",
+        "date": "2026-10-16T19:22:00+07:00",
+        "title": "Tự doanh mua ròng ~538 tỷ, VPB +218",
+        "summary": "Nội địa chọn lọc.",
+        "impact": {
+          "direction": "risk_on",
+          "horizon": "intraday",
+          "assets": [
+            "VPB"
+          ],
+          "text": "Cân bằng dòng nội."
+        },
+        "sourceId": "src-vietnambiz"
+      },
+      {
+        "id": "vn-2026-10-17-004",
+        "url": "https://sbv.gov.vn/",
+        "date": "2026-10-16T09:00:00+07:00",
+        "title": "Tỷ giá trung tâm ~25.637",
+        "summary": "Ổn định.",
+        "impact": {
+          "direction": "neutral",
+          "horizon": "intraday",
+          "assets": [
+            "USDVND"
+          ],
+          "text": "FX ổn."
+        },
+        "sourceId": "src-nhnn"
+      },
+      {
+        "id": "vn-2026-10-17-005",
+        "url": "https://cafef.vn/thi-truong-chung-khoan.chn",
+        "date": "2026-10-16T16:00:00+07:00",
+        "title": "CafeF xác nhận VN 1.705,91 thanh khoản thấp",
+        "summary": "Bank và VHM kéo.",
+        "impact": {
+          "direction": "mixed",
+          "horizon": "intraday",
+          "assets": [
+            "VNINDEX"
+          ],
+          "text": "Xác nhận."
+        },
+        "sourceId": "src-cafef"
+      },
+      {
+        "id": "vn-2026-10-17-006",
+        "url": "https://finance.vietstock.vn/",
+        "date": "2026-10-16T15:45:00+07:00",
+        "title": "Vietstock: VN30 +0,63% hỗ trợ",
+        "summary": "Large-cap chọn lọc.",
+        "impact": {
+          "direction": "risk_on",
+          "horizon": "intraday",
+          "assets": [
+            "VN30"
+          ],
+          "text": "Breadth bank."
+        },
+        "sourceId": "src-vietstock"
+      },
+      {
+        "id": "vn-2026-10-17-007",
+        "url": "https://f247.com/",
+        "date": "2026-10-16T20:00:00+07:00",
+        "title": "F247 thin: theo dõi 1.700",
+        "summary": "Sentiment color.",
+        "impact": {
+          "direction": "mixed",
+          "horizon": "intraday",
+          "assets": [],
+          "text": "Color."
+        },
+        "sourceId": "src-f247"
+      },
+      {
+        "id": "vn-2026-10-17-008",
+        "url": "https://newf319.com/",
+        "date": "2026-10-16T20:00:00+07:00",
+        "title": "newF319 thin cuối tuần",
+        "summary": "Color only.",
+        "impact": {
+          "direction": "neutral",
+          "horizon": "intraday",
+          "assets": [],
+          "text": "Color."
+        },
+        "sourceId": "src-newf319"
+      }
+    ],
+    "vietnamMacro": [
+      {
+        "indicator": "FX",
+        "nameVi": "Tỷ giá trung tâm",
+        "value": 25637,
+        "unit": "VND",
+        "sourceId": "src-nhnn"
+      },
+      {
+        "indicator": "RATES",
+        "nameVi": "Lãi suất liên ngân hàng",
+        "value": null,
+        "unit": "%",
+        "sourceId": "src-nhnn"
+      },
+      {
+        "indicator": "CPI",
+        "nameVi": "CPI",
+        "value": null,
+        "unit": "%",
+        "sourceId": "src-nso"
+      },
+      {
+        "indicator": "FDI",
+        "nameVi": "FDI",
+        "value": null,
+        "unit": "tỷ USD",
+        "sourceId": "src-nso"
+      },
+      {
+        "indicator": "FUEL",
+        "nameVi": "Giá xăng",
+        "value": null,
+        "unit": "đồng/lít",
+        "sourceId": "src-vneconomy"
+      },
+      {
+        "indicator": "FX",
+        "nameVi": "DXY",
+        "value": 101.8,
+        "unit": "điểm",
+        "sourceId": "src-barrons"
+      },
+      {
+        "indicator": "POLICY",
+        "nameVi": "WTI",
+        "value": 99.0,
+        "unit": "USD/thùng",
+        "sourceId": "src-barrons"
+      },
+      {
+        "indicator": "POLICY",
+        "nameVi": "Vàng",
+        "value": 4169.6,
+        "unit": "USD/oz",
+        "sourceId": "src-barrons"
+      }
+    ],
+    "equityMarket": {
+      "index": {
+        "priorClose": {
+          "date": "2026-10-16",
+          "price": 1705.91,
+          "change": 7.56,
+          "changePct": 0.45
+        },
+        "latest": {
+          "date": "2026-10-17",
+          "price": 1705.91,
+          "change": null,
+          "changePct": null,
+          "session": "preopen"
+        }
+      },
+      "liquidity": {
+        "hose": {
+          "volumeShares": 509780773,
+          "valueVndBn": 10996.28,
+          "note": "Phiên 16/10, StockBiz"
+        }
+      },
+      "foreign": {
+        "netValueVndBn": -534.4,
+        "note": "HoSE StockBiz (1.307,58 − 1.841,98); báo chí ~552 tổng"
+      },
+      "proprietary": {
+        "netValueVndBn": 538.4,
+        "note": "HOSE nmquan/VietnamBiz ~+538 tỷ, VPB +218"
+      },
+      "retail": {
+        "netValueVndBn": null,
+        "note": "Không có print riêng"
+      },
+      "relatedIndices": [
+        {
+          "symbol": "HNX",
+          "price": 259.13,
+          "changePct": -0.06
+        },
+        {
+          "symbol": "UPCOM",
+          "price": 124.87,
+          "changePct": 0.58
+        }
+      ]
+    },
+    "worldMarkets": {
+      "quotes": [
+        {
+          "symbol": "DXY",
+          "nameVi": "Dollar Index",
+          "price": 101.8,
+          "changePct": -0.2,
+          "sourceId": "src-barrons"
+        },
+        {
+          "symbol": "DJI",
+          "nameVi": "Dow Jones",
+          "price": 52002.41,
+          "changePct": -0.34,
+          "sourceId": "src-bloomberg"
+        },
+        {
+          "symbol": "NDX",
+          "nameVi": "Nasdaq-100",
+          "price": 29187.55,
+          "changePct": -2.5,
+          "sourceId": "src-bloomberg"
+        },
+        {
+          "symbol": "SPX",
+          "nameVi": "S&P 500",
+          "price": 7659.44,
+          "changePct": -1.09,
+          "sourceId": "src-bloomberg"
+        },
+        {
+          "symbol": "RUT",
+          "nameVi": "Russell 2000",
+          "price": 2721.37,
+          "changePct": -1.66,
+          "sourceId": "src-bloomberg"
+        },
+        {
+          "symbol": "NKY",
+          "nameVi": "Nikkei 225",
+          "price": 65324.29,
+          "changePct": 1.39,
+          "sourceId": "src-barrons"
+        },
+        {
+          "symbol": "HSI",
+          "nameVi": "Hang Seng",
+          "price": 24186.83,
+          "changePct": 0.52,
+          "sourceId": "src-barrons"
+        },
+        {
+          "symbol": "FTSE",
+          "nameVi": "FTSE 100",
+          "price": 10829.5,
+          "changePct": 0.38,
+          "sourceId": "src-barrons"
+        }
+      ]
+    },
+    "cryptoMarkets": {
+      "quotes": [
+        {
+          "symbol": "BTC",
+          "nameVi": "Bitcoin",
+          "price": 81600,
+          "changePct": -0.6,
+          "sourceId": "src-yahoo-btc"
+        },
+        {
+          "symbol": "ETH",
+          "nameVi": "Ethereum",
+          "price": 2420,
+          "changePct": 0.3,
+          "sourceId": "src-yahoo-btc"
+        }
+      ]
+    },
+    "companies": [
+      {
+        "ticker": "VPB",
+        "headline": "Tự doanh mua ròng mạnh +218 tỷ",
+        "impact": {
+          "direction": "risk_on",
+          "horizon": "intraday",
+          "assets": [
+            "VPB"
+          ],
+          "text": "Dòng nội hỗ trợ."
+        },
+        "metrics": {
+          "changePct": null,
+          "price": null
+        },
+        "sourceId": "src-vietnambiz"
+      },
+      {
+        "ticker": "HDB",
+        "headline": "Ngoại bán ròng lớn nhất ~183 tỷ",
+        "impact": {
+          "direction": "risk_off",
+          "horizon": "intraday",
+          "assets": [
+            "HDB"
+          ],
+          "text": "Áp lực ngoại."
+        },
+        "metrics": {
+          "changePct": 0.0,
+          "price": null
+        },
+        "sourceId": "src-stockbiz"
+      },
+      {
+        "ticker": "VIC",
+        "headline": "Ngoại bán ~69 tỷ, giảm 1,38%",
+        "impact": {
+          "direction": "risk_off",
+          "horizon": "intraday",
+          "assets": [
+            "VIC"
+          ],
+          "text": "Vin pressure."
+        },
+        "metrics": {
+          "changePct": -1.38,
+          "price": 215.0
+        },
+        "sourceId": "src-stockbiz"
+      },
+      {
+        "ticker": "VHM",
+        "headline": "Kéo chỉ số +3,6%",
+        "impact": {
+          "direction": "risk_on",
+          "horizon": "intraday",
+          "assets": [
+            "VHM"
+          ],
+          "text": "Large-cap support."
+        },
+        "metrics": {
+          "changePct": 3.57,
+          "price": 61.0
+        },
+        "sourceId": "src-cafef"
+      },
+      {
+        "ticker": "CTG",
+        "headline": "Bank hỗ trợ +2,68%",
+        "impact": {
+          "direction": "risk_on",
+          "horizon": "intraday",
+          "assets": [
+            "CTG"
+          ],
+          "text": "Bank breadth."
+        },
+        "metrics": {
+          "changePct": 2.68,
+          "price": null
+        },
+        "sourceId": "src-cafef"
+      },
+      {
+        "ticker": "FPT",
+        "headline": "Ngoại mua ròng +48 tỷ",
+        "impact": {
+          "direction": "risk_on",
+          "horizon": "intraday",
+          "assets": [
+            "FPT"
+          ],
+          "text": "Chọn lọc mua."
+        },
+        "metrics": {
+          "changePct": 0.34,
+          "price": null
+        },
+        "sourceId": "src-stockbiz"
+      }
+    ],
+    "outlook": {
+      "stance": "phục hồi mỏng, theo dõi ngoại",
+      "summary": "VN lấy lại 1.700 trên thanh khoản thấp và ngoại vẫn bán. Overnight US tech yếu. Hỗ trợ 1.690–1.700.",
+      "watchpoints": [
+        {
+          "text": "Ngoại tiếp tục bán >500 tỷ",
+          "impact": {
+            "direction": "risk_off",
+            "horizon": "intraday",
+            "assets": [
+              "VNINDEX"
+            ],
+            "text": "Áp lực dòng."
+          }
+        },
+        {
+          "text": "Thanh khoản dưới 12k tỷ",
+          "impact": {
+            "direction": "mixed",
+            "horizon": "intraday",
+            "assets": [
+              "VNINDEX"
+            ],
+            "text": "Hồi mỏng."
+          }
+        }
+      ],
+      "levels": [
+        {
+          "symbol": "VNINDEX",
+          "kind": "support",
+          "price": 1690,
+          "note": "Hỗ trợ tâm lý gần 1.700"
+        },
+        {
+          "symbol": "VNINDEX",
+          "kind": "resistance",
+          "price": 1720,
+          "note": "Kháng cự gần nhất"
+        }
+      ],
+      "events": [
+        {
+          "when": "2026-10-19",
+          "title": "Phiên mở cửa tuần mới",
+          "impact": {
+            "direction": "mixed",
+            "horizon": "intraday",
+            "assets": [
+              "VNINDEX"
+            ],
+            "text": "Theo dõi gap từ US."
+          }
+        },
+        {
+          "when": "2026-10-19",
+          "title": "Dữ liệu macro TQ (nếu có)",
+          "impact": {
+            "direction": "neutral",
+            "horizon": "days",
+            "assets": [
+              "HSI"
+            ],
+            "text": "Asia watch."
+          }
+        }
+      ]
+    },
+    "series": [
+      {
+        "id": "vnindex",
+        "interpolation": "official",
+        "points": [
+          {
+            "t": "2026-10-15",
+            "v": 1698.35
+          },
+          {
+            "t": "2026-10-16",
+            "v": 1705.91
+          }
+        ]
+      },
+      {
+        "id": "dji",
+        "interpolation": "official",
+        "points": [
+          {
+            "t": "2026-10-15",
+            "v": 52177.69
+          },
+          {
+            "t": "2026-10-16",
+            "v": 52002.41
+          }
+        ]
+      },
+      {
+        "id": "ndx",
+        "interpolation": "official",
+        "points": [
+          {
+            "t": "2026-10-15",
+            "v": 29935.59
+          },
+          {
+            "t": "2026-10-16",
+            "v": 29187.55
+          }
+        ]
+      },
+      {
+        "id": "spx",
+        "interpolation": "official",
+        "points": [
+          {
+            "t": "2026-10-15",
+            "v": 7744.06
+          },
+          {
+            "t": "2026-10-16",
+            "v": 7659.44
+          }
+        ]
+      },
+      {
+        "id": "dxy",
+        "interpolation": "anchored",
+        "points": [
+          {
+            "t": "2026-10-15",
+            "v": 102.04
+          },
+          {
+            "t": "2026-10-16",
+            "v": 101.8
+          }
+        ]
+      },
+      {
+        "id": "nky",
+        "interpolation": "official",
+        "points": [
+          {
+            "t": "2026-10-15",
+            "v": 64425.95
+          },
+          {
+            "t": "2026-10-16",
+            "v": 65324.29
+          }
+        ]
+      },
+      {
+        "id": "hsi",
+        "interpolation": "official",
+        "points": [
+          {
+            "t": "2026-10-15",
+            "v": 24062.72
+          },
+          {
+            "t": "2026-10-16",
+            "v": 24186.83
+          }
+        ]
+      },
+      {
+        "id": "btcUsd",
+        "interpolation": "anchored",
+        "points": [
+          {
+            "t": "2026-10-15",
+            "v": 82133
+          },
+          {
+            "t": "2026-10-16",
+            "v": 81600
+          }
+        ]
+      },
+      {
+        "id": "vnindexVolume5d",
+        "interpolation": "official",
+        "points": [
+          {
+            "t": "2026-10-12",
+            "v": 578
+          },
+          {
+            "t": "2026-10-13",
+            "v": 560
+          },
+          {
+            "t": "2026-10-14",
+            "v": 584
+          },
+          {
+            "t": "2026-10-15",
+            "v": 684
+          },
+          {
+            "t": "2026-10-16",
+            "v": 509
+          }
+        ]
+      },
+      {
+        "id": "foreignNet5dVndBn",
+        "interpolation": "official",
+        "points": [
+          {
+            "t": "2026-10-12",
+            "v": -583
+          },
+          {
+            "t": "2026-10-13",
+            "v": -434
+          },
+          {
+            "t": "2026-10-14",
+            "v": -770
+          },
+          {
+            "t": "2026-10-15",
+            "v": -686
+          },
+          {
+            "t": "2026-10-16",
+            "v": -534
+          }
+        ]
+      }
+    ]
+  },
+  "sources": {
+    "schemaVersion": "1.0.0",
+    "sources": [
+      {
+        "id": "src-stockbiz",
+        "name": "StockBiz",
+        "url": "http://en.stockbiz.vn/HistoricalIndices.aspx",
+        "accessedAt": "2026-10-17T08:35:00+07:00",
+        "reliability": "primary"
+      },
+      {
+        "id": "src-cafef",
+        "name": "CafeF",
+        "url": "https://cafef.vn/thi-truong-chung-khoan.chn",
+        "accessedAt": "2026-10-17T08:35:00+07:00",
+        "reliability": "primary"
+      },
+      {
+        "id": "src-vietstock",
+        "name": "Vietstock Finance",
+        "url": "https://finance.vietstock.vn/",
+        "accessedAt": "2026-10-17T08:35:00+07:00",
+        "reliability": "primary"
+      },
+      {
+        "id": "src-vietnambiz",
+        "name": "VietnamBiz",
+        "url": "https://vietnambiz.vn/",
+        "accessedAt": "2026-10-17T08:35:00+07:00",
+        "reliability": "secondary"
+      },
+      {
+        "id": "src-nhnn",
+        "name": "SBV / tỷ giá",
+        "url": "https://www.sbv.gov.vn/",
+        "accessedAt": "2026-10-17T08:35:00+07:00",
+        "reliability": "primary"
+      },
+      {
+        "id": "src-bloomberg",
+        "name": "Bloomberg Asia",
+        "url": "https://www.bloomberg.com/asia",
+        "accessedAt": "2026-10-17T08:35:00+07:00",
+        "reliability": "secondary"
+      },
+      {
+        "id": "src-barrons",
+        "name": "Barron's Market Data",
+        "url": "https://www.barrons.com/market-data",
+        "accessedAt": "2026-10-17T08:35:00+07:00",
+        "reliability": "secondary"
+      },
+      {
+        "id": "src-yahoo-btc",
+        "name": "Yahoo Bitcoin",
+        "url": "https://finance.yahoo.com/quote/BTC-USD/",
+        "accessedAt": "2026-10-17T08:35:00+07:00",
+        "reliability": "secondary"
+      },
+      {
+        "id": "src-fireant",
+        "name": "FireAnt cộng đồng",
+        "url": "https://fireant.vn/cong-dong/moi-nhat",
+        "accessedAt": "2026-10-17T08:35:00+07:00",
+        "reliability": "secondary"
+      },
+      {
+        "id": "src-f247",
+        "name": "F247",
+        "url": "https://f247.com/",
+        "accessedAt": "2026-10-17T08:35:00+07:00",
+        "reliability": "secondary"
+      },
+      {
+        "id": "src-newf319",
+        "name": "newF319",
+        "url": "https://newf319.com/",
+        "accessedAt": "2026-10-17T08:35:00+07:00",
+        "reliability": "secondary"
+      }
+    ]
+  }
+}

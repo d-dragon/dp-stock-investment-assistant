@@ -1,0 +1,142 @@
+{
+  "schemaVersion": "1.0.0",
+  "date": "2026-11-15",
+  "items": [
+    {
+      "id": "n-2026-11-15-001",
+      "impact": "high",
+      "impactScore": 90,
+      "rank": 1,
+      "kind": "market",
+      "board": "vn",
+      "title": "VN-Index đóng cửa 13/11 tại 1.734,93 (+0,01%) sau đảo chiều phút cuối",
+      "url": "https://stockbiz.vn/en/stocks/VNINDEX",
+      "sourceId": "src-stockbiz",
+      "publishedAt": "2026-11-13T15:00:00+07:00",
+      "tickers": [
+        "VNINDEX"
+      ],
+      "excerpt": "Lực cầu bắt đáy giúp chỉ số giữ sắc xanh dù độ rộng nghiêng bán.",
+      "whyImpact": "Prior close chính thức cho preopen 15/11."
+    },
+    {
+      "id": "n-2026-11-15-002",
+      "impact": "high",
+      "impactScore": 85,
+      "rank": 2,
+      "kind": "market",
+      "board": "vn",
+      "title": "Khối ngoại mua ròng 337,5 tỷ trên HoSE, tập trung VIX +308 tỷ",
+      "url": "https://vneconomy.vn/khoi-ngoai-tiep-tuc-mua-rong-gom-nhieu-nhat-mot-co-phieu-chung-khoan.htm",
+      "sourceId": "src-vneconomy",
+      "publishedAt": "2026-11-13T20:08:00+07:00",
+      "tickers": [
+        "VIX"
+      ],
+      "excerpt": "Điểm sáng dòng tiền ngoại phiên cuối tuần.",
+      "whyImpact": "Dòng ngoại quyết định bias preopen."
+    },
+    {
+      "id": "n-2026-11-15-003",
+      "impact": "high",
+      "impactScore": 80,
+      "rank": 3,
+      "kind": "news",
+      "board": "global",
+      "title": "S&P 500 -0,40% phiên 13/11, Nasdaq -0,91% do Nvidia CEO từ chức",
+      "url": "https://www.reuters.com/business/nasdaq-futures-dip-nvidia-tumult-keeps-investors-edge-2026-11-13/",
+      "sourceId": "src-bloomberg",
+      "publishedAt": "2026-11-13T22:00:00+07:00",
+      "tickers": [
+        "SPX",
+        "NDX"
+      ],
+      "excerpt": "Tech pressure từ resignation Jensen Huang.",
+      "whyImpact": "Overnight risk-off truyền sang Asia/VN."
+    },
+    {
+      "id": "n-2026-11-15-004",
+      "impact": "medium",
+      "impactScore": 70,
+      "rank": 4,
+      "kind": "market",
+      "board": "vn",
+      "title": "Tự doanh mua ròng ~154-162 tỷ, gom mạnh GMD",
+      "url": "https://cafef.vn/tu-doanh-ctck-mua-rong-hang-tram-ty-phien-cuoi-tuan-co-phieu-nao-duoc-gom-manh-nhat-18826111316571562.chn",
+      "sourceId": "src-cafef",
+      "publishedAt": "2026-11-13T23:57:00+07:00",
+      "tickers": [
+        "GMD"
+      ],
+      "excerpt": "Nội bộ CTCK hỗ trợ cuối phiên.",
+      "whyImpact": "Xác nhận demand nội."
+    },
+    {
+      "id": "n-2026-11-15-005",
+      "impact": "medium",
+      "impactScore": 65,
+      "rank": 5,
+      "kind": "news",
+      "board": "global",
+      "title": "Hang Seng -1,55% xuống 23.637 do tech/Nvidia",
+      "url": "https://english.news.cn/20261113/587d6ca737da423bbab3ab4a072d177f/c.html",
+      "sourceId": "src-bloomberg",
+      "publishedAt": "2026-11-13T16:00:00+07:00",
+      "tickers": [
+        "HSI"
+      ],
+      "excerpt": "Áp lực khu vực châu Á.",
+      "whyImpact": "Regional sentiment."
+    },
+    {
+      "id": "n-2026-11-15-006",
+      "impact": "medium",
+      "impactScore": 60,
+      "rank": 6,
+      "kind": "news",
+      "board": "global",
+      "title": "Nikkei +0,53% lên 61.142, đi ngược HSI",
+      "url": "https://en.moneyandbanking.co.th/2026/286994/",
+      "sourceId": "src-bloomberg",
+      "publishedAt": "2026-11-13T16:00:00+07:00",
+      "tickers": [
+        "NKY"
+      ],
+      "excerpt": "Japan resilient.",
+      "whyImpact": "Asia mixed."
+    },
+    {
+      "id": "n-2026-11-15-007",
+      "impact": "low",
+      "impactScore": 50,
+      "rank": 7,
+      "kind": "macro",
+      "board": "vn",
+      "title": "SBV tỷ giá trung tâm 25.637 VND/USD (+14đ)",
+      "url": "https://www.sbv.gov.vn/",
+      "sourceId": "src-nhnn",
+      "publishedAt": "2026-11-13T09:00:00+07:00",
+      "tickers": [],
+      "excerpt": "FX ổn định.",
+      "whyImpact": "Macro background."
+    },
+    {
+      "id": "n-2026-11-15-008",
+      "impact": "low",
+      "impactScore": 45,
+      "rank": 8,
+      "kind": "community",
+      "board": "vn",
+      "title": "Cộng đồng FireAnt/F247 thin, tập trung VIX và bank",
+      "url": "https://fireant.vn/cong-dong/moi-nhat",
+      "sourceId": "src-fireant",
+      "publishedAt": "2026-11-14T10:00:00+07:00",
+      "tickers": [
+        "VIX",
+        "STB"
+      ],
+      "excerpt": "Sentiment color only, không phải print.",
+      "whyImpact": "Retail tone."
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "schemaVersion": "1.0.0",
+  "date": "2026-10-18",
+  "generatedAt": "2026-10-18T08:35:00+07:00",
+  "briefKind": "eod_prev+overnight+preopen",
+  "market": {
+    "vnindex_prior": 1705.91,
+    "foreign_hose_net_bn": -534,
+    "proprietary_net_bn": 538,
+    "volume_shares": 509780773,
+    "value_vnd_bn": 10996
+  },
+  "news_events": [],
+  "sentiment": {
+    "fireant": "thin weekend",
+    "f247": "thin",
+    "newf319": "thin"
+  },
+  "gaps": ["no official 18/10 close", "community thin", "DXY/WTI/XAU sources disagree slightly"]
+}

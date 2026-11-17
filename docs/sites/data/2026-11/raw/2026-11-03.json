@@ -1,0 +1,37 @@
+{
+  "date": "2026-11-03",
+  "eodDate": "2026-11-02",
+  "briefKind": "eod_prev+overnight+preopen",
+  "market": {
+    "vnindex_prior": {
+      "price": 1710.72,
+      "change": -30.9,
+      "changePct": -1.77,
+      "source": "src-stockbiz"
+    },
+    "hnx_prior": {
+      "price": 250.55,
+      "change": -2.19,
+      "changePct": -0.87,
+      "source": "src-stockbiz"
+    },
+    "foreign_net_hose_bn": -524,
+    "value_hose_bn": 18577,
+    "volume_hose_m": 877.5
+  },
+  "news_events": [
+    "VN-Index giảm 30.9 điểm phiên 2/11 về 1710.72, ngân hàng bị xả mạnh (VCB -4.8%, VPB -6.1%)",
+    "Khối ngoại bán ròng ~524 tỷ đồng HoSE, tập trung MBB, VCB, ACB",
+    "US: S&P -0.51% 7541.40, Nasdaq -1.07%, Dow +0.41%; dầu giảm mạnh do hy vọng đàm phán Iran",
+    "HSI +0.42% 23393, NKY -0.33% 63082"
+  ],
+  "sentiment": {
+    "fireant": "thận trọng sau phiên bán tháo",
+    "f247": "thảo luận vùng hỗ trợ 1700",
+    "newf319": "mỏng, chờ cân bằng"
+  },
+  "gaps": [
+    "proprietary flow chi tiết chưa đầy đủ",
+    "official close hôm nay chưa có"
+  ]
+}

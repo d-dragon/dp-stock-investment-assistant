@@ -1,0 +1,182 @@
+{
+  "schemaVersion": "1.0.0",
+  "date": "2026-10-28",
+  "generatedAt": "2026-10-28T08:35:00+07:00",
+  "briefKind": "eod_prev+overnight+preopen",
+  "items": [
+    {
+      "id": "n-2026-10-28-001",
+      "impact": "high",
+      "impactScore": 92,
+      "rank": 1,
+      "kind": "market",
+      "board": "vn",
+      "title": "VN-Index đóng 1.761,87 điểm (-0,10%) phiên 27/10",
+      "url": "https://stockbiz.vn/en/stocks/VNINDEX",
+      "sourceId": "src-stockbiz",
+      "publishedAt": "2026-10-27T15:10:00+07:00",
+      "tickers": [
+        "VNINDEX"
+      ],
+      "excerpt": "Volume 631,6 triệu, giá trị 13.922 tỷ. Độ rộng 123 tăng / 197 giảm. VIC hỗ trợ >5 điểm nhưng chỉ số vẫn đỏ.",
+      "whyImpact": "Print chính thức khóa cho pre-open. Thanh khoản thấp hơn MA20."
+    },
+    {
+      "id": "n-2026-10-28-002",
+      "impact": "high",
+      "impactScore": 88,
+      "rank": 2,
+      "kind": "market",
+      "board": "vn",
+      "title": "Ngoại bán ròng ~441 tỷ trên HoSE phiên 27/10",
+      "url": "https://stockbiz.vn/en/markets/flows",
+      "sourceId": "src-stockbiz",
+      "publishedAt": "2026-10-27T16:00:00+07:00",
+      "tickers": [
+        "ACB",
+        "FPT",
+        "TCB"
+      ],
+      "excerpt": "Mua 1.197 tỷ, bán 1.638 tỷ. Top bán ACB -179, FPT -149; top mua TCB +196, MSN +54.",
+      "whyImpact": "Áp lực ngoại tiếp diễn sau chuỗi bán ròng dài."
+    },
+    {
+      "id": "n-2026-10-28-003",
+      "impact": "high",
+      "impactScore": 85,
+      "rank": 3,
+      "kind": "market",
+      "board": "vn",
+      "title": "Tự doanh mua ròng 227,3 tỷ trên HoSE",
+      "url": "https://nmquan.vn/data/tu-doanh",
+      "sourceId": "src-vneconomy",
+      "publishedAt": "2026-10-27T19:00:00+07:00",
+      "tickers": [
+        "VPB",
+        "TCB",
+        "MWG"
+      ],
+      "excerpt": "Mua ròng mạnh VPB +61, TCB +52, MWG +50,6. Đảo chiều so với phiên trước.",
+      "whyImpact": "Dòng nội địa (tự doanh) hấp thụ áp lực."
+    },
+    {
+      "id": "n-2026-10-28-004",
+      "impact": "high",
+      "impactScore": 82,
+      "rank": 4,
+      "kind": "news",
+      "board": "global",
+      "title": "Nasdaq Composite +1,18% đóng 26.477 phiên 27/10",
+      "url": "https://portfolio-terminal.com/markets/stock-market-close",
+      "sourceId": "src-bloomberg",
+      "publishedAt": "2026-10-27T20:00:00+07:00",
+      "tickers": [
+        "NDX"
+      ],
+      "excerpt": "S&P +0,60% 7.722, Dow gần như đi ngang. Tech dẫn dắt trước họp Fed.",
+      "whyImpact": "Risk-on Mỹ hỗ trợ tâm lý mở cửa châu Á/VN."
+    },
+    {
+      "id": "n-2026-10-28-005",
+      "impact": "medium",
+      "impactScore": 70,
+      "rank": 5,
+      "kind": "news",
+      "board": "global",
+      "title": "Hang Seng đóng 23.041 (-0,73%) phiên 27/10",
+      "url": "https://www.marketwatch.com/investing/index/hsi",
+      "sourceId": "src-bloomberg",
+      "publishedAt": "2026-10-27T16:00:00+07:00",
+      "tickers": [
+        "HSI"
+      ],
+      "excerpt": "Nikkei tăng mạnh hơn. Châu Á phân hóa.",
+      "whyImpact": "Tín hiệu hỗn hợp từ khu vực."
+    },
+    {
+      "id": "n-2026-10-28-006",
+      "impact": "medium",
+      "impactScore": 65,
+      "rank": 6,
+      "kind": "macro",
+      "board": "vn",
+      "title": "SBV tỷ giá trung tâm 25.633 VND/USD ngày 27/10",
+      "url": "https://en.vietnamplus.vn/reference-exchange-rate-up-6-vnd-on-october-27-post354357.vnp",
+      "sourceId": "src-nhnn",
+      "publishedAt": "2026-10-27T09:00:00+07:00",
+      "tickers": [
+        "USDVND"
+      ],
+      "excerpt": "Tăng 6 đồng so với phiên trước. Band ±5% giữ nguyên.",
+      "whyImpact": "FX ổn định, không áp lực mới cho equity."
+    },
+    {
+      "id": "n-2026-10-28-007",
+      "impact": "medium",
+      "impactScore": 60,
+      "rank": 7,
+      "kind": "news",
+      "board": "global",
+      "title": "DXY quanh 102,3; vàng ~4.026-4.058; WTI ~101-102",
+      "url": "https://www.barrons.com/market-data",
+      "sourceId": "src-barrons",
+      "publishedAt": "2026-10-27T22:00:00+07:00",
+      "tickers": [
+        "DXY",
+        "XAU",
+        "WTI"
+      ],
+      "excerpt": "Nguồn lệch nhẹ về mức chính xác. USD ổn định hơn.",
+      "whyImpact": "Chi phí vốn và năng lượng không đảo chiều mạnh."
+    },
+    {
+      "id": "n-2026-10-28-008",
+      "impact": "low",
+      "impactScore": 35,
+      "rank": 8,
+      "kind": "community",
+      "board": "vn",
+      "title": "Cộng đồng FireAnt / F247 / newF319 mỏng",
+      "url": "https://fireant.vn/cong-dong/moi-nhat",
+      "sourceId": "src-fireant",
+      "publishedAt": "2026-10-28T07:00:00+07:00",
+      "tickers": [],
+      "excerpt": "Ít thảo luận mới về phiên 27/10. Không có consensus mạnh.",
+      "whyImpact": "Sentiment không phải print; chỉ màu sắc."
+    },
+    {
+      "id": "n-2026-10-28-009",
+      "impact": "medium",
+      "impactScore": 55,
+      "rank": 9,
+      "kind": "news",
+      "board": "vn",
+      "title": "BSC: VN-Index tích lũy quanh MA50, thanh khoản mỏng",
+      "url": "https://www.bsc.com.vn/en/bao-cao/16087-bsc-brief-27-10-vn-index-consolidates-on-thin-liquidity-as-it-approaches-ma50-resistance",
+      "sourceId": "src-vietstock",
+      "publishedAt": "2026-10-27T17:00:00+07:00",
+      "tickers": [
+        "VNINDEX"
+      ],
+      "excerpt": "Vùng 1.730-1.772. Kháng cự gần 1.772.",
+      "whyImpact": "Khung kỹ thuật cho pre-open."
+    },
+    {
+      "id": "n-2026-10-28-010",
+      "impact": "medium",
+      "impactScore": 50,
+      "rank": 10,
+      "kind": "news",
+      "board": "global",
+      "title": "Bitcoin quanh 80.000-80.800 USD",
+      "url": "https://finance.yahoo.com/quote/BTC-USD/",
+      "sourceId": "src-yahoo-btc",
+      "publishedAt": "2026-10-28T01:00:00+07:00",
+      "tickers": [
+        "BTC"
+      ],
+      "excerpt": "Dao động nhẹ, không có breakout rõ.",
+      "whyImpact": "Crypto ổn định, không dẫn dắt risk."
+    }
+  ]
+}

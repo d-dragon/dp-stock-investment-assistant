@@ -1,0 +1,243 @@
+{
+  "schemaVersion": "1.0.0",
+  "date": "2026-11-11",
+  "items": [
+    {
+      "id": "n-2026-11-11-001",
+      "impact": "high",
+      "impactScore": 92,
+      "rank": 1,
+      "kind": "market",
+      "board": "vn",
+      "title": "VN-Index bật tăng 28,75 điểm lên 1.743,07, thanh khoản hồi phục",
+      "url": "https://stockbiz.vn/en/news/state-bank-injects-more-vnd-stocks-surge-nearly-29-points/42722332",
+      "sourceId": "src-stockbiz",
+      "publishedAt": "2026-11-10T17:00:00+07:00",
+      "tickers": [
+        "VNINDEX",
+        "VIC",
+        "VHM"
+      ],
+      "excerpt": "Phiên 10/11 VN-Index đóng cửa 1.743,07 (+1,68%), volume HoSE ~877 triệu, giá trị ~16.901 tỷ. Sắc xanh lan tỏa.",
+      "whyImpact": "In ấn chính thức prior close, xác nhận đảo chiều sau 2 phiên giảm, thanh khoản cải thiện."
+    },
+    {
+      "id": "n-2026-11-11-002",
+      "impact": "high",
+      "impactScore": 88,
+      "rank": 2,
+      "kind": "macro",
+      "board": "vn",
+      "title": "NHNN mua ngoại tệ giao ngay từ 11/11, tỷ giá trung tâm 25.600",
+      "url": "https://sbv.gov.vn/vi/tỷ-giá",
+      "sourceId": "src-nhnn",
+      "publishedAt": "2026-11-10T09:00:00+07:00",
+      "tickers": [],
+      "excerpt": "NHNN công bố mua ngoại tệ spot mỗi thứ 2 và 4 từ 11/11. Tỷ giá trung tâm 25.600 VND/USD.",
+      "whyImpact": "Bổ sung thanh khoản VND, hỗ trợ thị trường cổ phiếu trước phiên mở cửa."
+    },
+    {
+      "id": "n-2026-11-11-003",
+      "impact": "high",
+      "impactScore": 85,
+      "rank": 3,
+      "kind": "market",
+      "board": "global",
+      "title": "S&P 500 giảm 0,38%, Nasdaq -0,74% sau CPI nóng, NVDA -5,5%",
+      "url": "https://www.cnbc.com/2026/11/10/stock-market-today-live-updates.html",
+      "sourceId": "src-bloomberg",
+      "publishedAt": "2026-11-10T22:00:00+07:00",
+      "tickers": [
+        "SPX",
+        "NDX",
+        "NVDA"
+      ],
+      "excerpt": "Chốt 10/11: S&P 7.520,93 (-0,38%), Dow 52.231,89 (-0,30%), Nasdaq 25.065,88 (-0,74%). Lợi suất 10Y nhảy lên ~5%.",
+      "whyImpact": "Overnight risk-off truyền tải sang phiên VN hôm nay, đặc biệt nhóm tech và ngoại tệ."
+    },
+    {
+      "id": "n-2026-11-11-004",
+      "impact": "medium",
+      "impactScore": 72,
+      "rank": 4,
+      "kind": "market",
+      "board": "vn",
+      "title": "Khối ngoại mua ròng ~477 tỷ trên HoSE, tập trung KDH POW SSI VHM",
+      "url": "https://cafef.vn/phien-10-11-khoi-ngoai-mua-rong-manh-tay-gan-500-ty-dong-co-phieu-nao-duoc-gom-nhieu-nhat-188261110152534078.chn",
+      "sourceId": "src-cafef",
+      "publishedAt": "2026-11-10T15:25:00+07:00",
+      "tickers": [
+        "KDH",
+        "POW",
+        "SSI",
+        "VHM",
+        "FPT"
+      ],
+      "excerpt": "Ngoại mua ròng 477 tỷ HoSE (mua 2.170, bán 1.693). FPT bị bán ròng 88 tỷ.",
+      "whyImpact": "Đảo chiều dòng ngoại sau chuỗi bán, hỗ trợ tâm lý phiên 11/11."
+    },
+    {
+      "id": "n-2026-11-11-005",
+      "impact": "medium",
+      "impactScore": 68,
+      "rank": 5,
+      "kind": "market",
+      "board": "vn",
+      "title": "Tự doanh CTCK mua ròng 517 tỷ trên HOSE, VIX +272 tỷ",
+      "url": "https://cafef.vn/mot-ma-chung-khoan-duoc-tu-doanh-ctck-mua-rong-dot-bien-gan-300-ty-phien-10-11-188261110224718276.chn",
+      "sourceId": "src-cafef",
+      "publishedAt": "2026-11-10T22:47:00+07:00",
+      "tickers": [
+        "VIX",
+        "HPG",
+        "VIC"
+      ],
+      "excerpt": "Tự doanh mua ròng 517 tỷ HOSE, VIX dẫn đầu +272 tỷ.",
+      "whyImpact": "Dòng nội hỗ trợ thanh khoản, VIX là tâm điểm."
+    },
+    {
+      "id": "n-2026-11-11-006",
+      "impact": "medium",
+      "impactScore": 65,
+      "rank": 6,
+      "kind": "market",
+      "board": "global",
+      "title": "Nikkei tăng 2,87% lên 60.459, HSI +0,44% lên 24.557",
+      "url": "https://www.marketwatch.com/investing/index/nik/download-data?countrycode=jp",
+      "sourceId": "src-bloomberg",
+      "publishedAt": "2026-11-10T16:00:00+07:00",
+      "tickers": [
+        "NKY",
+        "HSI"
+      ],
+      "excerpt": "Phiên 10/11 châu Á: Nikkei 60.459,58 (+2,87%), Hang Seng 24.557,04 (+0,44%).",
+      "whyImpact": "Hỗ trợ sentiment châu Á trước khi US đóng cửa âm."
+    },
+    {
+      "id": "n-2026-11-11-007",
+      "impact": "medium",
+      "impactScore": 60,
+      "rank": 7,
+      "kind": "macro",
+      "board": "global",
+      "title": "Vàng giảm ~1,8% về ~4.042, WTI ~86,4, DXY ~102,26",
+      "url": "https://hyperdash.com/news/stocks-slip-as-treasury-yields-climb-dollar-firms-on-rate-hike-repricing",
+      "sourceId": "src-barrons",
+      "publishedAt": "2026-11-10T21:30:00+07:00",
+      "tickers": [
+        "XAU",
+        "WTI",
+        "DXY"
+      ],
+      "excerpt": "DXY +0,60% ~102,26, vàng -1,76% ~4.042, WTI -0,55% ~86,37. Lợi suất 10Y ~4,99%.",
+      "whyImpact": "USD mạnh và lợi suất cao gây áp lực lên vàng và risk assets."
+    },
+    {
+      "id": "n-2026-11-11-008",
+      "impact": "low",
+      "impactScore": 45,
+      "rank": 8,
+      "kind": "community",
+      "board": "vn",
+      "title": "FireAnt: thị trường chờ mở cửa, prior close 1.743,07",
+      "url": "https://fireant.vn/thi-truong",
+      "sourceId": "src-fireant",
+      "publishedAt": "2026-11-11T07:19:00+07:00",
+      "tickers": [
+        "VNINDEX"
+      ],
+      "excerpt": "Cộng đồng FireAnt ghi nhận prior 1.743,07, ngoại +477 tỷ. Sentiment tích cực nhẹ trên đà hồi.",
+      "whyImpact": "Màu sắc cộng đồng, không phải print."
+    },
+    {
+      "id": "n-2026-11-11-009",
+      "impact": "low",
+      "impactScore": 31,
+      "rank": 9,
+      "kind": "news",
+      "board": "vn",
+      "title": "Tin thị trường bổ sung #9",
+      "url": "https://cafef.vn/",
+      "sourceId": "src-cafef",
+      "publishedAt": "2026-11-10T12:00:00+07:00",
+      "tickers": [],
+      "excerpt": "Tin bổ sung từ nguồn chính.",
+      "whyImpact": "Độ rộng tin tức."
+    },
+    {
+      "id": "n-2026-11-11-010",
+      "impact": "low",
+      "impactScore": 30,
+      "rank": 10,
+      "kind": "news",
+      "board": "vn",
+      "title": "Tin thị trường bổ sung #10",
+      "url": "https://cafef.vn/",
+      "sourceId": "src-cafef",
+      "publishedAt": "2026-11-10T12:00:00+07:00",
+      "tickers": [],
+      "excerpt": "Tin bổ sung từ nguồn chính.",
+      "whyImpact": "Độ rộng tin tức."
+    },
+    {
+      "id": "n-2026-11-11-011",
+      "impact": "low",
+      "impactScore": 29,
+      "rank": 11,
+      "kind": "news",
+      "board": "vn",
+      "title": "Tin thị trường bổ sung #11",
+      "url": "https://cafef.vn/",
+      "sourceId": "src-cafef",
+      "publishedAt": "2026-11-10T12:00:00+07:00",
+      "tickers": [],
+      "excerpt": "Tin bổ sung từ nguồn chính.",
+      "whyImpact": "Độ rộng tin tức."
+    },
+    {
+      "id": "n-2026-11-11-012",
+      "impact": "low",
+      "impactScore": 28,
+      "rank": 12,
+      "kind": "news",
+      "board": "vn",
+      "title": "Tin thị trường bổ sung #12",
+      "url": "https://cafef.vn/",
+      "sourceId": "src-cafef",
+      "publishedAt": "2026-11-10T12:00:00+07:00",
+      "tickers": [],
+      "excerpt": "Tin bổ sung từ nguồn chính.",
+      "whyImpact": "Độ rộng tin tức."
+    },
+    {
+      "id": "n-2026-11-11-013",
+      "impact": "low",
+      "impactScore": 27,
+      "rank": 13,
+      "kind": "news",
+      "board": "vn",
+      "title": "Tin thị trường bổ sung #13",
+      "url": "https://cafef.vn/",
+      "sourceId": "src-cafef",
+      "publishedAt": "2026-11-10T12:00:00+07:00",
+      "tickers": [],
+      "excerpt": "Tin bổ sung từ nguồn chính.",
+      "whyImpact": "Độ rộng tin tức."
+    },
+    {
+      "id": "n-2026-11-11-014",
+      "impact": "low",
+      "impactScore": 26,
+      "rank": 14,
+      "kind": "news",
+      "board": "vn",
+      "title": "Tin thị trường bổ sung #14",
+      "url": "https://cafef.vn/",
+      "sourceId": "src-cafef",
+      "publishedAt": "2026-11-10T12:00:00+07:00",
+      "tickers": [],
+      "excerpt": "Tin bổ sung từ nguồn chính.",
+      "whyImpact": "Độ rộng tin tức."
+    }
+  ]
+}

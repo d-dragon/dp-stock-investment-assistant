@@ -1,0 +1,182 @@
+{
+  "schemaVersion": "1.0.0",
+  "date": "2026-10-31",
+  "generatedAt": "2026-10-31T08:35:00+07:00",
+  "briefKind": "eod_prev+overnight+preopen",
+  "items": [
+    {
+      "id": "n-2026-10-31-001",
+      "impact": "high",
+      "impactScore": 92,
+      "rank": 1,
+      "kind": "market",
+      "board": "vn",
+      "title": "VN-Index đóng 30/10 tại 1.741,62 điểm (-13,99 / -0,80%)",
+      "url": "https://stockbiz.vn/en/stocks/VNINDEX",
+      "sourceId": "src-stockbiz",
+      "publishedAt": "2026-10-30T15:33:00+07:00",
+      "tickers": [
+        "VNINDEX"
+      ],
+      "excerpt": "Volume 692,6m; giá trị 14.673 tỷ. Độ rộng 72 tăng / 253 giảm.",
+      "whyImpact": "Đóng cửa chính thức phiên cuối tháng, mốc hỗ trợ SMA."
+    },
+    {
+      "id": "n-2026-10-31-002",
+      "impact": "high",
+      "impactScore": 88,
+      "rank": 2,
+      "kind": "market",
+      "board": "global",
+      "title": "US close 30/10: S&P -1,82% 7.580; Nasdaq -2,86% 25.437",
+      "url": "https://www.cnbc.com/2026/10/29/stock-market-today-live-updates.html",
+      "sourceId": "src-bloomberg",
+      "publishedAt": "2026-10-30T16:20:00-04:00",
+      "tickers": [
+        "SPX",
+        "NDX"
+      ],
+      "excerpt": "Tech/AI selloff; Intel -29%, Amazon yếu. Dow -1,09%.",
+      "whyImpact": "Risk-off mạnh truyền sang phiên mở cửa thứ Hai."
+    },
+    {
+      "id": "n-2026-10-31-003",
+      "impact": "high",
+      "impactScore": 85,
+      "rank": 3,
+      "kind": "market",
+      "board": "vn",
+      "title": "Khối ngoại bán ròng ~634 tỷ trên HOSE phiên 30/10",
+      "url": "https://www.bsc.com.vn/en/bao-cao/16103-bsc-brief-30-10-vn-index-retreats-to-test-the-sma10-and-sma20",
+      "sourceId": "src-stockbiz",
+      "publishedAt": "2026-10-30T16:00:00+07:00",
+      "tickers": [
+        "VIC",
+        "TCB",
+        "MBB"
+      ],
+      "excerpt": "BSC: -633,9 tỷ; dẫn đầu VIC -354, TCB -133.",
+      "whyImpact": "Áp lực dòng tiền ngoại tiếp diễn."
+    },
+    {
+      "id": "n-2026-10-31-004",
+      "impact": "medium",
+      "impactScore": 72,
+      "rank": 4,
+      "kind": "market",
+      "board": "vn",
+      "title": "Tự doanh mua ròng +92,8 tỷ HOSE (nmquan)",
+      "url": "https://nmquan.vn/data/tu-doanh",
+      "sourceId": "src-vneconomy",
+      "publishedAt": "2026-10-31T07:00:00+07:00",
+      "tickers": [
+        "MWG",
+        "VPB",
+        "HPG"
+      ],
+      "excerpt": "MWG +306 tỷ, VPB +97; bán HPG -39, MBB -30.",
+      "whyImpact": "Nội địa hỗ trợ có chọn lọc."
+    },
+    {
+      "id": "n-2026-10-31-005",
+      "impact": "medium",
+      "impactScore": 68,
+      "rank": 5,
+      "kind": "news",
+      "board": "global",
+      "title": "HSI +1,46% đóng 23.294,42",
+      "url": "https://www.ad-hoc-news.de/boerse/news/marktberichte/hang-seng-closes-1-46-higher-at-23-294-42-after-october-rebound/70434788",
+      "sourceId": "src-bloomberg",
+      "publishedAt": "2026-10-30T16:00:00+08:00",
+      "tickers": [
+        "HSI"
+      ],
+      "excerpt": "Hồng Kông hồi phục cuối tháng.",
+      "whyImpact": "Tín hiệu khu vực hỗn hợp."
+    },
+    {
+      "id": "n-2026-10-31-006",
+      "impact": "medium",
+      "impactScore": 65,
+      "rank": 6,
+      "kind": "macro",
+      "board": "global",
+      "title": "WTI ~104 USD (+2%); vàng ~3.899 (-3,3%)",
+      "url": "https://edgeconsultancykw.com/commodities-wrap-30-october-2026/",
+      "sourceId": "src-barrons",
+      "publishedAt": "2026-10-31T02:00:00+07:00",
+      "tickers": [
+        "WTI",
+        "XAU"
+      ],
+      "excerpt": "Dầu tăng, vàng giảm trong risk-off.",
+      "whyImpact": "Chi phí năng lượng và vàng truyền sang VN."
+    },
+    {
+      "id": "n-2026-10-31-007",
+      "impact": "medium",
+      "impactScore": 60,
+      "rank": 7,
+      "kind": "market",
+      "board": "vn",
+      "title": "HNX-Index 252,74 (-1,51%)",
+      "url": "https://stockbiz.vn/en/stocks/HNXINDEX",
+      "sourceId": "src-stockbiz",
+      "publishedAt": "2026-10-30T15:33:00+07:00",
+      "tickers": [
+        "HNX"
+      ],
+      "excerpt": "Hà Nội giảm sâu hơn.",
+      "whyImpact": "Độ rộng thị trường âm."
+    },
+    {
+      "id": "n-2026-10-31-008",
+      "impact": "low",
+      "impactScore": 45,
+      "rank": 8,
+      "kind": "community",
+      "board": "vn",
+      "title": "FireAnt / F247 cộng đồng mỏng cuối tuần",
+      "url": "https://fireant.vn/cong-dong/moi-nhat",
+      "sourceId": "src-fireant",
+      "publishedAt": "2026-10-31T08:00:00+07:00",
+      "tickers": [],
+      "excerpt": "Ít thảo luận mới về phiên 30/10.",
+      "whyImpact": "Sentiment không phải print."
+    },
+    {
+      "id": "n-2026-10-31-009",
+      "impact": "medium",
+      "impactScore": 55,
+      "rank": 9,
+      "kind": "market",
+      "board": "global",
+      "title": "Bitcoin quanh 76-77k USD (-5%)",
+      "url": "https://finance.yahoo.com/quote/BTC-USD/",
+      "sourceId": "src-yahoo-btc",
+      "publishedAt": "2026-10-30T20:00:00+07:00",
+      "tickers": [
+        "BTC"
+      ],
+      "excerpt": "Crypto giảm theo risk-off.",
+      "whyImpact": "Màu sắc rủi ro."
+    },
+    {
+      "id": "n-2026-10-31-010",
+      "impact": "low",
+      "impactScore": 40,
+      "rank": 10,
+      "kind": "macro",
+      "board": "vn",
+      "title": "Tỷ giá trung tâm chưa cập nhật mới",
+      "url": "https://www.sbv.gov.vn/",
+      "sourceId": "src-nhnn",
+      "publishedAt": "2026-10-29T09:00:00+07:00",
+      "tickers": [
+        "USDVND"
+      ],
+      "excerpt": "Giữ mức trước 25.644.",
+      "whyImpact": "FX ổn định."
+    }
+  ]
+}

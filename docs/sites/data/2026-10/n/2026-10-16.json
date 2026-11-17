@@ -1,0 +1,148 @@
+{
+  "schemaVersion": "1.0.0",
+  "date": "2026-10-16",
+  "generatedAt": "2026-10-16T08:35:00+07:00",
+  "briefKind": "eod_prev+overnight+preopen",
+  "items": [
+    {
+      "id": "n-2026-10-16-001",
+      "impact": "high",
+      "impactScore": 92,
+      "rank": 1,
+      "kind": "market",
+      "board": "vn",
+      "title": "StockBiz khóa VN-Index 15/10 tại 1.698,35 (−6,52 / −0,38%), thủng 1.700",
+      "url": "http://en.stockbiz.vn/HistoricalIndices.aspx",
+      "sourceId": "src-stockbiz",
+      "publishedAt": "2026-10-15T15:10:00+07:00",
+      "tickers": [
+        "VNINDEX"
+      ],
+      "excerpt": "Volume 684,78 triệu, giá trị 15.043 tỷ. Foreign net ~−686 tỷ.",
+      "whyImpact": "Official print, broke psychological 1.700 after 7-session streak."
+    },
+    {
+      "id": "n-2026-10-16-002",
+      "impact": "high",
+      "impactScore": 85,
+      "rank": 2,
+      "kind": "market",
+      "board": "vn",
+      "title": "Khối ngoại bán ròng ~686 tỷ HoSE phiên 15/10",
+      "url": "http://en.stockbiz.vn/ForeignerTradingStats.aspx?Exchange=HOSTC&Type=1",
+      "sourceId": "src-stockbiz",
+      "publishedAt": "2026-10-15T15:20:00+07:00",
+      "tickers": [
+        "VIC",
+        "VHM"
+      ],
+      "excerpt": "Sell 2.280 tỷ, buy 1.594 tỷ. VIC/VHM tiếp tục áp lực.",
+      "whyImpact": "Persistent foreign selling chain continues into pre-open."
+    },
+    {
+      "id": "n-2026-10-16-003",
+      "impact": "high",
+      "impactScore": 78,
+      "rank": 3,
+      "kind": "news",
+      "board": "global",
+      "title": "Dow đóng 52.177,69 (+1,08%), SPX 7.744,06 (+0,33%), NDX 29.935,59 (−0,05%)",
+      "url": "https://www.marketwatch.com/investing/index/djia",
+      "sourceId": "src-bloomberg",
+      "publishedAt": "2026-10-15T16:30:00+07:00",
+      "tickers": [
+        "DJI",
+        "SPX",
+        "NDX"
+      ],
+      "excerpt": "Rotation out of tech after hot PPI; yields eased.",
+      "whyImpact": "Overnight US mixed: Dow strong, tech flat — transmits cautiously to VN."
+    },
+    {
+      "id": "n-2026-10-16-004",
+      "impact": "medium",
+      "impactScore": 70,
+      "rank": 4,
+      "kind": "macro",
+      "board": "vn",
+      "title": "Tỷ giá trung tâm NHNN ~25.642–25.646 cho 15/10 (nguồn lệch nhẹ)",
+      "url": "https://sbv.gov.vn/",
+      "sourceId": "src-nhnn",
+      "publishedAt": "2026-10-15T09:00:00+07:00",
+      "tickers": [
+        "USDVND"
+      ],
+      "excerpt": "Ổn định, một số báo 25.642.",
+      "whyImpact": "FX stable, no fresh pressure into open."
+    },
+    {
+      "id": "n-2026-10-16-005",
+      "impact": "medium",
+      "impactScore": 65,
+      "rank": 5,
+      "kind": "market",
+      "board": "vn",
+      "title": "Tự doanh bán ròng ~246 tỷ HOSE, VPB +164 tỷ",
+      "url": "https://vietnambiz.vn/tu-doanh-xa-rong-gan-400-ty-dong-mot-co-phieu-chi-sau-4-phien-2026101517378262.htm",
+      "sourceId": "src-vietnambiz",
+      "publishedAt": "2026-10-15T19:47:00+07:00",
+      "tickers": [
+        "VPB",
+        "TCB"
+      ],
+      "excerpt": "VPB gom mạnh, TCB/VIC xả.",
+      "whyImpact": "Selective domestic support in banks."
+    },
+    {
+      "id": "n-2026-10-16-006",
+      "impact": "medium",
+      "impactScore": 60,
+      "rank": 6,
+      "kind": "news",
+      "board": "global",
+      "title": "DXY đóng ~102,04 (−0,49%), vàng và WTI nguồn lệch",
+      "url": "https://www.barrons.com/market-data",
+      "sourceId": "src-barrons",
+      "publishedAt": "2026-10-15T17:00:00+07:00",
+      "tickers": [
+        "DXY",
+        "XAU",
+        "WTI"
+      ],
+      "excerpt": "USD eased from 18-month high; commodities mixed.",
+      "whyImpact": "Mild FX relief but commodity disagreement."
+    },
+    {
+      "id": "n-2026-10-16-007",
+      "impact": "medium",
+      "impactScore": 55,
+      "rank": 7,
+      "kind": "market",
+      "board": "vn",
+      "title": "HNX đóng 259,29 (−2,21%)",
+      "url": "http://en.stockbiz.vn/HistoricalIndices.aspx",
+      "sourceId": "src-stockbiz",
+      "publishedAt": "2026-10-15T15:15:00+07:00",
+      "tickers": [
+        "HNX"
+      ],
+      "excerpt": "Phân hóa sàn mạnh.",
+      "whyImpact": "Breadth weaker on HNX."
+    },
+    {
+      "id": "n-2026-10-16-008",
+      "impact": "low",
+      "impactScore": 40,
+      "rank": 8,
+      "kind": "community",
+      "board": "vn",
+      "title": "F247/FireAnt thin: theo dõi hỗ trợ 1.690–1.700",
+      "url": "https://f247.com/",
+      "sourceId": "src-f247",
+      "publishedAt": "2026-10-15T20:00:00+07:00",
+      "tickers": [],
+      "excerpt": "Sentiment color only, không phải print.",
+      "whyImpact": "Community not driving the tape."
+    }
+  ]
+}

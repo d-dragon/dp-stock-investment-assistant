@@ -1,0 +1,79 @@
+{
+  "date": "2026-11-10",
+  "generatedAt": "2026-11-10T08:35:00+07:00",
+  "market": {
+    "vn": {
+      "VNINDEX": {
+        "priorClose": 1714.32,
+        "change": -11.04,
+        "changePct": -0.64,
+        "volume": 678512401,
+        "valueVndBn": 13826.48,
+        "high": 1728.27,
+        "low": 1701.9,
+        "source": "src-stockbiz"
+      },
+      "HNX": {
+        "priorClose": 255.24,
+        "change": -1.49,
+        "changePct": -0.58,
+        "source": "src-stockbiz"
+      },
+      "foreignHoSE": {
+        "buyVndBn": 1155.19,
+        "sellVndBn": 1961.99,
+        "netVndBn": -806.8,
+        "source": "src-stockbiz"
+      },
+      "proprietaryHoSE": {
+        "netVndBn": -458,
+        "note": "approx 458-471 tỷ bán ròng",
+        "source": "src-vietnambiz"
+      }
+    },
+    "us": {
+      "SPX": 7549.94,
+      "SPXchgPct": 2.35,
+      "DJI": 52389.75,
+      "DJIchgPct": 2.15,
+      "NDX": 25253.14,
+      "NDXchgPct": 2.74,
+      "source": "AP/Bloomberg"
+    },
+    "asia": {
+      "HSI": 24448.95,
+      "HSIchgPct": -0.13,
+      "NKY": 58775.5,
+      "NKYchgPct": 2.33,
+      "source": "multiple"
+    },
+    "fx_commod": {
+      "DXY": 101.68,
+      "DXYchgPct": -0.61,
+      "XAU": 4140.69,
+      "XAUchgPct": 1.72,
+      "WTI": 86.85,
+      "BTC": 75524,
+      "USDVND_central": 25610,
+      "source": "mixed"
+    }
+  },
+  "news_events": [
+    "VN-Index đóng cửa 1.714,32 (−0,64%) phiên 9/11, thanh khoản giảm ~26%",
+    "Khối ngoại bán ròng ~807 tỷ HoSE; tự doanh bán ròng ~458-471 tỷ (SSI, MBB, VHM, VIC, HPG)",
+    "Mỹ hồi mạnh: SPX +2,35%, Nasdaq +2,74% sau bán AI; dầu giảm mạnh",
+    "HSI gần như đi ngang, Nikkei tăng"
+  ],
+  "sentiment": {
+    "community": "thin pre-open; tone thận trọng sau phiên đỏ + ngoại/tự doanh bán",
+    "sources": [
+      "src-fireant",
+      "src-f247",
+      "src-newf319"
+    ]
+  },
+  "gaps": [
+    "Chưa có close chính thức phiên 10/11",
+    "Một số quote thế giới từ nguồn thứ cấp"
+  ]
+}

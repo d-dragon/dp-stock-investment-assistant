@@ -1,0 +1,36 @@
+{
+  "schemaVersion": "1.0.0",
+  "date": "2026-11-08",
+  "market": {
+    "vnindex_prior": {
+      "date": "2026-11-06",
+      "price": 1725.36,
+      "change": -15.37,
+      "changePct": -0.88,
+      "source": "src-stockbiz"
+    },
+    "hose_volume": 984184812,
+    "hose_value_bn": 18799.44,
+    "foreign_net_hose_bn": 393.59,
+    "proprietary_net_bn": 278.5,
+    "hnx_prior": 256.73
+  },
+  "news_events": [
+    "VN-Index closed 1,725.36 on 06/11 after profit-taking and global tech pressure",
+    "Foreign turned net buyer ~394 bn HoSE, KDH/VND/VIX top buys, FPT/VCB sells",
+    "Proprietary +278.5 bn from nmquan",
+    "US Friday mixed: SPX +0.31%, NDX +1.09%, DJI -0.46%",
+    "Nikkei -5.96%, HSI -1.27% on 06/11",
+    "SBV central rate 25,615 for 07/11"
+  ],
+  "sentiment": {
+    "fireant": "thin weekend, prior close displayed",
+    "newf319": "no strong community print found",
+    "f247": "thin"
+  },
+  "gaps": [
+    "No official close for 08/11 (weekend)",
+    "Community sentiment thin",
+    "No new SBV page for 08/11"
+  ]
+}

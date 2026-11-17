@@ -1,0 +1,170 @@
+{
+  "schemaVersion": "1.0.0",
+  "date": "2026-11-04",
+  "generatedAt": "2026-11-04T08:35:00+07:00",
+  "briefKind": "eod_prev+overnight+preopen",
+  "items": [
+    {
+      "id": "n-2026-11-04-001",
+      "impact": "high",
+      "impactScore": 95,
+      "rank": 1,
+      "kind": "market",
+      "board": "vn",
+      "title": "VN-Index đóng 1.699,62 (-0,65%) thủng mốc 1.700 ngày 3/11",
+      "url": "https://stockbiz.vn/en/stocks/VNINDEX",
+      "sourceId": "src-stockbiz",
+      "publishedAt": "2026-11-03T15:10:00+07:00",
+      "tickers": [
+        "VNINDEX",
+        "VIC"
+      ],
+      "excerpt": "VIC -3,31% kéo chỉ số, thanh khoản HoSE ~12.940 tỷ, foreign -502 tỷ.",
+      "whyImpact": "In ấn chính thức phiên trước, xác định hỗ trợ gần cho pre-open hôm nay."
+    },
+    {
+      "id": "n-2026-11-04-002",
+      "impact": "high",
+      "impactScore": 88,
+      "rank": 2,
+      "kind": "market",
+      "board": "vn",
+      "title": "Khối ngoại bán ròng 502 tỷ đồng HoSE, tập trung MBB VCB VIC",
+      "url": "https://stockbiz.vn/en/markets/flows",
+      "sourceId": "src-stockbiz",
+      "publishedAt": "2026-11-03T16:00:00+07:00",
+      "tickers": [
+        "MBB",
+        "VCB",
+        "VIC",
+        "HPG"
+      ],
+      "excerpt": "MBB -255 tỷ, VCB -219 tỷ; HPG mua ròng +227 tỷ.",
+      "whyImpact": "Dòng ngoại tiếp tục rút, áp lực lên bank và VIC."
+    },
+    {
+      "id": "n-2026-11-04-003",
+      "impact": "high",
+      "impactScore": 82,
+      "rank": 3,
+      "kind": "news",
+      "board": "global",
+      "title": "S&P 500 đóng 7.568,92 (+0,36%), Nasdaq +0,83% phiên 3/11",
+      "url": "https://portfolio-terminal.com/markets/stock-market-close",
+      "sourceId": "src-barrons",
+      "publishedAt": "2026-11-03T21:00:00+07:00",
+      "tickers": [],
+      "excerpt": "Dow -0,38%; tech rebound, chip stocks mạnh.",
+      "whyImpact": "Overnight risk-on tech có thể hỗ trợ risk appetite VN."
+    },
+    {
+      "id": "n-2026-11-04-004",
+      "impact": "medium",
+      "impactScore": 70,
+      "rank": 4,
+      "kind": "news",
+      "board": "vn",
+      "title": "HPG tăng 4,17% dẫn dắt nhóm thép, hỗ trợ chỉ số",
+      "url": "https://vietnamnews.vn/economy/1803484/vn-index-falls-below-1-700-as-large-caps-weigh-on-market-steel-stocks-rally.html",
+      "sourceId": "src-vietstock",
+      "publishedAt": "2026-11-03T17:18:00+07:00",
+      "tickers": [
+        "HPG"
+      ],
+      "excerpt": "Khớp cao nhất thị trường, lực đỡ từ basic resources.",
+      "whyImpact": "Sector rotation vào thép khi bank/VIC yếu."
+    },
+    {
+      "id": "n-2026-11-04-005",
+      "impact": "medium",
+      "impactScore": 65,
+      "rank": 5,
+      "kind": "news",
+      "board": "global",
+      "title": "Vàng spot khoảng 3.930 USD, DXY 101,86, WTI gần 97",
+      "url": "https://www.ausecure.com/gold-market-close-nov-3-2026/",
+      "sourceId": "src-barrons",
+      "publishedAt": "2026-11-03T18:00:00+07:00",
+      "tickers": [],
+      "excerpt": "Yields tăng, oil rebound nhẹ sau slump.",
+      "whyImpact": "Commodities ổn định, không gap mạnh cho energy VN."
+    },
+    {
+      "id": "n-2026-11-04-006",
+      "impact": "medium",
+      "impactScore": 60,
+      "rank": 6,
+      "kind": "macro",
+      "board": "vn",
+      "title": "HNX-Index tăng 0,35% lên 251,42 trong khi HOSE giảm",
+      "url": "https://stockbiz.vn/en/stocks/VNINDEX",
+      "sourceId": "src-stockbiz",
+      "publishedAt": "2026-11-03T15:10:00+07:00",
+      "tickers": [],
+      "excerpt": "Phân hóa giữa hai sàn.",
+      "whyImpact": "Breadth không đồng nhất."
+    },
+    {
+      "id": "n-2026-11-04-007",
+      "impact": "low",
+      "impactScore": 45,
+      "rank": 7,
+      "kind": "community",
+      "board": "vn",
+      "title": "Cộng đồng thảo luận rủi ro mất 1.700 sau phiên đóng dưới mốc",
+      "url": "https://newf319.com/",
+      "sourceId": "src-newf319",
+      "publishedAt": "2026-11-04T07:00:00+07:00",
+      "tickers": [],
+      "excerpt": "Tone thận trọng, chờ xác nhận hỗ trợ.",
+      "whyImpact": "Sentiment color only."
+    },
+    {
+      "id": "n-2026-11-04-008",
+      "impact": "medium",
+      "impactScore": 55,
+      "rank": 8,
+      "kind": "news",
+      "board": "global",
+      "title": "Bitcoin giao dịch quanh 77.300-77.800 USD",
+      "url": "https://bitkan.com/price/bitcoin/historical-data",
+      "sourceId": "src-yahoo-vn",
+      "publishedAt": "2026-11-03T22:00:00+07:00",
+      "tickers": [
+        "BTC"
+      ],
+      "excerpt": "Ổn định, theo tech rebound.",
+      "whyImpact": "Risk asset, correlation hạn chế với VN."
+    },
+    {
+      "id": "n-2026-11-04-009",
+      "impact": "low",
+      "impactScore": 40,
+      "rank": 9,
+      "kind": "news",
+      "board": "vn",
+      "title": "Thanh khoản HoSE giảm mạnh còn ~12.940 tỷ",
+      "url": "https://baomoi.com/chung-khoan-hom-nay-3-11-2026-vn-index-tiep-tuc-dieu-chinh-sau-nhip-ban-thao-c56421072.epi",
+      "sourceId": "src-vietstock",
+      "publishedAt": "2026-11-03T17:35:00+07:00",
+      "tickers": [],
+      "excerpt": "Giảm ~30% so với phiên trước.",
+      "whyImpact": "Liquidity thấp, dễ biến động."
+    },
+    {
+      "id": "n-2026-11-04-010",
+      "impact": "medium",
+      "impactScore": 50,
+      "rank": 10,
+      "kind": "news",
+      "board": "global",
+      "title": "US midterms và JOLTS hỗ trợ yields, chip stocks rebound",
+      "url": "https://www.fool.com/coverage/stock-market-today/2026/11/03/stock-market-today-nov-3-markets-edge-higher-as-semiconductor-stocks-rebound/",
+      "sourceId": "src-barrons",
+      "publishedAt": "2026-11-03T17:43:00+07:00",
+      "tickers": [],
+      "excerpt": "Tech dẫn dắt S&P và Nasdaq.",
+      "whyImpact": "Overnight positive for growth stocks."
+    }
+  ]
+}

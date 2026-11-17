@@ -1,0 +1,42 @@
+{
+  "schemaVersion": "1.0.0",
+  "date": "2026-11-06",
+  "market": {
+    "vnindex_prior": {
+      "date": "2026-11-05",
+      "price": 1740.73,
+      "change": 7.71,
+      "changePct": 0.44,
+      "source": "src-stockbiz"
+    },
+    "hnx_prior": {
+      "price": 256.61,
+      "changePct": -0.49,
+      "source": "src-stockbiz"
+    },
+    "hose_volume": 747372416,
+    "hose_value_vnd_bn": 15829.78,
+    "foreign_net_vnd_bn": -170.56,
+    "proprietary_net_vnd_bn": 327.0,
+    "usdvnd_central": 25623
+  },
+  "news_events": [
+    "VN-Index +0.44% to 1740.73 on 05/11, VIC +6.54 pts contribution",
+    "Foreign net sell ~170.6 tỷ HoSE (StockBiz), press ~230-240",
+    "Proprietary +327 tỷ nmquan, VPB +105",
+    "US overnight: S&P -4.36% to 7353.73, Nasdaq -5.52% AI selloff",
+    "HSI +3.67% to 24796.98, Nikkei -1.79% to 61077.90",
+    "SBV central rate 25623 (-4)"
+  ],
+  "sentiment": {
+    "fireant": "Index page confirms 1740.73; community posts thin on overnight crash",
+    "f247": "Older threads on Nov outlook; no fresh high-impact 05/11 dump",
+    "newf319": "Thin / unreachable for fresh color"
+  },
+  "gaps": [
+    "Proprietary print sources disagree slightly (nmquan 327 vs press ~254-259)",
+    "WTI/gold/DXY sources disagree on exact overnight prints",
+    "No official HOSE close for 06/11 (preopen)",
+    "Community sentiment thin"
+  ]
+}

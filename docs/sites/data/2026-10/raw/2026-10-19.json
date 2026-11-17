@@ -1,0 +1,25 @@
+{
+  "schemaVersion": "1.0.0",
+  "date": "2026-10-19",
+  "market": {
+    "vnindex_close_16_10": 1705.91,
+    "change_pct": 0.45,
+    "hose_value_bn": 10996,
+    "foreign_net_bn": -534,
+    "note": "Sources: StockBiz, CafeF, Vietstock. Liquidity low, foreign sell streak continues."
+  },
+  "news_events": [
+    "US Nasdaq -2.15% on 16/10 AI concerns",
+    "VN reclaim 1700, bank + VHM support",
+    "SBV central rate 25637 unchanged"
+  ],
+  "sentiment": {
+    "fireant_f247_newf319": "thin / cautious on 1700 hold and foreign flow"
+  },
+  "gaps": [
+    "proprietary print not locked for 16/10",
+    "community thin",
+    "no official 19/10 close yet",
+    "oil/gold sources slightly disagree"
+  ]
+}

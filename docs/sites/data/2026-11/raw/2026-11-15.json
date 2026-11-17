@@ -1,0 +1,24 @@
+{
+  "market": {
+    "vnindex_prior": 1734.93,
+    "foreign_net_hose": 337.5,
+    "proprietary_net": 154,
+    "us_spx": 7561.67,
+    "us_nasdaq_comp": -0.91
+  },
+  "news_events": [
+    "VN-Index +0.01% on 13/11 after late recovery",
+    "Foreign net buy 337.5bn concentrated on VIX",
+    "US mixed on Nvidia CEO resignation"
+  ],
+  "sentiment": {
+    "fireant": "thin",
+    "f247": "thin",
+    "newf319": "thin"
+  },
+  "gaps": [
+    "No official close for 15/11 (weekend)",
+    "Community sentiment thin",
+    "Some commodity sources disagree slightly on WTI/gold"
+  ]
+}

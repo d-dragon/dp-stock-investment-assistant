@@ -1,0 +1,29 @@
+{
+  "schemaVersion": "1.0.0",
+  "date": "2026-11-01",
+  "generatedAt": "2026-11-01T08:35:00+07:00",
+  "briefKind": "eod_prev+overnight+preopen",
+  "market": {
+    "vnindex_prior": {"date": "2026-10-30", "price": 1741.62, "change": -13.99, "changePct": -0.8, "source": "src-stockbiz"},
+    "hnx_prior": {"price": 252.74, "changePct": -1.51},
+    "foreign_hose": {"netVndBn": -634, "note": "HoSE ~-634 tỷ BSC/StockBiz/VnEconomy"},
+    "proprietary_hose": {"netVndBn": 92.8, "note": "nmquan +92.8 tỷ"},
+    "volume_hose": {"shares": 692647474, "valueVndBn": 14673},
+    "usdvnd_central": 25637
+  },
+  "news_events": [
+    "VN-Index đóng 30/10 tại 1.741,62 (-0,80%)",
+    "Ngoại bán ròng ~634-641 tỷ HoSE",
+    "Tự doanh mua ròng +92,8 tỷ",
+    "US S&P -1,82%, Nasdaq -2,86% 30/10",
+    "HSI +1,46% 23.294",
+    "WTI ~104,1; vàng ~3.899",
+    "SBV tỷ giá trung tâm 25.637 cho 31/10"
+  ],
+  "sentiment": {
+    "fireant": "thin",
+    "f247": "thin",
+    "newf319": "thin"
+  },
+  "gaps": ["No official session 31/10 or 1/11", "Community thin weekend", "Some commodity/gold sources disagree slightly on exact close"]
+}

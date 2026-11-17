@@ -1,0 +1,91 @@
+{
+  "schemaVersion": "1.0.0",
+  "date": "2026-10-21",
+  "generatedAt": "2026-10-21T08:35:00+07:00",
+  "briefKind": "eod_prev+overnight+preopen",
+  "items": [
+    {
+      "id": "n-2026-10-21-001",
+      "impact": "high",
+      "impactScore": 88,
+      "rank": 1,
+      "kind": "market",
+      "board": "vn",
+      "title": "VN-Index đóng cửa 1.691,97 điểm (+0,13%) sau nhịp flashsale",
+      "url": "http://en.stockbiz.vn/HistoricalIndices.aspx",
+      "sourceId": "src-stockbiz",
+      "publishedAt": "2026-10-20T15:10:00+07:00",
+      "tickers": [
+        "VNINDEX"
+      ],
+      "excerpt": "Hồi phục cuối phiên từ dưới 1.680, thanh khoản 13.251 tỷ.",
+      "whyImpact": "Print chính thức, xác nhận giữ được sắc xanh trên thanh khoản thấp."
+    },
+    {
+      "id": "n-2026-10-21-002",
+      "impact": "high",
+      "impactScore": 82,
+      "rank": 2,
+      "kind": "market",
+      "board": "vn",
+      "title": "Khối ngoại bán ròng ~221 tỷ trên HoSE, TCB được gom mạnh",
+      "url": "https://baodautu.vn/chung-khoan-phien-2010-dao-chieu-cuoi-phien-vn-index-lay-lai-sac-xanh-d727759.html",
+      "sourceId": "src-vietnambiz",
+      "publishedAt": "2026-10-20T17:42:00+07:00",
+      "tickers": [
+        "TCB",
+        "HPG",
+        "VHM"
+      ],
+      "excerpt": "TCB +345 tỷ, HPG +145 tỷ; ACB/VHM bán ròng lớn.",
+      "whyImpact": "Dòng ngoại thu hẹp nhưng vẫn âm; TCB là điểm sáng KQKD."
+    },
+    {
+      "id": "n-2026-10-21-003",
+      "impact": "medium",
+      "impactScore": 70,
+      "rank": 3,
+      "kind": "news",
+      "board": "global",
+      "title": "Dow tăng hơn 500 điểm, Nasdaq gần như đi ngang overnight",
+      "url": "https://www.barrons.com/livecoverage/stock-market-news-today-102026",
+      "sourceId": "src-barrons",
+      "publishedAt": "2026-10-20T16:00:00+07:00",
+      "tickers": [],
+      "excerpt": "DJI +1.02%, SPX +0.28%, Nasdaq Composite -0.02%.",
+      "whyImpact": "Tín hiệu hỗn hợp cho pre-open VN."
+    },
+    {
+      "id": "n-2026-10-21-004",
+      "impact": "medium",
+      "impactScore": 65,
+      "rank": 4,
+      "kind": "news",
+      "board": "vn",
+      "title": "Techcombank lãi trước thuế quý 3 đạt 10.375 tỷ (+25,8%)",
+      "url": "https://news.cvs.vn/techcombank-lap-ky-luc-ve-loi-nhuan-cho-vay-xay-63097",
+      "sourceId": "src-vietnambiz",
+      "publishedAt": "2026-10-20T15:00:00+07:00",
+      "tickers": [
+        "TCB"
+      ],
+      "excerpt": "Kỷ lục quý, hỗ trợ dòng tiền vào TCB.",
+      "whyImpact": "KQKD mạnh hỗ trợ nhóm bank."
+    },
+    {
+      "id": "n-2026-10-21-005",
+      "impact": "low",
+      "impactScore": 40,
+      "rank": 5,
+      "kind": "community",
+      "board": "vn",
+      "title": "Cộng đồng FireAnt/F247 thận trọng quanh 1.690",
+      "url": "https://fireant.vn/cong-dong/moi-nhat",
+      "sourceId": "src-fireant",
+      "publishedAt": "2026-10-21T07:00:00+07:00",
+      "tickers": [],
+      "excerpt": "Sentiment mỏng, không đồng thuận rõ.",
+      "whyImpact": "Màu sắc tâm lý, không phải print."
+    }
+  ]
+}

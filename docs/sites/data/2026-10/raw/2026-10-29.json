@@ -1,0 +1,51 @@
+{
+  "schemaVersion": "1.0.0",
+  "date": "2026-10-29",
+  "generatedAt": "2026-10-29T08:35:00+07:00",
+  "briefKind": "eod_prev+overnight+preopen",
+  "market": {
+    "vnindex_prior": {
+      "date": "2026-10-28",
+      "price": 1766.65,
+      "change": 4.78,
+      "changePct": 0.27,
+      "sources": ["BSC", "TinnhanhCK", "CafeF", "multiple"]
+    },
+    "hnx_prior": {
+      "price": 259.86,
+      "changePct": 0.14
+    },
+    "liquidity": {
+      "hose_matched_vnd_bn": 12200,
+      "hose_total_vnd_bn": 15320,
+      "note": "Khớp ~12.200 tỷ, tổng ~15.320 tỷ"
+    },
+    "foreign_hose": {
+      "net_vnd_bn": -267,
+      "note": "StockBiz / Tin nhanh / BSC / CafeF khóa ~-267 tỷ HoSE; FPT -260"
+    },
+    "proprietary_hose": {
+      "net_vnd_bn": -418.8,
+      "note": "nmquan bán ròng 418,8 tỷ (gồm thỏa thuận)"
+    }
+  },
+  "news_events": [
+    "VN-Index +4.78 lên 1.766,65; độ rộng âm; VCB/VIC/HDB kéo",
+    "Ngoại bán ròng ~267 tỷ, tập trung FPT",
+    "Tự doanh bán ròng 418,8 tỷ (nmquan)",
+    "Fed giữ lãi suất 3.75-4%; US close nhẹ xanh",
+    "Nikkei +1.08%, HSI +0.23%"
+  ],
+  "sentiment": {
+    "fireant": "thin",
+    "f247": "thin",
+    "newf319": "thin",
+    "note": "Community mỏng, không dẫn dắt print"
+  },
+  "gaps": [
+    "No official HOSE close for 29/10",
+    "Retail net not printed",
+    "SBV central rate for 29/10 not yet locked in search",
+    "Some commodity sources disagree on exact WTI/gold ticks"
+  ]
+}

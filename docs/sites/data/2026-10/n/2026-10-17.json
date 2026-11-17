@@ -1,0 +1,182 @@
+{
+  "schemaVersion": "1.0.0",
+  "date": "2026-10-17",
+  "generatedAt": "2026-10-17T08:35:00+07:00",
+  "briefKind": "eod_prev+overnight+preopen",
+  "items": [
+    {
+      "id": "n-2026-10-17-001",
+      "impact": "high",
+      "impactScore": 92,
+      "rank": 1,
+      "kind": "market",
+      "board": "vn",
+      "title": "StockBiz khóa VN-Index 16/10 tại 1.705,91 (+0,45%)",
+      "url": "http://en.stockbiz.vn/HistoricalIndices.aspx",
+      "sourceId": "src-stockbiz",
+      "publishedAt": "2026-10-16T15:10:00+07:00",
+      "tickers": [
+        "VNINDEX"
+      ],
+      "excerpt": "Lấy lại mốc 1.700 sau chuỗi 7 phiên giảm. Volume 509,78 triệu, GT 10.996 tỷ.",
+      "whyImpact": "Print khóa chính thức, xác nhận phục hồi tâm lý."
+    },
+    {
+      "id": "n-2026-10-17-002",
+      "impact": "high",
+      "impactScore": 88,
+      "rank": 2,
+      "kind": "market",
+      "board": "vn",
+      "title": "Ngoại bán ròng ~534 tỷ HoSE phiên 16/10",
+      "url": "http://en.stockbiz.vn/ForeignerTradingStats.aspx?Exchange=HOSTC&Type=1",
+      "sourceId": "src-stockbiz",
+      "publishedAt": "2026-10-16T15:20:00+07:00",
+      "tickers": [
+        "HDB",
+        "VIC"
+      ],
+      "excerpt": "Buy 1.307,58 - sell 1.841,98. Chuỗi bán 11 phiên. HDB/VIC chịu áp lực.",
+      "whyImpact": "Dòng ngoại tiếp tục áp lực dù chỉ số xanh."
+    },
+    {
+      "id": "n-2026-10-17-003",
+      "impact": "high",
+      "impactScore": 85,
+      "rank": 3,
+      "kind": "market",
+      "board": "vn",
+      "title": "Tự doanh mua ròng ~538 tỷ HOSE, VPB +218",
+      "url": "https://nmquan.vn/data/tu-doanh",
+      "sourceId": "src-vietnambiz",
+      "publishedAt": "2026-10-16T19:22:00+07:00",
+      "tickers": [
+        "VPB",
+        "FRT",
+        "HPG"
+      ],
+      "excerpt": "Nội địa chọn lọc bank và thép. Cân bằng ngoại bán.",
+      "whyImpact": "Dòng nội hỗ trợ, đặc biệt VPB."
+    },
+    {
+      "id": "n-2026-10-17-004",
+      "impact": "high",
+      "impactScore": 80,
+      "rank": 4,
+      "kind": "news",
+      "board": "global",
+      "title": "NDX đóng 29.187,55 (−2,50%); SPX −1,09%",
+      "url": "https://www.marketwatch.com/investing/index/ndx",
+      "sourceId": "src-bloomberg",
+      "publishedAt": "2026-10-16T16:15:00+07:00",
+      "tickers": [
+        "NDX",
+        "SPX"
+      ],
+      "excerpt": "Tech AI concerns sâu. Dow chỉ −0,34%.",
+      "whyImpact": "Overnight risk-off tech truyền sang VN tuần tới."
+    },
+    {
+      "id": "n-2026-10-17-005",
+      "impact": "medium",
+      "impactScore": 72,
+      "rank": 5,
+      "kind": "macro",
+      "board": "vn",
+      "title": "Tỷ giá trung tâm NHNN ~25.637 cho 16/10",
+      "url": "https://sbv.gov.vn/",
+      "sourceId": "src-nhnn",
+      "publishedAt": "2026-10-16T09:00:00+07:00",
+      "tickers": [
+        "USDVND"
+      ],
+      "excerpt": "Ổn định, một số nguồn 25.642. FX không xáo trộn.",
+      "whyImpact": "Macro FX ổn hỗ trợ."
+    },
+    {
+      "id": "n-2026-10-17-006",
+      "impact": "medium",
+      "impactScore": 68,
+      "rank": 6,
+      "kind": "news",
+      "board": "global",
+      "title": "Nikkei +1,39% lên 65.324; HSI +0,52% 24.187",
+      "url": "https://www.marketwatch.com/investing/index/nik",
+      "sourceId": "src-barrons",
+      "publishedAt": "2026-10-16T15:30:00+07:00",
+      "tickers": [
+        "NKY",
+        "HSI"
+      ],
+      "excerpt": "Asia hỗ trợ. Tech HK hồi nhẹ.",
+      "whyImpact": "Regional risk-on nhẹ cân bằng US."
+    },
+    {
+      "id": "n-2026-10-17-007",
+      "impact": "medium",
+      "impactScore": 65,
+      "rank": 7,
+      "kind": "news",
+      "board": "global",
+      "title": "WTI ~99 (nguồn lệch 96–101); vàng ~4.170",
+      "url": "https://www.barrons.com/market-data",
+      "sourceId": "src-barrons",
+      "publishedAt": "2026-10-16T17:00:00+07:00",
+      "tickers": [
+        "WTI",
+        "XAU"
+      ],
+      "excerpt": "Dầu tăng do Hormuz; vàng ổn.",
+      "whyImpact": "Hàng hóa hỗ trợ năng lượng VN nhẹ."
+    },
+    {
+      "id": "n-2026-10-17-008",
+      "impact": "medium",
+      "impactScore": 60,
+      "rank": 8,
+      "kind": "news",
+      "board": "global",
+      "title": "Bitcoin ~81.600 (snapshot 16/10)",
+      "url": "https://finance.yahoo.com/quote/BTC-USD/",
+      "sourceId": "src-yahoo-btc",
+      "publishedAt": "2026-10-16T20:00:00+07:00",
+      "tickers": [
+        "BTC"
+      ],
+      "excerpt": "Crypto ổn, nhẹ giảm từ 82k.",
+      "whyImpact": "Risk assets không stress."
+    },
+    {
+      "id": "n-2026-10-17-009",
+      "impact": "low",
+      "impactScore": 45,
+      "rank": 9,
+      "kind": "community",
+      "board": "vn",
+      "title": "FireAnt/F247/newF319 thin cuối tuần",
+      "url": "https://fireant.vn/cong-dong/moi-nhat",
+      "sourceId": "src-fireant",
+      "publishedAt": "2026-10-16T20:00:00+07:00",
+      "tickers": [],
+      "excerpt": "Sentiment color only, theo dõi ngoại và bank.",
+      "whyImpact": "Color, không phải print."
+    },
+    {
+      "id": "n-2026-10-17-010",
+      "impact": "medium",
+      "impactScore": 70,
+      "rank": 10,
+      "kind": "news",
+      "board": "vn",
+      "title": "CafeF/Vietstock xác nhận VN 1.705,91, thanh khoản thấp",
+      "url": "https://cafef.vn/thi-truong-chung-khoan.chn",
+      "sourceId": "src-cafef",
+      "publishedAt": "2026-10-16T16:00:00+07:00",
+      "tickers": [
+        "VNINDEX"
+      ],
+      "excerpt": "Volume giảm ~25% so phiên trước. Bank và VHM kéo.",
+      "whyImpact": "Xác nhận print và liquidity."
+    }
+  ]
+}

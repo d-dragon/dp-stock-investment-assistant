@@ -1,0 +1,27 @@
+{
+  "schemaVersion": "1.0.0",
+  "date": "2026-10-23",
+  "market": {
+    "vnindex_close_22": 1760.63,
+    "change_pct": 1.26,
+    "volume": 672074209,
+    "value_bn": 15299.76,
+    "foreign_net_bn": 341,
+    "proprietary_net_bn": 49.2
+  },
+  "news_events": [
+    "US tech selloff",
+    "VN Vin-led rally",
+    "Foreign second consecutive buy"
+  ],
+  "sentiment": {
+    "fireant": "thin",
+    "f247": "thin",
+    "newf319": "thin"
+  },
+  "gaps": [
+    "Exact Nikkei/HSI close for 22/10 limited",
+    "No official SBV for 23/10",
+    "Gold sources vary"
+  ]
+}

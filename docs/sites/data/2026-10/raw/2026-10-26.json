@@ -1,0 +1,66 @@
+{
+  "schemaVersion": "1.0.0",
+  "date": "2026-10-26",
+  "generatedAt": "2026-10-26T08:35:00+07:00",
+  "briefKind": "eod_prev+overnight+preopen",
+  "market": {
+    "vnindex_prior": {
+      "date": "2026-10-23",
+      "price": 1774.15,
+      "change": 13.52,
+      "changePct": 0.77,
+      "source": "src-stockbiz"
+    },
+    "hnx_prior": {
+      "price": 262.7,
+      "changePct": 0.62
+    },
+    "volume_hose": 777197613,
+    "value_vnd_bn": 16942.03,
+    "foreign_net_bn": -477.72,
+    "proprietary_net_bn": 10.5,
+    "us_dji": {
+      "price": 52215.16,
+      "changePct": -1.23
+    },
+    "us_spx": {
+      "price": 7623.68,
+      "changePct": -0.52
+    },
+    "us_ndx": {
+      "price": 25955.34,
+      "changePct": -0.21
+    },
+    "nky": {
+      "price": 62693.16,
+      "changePct": -0.34
+    },
+    "hsi": {
+      "price": 23093.37,
+      "changePct": 0.69
+    },
+    "dxy": 101.68,
+    "wti": 101.74,
+    "xau": 3994.7,
+    "btc": 80100,
+    "usdvnd_center": 25627
+  },
+  "news_events": [
+    "VN-Index +0.77% to 1774.15 on 23/10, breadth mixed 144/156, volume 777m / 16.9tn",
+    "Foreign net sell ~478bn HoSE, focus ACB FPT PNJ",
+    "Proprietary net buy +10.5bn, ACB +240bn",
+    "US Dow -1.23%, SPX -0.52%, Nasdaq -0.21% Friday, oil ~103, gold ~3995",
+    "Asia mixed: Nikkei slight down, HSI +0.69%"
+  ],
+  "sentiment": {
+    "fireant": "Confirm foreign ~-480bn, index 1774.15",
+    "f247": "Prior strategy notes on recovery, community thin on weekend",
+    "newf319": "Thin public sample"
+  },
+  "gaps": [
+    "No official HOSE close for 26/10 (preopen Monday)",
+    "Proprietary only from nmquan secondary",
+    "Community thin",
+    "No new SBV print for 26/10 beyond weekend carry"
+  ]
+}

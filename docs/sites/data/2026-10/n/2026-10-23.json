@@ -1,0 +1,145 @@
+{
+  "schemaVersion": "1.0.0",
+  "date": "2026-10-23",
+  "items": [
+    {
+      "id": "n-2026-10-23-001",
+      "impact": "high",
+      "impactScore": 92,
+      "rank": 1,
+      "kind": "market",
+      "board": "vn",
+      "title": "VN-Index đóng cửa 1.760,63 điểm (+1,26%)",
+      "url": "https://www.finhay.com.vn/ban-tin-chung-khoan-22-10",
+      "sourceId": "src-stockbiz",
+      "publishedAt": "2026-10-22T16:41:00+07:00",
+      "tickers": [
+        "VNINDEX"
+      ],
+      "excerpt": "Vượt mốc 1.760, thanh khoản 672 triệu cp.",
+      "whyImpact": "Official close locked multiple sources."
+    },
+    {
+      "id": "n-2026-10-23-002",
+      "impact": "high",
+      "impactScore": 88,
+      "rank": 2,
+      "kind": "market",
+      "board": "vn",
+      "title": "Khối ngoại mua ròng ~341 tỷ HOSE",
+      "url": "https://baotintuc.vn/vn-index-tang-gan-22-diem-nha-dau-tu-nuoc-ngoai-tiep-tuc-mua-rong-post1396541.html",
+      "sourceId": "src-stockbiz",
+      "publishedAt": "2026-10-22T16:59:00+07:00",
+      "tickers": [
+        "VIC",
+        "TCB",
+        "VHM"
+      ],
+      "excerpt": "Phiên thứ 2 liên tiếp mua ròng.",
+      "whyImpact": "Foreign flow reversal support."
+    },
+    {
+      "id": "n-2026-10-23-003",
+      "impact": "high",
+      "impactScore": 85,
+      "rank": 3,
+      "kind": "news",
+      "board": "global",
+      "title": "Nasdaq Composite giảm 2,60% overnight",
+      "url": "https://english.news.cn/20261023/bbf156cd53aa409494f6f89e33932ea2/c.html",
+      "sourceId": "src-bloomberg",
+      "publishedAt": "2026-10-23T04:11:00+07:00",
+      "tickers": [
+        "NDX"
+      ],
+      "excerpt": "S&P -1,21%, tech dẫn đầu đà bán.",
+      "whyImpact": "Overnight risk transmission to VN tech."
+    },
+    {
+      "id": "n-2026-10-23-004",
+      "impact": "medium",
+      "impactScore": 75,
+      "rank": 4,
+      "kind": "market",
+      "board": "vn",
+      "title": "Tự doanh mua ròng 49,2 tỷ",
+      "url": "https://nmquan.vn/data/tu-doanh",
+      "sourceId": "src-vietnambiz",
+      "publishedAt": "2026-10-22T19:17:00+07:00",
+      "tickers": [
+        "VCB",
+        "HDB"
+      ],
+      "excerpt": "Mua VCB VPB, bán HDB FPT.",
+      "whyImpact": "Internal flow color."
+    },
+    {
+      "id": "n-2026-10-23-005",
+      "impact": "medium",
+      "impactScore": 70,
+      "rank": 5,
+      "kind": "news",
+      "board": "vn",
+      "title": "VIC đóng góp ~15,5 điểm, VHM hỗ trợ",
+      "url": "https://tuoitre.vn/vn-index-thang-hoa-hon-22-diem-du-chung-khoan-chau-a-do-lua-100261022153656557.htm",
+      "sourceId": "src-cafef",
+      "publishedAt": "2026-10-22T15:43:00+07:00",
+      "tickers": [
+        "VIC",
+        "VHM"
+      ],
+      "excerpt": "Nhóm Vin dẫn dắt.",
+      "whyImpact": "Index leadership."
+    },
+    {
+      "id": "n-2026-10-23-006",
+      "impact": "medium",
+      "impactScore": 65,
+      "rank": 6,
+      "kind": "macro",
+      "board": "global",
+      "title": "DXY ~101,57, WTI ~99,4",
+      "url": "https://portfolio-terminal.com/markets/us-dollar-index",
+      "sourceId": "src-barrons",
+      "publishedAt": "2026-10-22T20:00:00+07:00",
+      "tickers": [
+        "DXY",
+        "WTI"
+      ],
+      "excerpt": "FX và dầu ổn định.",
+      "whyImpact": "Limited transmission."
+    },
+    {
+      "id": "n-2026-10-23-007",
+      "impact": "low",
+      "impactScore": 50,
+      "rank": 7,
+      "kind": "community",
+      "board": "vn",
+      "title": "Sentiment FireAnt/F247 chú ý nhóm Vin và bank",
+      "url": "https://fireant.vn/cong-dong/moi-nhat",
+      "sourceId": "src-fireant",
+      "publishedAt": "2026-10-22T18:00:00+07:00",
+      "tickers": [],
+      "excerpt": "Thảo luận về phân hóa và dòng ngoại.",
+      "whyImpact": "Community color only."
+    },
+    {
+      "id": "n-2026-10-23-008",
+      "impact": "medium",
+      "impactScore": 68,
+      "rank": 8,
+      "kind": "news",
+      "board": "vn",
+      "title": "Breadth 149 tăng / 167 giảm",
+      "url": "https://www.finhay.com.vn/ban-tin-chung-khoan-22-10",
+      "sourceId": "src-cafef",
+      "publishedAt": "2026-10-22T16:41:00+07:00",
+      "tickers": [
+        "VNINDEX"
+      ],
+      "excerpt": "Phân hóa rõ.",
+      "whyImpact": "Quality of rally."
+    }
+  ]
+}

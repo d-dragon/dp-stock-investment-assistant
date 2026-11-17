@@ -1,0 +1,136 @@
+{
+  "schemaVersion": "1.0.0",
+  "date": "2026-10-27",
+  "generatedAt": "2026-10-27T08:35:00+07:00",
+  "briefKind": "eod_prev+overnight+preopen",
+  "items": [
+    {
+      "id": "n-2026-10-27-001",
+      "impact": "high",
+      "impactScore": 90,
+      "rank": 1,
+      "kind": "market",
+      "board": "vn",
+      "title": "VN-Index đóng cửa 1.763,55 điểm (-0,60%) phiên 26/10",
+      "url": "https://fireant.vn/ma-chung-khoan/VNINDEX",
+      "sourceId": "src-fireant",
+      "publishedAt": "2026-10-26T15:30:00+07:00",
+      "tickers": [
+        "VNINDEX"
+      ],
+      "excerpt": "Volume ~605 triệu, giá trị ~13.529 tỷ. Độ rộng 106 tăng / 205 giảm.",
+      "whyImpact": "Print chính thức phiên trước, xác định mốc tham chiếu pre-open."
+    },
+    {
+      "id": "n-2026-10-27-002",
+      "impact": "high",
+      "impactScore": 85,
+      "rank": 2,
+      "kind": "market",
+      "board": "vn",
+      "title": "Khối ngoại bán ròng ~892 tỷ đồng trên HoSE",
+      "url": "https://stockbiz.vn/en/markets/flows",
+      "sourceId": "src-stockbiz",
+      "publishedAt": "2026-10-26T16:00:00+07:00",
+      "tickers": [
+        "FPT",
+        "HDB",
+        "ACB"
+      ],
+      "excerpt": "Bán mạnh FPT -258 tỷ, HDB -80 tỷ. Mua MSN +72, TCB +64.",
+      "whyImpact": "Áp lực ngoại tiếp diễn sau FTSE upgrade."
+    },
+    {
+      "id": "n-2026-10-27-003",
+      "impact": "high",
+      "impactScore": 80,
+      "rank": 3,
+      "kind": "market",
+      "board": "vn",
+      "title": "Tự doanh bán ròng 222,8 tỷ trên HOSE",
+      "url": "https://nmquan.vn/data/tu-doanh/lich-su",
+      "sourceId": "src-vneconomy",
+      "publishedAt": "2026-10-26T19:00:00+07:00",
+      "tickers": [
+        "EIB"
+      ],
+      "excerpt": "Khớp ròng +13,9 tỷ nhưng thỏa thuận bán lớn. EIB bị xả mạnh.",
+      "whyImpact": "Nội địa đảo chiều bán sau các phiên mua."
+    },
+    {
+      "id": "n-2026-10-27-004",
+      "impact": "medium",
+      "impactScore": 70,
+      "rank": 4,
+      "kind": "news",
+      "board": "global",
+      "title": "Wall Street đóng cửa tăng: Dow +0,28%, Nasdaq +0,82%",
+      "url": "https://www.thestar.com.my/news/world/2026/10/27/us-stocks-close-higher",
+      "sourceId": "src-bloomberg",
+      "publishedAt": "2026-10-26T20:00:00+07:00",
+      "tickers": [],
+      "excerpt": "AI optimism, Anthropic IPO filing hỗ trợ tech.",
+      "whyImpact": "Overnight risk-on hỗ trợ tâm lý pre-open VN."
+    },
+    {
+      "id": "n-2026-10-27-005",
+      "impact": "medium",
+      "impactScore": 65,
+      "rank": 5,
+      "kind": "macro",
+      "board": "vn",
+      "title": "SBV tỷ giá trung tâm USD/VND 25.627",
+      "url": "https://sbv.gov.vn/vi/tỷ-giá",
+      "sourceId": "src-nhnn",
+      "publishedAt": "2026-10-26T09:00:00+07:00",
+      "tickers": [],
+      "excerpt": "Giữ nguyên, ổn định.",
+      "whyImpact": "FX không tạo áp lực mới."
+    },
+    {
+      "id": "n-2026-10-27-006",
+      "impact": "medium",
+      "impactScore": 60,
+      "rank": 6,
+      "kind": "news",
+      "board": "global",
+      "title": "Hang Seng +0,51% đóng 23.211,81",
+      "url": "https://www.marketwatch.com/investing/index/hsi",
+      "sourceId": "src-bloomberg",
+      "publishedAt": "2026-10-26T16:00:00+07:00",
+      "tickers": [],
+      "excerpt": "Nikkei giảm ~0,8%.",
+      "whyImpact": "Châu Á phân hóa, HSI hỗ trợ."
+    },
+    {
+      "id": "n-2026-10-27-007",
+      "impact": "low",
+      "impactScore": 50,
+      "rank": 7,
+      "kind": "news",
+      "board": "global",
+      "title": "WTI quanh 101-102 USD, vàng ~4.017",
+      "url": "https://www.macrotrends.net/2516/wti-crude-oil-prices-10-year-daily-chart",
+      "sourceId": "src-barrons",
+      "publishedAt": "2026-10-26T18:00:00+07:00",
+      "tickers": [],
+      "excerpt": "Dầu hạ nhiệt nhẹ, vàng ổn.",
+      "whyImpact": "Truyền tải chi phí năng lượng sang VN."
+    },
+    {
+      "id": "n-2026-10-27-008",
+      "impact": "low",
+      "impactScore": 40,
+      "rank": 8,
+      "kind": "community",
+      "board": "vn",
+      "title": "Cộng đồng FireAnt/F247/newF319 mỏng",
+      "url": "https://fireant.vn/cong-dong/moi-nhat",
+      "sourceId": "src-fireant",
+      "publishedAt": "2026-10-27T07:00:00+07:00",
+      "tickers": [],
+      "excerpt": "Ít thảo luận mới trước phiên.",
+      "whyImpact": "Sentiment color only, không phải print."
+    }
+  ]
+}

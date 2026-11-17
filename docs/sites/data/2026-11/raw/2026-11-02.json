@@ -1,0 +1,33 @@
+{
+  "schemaVersion": "1.0.0",
+  "date": "2026-11-02",
+  "briefKind": "eod_prev+overnight+preopen",
+  "eodDate": "2026-10-30",
+  "market": {
+    "vnindex_prior": {"date": "2026-10-30", "price": 1741.62, "change": -13.99, "changePct": -0.80, "source": "src-stockbiz / multiple"},
+    "hnx_prior": 252.74,
+    "liquidity_hose": {"volumeShares": 692647474, "valueVndBn": 14673},
+    "foreign_hose_net": -634,
+    "proprietary_hose_net": 92.8,
+    "notes": "No session 31/10-01/11; preopen Monday. Sources locked on StockBiz/VnEconomy/Tin nhanh CK."
+  },
+  "news_events": [
+    "VN-Index closed 1.741,62 (-0.80%) on 30/10; breadth 72/253; foreign ~-634 bn HoSE (VIC, TCB heavy).",
+    "Proprietary +92.8 bn (MWG +306, VPB +97).",
+    "US Friday close: S&P -1.82%, Nasdaq -2.86%, Dow -1.09%.",
+    "WTI ~104.1 (+2%), gold ~3.875-3.899 (-3.3 to -3.6%).",
+    "SBV central rate unchanged 25.637 on 01/11."
+  ],
+  "sentiment": {
+    "fireant": "thin weekend",
+    "f247": "thin",
+    "newf319": "thin",
+    "note": "Community color only; no new prints over weekend."
+  },
+  "gaps": [
+    "No official HOSE close for 02/11 (preopen).",
+    "Proprietary and foreign exact prints locked from 30/10 only.",
+    "Community forums low activity.",
+    "No new SBV rate for 02/11 yet at run time."
+  ]
+}

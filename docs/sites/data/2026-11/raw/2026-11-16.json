@@ -1,0 +1,28 @@
+{
+  "date": "2026-11-16",
+  "market": {
+    "vnindex_prior": {"price": 1734.93, "change": 0.18, "changePct": 0.01, "date": "2026-11-13", "source": "src-stockbiz"},
+    "hnx_prior": {"price": 254.98, "change": -1.64, "changePct": -0.64, "source": "src-stockbiz"},
+    "liquidity_hose": {"volume": 656750000, "valueVndBn": 15138, "source": "src-stockbiz"},
+    "foreign_hose": {"netVndBn": 337.5, "note": "VnEconomy", "source": "src-vneconomy"},
+    "proprietary": {"netVndBn": 154, "source": "src-cafef"},
+    "us": {"spx": 7561.67, "changePct": -0.4, "ndx_changePct": -0.91, "dji_changePct": 0.1, "source": "src-bloomberg"},
+    "asia": {"nky": 61142.35, "changePct": 0.53, "hsi": 23637.6, "changePct": -1.55, "source": "src-bloomberg"},
+    "fx_commod": {"dxy": 103.41, "xau": 3886, "wti": 89, "btc": 65020, "source": "src-barrons"}
+  },
+  "news_events": [
+    "VN-Index 1.734,93 prior close",
+    "Foreign net buy 337.5 bn VND",
+    "Proprietary net buy 154 bn",
+    "US mixed Friday, Asia split"
+  ],
+  "sentiment": {
+    "community": "Thận trọng, chờ dòng tiền tuần mới (FireAnt/F247)",
+    "source": "src-fireant"
+  },
+  "gaps": [
+    "Không có print đóng cửa 16/11 (preopen)",
+    "USDVND chính thức SBV chưa cập nhật sáng nay",
+    "Community thin"
+  ]
+}
