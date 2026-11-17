@@ -13,11 +13,11 @@
 | Field | Value |
 |-------|-------|
 | **Document** | Frontend technical design (realization) |
-| **Version** | 0.2 (local draft, not committed) |
+| **Version** | 0.4 |
 | **Status** | Draft — M-000 full, M-001 … M-009 outline |
 | **Canonical path** | `docs/domains/frontend/TECHNICAL_DESIGN.md` |
-| **Owner** | Coding Orchestrator (realization); Software Engineer (maintainer) |
-| **Reviewers** | Software Architect Assistant (fit to ARCHITECTURE / ADRs) · UX / UI Designer (fit to DESIGN_LOCK / DESIGN_SYSTEM) |
+| **Owner** | Software Engineer (realization and maintenance) |
+| **Reviewers** | Software Architect (fit to ARCHITECTURE / ADRs) · UX Designer (fit to DESIGN_LOCK / DESIGN_SYSTEM) |
 | **Date** | 2026-11-13 |
 
 ### Traceability
@@ -81,11 +81,11 @@ frontend/
         generated/schema.d.ts   # openapi-typescript output; not hand-edited
       stream/                   # fetch-based SSE client + event adapter
       workspace/                # Zustand store + URL sync hook
-      auth/                     # AuthAdapter interface; NoAuth for Pitch B
-      chart/                    # ChartEngine interface (M-001, Lightweight Charts)
-      stat-chart/               # StatChart wrapper (Chart.js) for non-price charts
+      auth/                     # AuthAdapter interface; NoAuthAdapter for Pitch B, BFF adapter from Pitch A
+      chart/                    # ChartEngine interface (M-001 S3, Lightweight Charts); Pitch B: import-lint seam only
+      stat-chart/               # StatChart wrapper (Chart.js) for non-price charts (M-001 S3); Pitch B: import-lint seam only
       i18n/                     # t() passthrough
-      format/                   # Intl wrappers: price, percent, VND, volume, date/time
+      format/                   # number formatters (price, change, pct, VND, volume); Intl for date/time
       observability/            # reportError(), boundary hooks
     design-system/              # DESIGN SYSTEM
       tokens/                   # tokens source + generated CSS (§8.1)
@@ -128,7 +128,9 @@ ARCHITECTURE §4.3 rules 1–5, realized as build-failing lint. ESLint runs in `
 ### 3.4 Platform contracts (interfaces only)
 
 ```ts
-// platform/auth — Pitch A fills this in; Pitch B ships NoAuth
+// platform/auth — Pitch B ships `NoAuthAdapter` (getSession → null, csrfHeaders → {}, signIn / signOut / onUnauthorized are no-ops);
+// Pitch A replaces it with the Backend-for-Frontend adapter below (§6.1a). Same interface, so no caller changes.
+// No global `X-User-ID` header in any adapter: ADR-SYS-001 retires the caller-set `X-User-ID` header.
 // Backend-for-Frontend (Product Owner, 2026-11-13; ADR-SYS-001): the browser never holds OAuth tokens.
 // Flask keeps them server-side; the browser holds only an HttpOnly `__Host-` session cookie.
 export interface AuthAdapter {
@@ -140,7 +142,8 @@ export interface AuthAdapter {
 }
 export interface SessionInfo { userId: string; displayName?: string; expiresAt: string }
 
-// platform/chart — M-001; engine-neutral (ADR-FRONTEND-004)
+// platform/chart — M-001 S3; engine-neutral (ADR-FRONTEND-004). Not built in Pitch B (Product Owner, 2026-11-17):
+// Pitch B ships only the `no-restricted-imports` rules for `lightweight-charts` and `chart.js` (§3.3 rule 5).
 export interface ChartEngine {
   mount(el: HTMLElement, theme: ChartTheme): void;
   setSeries(price: OhlcBar[], volume?: VolumeBar[]): void;
@@ -152,7 +155,7 @@ export interface ChartEngine {
   destroy(): void;
 }
 
-// platform/stat-chart — Chart.js (Product Owner, 2026-11-13) for non-price charts:
+// platform/stat-chart — M-001 S3 (not in Pitch B). Chart.js (Product Owner, 2026-11-13) for non-price charts:
 // allocation, fundamentals, scenario and comparison charts. Price and time-series charts
 // stay on ChartEngine (ADR-FRONTEND-004); a feature never picks the engine itself.
 export interface StatChartProps {
@@ -181,7 +184,7 @@ export function reportError(error: unknown, ctx: { zone?: ZoneId; route?: string
 
 **Provenance hook (all patterns):** any element showing Agent-produced content sets `data-origin="ai"` and, once the investor confirms it, `data-origin="investor"`. Styling (dashed vs solid edge + label) keys off the attribute; tests assert it. Naming of the confirmed value follows DESIGN_LOCK §4 when the Designer fixes it.
 
-**Keyboard path (Target M-000):** focus order Z2 → Z1 → Z3 → Z4; a "skip to workspace" link; `F6` cycles zones (Proposed); every resize handle reachable and operable by keyboard (built into `react-resizable-panels`).
+**Keyboard path (Target M-000):** focus order Z2 → Z1 → Z3 → Z4; a "skip to workspace" link; `F6` zone cycling and its tests move to M-001 (Product Owner, 2026-11-17); every resize handle reachable and operable by keyboard (built into `react-resizable-panels`).
 
 ---
 
@@ -225,7 +228,7 @@ interface LayoutSlice {
   paneSizes: Record<Track, [z1: number, z3: number, z4: number]>; // session only until M-009
   collapsed: { z1: boolean; z4: boolean };
 }
-interface UiSlice { theme: 'dark' | 'light'; density: 'compact' | 'comfortable'; }
+interface UiSlice { theme: 'dark' | 'light'; density: 'compact' | 'comfortable'; } // M-000 sets 'dark' only; 'light' and switching land in M-001
 ```
 
 - One store, four slices (`workspace`, `context`, `layout`, `ui`), `zustand/middleware` `devtools` in development only.
@@ -291,7 +294,9 @@ React Router (data router, `createBrowserRouter`). Routes are a public surface (
   - base URL from `import.meta.env.VITE_API_BASE_URL` (empty = same origin via dev proxy);
   - `credentials: 'same-origin'` on every request, so the session cookie rides along. The SPA and the Backend are served from one origin (the dev proxy locally, one host at the ingress), because a `__Host-` cookie can't cross origins. No `Authorization` header and no token anywhere in JS, storage or MSW fixtures;
   - a request hook that adds `AuthAdapter.csrfHeaders()` to state-changing requests, including `POST /api/chat`. The chat stream uses the same `fetch` client and reader (§6.2), so streaming needs nothing extra;
-  - a response hook that maps every non-2xx to `ApiError` and calls `AuthAdapter.onUnauthorized` on 401.
+  - a response hook that maps every non-2xx to `ApiError` and calls `AuthAdapter.onUnauthorized` on 401;
+  - no global `X-User-ID` header. [ADR-SYS-001](../../architecture/DECISIONS/ADR-SYS-001-IDENTITY-AND-PER-USER-ISOLATION.md) retires the caller-set `X-User-ID` header; identity comes from the session cookie once Pitch A lands.
+- **Pitch B scope:** the client calls only the health, config, `models/*` and chat paths already in `docs/openapi.yaml`, with `NoAuthAdapter` (§3.4). The cookie, CSRF and 401 hooks above are wired against the `AuthAdapter` interface in Pitch B and become active when Pitch A swaps in the Backend-for-Frontend adapter (§6.1a). `/api/auth/*` stays in Pitch A.
 - **One error model:**
 
 ```ts
@@ -334,7 +339,9 @@ data: [DONE]
 
 No `id:` fields, no typed tool events, no cancel endpoint, no heartbeat.
 
-**Stream delivery requirements (Backend contract ask, Target G6):** the chat stream response sends `Cache-Control: no-cache` and `X-Accel-Buffering: no` so proxies don't buffer it, plus a comment heartbeat (`: ping`) at least every 15 s so idle connections aren't dropped (interval Proposed). The ingress serves HTTP/2, because browsers allow only six HTTP/1.1 connections per origin and open streams would starve REST calls. The client treats a missed heartbeat window as `interrupted`.
+**Stream delivery requirements (Backend contract ask, Target G6):** the chat stream response sends `Cache-Control: no-cache` and `X-Accel-Buffering: no` so proxies don't buffer it, plus a comment heartbeat (`: ping`) at least every 15 s so idle connections aren't dropped (interval Proposed). The ingress serves HTTP/2, because browsers allow only six HTTP/1.1 connections per origin and open streams would starve REST calls. Future behaviour, once the later Backend heartbeat pitch ships: the client may then treat a missed heartbeat window as `interrupted`. Until then the client uses only the idle timeout from `VITE_STREAM_IDLE_TIMEOUT_MS` (60000 ms default, below).
+
+**Split of the heartbeat work (Product Owner decision recorded in `specs/pitches/M-000-B-frontend-foundation.md`, 2026-11-17):** the Backend side (stream headers, `: ping` emission, HTTP/2 ingress) is a later Backend pitch. The Frontend side is in M-000 Pitch B, slice B2: `platform/stream` ignores `:` comment lines, applies an idle window and ends the run as `interrupted` when it passes. B2 proves this against an MSW stream fixture that sends the headers and `: ping` comments, so the Backend work plugs in without a Frontend change. **Idle timeout (Product Owner, 2026-11-17):** 60000 ms in live mode from `VITE_STREAM_IDLE_TIMEOUT_MS` (§10.1), configurable and never hard-coded; MSW tests use 15000 ms with fake timers. Any received line, including `:` comments, resets the timer. On timeout the stream aborts and moves to `interrupted` with the "Tạo lại" (Retry) action; the Z4 draft and any partial message stay. This is a stopgap until the Backend sends heartbeats in the later Backend pitch, when the default can drop with no code change.
 
 ### 6.3 SSE client (Target G1 / G6)
 
@@ -353,15 +360,26 @@ export interface StreamHandle {
   abort(): void;                        // AbortController; closes the reader
 }
 
+// Parser output: every WHATWG field is kept (id, event, retry, data), even though today's adapter ignores id/retry
+export interface SseFrame { id?: string; event?: string; retry?: number; data: string }
+
+export interface StreamAdapter {           // legacyChatAdapter today; a typed-event adapter later
+  toEvents(frame: SseFrame): StreamEvent[] | 'end';
+}
+
 export function openChatStream(
   body: ChatRequest,                    // generated type from openapi.yaml
-  opts?: { signal?: AbortSignal },
+  opts?: { signal?: AbortSignal; idleTimeoutMs?: number },  // idleTimeoutMs defaults to VITE_STREAM_IDLE_TIMEOUT_MS
 ): StreamHandle;
 ```
 
-**Event adapter (`legacyChatAdapter`):** maps today's frames to the union — `{"event":"meta"}` → `meta`, `{"chunk"}` → `token`, `{"event":"done"}` → `final`, `[DONE]` → end of iterable, `{"error"}` or a malformed frame → `error`. When the contract gains named, typed events, a second adapter replaces this one; features do not change.
+**Event adapter (`legacyChatAdapter`):** maps today's frames to the union — `{"event":"meta"}` → `meta`, `{"chunk"}` → `token`, `{"event":"done"}` → `final`, `[DONE]` → end of iterable, `{"error"}` or a malformed frame → `error`. It implements `StreamAdapter`. When the contract gains named, typed events, a second adapter replaces this one; features do not change. Stream event names appear only in the `StreamEvent` union and the adapter (lint-enforced).
 
-**Companion run states (`features/companion`):** `idle → streaming → (done | interrupted | error)`; `stop` from `streaming` → `interrupted`. `interrupted` and `error` show retry (DESIGN_LOCK §5). Retry sends the same user message again as a new run; there is no mid-run resume (Target).
+**One open stream per tab:** `openChatStream` aborts any stream still open in the tab before starting a new one, so open streams never compete for HTTP/1.1 connections.
+
+**Seams for the later Backend streaming pitch:** the kept `id:` / `event:` / `retry:` fields, the `StreamAdapter` interface, `idleTimeoutMs` and the one-stream rule are the hooks that resume (`Last-Event-ID`), typed events and Backend heartbeats plug into without a feature change (Transition table below).
+
+**Companion run states (`features/companion`):** `idle → streaming → (done | interrupted | error)`; `stop` from `streaming` → `interrupted`. `interrupted` and `error` show retry, labelled "Tạo lại" (DESIGN_LOCK §5); an idle timeout ends in `interrupted` and keeps the Z4 draft and partial message. Retry sends the same user message again as a new run; there is no mid-run resume (Target).
 
 **Transition (needs a contract change, Backend follow-up):**
 
@@ -369,7 +387,7 @@ export function openChatStream(
 |-----------|------------------------------------------|-----------------|
 | Resume | Every event has `id:`; short replay buffer per run | Reconnect with `Last-Event-ID`; new adapter |
 | Cancel | `POST` cancel by `runId` | `abort()` also sends cancel |
-| Heartbeat | `:` comment every N s | Idle timeout → `interrupted` |
+| Heartbeat | `:` comment every N s (later Backend pitch) | Not a Transition item: heartbeat-tolerant client and idle timeout → `interrupted` ship in Pitch B slice B2, proven on an MSW stream fixture (§6.2) |
 | Typed events | Named events (`token`, `tool`, `citation`, `final`, `error`) with JSON schemas | New adapter, generated payload types |
 
 ### 6.3a Mock price data for the M-001 proof of concept (Product Owner, 2026-11-13)
@@ -402,12 +420,12 @@ Agent output is untrusted (ARCHITECTURE §6.5, OWASP LLM05).
 
 | Item | Realization | Test |
 |------|-------------|------|
-| WCAG 2.2 AA floor | Radix primitives for focus management; tokens meet DESIGN_SYSTEM §3.3 contrast table | axe on shell routes (G5) |
+| WCAG 2.2 AA floor | Radix primitives for focus management; tokens meet DESIGN_SYSTEM §3.3 contrast table | axe on shell routes (G5); the token contrast-check script moves to M-001 |
 | Never colour alone | `PriceCell` / `Delta` always render sign or arrow; `StatusBadge` always icon + label | Pattern unit tests assert the glyph / label |
-| Keyboard zones | Focus order and skip link (§3.5) | Playwright keyboard walk (Proposed, G5) |
+| Keyboard zones | Focus order and skip link (§3.5) | M-000: one Playwright keyboard-order test at 1920 px (skip link, then Z2, Z1, Z3, Z4), G5. `F6` zone-cycling tests move to M-001 |
 | Reduced motion | Motion tokens collapse under `prefers-reduced-motion: reduce` | Unit test on token output |
 | Streaming announcements | Z4 thread `aria-live="polite"`; announce at message end, not per token | RTL test |
-| Viewport | Design first at 1920 px; supported range 768–1920 px (Product Owner, 2026-11-13). Below 768 px is Future. Which zones collapse at which breakpoint is the Designer's call in DESIGN_LOCK; SNR-7.1.1 follows | Playwright + axe at 1920, 1440, 1024 and 768 (DESIGN_LOCK breakpoints: Z4 becomes a drawer below 1440, Z1 an icon strip below 1024); no horizontal scroll and every zone reachable at each |
+| Viewport | Design first at 1920 px; supported range 768–1920 px (Product Owner, 2026-11-13). Below 768 px is Future. Which zones collapse at which breakpoint is the UX Designer's call in DESIGN_LOCK; SNR-7.1.1 follows | Playwright + axe at 1920, 1440, 1024 and 768 (DESIGN_LOCK breakpoints: Z4 becomes a drawer below 1440, Z1 an icon strip below 1024); no horizontal scroll and every zone reachable at each. Pitch B fallback if the week runs short: 1920 and 768 only |
 | Vietnamese text | Be Vietnam Pro with Vietnamese subset; `lang` attribute from the locale setting | Visual check in Storybook |
 
 ---
@@ -419,30 +437,31 @@ Agent output is untrusted (ARCHITECTURE §6.5, OWASP LLM05).
 ```mermaid
 flowchart LR
   SRC["tokens/source/*.json<br/>(DTCG format)"] --> BUILD["npm run tokens<br/>(Style Dictionary — Proposed)"]
-  BUILD --> CSS["tokens/generated/tokens.css<br/>:root + [data-theme=light]"]
+  BUILD --> CSS["tokens/generated/tokens.css<br/>:root (dark); light overrides in M-001"]
   BUILD --> TW["tokens/generated/tailwind-preset.ts"]
-  CSS --> APP["index.css imports"]
+  CSS --> APP["app global stylesheet imports"]
   TW --> TWC["tailwind config presets"]
 ```
 
-- One source, three tiers (primitive → semantic → component), values owned by the Designer in DESIGN_SYSTEM.
-- Dark is the default on `:root`; light overrides under `[data-theme="light"]`; `UiSlice.theme` sets the attribute on `<html>`.
+- One source, three tiers (primitive → semantic → component), values owned by the UX Designer in DESIGN_SYSTEM.
+- M-000 is dark theme only (Product Owner, 2026-11-17): dark tokens on `:root` and the `data-theme="dark"` hook on `<html>`. Light overrides under `[data-theme="light"]`, theme switching and the token contrast-check script move to M-001.
 - The Tailwind preset exposes surface, text, border, accent, `ai.*`, spacing, radius, type and motion. It **does not** expose `market.*` or `state.*` (DESIGN_SYSTEM §2), so `text-market-up` cannot be written.
 - Density: `[data-density="compact"]` default; `comfortable` from M-006.
 - Generated files are committed; CI fails if `npm run tokens` changes them.
+- Fonts are self-hosted from `public/fonts` (Pitch B slice B4): Be Vietnam Pro for UI text, IBM Plex Mono for numbers.
 
 ### 8.2 Pattern rules
 
 | Pattern | Reads | Contract |
 |---------|-------|----------|
-| `PriceCell` | `market.up/down/ref/ceiling/floor` | Props: `value`, `reference`, `ceiling?`, `floor?` — all Backend-supplied; picks colour by comparison only, never computes bands; tabular digits; sign/arrow always |
-| `Delta` | `market.up/down` | Props: `change`, `percent?`; sign always |
+| `PriceCell` | `market.up/down/ref/ceiling/floor` | Props: `value`, `reference`, `ceiling?`, `floor?` — all Backend-supplied; picks colour by comparison only, never computes bands; tabular digits; sign or arrow for any non-zero value; zero shows `0.00` with no sign in `market.ref`; missing shows `—` |
+| `Delta` | `market.up/down` | Props: `change`, `percent?`; sign or arrow for any non-zero value; zero shows `0.00` with no sign in `market.ref`; missing shows `—` |
 | `StatusBadge` | `state.*` | Props: `status`, `label`; icon + label always |
 | `AiOrigin` | `ai.*` | Wraps content; sets `data-origin`; dashed vs solid edge + label |
 | `MessageBody` | text tokens | §6.5 |
 | `ZoneFrame` | surface, text | §3.5 |
 
-Storybook (ADR-FRONTEND-008, in M-000 for G4): stories for every pattern in both themes, compact density, and the AI-suggested / confirmed pair (DESIGN_SYSTEM §10). Visual regression is a later add-on.
+Storybook (ADR-FRONTEND-008, in M-000): a minimal set of about 15 stories, dark theme only, compact density (Product Owner, 2026-11-17): zone states, `PriceCell`, `Delta`, `StatusBadge` and `MessageBody`. Primitives stories are optional (tier D, dark) in M-000 if time allows. Token pages, the remaining patterns, the light theme and visual snapshots move to M-001.
 
 ### 8.3 i18n and locale seam (Target M-000, ADR-FRONTEND-005)
 
@@ -451,18 +470,20 @@ Storybook (ADR-FRONTEND-008, in M-000 for G4): stories for every pattern in both
 export type MessageKey = keyof typeof messages;      // messages/vi.ts is the launch catalogue (vi-VN first, Product Owner 2026-11-13)
 export function t(key: MessageKey, params?: Record<string, string | number>): string;
 
-// platform/format — Intl wrappers; the only place numbers and dates are formatted
+// platform/format — the only place numbers and dates are formatted (custom number formatters; Intl for dates only)
 export const fmt = {
-  price(v: number): string;               // tabular, fixed decimals per instrument (Backend-supplied precision)
-  percent(v: number): string;             // always signed
+  price(v: number): string;               // board style: integer VND → thousands, dot decimal, two places: 25300 → '25.30'
+  change(v: number): string;              // signed price change, dot decimal: 1750 → '+1.75', -450 → '−0.45' (U+2212), 0 → '0.00'
+  pct(v: number): string;                 // signed percent, dot decimal: 0.0698 → '+6.98%', -0.0698 → '−6.98%', 0 → '0.00%'
   vnd(v: number): string;                 // whole VND, comma grouping, ' ₫' suffix: 25300000 → '25,300,000 ₫'
-  volume(v: number): string;              // compact notation
-  dateTime(d: Date | string): string;     // timeZone: 'Asia/Ho_Chi_Minh' by default
+  volume(v: number): string;              // whole shares, comma grouping, no decimals, no compact notation: 1234500 → '1,234,500', 0 → '0'
+  dateTime(d: Date | string): string;     // standard vi-VN Intl; timeZone: 'Asia/Ho_Chi_Minh' by default
 };
 ```
 
 - Locale and time zone are settings in `UiSlice`; launch default `vi-VN` and `Asia/Ho_Chi_Minh` (not hard-coded inside formatters).
 - **Price notation (Product Owner, 2026-11-13): price-board style.** `fmt.price` is its own formatter, not `Intl` (which would print `25,30`): it takes integer VND and shows thousands of VND with a dot decimal and two decimals (25,300 ₫ → `25.30`). All numbers render in IBM Plex Mono, because Be Vietnam Pro has no fixed-width digits (DESIGN_LOCK). `fmt.volume` never goes through the price formatter: volume is a whole number of shares with comma grouping and no decimals (`1,234,500`), so in a market row the dot always means a decimal and the comma always means thousands (Product Owner, 2026-11-13). Price change and percent change in market rows also use a dot decimal, so one row never mixes `.` and `,` (Product Owner, 2026-11-13): `fmt.change(1750) === '+1.75'`, `fmt.pct(0.0698) === '+6.98%'`. Money totals are whole VND with comma grouping and a ` ₫` suffix (`fmt.vnd(25300000) === '25,300,000 ₫'`; Product Owner, 2026-11-13), built by the same formatter rather than `Intl` `vi-VN` currency (which would print `25.300.000 ₫`). Dates use standard `vi-VN` `Intl` formatting. Tests: `fmt.price(25300) === '25.30'`, ceiling and floor values, the change and percent cases, `fmt.vnd(25300000) === '25,300,000 ₫'`, plus `fmt.volume(1234500) === '1,234,500'`, so the styles can't get mixed up.
+- **Edge cases (Product Owner, 2026-11-17; pitch rows P1–P4, DESIGN_LOCK):** negatives use the true minus U+2212, never a hyphen (`fmt.change(-450) === '−0.45'`, `fmt.pct(-0.0698) === '−6.98%'`); zero shows `0.00` / `0.00%` with no sign; a missing value (`null`, `undefined`, `NaN`) shows `—` with the `aria-label` key "Không có dữ liệu", never `0` or blank; a traded volume of zero stays `0`. Tests cover each case.
 - No string concatenation for sentences; parameters go through `t()`.
 - Exchange sessions, price bands and ref/ceiling/floor come from the Backend (ADR-005); no constants for them in the Frontend.
 - `react/jsx-no-literals` (§3.3) blocks raw JSX strings.
@@ -478,7 +499,7 @@ export const fmt = {
 | Unit | Vitest | Pure functions: route params, SSE parser and adapter, formatters, query keys, store write rule | `npm test` |
 | Component | Vitest + React Testing Library + `@testing-library/user-event` | Patterns, zone frames, companion run states | `npm test` |
 | Network | MSW (ADR-FRONTEND-008, in M-000) | REST and SSE handlers built from `docs/openapi.yaml` examples | inside component tests |
-| E2E + a11y | Playwright + `@axe-core/playwright` (Proposed) | Shell boot, deep links, keyboard walk, chat round-trip against MSW or local Backend | `npm run e2e` |
+| E2E + a11y | Playwright + `@axe-core/playwright` (Proposed) | Shell boot, deep links, layout and axe at 1920/1440/1024/768 px, one keyboard-order test at 1920 px (M-000), chat round-trip against MSW or local Backend | `npm run e2e` |
 | Contract | openapi-typescript diff (FE) · Schemathesis (Backend) | Spec ↔ code drift | CI |
 
 Rules: test behaviour through public APIs (feature `index.ts`, rendered DOM), not internals; tests select by role, label and the `data-zone` / `data-state` / `data-origin` hooks, never by CSS class.
@@ -487,12 +508,12 @@ Rules: test behaviour through public APIs (feature `index.ts`, rendered DOM), no
 
 | Gate | Requirement | Done when (evidence) |
 |------|-------------|----------------------|
-| **G1** Vite + chat smoke | SNR-6.1.4 path | `npm run build` and `npm run dev` work on Vite; Vitest runs; a component test sends a chat and renders streamed tokens from an MSW SSE handler using the §6.2 frames |
+| **G1** Vite + chat smoke | SNR-6.1.4 path | `npm run build` and `npm run dev` work on Vite; Vitest runs; a component test sends a chat and renders streamed tokens from an MSW SSE handler using the §6.2 frames. The heartbeat fixture (`: ping` comments, then silence past the idle window → `interrupted`) belongs to Pitch B slice B2 and is evidence for G6 |
 | **G2** Z1–Z4 shell | SR-1.4.1 | Shell test: four landmarks present; Z2 not resizable; a throw in Z3 shows Z3 error frame while Z1, Z2, Z4 still render; lint fails on a planted forbidden import (fixture) |
 | **G3** Context store + URL | SR-1.4.2, ADR-003 | Deep link `/sandbox/FPT` sets mirrors; track switch navigates and restores `lastRouteByTrack`; store never changes `symbol` without navigation; unknown track → not found |
-| **G4** Tokens wired | DESIGN_LOCK | `tokens.css` generated and committed; theme toggle flips `data-theme`; lint fails on `var(--market-up)` outside patterns; `PriceCell`/`Delta`/`StatusBadge` tests assert sign/icon + label |
-| **G5** Baseline green | SNR-6.1.4 | All of the above green in CI; DESIGN_LOCK §5 zone state matrix covered including Z4 interrupted + retry; §6.5 XSS cases inert; axe finds no serious/critical issues on shell routes |
-| **G6** SSE only | SNR-8.1.2 | `socket.io-client` absent from `package.json` and bundle (`rg socket.io dist` empty); lint rule present; chat stream works over SSE only |
+| **G4** Tokens wired | DESIGN_LOCK | `tokens.css` (dark) generated and committed; `<html>` carries `data-theme="dark"` (theme toggle moves to M-001); lint fails on `var(--market-up)` outside patterns; `PriceCell`/`Delta`/`StatusBadge` tests assert sign/icon + label |
+| **G5** Baseline green | SNR-6.1.4 | All of the above green in CI; DESIGN_LOCK §5 zone state matrix covered including Z4 interrupted + retry; §6.5 XSS cases inert; axe finds no serious/critical issues on shell routes at 1920/1440/1024/768 px |
+| **G6** SSE only | SNR-8.1.2 | `socket.io-client` absent from `package.json` and bundle (`rg socket.io dist` empty); lint rule present; chat stream works over SSE only; the client tolerates `: ping` comments and marks the run `interrupted` when the idle window passes, against the MSW stream fixture (Pitch B slice B2; end-to-end proof waits for the later Backend pitch) |
 
 ---
 
@@ -502,9 +523,9 @@ Rules: test behaviour through public APIs (feature `index.ts`, rendered DOM), no
 
 | Item | Value |
 |------|-------|
-| Node | Current LTS, pinned in `.nvmrc` and `engines` |
+| Node | Node 26 LTS (Product Owner, 2026-11-17): `frontend/.nvmrc` = `26`; `engines.node` = `">=26.13.0"`; `frontend/.npmrc` with `engine-strict=true`; Docker build image `node:26-alpine`. The Product Owner installs Node v26.13.1 locally before the first B1 run |
 | Scripts | `dev`, `build` (`tsc -b && vite build`), `preview`, `test`, `test:watch`, `e2e`, `lint`, `gen:api`, `tokens` |
-| Env | `VITE_API_BASE_URL` (replaces `REACT_APP_API_URL`); `REACT_APP_WS_URL` removed |
+| Env | `VITE_API_BASE_URL` (replaces `REACT_APP_API_URL`); `REACT_APP_WS_URL` removed; `VITE_USE_MOCKS` (build switch for MSW, ADR-FRONTEND-008: `true` starts the MSW browser worker in development; absent or `false` in production builds, and `dist/` contains no `msw` or `mockServiceWorker` code); `VITE_STREAM_IDLE_TIMEOUT_MS` (stream idle timeout, §6.2: default `60000` in live mode, configurable, documented in `frontend/.env.example` as a stopgap until the Backend sends heartbeats; MSW tests use `15000` with fake timers) |
 | Dev proxy | Vite `server.proxy` `/api` → `http://localhost:5000`, so the browser stays same-origin in development |
 | Output | Static `dist/`; hosting and CDN are a Backend/infra decision (TBD) |
 | Headers (Proposed for hosting) | CSP `default-src 'self'; connect-src 'self' <api origin>; script-src 'self'; style-src 'self' 'unsafe-inline'` (Radix/Tailwind inline styles) — confirm when hosting is chosen |
@@ -512,7 +533,9 @@ Rules: test behaviour through public APIs (feature `index.ts`, rendered DOM), no
 
 ### 10.2 CRA → Vite migration (Transition → G1 … G6)
 
-Each step is one reviewable change in a worktree on the assigned branch, with its own test evidence. Phan's working tree is never edited directly.
+Each step is one reviewable change in a worktree on the assigned branch, with its own test evidence. The Product Owner's working tree is never edited directly.
+
+**Strategy (Product Owner, 2026-11-17): fresh, clean rebuild.** Pitch B rebuilds the Frontend rather than refactoring it: legacy code is replaced, not preserved for its own sake. New code never imports from the old `src/components/**`, and the legacy `App.css` and `index.css` are deleted. The steps below are the order of the rebuild, not a line-by-line port. The Accepted ADRs, `docs/openapi.yaml` and `backend/` do not change.
 
 | Step | Change | Evidence | Gate |
 |------|--------|----------|------|
@@ -520,13 +543,15 @@ Each step is one reviewable change in a worktree on the assigned branch, with it
 | **T1 types fix** | Align `@types/react` / `@types/react-dom` with React 18 (currently `^19`) | `tsc --noEmit` clean | pre-G1 |
 | **T2 Vite** | Replace `react-scripts` with Vite + `@vitejs/plugin-react`; move `public/index.html` to root `index.html`; `REACT_APP_*` → `VITE_*`; add Vitest + RTL + MSW and the first chat smoke test | G1 row | G1 |
 | **T3 platform/api + stream** | Fold `restApiClient.js` and `modelsApi.ts` into `platform/api` (one client, `ApiError`) and `platform/stream` (§6.3); convert remaining JS to TS | Adapter and parser unit tests; chat smoke still green | G1 |
-| **T4 shell** | Split `App.tsx` (282 lines) into `app/` shell + `features/companion` + `features/models`; add `MessageBody` (§6.5) and turn on `react/no-danger` | G2 row; §6.5 XSS cases inert | G2 |
+| **T4 shell** | Split `App.tsx` (262 lines) into `app/` shell + `features/companion` + `features/models`; add `MessageBody` (§6.5) and turn on `react/no-danger` | G2 row; §6.5 XSS cases inert | G2 |
 | **T5 router + store** | React Router, `platform/workspace`, `useUrlSync` | G3 row | G3 |
-| **T6 tokens + Tailwind + Radix** | Token pipeline, Tailwind preset, primitives, patterns, theme toggle; delete `UI_CONFIG.THEME` and ad hoc CSS | G4 row | G4 |
-| **T7 boundary lint + a11y** | ESLint/Stylelint rules §3.3; Playwright + axe smoke | G5 row | G5 |
+| **T6 tokens + Tailwind + Radix + format/i18n seam** | Dark token pipeline, Tailwind preset, the primitives and patterns the shell needs (light theme and theme toggle move to M-001); delete `UI_CONFIG.THEME` and the legacy `App.css` / `index.css`; `platform/format` and `platform/i18n` with the vi-VN catalogue (§8.3) — Pitch B slice B4 | G4 row; §8.3 formatter tests | G4 |
+| **T7 boundary lint + a11y** | ESLint/Stylelint rules §3.3; Playwright + axe smoke. The chart-library import rules (§3.3 rule 5: `lightweight-charts` only in `platform/chart`, `chart.js` only in `platform/stat-chart`) ship early, with Pitch B slice B4 | G5 row; lint fails on a planted feature-level chart-library import (fixture) | G5 |
 | **T8 drop Socket.IO** | §6.4 | G6 row | G6 |
 
 Order rationale: subtract first so later steps move less code; Vite before the shell so every later step has tests; Socket.IO last only because nothing live uses it (it can move earlier at no risk).
+
+**Pitch B slice ↔ step map** (`specs/pitches/M-000-B-frontend-foundation.md`): B0 = agent-instruction rewrite (no T-step); B1 = T0 + T1 + T2 (T2 includes the first MSW handler and the G1 chat smoke); B2 = §6.1 codegen + T3 + T8, plus the heartbeat MSW fixture (§6.2); B3 = T4 + T5; B4 = T6 (with the §8.3 format/i18n seam) + the T7 chart-library import rules; B5 = the rest of T7 (Playwright + axe, one keyboard-order test), minimal Storybook (§8.2, ADR-FRONTEND-008) and the Frontend CI workflow (§10.1). Slice order: B0 → B1 → B2 alongside B4 → B3 → B5. Deferred to M-001: chart interfaces, price mocks (§6.3a), light theme and switching, the contrast script, token Storybook pages, `F6` tests and visual snapshots.
 
 ---
 
@@ -554,15 +579,15 @@ Detailed when each Milestone is shaped. Each line names the new feature module, 
 
 | Item | Owner | Status |
 |------|-------|--------|
-| SSE ids, replay buffer, cancel, heartbeat, typed events; `X-Accel-Buffering: no`; HTTP/2 at ingress | Backend + `docs/openapi.yaml`; hosting | Follow-up; blocks resume (§6.3) |
+| SSE ids, replay buffer, cancel, typed events; Backend heartbeat emission, `Cache-Control: no-cache` / `X-Accel-Buffering: no`, HTTP/2 at ingress | Backend + `docs/openapi.yaml`; hosting | Follow-up (later Backend pitch); blocks resume (§6.3). The client-side heartbeat handling and its MSW fixture are not a follow-up: they ship in Pitch B slice B2 |
 | Auth flow details: login, callback, session and CSRF route names; CSRF scheme | ADR-SYS-001 (Pitch A) + `docs/openapi.yaml` | Storage decided: Backend-for-Frontend with HttpOnly cookie (Product Owner, 2026-11-13); route names open; `AuthAdapter` ready |
 | Performance budgets | SNR owners | TBD; measure after T2 before setting numbers |
 | Error reporting tool | This document | Open; `reportError` seam in M-000, console sink only |
-| Accent | Designer | **Bone** accepted by Product Owner (2026-11-10); values in DESIGN_SYSTEM |
-| `track.a` / `track.b` token values | Designer | Open in DESIGN_SYSTEM |
-| ADR-FRONTEND-002 colour line vs DESIGN_SYSTEM | Software Architect Assistant | Replaced by ADR-FRONTEND-007 (Accepted 2026-11-13); colour values live only in DESIGN_SYSTEM |
-| Frontend context ↔ Backend workspace / session / conversation mapping (`qk.workspace`, `sessionRef`) | Software Architect Assistant (ARCH §6.1) | Accepted fix 2026-11-13; TD §4 follows ARCH |
-| Mock price fixtures rules (bands, ticks, sessions, edge cases) | Researcher spec → Coding Orchestrator builds MSW fixtures | In progress |
+| Accent | UX Designer | **Bone** accepted by Product Owner (2026-11-10); values in DESIGN_SYSTEM |
+| `track.a` / `track.b` token values | UX Designer | Open in DESIGN_SYSTEM |
+| ADR-FRONTEND-002 colour line vs DESIGN_SYSTEM | Software Architect | Replaced by ADR-FRONTEND-007 (Accepted 2026-11-13); colour values live only in DESIGN_SYSTEM |
+| Frontend context ↔ Backend workspace / session / conversation mapping (`qk.workspace`, `sessionRef`) | Software Architect (ARCH §6.1) | Accepted fix 2026-11-13; TD §4 follows ARCH |
+| Mock price fixtures rules (bands, ticks, sessions, edge cases) | Research Analyst spec → Software Engineer builds MSW fixtures | In progress; M-001 S3, not Pitch B |
 | Latent XSS in `MessageFormatter.js` | M-000 Pitch B slices | Fix deferred to T0 / T4 by Product Owner (2026-11-10); §6.5 |
 | MSW and Storybook | ADR-FRONTEND-008 | **Accepted** 2026-11-13; in M-000 |
 | E2E tool, `openapi-fetch`, `eslint-plugin-boundaries`, Style Dictionary, SSE parser | This document | **Proposed**; confirm at G1 review |
@@ -589,5 +614,7 @@ Detailed when each Milestone is shaped. Each line names the new feature module, 
 | Version | Date | Author | Change |
 |---------|------|--------|--------|
 | 0.0 | 2026-04-03 | GitHub Copilot | Skeleton |
-| 0.1 | 2026-11-10 | Coding Orchestrator | Full M-000 realization (module tree, boundary lint, store and query keys, routes, typed REST and SSE clients, shell contracts, safe rendering, token pipeline, i18n seam, tests per gate, CRA → Vite steps) and M-001 … M-009 outline; WebSocket section retired; stale stack line removed; Product Owner calls of 2026-11-10 folded in (SR-1.3.5 chart PoC, ADR-FRONTEND-007 token line, Bone accent, latent XSS fixed in Pitch B slices T0 / T4) |
-| 0.2 | 2026-11-13 | Coding Orchestrator | §6.1a Backend-for-Frontend realization (routes Proposed, `Lax` login cookie and same-site callback redirect, CSRF synchronizer token, dev proxy, tests); sign-in uses the Backend-for-Frontend with an HttpOnly cookie: `AuthAdapter` holds no tokens, the client sends cookies same-origin and adds CSRF headers (§3.4, §6.1); mock prices served on the planned real path, with no "mock" in the URL; ₫ totals use comma grouping (`25,300,000 ₫`); volume `1,234,500`; track is URL-owned (store mirror); MSW and Storybook in M-000 per ADR-FRONTEND-008. Chart.js via `platform/stat-chart` for non-price charts; dot decimal for change and percent in market rows. Viewport 768–1920 px, design first at 1920; board-style price format; stream headers, heartbeat and HTTP/2 (§6.2). Review round fixes per Product Owner: mock price data for M-001 (§6.3a); per-symbol/index context with chart preferences in `sessionStorage`; Z4 draft in `sessionStorage`; M-006 named levels via `setLevels`; vi-VN launch catalogue; 1920 primary width; chart Sandbox only; `case` route removed; `jsx-no-literals` allow-list |
+| 0.1 | 2026-11-10 | Software Engineer | Full M-000 realization (module tree, boundary lint, store and query keys, routes, typed REST and SSE clients, shell contracts, safe rendering, token pipeline, i18n seam, tests per gate, CRA → Vite steps) and M-001 … M-009 outline; WebSocket section retired; stale stack line removed; Product Owner calls of 2026-11-10 folded in (SR-1.3.5 chart PoC, ADR-FRONTEND-007 token line, Bone accent, latent XSS fixed in Pitch B slices T0 / T4) |
+| 0.2 | 2026-11-13 | Software Engineer | §6.1a Backend-for-Frontend realization (routes Proposed, `Lax` login cookie and same-site callback redirect, CSRF synchronizer token, dev proxy, tests); sign-in uses the Backend-for-Frontend with an HttpOnly cookie: `AuthAdapter` holds no tokens, the client sends cookies same-origin and adds CSRF headers (§3.4, §6.1); mock prices served on the planned real path, with no "mock" in the URL; ₫ totals use comma grouping (`25,300,000 ₫`); volume `1,234,500`; track is URL-owned (store mirror); MSW and Storybook in M-000 per ADR-FRONTEND-008. Chart.js via `platform/stat-chart` for non-price charts; dot decimal for change and percent in market rows. Viewport 768–1920 px, design first at 1920; board-style price format; stream headers, heartbeat and HTTP/2 (§6.2). Review round fixes per Product Owner: mock price data for M-001 (§6.3a); per-symbol/index context with chart preferences in `sessionStorage`; Z4 draft in `sessionStorage`; M-006 named levels via `setLevels`; vi-VN launch catalogue; 1920 primary width; chart Sandbox only; `case` route removed; `jsx-no-literals` allow-list |
+| 0.3 | 2026-11-17 | Software Engineer | Aligned with `specs/pitches/M-000-B-frontend-foundation.md`: client-side heartbeat handling and its MSW stream fixture move from Transition / Follow-up to Pitch B slice B2; Backend headers, heartbeat emission and HTTP/2 stay a later Backend pitch (§6.2, §6.3, §9.2 G1 / G6, §12). `VITE_USE_MOCKS` added to the §10.1 env table. `App.tsx` corrected to 262 lines. Format/i18n seam owned by T6 and chart-library import rules by T7, both delivered in slice B4; slice ↔ step map added (§10.2). §8.3 formatter block made consistent with the prose (`change` and `pct` added, board-style `price`, volume without compact notation, custom formatters rather than `Intl` wrappers, also in the §3.1 module tree) |
+| 0.4 | 2026-11-17 | Software Engineer | Product Owner decisions of 2026-11-17 (thin initial stage): stream idle timeout 60000 ms via `VITE_STREAM_IDLE_TIMEOUT_MS` (15000 ms in MSW tests), "Tạo lại" keeps draft and partial message (§6.2, §6.3, §10.1); stream seams for the later Backend pitch: `openChatStream(body, { signal, idleTimeoutMs })`, parser keeps `id` / `event` / `retry`, `StreamAdapter`, one open stream per tab (§6.3); no global `X-User-ID` (ADR-SYS-001), Pitch B calls health, config, `models/*` and chat with `NoAuthAdapter` (§3.4, §6.1); Node 26 (`.nvmrc` 26, engines `>=26.13.0`, `engine-strict`, `node:26-alpine`) (§10.1); number edge cases: true minus, unsigned zero, `—` for missing, volume `0` (§8.3); chart interfaces to M-001 S3, Pitch B keeps the import lint (§3.1, §3.4); dark theme only, light theme, toggle and contrast script to M-001 (§4.2, §7, §8.1, §9.2, §10.2); Storybook about 15 dark stories (§8.2); one keyboard-order test at 1920 px, `F6` tests to M-001 (§3.5, §7, §9.1); fresh, clean rebuild note and B0 in the slice map (§10.2); role names instead of agent names (§1, §7, §8.1, §10.2, §12, §14) |

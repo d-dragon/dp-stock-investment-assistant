@@ -13,13 +13,13 @@
 | Field | Value |
 |-------|-------|
 | **Document** | Frontend domain architecture (target) |
-| **Version** | 0.3.4 (local draft, not committed) |
+| **Version** | 0.3.5 |
 | **Status** | Target — M-000 Pitch B foundation, extended with building blocks to M-009 |
 | **Canonical path** | `docs/domains/frontend/ARCHITECTURE.md` |
 | **Owners** | Software Engineer (maintainer) · UX / UI Designer (presentation viewpoint) |
 | **Architecture decisions** | Software Architect Assistant (ADR-FRONTEND-001 … 008) |
 | **Horizon** | Product §5.3 Milestones M-000 … M-009 plus foundation blocks; M-010 and later appear only as Future seams |
-| **Date** | 2026-11-13 |
+| **Date** | 2026-11-17 |
 
 ### Governing links
 
@@ -298,7 +298,7 @@ sequenceDiagram
   Note over S: open work kept per track and per symbol (SR-1.3.2)
 ```
 
-**b. Z4 companion stream.** Current: `fetch`-based SSE reader with `AbortController`; no resume, because the Backend emits no event ids today. Transition (needs a contract change): every event carries an `id`, the Backend keeps a short replay buffer per run, the client resumes with `Last-Event-ID`, a cancel request stops server work, and heartbeats keep proxies open. `EventSource` is not used because it supports only GET without custom headers ([WHATWG HTML §9.2](https://html.spec.whatwg.org/multipage/server-sent-events.html)).
+**b. Z4 companion stream.** Current: `fetch`-based SSE reader with `AbortController`; no resume, because the Backend emits no event ids today. M-000 Pitch B (stopgap until heartbeats ship): a configurable client idle timeout (`VITE_STREAM_IDLE_TIMEOUT_MS`, 60 s default in live mode) where any received line resets the timer and expiry marks the stream `interrupted` with retry, keeping the draft. Transition (needs a contract change): every event carries an `id`, the Backend keeps a short replay buffer per run, the client resumes with `Last-Event-ID`, a cancel request stops server work, and heartbeats keep proxies open. `EventSource` is not used because it supports only GET without custom headers ([WHATWG HTML §9.2](https://html.spec.whatwg.org/multipage/server-sent-events.html)).
 
 ```mermaid
 sequenceDiagram
@@ -306,7 +306,7 @@ sequenceDiagram
   participant C as SSE client (platform)
   participant B as Backend
   Z4->>C: send(message)
-  C->>B: POST stream (fetch, Authorization after Pitch A)
+  C->>B: POST stream (fetch, session cookie + CSRF header, no Authorization)
   B-->>C: token / tool / final events
   C-->>Z4: typed events
   alt user stops
@@ -336,7 +336,7 @@ sequenceDiagram
 ### 6.4 Persistence phases
 
 1. **M-000 Pitch B:** session-only workspace context and per-symbol context in `sessionStorage`; shareable state in the URL; Z4 by Backend `sessionRef` (session id + conversation id).
-2. **Pitch A:** identity and auth headers; durable user session (SR-10.1.x).
+2. **Pitch A:** identity through the Backend-for-Frontend session cookie and CSRF proof, no `Authorization` header (ADR-SYS-001); durable user session (SR-10.1.x).
 3. **M-009:** saved layout presets, per user.
 
 ### 6.5 Security (presentation)
@@ -457,6 +457,7 @@ Realization steps, worktrees and file moves → TECHNICAL_DESIGN.md (Coding Orch
 | 0.3.2 | 2026-11-13 | Software Architect Assistant | Dot decimal for every number, including percent; Chart.js row for auxiliary non-price charts (ADR-002 role confirmed); WCAG 2.2 AA stays as written, not raised to P1; Chart.js sits behind its own adapter |
 | 0.3.3 | 2026-11-13 | Software Architect Assistant | Comma groups thousands (`1,234,500`), dot only as decimal; MSW and Storybook move from candidates to M-000 (ADR-008) |
 | 0.3.4 | 2026-11-13 | Software Architect Assistant | ADR-SYS-001 token storage accepted: auth adapter uses the Backend-for-Frontend cookie session with CSRF proof, no token in the browser; Version field brought in line with the revision history |
+| 0.3.5 | 2026-11-17 | Software Architect Assistant | Pitch B review: Z4 stream and Pitch A persistence wording aligned with ADR-SYS-001 (session cookie + CSRF header, no `Authorization`); Pitch B client idle-timeout stopgap (60 s, configurable) recorded in §6.3b |
 
 ---
 

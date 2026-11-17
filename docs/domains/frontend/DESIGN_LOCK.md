@@ -6,7 +6,7 @@
 
 | Field | Value |
 |-------|-------|
-| **Version** | 0.3.1 (draft) |
+| **Version** | 0.3.2 (draft) |
 | **Status** | Draft — M-000 Pitch B foundation, extended with presentation rules to M-009 |
 | **Product Owner** | Phan Duy |
 | **Maintainer** | UX Designer |
@@ -20,6 +20,7 @@
 | Version | Date | Change |
 |---------|------|--------|
 | 0.1 | 2026-11-05 | M-000 Pitch B presentation contract |
+| 0.3.2 | 2026-11-17 | Number edge cases decided (Phan Duy): true minus U+2212, zero with no sign in `market.ref`, missing value `—`, zero volume `0`; §8 font line names IBM Plex Mono for numbers |
 | 0.3.1 | 2026-11-13 | Minimum supported width 768 px with breakpoint behaviour (Phan Duy); volume in whole shares with comma grouping `1,234,500` (Phan Duy); ₫ totals `25,300,000 ₫` (Phan Duy); percent in price rows uses the dot (Phan Duy); Chart.js data charts themed from tokens (Phan Duy, DESIGN_SYSTEM); price-board number format decided (Phan Duy); numbers use `mono` (IBM Plex Mono) because Be Vietnam Pro v1.002 has no tabular digits |
 | 0.3 | 2026-11-13 | Review round (Phan Duy decisions 2026-11-13): 1920 px design focus with a proposed zone width budget, zones never stack (Z4 → toggle, Z1 → rail); Z1 is one sidebar with Dual-Track and Lifecycle groups (IA v0.9.0, no Z1a/Z1b); Z2 content aligned to IA §2.3 and the model selector moved to the Z4 header; context kept per symbol or index; Z4 draft kept in `sessionStorage`; one zone-state list (adds Ready and Stale; provenance is not a state); `data-origin` values `ai` / `investor`; M-001 chart is Research Sandbox only, no marker content, candles carry a shape cue; launch UI language vi-VN; ADR-FRONTEND-003/004/005/007 cited as Accepted |
 | 0.2.1 | 2026-11-10 | Bone approved as accent (Phan Duy); colour-token architecture cites [ADR-FRONTEND-007](./DECISIONS/ADR-FRONTEND-007-DESIGN-TOKEN-ARCHITECTURE.md) (Proposed) — Design-Token Architecture; Colour Values Live in the Design System; SR-1.3.5 (approved 2026-11-10) for the M-001 docked chart proof of concept |
@@ -179,7 +180,8 @@ Rules that apply from M-001:
 - Numbers, prices, percents, currency and dates go through one format helper. **One number style across the app** (Phan Duy, 2026-11-13): the dot is only a decimal mark and the comma only groups thousands. Copy and dates stay `vi-VN`, in `Asia/Ho_Chi_Minh`. **Price-board format for prices** (Phan Duy, 2026-11-13): prices are shown in thousands of VND, always with two decimals and a dot as the decimal mark (`25.30` = 25,300 ₫; `6.81` = 6,810 ₫). `Intl.NumberFormat('vi-VN')` would render `25,30`, so `PriceCell` uses its own board formatter ([TECHNICAL_DESIGN.md](./TECHNICAL_DESIGN.md) §8.3).
 - **Change and percent use the dot too** (Phan Duy, 2026-11-13): inside `PriceCell` and `Delta`, change and percent use the dot decimal (`+0.45`, `+6.98%`), so one row never mixes `.` and `,`. ₫ totals use the same comma grouping (`25,300,000 ₫`; Phan Duy, 2026-11-13). Prose and dates use `vi-VN`. **Volume** is shown in whole shares, never lots, grouped with a **comma** and no decimals (`1,234,500`; Phan Duy, 2026-11-13), so inside price-board rows a dot always means a decimal. The unit "CP" sits in the column header, and volume never goes through the price formatter.
 - Layouts allow about 30% longer Vietnamese text than the English source.
-- Fonts cover the full Vietnamese diacritic set (Be Vietnam Pro; see [DESIGN_SYSTEM.md](./DESIGN_SYSTEM.md)).
+- **Edge cases** (Phan Duy, 2026-11-17): negatives use the true minus `−` (U+2212), not a hyphen (`−0.45`, `−6.98%`); zero change is `0.00` / `0.00%` with no sign, in `market.ref`; a missing value (`null`, `undefined`, `NaN`) is `—` with an accessible label, never `0` or blank; a traded volume of zero stays `0`.
+- Fonts cover the full Vietnamese diacritic set: Be Vietnam Pro for UI text, IBM Plex Mono for numbers (tabular digits); see [DESIGN_SYSTEM.md](./DESIGN_SYSTEM.md).
 
 ## 9. Out of scope
 
