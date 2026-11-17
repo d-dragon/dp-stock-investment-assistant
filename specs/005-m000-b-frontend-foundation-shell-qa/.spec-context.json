@@ -1,0 +1,24 @@
+{
+  "workflow": "speckit",
+  "specName": "[FEATURE NAME]",
+  "branch": "features/pitch-m000-B-frontend-foundation",
+  "currentStep": "specify",
+  "status": "specified",
+  "history": [
+    {
+      "step": "specify",
+      "substep": null,
+      "kind": "start",
+      "by": "extension",
+      "at": "2026-11-17T08:10:02.676Z"
+    },
+    {
+      "step": "specify",
+      "substep": null,
+      "kind": "complete",
+      "by": "extension",
+      "at": "2026-11-17T08:16:43.951Z"
+    }
+  ],
+  "telemetryInstanceId": "8a08179b-c788-40b8-b351-cfc524767383"
+}
