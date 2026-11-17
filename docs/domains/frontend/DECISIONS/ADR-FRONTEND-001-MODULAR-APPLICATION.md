@@ -7,9 +7,9 @@
 | **ADR ID** | ADR-Frontend-001 |
 | **Domain** | Frontend |
 | **Standards Stance** | Practice-Based ADR discipline |
-| **Status** | Proposed |
+| **Status** | Accepted |
 | **Date** | 2026-03-27 |
-| **Last Updated** | 2026-09-03 |
+| **Last Updated** | 2026-11-05 |
 | **Decision Owners** | Engineering · Architecture · Frontend maintainers |
 
 ## Context
@@ -51,6 +51,8 @@ This ADR therefore captures the architectural direction, while the modernization
 ## Decision Statement
 
 The frontend will evolve as a bounded-context modular SPA hosting a multi-pane financial workspace, not as independently deployed micro-frontends in the near term.
+
+For **M-000 Pitch B**, the modular shell maps to the Adaptive Workspace zones (IA §2.6): **Z2** top chrome, **Z1** dual-track A/B both visible at once (not swapped modes) plus Lifecycle cues, **Z3** main workspace with chart dock reserved, **Z4** AI companion. The Frontend is presentation-only: it presents Core objects and streams; it does not own gate/Pass/Fail decisions (Backend + Agent). Identity / SR-10.1.x remains **Pitch A / ADR-SYS-001**.
 
 In practical terms, this means:
 
@@ -148,7 +150,7 @@ This decision serves the following system requirement families without owning th
 
 | Requirement Family | Relevance |
 |--------------------|-----------|
-| **SR-1**: User Interaction and Experience Continuity | Modular SPA with resizable multi-pane canvas preserves UX consistency and shared session behavior across all trading and assistant features |
+| **SR-1** / **SR-1.4.1**: User Interaction; Modular presentation shell | Modular SPA shell hosts IA zones Z1–Z4 as composition slots (SR-1.4.1); preserves UX consistency and shared in-session workspace context across assistant features |
 | **SR-5**: Real-Time Delivery and Streaming Behavior | Shared platform layer centralizes streaming lifecycle and market data feeds instead of fragmenting them across micro-frontends |
 | **SNR-4**: Maintainability, Modularity, and Evolvability | Bounded feature modules with explicit public APIs directly address modularity and evolvability obligations |
 | **SNR-7**: Usability, Accessibility, and Design Governance | Single application shell and controlled platform layer support consistent UX governance and financial workspace design standards |
@@ -158,6 +160,7 @@ This decision serves the following system requirement families without owning th
 - [Frontend Architecture Evolution Report](../../../frontend/frontend-architecture-evolution-report.md)
 - [Frontend Modernization and Modularization Strategy Research](../../../frontend/frontend-modernization-and-modularization-strategy-research.md)
 - [ADR-Frontend-002: Modernize the Frontend Foundation with a Contract-First Modular Stack](./ADR-FRONTEND-002-MODERNIZE-FRONTEND-FOUNDATION.md)
+- [Frontend Domain Architecture](../ARCHITECTURE.md)
 - [Frontend Domain Technical Design](../TECHNICAL_DESIGN.md)
 - [Master System SRS](../../../system/SYSTEM_REQUIREMENTS_SPECIFICATION.md)
 - [Documentation Methodology](../../../study-hub/project-documentation-and-specification-methodology.md)
@@ -178,3 +181,4 @@ This decision serves the following system requirement families without owning th
 | 0.2 | 2026-04-01 | Engineering | Refined context with contract-first SPA realization and companion ADR-002 linkage |
 | 0.3 | 2026-04-13 | Engineering | Standardized to project ADR discipline; migrated to `docs/domains/frontend/DECISIONS/`; added Document Control, Requirement Alignment, and Revision History |
 | 0.4 | 2026-09-03 | Engineering | Incorporated resizable multi-pane financial canvas paradigm; refined scope to coordinate visual charting and AI copilot workspace |
+| 0.5 | 2026-11-05 | Software Architect Assistant | Accepted for M-000 Pitch B — modular Z1–Z4 presentation shell; cites SR-1.4.1; identity remains Pitch A / ADR-SYS-001 |

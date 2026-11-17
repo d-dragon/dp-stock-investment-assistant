@@ -7,9 +7,10 @@
 | **ADR ID** | ADR-Frontend-002 |
 | **Domain** | Frontend |
 | **Standards Stance** | Practice-Based ADR discipline |
-| **Status** | Proposed |
+| **Status** | Accepted |
 | **Date** | 2026-04-01 |
-| **Last Updated** | 2026-09-03 |
+| **Last Updated** | 2026-11-13 |
+| **Replaced in part by** | [ADR-Frontend-007](./ADR-FRONTEND-007-DESIGN-TOKEN-ARCHITECTURE.md) (token-colour bullet) · [ADR-Frontend-004](./ADR-FRONTEND-004-CHART-ENGINE-ADAPTER.md) (chart capabilities: Lightweight Charts ships no indicators) · [ADR-Frontend-003](./ADR-FRONTEND-003-URL-OWNED-SHAREABLE-STATE.md) (G3: the URL owns track, `symbol` and `coreObjectRef`; the store mirrors them) · [ADR-Frontend-008](./ADR-FRONTEND-008-MSW-AND-STORYBOOK-IN-M000.md) (MSW and Storybook move into M-000) |
 | **Decision Owners** | Engineering · Architecture · Frontend maintainers |
 
 ## Context
@@ -34,19 +35,19 @@ The modernization research concludes that the best fit is a **contract-first mod
 - Modernize the frontend foundation with a contract-first modular SPA stack hosting an adaptive financial workspace.
 - Replace Create React App with [Vite](https://vite.dev/guide/).
 - Introduce [React Router](https://reactrouter.com/start/declarative/installation) for shell and route composition.
-- Adopt [`react-resizable-panels`](https://github.com/bvaughn/react-resizable-panels) for the resizable, customizable multi-pane canvas layout (chart canvas + copilot drawer + analytical dock) with persistent layout state in localStorage.
+- Adopt [`react-resizable-panels`](https://github.com/bvaughn/react-resizable-panels) for adaptive panes on **Z1, Z3, Z4** only (**Z2 fixed chrome**); resize is **session-only** in Pitch B; saved layout presets belong to **M-009** (not localStorage in this bet).
 - Adopt a **Dual-Speed State Architecture**:
   - **Fast Reactive Lane**: [Zustand](https://github.com/pmndrs/zustand) for high-frequency market ticks, active symbol synchronization, timeframe selection, and transient workspace layout state.
   - **Slow Server-State Lane**: [TanStack Query](https://tanstack.com/query/latest/docs/framework/react/overview) for REST-backed server-state caching, deduplication, and invalidation (historical OHLCV, quarterly financials, model catalog).
 - Standardize financial visualization engines:
   - **Primary Canvas**: [TradingView Lightweight Charts](https://tradingview.github.io/lightweight-charts/) (`lightweight-charts`) for high-performance (60 FPS) OHLCV candlesticks, volume histograms, and indicators (RSI, MACD).
   - **Auxiliary Visualization**: [Chart.js](https://www.chartjs.org/) for macro graphs, solvency breakdown bars, and portfolio asset allocation donuts.
-- Formally specify a **Structured SSE Artifact Protocol** (`event: chunk`, `event: artifact_start`, `event: artifact_payload`) paired with a frontend Generative UI Dispatcher to stream interactive financial cards directly into the copilot dialog.
+- **Defer** a Structured SSE Artifact Protocol / Generative UI Dispatcher to **Future** (not M-000 Pitch B); Pitch B streams companion/chat tokens over SSE without GenUI artifact cards.
 - Adopt **Tailwind CSS + Radix UI primitives** with financial dark-mode design tokens (emerald green for gains, rose red for losses, cyan for copilot, slate-950 dark background) as the primary UI foundation.
 - Generate frontend-backend TypeScript contracts from the existing OpenAPI specification via [openapi-typescript](https://openapi-ts.dev/introduction).
-- Keep SSE and WebSocket flows explicit through typed platform clients and feature-facing hooks.
+- Keep **HTTPS + SSE** flows explicit through typed platform clients and feature-facing hooks (**no Socket.IO / WebSocket** in the target; SNR-8.1.2).
 - Adopt [Vitest](https://vitest.dev/) plus React Testing Library as the primary frontend test foundation.
-- Adopt a **Value-Driven Vertical-Slice Delivery Strategy**: pair build tool modernization with early delivery of the multi-pane canvas and TradingView chart in Phase 2.
+- Adopt a **Value-Driven Vertical-Slice Delivery Strategy**: pair build tool modernization with early delivery of the **Z1–Z4 Adaptive Workspace shell and workspace context store** in Phase 2 (maiden TradingView chart deferred; chart-yield → **M-006**).
 - Treat Progressive Web Application enablement as an optional later-phase capability layered on the SPA, not as a separate architecture choice.
 - Treat [MSW](https://mswjs.io/docs/) and [Storybook](https://storybook.js.org/docs) as planned accelerators for later phases rather than phase-0 prerequisites.
 
@@ -58,8 +59,8 @@ The frontend modernization program will implement ADR-Frontend-001 through a ver
 - React Router for shell and route composition
 - `react-resizable-panels` for the adaptive multi-pane workspace
 - Dual-speed state management: Zustand for fast reactive state and TanStack Query for server state
-- `lightweight-charts` as the primary 60 FPS financial canvas engine, complemented by `Chart.js` for auxiliary charts
-- Structured SSE artifact streaming for Generative UI cards
+- Chart engines (`lightweight-charts`, Chart.js) remain the intended visualization stack when Canvas milestones land; **not** the Pitch B foundation proof
+- HTTPS + SSE companion/chat streaming (GenUI artifact protocol deferred to Future)
 - Tailwind CSS plus Radix UI primitives for accessible, high-velocity financial UI design
 - contract-generated TypeScript types from OpenAPI for platform APIs
 - typed streaming adapters for chat and real-time interactions
@@ -67,6 +68,22 @@ The frontend modernization program will implement ADR-Frontend-001 through a ver
 - optional later-phase PWA capability where installability and carefully scoped offline behavior are justified
 
 This ADR defines the preferred modernization stack and delivery baseline. It operationalizes ADR-Frontend-001.
+
+
+## Carve-outs (M-000 Pitch B)
+
+These items are **not** delivered under this Accepted ADR for Pitch B:
+
+| Item | Disposition |
+|------|-------------|
+| Socket.IO / WebSocket client | **Out** — target transport is HTTPS + SSE only (**SNR-8.1.2** amend) |
+| GenUI / Structured SSE Artifact Protocol / Generative UI Dispatcher | **Future** |
+| localStorage saved layout presets | **M-009** — Pitch B layout sizes are session-only |
+| Chart-yield on Decision gate | **M-006** |
+| Maiden TradingView chart as Phase-2 proof | **Deferred** — foundation Phase 2 = Z1–Z4 shell + workspace context store |
+| Auth / Auth0 / **SR-10.1.x** | **Pitch A / ADR-SYS-001** |
+
+`react-resizable-panels` applies to **Z1, Z3, and Z4 only**; **Z2 stays fixed chrome**.
 
 ## Rationale
 
@@ -103,13 +120,16 @@ This ADR defines the preferred modernization stack and delivery baseline. It ope
 
 ## Implementation Direction
 
-Recommended sequence (Value-Driven Vertical Slice):
+Recommended sequence for **M-000 Pitch B** (aligns with Frontend Architecture gates G1–G6):
 
-1. **Phase 0: Active Surface Audit & Cleanup**: Quarantine dead JS files (`OptimizedApp.js`, `PerformanceProfiler.js`, `MessageFormatter.js`) and remove duplicate API clients.
-2. **Phase 1: Foundation Modernization**: Migrate from CRA to Vite, configure Vitest, install Tailwind CSS with financial tokens, and automate `openapi-typescript` contract generation.
-3. **Phase 2: Dual-Pane Resizable Shell & Maiden Chart Feature**: Scaffold `react-resizable-panels` in `src/app/`, wire `workspaceStore` (Zustand), and mount `lightweight-charts` in `src/modules/market-data/` to display live Vietnam market OHLCV data alongside existing chat.
-4. **Phase 3: Copilot Module Extraction & Generative UI**: Move chat into `src/modules/chat/`, implement typed SSE artifact event parser, and render interactive solvency/valuation cards inline.
-5. **Phase 4: Quality Hardening & Domain Expansion**: Add MSW network mocking, Storybook component catalog, and expand to full Workspace notes and Portfolio screener modules.
+1. **G1 — Vite + chat smoke**: Migrate from CRA to Vite; keep existing chat path working over HTTPS+SSE.
+2. **G2 — Z1–Z4 shell**: Scaffold Adaptive Workspace shell (IA §2.6); `react-resizable-panels` on Z1/Z3/Z4; Z2 fixed chrome.
+3. **G3 — Workspace context store**: Zustand fast lane for track/symbol/`coreObjectRef`/session layout; Z4 holds Backend `sessionRef` only (**SR-1.4.2**).
+4. **G4 — Design tokens wired**: Tailwind + Radix/shadcn primitives with IA-named tokens per `DESIGN_LOCK.md`.
+5. **G5 — Vitest + RTL baseline**: Executable FE tests for shell and critical seams (**SNR-6.1.4**).
+6. **G6 — Drop Socket.IO**: SSE-only transport conformance (**SNR-8.1.2**).
+
+Later (out of this ADR’s Pitch B acceptance): GenUI artifacts (Future), saved layout presets (**M-009**), chart-yield (**M-006**), TradingView maiden chart under Canvas milestones, Auth0/session durability (**Pitch A / ADR-SYS-001**). MSW and Storybook remain later accelerators.
 
 ## Guardrails
 
@@ -117,7 +137,7 @@ Recommended sequence (Value-Driven Vertical Slice):
 - Do not route high-frequency market tick streams through React Context or slow server caches; use Zustand transient subscriptions or direct canvas updates.
 - Do not expose secrets through client-side `VITE_*` variables.
 - Do not reintroduce ad hoc feature-local API clients when platform clients already exist.
-- Keep streaming logic explicit and typed; adhere to the structured SSE artifact event schema.
+- Keep streaming logic explicit and typed over **HTTPS + SSE**; do not reintroduce Socket.IO/WebSocket clients in the target path. GenUI artifact schemas remain Future.
 - Treat generated contract types as authoritative inputs at the platform boundary.
 - Do not enable offline caching strategies for live or market-sensitive data without explicit freshness and invalidation rules.
 
@@ -141,18 +161,19 @@ This decision serves the following system requirement families without owning th
 
 | Requirement Family | Relevance |
 |--------------------|-----------|
-| **SR-1**: User Interaction and Experience Continuity | Resizable multi-pane canvas preserves simultaneous chart and copilot continuity across all trading workflows |
-| **SR-5**: Real-Time Delivery and Streaming Behavior | Dual-speed state architecture and typed SSE artifact streaming guarantee sub-500ms TTFT and 60 FPS chart updates |
+| **SR-1** / **SR-1.4.2**: User Interaction; In-session workspace context | Z1–Z4 shell + Zustand workspace context (session-only until Pitch A) preserves simultaneous track/workspace/companion continuity (**SR-1.4.2**) |
+| **SR-5** / **SNR-8.1.2**: Real-Time Delivery; Client streaming compatibility | Dual-speed state + typed **HTTPS+SSE** clients (no Socket.IO); GenUI artifact streaming deferred to Future |
 | **SR-8**: Contract Exposure and Integration Compatibility | Contract-generated TypeScript types from OpenAPI specification enforce frontend-backend type synchronization |
 | **SNR-4**: Maintainability, Modularity, and Evolvability | Vite tooling, modular domain boundaries, and vertical-slice sequencing directly support maintainability |
 | **SNR-7**: Usability, Accessibility, and Design Governance | Tailwind CSS plus Radix UI primitives guarantee accessible (WCAG 2.2 AA) financial UI components |
-| **SNR-8**: Developer Experience, Testability, and Tooling | Vitest plus React Testing Library establish executable frontend quality gates |
+| **SNR-8** / **SNR-6.1.4**: Developer Experience; Frontend testability baseline | Vitest + React Testing Library establish executable frontend quality gates (**SNR-6.1.4**) |
 
 ## Related Documents
 
 - [ADR-Frontend-001: Adopt a Modular Application Frontend Before Any Micro-Frontend Decomposition](./ADR-FRONTEND-001-MODULAR-APPLICATION.md)
 - [Frontend Modernization and Modularization Strategy Research](../../../frontend/frontend-modernization-and-modularization-strategy-research.md)
 - [Frontend Architecture Evolution Report](../../../frontend/frontend-architecture-evolution-report.md)
+- [Frontend Domain Architecture](../ARCHITECTURE.md)
 - [Frontend Domain Technical Design](../TECHNICAL_DESIGN.md)
 - [Master System SRS](../../../system/SYSTEM_REQUIREMENTS_SPECIFICATION.md)
 - [Documentation Methodology](../../../study-hub/project-documentation-and-specification-methodology.md)
@@ -178,3 +199,7 @@ This decision serves the following system requirement families without owning th
 | 0.1 | 2026-04-01 | Engineering | Initial ADR proposed |
 | 0.2 | 2026-04-13 | Engineering | Standardized to project ADR discipline; migrated to `docs/domains/frontend/DECISIONS/`; added Document Control, Requirement Alignment, and Revision History |
 | 0.3 | 2026-09-03 | Engineering | Incorporated multi-pane canvas (`react-resizable-panels`), dual-speed state (`Zustand` + `TanStack Query`), `lightweight-charts`, Generative UI SSE artifacts, Tailwind+Radix, and vertical-slice delivery |
+| 0.4 | 2026-11-05 | Software Architect Assistant | Amend+Accept for M-000 Pitch B - Vite/Router/panels/Zustand/TQ/Tailwind+Radix/Vitest; HTTPS+SSE only; carve-outs GenUI Future, layout presets M-009, chart-yield M-006, Auth to Pitch A; cites SR-1.4.2, SNR-6.1.4, SNR-8.1.2 |
+| 0.5 | 2026-11-13 | Software Architect Assistant | History note only; decision text unchanged. Token-colour bullet replaced by ADR-007 and the indicator claim by ADR-004 (both Accepted 2026-11-13) |
+| 0.6 | 2026-11-13 | Software Architect Assistant | History note: G3 replaced in part by ADR-Frontend-003 (URL owns shareable state) |
+| 0.7 | 2026-11-13 | Software Architect Assistant | History note: the MSW / Storybook "later phases" bullet replaced in part by ADR-Frontend-008 |
