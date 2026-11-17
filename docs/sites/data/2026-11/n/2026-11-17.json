@@ -1,0 +1,132 @@
+{
+  "schemaVersion": "1.0.0",
+  "date": "2026-11-17",
+  "items": [
+    {
+      "id": "n-2026-11-17-001",
+      "impact": "high",
+      "impactScore": 92,
+      "rank": 1,
+      "kind": "market",
+      "board": "vn",
+      "title": "VN-Index đóng cửa 16/11 tại 1.736,89 (+0,11%)",
+      "url": "https://stockbiz.vn/en/stocks/VNINDEX",
+      "sourceId": "src-stockbiz",
+      "publishedAt": "2026-11-16T15:00:00+07:00",
+      "tickers": [
+        "VNINDEX",
+        "VIC"
+      ],
+      "excerpt": "Hỗ trợ bởi VIC, thanh khoản giảm mạnh xuống ~11.877 tỷ.",
+      "whyImpact": "Prior close chính thức cho pre-open 17/11."
+    },
+    {
+      "id": "n-2026-11-17-002",
+      "impact": "high",
+      "impactScore": 88,
+      "rank": 2,
+      "kind": "market",
+      "board": "global",
+      "title": "S&P 500 đóng cửa 16/11 tại 7.416,59 (-1,92%)",
+      "url": "https://english.news.cn/20261117/259e0999b1964405af89ce839c650aec/c.html",
+      "sourceId": "src-bloomberg",
+      "publishedAt": "2026-11-16T22:00:00+07:00",
+      "tickers": [],
+      "excerpt": "Nasdaq -2,49%, Dow -1,41% do áp lực Nvidia/tech.",
+      "whyImpact": "Overnight risk-off mạnh cho phiên VN."
+    },
+    {
+      "id": "n-2026-11-17-003",
+      "impact": "high",
+      "impactScore": 85,
+      "rank": 3,
+      "kind": "news",
+      "board": "vn",
+      "title": "Khối ngoại mua ròng ~21 tỷ trên HoSE phiên 16/11",
+      "url": "https://cafef.vn/mot-co-phieu-bluechips-bi-khoi-ngoai-xa-hon-160-ty-dong-ngay-phien-dau-tuan-188261116153542977.chn",
+      "sourceId": "src-cafef",
+      "publishedAt": "2026-11-16T15:35:00+07:00",
+      "tickers": [
+        "VIC",
+        "FPT"
+      ],
+      "excerpt": "VIC +117 tỷ, FPT -163 tỷ.",
+      "whyImpact": "Dòng ngoại phân hóa, hỗ trợ VIC."
+    },
+    {
+      "id": "n-2026-11-17-004",
+      "impact": "medium",
+      "impactScore": 75,
+      "rank": 4,
+      "kind": "market",
+      "board": "global",
+      "title": "Nikkei 225 đóng cửa 16/11 tại 59.662 (-2,42%)",
+      "url": "https://hyeongeonnoil.com/en/market/nikkei225",
+      "sourceId": "src-bloomberg",
+      "publishedAt": "2026-11-16T15:00:00+07:00",
+      "tickers": [],
+      "excerpt": "HSI +0,49% lên 23.753.",
+      "whyImpact": "Asia mixed, Japan yếu."
+    },
+    {
+      "id": "n-2026-11-17-005",
+      "impact": "medium",
+      "impactScore": 70,
+      "rank": 5,
+      "kind": "market",
+      "board": "vn",
+      "title": "Tự doanh bán ròng ~33,7 tỷ trên HoSE",
+      "url": "https://nmquan.vn/data/tu-doanh/lich-su",
+      "sourceId": "src-cafef",
+      "publishedAt": "2026-11-16T20:00:00+07:00",
+      "tickers": [],
+      "excerpt": "nmquan: -33,7 tỷ tổng, khớp lệnh -12,3.",
+      "whyImpact": "Nội bán nhẹ."
+    },
+    {
+      "id": "n-2026-11-17-006",
+      "impact": "medium",
+      "impactScore": 65,
+      "rank": 6,
+      "kind": "macro",
+      "board": "global",
+      "title": "DXY quanh 103,4-103,6, vàng ~3.850, WTI ~86-88",
+      "url": "https://www.babypips.com/news/daily-financial-forex-market-recap-2026-11-16",
+      "sourceId": "src-barrons",
+      "publishedAt": "2026-11-16T21:00:00+07:00",
+      "tickers": [],
+      "excerpt": "USD mạnh, commodities yếu.",
+      "whyImpact": "Áp lực EM và hàng hóa."
+    },
+    {
+      "id": "n-2026-11-17-007",
+      "impact": "medium",
+      "impactScore": 60,
+      "rank": 7,
+      "kind": "news",
+      "board": "vn",
+      "title": "Thanh khoản HoSE ~11.877 tỷ, giảm 21,5%",
+      "url": "https://nhandan.vn/phien-giao-dich-ngay-1611-vn-index-tang-nhe-post1003095.html",
+      "sourceId": "src-cafef",
+      "publishedAt": "2026-11-16T17:00:00+07:00",
+      "tickers": [],
+      "excerpt": "Volume ~526 triệu.",
+      "whyImpact": "Dòng tiền thận trọng."
+    },
+    {
+      "id": "n-2026-11-17-008",
+      "impact": "low",
+      "impactScore": 40,
+      "rank": 8,
+      "kind": "community",
+      "board": "vn",
+      "title": "Sentiment cộng đồng mỏng trên FireAnt/newF319",
+      "url": "https://newf319.com/",
+      "sourceId": "src-newf319",
+      "publishedAt": "2026-11-17T08:00:00+07:00",
+      "tickers": [],
+      "excerpt": "Không có chủ đề nóng lớn.",
+      "whyImpact": "Màu sắc, không phải print."
+    }
+  ]
+}
