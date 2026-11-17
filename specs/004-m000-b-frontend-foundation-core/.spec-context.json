@@ -1,0 +1,87 @@
+{
+  "workflow": "speckit",
+  "specName": "[FEATURE NAME]",
+  "branch": "features/pitch-m000-B-frontend-foundation",
+  "currentStep": "tasks",
+  "status": "ready-to-implement",
+  "history": [
+    {
+      "step": "specify",
+      "substep": null,
+      "kind": "start",
+      "by": "extension",
+      "at": "2026-11-17T06:51:50.295Z"
+    },
+    {
+      "step": "specify",
+      "substep": null,
+      "kind": "complete",
+      "by": "extension",
+      "at": "2026-11-17T07:07:30.910Z"
+    },
+    {
+      "step": "clarify",
+      "substep": null,
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-17T07:29:41.984Z"
+    },
+    {
+      "step": "plan",
+      "substep": "research",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-17T07:39:05.475Z"
+    },
+    {
+      "step": "plan",
+      "substep": "design",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-17T07:42:36.823Z"
+    },
+    {
+      "step": "plan",
+      "substep": null,
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-17T07:42:45.942Z"
+    },
+    {
+      "step": "plan",
+      "substep": null,
+      "kind": "start",
+      "by": "extension",
+      "at": "2026-11-17T07:42:50.012Z"
+    },
+    {
+      "step": "tasks",
+      "substep": "generate",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-17T07:55:52.021Z"
+    },
+    {
+      "step": "tasks",
+      "substep": null,
+      "kind": "start",
+      "by": "extension",
+      "at": "2026-11-17T07:55:52.321Z"
+    },
+    {
+      "step": "tasks",
+      "substep": null,
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-17T07:55:52.888Z"
+    },
+    {
+      "step": "analyze",
+      "substep": null,
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-17T08:04:17.461Z"
+    }
+  ],
+  "telemetryInstanceId": "6a37a225-9259-4a50-a966-8a018057919f"
+}
