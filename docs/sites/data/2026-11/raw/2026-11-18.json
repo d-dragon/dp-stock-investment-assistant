@@ -1,0 +1,21 @@
+{
+  "market": {
+    "vnindex_prior": 1726.72,
+    "foreign_net": -360,
+    "proprietary_net": -675,
+    "us_spx": 7340.53
+  },
+  "news_events": [
+    "US risk-off before Nvidia",
+    "VN large-cap pressure"
+  ],
+  "sentiment": {
+    "fireant": "cautious",
+    "f247": "thin",
+    "newf319": "thin"
+  },
+  "gaps": [
+    "No official 18/11 close",
+    "Community thin"
+  ]
+}
