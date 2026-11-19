@@ -13,13 +13,13 @@
 | Field | Value |
 |-------|-------|
 | **Document** | Frontend domain architecture (target) |
-| **Version** | 0.3.5 |
-| **Status** | Target — M-000 Pitch B foundation, extended with building blocks to M-009 |
+| **Version** | 0.3.6 |
+| **Status** | Target — M-000 Pitch B foundation, with spec 004 delivery 1 marked transition |
 | **Canonical path** | `docs/domains/frontend/ARCHITECTURE.md` |
 | **Owners** | Software Engineer (maintainer) · UX / UI Designer (presentation viewpoint) |
 | **Architecture decisions** | Software Architect Assistant (ADR-FRONTEND-001 … 008) |
 | **Horizon** | Product §5.3 Milestones M-000 … M-009 plus foundation blocks; M-010 and later appear only as Future seams |
-| **Date** | 2026-11-17 |
+| **Date** | 2026-11-18 |
 
 ### Governing links
 
@@ -172,15 +172,15 @@ flowchart TB
 
 | Block | Responsibility | State label | Decided by |
 |-------|----------------|-------------|------------|
-| App shell | Routes, Z1–Z4 hosts, error boundaries per zone | Target M-000 | ADR-001, ADR-002 |
-| Workspace context + URL sync | Shareable state in URL; session state and per-symbol context in store | Target M-000 | ADR-003 |
-| REST client + OpenAPI types | Typed calls; contract is wire truth | Target M-000 (types when codegen wired) | ADR-002 |
-| SSE stream client | Companion stream, abort, typed events; resume later | Target M-000; resume = Transition | ADR-002; contract follow-up |
-| Auth adapter | Sign-in redirect to the Backend, same-origin cookie credentials, CSRF proof on state-changing calls, 401 and session expiry; no token in the browser | Target Pitch A | ADR-SYS-001 |
-| Chart adapter | Engine-neutral chart API, annotation layer | Target M-001; enhanced M-006 | ADR-004 |
-| Message + locale-format seam | `t()` keys, one number/date/VND formatter | Target M-000 (seam only); adoption Future | ADR-005 |
+| App shell | Routes, Z1–Z4 hosts, error boundaries per zone | Target M-000 (spec 005). The live shell is still `App.tsx` | ADR-001, ADR-002 |
+| Workspace context + URL sync | Shareable state in URL; session state and per-symbol context in store | Target M-000 (spec 005) | ADR-003 |
+| REST client + OpenAPI types | Typed calls; contract is wire truth | Transition. Hand-written `fetch` client and generated types are in. `openapi-fetch` is not | ADR-002 |
+| SSE stream client | Companion stream, abort, idle timeout; resume later | Transition. Fetch SSE client is in. Resume stays later | ADR-002; contract follow-up |
+| Auth adapter | Sign-in redirect to the Backend, same-origin cookie credentials, CSRF proof on state-changing calls, 401 and session expiry; no token in the browser | Transition for `NoAuthAdapter` (Pitch B). Sign-in stays Target Pitch A | ADR-SYS-001 |
+| Chart adapter | Engine-neutral chart API, annotation layer | Target M-001; enhanced M-006. Pitch B has an empty import-lint seam only | ADR-004 |
+| Message + locale-format seam | `t()` keys, board-style number formatters, `Intl` for dates | Transition. Catalogue and formatters are in. A translation library stays Future | ADR-005 |
 | Error / telemetry hooks | Error boundaries, client error reporting | Target M-000 (hooks); tooling TBD | TECHNICAL_DESIGN |
-| Design system | Token tiers, primitives, patterns, provenance styling | Target M-000 onward | ADR-002, ADR-007; DESIGN_LOCK |
+| Design system | Token tiers, primitives, patterns, provenance styling | Transition. Dark tokens and `PriceCell`, `Delta`, `StatusBadge` are in. Primitives and the zone shell stay target | ADR-002, ADR-007; DESIGN_LOCK |
 | Generated-UI registry | Allow-listed components the Agent may propose | **Future** | ADR-006 |
 
 ### 4.4 Feature modules by Milestone
@@ -209,19 +209,19 @@ Milestone names follow Product §5.3. Each module mounts in its zones through th
 
 | Concern | Current | Target | Milestone | Source |
 |---------|---------|--------|-----------|--------|
-| Build | CRA | Vite | M-000 | ADR-002 |
-| Language | Mixed JS/TS | TypeScript | M-000 | ADR-002 |
-| Routing | None | React Router | M-000 | ADR-002, ADR-003 |
-| Panes | None | `react-resizable-panels` on Z1/Z3/Z4; Z2 fixed; session-only | M-000 | ADR-002 |
-| Fast state | Component-local | Zustand | M-000 | ADR-002 |
-| Server state | Ad hoc clients | TanStack Query | M-000 | ADR-002 |
-| UI | Ad hoc CSS | Tailwind + Radix / shadcn; dark-first | M-000 | ADR-002 |
-| Types | Handwritten | OpenAPI → TS (`openapi-typescript`) | When codegen wired | ADR-002 |
-| Transport | HTTP/SSE + Socket.IO | HTTPS + SSE only | M-000 (G6) | ADR-002, SNR-8.1.2 |
-| Tests | None | Vitest + RTL | M-000 (G5) | ADR-002, SNR-6.1.4 |
-| Network mocks and component catalogue | None | MSW (typed handlers serving prepared fixtures in browser and tests) and Storybook; both kept out of the production bundle | M-000 | ADR-008 |
-| Charts | None | Lightweight Charts behind chart adapter | M-001 PoC, M-006 enhanced | ADR-004 (engine and capabilities; no built-in indicators) |
-| Auxiliary charts | None | Chart.js for non-price charts (allocation, fundamentals bars, comparisons, macro graphs) behind its own adapter; features never import `chart.js` directly; never price or time-series | Seam may exist early; kept out of the bundle until a slice uses it (not M-001) | ADR-002 (auxiliary role, confirmed by the Product Owner 2026-11-13); ADR-004 rejects it for price |
+| Build | Vite | Vite | M-000 (spec 004) | ADR-002 |
+| Language | TypeScript on the foundation paths; some JS may remain outside them | TypeScript | M-000 | ADR-002 |
+| Routing | None | React Router | M-000 (spec 005) | ADR-002, ADR-003 |
+| Panes | None | `react-resizable-panels` on Z1/Z3/Z4; Z2 fixed; session-only | M-000 (spec 005) | ADR-002 |
+| Fast state | Component-local | Zustand | M-000 (spec 005) | ADR-002 |
+| Server state | One hand-written platform client | TanStack Query | M-000 (spec 005) | ADR-002 |
+| UI | Dark tokens and three patterns. Tailwind config file only | Tailwind + Radix / shadcn; dark-first | M-000 | ADR-002 |
+| Types | OpenAPI → TS (`openapi-typescript`) is wired. The client is still hand-written | Generated client over those types | Codegen wired in spec 004; `openapi-fetch` not adopted | ADR-002 |
+| Transport | HTTPS + SSE client. Socket.IO client removed | HTTPS + SSE only | M-000 (G6 frontend part, spec 004) | ADR-002, SNR-8.1.2 |
+| Tests | Vitest + Testing Library + MSW in the test runner | Vitest + RTL, plus Playwright and axe | M-000 (G5 remainder is spec 005) | ADR-002, SNR-6.1.4 |
+| Network mocks and component catalogue | MSW in Vitest only | MSW in browser and tests, plus Storybook; both kept out of the production bundle | M-000. Storybook is spec 005 | ADR-008 |
+| Charts | Empty import-lint seam | Lightweight Charts behind chart adapter | M-001 PoC, M-006 enhanced | ADR-004 (engine and capabilities; no built-in indicators) |
+| Auxiliary charts | Empty import-lint seam | Chart.js for non-price charts (allocation, fundamentals bars, comparisons, macro graphs) behind its own adapter; features never import `chart.js` directly; never price or time-series | Seam exists as an empty folder; kept out of the bundle until a slice uses it | ADR-002 (auxiliary role, confirmed by the Product Owner 2026-11-13); ADR-004 rejects it for price |
 
 ### 5.2 Candidates (not decided)
 
@@ -373,7 +373,7 @@ Values live in [DESIGN_SYSTEM.md](./DESIGN_SYSTEM.md) / [DESIGN_LOCK.md](./DESIG
 | Tests | Vitest + RTL — **SNR-6.1.4** | Target G5 |
 | Transport | HTTPS+SSE only — **SNR-8.1.2** | Target G6 |
 | Accessibility | WCAG 2.2 AA; keyboard paths Z2 → Z1 → Z3 → Z4; reduced motion | Target M-000 |
-| Viewport | Primary design and test width **1920** px; supported **768–1920** px (Product Owner 2026-11-13); layout per width in [DESIGN_LOCK.md](./DESIGN_LOCK.md). SNR-7.1.1 (320 px) awaits amendment | Target M-000 |
+| Viewport | Primary design and test width **1920** px; supported **768–1920** px (Product Owner 2026-11-13); below 768 px is Future. Layout per width in [DESIGN_LOCK.md](./DESIGN_LOCK.md). Width exercises stay with spec 005. SNR-7.1.1 priority stays P2 | Target M-000 |
 | Locale | Launch UI `vi-VN`, `Asia/Ho_Chi_Minh`; prices in board style (thousands of VND, two decimals, dot decimal, e.g. `25.30`); dot only as the decimal mark (`+6.98%`) and comma only for thousands (volume `1,234,500`); dates in `vi-VN` format; one formatter (ADR-005) | Target M-000 |
 | Zone and pattern states | One list, owned by [DESIGN_LOCK.md](./DESIGN_LOCK.md) §5. AI-suggested is provenance (§7.1), not a state | DESIGN_LOCK |
 | Resilience | Error boundary per zone; a stream failure never blanks Z1–Z3 | Target M-000 |
@@ -386,15 +386,17 @@ Values live in [DESIGN_SYSTEM.md](./DESIGN_SYSTEM.md) / [DESIGN_LOCK.md](./DESIG
 
 ### 8.1 Current → Target (M-000)
 
-| | Current (pre–M-000) | Target (Pitch B) |
-|--|---------------------|------------------|
-| Build | CRA (`react-scripts`) | Vite |
-| Shell | Single-column chat `App.tsx` | Z1–Z4 Adaptive Workspace shell |
-| Transport | HTTP/SSE **+ Socket.IO** | HTTPS + SSE only |
-| State | Component-local / ad hoc | URL + Zustand + TanStack Query |
-| UI | Ad hoc CSS | Tailwind + Radix/shadcn + token tiers |
-| Tests | No FE foundation | Vitest + RTL |
-| Model-output rendering | Unused unsafe HTML formatter (`MessageFormatter.js`); live path escaped text | Sanitized markdown `MessageBody`; formatter deleted in Pitch B cleanup |
+Appendix A stays the pre–M-000 snapshot. The middle column is what verified spec 004 put in the tree. It is not the finished Pitch B shell.
+
+| | Pre–M-000 | After spec 004 (transition) | Target (Pitch B complete) |
+|--|-----------|------------------------------|---------------------------|
+| Build | CRA (`react-scripts`) | Vite | Vite |
+| Shell | Single-column chat `App.tsx` | Still `App.tsx` | Z1–Z4 Adaptive Workspace shell (spec 005) |
+| Transport | HTTP/SSE **+ Socket.IO** | HTTPS + SSE client. Socket.IO client removed | HTTPS + SSE only |
+| State | Component-local / ad hoc | Component-local | URL + Zustand + TanStack Query (spec 005) |
+| UI | Ad hoc CSS | Dark tokens and `PriceCell`, `Delta`, `StatusBadge`. Tailwind config only | Tailwind + Radix/shadcn + token tiers |
+| Tests | No FE foundation | Vitest + Testing Library + MSW in tests | Plus Playwright, axe, and Storybook (spec 005) |
+| Model-output rendering | Unused unsafe HTML formatter (`MessageFormatter.js`); live path escaped text | `MessageFormatter.js` deleted. Live path is still escaped text | Sanitized markdown `MessageBody` (spec 005) |
 
 ### 8.2 Gates G1–G6 → M-001
 
@@ -458,6 +460,7 @@ Realization steps, worktrees and file moves → TECHNICAL_DESIGN.md (Coding Orch
 | 0.3.3 | 2026-11-13 | Software Architect Assistant | Comma groups thousands (`1,234,500`), dot only as decimal; MSW and Storybook move from candidates to M-000 (ADR-008) |
 | 0.3.4 | 2026-11-13 | Software Architect Assistant | ADR-SYS-001 token storage accepted: auth adapter uses the Backend-for-Frontend cookie session with CSRF proof, no token in the browser; Version field brought in line with the revision history |
 | 0.3.5 | 2026-11-17 | Software Architect Assistant | Pitch B review: Z4 stream and Pitch A persistence wording aligned with ADR-SYS-001 (session cookie + CSRF header, no `Authorization`); Pitch B client idle-timeout stopgap (60 s, configurable) recorded in §6.3b |
+| 0.3.6 | 2026-11-18 | Software Engineer | Spec 004 transition labels in §4.3, §5.1, and §8.1. SNR-7.1.1 320 px clause removed from §7.2; the supported range stays 768–1920 px. Shell, store, Storybook, and Playwright stay target |
 
 ---
 

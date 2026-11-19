@@ -1,5 +1,5 @@
 # Frontend multi-stage: build -> nginx
-FROM node:20-alpine AS build
+FROM node:26-alpine AS build
 WORKDIR /app
 COPY frontend/package*.json ./
 RUN npm ci
@@ -10,7 +10,7 @@ RUN npm run build
 FROM nginx:1.27-alpine
 # Non-root (nginx official uses 101)
 COPY frontend/nginx.conf /etc/nginx/conf.d/default.conf
-COPY --from=build /app/build /usr/share/nginx/html
+COPY --from=build /app/dist /usr/share/nginx/html
 # Add simple health file
 RUN echo "ok" > /usr/share/nginx/html/healthz
 EXPOSE 80

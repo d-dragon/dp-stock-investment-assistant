@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { modelsApi } from '../../services/modelsApi';
+import { StatusBadge } from '../../design-system/patterns/StatusBadge/StatusBadge';
+import { modelsApi } from '../../platform/api/client';
+import { t } from '../../platform/i18n/t';
 import { OpenAIModel, ModelListResponse, ModelSelection } from '../../types/models';
 
 interface ModelSelectorProps {
@@ -36,7 +38,7 @@ const ModelSelector: React.FC<ModelSelectorProps> = ({
         setCacheStatus(response.source);
       } catch (err: any) {
         if (!isMounted) return;
-        setError(err.message || 'Failed to load models');
+        setError(err.message || t('models.loadFailed'));
         console.error('Failed to load models:', err);
       } finally {
         if (!isMounted) return;
@@ -73,7 +75,7 @@ const ModelSelector: React.FC<ModelSelectorProps> = ({
       setModels(response.models);
       setCacheStatus(response.source);
     } catch (err: any) {
-      setError(err.message || 'Failed to refresh models');
+      setError(err.message || t('models.refreshFailed'));
       console.error('Failed to refresh models:', err);
     } finally {
       setIsRefreshing(false);
@@ -97,7 +99,7 @@ const ModelSelector: React.FC<ModelSelectorProps> = ({
         onModelChange(response.provider, response.name);
       }
     } catch (err: any) {
-      setError(err.message || 'Failed to select model');
+      setError(err.message || t('models.selectFailed'));
       console.error('Failed to select model:', err);
     }
   };
@@ -113,20 +115,21 @@ const ModelSelector: React.FC<ModelSelectorProps> = ({
           style={{
             padding: '4px 8px',
             fontSize: 14,
-            border: '1px solid #ddd',
+            border: '1px solid var(--surface-line)',
             borderRadius: 4,
-            backgroundColor: 'white',
+            backgroundColor: 'var(--surface-card)',
+            color: 'var(--surface-text)',
             cursor: disabled || isLoading ? 'not-allowed' : 'pointer'
           }}
-          title="Select OpenAI model"
+          title={t('models.select')}
         >
           {isLoading ? (
-            <option>Loading...</option>
+            <option>{t('models.loading')}</option>
           ) : models.length === 0 ? (
-            <option>No models available</option>
+            <option>{t('models.empty')}</option>
           ) : (
             <>
-              <option value="" disabled>Select model</option>
+              <option value="" disabled>{t('models.select')}</option>
               {models.map(model => (
                 <option key={model.id} value={model.id}>
                   {model.id}
@@ -141,13 +144,14 @@ const ModelSelector: React.FC<ModelSelectorProps> = ({
           style={{
             padding: '4px 8px',
             fontSize: 12,
-            border: '1px solid #ddd',
+            border: '1px solid var(--surface-line)',
             borderRadius: 4,
-            backgroundColor: 'white',
+            backgroundColor: 'var(--surface-card)',
+            color: 'var(--surface-text)',
             cursor: disabled || isRefreshing ? 'not-allowed' : 'pointer'
           }}
-          title="Refresh model list from OpenAI"
-          aria-label="Refresh model list"
+          title={t('models.refresh')}
+          aria-label={t('models.refresh')}
           aria-busy={isRefreshing}
         >
           {isRefreshing ? '⟳' : '↻'}
@@ -158,58 +162,50 @@ const ModelSelector: React.FC<ModelSelectorProps> = ({
 
   // Full view
   return (
-    <div style={{ padding: 12, border: '1px solid #ddd', borderRadius: 6, backgroundColor: '#f9f9f9' }}>
+    <div style={{ padding: 12, border: '1px solid var(--surface-line)', borderRadius: 6, backgroundColor: 'var(--surface-card)', color: 'var(--surface-text)' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-        <h3 style={{ margin: 0, fontSize: 16 }}>OpenAI Model Selection</h3>
+        <h3 style={{ margin: 0, fontSize: 16 }}>{t('models.title')}</h3>
         <button
           onClick={handleRefresh}
           disabled={disabled || isRefreshing}
           style={{
             padding: '6px 12px',
             fontSize: 14,
-            border: '1px solid #2196f3',
+            border: '1px solid var(--surface-line)',
             borderRadius: 4,
-            backgroundColor: disabled || isRefreshing ? '#ccc' : '#2196f3',
-            color: 'white',
+            backgroundColor: 'var(--surface-bg)',
+            color: 'var(--surface-text)',
             cursor: disabled || isRefreshing ? 'not-allowed' : 'pointer'
           }}
         >
-          {isRefreshing ? 'Refreshing...' : 'Refresh List'}
+          {isRefreshing ? t('models.refreshing') : t('models.refreshList')}
         </button>
       </div>
 
       {error && (
-        <div style={{
-          padding: 8,
-          marginBottom: 12,
-          backgroundColor: '#ffebee',
-          border: '1px solid #f44336',
-          borderRadius: 4,
-          color: '#c62828',
-          fontSize: 14
-        }}>
-          {error}
+        <div style={{ marginBottom: 12 }}>
+          <StatusBadge status="danger" label={error} />
         </div>
       )}
 
       <div style={{ marginBottom: 12 }}>
         <label style={{ display: 'block', marginBottom: 4, fontSize: 14, fontWeight: 500 }}>
-          Current Model:
+          {t('models.current')}
         </label>
-        <div style={{ fontSize: 14, color: '#666' }}>
+        <div style={{ fontSize: 14, color: 'var(--surface-text2)' }}>
           {selectedModel ? (
             <>
               <strong>{selectedModel.name}</strong> ({selectedModel.provider})
             </>
           ) : (
-            'Loading...'
+            t('models.loading')
           )}
         </div>
       </div>
 
       <div>
         <label style={{ display: 'block', marginBottom: 4, fontSize: 14, fontWeight: 500 }}>
-          Available Models:
+          {t('models.available')}
         </label>
         <select
           value={selectedModel?.name || ''}
@@ -219,30 +215,31 @@ const ModelSelector: React.FC<ModelSelectorProps> = ({
             width: '100%',
             padding: 8,
             fontSize: 14,
-            border: '1px solid #ddd',
+            border: '1px solid var(--surface-line)',
             borderRadius: 4,
-            backgroundColor: 'white',
+            backgroundColor: 'var(--surface-bg)',
+            color: 'var(--surface-text)',
             cursor: disabled || isLoading ? 'not-allowed' : 'pointer'
           }}
         >
           {isLoading ? (
-            <option>Loading models...</option>
+            <option>{t('models.loadingList')}</option>
           ) : models.length === 0 ? (
-            <option>No models available</option>
+            <option>{t('models.empty')}</option>
           ) : (
             models.map(model => (
               <option key={model.id} value={model.id}>
-                {model.id} (owned by: {model.owned_by})
+                {model.id} ({t('models.ownedBy')}: {model.owned_by})
               </option>
             ))
           )}
         </select>
       </div>
 
-      <div style={{ marginTop: 12, fontSize: 12, color: '#666' }}>
+      <div style={{ marginTop: 12, fontSize: 12, color: 'var(--surface-text2)' }}>
         {models.length > 0 && (
           <>
-            {models.length} models available · Source: {cacheStatus === 'cache' ? '💾 Cache' : '🌐 OpenAI API'}
+            {models.length} {t('models.availableSuffix')} · {cacheStatus === 'cache' ? t('models.sourceCache') : t('models.sourceLive')}
           </>
         )}
       </div>

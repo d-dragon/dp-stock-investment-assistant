@@ -13,12 +13,12 @@
 | Field | Value |
 |-------|-------|
 | **Document** | Frontend technical design (realization) |
-| **Version** | 0.4 |
-| **Status** | Draft — M-000 full, M-001 … M-009 outline |
+| **Version** | 0.5 |
+| **Status** | Draft — M-000 full, delivery 1 recorded as transition, M-001 … M-009 outline |
 | **Canonical path** | `docs/domains/frontend/TECHNICAL_DESIGN.md` |
 | **Owner** | Software Engineer (realization and maintenance) |
 | **Reviewers** | Software Architect (fit to ARCHITECTURE / ADRs) · UX Designer (fit to DESIGN_LOCK / DESIGN_SYSTEM) |
-| **Date** | 2026-11-13 |
+| **Date** | 2026-11-18 |
 
 ### Traceability
 
@@ -53,7 +53,31 @@
 
 ## 3. Module and component architecture
 
-### 3.1 Module tree (Target M-000)
+### 3.1 Module tree
+
+**Current (verified spec 004, 2026-11-18).** Delivery 1 (slices B0, B1, B2, B4) is in the tree. Spec 005 still owns the shell, router, and store.
+
+```text
+frontend/
+  index.html                  # lang=vi, data-theme=dark, data-density=compact
+  vite.config.ts              # /api proxy → http://127.0.0.1:5000
+  tsconfig.json               # strict: true; moduleResolution bundler; noUncheckedIndexedAccess is not set
+  eslint.config.js            # flat config; §3.3
+  tailwind.config.ts          # present; no market.* or state.* colours; the Tailwind package is not installed
+  src/
+    index.tsx                 # entry. Not main.tsx
+    App.tsx                   # shell until spec 005
+    components/models/ModelSelector.tsx
+    platform/                 # api, stream, auth (NoAuthAdapter), format, i18n
+    platform/chart/           # empty seam
+    platform/stat-chart/      # empty seam
+    design-system/            # dark tokens; patterns PriceCell, Delta, StatusBadge
+    test/                     # Vitest setup and MSW handlers
+```
+
+`app/`, `features/`, `platform/workspace`, `platform/observability`, `design-system/primitives`, and `stylelint.config.js` are not in the tree.
+
+**Target (M-000).** The fence below is the intended tree. It is not a claim that every path exists.
 
 ```text
 frontend/
@@ -113,17 +137,17 @@ features/<name>/
 
 ### 3.3 Boundary enforcement (Target G2)
 
-ARCHITECTURE §4.3 rules 1–5, realized as build-failing lint. ESLint runs in `npm run lint` and in CI; `npm run build` runs lint first.
+ARCHITECTURE §4.3 rules 1–5. **Transition:** `frontend/eslint.config.js` enforces the outcomes with ESLint core rules. `eslint-plugin-boundaries` and Stylelint are not installed. `npm run lint` is `eslint src`, so it does not scan `frontend/eslint-fixtures/`. `npm run build` does not run lint. CI runs lint as its own step before `tsc --noEmit`.
 
-| Rule | Mechanism (Proposed) |
-|------|----------------------|
-| 1. app → features → platform / design-system, never reverse | `eslint-plugin-boundaries` element types `app`, `feature`, `platform`, `design-system`, with allow-lists in that direction only |
-| 2. No sibling-feature or deep imports | `boundaries/element-types` (feature → feature disallowed) + `boundaries/entry-point` (only `index.ts`) |
-| 3. Only platform talks to the Backend | `no-restricted-globals` / `no-restricted-syntax` for `fetch`, `XMLHttpRequest`, `EventSource`, `WebSocket` outside `platform/api` and `platform/stream`; `no-restricted-imports` for `socket.io-client`, `axios` |
-| 4. Only patterns read `market.*` / `state.*` | `no-restricted-syntax` on string literals matching `var(--market-` / `var(--state-` and Tailwind arbitrary values `[...]` outside `design-system/patterns/`; Stylelint `declaration-property-value-disallowed-list` for CSS files |
-| 5. Third-party engines behind adapters | `no-restricted-imports` for `lightweight-charts` outside `platform/chart`, for `chart.js` outside `platform/stat-chart`, and for any i18n library outside `platform/i18n` |
-| i18n raw strings (ADR-005) | `react/jsx-no-literals` in `app/`, `features/`, `design-system/patterns/` with `noStrings: false`, `ignoreProps: true` and an `allowedStrings` list for punctuation and symbols (`·`, `—`, `/`, `%`, `₫`, `+`, `−`). Tickers and numbers come from data, so they never need allow-listing. Library-agnostic; works before an i18n library is chosen |
-| Agent output | `react/no-danger` = error everywhere; no exceptions |
+| Rule | Mechanism |
+|------|-----------|
+| 1. app → features → platform / design-system, never reverse | **Transition.** Core `no-restricted-imports` on the planted fixture `eslint-fixtures/b1-rule1-reverse-import.ts`. `eslint-plugin-boundaries` stays proposed until `app/` and `features/` exist |
+| 2. No sibling-feature or deep imports | **Transition.** Same core rule on `eslint-fixtures/b1-rule2-deep-import.ts` only. Not applied to `src/` by `npm run lint` |
+| 3. Only platform talks to the Backend | **Current** on `src/app`, `src/features`, `src/design-system`, and `src/platform`, except `platform/api` and `platform/stream`. `fetch`, `XMLHttpRequest`, `EventSource`, and `WebSocket` are blocked there, as are `socket.io-client` and `axios` |
+| 4. Only patterns read `market.*` / `state.*` | **Current** for `var(--market-` and `var(--state-` outside `design-system/patterns/`. Stylelint is not configured |
+| 5. Third-party engines behind adapters | **Current** for `lightweight-charts` outside `platform/chart` and `chart.js` outside `platform/stat-chart`. Both folders export nothing |
+| i18n raw strings (ADR-005) | **Target.** `react/jsx-no-literals` is off (spec 004 open item O7). The allow-list in the previous row stays the target rule |
+| Agent output | **Current.** `react/no-danger` is an error. No exceptions |
 
 ### 3.4 Platform contracts (interfaces only)
 
@@ -290,7 +314,7 @@ React Router (data router, `createBrowserRouter`). Routes are a public surface (
 ### 6.1 Typed REST client (Target G1; types when codegen wired)
 
 - **Source of truth:** `docs/openapi.yaml` (hand-written today). `npm run gen:api` runs `openapi-typescript ../docs/openapi.yaml -o src/platform/api/generated/schema.d.ts`. CI fails if the generated file differs from the committed one.
-- **Client:** `openapi-fetch` over the generated `paths` type (Proposed; same author as `openapi-typescript`, a few KB, plain `fetch`). One instance in `platform/api/client.ts` with:
+- **Client (current):** a hand-written `fetch` wrapper in `frontend/src/platform/api/client.ts`. `openapi-fetch` was not adopted (spec 004 open item O1) and stays proposed. Chat sends `conversation_id` and omits `sessionId` (`frontend/src/platform/api/sessionRef.ts`; open item O2). The instance:
   - base URL from `import.meta.env.VITE_API_BASE_URL` (empty = same origin via dev proxy);
   - `credentials: 'same-origin'` on every request, so the session cookie rides along. The SPA and the Backend are served from one origin (the dev proxy locally, one host at the ingress), because a `__Host-` cookie can't cross origins. No `Authorization` header and no token anywhere in JS, storage or MSW fixtures;
   - a request hook that adds `AuthAdapter.csrfHeaders()` to state-changing requests, including `POST /api/chat`. The chat stream uses the same `fetch` client and reader (§6.2), so streaming needs nothing extra;
@@ -345,7 +369,7 @@ No `id:` fields, no typed tool events, no cancel endpoint, no heartbeat.
 
 ### 6.3 SSE client (Target G1 / G6)
 
-`platform/stream` reads the response body with `fetch` + `ReadableStream` + `TextDecoderStream` and a spec-conformant line parser (WHATWG §9.2: `data:` / `event:` / `id:` / `retry:` fields, `:` comments ignored, blank line dispatches). `EventSource` is not used (no POST, no headers). Parser choice: `eventsource-parser` (Proposed, small and spec-tested) or an in-house parser of ~60 lines with tests; either sits behind the same API.
+`platform/stream` reads the response body with `fetch` + `ReadableStream` + `TextDecoderStream`. The parser is in-house: `frontend/src/platform/stream/parseSse.ts` (WHATWG fields `data:` / `event:` / `id:` / `retry:`, `:` comments ignored, blank line dispatches). `eventsource-parser` was not adopted (spec 004 open item O3) and stays proposed. `EventSource` is not used (no POST, no headers). The live idle timeout is `VITE_STREAM_IDLE_TIMEOUT_MS`. A missing or non-positive value throws. The mode env files set `60000`. Tests pass `15000` or `60000` themselves.
 
 ```ts
 export type StreamEvent =
@@ -400,9 +424,9 @@ The pitch verifies the chart concept on prepared mock data, not production data.
 - **Honesty:** the chart frame shows a visible "Mock data" tag whenever `source === 'mock'`, so mock prices are never mistaken for real ones.
 - **Exit:** the real endpoint goes into `docs/openapi.yaml` (Backend + data source per ADR-SYS-004) before any production use; then the handler is deleted and generated types replace the draft shape.
 
-### 6.4 Socket.IO removal (Target G6)
+### 6.4 Socket.IO removal (Current for the client)
 
-`webSocketService.ts` is used only by `WebSocketTest.tsx`, which nothing imports. G6 deletes both, removes `socket.io-client` and `@types/socket.io-client`, deletes `API_CONFIG.WEBSOCKET` from `config.ts`, and adds the `no-restricted-imports` rule so it cannot return. The skeleton section "WebSocket Integration" is retired by this section.
+`webSocketService.ts`, `WebSocketTest.tsx`, `socket.io-client`, and `@types/socket.io-client` are gone. `frontend/eslint.config.js` blocks `socket.io-client`. The last verification of spec 004 did not re-run `rg socket.io dist`. End-to-end HTTPS+SSE proof stays with the later Backend pitch.
 
 ### 6.5 Safe rendering of Agent output (Target M-000, must)
 
@@ -411,8 +435,8 @@ Agent output is untrusted (ARCHITECTURE §6.5, OWASP LLM05).
 - **Pattern:** `design-system/patterns/MessageBody` renders model text with `react-markdown` + `remark-gfm`. No `rehype-raw`; `skipHtml` on; default `urlTransform` (blocks `javascript:` and other unsafe schemes); links render with `rel="noopener noreferrer nofollow"` and `target="_blank"`; images off until a need is shown.
 - **Lint:** `react/no-danger` is an error (§3.3). There is no sanctioned `dangerouslySetInnerHTML` in the codebase.
 - **Tests (G5):** `<img src=x onerror=alert(1)>`, `<script>alert(1)</script>`, `[x](javascript:alert(1))` and an `<a onclick>` render inert (no element with an event handler attribute, no `script` element, no `javascript:` href). Markdown tables, lists and bold still render.
-- **Current finding:** `src/components/MessageFormatter.js` builds HTML with regex and injects it with `dangerouslySetInnerHTML` (lines 83, 132, 186) without escaping. It is **not imported anywhere** today (`App.tsx` renders `{m.content}` as text, which React escapes), so the hole is latent, not live.
-- **Disposition (Product Owner, 2026-11-10):** not patched now. The fix ships inside the M-000 Pitch B slices: step **T0** deletes `MessageFormatter.js`, and step **T4** adds `MessageBody` with the regression tests above (§10.2). The Pitch B slice specs cite this section and §10.2 as their design reference.
+- **Current:** `MessageFormatter.js` is deleted (spec 004, T0). `App.tsx` still renders message text as React text, which escapes it. `design-system/patterns/MessageBody` is not built.
+- **Remaining:** spec 005 (step T4) adds `MessageBody` and the XSS cases above. Do not treat sanitized markdown as current.
 
 ---
 
@@ -434,6 +458,8 @@ Agent output is untrusted (ARCHITECTURE §6.5, OWASP LLM05).
 
 ### 8.1 Token pipeline (Target G4)
 
+Target pipeline. The current tree commits dark CSS directly. Style Dictionary and `npm run tokens` are not wired.
+
 ```mermaid
 flowchart LR
   SRC["tokens/source/*.json<br/>(DTCG format)"] --> BUILD["npm run tokens<br/>(Style Dictionary — Proposed)"]
@@ -444,11 +470,9 @@ flowchart LR
 ```
 
 - One source, three tiers (primitive → semantic → component), values owned by the UX Designer in DESIGN_SYSTEM.
-- M-000 is dark theme only (Product Owner, 2026-11-17): dark tokens on `:root` and the `data-theme="dark"` hook on `<html>`. Light overrides under `[data-theme="light"]`, theme switching and the token contrast-check script move to M-001.
-- The Tailwind preset exposes surface, text, border, accent, `ai.*`, spacing, radius, type and motion. It **does not** expose `market.*` or `state.*` (DESIGN_SYSTEM §2), so `text-market-up` cannot be written.
-- Density: `[data-density="compact"]` default; `comfortable` from M-006.
-- Generated files are committed; CI fails if `npm run tokens` changes them.
-- Fonts are self-hosted from `public/fonts` (Pitch B slice B4): Be Vietnam Pro for UI text, IBM Plex Mono for numbers.
+- **Current:** dark tokens are committed under `frontend/src/design-system/tokens/`. `<html>` carries `data-theme="dark"` and `data-density="compact"`. There is no Style Dictionary step and no `npm run tokens`. Light overrides, theme switching, and the contrast script stay M-001.
+- **Transition:** `frontend/tailwind.config.ts` exposes surface, text, border, and accent utilities and does **not** expose `market.*` or `state.*`. The Tailwind package and Radix primitives are not installed. `comfortable` density stays M-006.
+- Fonts are self-hosted from `frontend/public/fonts` (Pitch B slice B4): Be Vietnam Pro for UI text, IBM Plex Mono on `[data-fmt]`.
 
 ### 8.2 Pattern rules
 
@@ -461,13 +485,15 @@ flowchart LR
 | `MessageBody` | text tokens | §6.5 |
 | `ZoneFrame` | surface, text | §3.5 |
 
-Storybook (ADR-FRONTEND-008, in M-000): a minimal set of about 15 stories, dark theme only, compact density (Product Owner, 2026-11-17): zone states, `PriceCell`, `Delta`, `StatusBadge` and `MessageBody`. Primitives stories are optional (tier D, dark) in M-000 if time allows. Token pages, the remaining patterns, the light theme and visual snapshots move to M-001.
+**Current patterns:** `PriceCell`, `Delta`, and `StatusBadge`. `AiOrigin`, `MessageBody`, and `ZoneFrame` are target (spec 005).
+
+Storybook (ADR-FRONTEND-008, still M-000, not built): spec 005 ships a minimal set of about 15 stories, dark theme only, compact density (Product Owner, 2026-11-17): zone states, `PriceCell`, `Delta`, `StatusBadge` and `MessageBody`. Token pages, the remaining patterns, the light theme and visual snapshots move to M-001.
 
 ### 8.3 i18n and locale seam (Target M-000, ADR-FRONTEND-005)
 
 ```ts
 // platform/i18n — passthrough until adoption
-export type MessageKey = keyof typeof messages;      // messages/vi.ts is the launch catalogue (vi-VN first, Product Owner 2026-11-13)
+export type MessageKey = keyof typeof messages;      // messages/vi-VN.ts is the launch catalogue (Product Owner 2026-11-13)
 export function t(key: MessageKey, params?: Record<string, string | number>): string;
 
 // platform/format — the only place numbers and dates are formatted (custom number formatters; Intl for dates only)
@@ -481,12 +507,12 @@ export const fmt = {
 };
 ```
 
-- Locale and time zone are settings in `UiSlice`; launch default `vi-VN` and `Asia/Ho_Chi_Minh` (not hard-coded inside formatters).
+- **Current:** locale and time zone live in `frontend/src/platform/format/localeSettings.ts` (`vi-VN`, `Asia/Ho_Chi_Minh`), not inside the formatter bodies. `UiSlice` arrives with the workspace store (spec 005). Delta direction phrases in the catalogue stay unresolved (`[NEEDS CLARIFICATION]`).
 - **Price notation (Product Owner, 2026-11-13): price-board style.** `fmt.price` is its own formatter, not `Intl` (which would print `25,30`): it takes integer VND and shows thousands of VND with a dot decimal and two decimals (25,300 ₫ → `25.30`). All numbers render in IBM Plex Mono, because Be Vietnam Pro has no fixed-width digits (DESIGN_LOCK). `fmt.volume` never goes through the price formatter: volume is a whole number of shares with comma grouping and no decimals (`1,234,500`), so in a market row the dot always means a decimal and the comma always means thousands (Product Owner, 2026-11-13). Price change and percent change in market rows also use a dot decimal, so one row never mixes `.` and `,` (Product Owner, 2026-11-13): `fmt.change(1750) === '+1.75'`, `fmt.pct(0.0698) === '+6.98%'`. Money totals are whole VND with comma grouping and a ` ₫` suffix (`fmt.vnd(25300000) === '25,300,000 ₫'`; Product Owner, 2026-11-13), built by the same formatter rather than `Intl` `vi-VN` currency (which would print `25.300.000 ₫`). Dates use standard `vi-VN` `Intl` formatting. Tests: `fmt.price(25300) === '25.30'`, ceiling and floor values, the change and percent cases, `fmt.vnd(25300000) === '25,300,000 ₫'`, plus `fmt.volume(1234500) === '1,234,500'`, so the styles can't get mixed up.
 - **Edge cases (Product Owner, 2026-11-17; pitch rows P1–P4, DESIGN_LOCK):** negatives use the true minus U+2212, never a hyphen (`fmt.change(-450) === '−0.45'`, `fmt.pct(-0.0698) === '−6.98%'`); zero shows `0.00` / `0.00%` with no sign; a missing value (`null`, `undefined`, `NaN`) shows `—` with the `aria-label` key "Không có dữ liệu", never `0` or blank; a traded volume of zero stays `0`. Tests cover each case.
 - No string concatenation for sentences; parameters go through `t()`.
 - Exchange sessions, price bands and ref/ceiling/floor come from the Backend (ADR-005); no constants for them in the Frontend.
-- `react/jsx-no-literals` (§3.3) blocks raw JSX strings.
+- `react/jsx-no-literals` (§3.3) is the target rule. It is off in the current ESLint config.
 
 ---
 
@@ -506,14 +532,14 @@ Rules: test behaviour through public APIs (feature `index.ts`, rendered DOM), no
 
 ### 9.2 Tests mapped to gates
 
-| Gate | Requirement | Done when (evidence) |
-|------|-------------|----------------------|
-| **G1** Vite + chat smoke | SNR-6.1.4 path | `npm run build` and `npm run dev` work on Vite; Vitest runs; a component test sends a chat and renders streamed tokens from an MSW SSE handler using the §6.2 frames. The heartbeat fixture (`: ping` comments, then silence past the idle window → `interrupted`) belongs to Pitch B slice B2 and is evidence for G6 |
-| **G2** Z1–Z4 shell | SR-1.4.1 | Shell test: four landmarks present; Z2 not resizable; a throw in Z3 shows Z3 error frame while Z1, Z2, Z4 still render; lint fails on a planted forbidden import (fixture) |
-| **G3** Context store + URL | SR-1.4.2, ADR-003 | Deep link `/sandbox/FPT` sets mirrors; track switch navigates and restores `lastRouteByTrack`; store never changes `symbol` without navigation; unknown track → not found |
-| **G4** Tokens wired | DESIGN_LOCK | `tokens.css` (dark) generated and committed; `<html>` carries `data-theme="dark"` (theme toggle moves to M-001); lint fails on `var(--market-up)` outside patterns; `PriceCell`/`Delta`/`StatusBadge` tests assert sign/icon + label |
-| **G5** Baseline green | SNR-6.1.4 | All of the above green in CI; DESIGN_LOCK §5 zone state matrix covered including Z4 interrupted + retry; §6.5 XSS cases inert; axe finds no serious/critical issues on shell routes at 1920/1440/1024/768 px |
-| **G6** SSE only | SNR-8.1.2 | `socket.io-client` absent from `package.json` and bundle (`rg socket.io dist` empty); lint rule present; chat stream works over SSE only; the client tolerates `: ping` comments and marks the run `interrupted` when the idle window passes, against the MSW stream fixture (Pitch B slice B2; end-to-end proof waits for the later Backend pitch) |
+| Gate | Requirement | Status after spec 004 | Done when (evidence) |
+|------|-------------|----------------------|----------------------|
+| **G1** Vite + chat smoke | SNR-6.1.4 path | **Met** for Vite, dev, Vitest, and the MSW chat smoke, including the idle-window fixture | `npm run build` and `npm run dev` work on Vite; Vitest runs; a component test sends a chat and renders streamed tokens from an MSW SSE handler using the §6.2 frames. The heartbeat fixture (`: ping` comments, then silence past the idle window → `interrupted`) belongs to Pitch B slice B2 and is evidence for G6 |
+| **G2** Z1–Z4 shell | SR-1.4.1 | **Target.** Spec 005 | Shell test: four landmarks present; Z2 not resizable; a throw in Z3 shows Z3 error frame while Z1, Z2, Z4 still render; lint fails on a planted forbidden import (fixture) |
+| **G3** Context store + URL | SR-1.4.2, ADR-003 | **Target.** Only the opaque `sessionRef` shape is in `platform/api`. Spec 005 | Deep link `/sandbox/FPT` sets mirrors; track switch navigates and restores `lastRouteByTrack`; store never changes `symbol` without navigation; unknown track → not found |
+| **G4** Tokens wired | DESIGN_LOCK | **Partial.** Dark tokens, three patterns, self-hosted fonts, and colour lint are in. No contrast script and no Storybook | `tokens.css` (dark) committed; `<html>` carries `data-theme="dark"` (theme toggle moves to M-001); lint fails on `var(--market-up)` outside patterns; `PriceCell`/`Delta`/`StatusBadge` tests assert sign/icon + label |
+| **G5** Baseline green | SNR-6.1.4 | **Partial.** Formatter and pattern tests run in CI. Axe, the zone matrix, and `MessageBody` do not. Spec 005 | All of the above green in CI; DESIGN_LOCK §5 zone state matrix covered including Z4 interrupted + retry; §6.5 XSS cases inert; axe finds no serious/critical issues on shell routes at 1920/1440/1024/768 px |
+| **G6** SSE only | SNR-8.1.2 | **Frontend part met** against the MSW fixture. End-to-end waits on the Backend pitch | `socket.io-client` absent from `package.json`; lint rule present; chat stream works over SSE only; the client tolerates `: ping` comments and marks the run `interrupted` when the idle window passes, against the MSW stream fixture (Pitch B slice B2). The last spec 004 pass did not re-run `rg socket.io dist` |
 
 ---
 
@@ -523,17 +549,17 @@ Rules: test behaviour through public APIs (feature `index.ts`, rendered DOM), no
 
 | Item | Value |
 |------|-------|
-| Node | Node 26 LTS (Product Owner, 2026-11-17): `frontend/.nvmrc` = `26`; `engines.node` = `">=26.13.0"`; `frontend/.npmrc` with `engine-strict=true`; Docker build image `node:26-alpine`. The Product Owner installs Node v26.13.1 locally before the first B1 run |
-| Scripts | `dev`, `build` (`tsc -b && vite build`), `preview`, `test`, `test:watch`, `e2e`, `lint`, `gen:api`, `tokens` |
-| Env | `VITE_API_BASE_URL` (replaces `REACT_APP_API_URL`); `REACT_APP_WS_URL` removed; `VITE_USE_MOCKS` (build switch for MSW, ADR-FRONTEND-008: `true` starts the MSW browser worker in development; absent or `false` in production builds, and `dist/` contains no `msw` or `mockServiceWorker` code); `VITE_STREAM_IDLE_TIMEOUT_MS` (stream idle timeout, §6.2: default `60000` in live mode, configurable, documented in `frontend/.env.example` as a stopgap until the Backend sends heartbeats; MSW tests use `15000` with fake timers) |
-| Dev proxy | Vite `server.proxy` `/api` → `http://localhost:5000`, so the browser stays same-origin in development |
+| Node | Node 26 LTS (Product Owner, 2026-11-17): `frontend/.nvmrc` = `26`; `engines.node` = `">=26.13.0"`; `frontend/.npmrc` with `engine-strict=true`; Docker build image `node:26-alpine`. Verified on Node v26.13.1 |
+| Scripts (current) | `dev` (`vite`), `build` (`vite build`), `test` (`vitest run`), `lint` (`eslint src`), `gen:api`, `clean`. `preview`, `e2e`, `tokens`, and `test:watch` are not scripts. Typecheck is `npx tsc --noEmit` in CI, not part of `build` |
+| Env | `VITE_API_BASE_URL` (empty = same origin); `VITE_STREAM_IDLE_TIMEOUT_MS` (`60000` in `frontend/.env.development`, `.env.production`, and `.env.test`). `VITE_USE_MOCKS` is not set. MSW runs inside Vitest only. The browser worker stays target (ADR-FRONTEND-008, spec 005) |
+| Dev proxy | Vite `server.proxy` `/api` → `http://127.0.0.1:5000` |
 | Output | Static `dist/`; hosting and CDN are a Backend/infra decision (TBD) |
 | Headers (Proposed for hosting) | CSP `default-src 'self'; connect-src 'self' <api origin>; script-src 'self'; style-src 'self' 'unsafe-inline'` (Radix/Tailwind inline styles) — confirm when hosting is chosen |
-| CI | lint → typecheck → unit/component → build → e2e (smoke) |
+| CI (current) | `.github/workflows/frontend-ci.yml`: lint → `tsc --noEmit` → Vitest → build → `gen:api` drift check. Playwright and Storybook are not in this workflow |
 
 ### 10.2 CRA → Vite migration (Transition → G1 … G6)
 
-Each step is one reviewable change in a worktree on the assigned branch, with its own test evidence. The Product Owner's working tree is never edited directly.
+Each step is one reviewable change on the assigned branch, with its own test evidence. The rule is a named git worktree. Spec 004 delivery 1 was made in the primary checkout on `features/pitch-m000-B-frontend-foundation` (review finding M1). That deviation is recorded. It does not change the rule.
 
 **Strategy (Product Owner, 2026-11-17): fresh, clean rebuild.** Pitch B rebuilds the Frontend rather than refactoring it: legacy code is replaced, not preserved for its own sake. New code never imports from the old `src/components/**`, and the legacy `App.css` and `index.css` are deleted. The steps below are the order of the rebuild, not a line-by-line port. The Accepted ADRs, `docs/openapi.yaml` and `backend/` do not change.
 
@@ -551,7 +577,7 @@ Each step is one reviewable change in a worktree on the assigned branch, with it
 
 Order rationale: subtract first so later steps move less code; Vite before the shell so every later step has tests; Socket.IO last only because nothing live uses it (it can move earlier at no risk).
 
-**Pitch B slice ↔ step map** (`specs/pitches/M-000-B-frontend-foundation.md`): B0 = agent-instruction rewrite (no T-step); B1 = T0 + T1 + T2 (T2 includes the first MSW handler and the G1 chat smoke); B2 = §6.1 codegen + T3 + T8, plus the heartbeat MSW fixture (§6.2); B3 = T4 + T5; B4 = T6 (with the §8.3 format/i18n seam) + the T7 chart-library import rules; B5 = the rest of T7 (Playwright + axe, one keyboard-order test), minimal Storybook (§8.2, ADR-FRONTEND-008) and the Frontend CI workflow (§10.1). Slice order: B0 → B1 → B2 alongside B4 → B3 → B5. Deferred to M-001: chart interfaces, price mocks (§6.3a), light theme and switching, the contrast script, token Storybook pages, `F6` tests and visual snapshots.
+**Pitch B slice ↔ step map** (`specs/pitches/M-000-B-frontend-foundation.md`): B0 = agent-instruction rewrite (no T-step); B1 = T0 + T1 + T2 plus the CI skeleton in §10.1 (verified, spec 004); B2 = §6.1 codegen + the hand-written client + T3 + T8, plus the heartbeat MSW fixture (§6.2) (verified, spec 004); B3 = T4 + T5 (spec 005); B4 = dark tokens, fonts, format/i18n, and the T7 chart-library import rules (verified, spec 004). Tailwind package, Radix, and Style Dictionary were not part of that slice; B5 = the rest of T7 (Playwright + axe, one keyboard-order test) and minimal Storybook (§8.2, ADR-FRONTEND-008) (spec 005). Slice order: B0 → B1 → B2 alongside B4 → B3 → B5. Deferred to M-001: chart interfaces, price mocks (§6.3a), light theme and switching, the contrast script, token Storybook pages, `F6` tests and visual snapshots.
 
 ---
 
@@ -588,9 +614,10 @@ Detailed when each Milestone is shaped. Each line names the new feature module, 
 | ADR-FRONTEND-002 colour line vs DESIGN_SYSTEM | Software Architect | Replaced by ADR-FRONTEND-007 (Accepted 2026-11-13); colour values live only in DESIGN_SYSTEM |
 | Frontend context ↔ Backend workspace / session / conversation mapping (`qk.workspace`, `sessionRef`) | Software Architect (ARCH §6.1) | Accepted fix 2026-11-13; TD §4 follows ARCH |
 | Mock price fixtures rules (bands, ticks, sessions, edge cases) | Research Analyst spec → Software Engineer builds MSW fixtures | In progress; M-001 S3, not Pitch B |
-| Latent XSS in `MessageFormatter.js` | M-000 Pitch B slices | Fix deferred to T0 / T4 by Product Owner (2026-11-10); §6.5 |
-| MSW and Storybook | ADR-FRONTEND-008 | **Accepted** 2026-11-13; in M-000 |
-| E2E tool, `openapi-fetch`, `eslint-plugin-boundaries`, Style Dictionary, SSE parser | This document | **Proposed**; confirm at G1 review |
+| `MessageFormatter.js` | Spec 004 | **Deleted** (T0). `MessageBody` remains spec 005; §6.5 |
+| MSW and Storybook | ADR-FRONTEND-008 | **Accepted.** MSW runs in Vitest (spec 004). Storybook and the browser worker stay spec 005 |
+| `openapi-fetch`, `eslint-plugin-boundaries`, Style Dictionary, `eventsource-parser` | This document | **Still proposed.** Spec 004 shipped a hand-written client, core ESLint rules, committed dark CSS, and `parseSse.ts` |
+| Playwright + axe | Spec 005 | **Target.** `@playwright/test` is a devDependency. It is not a CI job |
 
 ---
 
@@ -618,3 +645,4 @@ Detailed when each Milestone is shaped. Each line names the new feature module, 
 | 0.2 | 2026-11-13 | Software Engineer | §6.1a Backend-for-Frontend realization (routes Proposed, `Lax` login cookie and same-site callback redirect, CSRF synchronizer token, dev proxy, tests); sign-in uses the Backend-for-Frontend with an HttpOnly cookie: `AuthAdapter` holds no tokens, the client sends cookies same-origin and adds CSRF headers (§3.4, §6.1); mock prices served on the planned real path, with no "mock" in the URL; ₫ totals use comma grouping (`25,300,000 ₫`); volume `1,234,500`; track is URL-owned (store mirror); MSW and Storybook in M-000 per ADR-FRONTEND-008. Chart.js via `platform/stat-chart` for non-price charts; dot decimal for change and percent in market rows. Viewport 768–1920 px, design first at 1920; board-style price format; stream headers, heartbeat and HTTP/2 (§6.2). Review round fixes per Product Owner: mock price data for M-001 (§6.3a); per-symbol/index context with chart preferences in `sessionStorage`; Z4 draft in `sessionStorage`; M-006 named levels via `setLevels`; vi-VN launch catalogue; 1920 primary width; chart Sandbox only; `case` route removed; `jsx-no-literals` allow-list |
 | 0.3 | 2026-11-17 | Software Engineer | Aligned with `specs/pitches/M-000-B-frontend-foundation.md`: client-side heartbeat handling and its MSW stream fixture move from Transition / Follow-up to Pitch B slice B2; Backend headers, heartbeat emission and HTTP/2 stay a later Backend pitch (§6.2, §6.3, §9.2 G1 / G6, §12). `VITE_USE_MOCKS` added to the §10.1 env table. `App.tsx` corrected to 262 lines. Format/i18n seam owned by T6 and chart-library import rules by T7, both delivered in slice B4; slice ↔ step map added (§10.2). §8.3 formatter block made consistent with the prose (`change` and `pct` added, board-style `price`, volume without compact notation, custom formatters rather than `Intl` wrappers, also in the §3.1 module tree) |
 | 0.4 | 2026-11-17 | Software Engineer | Product Owner decisions of 2026-11-17 (thin initial stage): stream idle timeout 60000 ms via `VITE_STREAM_IDLE_TIMEOUT_MS` (15000 ms in MSW tests), "Tạo lại" keeps draft and partial message (§6.2, §6.3, §10.1); stream seams for the later Backend pitch: `openChatStream(body, { signal, idleTimeoutMs })`, parser keeps `id` / `event` / `retry`, `StreamAdapter`, one open stream per tab (§6.3); no global `X-User-ID` (ADR-SYS-001), Pitch B calls health, config, `models/*` and chat with `NoAuthAdapter` (§3.4, §6.1); Node 26 (`.nvmrc` 26, engines `>=26.13.0`, `engine-strict`, `node:26-alpine`) (§10.1); number edge cases: true minus, unsigned zero, `—` for missing, volume `0` (§8.3); chart interfaces to M-001 S3, Pitch B keeps the import lint (§3.1, §3.4); dark theme only, light theme, toggle and contrast script to M-001 (§4.2, §7, §8.1, §9.2, §10.2); Storybook about 15 dark stories (§8.2); one keyboard-order test at 1920 px, `F6` tests to M-001 (§3.5, §7, §9.1); fresh, clean rebuild note and B0 in the slice map (§10.2); role names instead of agent names (§1, §7, §8.1, §10.2, §12, §14) |
+| 0.5 | 2026-11-18 | Software Engineer | Spec 004 verified delivery recorded as transition. Current tree, lint mechanism, hand-written client, in-house SSE parser, Socket.IO client removal, deleted `MessageFormatter`, partial G4, and CI skeleton (§3.1, §3.3, §6, §8, §9.2, §10). Shell, router, store, `MessageBody`, Storybook, and Playwright stay target for spec 005. B3 and B5 are not marked current |

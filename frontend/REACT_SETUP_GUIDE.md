@@ -139,14 +139,14 @@ pip install -r requirements.txt
 
 ### Frontend Issues:
 ```bash
-# If React won't start:
+# If the Vite app won't start:
 cd frontend
-rm -rf node_modules package-lock.json
 npm install
-npm start
+npm run dev
 
 # If you see dependency errors:
-npm install react react-dom react-scripts
+npm install
+# This app uses Vite. Do not install react-scripts.
 ```
 
 ### Connection Issues:
@@ -158,8 +158,8 @@ npm install react react-dom react-scripts
 ## 🎨 Customization
 
 ### To modify the UI:
-- Edit `frontend/src/App.js`
-- Styling is done with inline CSS for simplicity
+- Edit `frontend/src/App.tsx`
+- Styling uses the design-system tokens. Do not add a Create React App setup
 - Colors and layout can be changed in the style objects
 
 ### To add new API endpoints:

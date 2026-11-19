@@ -1,0 +1,23 @@
+:root {
+  --surface-bg: #0D1014;
+  --surface-card: #15191E;
+  --surface-text: #E6E8EB;
+  --surface-text2: #9AA3AE;
+  --surface-line: #2A313B;
+  --market-up: #2EBD6B;
+  --market-down: #F0524A;
+  --market-ref: #E8B931;
+  --market-ceiling: #C062F0;
+  --market-floor: #22B8D9;
+  --state-info: #8FB3E0;
+  --state-success: #6ACAA1;
+  --state-warn: #DFA045;
+  --state-danger: #F38275;
+  --state-streaming: #B8C2CF;
+  --accent: #D8CDBB;
+}
+
+body {
+  background: var(--surface-bg);
+  color: var(--surface-text);
+}

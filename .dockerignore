@@ -2,6 +2,9 @@
 .env
 .env.*
 !.env.example
+!frontend/.env.development
+!frontend/.env.production
+!frontend/.env.test
 
 # VCS/IDE
 .git

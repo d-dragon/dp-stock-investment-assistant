@@ -1,10 +1,16 @@
+---
+pitch: M-000-B
+slices: [B0, B1, B2, B4]
+rows: [B4-F1, B4-F2, B4-F3, B4-F4, B4-F5, B4-P1, B4-P2, B4-P3, B4-P4, B4-T1, B4-T2, B4-T3, B4-T4]
+deferred_rows: [B4-T5, B4-T6]  # moved to M-001
+---
 # Feature Specification: M-000 Frontend foundation core (delivery 1 of 2)
 
 **Feature Branch**: `features/pitch-m000-B-frontend-foundation`
 
 **Created**: 2026-11-17
 
-**Status**: Draft
+**Status**: Verified
 
 **Input**: Delivery 1 of Pitch B (M-000 Frontend foundation): slices B0 (agent instructions on the target stack), B1 (Vite shell and subtract, T0–T2), B2 (API client, OpenAPI types, SSE-only transport, Socket.IO removal: codegen + T3 + T8, client proven against an MSW stream fixture only), and thin B4 (dark tokens, vi-VN format module, i18n seam, self-hosted fonts, chart-import lint). B3 and B5 are a separate reserved feature. Source of truth: `specs/pitches/M-000-B-frontend-foundation.md`, with the frontend architecture, technical design, design lock, design system, ADR-FRONTEND-001..008, and ADR-SYS-001.
 

@@ -3,41 +3,42 @@
   "version": "1.0.0",
   "description": "React frontend for DP Stock Investment Assistant",
   "private": true,
+  "engines": {
+    "node": ">=26.13.0"
+  },
   "dependencies": {
-    "@types/socket.io-client": "^1.4.36",
     "react": "^18.3.1",
-    "react-dom": "^18.3.1",
-    "react-scripts": "^5.0.1",
-    "socket.io-client": "^4.8.1"
+    "react-dom": "^18.3.1"
   },
   "devDependencies": {
+    "@eslint/js": "^9.39.1",
+    "@playwright/test": "^1.65.1",
+    "@testing-library/react": "^16.3.0",
     "@types/node": "^24.1.0",
-    "@types/react": "^19.1.9",
-    "@types/react-dom": "^19.1.7",
+    "@types/react": "^18.3.24",
+    "@types/react-dom": "^18.3.7",
+    "@vitejs/plugin-react": "^4.7.0",
     "cross-env": "^7.0.3",
-    "rimraf": "^5.0.10"
+    "eslint": "^9.39.1",
+    "eslint-plugin-react": "^7.37.5",
+    "jsdom": "^26.1.0",
+    "msw": "^2.11.3",
+    "openapi-typescript": "^7.13.0",
+    "rimraf": "^5.0.10",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.46.2",
+    "vite": "^6.2.7",
+    "vitest": "^5.1.0"
   },
   "scripts": {
-    "start": "react-scripts start",
-    "start:fast": "cross-env GENERATE_SOURCEMAP=false FAST_REFRESH=true react-scripts start",
-    "start:dev": "cross-env NODE_ENV=development react-scripts start",
-    "start:optimized": "cross-env NODE_OPTIONS=--max_old_space_size=4096 GENERATE_SOURCEMAP=false npm start",
-    "build": "react-scripts build",
-    "build:analyze": "npm run build && npx bundle-analyzer build/static/js/*.js",
-    "test": "react-scripts test",
-    "test:ci": "react-scripts test --coverage --ci --silent --maxWorkers=2",
-    "eject": "react-scripts eject",
-    "clean": "rimraf build node_modules/.cache",
-    "clean:cache": "rimraf node_modules/.cache",
-    "prestart": "npm run clean:cache",
+    "dev": "vite",
+    "build": "vite build",
+    "test": "vitest run",
+    "lint": "eslint src",
+    "gen:api": "openapi-typescript ../docs/openapi.yaml -o src/platform/api/generated/schema.d.ts",
+    "clean": "rimraf dist build node_modules/.cache",
     "benchmark": "node scripts/benchmark.js",
     "perf": "node scripts/performance-monitor.js"
-  },
-  "eslintConfig": {
-    "extends": [
-      "react-app",
-      "react-app/jest"
-    ]
   },
   "browserslist": {
     "production": [
@@ -50,5 +51,9 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "allowScripts": {
+    "esbuild@0.25.12": true,
+    "msw@2.15.0": true
   }
 }

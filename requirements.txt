@@ -13,8 +13,8 @@ langchain-community>=0.3.14        # Community tools and utilities
 langchain-core>=0.3.28             # Core abstractions (prompts, messages, runnables)
 langgraph>=0.2.62                  # LangGraph core for agent workflows
 langgraph-cli>=0.1.62              # CLI for LangGraph Studio (replaces [inmem] extra)
-langgraph-checkpoint>=2.0.9        # Base checkpoint interfaces
-langgraph-checkpoint-mongodb>=2.0.5  # MongoDB checkpointer for STM (FR-3.1)
+langgraph-checkpoint>=3.0.0        # Base checkpoint interfaces
+langgraph-checkpoint-mongodb==0.4.0  # MongoDB checkpointer for STM (FR-3.1)
 langsmith>=0.2.6                   # LangSmith tracing SDK
 
 
@@ -60,7 +60,7 @@ marshmallow==3.26.1
 # --- Testing ---
 pytest==8.4.1
 pytest-cov==7.1.0
-pytest-mock==4.4.0
+pytest-mock>=3.17.0
 coverage==7.13.5
 
 # --- Utilities ---

@@ -6,11 +6,11 @@
 
 | Field | Value |
 |-------|-------|
-| **Version** | 0.3.2 (draft) |
+| **Version** | 0.3.3 (draft) |
 | **Status** | Draft — M-000 Pitch B foundation, extended with presentation rules to M-009 |
 | **Product Owner** | Phan Duy |
 | **Maintainer** | UX Designer |
-| **Date** | 2026-11-13 |
+| **Date** | 2026-11-18 |
 | **Requirements** | SR-1.4.1 (modular shell), SR-1.4.2 (workspace context), SR-1.3.1–1.3.4 (canvas and chart yield), SR-1.3.5 (approved 2026-11-10; M-001 docked chart PoC), SR-10.1.x (identity surfaces, Pitch A) |
 | **Normative sources** | [CONCEPTUAL_IA_MAP.md](../../system/CONCEPTUAL_IA_MAP.md) §2.6 · [USER_JOURNEYS_WITH_WIREFRAMES.md](../../system/USER_JOURNEYS_WITH_WIREFRAMES.md) W1 · [ARCHITECTURE.md](./ARCHITECTURE.md) · [PRODUCT_SPECIFICATION.md](../../system/PRODUCT_SPECIFICATION.md) §5.3 |
 | **Token values** | [DESIGN_SYSTEM.md](./DESIGN_SYSTEM.md) |
@@ -20,6 +20,7 @@
 | Version | Date | Change |
 |---------|------|--------|
 | 0.1 | 2026-11-05 | M-000 Pitch B presentation contract |
+| 0.3.3 | 2026-11-18 | M-000 is dark only. Light tokens and the day-one contrast check move to M-001 (Phan Duy, 2026-11-17) |
 | 0.3.2 | 2026-11-17 | Number edge cases decided (Phan Duy): true minus U+2212, zero with no sign in `market.ref`, missing value `—`, zero volume `0`; §8 font line names IBM Plex Mono for numbers |
 | 0.3.1 | 2026-11-13 | Minimum supported width 768 px with breakpoint behaviour (Phan Duy); volume in whole shares with comma grouping `1,234,500` (Phan Duy); ₫ totals `25,300,000 ₫` (Phan Duy); percent in price rows uses the dot (Phan Duy); Chart.js data charts themed from tokens (Phan Duy, DESIGN_SYSTEM); price-board number format decided (Phan Duy); numbers use `mono` (IBM Plex Mono) because Be Vietnam Pro v1.002 has no tabular digits |
 | 0.3 | 2026-11-13 | Review round (Phan Duy decisions 2026-11-13): 1920 px design focus with a proposed zone width budget, zones never stack (Z4 → toggle, Z1 → rail); Z1 is one sidebar with Dual-Track and Lifecycle groups (IA v0.9.0, no Z1a/Z1b); Z2 content aligned to IA §2.3 and the model selector moved to the Z4 header; context kept per symbol or index; Z4 draft kept in `sessionStorage`; one zone-state list (adds Ready and Stale; provenance is not a state); `data-origin` values `ai` / `investor`; M-001 chart is Research Sandbox only, no marker content, candles carry a shape cue; launch UI language vi-VN; ADR-FRONTEND-003/004/005/007 cited as Accepted |
@@ -125,7 +126,7 @@ Values live in [DESIGN_SYSTEM.md](./DESIGN_SYSTEM.md). Colour-token architecture
 | Type | `display` `title` `body` `caption` `mono` (tickers, numbers) |
 | Space / radius / elevation | 4-pt scale · `radius.sm/md/lg` · `elevation.0–3` |
 
-Dark-first in M-000; light is built on the same tokens and is contrast-checked from day one. See [ADR-FRONTEND-007](./DECISIONS/ADR-FRONTEND-007-DESIGN-TOKEN-ARCHITECTURE.md) (Accepted 2026-11-13).
+Dark-only in M-000 (Phan Duy, 2026-11-17). Light values, theme switching, and the contrast script move to M-001. See [ADR-FRONTEND-007](./DECISIONS/ADR-FRONTEND-007-DESIGN-TOKEN-ARCHITECTURE.md) (Accepted 2026-11-13) for the token groups.
 
 ### 4.3 Colour and provenance rules
 

@@ -9,7 +9,7 @@
 | **Standards Stance** | Practice-Based ADR discipline |
 | **Status** | Accepted |
 | **Date** | 2026-04-01 |
-| **Last Updated** | 2026-11-13 |
+| **Last Updated** | 2026-11-18 |
 | **Replaced in part by** | [ADR-Frontend-007](./ADR-FRONTEND-007-DESIGN-TOKEN-ARCHITECTURE.md) (token-colour bullet) · [ADR-Frontend-004](./ADR-FRONTEND-004-CHART-ENGINE-ADAPTER.md) (chart capabilities: Lightweight Charts ships no indicators) · [ADR-Frontend-003](./ADR-FRONTEND-003-URL-OWNED-SHAREABLE-STATE.md) (G3: the URL owns track, `symbol` and `coreObjectRef`; the store mirrors them) · [ADR-Frontend-008](./ADR-FRONTEND-008-MSW-AND-STORYBOOK-IN-M000.md) (MSW and Storybook move into M-000) |
 | **Decision Owners** | Engineering · Architecture · Frontend maintainers |
 
@@ -43,13 +43,13 @@ The modernization research concludes that the best fit is a **contract-first mod
   - **Primary Canvas**: [TradingView Lightweight Charts](https://tradingview.github.io/lightweight-charts/) (`lightweight-charts`) for high-performance (60 FPS) OHLCV candlesticks, volume histograms, and indicators (RSI, MACD).
   - **Auxiliary Visualization**: [Chart.js](https://www.chartjs.org/) for macro graphs, solvency breakdown bars, and portfolio asset allocation donuts.
 - **Defer** a Structured SSE Artifact Protocol / Generative UI Dispatcher to **Future** (not M-000 Pitch B); Pitch B streams companion/chat tokens over SSE without GenUI artifact cards.
-- Adopt **Tailwind CSS + Radix UI primitives** with financial dark-mode design tokens (emerald green for gains, rose red for losses, cyan for copilot, slate-950 dark background) as the primary UI foundation.
+- Adopt **Tailwind CSS + Radix UI primitives** with financial dark-mode design tokens as the primary UI foundation. Colour values in this bullet (emerald, rose, cyan, slate-950) are replaced by [ADR-Frontend-007](./ADR-FRONTEND-007-DESIGN-TOKEN-ARCHITECTURE.md) and [DESIGN_SYSTEM.md](../DESIGN_SYSTEM.md).
 - Generate frontend-backend TypeScript contracts from the existing OpenAPI specification via [openapi-typescript](https://openapi-ts.dev/introduction).
 - Keep **HTTPS + SSE** flows explicit through typed platform clients and feature-facing hooks (**no Socket.IO / WebSocket** in the target; SNR-8.1.2).
 - Adopt [Vitest](https://vitest.dev/) plus React Testing Library as the primary frontend test foundation.
 - Adopt a **Value-Driven Vertical-Slice Delivery Strategy**: pair build tool modernization with early delivery of the **Z1–Z4 Adaptive Workspace shell and workspace context store** in Phase 2 (maiden TradingView chart deferred; chart-yield → **M-006**).
 - Treat Progressive Web Application enablement as an optional later-phase capability layered on the SPA, not as a separate architecture choice.
-- Treat [MSW](https://mswjs.io/docs/) and [Storybook](https://storybook.js.org/docs) as planned accelerators for later phases rather than phase-0 prerequisites.
+- Treat [MSW](https://mswjs.io/docs/) and [Storybook](https://storybook.js.org/docs) as M-000 foundation tools, not later-phase accelerators. This bullet is replaced in part by [ADR-Frontend-008](./ADR-FRONTEND-008-MSW-AND-STORYBOOK-IN-M000.md). Spec 004 shipped MSW in Vitest. Storybook stays with spec 005.
 
 ## Decision Statement
 
@@ -129,7 +129,7 @@ Recommended sequence for **M-000 Pitch B** (aligns with Frontend Architecture ga
 5. **G5 — Vitest + RTL baseline**: Executable FE tests for shell and critical seams (**SNR-6.1.4**).
 6. **G6 — Drop Socket.IO**: SSE-only transport conformance (**SNR-8.1.2**).
 
-Later (out of this ADR’s Pitch B acceptance): GenUI artifacts (Future), saved layout presets (**M-009**), chart-yield (**M-006**), TradingView maiden chart under Canvas milestones, Auth0/session durability (**Pitch A / ADR-SYS-001**). MSW and Storybook remain later accelerators.
+Later (out of this ADR’s Pitch B acceptance): GenUI artifacts (Future), saved layout presets (**M-009**), chart-yield (**M-006**), TradingView maiden chart under Canvas milestones, Auth0/session durability (**Pitch A / ADR-SYS-001**). MSW and Storybook are in M-000 per ADR-Frontend-008.
 
 ## Guardrails
 
@@ -203,3 +203,4 @@ This decision serves the following system requirement families without owning th
 | 0.5 | 2026-11-13 | Software Architect Assistant | History note only; decision text unchanged. Token-colour bullet replaced by ADR-007 and the indicator claim by ADR-004 (both Accepted 2026-11-13) |
 | 0.6 | 2026-11-13 | Software Architect Assistant | History note: G3 replaced in part by ADR-Frontend-003 (URL owns shareable state) |
 | 0.7 | 2026-11-13 | Software Architect Assistant | History note: the MSW / Storybook "later phases" bullet replaced in part by ADR-Frontend-008 |
+| 0.8 | 2026-11-18 | Software Engineer | Decision bullets for colour and for MSW / Storybook now point at ADR-007 and ADR-008. The implementation-direction sentence no longer calls MSW and Storybook later accelerators |

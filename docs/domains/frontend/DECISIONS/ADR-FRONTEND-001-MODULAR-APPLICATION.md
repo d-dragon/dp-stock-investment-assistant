@@ -9,7 +9,7 @@
 | **Standards Stance** | Practice-Based ADR discipline |
 | **Status** | Accepted |
 | **Date** | 2026-03-27 |
-| **Last Updated** | 2026-11-05 |
+| **Last Updated** | 2026-11-18 |
 | **Decision Owners** | Engineering · Architecture · Frontend maintainers |
 
 ## Context
@@ -100,7 +100,7 @@ The intended architectural form is:
 
 - shared shell in `app/` hosting the multi-pane resizable layout
 - controlled platform layer in `platform/`
-- bounded business modules in `modules/` (e.g., `market-data/` for charting canvas, `chat/` for copilot dialog and generative UI)
+- bounded business modules in `features/` (for example `companion/` for the copilot and `models/` for the model selector). The folder name `modules/` is not used
 - module public entry points as the only supported integration surface
 - typed platform-owned API and streaming adapters rather than ad hoc feature-local clients
 
@@ -182,3 +182,4 @@ This decision serves the following system requirement families without owning th
 | 0.3 | 2026-04-13 | Engineering | Standardized to project ADR discipline; migrated to `docs/domains/frontend/DECISIONS/`; added Document Control, Requirement Alignment, and Revision History |
 | 0.4 | 2026-09-03 | Engineering | Incorporated resizable multi-pane financial canvas paradigm; refined scope to coordinate visual charting and AI copilot workspace |
 | 0.5 | 2026-11-05 | Software Architect Assistant | Accepted for M-000 Pitch B — modular Z1–Z4 presentation shell; cites SR-1.4.1; identity remains Pitch A / ADR-SYS-001 |
+| 0.6 | 2026-11-18 | Software Engineer | Implementation direction uses `features/`, not `modules/`. The decision is unchanged |
