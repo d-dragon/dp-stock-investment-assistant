@@ -14,6 +14,7 @@ param(
     [string[]]$FeatureDescription
 )
 $ErrorActionPreference = 'Stop'
+$maxBranchLength = 244
 
 # Show help if requested
 if ($Help) {
@@ -24,7 +25,7 @@ if ($Help) {
     Write-Host "  -DryRun             Compute feature name and paths without creating directories or files"
     Write-Host "  -AllowExistingBranch  Reuse an existing feature directory if it already exists"
     Write-Host "  -ShortName <name>   Provide a custom short name (2-4 words) for the feature"
-    Write-Host "  -Number N           Specify branch number manually (overrides auto-detection)"
+    Write-Host "  -Number N           Prefer a feature number (auto-corrected if its specs prefix exists)"
     Write-Host "  -Timestamp          Use timestamp prefix (YYYYMMDD-HHMMSS) instead of sequential numbering"
     Write-Host "  -Help               Show this help message"
     Write-Host ""
@@ -53,8 +54,8 @@ function Get-HighestNumberFromSpecs {
     param([string]$SpecsDir)
 
     [long]$highest = 0
-    if (Test-Path $SpecsDir) {
-        Get-ChildItem -Path $SpecsDir -Directory | ForEach-Object {
+    if (Test-Path -LiteralPath $SpecsDir) {
+        Get-ChildItem -LiteralPath $SpecsDir -Directory | ForEach-Object {
             # Match sequential prefixes (>=3 digits), but skip timestamp dirs.
             if ($_.Name -match '^(\d{3,})-' -and $_.Name -notmatch '^\d{8}-\d{6}-') {
                 [long]$num = 0
@@ -67,10 +68,70 @@ function Get-HighestNumberFromSpecs {
     return $highest
 }
 
+function Test-SpecPrefixInUse {
+    param(
+        [string]$SpecsDir,
+        [string]$FeatureNum
+    )
+
+    if (-not (Test-Path -LiteralPath $SpecsDir -PathType Container)) {
+        return $false
+    }
+
+    return $null -ne (Get-ChildItem -LiteralPath $SpecsDir -Directory -ErrorAction SilentlyContinue |
+        Where-Object { $_.Name -like "$FeatureNum-*" } |
+        Select-Object -First 1)
+}
+
+function ConvertTo-AsciiLower {
+    param([string]$Name)
+
+    return [regex]::Replace($Name, '[A-Z]', { param($match) $match.Value.ToLowerInvariant() })
+}
+
+function ConvertTo-UnicodeWords {
+    param([string]$Name, [string]$Separator)
+
+    $lowerName = ConvertTo-AsciiLower -Name $Name
+    return [regex]::Replace($lowerName, '[\uD800-\uDBFF][\uDC00-\uDFFF]|[^\p{L}\p{Nd}]', {
+        param($match)
+        if ($match.Length -eq 2) {
+            $category = [System.Globalization.CharUnicodeInfo]::GetUnicodeCategory($match.Value, 0)
+            if ($category.ToString() -match '(Letter|DecimalDigitNumber)$') {
+                return $match.Value
+            }
+        }
+        return $Separator
+    })
+}
+
 function ConvertTo-CleanBranchName {
     param([string]$Name)
 
-    return $Name.ToLower() -replace '[^a-z0-9]', '-' -replace '-{2,}', '-' -replace '^-', '' -replace '-$', ''
+    return (ConvertTo-UnicodeWords -Name $Name -Separator '-') -replace '-{2,}', '-' -replace '^-', '' -replace '-$', ''
+}
+
+function Get-FittedBranchName {
+    param(
+        [string]$FeatureNum,
+        [string]$BranchSuffix
+    )
+
+    $fittedName = "$FeatureNum-$BranchSuffix"
+    if ([System.Text.Encoding]::UTF8.GetByteCount($fittedName) -gt $maxBranchLength) {
+        $prefixLength = $FeatureNum.Length + 1
+        $maxSuffixLength = $maxBranchLength - $prefixLength
+        $bytes = [System.Text.Encoding]::UTF8.GetBytes($BranchSuffix)
+        $bytesToUse = $maxSuffixLength
+        while ($bytesToUse -gt 0 -and ($bytes[$bytesToUse] -band 0xC0) -eq 0x80) {
+            $bytesToUse--
+        }
+        $truncatedSuffix = [System.Text.Encoding]::UTF8.GetString($bytes, 0, $bytesToUse)
+        $truncatedSuffix = $truncatedSuffix -replace '-$', ''
+        $fittedName = "$FeatureNum-$truncatedSuffix"
+    }
+
+    return $fittedName
 }
 # Load common functions (includes Get-RepoRoot and Resolve-Template)
 . "$PSScriptRoot/common.ps1"
@@ -78,7 +139,7 @@ function ConvertTo-CleanBranchName {
 # Use common.ps1 functions which prioritize .specify
 $repoRoot = Get-RepoRoot
 
-Set-Location $repoRoot
+Set-Location -LiteralPath $repoRoot
 
 $specsDir = Join-Path $repoRoot 'specs'
 if (-not $DryRun) {
@@ -98,24 +159,27 @@ function Get-BranchName {
         'want', 'need', 'add', 'get', 'set'
     )
 
-    # Convert to lowercase and extract words (alphanumeric only)
-    $cleanName = $Description.ToLower() -replace '[^a-z0-9\s]', ' '
+    # Lowercase ASCII and extract Unicode words, matching the shell variant.
+    $cleanName = ConvertTo-UnicodeWords -Name $Description -Separator ' '
     $words = $cleanName -split '\s+' | Where-Object { $_ }
 
     # Filter words: remove stop words and words shorter than 3 chars (unless they're uppercase acronyms in original)
     $meaningfulWords = @()
     foreach ($word in $words) {
         # Skip stop words
-        if ($stopWords -contains $word) { continue }
+        if ($stopWords -ccontains $word) { continue }
 
-        # Keep words that are length >= 3 OR appear as uppercase in original (likely acronyms)
-        if ($word.Length -ge 3) {
+        # Keep Unicode words even when short; ASCII words still need three
+        # characters or an uppercase acronym in the original.
+        if ($word.Length -ge 3 -or $word -match '[^\x00-\x7F]') {
             $meaningfulWords += $word
-        } elseif ($Description -cmatch "\b$($word.ToUpper())\b") {
+        } elseif ($Description -cmatch "(?<![0-9A-Za-z_])$($word.ToUpper())(?![0-9A-Za-z_])") {
             # Keep short words only if they appear as uppercase in original (likely
             # acronyms). Use -cmatch so the comparison is case-sensitive, matching the
             # bash script's case-sensitive grep; -match would be case-insensitive and
-            # would keep every short word.
+            # would keep every short word. The boundaries are spelled out as ASCII
+            # because .NET's \b is Unicode-aware, so an accented letter next to the
+            # acronym would suppress the match that bash's LC_ALL=C grep still makes.
             $meaningfulWords += $word
         }
     }
@@ -128,7 +192,8 @@ function Get-BranchName {
     } else {
         # Fallback to original logic if no meaningful words found
         $result = ConvertTo-CleanBranchName -Name $Description
-        $fallbackWords = ($result -split '-') | Where-Object { $_ } | Select-Object -First 3
+        # @() keeps this an array when the description contains only separators.
+        $fallbackWords = @(($result -split '-') | Where-Object { $_ } | Select-Object -First 3)
         return [string]::Join('-', $fallbackWords)
     }
 }
@@ -140,6 +205,10 @@ if ($ShortName) {
 } else {
     # Generate from description with smart filtering
     $branchSuffix = Get-BranchName -Description $featureDesc
+}
+
+if (-not $branchSuffix) {
+    [Console]::Error.WriteLine("[specify] Warning: Feature name is empty after removing unsupported characters. Use -ShortName with letters or digits (for example, user-auth).")
 }
 
 # Treat an explicit empty string as omitted, matching the bash and Python twins.
@@ -176,29 +245,43 @@ if ($Timestamp) {
     }
 
     $featureNum = ('{0:000}' -f $resolvedNumber)
-    $branchName = "$featureNum-$branchSuffix"
+
+    # Treat an explicit number as a preference when its prefix is already used
+    # by a feature directory. Auto-detected numbers are already conflict-free.
+    $specConflict = $false
+    if ($hasNumber -and (Test-Path -LiteralPath $specsDir -PathType Container)) {
+        $requestedBranchName = Get-FittedBranchName -FeatureNum $featureNum -BranchSuffix $branchSuffix
+        $requestedDir = Join-Path $specsDir $requestedBranchName
+        if (-not $AllowExistingBranch -or -not (Test-Path -LiteralPath $requestedDir -PathType Container)) {
+            $specConflict = Test-SpecPrefixInUse -SpecsDir $specsDir -FeatureNum $featureNum
+        }
+    }
+
+    if ($specConflict) {
+        $requestedNum = $featureNum
+        $highestNumber = Get-HighestNumberFromSpecs -SpecsDir $specsDir
+        $resolvedNumber = $highestNumber
+        do {
+            if ($resolvedNumber -eq [long]::MaxValue) {
+                Write-Error "Error: feature number must be between 0 and $([long]::MaxValue), got '9223372036854775808'"
+                exit 1
+            }
+            $resolvedNumber++
+            $featureNum = ('{0:000}' -f $resolvedNumber)
+        } while (Test-SpecPrefixInUse -SpecsDir $specsDir -FeatureNum $featureNum)
+        [Console]::Error.WriteLine("[specify] Warning: -Number $requestedNum conflicts with an existing spec directory; using $featureNum instead")
+    }
+
 }
 
 # GitHub enforces a 244-byte limit on branch names
 # Validate and truncate if necessary
-$maxBranchLength = 244
-if ($branchName.Length -gt $maxBranchLength) {
-    # Calculate how much we need to trim from suffix
-    # Account for prefix length: timestamp (15) + hyphen (1) = 16, or sequential (3) + hyphen (1) = 4
-    $prefixLength = $featureNum.Length + 1
-    $maxSuffixLength = $maxBranchLength - $prefixLength
-
-    # Truncate suffix
-    $truncatedSuffix = $branchSuffix.Substring(0, [Math]::Min($branchSuffix.Length, $maxSuffixLength))
-    # Remove trailing hyphen if truncation created one
-    $truncatedSuffix = $truncatedSuffix -replace '-$', ''
-
-    $originalBranchName = $branchName
-    $branchName = "$featureNum-$truncatedSuffix"
-
+$originalBranchName = "$featureNum-$branchSuffix"
+$branchName = Get-FittedBranchName -FeatureNum $featureNum -BranchSuffix $branchSuffix
+if ($branchName -ne $originalBranchName) {
     [Console]::Error.WriteLine("[specify] Warning: Branch name exceeded GitHub's 244-byte limit")
-    [Console]::Error.WriteLine("[specify] Original: $originalBranchName ($($originalBranchName.Length) bytes)")
-    [Console]::Error.WriteLine("[specify] Truncated to: $branchName ($($branchName.Length) bytes)")
+    [Console]::Error.WriteLine("[specify] Original: $originalBranchName ($([System.Text.Encoding]::UTF8.GetByteCount($originalBranchName)) bytes)")
+    [Console]::Error.WriteLine("[specify] Truncated to: $branchName ($([System.Text.Encoding]::UTF8.GetByteCount($branchName)) bytes)")
 }
 
 $featureDir = Join-Path $specsDir $branchName
@@ -214,13 +297,16 @@ if (-not $DryRun) {
         exit 1
     }
 
+    $needsSpec = -not (Test-Path -LiteralPath $specFile -PathType Leaf)
+    $content = $null
+    if ($needsSpec) {
+        $content = Resolve-TemplateContent -TemplateName 'spec-template' -RepoRoot $repoRoot
+    }
+
     New-Item -ItemType Directory -Path $featureDir -Force | Out-Null
 
-    if (-not (Test-Path -PathType Leaf $specFile)) {
-        $template = Resolve-Template -TemplateName 'spec-template' -RepoRoot $repoRoot
-        if ($template -and (Test-Path $template)) {
-            # Read the template content and write it to the spec file with UTF-8 encoding without BOM
-            $content = [System.IO.File]::ReadAllText($template)
+    if ($needsSpec) {
+        if ($null -ne $content) {
             $utf8NoBom = New-Object System.Text.UTF8Encoding($false)
             [System.IO.File]::WriteAllText($specFile, $content, $utf8NoBom)
         } else {
@@ -232,8 +318,11 @@ if (-not $DryRun) {
         }
     }
 
-    # Persist to .specify/feature.json so downstream commands can find the feature
-    Save-FeatureJson -RepoRoot $repoRoot -FeatureDirectory $featureDir
+    # Persist to .specify/feature.json so downstream commands can find the
+    # feature, unless the orchestrator opted out via SPECIFY_FEATURE_NO_PERSIST (#4129).
+    if ($env:SPECIFY_FEATURE_NO_PERSIST -ne '1' -and $env:SPECIFY_FEATURE_NO_PERSIST -ne 'true') {
+        Save-FeatureJson -RepoRoot $repoRoot -FeatureDirectory $featureDir
+    }
 
     # Set environment variables for the current session
     $env:SPECIFY_FEATURE = $branchName

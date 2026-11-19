@@ -1,40 +1,44 @@
 <!--
 SYNC IMPACT REPORT
 ==================
-Version Change: 2.5.0 -> 2.6.0 (MINOR)
-Bump Rationale: Added explicit Structured Output Subsystem governance, Route-Adapted Custom Response
-  Tool rules, Two-Stage Fallback Formatter constraints, checkpointer payload exclusion hygiene, and
-  transport edge streaming suppression rules based on ADR-AGENT-005, ARCHITECTURE_DESIGN.md,
-  TECHNICAL_DESIGN.md v1.2, and SRS v2.9 (FR-1.2.5–1.2.9, AC-10).
+Version Change: 2.6.0 -> 2.7.0 (MINOR)
+Bump Rationale: Expanded Principle I and the Spec Kit document-referencing rules
+  with a recorded deferral. When the governing feature spec forbids edits to
+  docs/**, Accepted ADRs, or specs/spec-traceability.yaml, anchor and
+  traceability refresh waits for a later change that is allowed to touch those
+  files. Implementation of the forbidden delivery must not edit them to clear
+  the gap. Resolves C1 in
+  specs/004-m000-b-frontend-foundation-core/analysis.md.
 
 Modified Principles:
-- Layered Boundaries and Explicit Ownership -> Layered Boundaries and Explicit Ownership
-  (expanded with checkpointer payload exclusion hygiene rule excluding AgentStructuredOutput from STM)
-- Prompts, Memory, and Fine-Tuning Control Behavior, Not Truth -> Prompts, Memory, and Fine-Tuning
-  Control Behavior, Not Truth (expanded with explicit separation between Output Contract Schema
-  Validation and ResponseGuardrailMiddleware behavioral enforcement)
-- Deterministic Tools and Contracted Interfaces -> Deterministic Tools and Contracted Interfaces
-  (expanded with control-plane response tool admission under RiskClass.BOUNDED_NON_MUTATING and
-  return_direct=True)
+- Spec-Driven, Traceable Delivery -> Spec-Driven, Traceable Delivery
+  (expanded with a recorded deferral when the governing spec forbids the
+  long-lived sync edit)
 
 Added Sections:
-- Structured Output Subsystem and Response Tool Governance
+- Recorded deferral when the delivery forbids the sync edit
 
 Removed Sections:
 - None
 
 Template Consistency Check:
-- .specify/templates/plan-template.md: checked; no structural change required
+- .specify/templates/plan-template.md: checked; Complexity Tracking already
+  holds justified constitution deviations; no structural change required
 - .specify/templates/spec-template.md: checked; no structural change required
 - .specify/templates/tasks-template.md: checked; no structural change required
 - .specify/templates/checklist-template.md: checked; no structural change required
 - .specify/templates/agent-file-template.md: checked; no structural change required
 - .specify/templates/constitution-template.md: checked; no structural change required
 - .specify/templates/commands/*.md: not present in this repository
-- AGENTS.md and relevant .github/instructions/*.md: checked; no structural change required
+- AGENTS.md and relevant .github/instructions/*.md: checked; principle title
+  unchanged; no structural change required
 
 Follow-up TODOs:
-- None
+- specs/003-agent-structured-outputs citations of Constitution v2.6.0 stay as
+  the version those artifacts were written against.
+- Feature 004 does not edit docs/**, Accepted ADRs, or
+  specs/spec-traceability.yaml to clear C1. The later allowed change refreshes
+  anchors and traceability.
 -->
 
 
@@ -57,9 +61,14 @@ Every non-trivial change MUST start from governed artifacts and named authoritie
 long-lived requirements, architecture, technical design, contracts, policy, and runbooks;
 `specs/` owns delivery-scoped feature artifacts and verification evidence; `.specify/` owns Spec
 Kit runtime files, templates, extensions, and workflows. Delivered work MUST refresh affected
-traceability and long-lived artifacts before it is considered complete. Rationale: this
-repository uses Spec Kit as its delivery governance engine, so unsourced or unsynchronized work
-creates drift across code, contracts, and docs.
+traceability and long-lived artifacts before it is considered complete. When the governing
+feature spec forbids edits to `docs/**`, Accepted ADRs, or `specs/spec-traceability.yaml`, that
+refresh is a recorded deferral: the plan MUST record it, implementation of that delivery MUST
+NOT edit those forbidden files to clear the gap, and a later change that is allowed to touch
+those files MUST refresh the affected anchors and traceability. Rationale: this repository uses
+Spec Kit as its delivery governance engine, so unsourced or unsynchronized work creates drift
+across code, contracts, and docs. A scope ban in the governing spec defers the refresh. It does
+not waive it, and it does not permit breaking the ban inside the same delivery.
 
 ### II. Layered Boundaries and Explicit Ownership
 Implementation MUST respect ownership boundaries across frontend, backend, agent, data,
@@ -158,7 +167,9 @@ When stable behavior changes, update `docs/openapi.yaml`, `specs/spec-traceabili
 `specs/spec-sync-status.md`, affected reverse-trace documents, and impacted technical design or
 runbook artifacts in the same delivery cycle when relevant. The sync report MUST be regenerated
 with `python scripts/sync_spec_status.py --gate` when requirement coverage, feature lifecycle
-status, or evidence paths change.
+status, or evidence paths change. When the governing feature spec forbids edits to those files,
+record the deferral and leave the files unchanged in that delivery. The later change that is
+allowed to touch them performs the update and regenerates the sync report.
 
 #### 4. Protect Secrets and Privileged Access
 Secrets MUST NOT appear in source, logs, docs, or test fixtures. Use environment variables,
@@ -235,6 +246,20 @@ agentic workflow context.
 | `speckit.implement` | Code or documentation changes that modify section headings, requirement IDs, or anchor labels in `docs/` MUST be paired with updates to all inbound references. |
 | `speckit.verify.run` | Verification MUST check that cross-references between `specs/` artifacts and `docs/` documents resolve to valid, non-broken anchors. |
 | Steps 15-17 (sync) | The traceability-refresh and documentation-sync steps MUST validate all cross-references and flag any stale or broken anchors for correction. |
+
+A row in the table above is deferred, not waived, when the recorded-deferral rule below applies.
+
+#### Recorded deferral when the delivery forbids the sync edit
+
+When the governing feature spec forbids edits to `docs/**`, Accepted ADRs, or
+`specs/spec-traceability.yaml`, that delivery MUST treat a missing Governance Context section,
+prose heading citations, missing anchor-check tasks, and missing traceability-refresh tasks as
+one recorded deviation. The plan's Complexity Tracking, or an equivalent governing note, MUST
+name the forbidden surfaces and state that a later allowed change carries the refresh.
+Implementation MUST NOT repair the deviation by editing those forbidden files. The next change
+that is allowed to touch them MUST refresh section anchors and traceability. Citations in the
+deferred delivery MUST still name a repository-relative path and the governing heading, ADR ID,
+SRS ID, or pitch slice.
 
 #### Agentic Workflow Guidance
 
@@ -539,9 +564,13 @@ Agent tool-system plans and implementations MUST include focused evidence for:
   architecture impact, and rollback or migration implications.
 - Tasks MUST include tests, contract updates, traceability refresh, and long-lived doc sync work
   whenever those surfaces are affected.
+- When the governing feature spec forbids edits to `docs/**`, Accepted ADRs, or
+  `specs/spec-traceability.yaml`, traceability-refresh and long-lived doc sync tasks for that
+  delivery MUST be omitted. The omission MUST be the recorded deferral under Document
+  Referencing. Implementation MUST NOT add those tasks by editing the forbidden files.
 - All references to `docs/` documents in spec-kit artifacts MUST use section-level anchors, not
-  document-level paths alone. The lifecycle table under Document Referencing in Spec-Kit
-  Workflows defines the responsibility per phase.
+  document-level paths alone, except where the recorded-deferral rule applies. The lifecycle
+  table under Document Referencing in Spec-Kit Workflows defines the responsibility per phase.
 - Documentation-first work MAY start from documentation-focused agents or workflows, but it MUST
   obey the same artifact boundaries and sync duties.
 
@@ -582,16 +611,19 @@ delivery MUST preserve one coherent feature workflow and one authoritative artif
 - Docs-only changes MUST pass diagnostics on the touched files and keep anchors or links current.
 - Cross-references between `specs/` artifacts and `docs/` documents MUST be validated for anchor
   correctness during verification. Stale or broken section-level references are a verification
-  failure, not optional cleanup.
+  failure, not optional cleanup. A recorded deferral is not that failure for the delivery whose
+  governing spec forbids editing the target files.
 
 ### Pre-Merge Checklist
 
 - [ ] Governing artifacts and affected domains are identified.
 - [ ] Focused executable validation or diagnostics have been run.
-- [ ] Required contracts, long-lived docs, and sync artifacts are updated.
+- [ ] Required contracts, long-lived docs, and sync artifacts are updated, unless the plan
+      records a deferral because the governing spec forbids those edits.
 - [ ] Agent tool-system changes include descriptor, route, provider, normalized-output, source
   lineage, and degraded-state evidence where applicable.
-- [ ] Cross-references in spec-kit artifacts use section-level anchors and resolve to valid targets.
+- [ ] Cross-references in spec-kit artifacts use section-level anchors and resolve to valid
+      targets, or the plan records a deferral because the governing spec forbids the sync edit.
 - [ ] No secrets or unsafe internal details are exposed.
 - [ ] Any migration, fallback, rollout, or breaking-change path is documented.
 - [ ] The change remains one logical slice or explicitly justifies broader scope.
@@ -607,6 +639,10 @@ delivery MUST preserve one coherent feature workflow and one authoritative artif
   work is considered synchronized.
 - Affected technical design, architecture, or runbook documents MUST be synchronized when stable
   behavior becomes part of the long-lived baseline.
+- A delivery whose governing spec forbids edits to `docs/**`, Accepted ADRs, or
+  `specs/spec-traceability.yaml` MUST NOT run those sync edits. Closeout of that delivery MUST
+  point at the recorded deferral. The later change that is allowed to touch the affected files
+  MUST carry the refresh.
 
 ---
 
@@ -636,10 +672,14 @@ specific concern MUST then be reconciled across dependent artifacts.
   feature work when those surfaces apply.
 - Any approved deviation MUST be written as an explicit justification in the affected plan,
   review, ADR, or equivalent governing artifact.
+- A recorded deferral for a delivery that forbids edits to `docs/**`, Accepted ADRs, or
+  `specs/spec-traceability.yaml` satisfies the in-delivery traceability and anchor obligations.
+  It does not authorize those edits inside that delivery. The later allowed change MUST carry
+  the refresh.
 
 ### Version Control
 - **MAJOR**: Breaking changes to core principles or backward-incompatible governance changes
 - **MINOR**: New articles, principles, or materially expanded guidance
 - **PATCH**: Clarifications, typo fixes, non-semantic refinements
 
-**Version**: 2.6.0 | **Ratified**: 2026-01-27 | **Last Amended**: 2026-07-22
+**Version**: 2.7.0 | **Ratified**: 2026-01-27 | **Last Amended**: 2026-11-17

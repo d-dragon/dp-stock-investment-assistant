@@ -1,0 +1,16 @@
+{
+  "integration": "grok",
+  "version": "1.4.1",
+  "installed_at": "2026-11-17T05:02:46.317675+00:00",
+  "files": {
+    ".grok/skills/speckit-analyze/SKILL.md": "55fb0fab0218e8a254f0358701a8662bee039eba8ad6d32554523c4f8a8d8902",
+    ".grok/skills/speckit-clarify/SKILL.md": "8b80ede8b64130a1cbd86c7237e7048eb44ef65bf15672562f5a8ffbbcc4e07d",
+    ".grok/skills/speckit-constitution/SKILL.md": "1a11090c623d46b913add76949b460f48c36e0bff87368d6b7f535fc348677c1",
+    ".grok/skills/speckit-implement/SKILL.md": "81ff71390b0c3a3a2f26ce4c91c98dcd6f352bd8f2ac88a127b89558f12b6ca6",
+    ".grok/skills/speckit-converge/SKILL.md": "c73faaef7cd7cbf8b5f5b3a378f5b583b4b878fa6add039d0dc30f5617baa5ef",
+    ".grok/skills/speckit-plan/SKILL.md": "e5e044dcf0087f6684bab379008dc84351af7d81e4789656dcc4fe177bb19315",
+    ".grok/skills/speckit-checklist/SKILL.md": "f846c702c2a83777ab6806decbfaecb9d7f48b15f48bebb2db1d5f06bc6775dc",
+    ".grok/skills/speckit-specify/SKILL.md": "b81415e73187132e037a331e92d6a44041d3b1a50dcc5860e342a9ff4fb21383",
+    ".grok/skills/speckit-tasks/SKILL.md": "1dc46314ee8d1a1fa3e9429fa6f99babf4803ca9cd9983806badea34aaa2fda3"
+  }
+}

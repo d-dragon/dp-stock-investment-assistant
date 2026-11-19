@@ -3,7 +3,7 @@ generated_on: 2026-03-31
 
 reports:
   spec_sync_status:
-    version: "1.19"
+    version: "1.20"
     status: Active
     revision_history:
       - version: "1.0"
@@ -66,8 +66,11 @@ reports:
       - version: "1.19"
         date: 2026-07-07
         summary: Added tool-system-m2b.3 implementation task breakdown with dependency-aware story phases, verification commands, and requirement coverage matrix.
+      - version: "1.20"
+        date: 2026-11-18
+        summary: Added 004-m000-b-frontend-foundation-core as a mapped partial feature and promoted it to verified after review.md, .verify-done, complete tasks, and the sync gate.
   srs_spec_traceability:
-    version: "3.4"
+    version: "3.5"
     status: Active
     revision_history:
       - version: "1.0"
@@ -145,11 +148,26 @@ reports:
       - version: "3.4"
         date: 2026-07-07
         summary: Regenerated reverse trace after tool-system-m2b.3 task generation added tasks.md as planned implementation evidence.
+      - version: "3.5"
+        date: 2026-11-18
+        summary: Registered 004-m000-b-frontend-foundation-core against system SRS SR and SNR ids. The agent reverse index does not emit rows for those ids.
 
 srs:
   path: docs/domains/agent/SOFTWARE_REQUIREMENTS_SPECIFICATION.md
   version: "2.9"
   last_updated: 2026-07-22
+
+srs_documents:
+  agent:
+    path: docs/domains/agent/SOFTWARE_REQUIREMENTS_SPECIFICATION.md
+    version: "2.9"
+    last_updated: 2026-07-22
+    reverse_output: docs/domains/agent/SRS_SPEC_TRACEABILITY.md
+  system:
+    path: docs/system/SYSTEM_REQUIREMENTS_SPECIFICATION.md
+    version: "0.3.3"
+    last_updated: 2026-11-13
+    reverse_output: docs/system/SRS_SPEC_TRACEABILITY.md
 
 status_rules:
   analyzed:
@@ -1542,4 +1560,172 @@ features:
       - path: tests/integration/test_chat_structured_flow.py
         label: Integration tests for checkpointer hygiene and transport streaming
 
+  - feature_id: 004-m000-b-frontend-foundation-core
+    feature_title: M-000 Frontend foundation core (delivery 1 of 2)
+    feature_path: specs/004-m000-b-frontend-foundation-core
+    reference_document: specs/004-m000-b-frontend-foundation-core/spec.md
+    reference_anchor: requirements-mandatory
+    mapping_status: mapped
+    feature_kind: implementation-feature
+    status_sync:
+      source_of_truth: derived
+      gate_enforced: true
+      synchronized_documents:
+        - specs/004-m000-b-frontend-foundation-core/spec.md
+        - specs/004-m000-b-frontend-foundation-core/plan.md
+        - specs/004-m000-b-frontend-foundation-core/tasks.md
+        - specs/004-m000-b-frontend-foundation-core/review.md
+        - specs/004-m000-b-frontend-foundation-core/.verify-done
+    srs_mapping:
+      srs: system
+      baseline_version: "0.3.3"
+      coverage_status: partial
+      mapped_srs_items:
+        - SR-5.1.2
+        - SR-1.4.2
+        - SNR-8.1.2
+        - SNR-6.1.4
+        - SNR-7.1.1
+        - SNR-7.2.1
+      mapped_functional_groups:
+        - group: SR-5
+          coverage: partial
+          includes:
+            - SR-5.1.2
+        - group: SR-1
+          coverage: partial
+          includes:
+            - SR-1.4.2
+        - group: SNR-6
+          coverage: partial
+          includes:
+            - SNR-6.1.4
+        - group: SNR-7
+          coverage: partial
+          includes:
+            - SNR-7.1.1
+            - SNR-7.2.1
+        - group: SNR-8
+          coverage: partial
+          includes:
+            - SNR-8.1.2
+      sync_notes:
+        - "These IDs live in docs/system/SYSTEM_REQUIREMENTS_SPECIFICATION.md. The reverse report indexes the agent SRS and will not emit rows for SR or SNR ids."
+        - "Coverage is partial. SR-1.4.1 stays out of scope with B3. SR-5.2.1 and SR-5.2.2 stay Superseded and are not mapped."
+        - "SR-1.4.2 is the opaque sessionRef shape only. The workspace store stays with spec 005 (B3)."
+        - "SNR-8.1.2 is the frontend part against the MSW fixture. End-to-end HTTPS and SSE stays with the later Backend pitch."
+        - "SNR-6.1.4 covers the G1 path and the streaming-client seam. The presentation shell and workspace store stay with B3. The SRS coverage target remains TBD."
+        - "SNR-7.1.1 is recorded. Width exercises stay with B5. Priority stays P2."
+        - "SNR-7.2.1 stays P2. The axe baseline stays with B5. Contrast script row B4-T6 moved to M-001."
+        - "System SRS section 9.1 still says the M-000 draft registry rows were deferred in that draft. This entry is the slice registration that section describes. The system SRS prose was not rewritten."
+        - "Verification on 2026-11-18 closed E1 through E4 and G1. Residual findings M1, L1, and L2 stay in review.md. This marker does not promote frontend target architecture to Current."
+        - "Manifest baseline stays the agent SRS version 2.9. This feature does not change that baseline."
+    speckit_mapping:
+      evidence_paths:
+        - path: specs/004-m000-b-frontend-foundation-core/spec.md
+          label: Feature specification
+          anchor: requirements-mandatory
+        - path: specs/004-m000-b-frontend-foundation-core/plan.md
+          label: Implementation plan
+        - path: specs/004-m000-b-frontend-foundation-core/tasks.md
+          label: Implementation tasks
+        - path: specs/004-m000-b-frontend-foundation-core/review.md
+          label: Verification report
+        - path: specs/004-m000-b-frontend-foundation-core/.verify-done
+          label: Verify marker
+        - path: specs/004-m000-b-frontend-foundation-core/evidence/snr-8.1.2.md
+          label: SNR-8.1.2 frontend-part evidence
+        - path: specs/004-m000-b-frontend-foundation-core/evidence/t043-shared-proof.md
+          label: Shared proof and follow-up image build
+    lifecycle:
+      status: verified
+      current_step: verify
 
+  - feature_id: 005-m000-b-frontend-foundation-shell-qa
+    feature_title: M-000 Frontend foundation shell and QA (delivery 2 of 2)
+    feature_path: specs/005-m000-b-frontend-foundation-shell-qa
+    reference_document: specs/005-m000-b-frontend-foundation-shell-qa/spec.md
+    mapping_status: unmapped
+    feature_kind: implementation-feature
+    sync_notes:
+      - "Specify only. spec.md Status is Draft; no plan.md or tasks.md yet."
+      - "Left unmapped so the sync gate does not fail on a draft. Map against system SRS ids (SR-1.4.1 workspace store, B3, B5 rows) once planned."
+      - "Prerequisites B0, B1, B2, B4 are delivered by 004-m000-b-frontend-foundation-core."
+
+# BEGIN GENERATED: pitch-trace
+# Generated by scripts/sync_spec_status.py. Do not edit by hand.
+# Source of truth: specs/pitches/*.md acceptance tables and solution-sketch slice headings, spec.md front matter, tasks.md row tags, and frontend/src tests.
+pitch_trace:
+  - pitch: M-000-A
+    path: specs/pitches/M-000-A-identity-and-session.md
+    specs: []
+    slice_delivery:
+      - slice: A1
+        specs: []
+        status: unclaimed
+      - slice: A2
+        specs: []
+        status: unclaimed
+      - slice: A3
+        specs: []
+        status: unclaimed
+    deferred_rows: []
+    orphans: []
+    warnings: []
+  - pitch: M-000-B
+    path: specs/pitches/M-000-B-frontend-foundation.md
+    specs:
+      - id: 004-m000-b-frontend-foundation-core
+        path: specs/004-m000-b-frontend-foundation-core/spec.md
+        slices: [B0, B1, B2, B4]
+        rows: [B4-F1, B4-F2, B4-F3, B4-F4, B4-F5, B4-P1, B4-P2, B4-P3, B4-P4, B4-T1, B4-T2, B4-T3, B4-T4]
+        task_rows: [B4-F1, B4-F2, B4-F3, B4-F4, B4-F5, B4-T1, B4-T2, B4-T3, B4-T4, B4-T5, B3-D9]
+        test_rows: []
+      - id: 005-m000-b-frontend-foundation-shell-qa
+        path: specs/005-m000-b-frontend-foundation-shell-qa/spec.md
+        slices: [B3, B5]
+        rows: [B3-D1, B3-D2, B3-D3, B3-D4, B3-D5, B3-D6, B3-D7, B3-D8, B3-D9, B5-S1, B5-S2, B5-S3]
+        task_rows: []
+        test_rows: []
+    slice_delivery:
+      - slice: B0
+        specs: [004-m000-b-frontend-foundation-core]
+        status: verified
+      - slice: B1
+        specs: [004-m000-b-frontend-foundation-core]
+        status: verified
+      - slice: B2
+        specs: [004-m000-b-frontend-foundation-core]
+        status: verified
+      - slice: B3
+        specs: [005-m000-b-frontend-foundation-shell-qa]
+        status: unmapped
+      - slice: B4
+        specs: [004-m000-b-frontend-foundation-core]
+        status: verified
+      - slice: B5
+        specs: [005-m000-b-frontend-foundation-shell-qa]
+        status: unmapped
+    deferred_rows:
+      - B4-T5
+      - B4-T6
+      - B5-S4
+    orphans: []
+    warnings: []
+  - pitch: M-001
+    path: specs/pitches/M-001-adaptive-visual-canvas.md
+    specs: []
+    slice_delivery:
+      - slice: S1
+        specs: []
+        status: unclaimed
+      - slice: S2
+        specs: []
+        status: unclaimed
+      - slice: S3
+        specs: []
+        status: unclaimed
+    deferred_rows: []
+    orphans: []
+    warnings: []
+# END GENERATED: pitch-trace

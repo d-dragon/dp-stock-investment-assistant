@@ -1,25 +1,15 @@
 {
-  "version": "0.14.1",
+  "version": "1.4.1",
   "integration_state_schema": 1,
   "installed_integrations": [
-    "copilot",
-    "codex",
-    "agy"
+    "grok"
   ],
   "integration_settings": {
-    "copilot": {
-      "script": "ps",
-      "invoke_separator": "."
-    },
-    "codex": {
-      "script": "ps",
-      "invoke_separator": "-"
-    },
-    "agy": {
+    "grok": {
       "script": "ps",
       "invoke_separator": "-"
     }
   },
-  "integration": "copilot",
-  "default_integration": "copilot"
+  "integration": "grok",
+  "default_integration": "grok"
 }

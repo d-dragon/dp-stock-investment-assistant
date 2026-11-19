@@ -605,6 +605,7 @@ The installed `speckit` workflow currently executes 14 concrete steps, including
      - [spec-traceability.yaml](../../specs/spec-traceability.yaml) (Bidirectional traceability manifest)
    - **Cross-Reference Prompt Hint**:
      > *Prompt Hint*: "Bind specs to requirements: 'Link the user stories and scenarios in this specification to the appropriate requirement IDs in [SYSTEM_REQUIREMENTS_SPECIFICATION.md](../system/SYSTEM_REQUIREMENTS_SPECIFICATION.md). Register this coverage mapping in [spec-traceability.yaml](../../specs/spec-traceability.yaml) under the feature entry.'"
+   - **Pitch trace**: for product-roadmap work, start `spec.md` with front matter naming `pitch`, `slices`, `rows`, and `deferred_rows`, using canonical IDs from [specs/pitches/README.md](../../specs/pitches/README.md#traceability-ids). Tag tasks with the row they deliver (`- [ ] T012 [B4-F1] ...`) and carry the row ID in test names. The doc-sync gate generates the reverse links in the `pitch-trace` block of [spec-traceability.yaml](../../specs/spec-traceability.yaml) and fails on must-have rows with no spec. It also lists each pitch's `slice_delivery` (slice, delivering spec, derived status) and a "Pitch delivery" table in [spec-sync-status.md](../../specs/spec-sync-status.md); an unclaimed slice is a warning, and a claim on a slice the pitch doesn't have fails the gate.
 
 4. **`speckit.clarify`**: Resolve ambiguity, missing constraints, open questions, and weak acceptance criteria before the workflow advances.
    - **Mapped Long-Lived Documents**:
@@ -1129,7 +1130,7 @@ Status movement rules:
 
 - Update the `**Status**` field in `spec.md` when the feature moves between these lifecycle states.
 - Create or update `review.md` during implementation verification; create `.verify-done` only after `speckit.verify.run` passes.
-- Regenerate [spec-sync-status.md](../../specs/spec-sync-status.md) and [SRS_SPEC_TRACEABILITY.md](../domains/agent/SRS_SPEC_TRACEABILITY.md) with `speckit.doc-sync.gate` / `python scripts/sync_spec_status.py --gate` after planning, implementation, verification, status, tasks, review, or SRS mapping changes.
+- Regenerate [spec-sync-status.md](../../specs/spec-sync-status.md) and [SRS_SPEC_TRACEABILITY.md](../domains/agent/SRS_SPEC_TRACEABILITY.md) with `speckit.doc-sync.gate` / `python scripts/sync_spec_status.py --gate` after planning, implementation, verification, status, tasks, review, SRS mapping, or pitch-trace front matter changes. The same run rewrites the generated `pitch-trace` block in [spec-traceability.yaml](../../specs/spec-traceability.yaml).
 - Use `Implemented`, not `Verified`, when implementation evidence is complete but `.verify-done` is absent.
 - Use `Backfilled` for governance restoration of pre-existing behavior; do not use it for a normal feature that is merely late in updating docs.
 
@@ -1149,7 +1150,7 @@ Use Living Spec behavior only for long-lived authority documents outside a compl
 |----------|------|-----------------|-------|
 | [../../specs/](../../specs/) | Governed feature work | Canonical | Create and maintain approved feature specs, plans, tasks, review evidence, and sync artifacts here. |
 | [../../specs/pitches/](../../specs/pitches/README.md) | Pitches and betting order | Canonical for bets | One pitch per bet on a Product Milestone (`M-nnn-<slug>.md`); the README holds the ranking. Rules: [Governance §2.3](../system/REQUIREMENTS_METHOD_AND_GOVERNANCE.md#23-pitch-template-l15). |
-| [../../specs/spec-traceability.yaml](../../specs/spec-traceability.yaml) | SRS to feature traceability | Canonical | Update when a feature gains, removes, or changes SRS scope. |
+| [../../specs/spec-traceability.yaml](../../specs/spec-traceability.yaml) | SRS to feature traceability | Canonical | Update when a feature gains, removes, or changes SRS scope. The block between `# BEGIN GENERATED: pitch-trace` and `# END GENERATED: pitch-trace` (pitch, slice, spec, and row links) is script-owned; do not hand-edit it. |
 | [../../specs/spec-sync-status.md](../../specs/spec-sync-status.md) | Feature sync reporting | Canonical | Reflects current coverage, derived status, and evidence links. |
 | [../../.specify/](../../.specify/) | Runtime and automation area | Supporting | Stores templates, workflows, integration metadata, extension catalogs, scripts, and local command assets. |
 | [../../.specify/templates/](../../.specify/templates/) | Spec Kit templates | Supporting | Use as references when shaping governed artifacts, but publish governed outputs in root `specs/`. |
@@ -1228,7 +1229,7 @@ The current supported synchronization posture is local-script first: `speckit.do
 - Keep diagrams, tables, command names, and prose synchronized so the workflow description does not drift.
 - Use `speckit.clarify` aggressively when requirements remain ambiguous before implementation.
 - Remove unused template scaffolding from accepted plans before task generation or closeout.
-- Regenerate generated reports through `speckit.doc-sync.gate` / `python scripts/sync_spec_status.py --gate`; do not hand-edit generated sync output.
+- Regenerate generated reports through `speckit.doc-sync.gate` / `python scripts/sync_spec_status.py --gate`; do not hand-edit generated sync output, including the `pitch-trace` block in [spec-traceability.yaml](../../specs/spec-traceability.yaml).
 - Flow verified feature knowledge forward into long-lived docs, contracts, roadmap, ADRs, and runbooks rather than repeatedly rewriting closed feature specs.
 
 ## 7. Troubleshooting

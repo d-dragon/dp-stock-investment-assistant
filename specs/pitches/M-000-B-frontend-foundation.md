@@ -6,6 +6,7 @@
 | Priority | P0 (from M-000) |
 | Requirements covered | FR: [SR-1.4.1](../../docs/system/SYSTEM_REQUIREMENTS_SPECIFICATION.md#sr-1-4-1), [SR-1.4.2](../../docs/system/SYSTEM_REQUIREMENTS_SPECIFICATION.md#sr-1-4-2) (shell store), [SR-5.1.2](../../docs/system/SYSTEM_REQUIREMENTS_SPECIFICATION.md#sr-5-1-2) · NFR: [SNR-6.1.4](../../docs/system/SYSTEM_REQUIREMENTS_SPECIFICATION.md#snr-6-1-4), [SNR-8.1.2](../../docs/system/SYSTEM_REQUIREMENTS_SPECIFICATION.md#snr-8-1-2), [SNR-7.1.1](../../docs/system/SYSTEM_REQUIREMENTS_SPECIFICATION.md), [SNR-7.2.1](../../docs/system/SYSTEM_REQUIREMENTS_SPECIFICATION.md) (priority stays P2) · [SR-5.2.1](../../docs/system/SYSTEM_REQUIREMENTS_SPECIFICATION.md#sr-5-2-1) / [SR-5.2.2](../../docs/system/SYSTEM_REQUIREMENTS_SPECIFICATION.md#sr-5-2-2) remain Superseded |
 | Status | Shaped — ready for implementation (Product Owner, 2026-11-17; no open questions) |
+| Slice delivery | Reading of the 2026-11-18 gate: B0, B1, B2, B4 `verified` ([004](../004-m000-b-frontend-foundation-core/spec.md)); B3, B5 `unmapped` ([005](../005-m000-b-frontend-foundation-shell-qa/spec.md), written Status Draft). Method: [Slice delivery](#slice-delivery). Live register: [Pitch delivery](../spec-sync-status.md#pitch-delivery). |
 | Appetite | 1 week (Product Owner, 2026-11-17; agentic delivery: Grok Build implements from Spec Kit slice specs) |
 | Cost | Team time within the appetite; no paid service, licensed data provider or model spend expected (Product Owner, 2026-11-17) |
 | Slices | Order: B0 → B1 → B2 alongside thin B4 → B3 → thin B5 (Product Owner, 2026-11-17). B0 agent-instructions — no T-step; B1 vite-shell-and-subtract — T0–T2, SNR-6.1.4 (path); B2 api-client-and-sse — codegen (TECHNICAL_DESIGN §6.1) + T3 + T8, SR-5.1.2, SNR-8.1.2 (Frontend part); B3 modular-shell-and-safe-render — T4 + T5, SR-1.4.1, SR-1.4.2; B4 tokens-format-and-lint-seams (thin) — T6 + part of T7 + §8.3, SNR-7, ADR-007 / 005 / 004; B5 msw-storybook-and-ci (thin) — T7 + Storybook, CI and Playwright, SNR-6.1.4, SNR-7.1.1, [ADR-FRONTEND-008](../../docs/domains/frontend/DECISIONS/ADR-FRONTEND-008-MSW-AND-STORYBOOK-IN-M000.md) (Accepted, 2026-11-13) |
@@ -86,6 +87,27 @@ Agent constraints for every slice (all commands run from `frontend/`):
 - Must not change: `backend/`; `docs/**`, including `docs/openapi.yaml`; the Accepted ADRs; `main`; the Product Owner's main tree (work in a worktree); the `wt/m001-s3` worktree.
 - No `socket.io-client`, WebSocket or EventSource; `fetch` only in `platform/api` and `platform/stream`; `VITE_*` environment variables only.
 - "AI gợi ý" and "Đã xác nhận", like every user-facing string, go through `t()`.
+
+## Slice delivery
+
+Every pitch uses this method. The pitch owns the slices and the acceptance rows. A Spec Kit spec delivers those slices by naming the pitch. The reverse index is generated.
+
+1. Slice headings in the solution sketch (`B0`, `A1`, `S1`) and acceptance rows in the tables (`B3-D1`; kinds `D` design, `F` format, `P` format edge, `T` tokens and type, `S` Storybook, MSW and CI) are the pitch's IDs. Rules: [Traceability IDs](README.md#traceability-ids).
+2. A delivering `spec.md` sets front matter `pitch`, `slices`, `rows`, and `deferred_rows`. One spec may cover several slices, and one slice may be claimed by several specs. Each `tasks.md` line tags the row IDs it delivers. A test puts the row ID in its name.
+3. The Traceability Manager registers the spec under `features:` in [`spec-traceability.yaml`](../spec-traceability.yaml), with `srs_mapping.srs` of `system` or `agent` and `baseline_version` equal to that SRS version. While `mapping_status` is `unmapped`, the gate leaves the spec out of row enforcement.
+4. `python scripts/sync_spec_status.py --gate` reads the pitch, that front matter, `tasks.md`, and `frontend/src` tests. It rewrites the `pitch-trace` block in the manifest and the [Pitch delivery](../spec-sync-status.md#pitch-delivery) table. Those two blocks are the live register. The gate rewrites them on each run.
+5. A slice takes the least-advanced status of the specs that claim it: `unmapped`, `draft`, `clarified`, `analyzed`, `planned`, `implemented`, `verified`. A slice with no claiming spec is `unclaimed` (a warning). A spec that names a slice the pitch does not define fails the gate. A must-have row in the current Milestone with no spec, task, or test fails once its spec is mapped. A row marked "Moved to M-nnn" is deferred. A mapped spec whose written **Status** differs from the derived status fails the gate.
+
+This pitch, read from the gate of 2026-11-18. The generated [Pitch delivery](../spec-sync-status.md#pitch-delivery) table is the live register. Refresh this reading after the next gate run.
+
+| Slices | Spec | Gate status | Standing |
+|---|---|---|---|
+| B0, B1, B2, B4 | [004-m000-b-frontend-foundation-core](../004-m000-b-frontend-foundation-core/spec.md) | `verified` | Delivery 1. `mapping_status: mapped` to the system SRS (coverage `partial`). Written **Status** Verified. Tasks 44/44. |
+| B3, B5 | [005-m000-b-frontend-foundation-shell-qa](../005-m000-b-frontend-foundation-shell-qa/spec.md) | `unmapped` | Delivery 2. Registered with `mapping_status: unmapped`, so a Draft stays outside the gate. Written **Status** Draft. `spec.md` only; no `plan.md` or `tasks.md`. |
+
+`B4-T5`, `B4-T6`, and `B5-S4` are moved to M-001 and stay out of this delivery.
+
+The header **Status** is the betting-table status (Shaped). The table above is the slice-delivery trace.
 
 ## Design acceptance criteria (UX)
 The UX Designer's Given/When/Then criteria for B3, B4 and B5, aligned with the cut line above. Each slice's `spec.md` copies its block under "Acceptance". Each row names a value, a test and where it runs, so a coding agent can check it without asking. Sources: [DESIGN_LOCK](../../docs/domains/frontend/DESIGN_LOCK.md) v0.3.2 §1.1, §2, §4, §5, §6, §8 and [DESIGN_SYSTEM](../../docs/domains/frontend/DESIGN_SYSTEM.md) v0.3.1 §3, §4, §8, §10. Tiers: **M** means M-001 needs it, so it stays inside the week; **D** means it can move to the first days of M-001 if the week runs short.

@@ -1,0 +1,38 @@
+name: Spec traceability
+
+on:
+  push:
+    paths:
+      - "specs/**"
+      - "docs/**"
+      - "scripts/sync_spec_status.py"
+      - ".github/workflows/spec-trace.yml"
+  pull_request:
+    paths:
+      - "specs/**"
+      - "docs/**"
+      - "scripts/sync_spec_status.py"
+      - ".github/workflows/spec-trace.yml"
+
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install PyYAML
+        run: pip install pyyaml
+
+      - name: Run the spec traceability gate
+        run: python scripts/sync_spec_status.py --gate
+
+      # Generated reports keep their previous timestamp when only the clock
+      # changed, so a second run of an up-to-date tree has an empty diff.
+      - name: Fail if generated trace files are stale
+        run: git diff --exit-code
