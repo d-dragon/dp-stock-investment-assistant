@@ -38,6 +38,8 @@ PROSE_TIER = re.compile(
 ROW_CELL = re.compile(r"^(?:([A-Z]\d+)-([DFPST])(\d+)|([DFPST])(\d+))$")
 MOVED_TIER = re.compile(r"^Moved to (M-\d+)\b")
 ROW_TOKEN = re.compile(r"\b([A-Za-z]\d+)-([DFPSTdfpst])(\d+)\b")
+# wt/m001-s3 is a worktree path. The row scanner would read it as M001-S3.
+IGNORED_ROW_IDS = {"M001-S3"}
 ROW_RANGE = re.compile(
     r"\b([A-Za-z]\d+)-([DFPSTdfpst])(\d+)\.\.(?:([A-Za-z]\d+)-)?([DFPSTdfpst])?(\d+)\b"
 )
@@ -834,14 +836,16 @@ def extract_row_ids(text: str) -> List[str]:
             continue
         for number in range(start_number, end_number + 1):
             token = canon_row(slice_id, kind, str(number))
-            if token not in seen:
-                seen.add(token)
-                found.append(token)
-    for match in ROW_TOKEN.finditer(text):
-        token = canon_row(*match.groups())
-        if token not in seen:
+            if token in IGNORED_ROW_IDS or token in seen:
+                continue
             seen.add(token)
             found.append(token)
+    for match in ROW_TOKEN.finditer(text):
+        token = canon_row(*match.groups())
+        if token in IGNORED_ROW_IDS or token in seen:
+            continue
+        seen.add(token)
+        found.append(token)
     return found
 
 

@@ -1,0 +1,87 @@
+:global(body) {
+  margin: 0;
+}
+
+.focus a {
+  color: var(--surface-text);
+}
+
+.focus :global([data-zone]) {
+  margin: 0;
+  min-width: 0;
+}
+
+.focus :global([data-zone] p) {
+  margin-block: 0;
+}
+
+.focus :global(:focus-visible) {
+  outline: 2px solid CanvasText;
+  outline-offset: 2px;
+}
+
+.trackIcon {
+  display: block;
+  width: 16px;
+  height: 16px;
+  flex: 0 0 16px;
+  color: var(--surface-text);
+}
+
+.rail a {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 32px;
+}
+
+.railLabel {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+}
+
+.rail a:hover .railLabel,
+.rail a:focus .railLabel {
+  position: static;
+  width: auto;
+  height: auto;
+  overflow: visible;
+  clip: auto;
+}
+
+.activeMark {
+  border-inline-start: 3px solid CanvasText;
+}
+
+.row {
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  min-width: 0;
+}
+
+.railCol {
+  flex: 0 0 56px;
+  width: 56px;
+  max-width: 56px;
+}
+
+.dockCol {
+  flex: 0 0 20%;
+  min-width: 0;
+}
+
+.mainCol {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.drawer {
+  position: fixed;
+  inset-inline-end: 0;
+  top: 0;
+  bottom: 0;
+}

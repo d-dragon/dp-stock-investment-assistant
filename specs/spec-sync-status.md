@@ -1,7 +1,7 @@
 # Spec Sync Status
 
-> **Document Version**: 1.20
-> **Generated**: 2026-11-18 09:29:59Z
+> **Document Version**: 1.21
+> **Generated**: 2026-11-19 13:38:31Z
 > **Status**: Active
 > **Traceability Manifest Version**: 1
 
@@ -27,7 +27,7 @@
 | [002-tool-system-integration-verification](002-tool-system-integration-verification/spec.md#governance-context-mandatory) | `mapped` | `partial` | `verified` | `current` | `58/58` |
 | [003-agent-structured-outputs](003-agent-structured-outputs/spec.md#governance-context-mandatory) | `mapped` | `full` | `implemented` | `current` | `24/24` |
 | [004-m000-b-frontend-foundation-core](004-m000-b-frontend-foundation-core/spec.md#requirements-mandatory) | `mapped` | `partial` | `verified` | `current` | `44/44` |
-| [005-m000-b-frontend-foundation-shell-qa](005-m000-b-frontend-foundation-shell-qa/spec.md) | `unmapped` | `n/a` | `unmapped` | `unmapped` | `n/a` |
+| [005-m000-b-frontend-foundation-shell-qa](005-m000-b-frontend-foundation-shell-qa/spec.md#requirements-mandatory) | `mapped` | `partial` | `implemented` | `current` | `58/58` |
 
 ## Pitch delivery
 
@@ -39,9 +39,9 @@
 | [M-000-B](pitches/M-000-B-frontend-foundation.md) | `B0` | [004-m000-b-frontend-foundation-core](004-m000-b-frontend-foundation-core/spec.md) | `verified` |
 | [M-000-B](pitches/M-000-B-frontend-foundation.md) | `B1` | [004-m000-b-frontend-foundation-core](004-m000-b-frontend-foundation-core/spec.md) | `verified` |
 | [M-000-B](pitches/M-000-B-frontend-foundation.md) | `B2` | [004-m000-b-frontend-foundation-core](004-m000-b-frontend-foundation-core/spec.md) | `verified` |
-| [M-000-B](pitches/M-000-B-frontend-foundation.md) | `B3` | [005-m000-b-frontend-foundation-shell-qa](005-m000-b-frontend-foundation-shell-qa/spec.md) | `unmapped` |
+| [M-000-B](pitches/M-000-B-frontend-foundation.md) | `B3` | [005-m000-b-frontend-foundation-shell-qa](005-m000-b-frontend-foundation-shell-qa/spec.md) | `implemented` |
 | [M-000-B](pitches/M-000-B-frontend-foundation.md) | `B4` | [004-m000-b-frontend-foundation-core](004-m000-b-frontend-foundation-core/spec.md) | `verified` |
-| [M-000-B](pitches/M-000-B-frontend-foundation.md) | `B5` | [005-m000-b-frontend-foundation-shell-qa](005-m000-b-frontend-foundation-shell-qa/spec.md) | `unmapped` |
+| [M-000-B](pitches/M-000-B-frontend-foundation.md) | `B5` | [005-m000-b-frontend-foundation-shell-qa](005-m000-b-frontend-foundation-shell-qa/spec.md) | `implemented` |
 | [M-001](pitches/M-001-adaptive-visual-canvas.md) | `S1` | `-` | `unclaimed` |
 | [M-001](pitches/M-001-adaptive-visual-canvas.md) | `S2` | `-` | `unclaimed` |
 | [M-001](pitches/M-001-adaptive-visual-canvas.md) | `S3` | `-` | `unclaimed` |
@@ -71,6 +71,7 @@
 | `1.18` | `2026-07-07` | Promoted tool-system-m2b.3 to planned with implementation plan, research, data model, quickstart, and feature-local market-data, attribution, TradingView, and route-evaluation contracts. |
 | `1.19` | `2026-07-07` | Added tool-system-m2b.3 implementation task breakdown with dependency-aware story phases, verification commands, and requirement coverage matrix. |
 | `1.20` | `2026-11-18` | Added 004-m000-b-frontend-foundation-core as a mapped partial feature and promoted it to verified after review.md, .verify-done, complete tasks, and the sync gate. |
+| `1.21` | `2026-11-19` | Mapped 005-m000-b-frontend-foundation-shell-qa to the system SRS at implemented status. B3 and B5 claim the shell, store, viewport, and axe rows. Verified stays blocked until .verify-done exists. |
 
 ## agent-session-with-stm-wiring
 
@@ -325,13 +326,20 @@
 ## 005-m000-b-frontend-foundation-shell-qa
 
 - Title: M-000 Frontend foundation shell and QA (delivery 2 of 2)
-- Path: [specs/005-m000-b-frontend-foundation-shell-qa](005-m000-b-frontend-foundation-shell-qa/spec.md)
-- Mapping status: `unmapped`
-- Coverage status: `n/a`
-- Derived status: `unmapped`
-- Sync status: `unmapped`
-- Sync gate enforced: `no`
-- spec.md status field: `Draft`
+- Path: [specs/005-m000-b-frontend-foundation-shell-qa](005-m000-b-frontend-foundation-shell-qa/spec.md#requirements-mandatory)
+- Mapping status: `mapped`
+- Coverage status: `partial`
+- Derived status: `implemented`
+- Sync status: `current`
+- Sync gate enforced: `yes`
+- spec.md status field: `Implemented`
+- Task completion: `58/58`
+- Linked SRS items: `SR-1.4.1, SR-1.4.2, SR-1.3.1, SR-1.3.2, SNR-6.1.4, SNR-7.1.1, SNR-7.2.1`
+- Evidence:
+  - [Feature specification](005-m000-b-frontend-foundation-shell-qa/spec.md#requirements-mandatory)
+  - [Implementation plan](005-m000-b-frontend-foundation-shell-qa/plan.md)
+  - [Implementation tasks](005-m000-b-frontend-foundation-shell-qa/tasks.md)
+  - [Verification report](005-m000-b-frontend-foundation-shell-qa/review.md)
 
 ## Status Semantics
 

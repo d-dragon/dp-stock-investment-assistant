@@ -1,7 +1,7 @@
 # SRS To Spec Traceability
 
-> **Document Version**: 3.5
-> **Generated**: 2026-11-18 06:59:12Z
+> **Document Version**: 3.6
+> **Generated**: 2026-11-19 13:38:31Z
 > **Status**: Active
 > **Traceability Manifest Version**: 1
 
@@ -13,8 +13,8 @@
 ## Summary
 
 - Total traced SRS items discovered: `74`
-- Items with linked specs: `6`
-- Items without linked specs: `68`
+- Items with linked specs: `9`
+- Items without linked specs: `65`
 
 ## Family Index
 
@@ -27,7 +27,7 @@
 
 ### SR-1
 
-Mapped: `1/11`. Unmapped: `10`.
+Mapped: `4/11`. Unmapped: `7`.
 
 | SRS Item | Linked Spec | Current Status | Sync Status |
 |----------|-------------|----------------|-------------|
@@ -35,13 +35,14 @@ Mapped: `1/11`. Unmapped: `10`.
 | [SR-1.1.2](SYSTEM_REQUIREMENTS_SPECIFICATION.md#L118) | `-` | `unmapped` | `unmapped` |
 | [SR-1.2.1](SYSTEM_REQUIREMENTS_SPECIFICATION.md#L119) | `-` | `unmapped` | `unmapped` |
 | [SR-1.2.2](SYSTEM_REQUIREMENTS_SPECIFICATION.md#L120) | `-` | `unmapped` | `unmapped` |
-| [SR-1.3.1](SYSTEM_REQUIREMENTS_SPECIFICATION.md#L128) | `-` | `unmapped` | `unmapped` |
-| [SR-1.3.2](SYSTEM_REQUIREMENTS_SPECIFICATION.md#L129) | `-` | `unmapped` | `unmapped` |
+| [SR-1.3.1](SYSTEM_REQUIREMENTS_SPECIFICATION.md#L128) | [005-m000-b-frontend-foundation-shell-qa](../../specs/005-m000-b-frontend-foundation-shell-qa/spec.md#requirements-mandatory) | `implemented` | `current` |
+| [SR-1.3.2](SYSTEM_REQUIREMENTS_SPECIFICATION.md#L129) | [005-m000-b-frontend-foundation-shell-qa](../../specs/005-m000-b-frontend-foundation-shell-qa/spec.md#requirements-mandatory) | `implemented` | `current` |
 | [SR-1.3.3](SYSTEM_REQUIREMENTS_SPECIFICATION.md#L130) | `-` | `unmapped` | `unmapped` |
 | [SR-1.3.4](SYSTEM_REQUIREMENTS_SPECIFICATION.md#L131) | `-` | `unmapped` | `unmapped` |
 | [SR-1.3.5](SYSTEM_REQUIREMENTS_SPECIFICATION.md#L132) | `-` | `unmapped` | `unmapped` |
-| [SR-1.4.1](SYSTEM_REQUIREMENTS_SPECIFICATION.md#L141) | `-` | `unmapped` | `unmapped` |
+| [SR-1.4.1](SYSTEM_REQUIREMENTS_SPECIFICATION.md#L141) | [005-m000-b-frontend-foundation-shell-qa](../../specs/005-m000-b-frontend-foundation-shell-qa/spec.md#requirements-mandatory) | `implemented` | `current` |
 | [SR-1.4.2](SYSTEM_REQUIREMENTS_SPECIFICATION.md#L142) | [004-m000-b-frontend-foundation-core](../../specs/004-m000-b-frontend-foundation-core/spec.md#requirements-mandatory) | `verified` | `current` |
+|  | [005-m000-b-frontend-foundation-shell-qa](../../specs/005-m000-b-frontend-foundation-shell-qa/spec.md#requirements-mandatory) | `implemented` | `current` |
 
 ### SR-2
 
@@ -204,6 +205,7 @@ Mapped: `1/5`. Unmapped: `4`.
 | [SNR-6.1.2](SYSTEM_REQUIREMENTS_SPECIFICATION.md#L291) | `-` | `unmapped` | `unmapped` |
 | [SNR-6.1.3](SYSTEM_REQUIREMENTS_SPECIFICATION.md#L292) | `-` | `unmapped` | `unmapped` |
 | [SNR-6.1.4](SYSTEM_REQUIREMENTS_SPECIFICATION.md#L293) | [004-m000-b-frontend-foundation-core](../../specs/004-m000-b-frontend-foundation-core/spec.md#requirements-mandatory) | `verified` | `current` |
+|  | [005-m000-b-frontend-foundation-shell-qa](../../specs/005-m000-b-frontend-foundation-shell-qa/spec.md#requirements-mandatory) | `implemented` | `current` |
 | [SNR-6.2.1](SYSTEM_REQUIREMENTS_SPECIFICATION.md#L294) | `-` | `unmapped` | `unmapped` |
 
 ### SNR-7
@@ -213,7 +215,9 @@ Mapped: `2/2`. Unmapped: `0`.
 | SRS Item | Linked Spec | Current Status | Sync Status |
 |----------|-------------|----------------|-------------|
 | [SNR-7.1.1](SYSTEM_REQUIREMENTS_SPECIFICATION.md#L300) | [004-m000-b-frontend-foundation-core](../../specs/004-m000-b-frontend-foundation-core/spec.md#requirements-mandatory) | `verified` | `current` |
+|  | [005-m000-b-frontend-foundation-shell-qa](../../specs/005-m000-b-frontend-foundation-shell-qa/spec.md#requirements-mandatory) | `implemented` | `current` |
 | [SNR-7.2.1](SYSTEM_REQUIREMENTS_SPECIFICATION.md#L301) | [004-m000-b-frontend-foundation-core](../../specs/004-m000-b-frontend-foundation-core/spec.md#requirements-mandatory) | `verified` | `current` |
+|  | [005-m000-b-frontend-foundation-shell-qa](../../specs/005-m000-b-frontend-foundation-shell-qa/spec.md#requirements-mandatory) | `implemented` | `current` |
 
 ### SNR-8
 
