@@ -1,9 +1,9 @@
 {
   "workflow": "speckit",
-  "specName": "[FEATURE NAME]",
+  "specName": "004-m000-b-frontend-foundation-core",
   "branch": "features/pitch-m000-B-frontend-foundation",
-  "currentStep": "tasks",
-  "status": "ready-to-implement",
+  "currentStep": "verify",
+  "status": "verified",
   "history": [
     {
       "step": "specify",
@@ -81,7 +81,781 @@
       "kind": "complete",
       "by": "ai",
       "at": "2026-11-17T08:04:17.461Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "kind": "start",
+      "by": "extension",
+      "at": "2026-11-17T09:08:08.700Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T001",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-17T09:08:51.291Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T002",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-17T09:08:51.672Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T003",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-17T09:10:44.257Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T004",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-17T09:24:44.937Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T005",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-17T09:24:45.289Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T006",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-17T09:24:45.592Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T007",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-17T09:32:53.535Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T008",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-17T09:32:53.835Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T009",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-17T09:32:54.135Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T010",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-17T09:32:54.464Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T011",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-17T09:32:54.756Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T012",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-17T09:32:55.045Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T013",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-17T09:32:55.318Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T014",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-17T09:32:55.605Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T015",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-17T09:32:55.879Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T016",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-17T09:32:56.243Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T017",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-17T10:13:42.809Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T018",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-17T10:13:43.762Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T019",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-17T10:13:44.591Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T020",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-17T10:13:45.565Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T021",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-17T10:13:46.247Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T022",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-17T10:13:46.920Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T023",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-17T10:13:47.810Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T024",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-17T10:13:48.533Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T025",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-17T10:13:49.251Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T026",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-17T10:13:50.275Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T027",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-17T10:13:51.757Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T028",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-17T10:41:20.646Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T029",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-17T10:41:20.969Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T030",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-17T10:41:21.635Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T031",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-17T10:41:22.027Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T032",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-17T10:41:22.414Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T033",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-17T10:41:22.807Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T034",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-17T10:41:23.242Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T035",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-17T10:41:23.580Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T036",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-17T10:41:23.944Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T037",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-17T10:41:24.383Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T038",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-17T10:41:24.717Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T039",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-17T10:41:25.111Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T040",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-17T10:41:25.455Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T041",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-17T10:41:25.779Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T042",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-17T10:41:26.193Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T043",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-17T10:41:26.585Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T044",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-17T10:41:26.960Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "kind": "complete",
+      "by": "extension",
+      "at": "2026-11-17T10:41:27.829Z"
+    },
+    {
+      "step": "verify",
+      "substep": null,
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-18T04:55:29.000Z"
     }
   ],
-  "telemetryInstanceId": "6a37a225-9259-4a50-a966-8a018057919f"
+  "telemetryInstanceId": "6a37a225-9259-4a50-a966-8a018057919f",
+  "currentTask": "T044",
+  "task_summaries": {
+    "T001": {
+      "status": "DONE",
+      "did": "Added frontend/AGENTS.md and rewrote the Frontend lines of root AGENTS.md to the Vite and Vitest target rules.",
+      "files": [
+        "frontend/AGENTS.md",
+        "AGENTS.md"
+      ]
+    },
+    "T002": {
+      "status": "DONE",
+      "did": "Rewrote frontend-react.instructions.md to the same target rules. CLAUDE.md, .claude/rules, and .cursor/rules are absent, so they were not created.",
+      "files": [
+        ".github/instructions/frontend-react.instructions.md"
+      ]
+    },
+    "T003": {
+      "status": "DONE",
+      "did": "Ran grok inspect from frontend and the instruction search. Both AGENTS.md files load. Hits are prohibitions only. AGENT.md and .grok/rules are absent.",
+      "files": [
+        "frontend/AGENTS.md",
+        "AGENTS.md",
+        ".github/instructions/frontend-react.instructions.md"
+      ]
+    },
+    "T004": {
+      "status": "DONE",
+      "did": "Added the T0 subtract scan test. It failed while MessageFormatter, dangerouslySetInnerHTML, and REACT_APP_ remain under src.",
+      "files": [
+        "frontend/src/test/b1-t0-subtract.test.ts"
+      ]
+    },
+    "T005": {
+      "status": "DONE",
+      "did": "Added the G1 chat smoke, MSW frames, handlers, and setup. Vitest failed before the test dependencies were installed.",
+      "files": [
+        "frontend/src/test/g1-chat-smoke.test.tsx",
+        "frontend/src/test/msw/chat-frames.ts",
+        "frontend/src/test/msw/handlers.ts",
+        "frontend/src/test/setup.ts"
+      ]
+    },
+    "T006": {
+      "status": "DONE",
+      "did": "Added lint fixtures for reverse imports, deep imports, fetch outside platform, and dangerouslySetInnerHTML. npm run lint has no script yet.",
+      "files": [
+        "frontend/eslint-fixtures/b1-rule1-reverse-import.ts",
+        "frontend/eslint-fixtures/b1-rule2-deep-import.ts",
+        "frontend/eslint-fixtures/b1-rule3-fetch.ts",
+        "frontend/eslint-fixtures/b1-no-danger.tsx"
+      ]
+    },
+    "T007": {
+      "status": "DONE",
+      "did": "Confirmed node -v is v26.13.1. Did not change engines so that Node 22.18 would pass.",
+      "files": [
+        "frontend/package.json"
+      ]
+    },
+    "T008": {
+      "status": "DONE",
+      "did": "Deleted OptimizedApp, PerformanceProfiler, WebSocketTest, and MessageFormatter without patching the formatter.",
+      "files": [
+        "frontend/src/components/OptimizedApp.js",
+        "frontend/src/components/PerformanceProfiler.js",
+        "frontend/src/components/WebSocketTest.tsx",
+        "frontend/src/components/MessageFormatter.js"
+      ]
+    },
+    "T009": {
+      "status": "DONE",
+      "did": "Deleted apiService.ts and unreferenced performance.js.",
+      "files": [
+        "frontend/src/services/apiService.ts",
+        "frontend/src/utils/performance.js"
+      ]
+    },
+    "T010": {
+      "status": "DONE",
+      "did": "Declared TypeScript 5.9.3 and aligned @types/react and @types/react-dom with React 18.",
+      "files": [
+        "frontend/package.json",
+        "frontend/package-lock.json"
+      ]
+    },
+    "T011": {
+      "status": "DONE",
+      "did": "Pinned engines.node to >=26.13.0, added .nvmrc and engine-strict, and pointed the image at node:26-alpine and dist.",
+      "files": [
+        "frontend/package.json",
+        "frontend/.nvmrc",
+        "frontend/.npmrc",
+        "frontend/Dockerfile"
+      ]
+    },
+    "T012": {
+      "status": "DONE",
+      "did": "Switched dev and build to Vite with an /api proxy, moved index.html, updated tsconfig, and removed the dead CRA configs.",
+      "files": [
+        "frontend/package.json",
+        "frontend/vite.config.ts",
+        "frontend/index.html",
+        "frontend/tsconfig.json",
+        "frontend/config-overrides.js",
+        "frontend/webpack.config.dev.js"
+      ]
+    },
+    "T013": {
+      "status": "DONE",
+      "did": "Replaced REACT_APP_ and the hard-coded localhost API URL with an empty VITE_API_BASE_URL. Left API_CONFIG.WEBSOCKET in place.",
+      "files": [
+        "frontend/src/config.ts",
+        "frontend/src/services/modelsApi.ts",
+        "frontend/src/App.tsx"
+      ]
+    },
+    "T014": {
+      "status": "DONE",
+      "did": "Added Vitest with jsdom, React Testing Library, and MSW. The subtract scan and G1 smoke pass without edits to those tests.",
+      "files": [
+        "frontend/vitest.config.ts",
+        "frontend/package.json",
+        "frontend/package-lock.json"
+      ]
+    },
+    "T015": {
+      "status": "DONE",
+      "did": "Added eslint.config.js and npm run lint. Planted fixtures fail rules 1-3 and react/no-danger. eslint-fixtures stay outside tsc.",
+      "files": [
+        "frontend/eslint.config.js",
+        "frontend/package.json",
+        "frontend/tsconfig.json"
+      ]
+    },
+    "T016": {
+      "status": "DONE",
+      "did": "Added frontend-ci.yml in the order lint, tsc, Vitest, build, then gen:api drift. Did not change the Docker workflow trigger.",
+      "files": [
+        ".github/workflows/frontend-ci.yml"
+      ]
+    },
+    "T017": {
+      "status": "DONE",
+      "did": "Wrote client tests for same-origin credentials, CSRF on mutating methods, 401 handling, ApiError, and the health/config/models/chat scope.",
+      "files": [
+        "frontend/src/platform/api/client.test.ts",
+        "frontend/src/platform/api/client.scope.test.ts"
+      ]
+    },
+    "T018": {
+      "status": "DONE",
+      "did": "Wrote NoAuthAdapter tests and a fake adapter with no token. A Node 26 storage shim supplies localStorage so those tests can run.",
+      "files": [
+        "frontend/src/platform/auth/NoAuthAdapter.test.ts",
+        "frontend/src/platform/auth/fakeAuthAdapter.ts",
+        "frontend/src/test/storage-shim.ts",
+        "frontend/vitest.config.ts"
+      ]
+    },
+    "T019": {
+      "status": "DONE",
+      "did": "Wrote stream tests for today's frames, idle timeout, a second open aborting the first, and the retry label.",
+      "files": [
+        "frontend/src/platform/stream/legacyChatAdapter.test.ts",
+        "frontend/src/platform/stream/openChatStream.test.ts",
+        "frontend/src/platform/stream/idle-timeout.test.ts"
+      ]
+    },
+    "T020": {
+      "status": "DONE",
+      "did": "Added lint fixtures for a socket.io-client import and a stream event name outside the StreamEvent union.",
+      "files": [
+        "frontend/eslint-fixtures/b2-socket-io-import.ts",
+        "frontend/eslint-fixtures/b2-stream-event-outside-union.ts"
+      ]
+    },
+    "T021": {
+      "status": "DONE",
+      "did": "Added openapi-typescript and gen:api. Generated schema.d.ts from docs/openapi.yaml. A second run left the file hash unchanged. The file is still untracked.",
+      "files": [
+        "frontend/package.json",
+        "frontend/package-lock.json",
+        "frontend/src/platform/api/generated/schema.d.ts"
+      ]
+    },
+    "T022": {
+      "status": "DONE",
+      "did": "Added AuthAdapter, SessionInfo, and NoAuthAdapter with empty CSRF headers and no-op session methods.",
+      "files": [
+        "frontend/src/platform/auth/types.ts",
+        "frontend/src/platform/auth/NoAuthAdapter.ts",
+        "frontend/src/platform/auth/index.ts"
+      ]
+    },
+    "T023": {
+      "status": "DONE",
+      "did": "Added the fetch client with same-origin credentials, CSRF, ApiError, and sessionRef that sends conversation_id and omits session_id.",
+      "files": [
+        "frontend/src/platform/api/client.ts",
+        "frontend/src/platform/api/errors.ts",
+        "frontend/src/platform/api/sessionRef.ts",
+        "frontend/src/platform/api/index.ts"
+      ]
+    },
+    "T024": {
+      "status": "DONE",
+      "did": "Added openChatStream, parseSse, and legacyChatAdapter. Idle timeout defaults to 60000. One chat stream per tab. Abort cancels the reader and does not pass the jsdom signal into fetch.",
+      "files": [
+        "frontend/src/platform/stream/types.ts",
+        "frontend/src/platform/stream/parseSse.ts",
+        "frontend/src/platform/stream/legacyChatAdapter.ts",
+        "frontend/src/platform/stream/openChatStream.ts",
+        "frontend/.env.example"
+      ]
+    },
+    "T025": {
+      "status": "DONE",
+      "did": "Pointed App and ModelSelector at the platform client and removed restApiClient.js and modelsApi.ts. The G1 smoke stays green.",
+      "files": [
+        "frontend/src/App.tsx",
+        "frontend/src/components/models/ModelSelector.tsx",
+        "frontend/src/services/restApiClient.js",
+        "frontend/src/services/modelsApi.ts",
+        "frontend/src/platform/api/client.ts"
+      ]
+    },
+    "T026": {
+      "status": "DONE",
+      "did": "Removed socket.io-client, webSocketService.ts, and API_CONFIG.WEBSOCKET. Lint rejects the B2 fixtures. The production bundle has no socket.io.",
+      "files": [
+        "frontend/package.json",
+        "frontend/package-lock.json",
+        "frontend/src/services/webSocketService.ts",
+        "frontend/src/config.ts",
+        "frontend/eslint.config.js"
+      ]
+    },
+    "T027": {
+      "status": "DONE",
+      "did": "Recorded SNR-8.1.2 as Frontend part verified against the MSW stream fixture. Traceability and docs were left unchanged.",
+      "files": [
+        "specs/004-m000-b-frontend-foundation-core/evidence/snr-8.1.2.md"
+      ]
+    },
+    "T028": {
+      "status": "DONE",
+      "did": "Wrote failing board-format tests for the exact B4-F and P1-P4 strings and the 1000-value separator property.",
+      "files": [
+        "frontend/src/platform/format/format.test.ts",
+        "frontend/src/platform/format/format.property.test.ts"
+      ]
+    },
+    "T029": {
+      "status": "DONE",
+      "did": "Wrote failing catalogue tests for the four vi-VN strings and a dateTime test that requires Intl vi-VN in Asia/Ho_Chi_Minh.",
+      "files": [
+        "frontend/src/platform/i18n/catalogue.test.ts",
+        "frontend/src/platform/format/dateTime.test.ts"
+      ]
+    },
+    "T030": {
+      "status": "DONE",
+      "did": "Copied the two-part dark hex column into a fixture and wrote a failing generated-CSS test, including --market-up #2EBD6B.",
+      "files": [
+        "frontend/src/design-system/tokens/dark-palette.fixture.ts",
+        "frontend/src/design-system/tokens/dark-tokens.test.ts"
+      ]
+    },
+    "T031": {
+      "status": "DONE",
+      "did": "Wrote a failing Tailwind test for market and state utilities and lint fixtures for market vars, state vars, and arbitrary colours.",
+      "files": [
+        "frontend/src/design-system/tailwind-market-state.test.ts",
+        "frontend/eslint-fixtures/b4-market-var-outside.tsx",
+        "frontend/eslint-fixtures/b4-state-var-outside.tsx",
+        "frontend/eslint-fixtures/b4-arbitrary-color.tsx"
+      ]
+    },
+    "T032": {
+      "status": "DONE",
+      "did": "Wrote failing RTL tests for Delta, PriceCell, and StatusBadge. Direction names must differ and come from t() without locking invented wording.",
+      "files": [
+        "frontend/src/design-system/patterns/Delta/Delta.test.tsx",
+        "frontend/src/design-system/patterns/PriceCell/PriceCell.test.tsx",
+        "frontend/src/design-system/patterns/StatusBadge/StatusBadge.test.tsx"
+      ]
+    },
+    "T033": {
+      "status": "DONE",
+      "did": "Wrote the Playwright font spec. It failed before @playwright/test and the self-hosted fonts existed.",
+      "files": [
+        "frontend/e2e/b4-t4-fonts.spec.ts"
+      ]
+    },
+    "T034": {
+      "status": "DONE",
+      "did": "Wrote lint fixtures that import lightweight-charts and chart.js outside the chart seams. Lint did not reject them yet.",
+      "files": [
+        "frontend/eslint-fixtures/b4-lightweight-charts-outside.ts",
+        "frontend/eslint-fixtures/b4-chartjs-outside.ts"
+      ]
+    },
+    "T035": {
+      "status": "DONE",
+      "did": "Implemented custom fmt.price, change, pct, vnd, and volume, plus fmt.dateTime through Intl and the launch locale settings.",
+      "files": [
+        "frontend/src/platform/format/format.ts",
+        "frontend/src/platform/format/localeSettings.ts",
+        "frontend/src/platform/format/index.ts"
+      ]
+    },
+    "T036": {
+      "status": "DONE",
+      "did": "Implemented t() and the vi-VN catalogue. Delta direction values stay marked [NEEDS CLARIFICATION]. No English catalogue and no i18n library.",
+      "files": [
+        "frontend/src/platform/i18n/t.ts",
+        "frontend/src/platform/i18n/messages/vi-VN.ts",
+        "frontend/src/platform/i18n/index.ts",
+        "frontend/src/platform/stream/types.ts"
+      ]
+    },
+    "T037": {
+      "status": "DONE",
+      "did": "Committed two-part dark CSS variables, including --market-up #2EBD6B, and set data-theme=dark and data-density=compact on html.",
+      "files": [
+        "frontend/src/design-system/tokens/source/color.json",
+        "frontend/src/design-system/tokens/generated/tokens.css",
+        "frontend/index.html"
+      ]
+    },
+    "T038": {
+      "status": "DONE",
+      "did": "Added a Tailwind config with no market or state colour utilities.",
+      "files": [
+        "frontend/tailwind.config.ts",
+        "frontend/src/design-system/tokens/generated/tokens.css"
+      ]
+    },
+    "T039": {
+      "status": "DONE",
+      "did": "Implemented PriceCell, Delta, and StatusBadge. PriceCell colours from supplied bands. Delta direction copy uses the clarification keys.",
+      "files": [
+        "frontend/src/design-system/patterns/PriceCell/PriceCell.tsx",
+        "frontend/src/design-system/patterns/Delta/Delta.tsx",
+        "frontend/src/design-system/patterns/StatusBadge/StatusBadge.tsx",
+        "frontend/src/test/rtl-cleanup.ts"
+      ]
+    },
+    "T040": {
+      "status": "DONE",
+      "did": "Self-hosted Be Vietnam Pro and IBM Plex Mono, declared @font-face, and added Playwright outside the B1 CI skeleton. The font spec passed.",
+      "files": [
+        "frontend/public/fonts/be-vietnam-pro-latin-400-normal.woff2",
+        "frontend/public/fonts/be-vietnam-pro-vietnamese-400-normal.woff2",
+        "frontend/public/fonts/ibm-plex-mono-latin-400-normal.woff2",
+        "frontend/src/design-system/tokens/generated/fonts.css",
+        "frontend/package.json",
+        "frontend/package-lock.json",
+        "frontend/playwright.config.ts",
+        "frontend/vitest.config.ts"
+      ]
+    },
+    "T041": {
+      "status": "DONE",
+      "did": "Added empty chart and stat-chart seams and lint that rejects lightweight-charts and chart.js outside them, plus market, state, and arbitrary-colour reads.",
+      "files": [
+        "frontend/src/platform/chart/index.ts",
+        "frontend/src/platform/stat-chart/index.ts",
+        "frontend/eslint.config.js"
+      ]
+    },
+    "T042": {
+      "status": "DONE",
+      "did": "Removed App.css, index.css, and UI_CONFIG.THEME, and imported the token and font stylesheets as the global styles.",
+      "files": [
+        "frontend/src/App.css",
+        "frontend/src/index.css",
+        "frontend/src/config.ts",
+        "frontend/src/index.tsx",
+        "frontend/src/App.tsx"
+      ]
+    },
+    "T043": {
+      "status": "DONE",
+      "did": "Re-ran the shared proof on Node v26.13.1 after npm ci: tsc, vitest (43 tests), and vite build passed. grok inspect still lists the B0 instruction files.",
+      "files": [
+        "specs/004-m000-b-frontend-foundation-core/quickstart.md",
+        "frontend/package.json"
+      ]
+    },
+    "T044": {
+      "status": "DONE",
+      "did": "Confirmed frontend-ci.yml runs lint, tsc, Vitest, build, then gen:api drift, and does not run Playwright or Storybook. The Docker workflow trigger is unchanged. SNR-7.2.1 stays P2.",
+      "files": [
+        ".github/workflows/frontend-ci.yml",
+        ".github/workflows/build-push-dockerhub.yml",
+        "frontend/e2e/b4-t4-fonts.spec.ts"
+      ]
+    }
+  }
 }

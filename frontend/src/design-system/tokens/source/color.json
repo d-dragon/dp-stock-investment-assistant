@@ -1,0 +1,24 @@
+{
+  "surface": {
+    "bg": { "$value": "#0D1014" },
+    "card": { "$value": "#15191E" },
+    "text": { "$value": "#E6E8EB" },
+    "text2": { "$value": "#9AA3AE" },
+    "line": { "$value": "#2A313B" }
+  },
+  "market": {
+    "up": { "$value": "#2EBD6B" },
+    "down": { "$value": "#F0524A" },
+    "ref": { "$value": "#E8B931" },
+    "ceiling": { "$value": "#C062F0" },
+    "floor": { "$value": "#22B8D9" }
+  },
+  "state": {
+    "info": { "$value": "#8FB3E0" },
+    "success": { "$value": "#6ACAA1" },
+    "warn": { "$value": "#DFA045" },
+    "danger": { "$value": "#F38275" },
+    "streaming": { "$value": "#B8C2CF" }
+  },
+  "accent": { "$value": "#D8CDBB" }
+}

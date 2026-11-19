@@ -9,7 +9,7 @@
 | **Standards Stance** | Practice-Based ADR discipline |
 | **Status** | Accepted |
 | **Date** | 2026-11-10 |
-| **Last Updated** | 2026-11-13 |
+| **Last Updated** | 2026-11-18 |
 | **Decision Owners** | Engineering · Architecture · Frontend maintainers |
 
 ## Context
@@ -19,7 +19,7 @@ DP Stock AI is Vietnam-first. The Product Owner decided on 2026-11-10 that trans
 ## Decision
 
 - From M-000, every user-facing string goes through **one message layer** (`t()` keys), even with one language shipped.
-- Every number, price, percent, currency and date goes through **one locale-format helper** built on the browser `Intl` APIs, with locale and time zone as settings.
+- Every number, price, percent, currency and date goes through **one locale-format helper**, with locale and time zone as settings. Numbers use the custom board formatters in [TECHNICAL_DESIGN.md](../TECHNICAL_DESIGN.md) §8.3. Dates use the browser `Intl` APIs. The helper is not an `Intl` wrapper for prices (Product Owner, 2026-11-17).
 - Exchange sessions, price bands and reference/ceiling/floor prices come from the Backend as data, never hard-coded in the Frontend.
 - Layouts tolerate longer strings; fonts cover Vietnamese diacritics (design rules in DESIGN_LOCK / `DESIGN_SYSTEM.md`).
 - **Launch language is Vietnamese (`vi-VN`)**, with `Asia/Ho_Chi_Minh`; the source message catalogue is Vietnamese (Product Owner decision 2026-11-13).
@@ -65,3 +65,4 @@ DP Stock AI is Vietnam-first. The Product Owner decided on 2026-11-10 that trans
 | 0.3 | 2026-11-13 | Software Architect Assistant | Same-day correction before first commit: board style applies to prices only; volume is a grouped whole number |
 | 0.4 | 2026-11-13 | Software Architect Assistant | Product Owner chose the dot decimal for every number, including percent change (`+6.98%`) |
 | 0.5 | 2026-11-13 | Software Architect Assistant | Product Owner chose comma grouping for thousands (`1,234,500`), so the dot only ever marks a decimal |
+| 0.6 | 2026-11-18 | Software Engineer | The format helper is custom board formatters for numbers and `Intl` for dates. Realization is TECHNICAL_DESIGN §8.3 |

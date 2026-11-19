@@ -1,15 +1,15 @@
 # Quick Start Guide - Frontend with Model Management
 
 ## Prerequisites
-- Node.js 16+ installed
-- Backend server configured with OpenAI API key
-- npm or yarn package manager
+- Node.js v26.13.1 (`engines.node` is `>=26.13.0`)
+- Backend server configured with an OpenAI API key
+- npm
 
 ## Installation
 
 ```bash
 cd frontend
-npm install
+npm ci
 ```
 
 ## Development Mode
@@ -24,8 +24,8 @@ python src/main.py
 ### 2. Start Frontend Development Server
 ```bash
 # In frontend directory
-npm start
-# Frontend will open at http://localhost:3000
+npm run dev
+# Vite serves the app and proxies /api to http://127.0.0.1:5000
 ```
 
 ## Using the Model Selector
@@ -140,10 +140,11 @@ import ModelSelector from './components/models/ModelSelector';
 ### API Service
 ```typescript
 // Models API
-import { modelsApi } from './services/modelsApi';
+import { modelsApi } from './platform/api/client';
 
-// List models
-const models = await modelsApi.listModels(refresh=false);
+// List models. Refresh is a separate call.
+const models = await modelsApi.listModels();
+await modelsApi.refreshModels();
 
 // Select model
 await modelsApi.selectModel({ 
@@ -163,13 +164,16 @@ import {
 
 ## Environment Configuration
 
-### .env File
-```bash
-# API Base URL (default: http://localhost:5000)
-REACT_APP_API_URL=http://localhost:5000
+### Vite env files
 
-# WebSocket URL (default: http://localhost:5000)
-REACT_APP_WS_URL=http://localhost:5000
+Public settings are `VITE_*` only. `npm run dev` loads `.env.development`. `npm run build` loads `.env.production`. Vitest loads `.env.test`. `.env.example` is a template and is not loaded.
+
+```bash
+# Empty means same origin. The dev server proxies /api to port 5000.
+VITE_API_BASE_URL=
+
+# Chat stream idle window, in milliseconds. Change this file, not the client.
+VITE_STREAM_IDLE_TIMEOUT_MS=60000
 ```
 
 ## Build & Deploy
@@ -179,16 +183,17 @@ REACT_APP_WS_URL=http://localhost:5000
 npm run build
 ```
 
-Output: `build/` directory ready for deployment
+Output: `dist/` directory ready for deployment
 
-### Build Analysis
+### Checks
 ```bash
-npm run build:analyze
+npm run lint
+npx vitest run
 ```
 
 ### Serve Production Build Locally
 ```bash
-npx serve -s build
+npx vite preview
 ```
 
 ## Troubleshooting
@@ -286,10 +291,9 @@ console.log(await modelsApi.listModels());
 ## Support
 
 ### Documentation
-- **../docs/domains/frontend/FRONTEND_ANALYSIS.md** - Detailed analysis
-- **../docs/domains/frontend/UI_IMPROVEMENTS.md** - All improvements explained
-- **../docs/domains/frontend/REFINEMENT_SUMMARY.md** - Executive summary
-- **README.md** - Full documentation
+- **FRONTEND_ANALYSIS.md** - Current stack
+- **REFINEMENT_SUMMARY.md** - 2025-10-19 model-selector notes, with the live toolchain called out at the top
+- **README.md** - Setup, scripts, and environment
 
 ### Logs
 ```bash
@@ -317,6 +321,6 @@ Check terminal where backend is running
 **Happy Coding!** 🚀
 
 For issues or questions, refer to the comprehensive documentation in:
-- ../docs/domains/frontend/FRONTEND_ANALYSIS.md
-- ../docs/domains/frontend/UI_IMPROVEMENTS.md  
-- ../docs/domains/frontend/REFINEMENT_SUMMARY.md
+- FRONTEND_ANALYSIS.md
+- REFINEMENT_SUMMARY.md
+- README.md

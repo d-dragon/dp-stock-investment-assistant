@@ -1,7 +1,7 @@
 # SRS To Spec Traceability
 
-> **Document Version**: 3.4
-> **Generated**: 2026-07-24 05:20:21Z
+> **Document Version**: 3.5
+> **Generated**: 2026-11-18 06:59:11Z
 > **Status**: Active
 > **Traceability Manifest Version**: 1
 
@@ -45,6 +45,7 @@
 | `3.2` | `2026-07-07` | Added reverse trace coverage for tool-system-m2b.3 clarified specification against M2B.3 Vietnam market and visualization SRS scope. |
 | `3.3` | `2026-07-07` | Regenerated reverse trace after tool-system-m2b.3 planning artifacts advanced the feature lifecycle to planned. |
 | `3.4` | `2026-07-07` | Regenerated reverse trace after tool-system-m2b.3 task generation added tasks.md as planned implementation evidence. |
+| `3.5` | `2026-11-18` | Registered 004-m000-b-frontend-foundation-core against system SRS SR and SNR ids. The agent reverse index does not emit rows for those ids. |
 
 ## Family Index
 
@@ -788,4 +789,3 @@ Mapped: `0/13`. Unmapped: `13`.
 - A mapped feature is in sync only when its derived status and its feature `spec.md` status agree, and its SRS baseline version matches the manifest baseline.
 - Informational mappings remain visible in the reverse trace but are excluded from gate enforcement.
 - Use `python scripts/sync_spec_status.py --gate` after each development iteration.
-

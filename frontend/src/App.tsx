@@ -1,8 +1,12 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import './App.css';
-import { restApiClient } from './services/restApiClient';
-import { getUUID } from './utils/uuid';
 import ModelSelector from './components/models/ModelSelector';
+import { StatusBadge } from './design-system/patterns/StatusBadge/StatusBadge';
+import { getConfig, getHealth } from './platform/api/client';
+import { fmt } from './platform/format/format';
+import { t } from './platform/i18n/t';
+import { reduceAssistantMessage } from './platform/stream/legacyChatAdapter';
+import { openChatStream } from './platform/stream/openChatStream';
+import { getUUID } from './utils/uuid';
 
 // Interface definitions
 interface Message {
@@ -26,15 +30,12 @@ const App: React.FC = () => {
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const abortRef = useRef<AbortController | null>(null);
-  
-  const API_BASE_URL = 'http://localhost:5000';
 
   useEffect(() => {
     // Add welcome message
-    addMessage('system', 'Welcome to DP Stock Investment Assistant! Please start the backend server first.');
+    addMessage('system', t('app.welcome'));
     loadConfig();
     checkConnection();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -59,26 +60,19 @@ const App: React.FC = () => {
 
   const checkConnection = useCallback(async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/health`);
-      if (response.ok) {
-        setIsConnected(true);
-        addMessage('system', '✅ Connected to backend server!');
-      }
+      await getHealth();
+      setIsConnected(true);
+      addMessage('system', t('app.connected'));
     } catch (error) {
       setIsConnected(false);
-      addMessage('system', '❌ Backend server not available. Please start it first.');
+      addMessage('system', t('app.backendDown'));
     }
   }, []);
 
   const loadConfig = async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/config`);
-      if (response.ok) {
-        const config = await response.json();
-        console.log('Backend configuration loaded:', config);
-        // You can use this config data to customize the frontend behavior
-        // For example: update API timeouts, feature flags, etc.
-      }
+      const config = await getConfig();
+      console.log('Backend configuration loaded:', config);
     } catch (error) {
       console.error('Failed to load backend config:', error);
     }
@@ -108,47 +102,37 @@ const App: React.FC = () => {
     const controller = new AbortController();
     abortRef.current = controller;
 
+    const handle = openChatStream(
+      {
+        message: userMessage,
+        stream: true,
+        ...(selectedProvider ? { provider: selectedProvider } : {}),
+      },
+      { signal: controller.signal },
+    );
     try {
-      await restApiClient.streamChat(
-        userMessage,
-        (chunk: string | { event: string; provider?: string; model?: string; fallback?: boolean; error?: string } | null) => {
-          setMessages(prev =>
-            prev.map(m => {
-              if (m.id !== assistantId) return m;
-              // Meta / done events
-              if (typeof chunk === 'object' && chunk !== null) {
-                if (chunk.event === 'meta') {
-                  return { ...m, provider: chunk.provider, model: chunk.model };
-                }
-                if (chunk.event === 'done') {
-                  return {
-                    ...m,
-                    isStreaming: false,
-                    fallback: !!chunk.fallback,
-                    provider: chunk.provider || m.provider,
-                    model: chunk.model || m.model
-                  };
-                }
-                if (chunk.event === 'error') {
-                  return { ...m, isStreaming: false, content: (m.content || '') + `\n[Error] ${chunk.error}` };
-                }
-              } else if (typeof chunk === 'string') {
-                return { ...m, content: m.content + chunk };
-              }
-              return m;
-            })
-          );
-        },
-        { provider: selectedProvider, signal: controller.signal }
-      );
+      for await (const event of handle.events) {
+        setMessages(prev =>
+          prev.map(m => (m.id === assistantId ? reduceAssistantMessage(m, event) : m)),
+        );
+      }
+      if (handle.outcome() === 'aborted') {
+        setMessages(prev =>
+          prev.map(m => (m.id === assistantId ? { ...m, isStreaming: false, content: m.content + '\n' + t('app.cancelled') } : m)),
+        );
+      } else if (handle.outcome() === 'interrupted') {
+        setMessages(prev =>
+          prev.map(m => (m.id === assistantId ? { ...m, isStreaming: false } : m)),
+        );
+      }
     } catch (e: any) {
       if (e.name === 'AbortError') {
         setMessages(prev =>
-          prev.map(m => (m.id === assistantId ? { ...m, isStreaming: false, content: m.content + '\n[Cancelled]' } : m))
+          prev.map(m => (m.id === assistantId ? { ...m, isStreaming: false, content: m.content + '\n' + t('app.cancelled') } : m))
         );
       } else {
         setMessages(prev =>
-          prev.map(m => (m.id === assistantId ? { ...m, isStreaming: false, content: `[Error] ${e.message}` } : m))
+          prev.map(m => (m.id === assistantId ? { ...m, isStreaming: false, content: `${t('app.errorPrefix')}: ${e.message}` } : m))
         );
         setError(e.message);
       }
@@ -171,7 +155,7 @@ const App: React.FC = () => {
     }
   };
 
-  const getMessageStyle = (type: string, fallback?: boolean) => {
+  const getMessageStyle = (type: string) => {
     const base: React.CSSProperties = {
       padding: '8px 12px',
       borderRadius: 6,
@@ -179,22 +163,18 @@ const App: React.FC = () => {
       maxWidth: '80%',
       whiteSpace: 'pre-wrap',
       lineHeight: 1.4,
-      border: '1px solid #e0e0e0',
-      fontFamily: 'system-ui, Arial, sans-serif',
+      border: '1px solid var(--surface-line)',
+      color: 'var(--surface-text)',
       fontSize: 14,
       position: 'relative'
     };
     if (type === 'user') {
-      base.background = '#e6f2ff';
+      base.background = 'var(--surface-card)';
       base.alignSelf = 'flex-end';
     } else if (type === 'assistant') {
-      base.background = '#fafafa';
+      base.background = 'var(--surface-bg)';
     } else {
-      base.background = '#fff8e1';
-    }
-    if (fallback) {
-      base.borderLeft = '4px solid #ff9800';
-      base.paddingLeft = 8;
+      base.background = 'var(--surface-card)';
     }
     return base;
   };
@@ -205,73 +185,75 @@ const App: React.FC = () => {
   };
 
   return (
-    <div style={{ fontFamily: 'system-ui, Arial, sans-serif', height: '100vh', display: 'flex', flexDirection: 'column' }}>
-      {/* Header / Controls */}
-      <div style={{ padding: '8px 12px', borderBottom: '1px solid #ddd', display: 'flex', gap: 12, alignItems: 'center' }}>
-        <strong>DP Stock Investment Assistant</strong>
+    <div data-ui="shell" style={{ height: '100vh', display: 'flex', flexDirection: 'column', background: 'var(--surface-bg)', color: 'var(--surface-text)' }}>
+      <header style={{ padding: '8px 12px', borderBottom: '1px solid var(--surface-line)', display: 'flex', gap: 12, alignItems: 'center' }}>
+        <h1 style={{ fontSize: 16, margin: 0 }}>{t('app.title')}</h1>
         <ModelSelector compact onModelChange={handleModelChange} disabled={isLoading} />
         <select
           value={selectedProvider || ''}
           onChange={e => setSelectedProvider(e.target.value || undefined)}
-          style={{ padding: '4px 8px' }}
-          title="Select model provider override"
+          style={{ padding: '4px 8px', background: 'var(--surface-card)', color: 'var(--surface-text)', border: '1px solid var(--surface-line)' }}
+          title={t('app.modelOverride')}
         >
-          <option value="">Auto (from selector)</option>
-          <option value="openai">OpenAI</option>
-          <option value="grok">Grok (stub)</option>
+          <option value="">{t('app.provider.auto')}</option>
+          <option value="openai">{t('app.provider.openai')}</option>
+          <option value="grok">{t('app.provider.grok')}</option>
         </select>
         <button
           onClick={sendMessage}
           disabled={isLoading}
           style={{ padding: '4px 12px' }}
         >
-          {isLoading ? 'Sending...' : 'Send'}
+          {isLoading ? t('app.sending') : t('app.send')}
         </button>
         <button
           onClick={cancelStreaming}
           disabled={!isLoading || !abortRef.current}
           style={{ padding: '4px 12px' }}
         >
-          Cancel
+          {t('app.cancel')}
         </button>
         <div style={{ marginLeft: 'auto', fontSize: 12 }}>
-          {isLoading ? 'Streaming...' : isConnected ? 'Online' : 'Offline'}
+          {isLoading ? t('app.streaming') : isConnected ? t('app.online') : t('app.offline')}
         </div>
-      </div>
+      </header>
 
       {/* Messages */}
       <div style={{ flex: 1, overflowY: 'auto', padding: 16, display: 'flex', flexDirection: 'column' }}>
         {messages.map(m => (
           <div
             key={m.id}
-            style={getMessageStyle(m.type, m.fallback)}
+            style={getMessageStyle(m.type)}
           >
             <div style={{ fontSize: 12, opacity: 0.7, marginBottom: 4 }}>
-              {m.type.toUpperCase()} {m.provider ? `· ${m.provider}${m.model ? ':' + m.model : ''}` : ''} {m.fallback ? '· fallback' : ''}
-              {m.isStreaming && ' · streaming'}
+              {m.type === 'user' ? t('app.role.user') : m.type === 'assistant' ? t('app.role.assistant') : t('app.role.system')}
+              {' '}
+              <time data-fmt="date" dateTime={m.timestamp}>{fmt.dateTime(m.timestamp)}</time>
+              {m.provider ? ` · ${m.provider}${m.model ? ':' + m.model : ''}` : ''} {m.fallback ? <> · <StatusBadge status="warn" label={t('app.fallback')} /></> : null}
+              {m.isStreaming && ` · ${t('app.streamingFlag')}`}
             </div>
-            {m.content || <em style={{ opacity: 0.6 }}>...</em>}
+            {m.content || <em style={{ opacity: 0.6 }}>{t('app.pending')}</em>}
           </div>
         ))}
         <div ref={messagesEndRef} />
       </div>
 
       {/* Input */}
-      <div style={{ borderTop: '1px solid #ddd', padding: 12, display: 'flex', flexDirection: 'column', gap: 8 }}>
-        {error && <div style={{ color: 'red', fontSize: 12 }}>{error}</div>}
+      <div style={{ borderTop: '1px solid var(--surface-line)', padding: 12, display: 'flex', flexDirection: 'column', gap: 8 }}>
+        {error && <StatusBadge status="danger" label={error} />}
         <textarea
           value={inputValue}
           onChange={e => setInputValue(e.target.value)}
           onKeyDown={handleKeyPress}
-          placeholder="Ask about stocks, e.g. 'Latest news on AAPL and MSFT'"
-          style={{ width: '100%', height: 70, resize: 'vertical', padding: 8, fontFamily: 'inherit' }}
+          placeholder={t('app.placeholder')}
+          style={{ width: '100%', height: 70, resize: 'vertical', padding: 8, background: 'var(--surface-card)', color: 'var(--surface-text)', border: '1px solid var(--surface-line)' }}
         />
         <div style={{ display: 'flex', gap: 8 }}>
           <button onClick={sendMessage} disabled={isLoading} style={{ padding: '6px 14px' }}>
-            Send
+            {t('app.send')}
           </button>
           <button onClick={cancelStreaming} disabled={!isLoading || !abortRef.current} style={{ padding: '6px 14px' }}>
-            Cancel
+            {t('app.cancel')}
           </button>
         </div>
       </div>

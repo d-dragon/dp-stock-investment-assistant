@@ -6,12 +6,12 @@
 
 | Field | Value |
 |-------|-------|
-| **Version** | 0.3.1 (draft) |
+| **Version** | 0.3.2 (draft) |
 | **Status** | Draft |
 | **Product Owner** | Phan Duy |
 | **Maintainer** | UX Designer |
-| **Date** | 2026-11-13 |
-| **Cited by** | [DESIGN_LOCK.md](./DESIGN_LOCK.md) v0.3.1 · [ARCHITECTURE.md](./ARCHITECTURE.md) |
+| **Date** | 2026-11-18 |
+| **Cited by** | [DESIGN_LOCK.md](./DESIGN_LOCK.md) v0.3.3 · [ARCHITECTURE.md](./ARCHITECTURE.md) |
 
 ## Change log
 
@@ -21,11 +21,12 @@
 | 0.2 | 2026-11-10 | Bone approved as accent (Phan Duy); colour-token architecture governed by [ADR-FRONTEND-007](./DECISIONS/ADR-FRONTEND-007-DESIGN-TOKEN-ARCHITECTURE.md) (Proposed) — Design-Token Architecture; Colour Values Live in the Design System, superseding ADR-FRONTEND-002's colour line (cyan copilot, emerald/rose gains-losses); copilot/AI has no brand hue; gains/losses use `market.up` / `market.down`; `track.*` group listed (accents only, never on prices) |
 | 0.3 | 2026-11-13 | Review round (Phan Duy decisions 2026-11-13): `state.success`, `state.warn`, `state.danger` re-tuned so every state/market pair is ≥ 10 dE2000 in both themes (was 3.2–9.2); `ai.suggested` / `ai.confirmed` given values and `data-origin` values fixed (`ai` / `investor`); chart candles carry a shape cue (hollow up / filled down); lint backstop narrowed to arbitrary **colour** values; vi-VN first for copy and labels; ADR-FRONTEND-003/004/005/007 cited as Accepted; Storybook and visual regression marked Proposed (adoption via TECHNICAL_DESIGN) |
 | 0.3.1 | 2026-11-13 | Be Vietnam Pro v1.002 checked: no `tnum` feature and proportional digits, so all numbers use `mono` = **IBM Plex Mono** (full Vietnamese set incl. `₫`); price-board number format, percent in price rows with the dot, volume `1,234,500`, ₫ totals `25,300,000 ₫`, Storybook in M-000 per ADR-FRONTEND-008, Chart.js data charts themed from tokens (Phan Duy, 2026-11-13) |
+| 0.3.2 | 2026-11-18 | M-000 launch theme is dark only. Light values, theme switching, and the contrast script move to M-001 (Phan Duy, 2026-11-17). Numbers use the board formatters; `Intl` is for dates |
 
 ## 1. Principles
 
 - Calm and analytical. The investor is the decision-maker; the UI reports, it does not cheer or alarm without cause.
-- **Dark-first in M-000.** Light is built on the same tokens and is contrast-checked from day one — not deferred.
+- **Dark-only in M-000** (Phan Duy, 2026-11-17). Light values may stay on this sheet for the later theme. Light theme, theme switching, and the contrast script move to M-001. They are not part of the M-000 launch.
 - Colour is never the only cue ([WCAG 2.2 SC 1.4.1](https://www.w3.org/WAI/WCAG22/Understanding/use-of-color.html)). Focus rings and selected edges meet ≥ 3:1 against adjacent colours ([SC 1.4.11](https://www.w3.org/WAI/WCAG22/Understanding/non-text-contrast.html)).
 - Accent stays clearly apart from `market.floor` and `market.ceiling`. **Bone** is the approved accent (Phan Duy, 2026-11-10).
 
@@ -205,11 +206,11 @@ Honour `prefers-reduced-motion`: no decorative animation, instant state change, 
 - The investor decides. AI output is advice or a draft, never a verdict. Provenance is always visible (§3.6, §8).
 - **Launch UI language is vi-VN** (Phan Duy, 2026-11-13); copy is written in Vietnamese first, with English kept as the second catalogue.
 - **Prices use the price-board format** (Phan Duy, 2026-11-13): thousands of VND, two decimals, dot decimal (`25.30`). Change and percent inside `PriceCell`/`Delta` use the dot too (`+6.98%`), and volume groups with a comma (`1,234,500`), so in a price row a dot always means a decimal (Phan Duy, 2026-11-13). ₫ totals use comma grouping too (`25,300,000 ₫`). Prose and dates use `vi-VN`. Rules: [DESIGN_LOCK.md](./DESIGN_LOCK.md) §8.
-- Translatable from day one: no hard-coded user-facing strings; `t()` for copy; one format helper for numbers (dot decimal, comma grouping) and `vi-VN` dates in `Asia/Ho_Chi_Minh`; allow ~30% longer Vietnamese than the English source; no concatenated fragments that break in translation ([ADR-FRONTEND-005](./DECISIONS/ADR-FRONTEND-005-I18N-READINESS-SEAM.md), Accepted 2026-11-13; adoption is Future).
+- Translatable from day one: no hard-coded user-facing strings; `t()` for copy; one format helper. Numbers use the board formatters in [TECHNICAL_DESIGN.md](./TECHNICAL_DESIGN.md) §8.3 (dot decimal, comma grouping). Dates use `Intl` with `vi-VN` and `Asia/Ho_Chi_Minh`. Allow ~30% longer Vietnamese than the English source; no concatenated fragments that break in translation ([ADR-FRONTEND-005](./DECISIONS/ADR-FRONTEND-005-I18N-READINESS-SEAM.md), Accepted 2026-11-13; library adoption is Future).
 
 ## 10. Quality
 
-- Patterns get **Storybook** stories, including both themes, compact density, and the AI-suggested / confirmed pair, from **M-000** (ADR-FRONTEND-008, Accepted 2026-11-13: Storybook and MSW come in with M-000).
-- Visual regression on those stories (tool choice in TECHNICAL_DESIGN).
+- Patterns get **Storybook** stories in **M-000** (ADR-FRONTEND-008). The first set is dark theme only and compact density (Phan Duy, 2026-11-17). Both-theme stories and visual snapshots move to M-001. Spec 005 delivers Storybook. MSW in Vitest is already in the foundation.
+- Visual regression on those stories moves to M-001 (tool choice in TECHNICAL_DESIGN).
 - **axe** (or equivalent) on stories and on the W1 shell; keyboard path Z2 → Z1 → Z3 → Z4; visible focus.
 - Interaction tests: every `StatusBadge` has an icon and a label; provenance hooks are present (`data-origin="ai"` and `data-origin="investor"`).

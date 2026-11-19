@@ -1,5 +1,7 @@
 # Frontend UI Refinement Summary
 
+The notes below record the 2025-10-19 model-selector refinement. The live toolchain has since moved. The UI is Vite 6 and Vitest. Public configuration is `VITE_*` in `.env.development`, `.env.production`, and `.env.test`. Chat uses server-sent events in `src/platform/stream`. The fetch client is `src/platform/api`. Create React App, react-scripts, Jest, `REACT_APP_*`, and Socket.IO are not part of this app.
+
 ## Executive Summary
 
 The frontend UI has been successfully refined to integrate with backend API enhancements (v1.2.0), adding full OpenAI model management capabilities while fixing critical build issues and improving code quality.
@@ -54,11 +56,12 @@ Error: Unused imports and variables causing CI failure
    - `ModelSelection` - Current selection
    - Request/Response types for all operations
 
-2. **API Service** (`src/services/modelsApi.ts`)
+2. **API Service** (then `src/services/modelsApi.ts`; that file was later removed)
    - Type-safe API client for all model endpoints
    - Proper error handling
    - Configurable base URL
    - Full TypeScript coverage
+   - Model calls now go through `modelsApi` on `src/platform/api/client.ts`
 
 3. **ModelSelector Component** (`src/components/models/ModelSelector.tsx`)
    - **Compact mode** - Minimal dropdown for header/toolbar
@@ -85,21 +88,20 @@ Error: Unused imports and variables causing CI failure
 ### Frontend Technologies
 ```
 Core:
-├── React 18.3.1          - Modern hooks-based architecture
-├── TypeScript            - Full type safety, strict mode
-├── React Scripts 5.0.1   - Build tooling and dev server
-└── Create React App      - Zero-configuration setup
+├── React 18              - Hooks-based UI
+├── TypeScript 5.9        - Strict typecheck
+├── Vite 6                - Dev server and production build (dist/)
+└── Vitest                - Unit tests (jsdom, Testing Library, MSW)
 
 Communication:
-├── Fetch API             - REST client with streaming support
-├── Socket.IO 4.8.1       - WebSocket real-time communication
-└── Server-Sent Events    - Chat response streaming
+├── fetch                 - Typed client in src/platform/api
+└── Server-sent events    - Chat stream in src/platform/stream
 
 Development:
-├── Node.js               - JavaScript runtime
+├── Node.js >=26.13.0     - Runtime (.nvmrc is 26)
 ├── npm                   - Package management
-├── ESLint                - Code quality
-└── Babel                 - Transpilation
+├── ESLint                - npm run lint (scope: src)
+└── VITE_* env files      - .env.development, .env.production, .env.test
 ```
 
 ### Architecture Patterns
@@ -158,27 +160,21 @@ Flask API (localhost:5000)
 ```
 frontend/
 ├── src/
-│   ├── components/
-│   │   ├── models/
-│   │   │   └── ModelSelector.tsx        ← NEW: Model management UI
-│   │   ├── WebSocketTest.tsx
-│   │   └── ...
-│   ├── services/
-│   │   ├── modelsApi.ts                 ← NEW: Model API client
-│   │   ├── restApiClient.js
-│   │   ├── apiService.ts
-│   │   └── webSocketService.ts
-│   ├── types/
-│   │   └── models.ts                    ← NEW: Type definitions
-│   ├── utils/
-│   │   └── uuid.ts
-│   ├── App.tsx                          ← UPDATED: Integrated ModelSelector
-│   ├── index.tsx                        ← CLEANED: Removed unused imports
-│   └── ...
-├── FRONTEND_ANALYSIS.md                 ← NEW: Analysis document
-├── UI_IMPROVEMENTS.md                   ← NEW: Improvements doc
-├── REFINEMENT_SUMMARY.md                ← NEW: This summary
-└── README.md                            ← UPDATED: New features documented
+│   ├── components/models/ModelSelector.tsx
+│   ├── platform/api/client.ts           modelsApi and the typed fetch client
+│   ├── platform/stream/                 SSE chat stream (openChatStream)
+│   ├── platform/i18n/                   vi-VN catalogue and t()
+│   ├── platform/format/                 fmt
+│   ├── design-system/                   dark tokens and self-hosted fonts
+│   ├── types/models.ts
+│   ├── App.tsx                          shell; ModelSelector in the header
+│   └── index.tsx
+├── .env.development                     loaded by npm run dev
+├── .env.production                      loaded by npm run build
+├── .env.test                            loaded by Vitest
+├── FRONTEND_ANALYSIS.md
+├── REFINEMENT_SUMMARY.md
+└── README.md
 ```
 
 ## Testing Checklist
@@ -191,7 +187,7 @@ frontend/
 
 ### Functionality (Manual Testing Required)
 - [ ] Start backend with OpenAI API key
-- [ ] Start frontend with `npm start`
+- [ ] Start frontend with `npm run dev` (Vite proxies `/api` to port 5000)
 - [ ] Verify model selector loads models
 - [ ] Select different model - should update
 - [ ] Send chat message - should use selected model
@@ -225,9 +221,9 @@ frontend/
 **None** - All changes are additive and backward compatible
 
 ### For Developers
-- New TypeScript types available in `src/types/models.ts`
-- New API service in `src/services/modelsApi.ts`
-- ModelSelector component ready for reuse
+- Model types live in `src/types/models.ts`
+- Model calls go through `modelsApi` on `src/platform/api/client.ts`
+- ModelSelector lives in `src/components/models/ModelSelector.tsx`
 - All code properly typed and documented
 
 ### For End Users

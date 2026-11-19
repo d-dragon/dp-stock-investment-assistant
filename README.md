@@ -198,7 +198,7 @@ Ensure the following tools and runtimes are installed on your workstation based 
 | Category | Tool / Runtime | Minimum Version | Purpose |
 |---|---|---|---|
 | **Backend/Frontend Runtimes** | **Python** | `3.10+` (or `3.8+`) | Core Flask API, AI agent reasoning, and data migrations |
-| | **Node.js & npm** | `v18.0+` (LTS) / `npm 9.0+` | React frontend single-page application and UI build |
+| | **Node.js & npm** | `>=26.13.0` (`.nvmrc` is `26`; proven `v26.13.1`) | Vite frontend. `frontend/.npmrc` sets `engine-strict=true` |
 | **AI Frameworks & Tooling** | **LangChain & LangGraph** | `0.1.0+` / `0.0.20+` | Multi-agent state graph orchestration, tool gateway integration, and workflow loops |
 | | **LangSmith CLI & Studio** | `langgraph-cli[inmem]` | Real-time agent execution trace analysis, prompt debugging, and visual graph inspection |
 | **Data & Persistence** | **MongoDB** | `5.0+` (or via Docker) | Document persistence for users, sessions, workspaces, and market data |
@@ -209,7 +209,7 @@ Ensure the following tools and runtimes are installed on your workstation based 
 | | **Terraform** | `v1.5+` | Azure Cloud infrastructure provisioning (Resource Group, ACR, AKS) |
 | | **Azure CLI (`az`)** | `2.45+` | Azure cloud authentication, ACR pull credentials, and AKS cluster access |
 | **Testing & Quality** | **pytest & pytest-cov** | `7.0+` / `4.0+` | Backend unit, integration, and service-layer test suite with coverage reports |
-| | **Jest & RTL** | `29.0+` / `14.0+` | Frontend component testing, hook isolation, and DOM assertions |
+| | **Vitest & RTL** | Vitest `5+` / React Testing Library `16+` | Frontend component tests (`npm test` in `frontend/`) |
 | **Version Control & CI/CD** | **Git** | `2.30+` | Version control, branch policies, and Spec Kit metadata tracking |
 | | **GitHub Actions** | `v2+` | Automated CI/CD workflows, build pipelines, and gate verification |
 
@@ -306,24 +306,46 @@ for chunk in agent.process_query_streaming('Analyze VNM stock technicals'):
 
 #### Frontend & UX/UI
 
+Local UI is the Vite app in `frontend/`. The proven runtime is Node `v26.13.1`. `frontend/.npmrc` sets `engine-strict=true`, so an older Node fails `npm ci`.
+
 ```powershell
-# 1. Navigate to Frontend Directory
+# 1. Confirm Node (frontend/.nvmrc is 26; package engines require >=26.13.0)
+node -v
+
+# 2. Install dependencies from the frontend package
 cd frontend
+npm ci
 
-# 2. Install Node Dependencies
-npm install
-
-# 3. Start React Development Server (Port 3000)
-npm start
+# 3. Start the Vite development server
+npm run dev
 ```
 
-The browser will automatically open `http://localhost:3000`. The frontend will connect to `http://localhost:5000` for REST API and Socket.IO real-time streaming.
+Vite prints a local URL. The default port is **5173**: open `http://localhost:5173/`. If that port is already taken, Vite picks the next free port and prints it. The dev server does not open a browser window.
 
-🎨 **Figma UX/UI reference**: [Open the UX/UI design in Figma](https://www.figma.com/design/Jy1qyQeJJT1gaQVar8KJLd/Stock-Investment-Assistant?m=dev&t=ri6ZCr5ojO5e0ErZ-1). 
+`npm run dev` loads `frontend/.env.development`. Leave `VITE_API_BASE_URL` empty so the browser stays on the Vite origin. Vite proxies `/api` to the Flask API at `http://127.0.0.1:5000`. Start the API in another terminal when you want live data:
+
+```powershell
+# From the repository root
+python src\main.py --mode web
+```
+
+Chat uses SSE through `fetch` (`platform/stream`). There is no separate frontend socket port.
+
+```powershell
+# From frontend/
+npm test          # Vitest, one run
+npm run lint
+npx tsc --noEmit
+npm run build     # static files in frontend/dist/
+```
+
+The Docker image publishes the built UI on host port **3000**. That port is the container mapping, separate from the Vite dev server.
+
+🎨 **Figma UX/UI reference**: [Open the UX/UI design in Figma](https://www.figma.com/design/Jy1qyQeJJT1gaQVar8KJLd/Stock-Investment-Assistant?m=dev&t=ri6ZCr5ojO5e0ErZ-1).
 
 The Figma page is a design reference for the frontend implementation; React components and live API behavior remain owned by `frontend/src/` and the backend contracts.
 
-📖 *For component architecture, UI state management, and mock mode options, see **[`frontend/REACT_SETUP_GUIDE.md`](frontend/REACT_SETUP_GUIDE.md)**, **[`frontend/README.md`](frontend/README.md)**, and **[`docs/domains/frontend/ARCHITECTURE.md`](docs/domains/frontend/ARCHITECTURE.md)**.*
+📖 *Package scripts, env files, and layout: **[`frontend/README.md`](frontend/README.md)**. Domain design: **[`docs/domains/frontend/TECHNICAL_DESIGN.md`](docs/domains/frontend/TECHNICAL_DESIGN.md)**.*
 
 ---
 
@@ -346,7 +368,7 @@ pytest --cov=src --cov-report=term-missing --cov-report=html
 
 # 5. Run Frontend Component & Unit Tests
 cd frontend
-npm test -- --watchAll=false --coverage
+npm test
 
 # 6. Verify Spec Traceability Gate Compliance
 cd ..
@@ -465,7 +487,7 @@ The project employs a multi-tiered testing and verification strategy designed fo
 | **API & Contract Testing** | REST endpoints, SSE chat streaming, Socket.IO events, and schema compliance | `pytest`, `FlaskClient`, `schemathesis` | `tests/api/`, [API Tests Runbook](tests/API%20tests.md) |
 | **Service & Repository Integration** | Layered DI wiring, MongoDB schema validation, and Redis cache failovers | `pytest`, in-memory stubs | `tests/integration/`, `tests/helpers/` |
 | **AI Agent & Tool Verification** | Agent reasoning flow, symbol normalization, market tools, and STM memory | `pytest`, stubs, LangSmith traces | `tests/test_tools.py`, `tests/test_agent_memory.py` |
-| **Frontend Component Testing** | React components, UI state hooks, streaming handlers, and DOM assertions | `Jest`, `React Testing Library` | `frontend/src/**/*.test.tsx` |
+| **Frontend Component Testing** | React components, UI state hooks, streaming handlers, and DOM assertions | `Vitest`, `React Testing Library` | `frontend/src/**/*.test.tsx` |
 | **Performance & Security Testing** | Latency benchmarks, prompt injection defenses, and secret leakage audits | `pytest-benchmark`, pytest fixtures | `tests/performance/`, `tests/security/` |
 
 ### 5.2 Test Execution Runbook
@@ -485,8 +507,8 @@ pytest tests/test_agent_memory.py tests/test_session_service.py -v # Memory & Se
 # Generate coverage report
 pytest --cov=src --cov-report=term-missing --cov-report=html
 
-# Run frontend tests
-cd frontend; npm test -- --watchAll=false --coverage
+# Run frontend tests (Vitest, one run)
+cd frontend; npm test
 ```
 
 ### 5.3 Testing Documentation & Reference Links
