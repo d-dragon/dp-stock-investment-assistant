@@ -1,0 +1,104 @@
+{
+  "schemaVersion": "1.0.0",
+  "date": "2026-11-19",
+  "newsPath": "2026-11/n/2026-11-19.json",
+  "report": {
+    "schemaVersion": "1.0.0",
+    "id": "daily-brief-2026-11-19",
+    "type": "daily_market_brief",
+    "locale": "vi-VN",
+    "timezone": "Asia/Ho_Chi_Minh",
+    "generatedAt": "2026-11-19T08:35:00+07:00",
+    "coverage": "EOD 2026-11-18 + overnight + pre-open 2026-11-19",
+    "marketSession": "preopen",
+    "disclaimer": "Không phải khuyến nghị đầu tư. Số liệu từ nguồn công khai, có thể lệch giữa matched/total.",
+    "ui": {
+      "title": "Bản tin thị trường 19/11/2026",
+      "subtitle": "Pre-open sau phiên VN-Index 1.703,01"
+    },
+    "snapshot": {
+      "quotes": [
+        {"symbol": "VNINDEX", "last": 1703.01, "change": -23.71, "changePct": -1.37, "note": "EOD 18/11 locked StockBiz", "sourceId": "src-stockbiz"},
+        {"symbol": "HNX", "last": 242.73, "change": -5.87, "changePct": -2.36, "sourceId": "src-stockbiz"},
+        {"symbol": "DXY", "last": 103.7, "changePct": 0.2, "note": "approx, sources disagree", "sourceId": "src-barrons"},
+        {"symbol": "DJI", "last": 50198.17, "change": -561.25, "changePct": -1.11, "sourceId": "src-barrons"},
+        {"symbol": "NDX", "last": null, "note": "Nasdaq Composite 24429.88 +0.42%", "sourceId": "src-barrons"},
+        {"symbol": "SPX", "last": 7323.63, "changePct": -0.23, "sourceId": "src-barrons"},
+        {"symbol": "NKY", "last": 59024, "changePct": 0.28, "sourceId": "src-bloomberg"},
+        {"symbol": "HSI", "last": 23294.75, "changePct": -0.91, "sourceId": "src-bloomberg"},
+        {"symbol": "WTI", "last": 83.2, "changePct": -3.0, "note": "sources ~83-90 disagree", "sourceId": "src-barrons"},
+        {"symbol": "XAU", "last": 3725, "changePct": -3.2, "note": "sources disagree higher", "sourceId": "src-barrons"},
+        {"symbol": "BTC", "last": 62500, "changePct": -3.3, "note": "approx", "sourceId": "src-yahoo-btc"},
+        {"symbol": "USDVND", "last": 25656, "note": "SBV central approx 18/11", "sourceId": "src-nhnn"}
+      ]
+    },
+    "globalNews": [
+      {"title": "S&P 500 fifth straight loss", "url": "https://www.seattletimes.com/business/how-major-us-stock-indexes-fared-wednesday-11-18-2026/", "sourceId": "src-barrons"},
+      {"title": "Hang Seng -0.91%", "url": "https://english.news.cn/20261118/50cbc2a8338b4d48af967fbdd87cbde8/c.html", "sourceId": "src-bloomberg"}
+    ],
+    "vietnamNews": [
+      {"title": "VN-Index 1.703,01 ngoại bán nghìn tỷ", "url": "https://stockbiz.vn/tin-tuc/vn-index-mat-hon-23-diem-khoi-ngoai-ban-rong-nghin-ty-dong/42830237", "sourceId": "src-stockbiz"},
+      {"title": "CafeF: rơi sát 1.700", "url": "https://cafef.vn/chung-khoan-do-lua-vn-index-roi-sat-moc-1700-diem-188261118181422339.chn", "sourceId": "src-cafef"}
+    ],
+    "vietnamMacro": [
+      {"name": "Tỷ giá trung tâm", "value": 25656, "unit": "VND/USD", "sourceId": "src-nhnn"},
+      {"name": "Ngoại HoSE ròng", "value": -1113.55, "unit": "tỷ VND", "sourceId": "src-stockbiz"}
+    ],
+    "equityMarket": {
+      "index": {"symbol": "VNINDEX", "last": 1703.01, "prior": 1726.72},
+      "breadth": {"advancers": 172, "decliners": 539},
+      "liquidity": {"volumeM": 530, "valueTy": 11150, "note": "matched approx"}
+    },
+    "worldMarkets": {
+      "quotes": [
+        {"symbol": "DXY", "last": 103.7},
+        {"symbol": "DJI", "last": 50198.17},
+        {"symbol": "SPX", "last": 7323.63},
+        {"symbol": "NKY", "last": 59024},
+        {"symbol": "HSI", "last": 23294.75},
+        {"symbol": "FTSE", "last": null}
+      ]
+    },
+    "cryptoMarkets": {
+      "quotes": [
+        {"symbol": "BTC", "last": 62500},
+        {"symbol": "ETH", "last": 1820}
+      ]
+    },
+    "companies": [
+      {"ticker": "FPT", "note": "Ngoại bán ròng ~226 tỷ", "sourceId": "src-stockbiz"},
+      {"ticker": "VIC", "note": "Drag ~4.8 điểm", "sourceId": "src-stockbiz"},
+      {"ticker": "VCB", "note": "Giảm 2.5%", "sourceId": "src-stockbiz"},
+      {"ticker": "POW", "note": "Tự doanh mua ròng mạnh", "sourceId": "src-vneconomy"},
+      {"ticker": "KDH", "note": "Ngoại mua ròng", "sourceId": "src-vneconomy"}
+    ],
+    "outlook": {
+      "watchpoints": ["Mốc 1.700", "Dòng ngoại tiếp tục bán", "Overnight US/Asia"],
+      "levels": [{"label": "Hỗ trợ", "value": 1700}, {"label": "Kháng cự", "value": 1720}],
+      "events": ["Pre-open 19/11", "Theo dõi SBV tỷ giá"]
+    },
+    "series": [
+      {"id": "vnindex", "points": [{"date": "2026-11-18", "value": 1703.01}, {"date": "2026-11-17", "value": 1726.72}]},
+      {"id": "dji", "points": [{"date": "2026-11-18", "value": 50198.17}]},
+      {"id": "ndx", "points": [{"date": "2026-11-18", "value": 24429.88}]},
+      {"id": "spx", "points": [{"date": "2026-11-18", "value": 7323.63}]},
+      {"id": "dxy", "points": [{"date": "2026-11-18", "value": 103.7}]},
+      {"id": "nky", "points": [{"date": "2026-11-18", "value": 59024}]},
+      {"id": "hsi", "points": [{"date": "2026-11-18", "value": 23294.75}]},
+      {"id": "btcUsd", "points": [{"date": "2026-11-18", "value": 62500}]},
+      {"id": "vnindexVolume5d", "points": [{"date": "2026-11-18", "value": 530}]},
+      {"id": "foreignNet5dVndBn", "points": [{"date": "2026-11-18", "value": -1113.55}]}
+    ]
+  },
+  "sources": {
+    "schemaVersion": "1.0.0",
+    "sources": [
+      {"id": "src-stockbiz", "name": "StockBiz", "url": "http://en.stockbiz.vn/", "accessedAt": "2026-11-19T08:35:00+07:00"},
+      {"id": "src-cafef", "name": "CafeF", "url": "https://cafef.vn/", "accessedAt": "2026-11-19T08:35:00+07:00"},
+      {"id": "src-vneconomy", "name": "VnEconomy", "url": "https://vneconomy.vn/", "accessedAt": "2026-11-19T08:35:00+07:00"},
+      {"id": "src-nhnn", "name": "SBV", "url": "https://www.sbv.gov.vn/", "accessedAt": "2026-11-19T08:35:00+07:00"},
+      {"id": "src-barrons", "name": "Barron's", "url": "https://www.barrons.com/market-data", "accessedAt": "2026-11-19T08:35:00+07:00"},
+      {"id": "src-bloomberg", "name": "Bloomberg Asia", "url": "https://www.bloomberg.com/asia", "accessedAt": "2026-11-19T08:35:00+07:00"}
+    ]
+  }
+}

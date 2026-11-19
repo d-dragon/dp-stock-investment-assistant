@@ -1,0 +1,34 @@
+{
+  "date": "2026-11-19",
+  "eodDate": "2026-11-18",
+  "briefKind": "eod_prev+overnight+preopen",
+  "market": {
+    "vnindex_prior_close": 1703.01,
+    "vnindex_change": -23.71,
+    "vnindex_change_pct": -1.37,
+    "hnx_prior": 242.73,
+    "volume_hose_matched_approx_m": 530,
+    "value_hose_approx_ty": 11150,
+    "foreign_hose_net_sell_ty": 1113.55,
+    "proprietary_hose_net_approx_ty": -6.3,
+    "note": "VN 1.703,01 locked StockBiz/Vietnam+/CafeF; foreign ~1.113,55 HoSE StockBiz; proprietary mixed VnEconomy -6,3 / VietnamBiz ~-52; volume matched vs total disagree 530-755m / 11-17k tỷ"
+  },
+  "news_events": [
+    "VN-Index mất 23,71 điểm về 1.703,01, có lúc xuyên 1.700",
+    "Khối ngoại bán ròng hơn 1.100 tỷ HoSE, tập trung FPT VIC MBB VCB",
+    "US mixed: SPX -0.23% DJI -1.11% Nasdaq +0.42% after Nvidia",
+    "HSI -0.91% Nikkei +0.28%"
+  ],
+  "sentiment": {
+    "fireant": "thin",
+    "f247": "thin",
+    "newf319": "thin",
+    "note": "Community threads thin; tone cautious after deep red session"
+  },
+  "gaps": [
+    "WTI/gold/DXY sources disagree on exact prints",
+    "Proprietary net print varies across outlets",
+    "No official SBV page locked for 19/11 yet",
+    "Volume matched vs total value inconsistent across sources"
+  ]
+}
