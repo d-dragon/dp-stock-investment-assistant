@@ -31,10 +31,19 @@ jobs:
         run: npx tsc --noEmit
 
       - name: Test
-        run: npx vitest run
+        run: npx vitest run --project unit
 
       - name: Build
         run: npm run build
 
       - name: OpenAPI drift
         run: npm run gen:api && git diff --exit-code src/platform/api/generated
+
+      - name: Storybook
+        run: npm run build-storybook
+
+      - name: Storybook axe
+        run: npx playwright install --with-deps chromium && npx vitest run --project storybook
+
+      - name: Playwright
+        run: npx playwright install --with-deps chromium && npx playwright test

@@ -1,9 +1,9 @@
 {
-  "workflow": "speckit",
-  "specName": "[FEATURE NAME]",
+  "workflow": "companion",
+  "specName": "005 M-000-B Frontend foundation shell and QA (delivery 2 of 2)",
   "branch": "features/pitch-m000-B-frontend-foundation",
-  "currentStep": "specify",
-  "status": "specified",
+  "currentStep": "converge",
+  "status": "completed",
   "history": [
     {
       "step": "specify",
@@ -18,7 +18,1274 @@
       "kind": "complete",
       "by": "extension",
       "at": "2026-11-17T08:16:43.951Z"
+    },
+    {
+      "step": "clarify",
+      "substep": null,
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-19T07:39:37.199Z"
+    },
+    {
+      "step": "plan",
+      "substep": "research",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-19T08:04:50.499Z"
+    },
+    {
+      "step": "plan",
+      "substep": "design",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-19T08:07:56.405Z"
+    },
+    {
+      "step": "plan",
+      "substep": null,
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-19T08:08:26.794Z"
+    },
+    {
+      "step": "tasks",
+      "substep": "generate",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-19T08:24:11.830Z"
+    },
+    {
+      "step": "tasks",
+      "substep": null,
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-19T08:24:13.291Z"
+    },
+    {
+      "step": "analyze",
+      "substep": null,
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-19T08:39:25.419Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "kind": "start",
+      "by": "extension",
+      "at": "2026-11-19T09:02:37.608Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T001",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-19T09:43:21.726Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T002",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-19T09:43:21.729Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T003",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-19T09:43:23.357Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T004",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-19T09:43:25.453Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T005",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-19T09:43:25.456Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T006",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-19T09:43:25.458Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T007",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-19T09:43:25.460Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T008",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-19T09:43:25.461Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T009",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-19T09:43:25.463Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T010",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-19T09:43:25.465Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T011",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-19T09:43:25.467Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T012",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-19T09:43:25.469Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T013",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-19T09:43:25.471Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T014",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-19T09:43:28.359Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T015",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-19T09:43:28.361Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T016",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-19T09:43:28.363Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T017",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-19T09:43:28.365Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T018",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-19T09:43:28.367Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T019",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-19T09:43:28.373Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T020",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-19T09:43:28.375Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T021",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-19T09:43:28.388Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T022",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-19T09:43:28.390Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T023",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-19T09:43:28.391Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T024",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-19T09:43:28.393Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T025",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-19T09:43:28.400Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T026",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-19T09:43:31.303Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T027",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-19T09:43:31.304Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T028",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-19T09:43:31.310Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T029",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-19T09:43:31.312Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T030",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-19T09:43:31.314Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T031",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-19T09:43:34.006Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T032",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-19T09:43:34.008Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T033",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-19T09:43:34.010Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T034",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-19T09:43:34.012Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T035",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-19T09:43:34.013Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T036",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-19T09:43:34.015Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T037",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-19T09:43:36.829Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T038",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-19T09:43:36.832Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T039",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-19T09:43:36.834Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T040",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-19T09:43:36.837Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-19T09:43:37.402Z"
+    },
+    {
+      "step": "converge",
+      "substep": null,
+      "kind": "start",
+      "by": "extension",
+      "at": "2026-11-19T09:55:12.775Z"
+    },
+    {
+      "step": "converge",
+      "substep": null,
+      "kind": "complete",
+      "by": "extension",
+      "at": "2026-11-19T10:04:08.505Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T041",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-19T10:34:00.056Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T042",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-19T10:34:00.058Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T043",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-19T10:34:00.062Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T044",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-19T10:34:00.065Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T045",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-19T10:34:00.068Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T046",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-19T10:34:00.076Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T047",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-19T10:34:00.081Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T048",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-19T10:34:00.086Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T049",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-19T10:34:00.089Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T050",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-19T10:34:00.093Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T051",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-19T10:34:00.097Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T052",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-19T10:34:00.100Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T053",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-19T10:34:00.103Z"
     }
   ],
-  "telemetryInstanceId": "8a08179b-c788-40b8-b351-cfc524767383"
+  "telemetryInstanceId": "8a08179b-c788-40b8-b351-cfc524767383",
+  "currentTask": null,
+  "task_summaries": {
+    "T001": {
+      "status": "DONE",
+      "did": "Confirmed Node and the delivery 1 files the shell reuses",
+      "files": [
+        "frontend/package.json",
+        "frontend/.nvmrc"
+      ],
+      "wave": "T001-T002"
+    },
+    "T002": {
+      "status": "DONE",
+      "did": "Confirmed Node and the delivery 1 files the shell reuses",
+      "files": [
+        "frontend/package.json",
+        "frontend/.nvmrc"
+      ],
+      "wave": "T001-T002"
+    },
+    "T003": {
+      "status": "DONE",
+      "did": "Recorded the pre-shell baseline",
+      "files": [
+        "frontend/src/App.tsx",
+        "frontend/src/test/msw/handlers.ts"
+      ]
+    },
+    "T004": {
+      "status": "DONE",
+      "did": "Added the B3 failing-then-passing Vitest proofs",
+      "files": [
+        "frontend/src/app",
+        "frontend/src/design-system/patterns",
+        "frontend/src/platform/workspace",
+        "frontend/eslint-fixtures"
+      ],
+      "wave": "T004-T013"
+    },
+    "T005": {
+      "status": "DONE",
+      "did": "Added the B3 failing-then-passing Vitest proofs",
+      "files": [
+        "frontend/src/app",
+        "frontend/src/design-system/patterns",
+        "frontend/src/platform/workspace",
+        "frontend/eslint-fixtures"
+      ],
+      "wave": "T004-T013"
+    },
+    "T006": {
+      "status": "DONE",
+      "did": "Added the B3 failing-then-passing Vitest proofs",
+      "files": [
+        "frontend/src/app",
+        "frontend/src/design-system/patterns",
+        "frontend/src/platform/workspace",
+        "frontend/eslint-fixtures"
+      ],
+      "wave": "T004-T013"
+    },
+    "T007": {
+      "status": "DONE",
+      "did": "Added the B3 failing-then-passing Vitest proofs",
+      "files": [
+        "frontend/src/app",
+        "frontend/src/design-system/patterns",
+        "frontend/src/platform/workspace",
+        "frontend/eslint-fixtures"
+      ],
+      "wave": "T004-T013"
+    },
+    "T008": {
+      "status": "DONE",
+      "did": "Added the B3 failing-then-passing Vitest proofs",
+      "files": [
+        "frontend/src/app",
+        "frontend/src/design-system/patterns",
+        "frontend/src/platform/workspace",
+        "frontend/eslint-fixtures"
+      ],
+      "wave": "T004-T013"
+    },
+    "T009": {
+      "status": "DONE",
+      "did": "Added the B3 failing-then-passing Vitest proofs",
+      "files": [
+        "frontend/src/app",
+        "frontend/src/design-system/patterns",
+        "frontend/src/platform/workspace",
+        "frontend/eslint-fixtures"
+      ],
+      "wave": "T004-T013"
+    },
+    "T010": {
+      "status": "DONE",
+      "did": "Added the B3 failing-then-passing Vitest proofs",
+      "files": [
+        "frontend/src/app",
+        "frontend/src/design-system/patterns",
+        "frontend/src/platform/workspace",
+        "frontend/eslint-fixtures"
+      ],
+      "wave": "T004-T013"
+    },
+    "T011": {
+      "status": "DONE",
+      "did": "Added the B3 failing-then-passing Vitest proofs",
+      "files": [
+        "frontend/src/app",
+        "frontend/src/design-system/patterns",
+        "frontend/src/platform/workspace",
+        "frontend/eslint-fixtures"
+      ],
+      "wave": "T004-T013"
+    },
+    "T012": {
+      "status": "DONE",
+      "did": "Added the B3 failing-then-passing Vitest proofs",
+      "files": [
+        "frontend/src/app",
+        "frontend/src/design-system/patterns",
+        "frontend/src/platform/workspace",
+        "frontend/eslint-fixtures"
+      ],
+      "wave": "T004-T013"
+    },
+    "T013": {
+      "status": "DONE",
+      "did": "Added the B3 failing-then-passing Vitest proofs",
+      "files": [
+        "frontend/src/app",
+        "frontend/src/design-system/patterns",
+        "frontend/src/platform/workspace",
+        "frontend/eslint-fixtures"
+      ],
+      "wave": "T004-T013"
+    },
+    "T014": {
+      "status": "DONE",
+      "did": "Built the Z1-Z4 shell, store, ZoneFrame, and MessageBody",
+      "files": [
+        "frontend/src/app",
+        "frontend/src/features",
+        "frontend/src/platform",
+        "frontend/src/main.tsx"
+      ],
+      "wave": "T014-T025"
+    },
+    "T015": {
+      "status": "DONE",
+      "did": "Built the Z1-Z4 shell, store, ZoneFrame, and MessageBody",
+      "files": [
+        "frontend/src/app",
+        "frontend/src/features",
+        "frontend/src/platform",
+        "frontend/src/main.tsx"
+      ],
+      "wave": "T014-T025"
+    },
+    "T016": {
+      "status": "DONE",
+      "did": "Built the Z1-Z4 shell, store, ZoneFrame, and MessageBody",
+      "files": [
+        "frontend/src/app",
+        "frontend/src/features",
+        "frontend/src/platform",
+        "frontend/src/main.tsx"
+      ],
+      "wave": "T014-T025"
+    },
+    "T017": {
+      "status": "DONE",
+      "did": "Built the Z1-Z4 shell, store, ZoneFrame, and MessageBody",
+      "files": [
+        "frontend/src/app",
+        "frontend/src/features",
+        "frontend/src/platform",
+        "frontend/src/main.tsx"
+      ],
+      "wave": "T014-T025"
+    },
+    "T018": {
+      "status": "DONE",
+      "did": "Built the Z1-Z4 shell, store, ZoneFrame, and MessageBody",
+      "files": [
+        "frontend/src/app",
+        "frontend/src/features",
+        "frontend/src/platform",
+        "frontend/src/main.tsx"
+      ],
+      "wave": "T014-T025"
+    },
+    "T019": {
+      "status": "DONE",
+      "did": "Built the Z1-Z4 shell, store, ZoneFrame, and MessageBody",
+      "files": [
+        "frontend/src/app",
+        "frontend/src/features",
+        "frontend/src/platform",
+        "frontend/src/main.tsx"
+      ],
+      "wave": "T014-T025"
+    },
+    "T020": {
+      "status": "DONE",
+      "did": "Built the Z1-Z4 shell, store, ZoneFrame, and MessageBody",
+      "files": [
+        "frontend/src/app",
+        "frontend/src/features",
+        "frontend/src/platform",
+        "frontend/src/main.tsx"
+      ],
+      "wave": "T014-T025"
+    },
+    "T021": {
+      "status": "DONE",
+      "did": "Built the Z1-Z4 shell, store, ZoneFrame, and MessageBody",
+      "files": [
+        "frontend/src/app",
+        "frontend/src/features",
+        "frontend/src/platform",
+        "frontend/src/main.tsx"
+      ],
+      "wave": "T014-T025"
+    },
+    "T022": {
+      "status": "DONE",
+      "did": "Built the Z1-Z4 shell, store, ZoneFrame, and MessageBody",
+      "files": [
+        "frontend/src/app",
+        "frontend/src/features",
+        "frontend/src/platform",
+        "frontend/src/main.tsx"
+      ],
+      "wave": "T014-T025"
+    },
+    "T023": {
+      "status": "DONE",
+      "did": "Built the Z1-Z4 shell, store, ZoneFrame, and MessageBody",
+      "files": [
+        "frontend/src/app",
+        "frontend/src/features",
+        "frontend/src/platform",
+        "frontend/src/main.tsx"
+      ],
+      "wave": "T014-T025"
+    },
+    "T024": {
+      "status": "DONE",
+      "did": "Built the Z1-Z4 shell, store, ZoneFrame, and MessageBody",
+      "files": [
+        "frontend/src/app",
+        "frontend/src/features",
+        "frontend/src/platform",
+        "frontend/src/main.tsx"
+      ],
+      "wave": "T014-T025"
+    },
+    "T025": {
+      "status": "DONE",
+      "did": "Built the Z1-Z4 shell, store, ZoneFrame, and MessageBody",
+      "files": [
+        "frontend/src/app",
+        "frontend/src/features",
+        "frontend/src/platform",
+        "frontend/src/main.tsx"
+      ],
+      "wave": "T014-T025"
+    },
+    "T026": {
+      "status": "DONE",
+      "did": "Added the B5 handler, story, CI, and bundle proofs",
+      "files": [
+        "frontend/src/test",
+        "frontend/e2e"
+      ],
+      "wave": "T026-T030"
+    },
+    "T027": {
+      "status": "DONE",
+      "did": "Added the B5 handler, story, CI, and bundle proofs",
+      "files": [
+        "frontend/src/test",
+        "frontend/e2e"
+      ],
+      "wave": "T026-T030"
+    },
+    "T028": {
+      "status": "DONE",
+      "did": "Added the B5 handler, story, CI, and bundle proofs",
+      "files": [
+        "frontend/src/test",
+        "frontend/e2e"
+      ],
+      "wave": "T026-T030"
+    },
+    "T029": {
+      "status": "DONE",
+      "did": "Added the B5 handler, story, CI, and bundle proofs",
+      "files": [
+        "frontend/src/test",
+        "frontend/e2e"
+      ],
+      "wave": "T026-T030"
+    },
+    "T030": {
+      "status": "DONE",
+      "did": "Added the B5 handler, story, CI, and bundle proofs",
+      "files": [
+        "frontend/src/test",
+        "frontend/e2e"
+      ],
+      "wave": "T026-T030"
+    },
+    "T031": {
+      "status": "DONE",
+      "did": "Wired MSW, Storybook, Playwright, and Frontend CI",
+      "files": [
+        "frontend/src/mocks",
+        "frontend/.storybook",
+        ".github/workflows/frontend-ci.yml"
+      ],
+      "wave": "T031-T036"
+    },
+    "T032": {
+      "status": "DONE",
+      "did": "Wired MSW, Storybook, Playwright, and Frontend CI",
+      "files": [
+        "frontend/src/mocks",
+        "frontend/.storybook",
+        ".github/workflows/frontend-ci.yml"
+      ],
+      "wave": "T031-T036"
+    },
+    "T033": {
+      "status": "DONE",
+      "did": "Wired MSW, Storybook, Playwright, and Frontend CI",
+      "files": [
+        "frontend/src/mocks",
+        "frontend/.storybook",
+        ".github/workflows/frontend-ci.yml"
+      ],
+      "wave": "T031-T036"
+    },
+    "T034": {
+      "status": "DONE",
+      "did": "Wired MSW, Storybook, Playwright, and Frontend CI",
+      "files": [
+        "frontend/src/mocks",
+        "frontend/.storybook",
+        ".github/workflows/frontend-ci.yml"
+      ],
+      "wave": "T031-T036"
+    },
+    "T035": {
+      "status": "DONE",
+      "did": "Wired MSW, Storybook, Playwright, and Frontend CI",
+      "files": [
+        "frontend/src/mocks",
+        "frontend/.storybook",
+        ".github/workflows/frontend-ci.yml"
+      ],
+      "wave": "T031-T036"
+    },
+    "T036": {
+      "status": "DONE",
+      "did": "Wired MSW, Storybook, Playwright, and Frontend CI",
+      "files": [
+        "frontend/src/mocks",
+        "frontend/.storybook",
+        ".github/workflows/frontend-ci.yml"
+      ],
+      "wave": "T031-T036"
+    },
+    "T037": {
+      "status": "DONE",
+      "did": "Re-ran lint, Vitest, build, Storybook, and Playwright",
+      "files": [
+        "frontend/package.json"
+      ],
+      "wave": "T037-T040"
+    },
+    "T038": {
+      "status": "DONE",
+      "did": "Re-ran lint, Vitest, build, Storybook, and Playwright",
+      "files": [
+        "frontend/package.json"
+      ],
+      "wave": "T037-T040"
+    },
+    "T039": {
+      "status": "DONE",
+      "did": "Re-ran lint, Vitest, build, Storybook, and Playwright",
+      "files": [
+        "frontend/package.json"
+      ],
+      "wave": "T037-T040"
+    },
+    "T040": {
+      "status": "DONE",
+      "did": "Re-ran lint, Vitest, build, Storybook, and Playwright",
+      "files": [
+        "frontend/package.json"
+      ],
+      "wave": "T037-T040"
+    },
+    "T041": {
+      "status": "DONE",
+      "did": "Closed the convergence gaps for layout, keyboard order, stream stop, lazy routes, query, stories, and lint",
+      "files": [
+        "frontend/src/app/layout/WorkspaceShell.tsx",
+        "frontend/src/features/companion/Companion.tsx",
+        "frontend/src/features/models/ModelSelector.tsx",
+        "frontend/src/app/route-views.tsx",
+        "frontend/vitest.config.ts",
+        ".github/workflows/frontend-ci.yml",
+        "frontend/eslint.config.js"
+      ],
+      "wave": "T041-T053"
+    },
+    "T042": {
+      "status": "DONE",
+      "did": "Closed the convergence gaps for layout, keyboard order, stream stop, lazy routes, query, stories, and lint",
+      "files": [
+        "frontend/src/app/layout/WorkspaceShell.tsx",
+        "frontend/src/features/companion/Companion.tsx",
+        "frontend/src/features/models/ModelSelector.tsx",
+        "frontend/src/app/route-views.tsx",
+        "frontend/vitest.config.ts",
+        ".github/workflows/frontend-ci.yml",
+        "frontend/eslint.config.js"
+      ],
+      "wave": "T041-T053"
+    },
+    "T043": {
+      "status": "DONE",
+      "did": "Closed the convergence gaps for layout, keyboard order, stream stop, lazy routes, query, stories, and lint",
+      "files": [
+        "frontend/src/app/layout/WorkspaceShell.tsx",
+        "frontend/src/features/companion/Companion.tsx",
+        "frontend/src/features/models/ModelSelector.tsx",
+        "frontend/src/app/route-views.tsx",
+        "frontend/vitest.config.ts",
+        ".github/workflows/frontend-ci.yml",
+        "frontend/eslint.config.js"
+      ],
+      "wave": "T041-T053"
+    },
+    "T044": {
+      "status": "DONE",
+      "did": "Closed the convergence gaps for layout, keyboard order, stream stop, lazy routes, query, stories, and lint",
+      "files": [
+        "frontend/src/app/layout/WorkspaceShell.tsx",
+        "frontend/src/features/companion/Companion.tsx",
+        "frontend/src/features/models/ModelSelector.tsx",
+        "frontend/src/app/route-views.tsx",
+        "frontend/vitest.config.ts",
+        ".github/workflows/frontend-ci.yml",
+        "frontend/eslint.config.js"
+      ],
+      "wave": "T041-T053"
+    },
+    "T045": {
+      "status": "DONE",
+      "did": "Closed the convergence gaps for layout, keyboard order, stream stop, lazy routes, query, stories, and lint",
+      "files": [
+        "frontend/src/app/layout/WorkspaceShell.tsx",
+        "frontend/src/features/companion/Companion.tsx",
+        "frontend/src/features/models/ModelSelector.tsx",
+        "frontend/src/app/route-views.tsx",
+        "frontend/vitest.config.ts",
+        ".github/workflows/frontend-ci.yml",
+        "frontend/eslint.config.js"
+      ],
+      "wave": "T041-T053"
+    },
+    "T046": {
+      "status": "DONE",
+      "did": "Closed the convergence gaps for layout, keyboard order, stream stop, lazy routes, query, stories, and lint",
+      "files": [
+        "frontend/src/app/layout/WorkspaceShell.tsx",
+        "frontend/src/features/companion/Companion.tsx",
+        "frontend/src/features/models/ModelSelector.tsx",
+        "frontend/src/app/route-views.tsx",
+        "frontend/vitest.config.ts",
+        ".github/workflows/frontend-ci.yml",
+        "frontend/eslint.config.js"
+      ],
+      "wave": "T041-T053"
+    },
+    "T047": {
+      "status": "DONE",
+      "did": "Closed the convergence gaps for layout, keyboard order, stream stop, lazy routes, query, stories, and lint",
+      "files": [
+        "frontend/src/app/layout/WorkspaceShell.tsx",
+        "frontend/src/features/companion/Companion.tsx",
+        "frontend/src/features/models/ModelSelector.tsx",
+        "frontend/src/app/route-views.tsx",
+        "frontend/vitest.config.ts",
+        ".github/workflows/frontend-ci.yml",
+        "frontend/eslint.config.js"
+      ],
+      "wave": "T041-T053"
+    },
+    "T048": {
+      "status": "DONE",
+      "did": "Closed the convergence gaps for layout, keyboard order, stream stop, lazy routes, query, stories, and lint",
+      "files": [
+        "frontend/src/app/layout/WorkspaceShell.tsx",
+        "frontend/src/features/companion/Companion.tsx",
+        "frontend/src/features/models/ModelSelector.tsx",
+        "frontend/src/app/route-views.tsx",
+        "frontend/vitest.config.ts",
+        ".github/workflows/frontend-ci.yml",
+        "frontend/eslint.config.js"
+      ],
+      "wave": "T041-T053"
+    },
+    "T049": {
+      "status": "DONE",
+      "did": "Closed the convergence gaps for layout, keyboard order, stream stop, lazy routes, query, stories, and lint",
+      "files": [
+        "frontend/src/app/layout/WorkspaceShell.tsx",
+        "frontend/src/features/companion/Companion.tsx",
+        "frontend/src/features/models/ModelSelector.tsx",
+        "frontend/src/app/route-views.tsx",
+        "frontend/vitest.config.ts",
+        ".github/workflows/frontend-ci.yml",
+        "frontend/eslint.config.js"
+      ],
+      "wave": "T041-T053"
+    },
+    "T050": {
+      "status": "DONE",
+      "did": "Closed the convergence gaps for layout, keyboard order, stream stop, lazy routes, query, stories, and lint",
+      "files": [
+        "frontend/src/app/layout/WorkspaceShell.tsx",
+        "frontend/src/features/companion/Companion.tsx",
+        "frontend/src/features/models/ModelSelector.tsx",
+        "frontend/src/app/route-views.tsx",
+        "frontend/vitest.config.ts",
+        ".github/workflows/frontend-ci.yml",
+        "frontend/eslint.config.js"
+      ],
+      "wave": "T041-T053"
+    },
+    "T051": {
+      "status": "DONE",
+      "did": "Closed the convergence gaps for layout, keyboard order, stream stop, lazy routes, query, stories, and lint",
+      "files": [
+        "frontend/src/app/layout/WorkspaceShell.tsx",
+        "frontend/src/features/companion/Companion.tsx",
+        "frontend/src/features/models/ModelSelector.tsx",
+        "frontend/src/app/route-views.tsx",
+        "frontend/vitest.config.ts",
+        ".github/workflows/frontend-ci.yml",
+        "frontend/eslint.config.js"
+      ],
+      "wave": "T041-T053"
+    },
+    "T052": {
+      "status": "DONE",
+      "did": "Closed the convergence gaps for layout, keyboard order, stream stop, lazy routes, query, stories, and lint",
+      "files": [
+        "frontend/src/app/layout/WorkspaceShell.tsx",
+        "frontend/src/features/companion/Companion.tsx",
+        "frontend/src/features/models/ModelSelector.tsx",
+        "frontend/src/app/route-views.tsx",
+        "frontend/vitest.config.ts",
+        ".github/workflows/frontend-ci.yml",
+        "frontend/eslint.config.js"
+      ],
+      "wave": "T041-T053"
+    },
+    "T053": {
+      "status": "DONE",
+      "did": "Closed the convergence gaps for layout, keyboard order, stream stop, lazy routes, query, stories, and lint",
+      "files": [
+        "frontend/src/app/layout/WorkspaceShell.tsx",
+        "frontend/src/features/companion/Companion.tsx",
+        "frontend/src/features/models/ModelSelector.tsx",
+        "frontend/src/app/route-views.tsx",
+        "frontend/vitest.config.ts",
+        ".github/workflows/frontend-ci.yml",
+        "frontend/eslint.config.js"
+      ],
+      "wave": "T041-T053"
+    }
+  },
+  "decisions": [
+    {
+      "decision": "Implement in the checkout that already has the branch",
+      "why": "features/pitch-m000-B-frontend-foundation is checked out here and the spec is uncommitted, so a second worktree cannot take the same branch",
+      "rejected": "A second worktree on another branch",
+      "by": "agent",
+      "at": "2026-11-19T09:44:07.992Z"
+    },
+    {
+      "decision": "react-resizable-panels v2",
+      "why": "The technical design names PanelGroup and PanelResizeHandle",
+      "rejected": "v4 Group and Separator",
+      "by": "agent",
+      "at": "2026-11-19T09:44:07.992Z"
+    },
+    {
+      "decision": "Vite 6.4.1 inside the existing ^6 range",
+      "why": "Vitest 5.1 cannot load its config on Vite 6.2.7",
+      "rejected": "Leaving Vite at 6.2.7",
+      "by": "agent",
+      "at": "2026-11-19T09:44:07.992Z"
+    }
+  ],
+  "verified": [
+    {
+      "what": "Production dist contains no MSW worker",
+      "result": "findstr found neither msw/browser nor mockServiceWorker in frontend/dist"
+    },
+    {
+      "what": "lint",
+      "command": "cd frontend && npx eslint src",
+      "source": "derived",
+      "exitCode": 0,
+      "durationSeconds": 15.0,
+      "result": "no output",
+      "commit": "12077c7",
+      "tree": "b5af9b93a0c2c87faefc37b8e16e6a1df46567ca"
+    },
+    {
+      "what": "typecheck",
+      "command": "npm --prefix frontend exec -- tsc --noEmit",
+      "source": "derived",
+      "exitCode": 1,
+      "durationSeconds": 4.8,
+      "result": "type: boolean · default: false · You can learn about all of the compiler options at https://aka.ms/tsc",
+      "warnings": [
+        "exited 1"
+      ],
+      "commit": "13e9b64",
+      "tree": "f69a455bacf815cd2913efaa74c5107733b9e3fe"
+    },
+    {
+      "what": "vitest",
+      "command": "npm --prefix frontend test",
+      "source": "derived",
+      "exitCode": 0,
+      "durationSeconds": 70.1,
+      "result": "    at ZoneHost (C:/Users/Dell 7470/Documents/dphan/dp-stock-investment-assistant/frontend/src/app/layout/ZoneHost.tsx:7:1) ·     at div · React will try to recreate this component tree from scratch using the error boundary you provided, ZoneHost.",
+      "commit": "13e9b64",
+      "tree": "f69a455bacf815cd2913efaa74c5107733b9e3fe"
+    },
+    {
+      "what": "build",
+      "command": "cd frontend && npm run build",
+      "source": "derived",
+      "exitCode": 0,
+      "durationSeconds": 11.8,
+      "result": "dist/assets/route-views-DsTetk7s.js    0.42 kB │ gzip:   0.24 kB · dist/assets/index-HTu7SEZ7.js        467.86 kB │ gzip: 148.93 kB · ✓ built in 8.67s",
+      "commit": "12077c7",
+      "tree": "b5af9b93a0c2c87faefc37b8e16e6a1df46567ca"
+    },
+    {
+      "what": "storybook",
+      "command": "npm --prefix frontend run build-storybook",
+      "source": "derived",
+      "exitCode": 0,
+      "durationSeconds": 25.6,
+      "result": "└  Storybook build completed successfully · (node:27416) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead. · (Use `node --trace-deprecation ...` to show where the warning was created)",
+      "commit": "13e9b64",
+      "tree": "f69a455bacf815cd2913efaa74c5107733b9e3fe"
+    },
+    {
+      "what": "playwright",
+      "command": "npm --prefix frontend exec -- playwright test",
+      "source": "derived",
+      "exitCode": 1,
+      "durationSeconds": 44.4,
+      "result": "(node:14116) Warning: Failed to load the ES module: C:\\Users\\Dell 7470\\Documents\\dphan\\dp-stock-investment-assistant\\frontend\\src\\test\\b5-s3-bundle.test.ts. Make sure to set \"type\": \"module\" in the nearest package.json file or use the .mjs extension. · (node:14116) Warning: Failed to load the ES module: C:\\Users\\Dell 7470\\Documents\\dphan\\dp-stock-investment-assistant\\frontend\\src\\test\\b5-story-bound.test.ts. Make sure to set \"type\": \"module\" in the nearest package.json file or use the .mjs extension. · (node:14116) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.",
+      "warnings": [
+        "exited 1"
+      ],
+      "commit": "13e9b64",
+      "tree": "5bf95f2b53601c175f98f5d2dd42c1cc967dc650"
+    },
+    {
+      "what": "unit",
+      "command": "cd frontend && npx vitest run --project unit",
+      "source": "derived",
+      "exitCode": 0,
+      "durationSeconds": 79.2,
+      "result": "    at ZoneHost (C:/Users/Dell 7470/Documents/dphan/dp-stock-investment-assistant/frontend/src/app/layout/ZoneHost.tsx:7:1) ·     at div · React will try to recreate this component tree from scratch using the error boundary you provided, ZoneHost.",
+      "commit": "12077c7",
+      "tree": "b5af9b93a0c2c87faefc37b8e16e6a1df46567ca"
+    },
+    {
+      "what": "types",
+      "command": "cd frontend && npx tsc --noEmit",
+      "source": "derived",
+      "exitCode": 0,
+      "durationSeconds": 14.8,
+      "result": "no output",
+      "commit": "12077c7",
+      "tree": "b5af9b93a0c2c87faefc37b8e16e6a1df46567ca"
+    },
+    {
+      "what": "stories",
+      "command": "cd frontend && npx vitest run --project storybook",
+      "source": "derived",
+      "exitCode": 0,
+      "durationSeconds": 23.3,
+      "result": "   Duration  10.64s (setup 49%, worker 29%, tests 20%, import 2%) · (node:25472) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead. · (Use `node --trace-deprecation ...` to show where the warning was created)",
+      "commit": "12077c7",
+      "tree": "b5af9b93a0c2c87faefc37b8e16e6a1df46567ca"
+    },
+    {
+      "what": "e2e",
+      "command": "cd frontend && npx playwright test",
+      "source": "derived",
+      "exitCode": 0,
+      "durationSeconds": 32.7,
+      "result": "(Use `node --trace-warnings ...` to show where the warning was created) · (node:25108) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set. · (Use `node --trace-warnings ...` to show where the warning was created)",
+      "commit": "12077c7",
+      "tree": "b5af9b93a0c2c87faefc37b8e16e6a1df46567ca"
+    }
+  ],
+  "concerns": [
+    {
+      "note": "The doc-sync gate was not run. This spec forbids edits to docs/** and specs/spec-traceability.yaml.",
+      "step": "implement"
+    }
+  ],
+  "coverage": {
+    "FR-006": {
+      "tests": [
+        "frontend/src/app/layout/WorkspaceShell.test.tsx"
+      ]
+    },
+    "FR-009": {
+      "tests": [
+        "frontend/src/design-system/patterns/ZoneFrame/ZoneFrame.test.tsx"
+      ]
+    },
+    "FR-012": {
+      "tests": [
+        "frontend/src/design-system/patterns/MessageBody/MessageBody.test.tsx"
+      ]
+    },
+    "FR-015": {
+      "tests": [
+        "frontend/src/app/router.chart-slot.test.tsx"
+      ]
+    },
+    "FR-024": {
+      "tests": [
+        "frontend/e2e/b3-d3-widths.spec.ts"
+      ]
+    }
+  },
+  "risk": {
+    "tier": "high",
+    "computed": "high",
+    "reasons": [
+      "touches .github/workflows/frontend-ci.yml, .github/workflows/spec-trace.yml, docs/research/AUTH0_BFF_VS_SPA_PKCE_RESEARCH.md and 5 more"
+    ]
+  },
+  "convergeStartedAt": "2026-11-19T10:39:27.076Z"
 }

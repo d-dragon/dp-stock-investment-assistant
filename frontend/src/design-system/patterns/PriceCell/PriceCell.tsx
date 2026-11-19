@@ -38,10 +38,10 @@ export function PriceCell({ value, reference, ceiling, floor }: PriceCellProps) 
     return <span role="img" aria-label={fmt.missingAccessibleName()}>—</span>
   }
   const band = bandFor(value, reference, ceiling, floor)
+  const label = `${arrow[band]}${fmt.price(value)}`
   return (
-    <span role="img" style={{ color: colour[band] }}>
-      {arrow[band]}
-      {fmt.price(value)}
+    <span role="img" aria-label={label} style={{ color: colour[band] }}>
+      {label}
     </span>
   )
 }

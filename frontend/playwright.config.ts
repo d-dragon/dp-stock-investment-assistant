@@ -7,6 +7,7 @@ export default defineConfig({
   },
   webServer: {
     command: 'npx vite --host 127.0.0.1 --port 4173 --strictPort',
+    env: { VITE_USE_MOCKS: 'true' },
     url: 'http://127.0.0.1:4173',
     reuseExistingServer: false,
     timeout: 120000,

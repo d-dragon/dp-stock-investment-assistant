@@ -1,7 +1,7 @@
 # SRS To Spec Traceability
 
-> **Document Version**: 3.5
-> **Generated**: 2026-11-18 06:59:11Z
+> **Document Version**: 3.6
+> **Generated**: 2026-11-19 13:38:31Z
 > **Status**: Active
 > **Traceability Manifest Version**: 1
 
@@ -46,6 +46,7 @@
 | `3.3` | `2026-07-07` | Regenerated reverse trace after tool-system-m2b.3 planning artifacts advanced the feature lifecycle to planned. |
 | `3.4` | `2026-07-07` | Regenerated reverse trace after tool-system-m2b.3 task generation added tasks.md as planned implementation evidence. |
 | `3.5` | `2026-11-18` | Registered 004-m000-b-frontend-foundation-core against system SRS SR and SNR ids. The agent reverse index does not emit rows for those ids. |
+| `3.6` | `2026-11-19` | Linked 005-m000-b-frontend-foundation-shell-qa to the system SRS rows this delivery lands. The agent reverse index does not emit SR or SNR rows. |
 
 ## Family Index
 

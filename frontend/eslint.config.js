@@ -194,7 +194,13 @@ module.exports = [
           ],
           patterns: [
             {
-              group: ['**/app/**', '**/features/*/components/**', '**/features/*/hooks/**', '**/features/*/model/**'],
+              group: [
+                '**/app/**',
+                '**/components/**',
+                '**/features/*/components/**',
+                '**/features/*/hooks/**',
+                '**/features/*/model/**',
+              ],
               message: 'No sibling-feature or deep imports. Import a feature only through its index.',
             },
           ],
@@ -478,6 +484,103 @@ module.exports = [
         {
           selector: 'Literal[value=/var\\(--market-/]',
           message: 'Read var(--market-*) only inside PriceCell and Delta.',
+        },
+      ],
+    },
+  },
+  {
+    files: [
+      'src/app/**/*.{js,jsx,ts,tsx}',
+      'src/features/**/*.{js,jsx,ts,tsx}',
+      'src/design-system/patterns/**/*.{js,jsx,ts,tsx}',
+      'eslint-fixtures/b3-jsx-literal.tsx',
+    ],
+    ignores: ['**/*.test.ts', '**/*.test.tsx', '**/*.stories.tsx'],
+    plugins: { react },
+    rules: {
+      'react/jsx-no-literals': [
+        'error',
+        { allowedStrings: ['·', '—', '/', '%', '₫', '+', '−'], ignoreProps: true },
+      ],
+    },
+  },
+  {
+    files: [
+      'src/features/**/*.{js,jsx,ts,tsx}',
+      'eslint-fixtures/b3-feature-color.tsx',
+      'eslint-fixtures/b3-feature-stream.ts',
+    ],
+    ignores: ['**/*.test.ts', '**/*.test.tsx', '**/*.stories.tsx'],
+    rules: {
+      'no-restricted-syntax': [
+        'error',
+        {
+          selector: "CallExpression[callee.name='fetch']",
+          message: 'fetch is allowed only inside platform/api and platform/stream.',
+        },
+        {
+          selector: "NewExpression[callee.name='XMLHttpRequest']",
+          message: 'XMLHttpRequest is allowed only inside platform/api and platform/stream.',
+        },
+        {
+          selector: "NewExpression[callee.name='WebSocket']",
+          message: 'WebSocket is not allowed.',
+        },
+        {
+          selector: "NewExpression[callee.name='EventSource']",
+          message: 'EventSource is not allowed.',
+        },
+        {
+          selector: "Literal[value='meta'], Literal[value='token'], Literal[value='final']",
+          message: 'Stream event names stay in the StreamEvent union and legacyChatAdapter.',
+        },
+        {
+          selector: 'Literal[value=/var\\(--market-/]',
+          message: 'Read var(--market-*) only inside PriceCell and Delta.',
+        },
+        {
+          selector: 'Literal[value=/var\\(--state-/]',
+          message: 'Read var(--state-*) only inside StatusBadge.',
+        },
+        {
+          selector: 'Literal[value=/\\[#/]',
+          message: 'Arbitrary Tailwind colours stay inside design-system/patterns.',
+        },
+        {
+          selector: 'Literal[value=/\\[var\\(--market-/]',
+          message: 'Arbitrary Tailwind colours stay inside design-system/patterns.',
+        },
+        {
+          selector: 'Literal[value=/\\[var\\(--state-/]',
+          message: 'Arbitrary Tailwind colours stay inside design-system/patterns.',
+        },
+        {
+          selector: 'Literal[value=/^#[0-9A-Fa-f]{3,8}$/]',
+          message: 'No hex colour literals in features.',
+        },
+        {
+          selector: 'Literal[value=/^rgb\\(/]',
+          message: 'No rgb() colour literals in features.',
+        },
+        {
+          selector: 'Literal[value=/^hsl\\(/]',
+          message: 'No hsl() colour literals in features.',
+        },
+      ],
+    },
+  },
+  {
+    files: ['eslint-fixtures/b3-legacy-components-import.ts'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              group: ['**/components/**'],
+              message: 'Do not import legacy src/components.',
+            },
+          ],
         },
       ],
     },

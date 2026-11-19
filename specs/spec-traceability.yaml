@@ -3,7 +3,7 @@ generated_on: 2026-03-31
 
 reports:
   spec_sync_status:
-    version: "1.20"
+    version: "1.21"
     status: Active
     revision_history:
       - version: "1.0"
@@ -69,8 +69,11 @@ reports:
       - version: "1.20"
         date: 2026-11-18
         summary: Added 004-m000-b-frontend-foundation-core as a mapped partial feature and promoted it to verified after review.md, .verify-done, complete tasks, and the sync gate.
+      - version: "1.21"
+        date: 2026-11-19
+        summary: Mapped 005-m000-b-frontend-foundation-shell-qa to the system SRS at implemented status. B3 and B5 claim the shell, store, viewport, and axe rows. Verified stays blocked until .verify-done exists.
   srs_spec_traceability:
-    version: "3.5"
+    version: "3.6"
     status: Active
     revision_history:
       - version: "1.0"
@@ -151,6 +154,9 @@ reports:
       - version: "3.5"
         date: 2026-11-18
         summary: Registered 004-m000-b-frontend-foundation-core against system SRS SR and SNR ids. The agent reverse index does not emit rows for those ids.
+      - version: "3.6"
+        date: 2026-11-19
+        summary: Linked 005-m000-b-frontend-foundation-shell-qa to the system SRS rows this delivery lands. The agent reverse index does not emit SR or SNR rows.
 
 srs:
   path: docs/domains/agent/SOFTWARE_REQUIREMENTS_SPECIFICATION.md
@@ -1645,12 +1651,73 @@ features:
     feature_title: M-000 Frontend foundation shell and QA (delivery 2 of 2)
     feature_path: specs/005-m000-b-frontend-foundation-shell-qa
     reference_document: specs/005-m000-b-frontend-foundation-shell-qa/spec.md
-    mapping_status: unmapped
+    reference_anchor: requirements-mandatory
+    mapping_status: mapped
     feature_kind: implementation-feature
-    sync_notes:
-      - "Specify only. spec.md Status is Draft; no plan.md or tasks.md yet."
-      - "Left unmapped so the sync gate does not fail on a draft. Map against system SRS ids (SR-1.4.1 workspace store, B3, B5 rows) once planned."
-      - "Prerequisites B0, B1, B2, B4 are delivered by 004-m000-b-frontend-foundation-core."
+    status_sync:
+      source_of_truth: derived
+      gate_enforced: true
+      synchronized_documents:
+        - specs/005-m000-b-frontend-foundation-shell-qa/spec.md
+        - specs/005-m000-b-frontend-foundation-shell-qa/plan.md
+        - specs/005-m000-b-frontend-foundation-shell-qa/tasks.md
+        - specs/005-m000-b-frontend-foundation-shell-qa/review.md
+    srs_mapping:
+      srs: system
+      baseline_version: "0.3.3"
+      coverage_status: partial
+      mapped_srs_items:
+        - SR-1.4.1
+        - SR-1.4.2
+        - SR-1.3.1
+        - SR-1.3.2
+        - SNR-6.1.4
+        - SNR-7.1.1
+        - SNR-7.2.1
+      mapped_functional_groups:
+        - group: SR-1
+          coverage: partial
+          includes:
+            - SR-1.4.1
+            - SR-1.4.2
+            - SR-1.3.1
+            - SR-1.3.2
+        - group: SNR-6
+          coverage: partial
+          includes:
+            - SNR-6.1.4
+        - group: SNR-7
+          coverage: partial
+          includes:
+            - SNR-7.1.1
+            - SNR-7.2.1
+      sync_notes:
+        - "These IDs live in docs/system/SYSTEM_REQUIREMENTS_SPECIFICATION.md. The agent reverse index does not emit rows for SR or SNR ids."
+        - "Coverage is partial. Tasks are 58/58. review.md exists. .verify-done does not, so the derived status is implemented, matching spec.md."
+        - "SR-1.4.1 is this delivery's done bar for the Z1-Z4 shell."
+        - "SR-1.4.2 is the shell side: track, symbol, Core-object reference, and sessionRef as references. Spec 004 keeps the opaque sessionRef shape. Identity stays with Pitch A."
+        - "SR-1.3.1 is the shell frame only. Both tracks are visible in Z1. Canvas verification stays with M-001."
+        - "SR-1.3.2 is the store seam only. Canvas verification stays with M-001."
+        - "SNR-6.1.4 adds the shell and workspace-store proofs. Delivery 1 keeps the G1 path and the streaming-client seam. The coverage target stays TBD."
+        - "SNR-7.1.1 is exercised at 1920, 1440, 1024, and 768. Priority stays P2."
+        - "SNR-7.2.1 stays P2. The axe baseline is the shell routes and the in-scope stories. The contrast script stays in M-001."
+        - "SR-5.1.2 and SNR-8.1.2 stay with spec 004. SR-5.2.1 and SR-5.2.2 stay Superseded. SR-1.3.5 stays out of scope."
+        - "Prerequisites B0, B1, B2, and B4 stay with 004-m000-b-frontend-foundation-core."
+        - "The system SRS prose was not rewritten."
+    speckit_mapping:
+      evidence_paths:
+        - path: specs/005-m000-b-frontend-foundation-shell-qa/spec.md
+          label: Feature specification
+          anchor: requirements-mandatory
+        - path: specs/005-m000-b-frontend-foundation-shell-qa/plan.md
+          label: Implementation plan
+        - path: specs/005-m000-b-frontend-foundation-shell-qa/tasks.md
+          label: Implementation tasks
+        - path: specs/005-m000-b-frontend-foundation-shell-qa/review.md
+          label: Verification report
+    lifecycle:
+      status: implemented
+      current_step: verify
 
 # BEGIN GENERATED: pitch-trace
 # Generated by scripts/sync_spec_status.py. Do not edit by hand.
@@ -1685,8 +1752,8 @@ pitch_trace:
         path: specs/005-m000-b-frontend-foundation-shell-qa/spec.md
         slices: [B3, B5]
         rows: [B3-D1, B3-D2, B3-D3, B3-D4, B3-D5, B3-D6, B3-D7, B3-D8, B3-D9, B5-S1, B5-S2, B5-S3]
-        task_rows: []
-        test_rows: []
+        task_rows: [B3-D1, B3-D4, B3-D5, B3-D7, B3-D6, B3-D8, B3-D9, B5-S1, B3-D2, B3-D3, B5-S2, B4-T4, B5-S3]
+        test_rows: [B3-D8, B5-S3]
     slice_delivery:
       - slice: B0
         specs: [004-m000-b-frontend-foundation-core]
@@ -1699,13 +1766,13 @@ pitch_trace:
         status: verified
       - slice: B3
         specs: [005-m000-b-frontend-foundation-shell-qa]
-        status: unmapped
+        status: implemented
       - slice: B4
         specs: [004-m000-b-frontend-foundation-core]
         status: verified
       - slice: B5
         specs: [005-m000-b-frontend-foundation-shell-qa]
-        status: unmapped
+        status: implemented
     deferred_rows:
       - B4-T5
       - B4-T6
