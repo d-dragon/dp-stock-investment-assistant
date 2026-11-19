@@ -34,3 +34,27 @@ This is the ordered list of pitches chosen at the betting table (rules: [Require
 | 8 | **EXAMPLE — no pitch file yet** | [M-009](../../docs/system/PRODUCT_SPECIFICATION.md#m-009) Saved layout presets — P1 | *example:* shaped | *example:* 1 wk | Speed across work once the Canvas exists | Partly ready: blocked until Adaptive Visual Canvas is delivered; per-user state needs M-000 Pitch A (ADR-SYS-001) | *example:* 6 × 1 × 0.5 ÷ 1 = 3.0 | — |
 
 *RICE is optional and advisory: with only a few pitches it gives false precision; the betting order above is what counts.* Example RICE scales: Reach 1–10, Impact 0.5–3, Confidence 0–1, Effort in weeks.
+
+## Traceability IDs
+
+Convention adopted by the Product Owner, 2026-11-18 (hybrid approach). The docs are the source of truth, and each child names its parent. A script generates the reverse links (pitch to slices, specs, rows, tasks and tests) into the generated section of [`specs/spec-traceability.yaml`](../spec-traceability.yaml). Nobody writes that section by hand, and CI fails on orphans. GitHub issues may mirror these IDs later, but they never own them.
+
+| Level | Format | Example | Defined in | Names its parent by |
+|---|---|---|---|---|
+| Pitch | `M-nnn-X` (Milestone + pitch letter) | `M-000-B` | Pitch file name and title | Its Milestone link in the Ranking table |
+| Slice | `Bn`, unique within its pitch | `B2` | Pitch "Solution sketch" | The pitch file it sits in |
+| Acceptance row | Slice + kind + number. Kinds: `D` design and UX, `F` format, `P` format edge case, `T` tokens and type, `S` Storybook, MSW and CI | `B3-D4`, `B4-P2` | Pitch acceptance tables | Its slice prefix |
+| Spec | Spec Kit folder number | `004` | `specs/nnn-<slug>/` | Front matter `pitch:` and `slices:` (a list, so one spec may cover several slices and one slice may span specs) |
+| Requirement, success criterion, user story | `FR-nnn`, `SC-nnn`, `USn`, scoped to the spec | `004/FR-001` | `spec.md` | Front matter `rows:` plus row IDs written inline |
+| Task | `Tnnn`, scoped to the spec | `004/T005` | `tasks.md` | The slice or row ID written in the task line |
+| Test | The row ID appears in the file or test name | `it('B4-F1 ...')` | Test code | That row ID |
+
+**Rules**
+
+1. IDs are stable. An ID already used in a task or test is never renamed or reused; a cut row keeps its ID and is marked cut or moved.
+2. Write canonical IDs outside their home table. Pitch B lists `P1`-`P4` without a prefix inside the B4 table; everywhere else write `B4-P1`-`B4-P4`.
+3. Pitch steps are not rows. Pitch B's migration steps `T0`-`T8` are written as "step T3" in new text. Existing `Bn-Tn` uses of a step in `tasks.md` and test names (for example `B1-T0`) stay as they are, and the script resolves them through an alias list. In `rows:` and in new text, `Bn-Tn` means a tokens-and-type acceptance row only.
+4. Orphan check, in both directions:
+   - **Fail:** a must-have (M) row in the current Milestone with no spec, task or test, or a spec, task or test that names an ID that does not exist.
+   - **Warn:** a row of a lower tier that has no link yet.
+   - **Deferred, not checked:** rows marked "Moved to M-nnn" (in Pitch B: `B4-T5`, `B4-T6`, `B5-S4`). They are checked under the Milestone they moved to.

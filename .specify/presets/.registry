@@ -43,9 +43,28 @@
           "speckit.analyze",
           "speckit.implement",
           "speckit.constitution"
+        ],
+        "grok": [
+          "speckit.specify",
+          "speckit.clarify",
+          "speckit.plan",
+          "speckit.tasks",
+          "speckit.analyze",
+          "speckit.implement",
+          "speckit.constitution"
         ]
       },
-      "registered_skills": [],
+      "registered_skills": {
+        "grok": [
+          "speckit-specify",
+          "speckit-clarify",
+          "speckit-plan",
+          "speckit-tasks",
+          "speckit-analyze",
+          "speckit-implement",
+          "speckit-constitution"
+        ]
+      },
       "installed_at": "2026-07-15T07:29:40.157004+00:00"
     }
   }

@@ -24,9 +24,20 @@
           "speckit.understanding",
           "speckit.understanding.validate",
           "speckit.understanding.energy"
+        ],
+        "grok": [
+          "speckit.understanding.scan",
+          "speckit.understanding",
+          "speckit.understanding.validate",
+          "speckit.understanding.energy"
         ]
       },
-      "installed_at": "2026-03-16T04:12:21.870110+00:00"
+      "installed_at": "2026-03-16T04:12:21.870110+00:00",
+      "registered_skills": [
+        "speckit-understanding-scan",
+        "speckit-understanding-validate",
+        "speckit-understanding-energy"
+      ]
     },
     "verify-tasks": {
       "version": "1.0.0",
@@ -46,9 +57,16 @@
         "agy": [
           "speckit.verify-tasks.run",
           "speckit.verify-tasks"
+        ],
+        "grok": [
+          "speckit.verify-tasks.run",
+          "speckit.verify-tasks"
         ]
       },
-      "installed_at": "2026-03-23T03:07:54.641378+00:00"
+      "installed_at": "2026-03-23T03:07:54.641378+00:00",
+      "registered_skills": [
+        "speckit-verify-tasks-run"
+      ]
     },
     "speckit-utils": {
       "version": "1.0.0",
@@ -80,9 +98,22 @@
           "speckit.doctor",
           "speckit.speckit-utils.validate",
           "speckit.validate"
+        ],
+        "grok": [
+          "speckit.speckit-utils.resume",
+          "speckit.resume",
+          "speckit.speckit-utils.doctor",
+          "speckit.doctor",
+          "speckit.speckit-utils.validate",
+          "speckit.validate"
         ]
       },
-      "installed_at": "2026-03-23T03:58:15.288439+00:00"
+      "installed_at": "2026-03-23T03:58:15.288439+00:00",
+      "registered_skills": [
+        "speckit-speckit-utils-resume",
+        "speckit-speckit-utils-doctor",
+        "speckit-speckit-utils-validate"
+      ]
     },
     "git": {
       "version": "1.0.0",
@@ -111,9 +142,22 @@
           "speckit.git.remote",
           "speckit.git.initialize",
           "speckit.git.commit"
+        ],
+        "grok": [
+          "speckit.git.feature",
+          "speckit.git.validate",
+          "speckit.git.remote",
+          "speckit.git.initialize",
+          "speckit.git.commit"
         ]
       },
-      "registered_skills": [],
+      "registered_skills": [
+        "speckit-git-feature",
+        "speckit-git-validate",
+        "speckit-git-remote",
+        "speckit-git-initialize",
+        "speckit-git-commit"
+      ],
       "installed_at": "2026-05-04T03:20:00.335901+00:00"
     },
     "fleet": {
@@ -134,9 +178,16 @@
         "agy": [
           "speckit.fleet.run",
           "speckit.fleet.review"
+        ],
+        "grok": [
+          "speckit.fleet.run",
+          "speckit.fleet.review"
         ]
       },
-      "registered_skills": [],
+      "registered_skills": [
+        "speckit-fleet-run",
+        "speckit-fleet-review"
+      ],
       "installed_at": "2026-03-16T06:30:36.324513+00:00"
     },
     "verify": {
@@ -174,9 +225,14 @@
         ],
         "agy": [
           "speckit.memory-loader.load"
+        ],
+        "grok": [
+          "speckit.memory-loader.load"
         ]
       },
-      "registered_skills": [],
+      "registered_skills": [
+        "speckit-memory-loader-load"
+      ],
       "installed_at": "2026-05-21T07:31:57.127747+00:00"
     },
     "arch": {
@@ -197,9 +253,16 @@
         "agy": [
           "speckit.arch.generate",
           "speckit.arch.reverse"
+        ],
+        "grok": [
+          "speckit.arch.generate",
+          "speckit.arch.reverse"
         ]
       },
-      "registered_skills": [],
+      "registered_skills": [
+        "speckit-arch-generate",
+        "speckit-arch-reverse"
+      ],
       "installed_at": "2026-05-21T07:37:22.755969+00:00"
     },
     "agent-context": {
@@ -217,9 +280,14 @@
         ],
         "agy": [
           "speckit.agent-context.update"
+        ],
+        "grok": [
+          "speckit.agent-context.update"
         ]
       },
-      "registered_skills": [],
+      "registered_skills": [
+        "speckit-agent-context-update"
+      ],
       "installed_at": "2026-06-02T03:30:15.788181+00:00"
     },
     "harness": {
@@ -249,9 +317,22 @@
           "speckit.harness.verify",
           "speckit.harness.status",
           "speckit.harness.report"
+        ],
+        "grok": [
+          "speckit.harness.init",
+          "speckit.harness.explore",
+          "speckit.harness.verify",
+          "speckit.harness.status",
+          "speckit.harness.report"
         ]
       },
-      "registered_skills": [],
+      "registered_skills": [
+        "speckit-harness-init",
+        "speckit-harness-explore",
+        "speckit-harness-verify",
+        "speckit-harness-status",
+        "speckit-harness-report"
+      ],
       "installed_at": "2026-06-16T08:18:19.741223+00:00"
     },
     "security-review": {
@@ -293,9 +374,30 @@
           "speckit.security-review.apply",
           "speckit.security-review.export",
           "speckit.security-review.init"
+        ],
+        "grok": [
+          "speckit.security-review.audit",
+          "speckit.security-review.staged",
+          "speckit.security-review.branch",
+          "speckit.security-review.plan",
+          "speckit.security-review.tasks",
+          "speckit.security-review.followup",
+          "speckit.security-review.apply",
+          "speckit.security-review.export",
+          "speckit.security-review.init"
         ]
       },
-      "registered_skills": [],
+      "registered_skills": [
+        "speckit-security-review-audit",
+        "speckit-security-review-staged",
+        "speckit-security-review-branch",
+        "speckit-security-review-plan",
+        "speckit-security-review-tasks",
+        "speckit-security-review-followup",
+        "speckit-security-review-apply",
+        "speckit-security-review-export",
+        "speckit-security-review-init"
+      ],
       "installed_at": "2026-05-04T04:06:18.177852+00:00"
     },
     "architecture-guard": {
@@ -340,9 +442,32 @@
           "speckit.architecture-guard.architecture-apply",
           "speckit.architecture-guard.init",
           "speckit.architecture-guard.architecture-verify"
+        ],
+        "grok": [
+          "speckit.architecture-guard.governed-plan",
+          "speckit.architecture-guard.governed-tasks",
+          "speckit.architecture-guard.governed-implement",
+          "speckit.architecture-guard.architecture-workflow",
+          "speckit.architecture-guard.architecture-review",
+          "speckit.architecture-guard.violation-detection",
+          "speckit.architecture-guard.refactor-generator",
+          "speckit.architecture-guard.architecture-apply",
+          "speckit.architecture-guard.init",
+          "speckit.architecture-guard.architecture-verify"
         ]
       },
-      "registered_skills": [],
+      "registered_skills": [
+        "speckit-architecture-guard-governed-plan",
+        "speckit-architecture-guard-governed-tasks",
+        "speckit-architecture-guard-governed-implement",
+        "speckit-architecture-guard-architecture-workflow",
+        "speckit-architecture-guard-architecture-review",
+        "speckit-architecture-guard-violation-detection",
+        "speckit-architecture-guard-refactor-generator",
+        "speckit-architecture-guard-architecture-apply",
+        "speckit-architecture-guard-init",
+        "speckit-architecture-guard-architecture-verify"
+      ],
       "installed_at": "2026-05-21T07:20:36.956085+00:00"
     },
     "doc-sync": {
@@ -363,9 +488,14 @@
         ],
         "zed": [
           "speckit.doc-sync.gate"
+        ],
+        "grok": [
+          "speckit.doc-sync.gate"
         ]
       },
-      "registered_skills": [],
+      "registered_skills": [
+        "speckit-doc-sync-gate"
+      ],
       "installed_at": "2026-07-02T05:03:08.240888+00:00"
     },
     "companion": {
@@ -446,9 +576,44 @@
           "speckit.companion.adopt",
           "speckit.companion.drift",
           "speckit.companion.coverage"
+        ],
+        "grok": [
+          "speckit.companion.capture",
+          "speckit.companion.capture-plan",
+          "speckit.companion.capture-tasks",
+          "speckit.companion.capture-implement",
+          "speckit.companion.status",
+          "speckit.companion.resume",
+          "speckit.companion.specify",
+          "speckit.companion.plan",
+          "speckit.companion.tasks",
+          "speckit.companion.implement",
+          "speckit.companion.classify",
+          "speckit.companion.mark-complete",
+          "speckit.companion.auto",
+          "speckit.companion.adopt",
+          "speckit.companion.drift",
+          "speckit.companion.coverage"
         ]
       },
-      "registered_skills": [],
+      "registered_skills": [
+        "speckit-companion-capture",
+        "speckit-companion-capture-plan",
+        "speckit-companion-capture-tasks",
+        "speckit-companion-capture-implement",
+        "speckit-companion-status",
+        "speckit-companion-resume",
+        "speckit-companion-specify",
+        "speckit-companion-plan",
+        "speckit-companion-tasks",
+        "speckit-companion-implement",
+        "speckit-companion-classify",
+        "speckit-companion-mark-complete",
+        "speckit-companion-auto",
+        "speckit-companion-adopt",
+        "speckit-companion-drift",
+        "speckit-companion-coverage"
+      ],
       "installed_at": "2026-07-15T07:34:06.860642+00:00"
     }
   }

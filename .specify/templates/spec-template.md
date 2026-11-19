@@ -1,3 +1,10 @@
+---
+# Pitch trace (product-roadmap work only; delete this block otherwise). Canonical IDs per specs/pitches/README.md "Traceability IDs".
+pitch: M-nnn-X
+slices: [Bn]
+rows: [Bn-D1]
+deferred_rows: []
+---
 # Feature Specification: [FEATURE NAME]
 
 **Feature Branch**: `[###-feature-name]`

@@ -1,7 +1,7 @@
 # Spec Sync Status
 
-> **Document Version**: 1.19
-> **Generated**: 2026-07-24 05:20:21Z
+> **Document Version**: 1.20
+> **Generated**: 2026-11-18 09:29:59Z
 > **Status**: Active
 > **Traceability Manifest Version**: 1
 
@@ -26,6 +26,25 @@
 | [tool-system-m2b.3](tool-system-m2b.3/spec.md#governance-context-mandatory) | `mapped` | `partial` | `verified` | `current` | `128/128` |
 | [002-tool-system-integration-verification](002-tool-system-integration-verification/spec.md#governance-context-mandatory) | `mapped` | `partial` | `verified` | `current` | `58/58` |
 | [003-agent-structured-outputs](003-agent-structured-outputs/spec.md#governance-context-mandatory) | `mapped` | `full` | `implemented` | `current` | `24/24` |
+| [004-m000-b-frontend-foundation-core](004-m000-b-frontend-foundation-core/spec.md#requirements-mandatory) | `mapped` | `partial` | `verified` | `current` | `44/44` |
+| [005-m000-b-frontend-foundation-shell-qa](005-m000-b-frontend-foundation-shell-qa/spec.md) | `unmapped` | `n/a` | `unmapped` | `unmapped` | `n/a` |
+
+## Pitch delivery
+
+| Pitch | Slice | Spec | Status |
+|-------|-------|------|--------|
+| [M-000-A](pitches/M-000-A-identity-and-session.md) | `A1` | `-` | `unclaimed` |
+| [M-000-A](pitches/M-000-A-identity-and-session.md) | `A2` | `-` | `unclaimed` |
+| [M-000-A](pitches/M-000-A-identity-and-session.md) | `A3` | `-` | `unclaimed` |
+| [M-000-B](pitches/M-000-B-frontend-foundation.md) | `B0` | [004-m000-b-frontend-foundation-core](004-m000-b-frontend-foundation-core/spec.md) | `verified` |
+| [M-000-B](pitches/M-000-B-frontend-foundation.md) | `B1` | [004-m000-b-frontend-foundation-core](004-m000-b-frontend-foundation-core/spec.md) | `verified` |
+| [M-000-B](pitches/M-000-B-frontend-foundation.md) | `B2` | [004-m000-b-frontend-foundation-core](004-m000-b-frontend-foundation-core/spec.md) | `verified` |
+| [M-000-B](pitches/M-000-B-frontend-foundation.md) | `B3` | [005-m000-b-frontend-foundation-shell-qa](005-m000-b-frontend-foundation-shell-qa/spec.md) | `unmapped` |
+| [M-000-B](pitches/M-000-B-frontend-foundation.md) | `B4` | [004-m000-b-frontend-foundation-core](004-m000-b-frontend-foundation-core/spec.md) | `verified` |
+| [M-000-B](pitches/M-000-B-frontend-foundation.md) | `B5` | [005-m000-b-frontend-foundation-shell-qa](005-m000-b-frontend-foundation-shell-qa/spec.md) | `unmapped` |
+| [M-001](pitches/M-001-adaptive-visual-canvas.md) | `S1` | `-` | `unclaimed` |
+| [M-001](pitches/M-001-adaptive-visual-canvas.md) | `S2` | `-` | `unclaimed` |
+| [M-001](pitches/M-001-adaptive-visual-canvas.md) | `S3` | `-` | `unclaimed` |
 
 ## Revision History
 
@@ -51,6 +70,7 @@
 | `1.17` | `2026-07-07` | Added tool-system-m2b.3 clarified feature mapping for Vietnam market-data, TradingView visualization provenance, attribution, cache freshness, and route-evaluation scope. |
 | `1.18` | `2026-07-07` | Promoted tool-system-m2b.3 to planned with implementation plan, research, data model, quickstart, and feature-local market-data, attribution, TradingView, and route-evaluation contracts. |
 | `1.19` | `2026-07-07` | Added tool-system-m2b.3 implementation task breakdown with dependency-aware story phases, verification commands, and requirement coverage matrix. |
+| `1.20` | `2026-11-18` | Added 004-m000-b-frontend-foundation-core as a mapped partial feature and promoted it to verified after review.md, .verify-done, complete tasks, and the sync gate. |
 
 ## agent-session-with-stm-wiring
 
@@ -281,6 +301,38 @@
 - Task completion: `24/24`
 - Linked SRS items: `FR-1.2.5, FR-1.2.6, FR-1.2.7, FR-1.2.8, FR-1.2.9, AC-10.1, AC-10.2, AC-10.3, AC-10.4, AC-10.5, AC-10.6, IR-1.14, IR-3.11, ERR-1.4`
 
+## 004-m000-b-frontend-foundation-core
+
+- Title: M-000 Frontend foundation core (delivery 1 of 2)
+- Path: [specs/004-m000-b-frontend-foundation-core](004-m000-b-frontend-foundation-core/spec.md#requirements-mandatory)
+- Mapping status: `mapped`
+- Coverage status: `partial`
+- Derived status: `verified`
+- Sync status: `current`
+- Sync gate enforced: `yes`
+- spec.md status field: `Verified`
+- Task completion: `44/44`
+- Linked SRS items: `SR-5.1.2, SR-1.4.2, SNR-8.1.2, SNR-6.1.4, SNR-7.1.1, SNR-7.2.1`
+- Evidence:
+  - [Feature specification](004-m000-b-frontend-foundation-core/spec.md#requirements-mandatory)
+  - [Implementation plan](004-m000-b-frontend-foundation-core/plan.md)
+  - [Implementation tasks](004-m000-b-frontend-foundation-core/tasks.md)
+  - [Verification report](004-m000-b-frontend-foundation-core/review.md)
+  - [Verify marker](004-m000-b-frontend-foundation-core/.verify-done)
+  - [SNR-8.1.2 frontend-part evidence](004-m000-b-frontend-foundation-core/evidence/snr-8.1.2.md)
+  - [Shared proof and follow-up image build](004-m000-b-frontend-foundation-core/evidence/t043-shared-proof.md)
+
+## 005-m000-b-frontend-foundation-shell-qa
+
+- Title: M-000 Frontend foundation shell and QA (delivery 2 of 2)
+- Path: [specs/005-m000-b-frontend-foundation-shell-qa](005-m000-b-frontend-foundation-shell-qa/spec.md)
+- Mapping status: `unmapped`
+- Coverage status: `n/a`
+- Derived status: `unmapped`
+- Sync status: `unmapped`
+- Sync gate enforced: `no`
+- spec.md status field: `Draft`
+
 ## Status Semantics
 
 - `derived status` is computed from spec-kit artifacts, with a pre-planning `clarified` stage recognized from a spec header of `Status: Clarified`.
@@ -292,4 +344,3 @@
 - Update `spec-traceability.yaml` when a feature gains or changes SRS scope.
 - Update `tasks.md` and workflow markers during delivery.
 - Regenerate this report with `python scripts/sync_spec_status.py --gate` whenever either side changes.
-
