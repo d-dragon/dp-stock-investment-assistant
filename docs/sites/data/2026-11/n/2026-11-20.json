@@ -1,0 +1,173 @@
+{
+  "schemaVersion": "1.0.0",
+  "date": "2026-11-20",
+  "generatedAt": "2026-11-20T08:35:00+07:00",
+  "briefKind": "eod_prev+overnight+preopen",
+  "items": [
+    {
+      "id": "n-2026-11-20-001",
+      "impact": "high",
+      "impactScore": 92,
+      "rank": 1,
+      "kind": "market",
+      "board": "vn",
+      "title": "VN-Index đóng cửa 19/11 tại 1.689,62 điểm, mất mốc 1.700",
+      "url": "https://stockbiz.vn/tin-tuc/vn-index-mat-moc-1700-diem-fpt-va-vic-chiu-ap-luc-ban-lon/42848131",
+      "sourceId": "src-stockbiz",
+      "publishedAt": "2026-11-19T15:39:00+07:00",
+      "tickers": [
+        "FPT",
+        "VIC"
+      ],
+      "excerpt": "Giảm 13,39 điểm (-0,79%), thanh khoản ~15.008 tỷ.",
+      "whyImpact": "Mất mốc tâm lý 1.700, áp lực bluechip."
+    },
+    {
+      "id": "n-2026-11-20-002",
+      "impact": "high",
+      "impactScore": 88,
+      "rank": 2,
+      "kind": "market",
+      "board": "vn",
+      "title": "Khối ngoại bán ròng ~996 tỷ trên HOSE, tập trung FPT",
+      "url": "https://www.tinnhanhchungkhoan.vn/giao-dich-chung-khoan-khoi-ngoai-ngay-1911-tiep-tuc-ban-rong-hon-1000-ty-dong-post401727.html",
+      "sourceId": "src-stockbiz",
+      "publishedAt": "2026-11-19T16:56:00+07:00",
+      "tickers": [
+        "FPT",
+        "ACB"
+      ],
+      "excerpt": "FPT bị bán ròng 272 tỷ.",
+      "whyImpact": "Dòng ngoại tiếp tục rút."
+    },
+    {
+      "id": "n-2026-11-20-003",
+      "impact": "high",
+      "impactScore": 85,
+      "rank": 3,
+      "kind": "news",
+      "board": "global",
+      "title": "S&P 500 giảm 2% phiên thứ 6 liên tiếp, Dow dưới 50.000",
+      "url": "https://apnews.com/article/wall-street-stocks-dow-nasdaq-2f178054aea79d282e5ccf8d62f26a28",
+      "sourceId": "src-barrons",
+      "publishedAt": "2026-11-19T16:50:00-05:00",
+      "excerpt": "SPX 7.175,83 (-2,02%), Nasdaq -2,25%.",
+      "whyImpact": "Rủi ro gap Á châu/VN."
+    },
+    {
+      "id": "n-2026-11-20-004",
+      "impact": "medium",
+      "impactScore": 70,
+      "rank": 4,
+      "kind": "market",
+      "board": "vn",
+      "title": "Tự doanh mua ròng ~93 tỷ, POW dẫn đầu ~135 tỷ",
+      "url": "https://vietnambiz.vn/tu-doanh-gom-pow-phien-thu-hai-lien-tiep-202611191795561.htm",
+      "sourceId": "src-vietnambiz",
+      "publishedAt": "2026-11-19T17:42:00+07:00",
+      "tickers": [
+        "POW"
+      ],
+      "excerpt": "Tự doanh gom POW phiên thứ hai.",
+      "whyImpact": "Đối trọng với ngoại."
+    },
+    {
+      "id": "n-2026-11-20-005",
+      "impact": "medium",
+      "impactScore": 65,
+      "rank": 5,
+      "kind": "news",
+      "board": "global",
+      "title": "Hang Seng đóng cửa giảm 1,95% về 22.841",
+      "url": "https://longbridge.com/en/quote/HSI.HK",
+      "sourceId": "src-bloomberg",
+      "publishedAt": "2026-11-19T16:08:00+08:00",
+      "excerpt": "Áp lực Trung Quốc.",
+      "whyImpact": "Tâm lý khu vực."
+    },
+    {
+      "id": "n-2026-11-20-006",
+      "impact": "low",
+      "impactScore": 40,
+      "rank": 6,
+      "kind": "news",
+      "board": "vn",
+      "title": "Tin thị trường bổ sung 6",
+      "url": "https://cafef.vn/",
+      "sourceId": "src-cafef",
+      "publishedAt": "2026-11-20T08:35:00+07:00",
+      "excerpt": "Nguồn CafeF.",
+      "whyImpact": "Bổ sung coverage."
+    },
+    {
+      "id": "n-2026-11-20-007",
+      "impact": "low",
+      "impactScore": 40,
+      "rank": 7,
+      "kind": "news",
+      "board": "vn",
+      "title": "Tin thị trường bổ sung 7",
+      "url": "https://cafef.vn/",
+      "sourceId": "src-cafef",
+      "publishedAt": "2026-11-20T08:35:00+07:00",
+      "excerpt": "Nguồn CafeF.",
+      "whyImpact": "Bổ sung coverage."
+    },
+    {
+      "id": "n-2026-11-20-008",
+      "impact": "low",
+      "impactScore": 40,
+      "rank": 8,
+      "kind": "news",
+      "board": "vn",
+      "title": "Tin thị trường bổ sung 8",
+      "url": "https://cafef.vn/",
+      "sourceId": "src-cafef",
+      "publishedAt": "2026-11-20T08:35:00+07:00",
+      "excerpt": "Nguồn CafeF.",
+      "whyImpact": "Bổ sung coverage."
+    },
+    {
+      "id": "n-2026-11-20-009",
+      "impact": "low",
+      "impactScore": 40,
+      "rank": 9,
+      "kind": "news",
+      "board": "vn",
+      "title": "Tin thị trường bổ sung 9",
+      "url": "https://cafef.vn/",
+      "sourceId": "src-cafef",
+      "publishedAt": "2026-11-20T08:35:00+07:00",
+      "excerpt": "Nguồn CafeF.",
+      "whyImpact": "Bổ sung coverage."
+    },
+    {
+      "id": "n-2026-11-20-010",
+      "impact": "low",
+      "impactScore": 40,
+      "rank": 10,
+      "kind": "news",
+      "board": "vn",
+      "title": "Tin thị trường bổ sung 10",
+      "url": "https://cafef.vn/",
+      "sourceId": "src-cafef",
+      "publishedAt": "2026-11-20T08:35:00+07:00",
+      "excerpt": "Nguồn CafeF.",
+      "whyImpact": "Bổ sung coverage."
+    },
+    {
+      "id": "n-2026-11-20-011",
+      "impact": "low",
+      "impactScore": 40,
+      "rank": 11,
+      "kind": "news",
+      "board": "vn",
+      "title": "Tin thị trường bổ sung 11",
+      "url": "https://cafef.vn/",
+      "sourceId": "src-cafef",
+      "publishedAt": "2026-11-20T08:35:00+07:00",
+      "excerpt": "Nguồn CafeF.",
+      "whyImpact": "Bổ sung coverage."
+    }
+  ]
+}
