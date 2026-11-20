@@ -1,0 +1,12 @@
+{
+  "market": {
+    "vnindex_eod": 1689.62,
+    "change": -13.39,
+    "foreign_hose": -996.5,
+    "proprietary_hose": 93,
+    "value_hose": 15008.74
+  },
+  "news_events": ["US SPX -2%", "HSI -1.95%", "FPT foreign sell"],
+  "sentiment": {"fireant": "thin", "f247": "thin", "newf319": "thin"},
+  "gaps": ["USDVND SBV morning", "Nikkei close", "BTC exact"]
+}
