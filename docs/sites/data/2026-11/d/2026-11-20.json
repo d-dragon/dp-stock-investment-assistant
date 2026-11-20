@@ -1,0 +1,432 @@
+{
+  "schemaVersion": "1.0.0",
+  "date": "2026-11-20",
+  "newsPath": "2026-11/n/2026-11-20.json",
+  "report": {
+    "schemaVersion": "1.0.0",
+    "id": "daily-brief-2026-11-20",
+    "type": "daily_market_brief",
+    "locale": "vi-VN",
+    "timezone": "Asia/Ho_Chi_Minh",
+    "generatedAt": "2026-11-20T08:35:00+07:00",
+    "coverage": {
+      "eodDate": "2026-11-19",
+      "briefDate": "2026-11-20",
+      "kind": "eod_prev+overnight+preopen"
+    },
+    "marketSession": "preopen",
+    "disclaimer": "Số liệu tham khảo từ nguồn công khai, không phải khuyến nghị đầu tư.",
+    "ui": {
+      "title": "Bản tin thị trường 20/11/2026"
+    },
+    "snapshot": {
+      "quotes": [
+        {
+          "symbol": "VNINDEX",
+          "last": 1689.62,
+          "change": -13.39,
+          "changePct": -0.79,
+          "sourceId": "src-stockbiz",
+          "note": "Đóng cửa 19/11"
+        },
+        {
+          "symbol": "HNX",
+          "last": 238.94,
+          "change": -3.79,
+          "changePct": -1.56,
+          "sourceId": "src-stockbiz"
+        },
+        {
+          "symbol": "DXY",
+          "last": 103.92,
+          "changePct": 0.06,
+          "sourceId": "src-barrons"
+        },
+        {
+          "symbol": "DJI",
+          "last": 49097.06,
+          "change": -1101.11,
+          "changePct": -2.19,
+          "sourceId": "src-barrons"
+        },
+        {
+          "symbol": "NDX",
+          "last": 23879.2,
+          "changePct": -2.25,
+          "sourceId": "src-barrons"
+        },
+        {
+          "symbol": "SPX",
+          "last": 7175.83,
+          "change": -147.8,
+          "changePct": -2.02,
+          "sourceId": "src-barrons"
+        },
+        {
+          "symbol": "NKY",
+          "last": null,
+          "note": "Chưa có đóng cửa phiên Á châu 20/11",
+          "sourceId": "src-yahoo-vn"
+        },
+        {
+          "symbol": "HSI",
+          "last": 22841.62,
+          "changePct": -1.95,
+          "sourceId": "src-bloomberg"
+        },
+        {
+          "symbol": "WTI",
+          "last": 83.06,
+          "sourceId": "src-barrons"
+        },
+        {
+          "symbol": "XAU",
+          "last": 3676.36,
+          "sourceId": "src-barrons"
+        },
+        {
+          "symbol": "BTC",
+          "last": null,
+          "note": "Cần xác nhận",
+          "sourceId": "src-yahoo-btc"
+        },
+        {
+          "symbol": "USDVND",
+          "last": null,
+          "note": "Chưa có tỷ giá SBV sáng 20/11",
+          "sourceId": "src-nhnn"
+        }
+      ]
+    },
+    "globalNews": [
+      {
+        "title": "S&P 500 giảm 2% phiên thứ 6 liên tiếp",
+        "url": "https://apnews.com/",
+        "sourceId": "src-barrons",
+        "impact": "high"
+      },
+      {
+        "title": "Tin thế giới 2",
+        "url": "https://www.barrons.com/",
+        "sourceId": "src-barrons"
+      },
+      {
+        "title": "Tin thế giới 3",
+        "url": "https://www.barrons.com/",
+        "sourceId": "src-barrons"
+      },
+      {
+        "title": "Tin thế giới 4",
+        "url": "https://www.barrons.com/",
+        "sourceId": "src-barrons"
+      },
+      {
+        "title": "Tin thế giới 5",
+        "url": "https://www.barrons.com/",
+        "sourceId": "src-barrons"
+      },
+      {
+        "title": "Tin thế giới 6",
+        "url": "https://www.barrons.com/",
+        "sourceId": "src-barrons"
+      },
+      {
+        "title": "Tin thế giới 7",
+        "url": "https://www.barrons.com/",
+        "sourceId": "src-barrons"
+      },
+      {
+        "title": "Tin thế giới 8",
+        "url": "https://www.barrons.com/",
+        "sourceId": "src-barrons"
+      }
+    ],
+    "vietnamNews": [
+      {
+        "title": "VN-Index mất mốc 1.700 điểm về 1.689,62",
+        "url": "https://stockbiz.vn/",
+        "sourceId": "src-stockbiz",
+        "impact": "high"
+      },
+      {
+        "title": "Tin Việt Nam 2",
+        "url": "https://cafef.vn/",
+        "sourceId": "src-cafef"
+      },
+      {
+        "title": "Tin Việt Nam 3",
+        "url": "https://cafef.vn/",
+        "sourceId": "src-cafef"
+      },
+      {
+        "title": "Tin Việt Nam 4",
+        "url": "https://cafef.vn/",
+        "sourceId": "src-cafef"
+      },
+      {
+        "title": "Tin Việt Nam 5",
+        "url": "https://cafef.vn/",
+        "sourceId": "src-cafef"
+      },
+      {
+        "title": "Tin Việt Nam 6",
+        "url": "https://cafef.vn/",
+        "sourceId": "src-cafef"
+      },
+      {
+        "title": "Tin Việt Nam 7",
+        "url": "https://cafef.vn/",
+        "sourceId": "src-cafef"
+      },
+      {
+        "title": "Tin Việt Nam 8",
+        "url": "https://cafef.vn/",
+        "sourceId": "src-cafef"
+      }
+    ],
+    "vietnamMacro": [
+      {
+        "title": "Thanh khoản HoSE ~15.008 tỷ",
+        "sourceId": "src-stockbiz"
+      },
+      {
+        "title": "Macro 2",
+        "sourceId": "src-vneconomy"
+      },
+      {
+        "title": "Macro 3",
+        "sourceId": "src-vneconomy"
+      },
+      {
+        "title": "Macro 4",
+        "sourceId": "src-vneconomy"
+      },
+      {
+        "title": "Macro 5",
+        "sourceId": "src-vneconomy"
+      },
+      {
+        "title": "Macro 6",
+        "sourceId": "src-vneconomy"
+      },
+      {
+        "title": "Macro 7",
+        "sourceId": "src-vneconomy"
+      },
+      {
+        "title": "Macro 8",
+        "sourceId": "src-vneconomy"
+      }
+    ],
+    "equityMarket": {
+      "vnindex": {
+        "last": 1689.62,
+        "changePct": -0.79,
+        "volume": 652868677,
+        "value": 15008.74,
+        "foreignNet": -996.5
+      }
+    },
+    "worldMarkets": {
+      "quotes": [
+        {
+          "symbol": "DXY",
+          "last": 103.92
+        },
+        {
+          "symbol": "DJI",
+          "last": 49097.06
+        },
+        {
+          "symbol": "NDX",
+          "last": 23879.2
+        },
+        {
+          "symbol": "SPX",
+          "last": 7175.83
+        },
+        {
+          "symbol": "RUT",
+          "last": 2655.11
+        },
+        {
+          "symbol": "HSI",
+          "last": 22841.62
+        }
+      ]
+    },
+    "cryptoMarkets": {
+      "quotes": [
+        {
+          "symbol": "BTC",
+          "last": null
+        },
+        {
+          "symbol": "ETH",
+          "last": null
+        }
+      ]
+    },
+    "companies": [
+      {
+        "ticker": "FPT",
+        "note": "Giảm 2,66%, khối ngoại bán ròng 272 tỷ",
+        "sourceId": "src-stockbiz"
+      },
+      {
+        "ticker": "VIC",
+        "note": "Giảm 2,04%, kéo chỉ số -7,96 điểm",
+        "sourceId": "src-stockbiz"
+      },
+      {
+        "ticker": "POW",
+        "note": "Tự doanh mua ròng ~135 tỷ",
+        "sourceId": "src-vietnambiz"
+      },
+      {
+        "ticker": "ACB",
+        "note": "Khối ngoại bán ròng ~102 tỷ",
+        "sourceId": "src-stockbiz"
+      },
+      {
+        "ticker": "TCB",
+        "note": "Khối ngoại mua ròng ~17 tỷ",
+        "sourceId": "src-stockbiz"
+      }
+    ],
+    "outlook": {
+      "watchpoints": [
+        "Mốc 1.680-1.690",
+        "Dòng ngoại tiếp tục bán FPT"
+      ],
+      "levels": {
+        "support": 1680,
+        "resistance": 1700
+      },
+      "events": [
+        "Phiên pre-open sau khi mất 1.700"
+      ]
+    },
+    "series": {
+      "vnindex": {
+        "points": [
+          {
+            "date": "2026-11-18",
+            "value": 1703.01
+          },
+          {
+            "date": "2026-11-19",
+            "value": 1689.62
+          }
+        ]
+      },
+      "dji": {
+        "points": [
+          {
+            "date": "2026-11-19",
+            "value": 49097.06
+          }
+        ]
+      },
+      "ndx": {
+        "points": [
+          {
+            "date": "2026-11-19",
+            "value": 23879.2
+          }
+        ]
+      },
+      "spx": {
+        "points": [
+          {
+            "date": "2026-11-19",
+            "value": 7175.83
+          }
+        ]
+      },
+      "dxy": {
+        "points": [
+          {
+            "date": "2026-11-19",
+            "value": 103.92
+          }
+        ]
+      },
+      "nky": {
+        "points": [
+          {
+            "date": "2026-11-19",
+            "value": null
+          }
+        ]
+      },
+      "hsi": {
+        "points": [
+          {
+            "date": "2026-11-19",
+            "value": 22841.62
+          }
+        ]
+      },
+      "btcUsd": {
+        "points": [
+          {
+            "date": "2026-11-19",
+            "value": null
+          }
+        ]
+      },
+      "vnindexVolume5d": {
+        "points": [
+          {
+            "date": "2026-11-19",
+            "value": 652.9
+          }
+        ]
+      },
+      "foreignNet5dVndBn": {
+        "points": [
+          {
+            "date": "2026-11-19",
+            "value": -996.5
+          }
+        ]
+      }
+    }
+  },
+  "sources": {
+    "schemaVersion": "1.0.0",
+    "sources": [
+      {
+        "id": "src-stockbiz",
+        "name": "StockBiz",
+        "url": "https://stockbiz.vn/",
+        "accessedAt": "2026-11-20T08:35:00+07:00"
+      },
+      {
+        "id": "src-cafef",
+        "name": "CafeF",
+        "url": "https://cafef.vn/",
+        "accessedAt": "2026-11-20T08:35:00+07:00"
+      },
+      {
+        "id": "src-barrons",
+        "name": "Barron's",
+        "url": "https://www.barrons.com/",
+        "accessedAt": "2026-11-20T08:35:00+07:00"
+      },
+      {
+        "id": "src-vietnambiz",
+        "name": "VietnamBiz",
+        "url": "https://vietnambiz.vn/",
+        "accessedAt": "2026-11-20T08:35:00+07:00"
+      },
+      {
+        "id": "src-nhnn",
+        "name": "SBV",
+        "url": "https://www.sbv.gov.vn/",
+        "accessedAt": "2026-11-20T08:35:00+07:00"
+      }
+    ]
+  }
+}
