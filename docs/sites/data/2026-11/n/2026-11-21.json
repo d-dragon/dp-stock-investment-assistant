@@ -1,0 +1,133 @@
+{
+  "schemaVersion": "1.0.0",
+  "date": "2026-11-21",
+  "generatedAt": "2026-11-21T08:35:00+07:00",
+  "briefKind": "eod_prev+overnight+preopen",
+  "items": [
+    {
+      "id": "n-2026-11-21-001",
+      "impact": "high",
+      "impactScore": 92,
+      "rank": 1,
+      "kind": "market",
+      "board": "vn",
+      "title": "VN-Index đóng cửa 1.688,79 điểm (-0,05%), thu hẹp đà giảm cuối phiên 20/11",
+      "url": "https://stockbiz.vn/tin-tuc/vn-index-thu-hep-da-giam-cuoi-phien-nhom-nang-luong-hut-tien/42867944",
+      "sourceId": "src-stockbiz",
+      "publishedAt": "2026-11-20T15:55:00+07:00",
+      "tickers": [
+        "VNINDEX"
+      ],
+      "excerpt": "Chỉ số về 1.688,79 sau khi có lúc giảm sâu dưới 1.670.",
+      "whyImpact": "Mốc đóng cửa chính thức phiên EOD."
+    },
+    {
+      "id": "n-2026-11-21-002",
+      "impact": "high",
+      "impactScore": 88,
+      "rank": 2,
+      "kind": "market",
+      "board": "vn",
+      "title": "Khối ngoại bán ròng gần 900 tỷ đồng, xả mạnh FPT, ACB, HDB",
+      "url": "https://cafef.vn/phien-20-11-khoi-ngoai-thang-tay-ban-rong-gan-900-ty-dong-xa-manh-fpt-cung-loat-co-phieu-ngan-hang-hot-188261120154440739.chn",
+      "sourceId": "src-cafef",
+      "publishedAt": "2026-11-20T15:44:00+07:00",
+      "tickers": [
+        "FPT",
+        "ACB",
+        "HDB",
+        "POW"
+      ],
+      "excerpt": "Bán ròng ~895 tỷ toàn thị trường, HoSE ~841 tỷ. POW được mua ròng 152 tỷ.",
+      "whyImpact": "Dòng ngoại quyết định áp lực phiên."
+    },
+    {
+      "id": "n-2026-11-21-003",
+      "impact": "high",
+      "impactScore": 85,
+      "rank": 3,
+      "kind": "news",
+      "board": "global",
+      "title": "S&P 500 giảm 3,70% xuống 6.910,39; Nasdaq -5,28% do AI selloff",
+      "url": "https://www.fool.com/coverage/stock-market-today/2026/11/20/stock-market-today-nov-20-stocks-plunge-as-ai-trade-unwinds/",
+      "sourceId": "src-barrons",
+      "publishedAt": "2026-11-20T16:00:00+07:00",
+      "tickers": [],
+      "excerpt": "Dow -1,93% về 48.147. Thị trường Mỹ vào vùng correction.",
+      "whyImpact": "Overnight risk truyền sang phiên Á châu."
+    },
+    {
+      "id": "n-2026-11-21-004",
+      "impact": "high",
+      "impactScore": 80,
+      "rank": 4,
+      "kind": "news",
+      "board": "global",
+      "title": "Nikkei 225 đóng cửa 56.436,65 (-5,06%); HSI 22.410,80 (-1,89%)",
+      "url": "https://en.kabutan.com/jp/news/n202611201392",
+      "sourceId": "src-bloomberg",
+      "publishedAt": "2026-11-20T15:30:00+07:00",
+      "excerpt": "Á châu đồng loạt giảm mạnh theo Mỹ.",
+      "whyImpact": "Rủi ro gap phiên mở cửa tiếp theo."
+    },
+    {
+      "id": "n-2026-11-21-005",
+      "impact": "medium",
+      "impactScore": 65,
+      "rank": 5,
+      "kind": "market",
+      "board": "vn",
+      "title": "Tự doanh bán ròng khoảng 227 tỷ đồng trên HOSE",
+      "url": "https://vietnambiz.vn/mot-co-phieu-bi-tu-doanh-quay-dau-ban-rong-sau-hai-phien-duoc-gom-lien-tiep-20261120175958937-print.htm",
+      "sourceId": "src-vietnambiz",
+      "publishedAt": "2026-11-20T17:59:00+07:00",
+      "tickers": [
+        "POW"
+      ],
+      "excerpt": "POW bị tự doanh quay đầu bán sau khi mua mạnh hai phiên trước.",
+      "whyImpact": "Dòng tự doanh đảo chiều."
+    },
+    {
+      "id": "n-2026-11-21-006",
+      "impact": "medium",
+      "impactScore": 60,
+      "rank": 6,
+      "kind": "news",
+      "board": "vn",
+      "title": "HNX-Index giảm 1,82% về 234,59 điểm",
+      "url": "https://fili.vn/2026/11/nhip-dap-thi-truong-2011-vn-index-lui-sau-dong-tien-ngoai-tiep-tuc-thoat-khoi-thi-truong-1636-1516413.htm",
+      "sourceId": "src-vietstock",
+      "publishedAt": "2026-11-20T15:00:00+07:00",
+      "excerpt": "Sàn Hà Nội giảm mạnh hơn HoSE.",
+      "whyImpact": "Độ rộng thị trường yếu."
+    },
+    {
+      "id": "n-2026-11-21-007",
+      "impact": "medium",
+      "impactScore": 55,
+      "rank": 7,
+      "kind": "macro",
+      "board": "global",
+      "title": "DXY đóng cửa khoảng 103,84; vàng ~3.534 USD/oz",
+      "url": "https://www.barrons.com/market-data",
+      "sourceId": "src-barrons",
+      "publishedAt": "2026-11-20T16:00:00+07:00",
+      "excerpt": "Dollar ổn định, vàng giảm theo risk-off.",
+      "whyImpact": "FX và hàng hóa tác động chi phí."
+    },
+    {
+      "id": "n-2026-11-21-008",
+      "impact": "low",
+      "impactScore": 40,
+      "rank": 8,
+      "kind": "community",
+      "board": "vn",
+      "title": "Cộng đồng FireAnt/F247/newF319 thin, chủ yếu theo dõi FPT và ngân hàng",
+      "url": "https://fireant.vn/cong-dong/moi-nhat",
+      "sourceId": "src-fireant",
+      "publishedAt": "2026-11-20T18:00:00+07:00",
+      "excerpt": "Sentiment màu sắc, không phải print.",
+      "whyImpact": "Màu tâm lý, không dùng làm số liệu."
+    }
+  ]
+}
