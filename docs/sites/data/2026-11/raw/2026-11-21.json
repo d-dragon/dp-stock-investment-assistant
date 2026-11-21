@@ -1,0 +1,29 @@
+{
+  "market": {
+    "vnindex_close": 1688.79,
+    "vnindex_change": -0.83,
+    "vnindex_change_pct": -0.05,
+    "hnx_close": 234.59,
+    "hnx_change_pct": -1.82,
+    "hose_value_vnd_bn": 15933,
+    "foreign_net_vnd_bn": -895,
+    "foreign_hose_approx": -841,
+    "proprietary_hose_vnd_bn": -227,
+    "note": "Nguồn StockBiz, CafeF, VietnamBiz, Fili"
+  },
+  "news_events": [
+    "VN-Index đóng cửa 1.688,79 sau khi thu hẹp đà giảm cuối phiên",
+    "Khối ngoại bán ròng ~895 tỷ, tập trung FPT/ACB/HDB, mua POW",
+    "US S&P -3.70% Nasdaq -5.28% Dow -1.93% do AI selloff",
+    "Nikkei -5.06% HSI -1.89%"
+  ],
+  "sentiment": {
+    "fireant": "thin",
+    "f247": "thin",
+    "newf319": "thin"
+  },
+  "gaps": [
+    "USDVND SBV chưa có print sáng 21/11",
+    "community thin"
+  ]
+}
