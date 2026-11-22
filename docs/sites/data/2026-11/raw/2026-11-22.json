@@ -1,0 +1,28 @@
+{
+  "market": {
+    "vnindex": {"last": 1688.79, "change": -0.83, "changePct": -0.05, "volume": 736600000, "value": 15933, "session": "2026-11-20", "sourceId": "src-stockbiz"},
+    "hnx": {"last": 234.59, "changePct": -1.82, "sourceId": "src-stockbiz"},
+    "foreignNet3San": -895,
+    "foreignNetHoSE": -841,
+    "proprietaryHoSE": -227,
+    "note": "Nguồn StockBiz/CafeF/VnEconomy/nmquan. Proprietary prints disagree slightly (~220-246)."
+  },
+  "news_events": [
+    {"title": "VN-Index đóng cửa 1.688,79 (-0,05%) sau thu hẹp đà giảm", "url": "https://stockbiz.vn/tin-tuc/chung-khoan-ngay-2011-luc-mua-cuoi-phien-giup-vn-index-thu-hep-da-giam/42869601", "sourceId": "src-stockbiz"},
+    {"title": "Khối ngoại bán ròng gần 900 tỷ, xả FPT ACB HDB", "url": "https://cafef.vn/phien-20-11-khoi-ngoai-thang-tay-ban-rong-gan-900-ty-dong-xa-manh-fpt-cung-loat-co-phieu-ngan-hang-hot-188261120154440739.chn", "sourceId": "src-cafef"},
+    {"title": "S&P 500 -3,70% Nasdaq -5,28% vào correction do AI selloff", "url": "https://www.moneycontrol.com/news/business/stocks/wall-street-ends-sharply-lower-on-ai-selloff-s-p-500-dow-in-correction-14085938.html", "sourceId": "src-barrons"},
+    {"title": "Nikkei -5,06% HSI -1,89% vào bear market", "url": "https://www.businesstoday.com.my/2026/11/21/hong-kong-stocks-sink-1-89-as-hang-seng-enters-bear-market/", "sourceId": "src-bloomberg"}
+  ],
+  "sentiment": {
+    "fireant": "thin",
+    "f247": "thin",
+    "newf319": "thin",
+    "note": "Community threads thin over weekend; no high-impact prints."
+  },
+  "gaps": [
+    "No official HOSE close for 21/11 or 22/11 (weekend)",
+    "SBV USD/VND print not locked for morning 22/11",
+    "Proprietary net print sources differ by ~20 tỷ",
+    "Community sentiment thin"
+  ]
+}
