@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "1.0.0",
+  "date": "2026-11-23",
+  "generatedAt": "2026-11-23T08:35:00+07:00",
+  "market": {
+    "vnindex": {
+      "priorClose": 1688.79,
+      "priorDate": "2026-11-20",
+      "change": -0.83,
+      "changePct": -0.05,
+      "source": "src-stockbiz"
+    },
+    "hnx": {
+      "priorClose": 234.59,
+      "changePct": -1.82,
+      "source": "src-stockbiz"
+    },
+    "foreignNet3SanVndBn": -895,
+    "foreignNetHoseVndBn": -841,
+    "proprietaryHoseVndBn": -227,
+    "hoseValueVndBn": 15933,
+    "hoseVolumeM": 736.6,
+    "sourceNotes": "EOD 20/11 locked StockBiz/CafeF/multiple; no session 21-22"
+  },
+  "news_events": [
+    "US Friday 20/11: S&P 6910.39 -3.70%, Nasdaq 22617.73 -5.28%, Dow 48147.33 -1.93%; into correction",
+    "Nikkei 56436.65 -5.06%, HSI 22410.80 -1.89% on 20/11",
+    "DXY ~103.81-103.85",
+    "Gold ~3535-3539, WTI ~83.4-83.6",
+    "SBV central rate 25659 VND/USD stable",
+    "Foreign net sell ~895 tỷ 3 sàn on 20/11, focus FPT ACB HDB",
+    "POW foreign buy ~152 tỷ",
+    "Next session 23/11 open after weekend; holiday 24/11 possible"
+  ],
+  "sentiment": {
+    "fireant": "thin preopen, focus on prior close and US correction impact",
+    "f247": "thin",
+    "newf319": "thin",
+    "note": "Community color only, not prints"
+  },
+  "gaps": [
+    "No official HOSE close for 23/11 (preopen)",
+    "No SBV new print morning 23/11 beyond prior 25659",
+    "Asia cash markets not yet open at 08:35",
+    "Community threads thin",
+    "Sources disagree slightly on exact DXY/gold/BTC"
+  ]
+}
