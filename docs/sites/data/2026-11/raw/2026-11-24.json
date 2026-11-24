@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "1.0.0",
+  "date": "2026-11-24",
+  "generatedAt": "2026-11-24T08:36:00+07:00",
+  "briefKind": "eod_prev+overnight+preopen",
+  "market": {
+    "vnindex_prior": {
+      "date": "2026-11-23",
+      "price": 1697.14,
+      "change": 8.35,
+      "changePct": 0.49,
+      "source": "multiple CafeF/StockBiz/Vietstock"
+    },
+    "hnx_prior": {
+      "price": 232.23,
+      "changePct": -1.01
+    },
+    "hose_liquidity": {
+      "volumeShares": 605500000,
+      "valueVndBn": 12691,
+      "note": "CafeF/DNSE ~12.691 tỷ"
+    },
+    "foreign_hose": {
+      "netValueVndBn": -419,
+      "note": "StockBiz/CafeF ~-418 to -440"
+    },
+    "proprietary_hose": {
+      "netValueVndBn": 357.5,
+      "note": "nmquan.vn +357.5"
+    },
+    "usdVnd_central": 25659,
+    "gaps": [
+      "proprietary retail split thin",
+      "community thin"
+    ]
+  },
+  "news_events": [
+    "US rebound: S&P +4.73% to 7237.17, Nasdaq Composite +6.51% after Huang returns to NVDA (+31%)",
+    "Nikkei closed 23/11 (Labor Thanksgiving); prior 20/11 56436.65 -5.06%",
+    "HSI 22383.74 -0.12%",
+    "DXY ~104.3 near 19-month high",
+    "Gold rebound ~3609-3638 after sharp drop",
+    "WTI ~80-81"
+  ],
+  "sentiment": {
+    "note": "FireAnt/F247/newF319 thin on 24/11 preopen; prior session cautious on low liquidity"
+  }
+}
