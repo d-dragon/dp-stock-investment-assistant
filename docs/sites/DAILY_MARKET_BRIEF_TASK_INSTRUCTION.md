@@ -23,6 +23,7 @@
 ## Changelog
 
 | Date | Version | Change |
+| 2026-11-25 | 2.6.1 | Run 2026-11-25: Wednesday preopen after Culture Day holiday (no 24/11 session); VN prior 1.697,14 locked CafeF/multiple; foreign ~-419 HoSE; proprietary nmquan +357,5; US S&P -0,50% Nasdaq -1,48% chip selloff; Nikkei +3,91% HSI -0,73%; DXY ~103,85; community thin; day/n/raw/a/week/catalog pushed via git. |
 | 2026-11-24 | 2.6.1 | Run 2026-11-24: Tuesday preopen; VN prior 1.697,14 locked CafeF/multiple; foreign ~-419 HoSE; proprietary nmquan +357,5; US S&P +4,73% Nasdaq +6,51% Huang/NVDA; Nikkei closed (prior -5,06%); HSI -0,12%; DXY ~104,3; community thin; day/n/raw/a/week/catalog pushed via git. |
 | 2026-11-22 | 2.6.1 | Run 2026-11-22: Sunday preopen; VN prior 1.688,79 locked StockBiz/multiple; foreign ~-895 3 sàn CafeF; proprietary ~-227 HOSE; US S&P -3,70% Nasdaq -5,28%; Nikkei -5,06% HSI -1,89%; DXY ~103,8; community thin; day/n/raw/a/week/catalog pushed via gh. |
 | 2026-11-17 | 2.6.1 | Run 2026-11-17: Tuesday preopen; VN prior 1.736,89 locked StockBiz/multiple; foreign ~+21 HoSE CafeF; proprietary nmquan -33,7; US S&P -1,92% Nasdaq -2,49%; Nikkei -2,42% HSI +0,49%; DXY ~103,5; community thin; day/n/raw/a/week/catalog pushed via gh. |

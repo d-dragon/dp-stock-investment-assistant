@@ -1,0 +1,165 @@
+{
+  "schemaVersion": "1.0.0",
+  "date": "2026-11-25",
+  "items": [
+    {
+      "id": "n-2026-11-25-001",
+      "impact": "high",
+      "impactScore": 92,
+      "rank": 1,
+      "kind": "market",
+      "board": "vn",
+      "title": "Thị trường chứng khoán Việt Nam nghỉ 24/11 vì Ngày Văn hóa, mở lại 25/11",
+      "url": "https://vietnamii.com/articles/chung-khoan-nghi-giao-dich-24-11-2026-ngay-van-hoa-viet-nam-tro-lai-25-11",
+      "sourceId": "src-vietstock",
+      "publishedAt": "2026-11-24T06:11:00+07:00",
+      "tickers": [
+        "VNINDEX"
+      ],
+      "excerpt": "HOSE/HNX đóng cửa 24/11 theo Nghị quyết 28/2026/QH16, giao dịch lại từ 25/11.",
+      "whyImpact": "Không có phiên EOD 24/11; brief dùng prior 23/11"
+    },
+    {
+      "id": "n-2026-11-25-002",
+      "impact": "high",
+      "impactScore": 88,
+      "rank": 2,
+      "kind": "market",
+      "board": "global",
+      "title": "Mỹ 24/11: S&P -0,50% Nasdaq -1,48% Dow +0,85% sau selloff chip",
+      "url": "https://www.reuters.com/business/wall-st-futures-dip-chip-stocks-cool-after-nvidia-fueled-rally-2026-11-24/",
+      "sourceId": "src-barrons",
+      "publishedAt": "2026-11-24T17:00:00+07:00",
+      "tickers": [
+        "NVDA"
+      ],
+      "excerpt": "S&P 7201,09; Nasdaq Composite ~23.733; NVDA -5,86% sau rally thứ Hai.",
+      "whyImpact": "Overnight risk-off tech có thể kìm VN mở cửa"
+    },
+    {
+      "id": "n-2026-11-25-003",
+      "impact": "high",
+      "impactScore": 85,
+      "rank": 3,
+      "kind": "news",
+      "board": "vn",
+      "title": "VN-Index phiên 23/11 đóng 1.697,14 (+0,49%), thanh khoản thấp",
+      "url": "https://cafef.vn/",
+      "sourceId": "src-cafef",
+      "publishedAt": "2026-11-23T15:00:00+07:00",
+      "tickers": [
+        "VNINDEX"
+      ],
+      "excerpt": "Tăng 8,35 điểm, HOSE ~12.691 tỷ.",
+      "whyImpact": "Print chính thức phiên gần nhất"
+    },
+    {
+      "id": "n-2026-11-25-004",
+      "impact": "medium",
+      "impactScore": 72,
+      "rank": 4,
+      "kind": "market",
+      "board": "global",
+      "title": "Nikkei 24/11 đóng 58.644,63 (+3,91%) bắt kịp US Monday",
+      "url": "https://en.kabutan.com/jp/news/n202611240918",
+      "sourceId": "src-bloomberg",
+      "publishedAt": "2026-11-24T15:00:00+07:00",
+      "tickers": [],
+      "excerpt": "Tokyo reopen sau lễ, chip Advantest/TEL dẫn.",
+      "whyImpact": "Asia risk-on một phần"
+    },
+    {
+      "id": "n-2026-11-25-005",
+      "impact": "medium",
+      "impactScore": 68,
+      "rank": 5,
+      "kind": "market",
+      "board": "global",
+      "title": "HSI 24/11 22.219,65 (-0,73%)",
+      "url": "https://english.news.cn/20261124/dc40f6a3e7ea452991d2d9611fc092d5/c.html",
+      "sourceId": "src-bloomberg",
+      "publishedAt": "2026-11-24T16:30:00+07:00",
+      "tickers": [],
+      "excerpt": "Hang Seng giảm nhẹ.",
+      "whyImpact": "Asia mixed"
+    },
+    {
+      "id": "n-2026-11-25-006",
+      "impact": "medium",
+      "impactScore": 65,
+      "rank": 6,
+      "kind": "macro",
+      "board": "vn",
+      "title": "Tỷ giá trung tâm USD/VND 25.668 giữ nguyên 24-25/11",
+      "url": "https://sbv.gov.vn/",
+      "sourceId": "src-nhnn",
+      "publishedAt": "2026-11-25T07:00:00+07:00",
+      "tickers": [],
+      "excerpt": "SBV neo đỉnh.",
+      "whyImpact": "FX ổn định"
+    },
+    {
+      "id": "n-2026-11-25-007",
+      "impact": "medium",
+      "impactScore": 60,
+      "rank": 7,
+      "kind": "market",
+      "board": "vn",
+      "title": "Khối ngoại bán ròng ~419 tỷ HOSE phiên 23/11",
+      "url": "https://chuyendongthitruong.vn/phien-2311-khoi-ngoai-tiep-tuc-ban-rong-bat-ngo-tung-gan-200-ty-dong-gom-mot-co-phieu-hose-352519.html",
+      "sourceId": "src-stockbiz",
+      "publishedAt": "2026-11-23T17:00:00+07:00",
+      "tickers": [
+        "POW",
+        "HDB"
+      ],
+      "excerpt": "Mua POW ~176 tỷ; bán HDB, VPX, SSI.",
+      "whyImpact": "Dòng ngoại vẫn rút"
+    },
+    {
+      "id": "n-2026-11-25-008",
+      "impact": "low",
+      "impactScore": 45,
+      "rank": 8,
+      "kind": "community",
+      "board": "vn",
+      "title": "Cộng đồng FireAnt/F247 thận trọng trước thanh khoản thấp phiên trước",
+      "url": "https://fireant.vn/cong-dong/moi-nhat",
+      "sourceId": "src-fireant",
+      "publishedAt": "2026-11-24T20:00:00+07:00",
+      "tickers": [],
+      "excerpt": "Sentiment color only, không phải print.",
+      "whyImpact": "Color, không phải số liệu"
+    },
+    {
+      "id": "n-2026-11-25-009",
+      "impact": "medium",
+      "impactScore": 58,
+      "rank": 9,
+      "kind": "macro",
+      "board": "global",
+      "title": "DXY quanh 103,85 giảm nhẹ overnight",
+      "url": "https://www.barrons.com/market-data",
+      "sourceId": "src-barrons",
+      "publishedAt": "2026-11-24T22:00:00+07:00",
+      "tickers": [],
+      "excerpt": "USD hơi yếu sau đỉnh gần.",
+      "whyImpact": "Giảm áp lực FX nhẹ"
+    },
+    {
+      "id": "n-2026-11-25-010",
+      "impact": "low",
+      "impactScore": 40,
+      "rank": 10,
+      "kind": "news",
+      "board": "global",
+      "title": "WTI ~81,6 +1,9%; vàng mixed ~3548",
+      "url": "https://worldoilmonitor.com/daily-oil-market-summary",
+      "sourceId": "src-barrons",
+      "publishedAt": "2026-11-24T20:00:00+07:00",
+      "tickers": [],
+      "excerpt": "Dầu phục hồi nhẹ.",
+      "whyImpact": "Commodity ổn"
+    }
+  ]
+}

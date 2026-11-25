@@ -1,0 +1,26 @@
+{
+  "market": {
+    "briefDate": "2026-11-25",
+    "eodDate": "2026-11-23",
+    "note": "HOSE/HNX closed 24/11 for Vietnam Culture Day; prior session 23/11 VNINDEX 1697.14",
+    "vnindex_prior": 1697.14,
+    "foreign_hose": -419,
+    "proprietary_hose": 357.5,
+    "liquidity_hose_bn": 12691
+  },
+  "news_events": [
+    "US 24/11: S&P 7201.09 -0.50%, Nasdaq ~23733 -1.48%, Dow 50019 +0.85% chip selloff after Monday rally",
+    "Nikkei 24/11 58644.63 +3.91% (from Friday prior, closed Mon)",
+    "HSI 24/11 22219.65 -0.73%",
+    "DXY ~103.85 -0.4%",
+    "VN market reopens 25/11 after Culture Day holiday"
+  ],
+  "sentiment": {
+    "note": "Community thin; FireAnt/F247/newF319 color only, cautious on low liquidity prior"
+  },
+  "gaps": [
+    "No official 24/11 VN session",
+    "Proprietary retail exact print not locked",
+    "Community volume thin"
+  ]
+}
