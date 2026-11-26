@@ -1,0 +1,35 @@
+{
+  "schemaVersion": "1.0.0",
+  "date": "2026-11-26",
+  "market": {
+    "vnindex_prior": {
+      "date": "2026-11-25",
+      "price": 1687.45,
+      "change": -9.69,
+      "changePct": -0.57,
+      "source": "src-stockbiz/src-cafef"
+    },
+    "hose_volume_m": 576.3,
+    "hose_value_bn": 16091.2,
+    "foreign_net_bn": -5681,
+    "foreign_note": "Record sell, VIC ~4701 bn",
+    "hnx": 227.46,
+    "upcom": 119.82
+  },
+  "news_events": [
+    "VN-Index 25/11 đóng 1.687,45 (-0,57%), dưới 1.700",
+    "Khối ngoại bán ròng kỷ lục ~5.681 tỷ HOSE, chủ yếu VIC",
+    "US 25/11: S&P -0,25% Nasdaq -0,62% Dow +0,33% sau intraday dump AI/tariff rồi recovery; thị trường đóng Thanksgiving 26/11",
+    "Nikkei 25/11 57.011,62 (-2,78%); HSI 21.966,01 (-1,14%)",
+    "Tỷ giá trung tâm 26/11: 25.676; 25/11: 25.679 đỉnh"
+  ],
+  "sentiment": {
+    "fireant": "thin",
+    "f247": "thin",
+    "newf319": "thin"
+  },
+  "gaps": [
+    "proprietary trading full print not extracted from HOSE PDF",
+    "community thin"
+  ]
+}
