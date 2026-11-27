@@ -1,0 +1,395 @@
+{
+  "schemaVersion": "1.0.0",
+  "date": "2026-11-27",
+  "newsPath": "2026-11/n/2026-11-27.json",
+  "report": {
+    "schemaVersion": "1.0.0",
+    "id": "daily-brief-2026-11-27",
+    "type": "daily_market_brief",
+    "locale": "vi-VN",
+    "timezone": "Asia/Ho_Chi_Minh",
+    "generatedAt": "2026-11-27T08:35:00+07:00",
+    "coverage": {
+      "from": "2026-11-26T00:00:00+07:00",
+      "to": "2026-11-27T08:35:00+07:00",
+      "session": "preopen"
+    },
+    "marketSession": "preopen",
+    "disclaimer": "Không phải khuyến nghị đầu tư. Dữ liệu từ nguồn công khai, có thể chậm hoặc không đồng nhất.",
+    "ui": {
+      "title": "Nhật ký 2026-11-27 — Prior 1.629,68 sau lao dốc, US nghỉ Thanksgiving"
+    },
+    "snapshot": {
+      "quotes": [
+        {
+          "symbol": "VNINDEX",
+          "name": "VN-Index",
+          "value": 1629.68,
+          "change": -57.77,
+          "changePct": -3.42,
+          "sourceId": "src-stockbiz",
+          "note": "Đóng cửa 26/11"
+        },
+        {
+          "symbol": "HNX",
+          "name": "HNX-Index",
+          "value": 226.57,
+          "change": -0.89,
+          "changePct": -0.39,
+          "sourceId": "src-stockbiz"
+        },
+        {
+          "symbol": "DXY",
+          "name": "US Dollar Index",
+          "value": 103.78,
+          "change": 0.11,
+          "changePct": 0.11,
+          "sourceId": "src-barrons"
+        },
+        {
+          "symbol": "DJI",
+          "name": "Dow Jones",
+          "value": 50182.95,
+          "change": 164.25,
+          "changePct": 0.33,
+          "sourceId": "src-barrons",
+          "note": "Đóng cửa trước Thanksgiving"
+        },
+        {
+          "symbol": "NDX",
+          "name": "Nasdaq 100",
+          "value": 26046.9,
+          "change": -167.27,
+          "changePct": -0.64,
+          "sourceId": "src-barrons"
+        },
+        {
+          "symbol": "SPX",
+          "name": "S&P 500",
+          "value": 7182.78,
+          "change": -18.31,
+          "changePct": -0.25,
+          "sourceId": "src-barrons"
+        },
+        {
+          "symbol": "NKY",
+          "name": "Nikkei 225",
+          "value": 57499.16,
+          "change": 487.54,
+          "changePct": 0.86,
+          "sourceId": "src-bloomberg"
+        },
+        {
+          "symbol": "HSI",
+          "name": "Hang Seng",
+          "value": 22226.88,
+          "change": 260.87,
+          "changePct": 1.19,
+          "sourceId": "src-bloomberg"
+        },
+        {
+          "symbol": "WTI",
+          "name": "WTI Crude",
+          "value": 85.22,
+          "change": 1.54,
+          "changePct": 1.84,
+          "sourceId": "src-barrons"
+        },
+        {
+          "symbol": "XAU",
+          "name": "Gold",
+          "value": 3571.29,
+          "change": 4.13,
+          "changePct": 0.12,
+          "sourceId": "src-barrons"
+        },
+        {
+          "symbol": "BTC",
+          "name": "Bitcoin",
+          "value": 60666,
+          "change": 181,
+          "changePct": 0.3,
+          "sourceId": "src-yahoo-btc"
+        },
+        {
+          "symbol": "USDVND",
+          "name": "USD/VND",
+          "value": 25450,
+          "change": null,
+          "changePct": null,
+          "sourceId": "src-nhnn",
+          "note": "Ước lượng thị trường"
+        }
+      ]
+    },
+    "globalNews": [
+      {
+        "title": "US đóng cửa Thanksgiving, S&P -0.25% phiên trước",
+        "url": "https://www.reuters.com/",
+        "sourceId": "src-bloomberg",
+        "excerpt": "Wall Street mixed trước holiday."
+      }
+    ],
+    "vietnamNews": [
+      {
+        "title": "VN-Index mất 57,77 điểm về 1.629,68",
+        "url": "https://tuoitre.vn/",
+        "sourceId": "src-cafef",
+        "excerpt": "Áp lực bán rộng, VIC dẫn dắt giảm."
+      }
+    ],
+    "vietnamMacro": [
+      {
+        "title": "Không có dữ liệu SBV mới cho 27/11",
+        "sourceId": "src-nhnn"
+      }
+    ],
+    "equityMarket": {
+      "vnindex": {
+        "close": 1629.68,
+        "change": -57.77,
+        "changePct": -3.42,
+        "sourceId": "src-stockbiz",
+        "note": "Prior EOD 26/11"
+      }
+    },
+    "worldMarkets": {
+      "quotes": [
+        {
+          "symbol": "DXY",
+          "value": 103.78,
+          "changePct": 0.11,
+          "sourceId": "src-barrons"
+        },
+        {
+          "symbol": "DJI",
+          "value": 50182.95,
+          "changePct": 0.33,
+          "sourceId": "src-barrons"
+        },
+        {
+          "symbol": "NDX",
+          "value": 26046.9,
+          "changePct": -0.64,
+          "sourceId": "src-barrons"
+        },
+        {
+          "symbol": "SPX",
+          "value": 7182.78,
+          "changePct": -0.25,
+          "sourceId": "src-barrons"
+        },
+        {
+          "symbol": "NKY",
+          "value": 57499.16,
+          "changePct": 0.86,
+          "sourceId": "src-bloomberg"
+        },
+        {
+          "symbol": "HSI",
+          "value": 22226.88,
+          "changePct": 1.19,
+          "sourceId": "src-bloomberg"
+        }
+      ]
+    },
+    "cryptoMarkets": {
+      "quotes": [
+        {
+          "symbol": "BTC",
+          "value": 60666,
+          "changePct": 0.3,
+          "sourceId": "src-yahoo-btc"
+        },
+        {
+          "symbol": "ETH",
+          "value": 1699,
+          "changePct": 0.74,
+          "sourceId": "src-yahoo-btc"
+        }
+      ]
+    },
+    "companies": [
+      {
+        "ticker": "VIC",
+        "name": "Vingroup",
+        "note": "Giảm mạnh 6.28%, bán ròng ngoại lớn",
+        "sourceId": "src-stockbiz"
+      },
+      {
+        "ticker": "VHM",
+        "name": "Vinhomes",
+        "note": "Giảm 3.44%",
+        "sourceId": "src-cafef"
+      },
+      {
+        "ticker": "TCB",
+        "name": "Techcombank",
+        "note": "Giảm 5.07%",
+        "sourceId": "src-dnse"
+      },
+      {
+        "ticker": "HPG",
+        "name": "Hòa Phát",
+        "note": "Giảm 2.24%",
+        "sourceId": "src-cafef"
+      },
+      {
+        "ticker": "VNM",
+        "name": "Vinamilk",
+        "note": "Tăng nhẹ 0.38%",
+        "sourceId": "src-cafef"
+      }
+    ],
+    "outlook": {
+      "watchpoints": [
+        "Mở cửa sau lao dốc 3.42%",
+        "US early close Friday",
+        "Foreign flow sau VIC"
+      ],
+      "levels": [
+        {
+          "label": "Hỗ trợ",
+          "value": 1600
+        },
+        {
+          "label": "Kháng cự",
+          "value": 1650
+        }
+      ],
+      "events": [
+        {
+          "title": "US markets closed Thanksgiving",
+          "date": "2026-11-26"
+        }
+      ]
+    },
+    "series": {
+      "vnindex": {
+        "id": "vnindex",
+        "points": [
+          {
+            "date": "2026-11-26",
+            "value": 1629.68
+          }
+        ]
+      },
+      "dji": {
+        "id": "dji",
+        "points": [
+          {
+            "date": "2026-11-25",
+            "value": 50182.95
+          }
+        ]
+      },
+      "ndx": {
+        "id": "ndx",
+        "points": [
+          {
+            "date": "2026-11-25",
+            "value": 26046.9
+          }
+        ]
+      },
+      "spx": {
+        "id": "spx",
+        "points": [
+          {
+            "date": "2026-11-25",
+            "value": 7182.78
+          }
+        ]
+      },
+      "dxy": {
+        "id": "dxy",
+        "points": [
+          {
+            "date": "2026-11-26",
+            "value": 103.78
+          }
+        ]
+      },
+      "nky": {
+        "id": "nky",
+        "points": [
+          {
+            "date": "2026-11-26",
+            "value": 57499.16
+          }
+        ]
+      },
+      "hsi": {
+        "id": "hsi",
+        "points": [
+          {
+            "date": "2026-11-26",
+            "value": 22226.88
+          }
+        ]
+      },
+      "btcUsd": {
+        "id": "btcUsd",
+        "points": [
+          {
+            "date": "2026-11-27",
+            "value": 60666
+          }
+        ]
+      },
+      "vnindexVolume5d": {
+        "id": "vnindexVolume5d",
+        "points": [
+          {
+            "date": "2026-11-26",
+            "value": 16043
+          }
+        ]
+      },
+      "foreignNet5dVndBn": {
+        "id": "foreignNet5dVndBn",
+        "points": [
+          {
+            "date": "2026-11-26",
+            "value": -180
+          }
+        ]
+      }
+    }
+  },
+  "sources": {
+    "schemaVersion": "1.0.0",
+    "sources": [
+      {
+        "id": "src-stockbiz",
+        "name": "StockBiz",
+        "url": "https://stockbiz.vn/",
+        "accessedAt": "2026-11-27T08:35:00+07:00"
+      },
+      {
+        "id": "src-cafef",
+        "name": "CafeF",
+        "url": "https://cafef.vn/",
+        "accessedAt": "2026-11-27T08:35:00+07:00"
+      },
+      {
+        "id": "src-barrons",
+        "name": "Barron's",
+        "url": "https://www.barrons.com/",
+        "accessedAt": "2026-11-27T08:35:00+07:00"
+      },
+      {
+        "id": "src-bloomberg",
+        "name": "Bloomberg",
+        "url": "https://www.bloomberg.com/",
+        "accessedAt": "2026-11-27T08:35:00+07:00"
+      },
+      {
+        "id": "src-yahoo-btc",
+        "name": "Yahoo BTC",
+        "url": "https://finance.yahoo.com/quote/BTC-USD/",
+        "accessedAt": "2026-11-27T08:35:00+07:00"
+      }
+    ]
+  }
+}

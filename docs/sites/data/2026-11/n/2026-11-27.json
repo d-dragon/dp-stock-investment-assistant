@@ -1,0 +1,37 @@
+{
+  "schemaVersion": "1.0.0",
+  "date": "2026-11-27",
+  "items": [
+    {
+      "id": "n-2026-11-27-001",
+      "impact": "high",
+      "impactScore": 90,
+      "rank": 1,
+      "kind": "market",
+      "board": "vn",
+      "title": "VN-Index đóng cửa 1.629,68 (-3.42%)",
+      "url": "https://tuoitre.vn/print/ap-luc-ban-don-dap-phien-chieu-vn-index-giam-gan-60-diem-100261126152251911.htm",
+      "sourceId": "src-cafef",
+      "publishedAt": "2026-11-26T15:00:00+07:00",
+      "tickers": [
+        "VIC"
+      ],
+      "excerpt": "Lao dốc gần 58 điểm, VIC dẫn dắt.",
+      "whyImpact": "Prior close chính thức cho preopen 27/11"
+    },
+    {
+      "id": "n-2026-11-27-002",
+      "impact": "medium",
+      "impactScore": 70,
+      "rank": 2,
+      "kind": "news",
+      "board": "us",
+      "title": "US markets closed for Thanksgiving",
+      "url": "https://www.livemint.com/",
+      "sourceId": "src-barrons",
+      "publishedAt": "2026-11-26T08:00:00+07:00",
+      "excerpt": "S&P -0.25% phiên trước, closed 26/11.",
+      "whyImpact": "Overnight transmission muted"
+    }
+  ]
+}
