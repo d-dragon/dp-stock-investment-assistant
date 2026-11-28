@@ -1,0 +1,44 @@
+{
+  "schemaVersion": "1.0.0",
+  "date": "2026-11-28",
+  "generatedAt": "2026-11-28T08:35:00+07:00",
+  "briefKind": "eod_prev+overnight+preopen",
+  "market": {
+    "vnindex": {
+      "close": 1653.90,
+      "change": 24.22,
+      "changePct": 1.49,
+      "prior": 1629.68,
+      "volumeM": 585.79,
+      "valueBn": 11269,
+      "source": "src-stockbiz / CafeF / FireAnt",
+      "note": "EOD 27/11 recovery after -3.42% prior"
+    },
+    "hnx": {
+      "close": 228.11,
+      "change": 1.54,
+      "changePct": 0.68,
+      "source": "src-stockbiz"
+    },
+    "foreignNetHoSeBn": 560,
+    "proprietaryNetHoSeBn": -50,
+    "note": "Foreign ~+560 to +611 bn HOSE; proprietary ~-36 to -66 bn"
+  },
+  "news_events": [
+    "VN-Index +24.22 to 1653.90 on oil/real estate rebound, VIC +2.17%",
+    "US early close Friday: SPX +1.6% to 7297.49, DJI +1.18%, Nasdaq Comp +2.3%",
+    "Nikkei +2.11% to 58711, HSI +2.11% to 22694.77 tech-led",
+    "PM comment on lower US tariff risk at securities anniversary"
+  ],
+  "sentiment": {
+    "fireant": "Recovery noted, weekend pause, next open Monday",
+    "f247": "Thin",
+    "newf319": "Thin community color"
+  },
+  "gaps": [
+    "Proprietary exact print varies -36 to -66 bn",
+    "WTI sources 83-85 range",
+    "No official SBV page for weekend",
+    "Community forums thin on Saturday"
+  ]
+}

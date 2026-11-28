@@ -1,8 +1,20 @@
 {
   "schemaVersion": "2.0.0",
-  "updatedAt": "2026-11-27T08:35:00+07:00",
+  "updatedAt": "2026-11-28T08:35:00+07:00",
   "layout": "monthly-weekly",
   "reports": [
+    {
+      "id": "daily-brief-2026-11-28",
+      "date": "2026-11-28",
+      "title": "Nhật ký 28/11 — Prior 1.653,90 hồi phục, US/Asia risk-on, nghỉ cuối tuần",
+      "status": "preopen",
+      "weekId": "2026-W48",
+      "weekPath": "2026-11/week-48.json",
+      "dayPath": "2026-11/d/2026-11-28.json",
+      "newsPath": "2026-11/n/2026-11-28.json",
+      "analysisPath": "2026-11/a/2026-11-28.md",
+      "path": "index.html#/2026-11-28"
+    },
     {
       "id": "daily-brief-2026-11-27",
       "date": "2026-11-27",
